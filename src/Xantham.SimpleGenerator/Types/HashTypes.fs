@@ -26,6 +26,8 @@ a value in a dictionary.
 This should ultimately prevent recomputation of common objects/patterns and improve performance.
 *)
 
+type ShapeDocumentation<^T when ^T:(member Documentation: TsComment list)> = ^T
+
 module Prelude =
     module Primitive =
         let anyKey = PrimitiveKey.create TypeKindPrimitive.Any
@@ -905,7 +907,7 @@ module KeyResolution =
                 Name = createNameKey ctx value.Name
                 Parameters = value.Parameters |> List.toArray |> Array.map (Parameter.visit ctx >> _.typeKey)
                 Type = ctx.visitType value.Type
-                TypeParameters = value.TypeParameters |> List.toArray |> Array.map (TypeParameter.visit ctx >> _.typeKey)
+                TypeParameters = value.TypeParameters |> List.toArray |> Array.map (snd >> TypeParameter.visit ctx >> _.typeKey)
             }
         let visit ctx value =
             makeVisitationContext ctx make ctx.createFunctionKey MasterBuilder.Function value
@@ -932,7 +934,7 @@ module KeyResolution =
                 TypeParameters =
                     value.TypeParameters
                     |> List.toArray
-                    |> Array.map (TypeParameter.visit ctx >> _.typeKey)
+                    |> Array.map (snd >> TypeParameter.visit ctx >> _.typeKey)
             }
         let visit ctx value =
             makeDocVisitationContext ctx make ctx.createTypeAliasKey MasterBuilder.TypeAlias value
@@ -1023,7 +1025,7 @@ module KeyResolution =
                     |> List.toArray
                     |> Array.map (TypeReference.visit ctx >> _.typeKey)
                 Source = ctx.createSourceKey value
-                TypeParameters = value.TypeParameters |> List.toArray |> Array.map (TypeParameter.visit ctx >> _.typeKey)
+                TypeParameters = value.TypeParameters |> List.toArray |> Array.map (snd >> TypeParameter.visit ctx >> _.typeKey)
                 Members = value.Members |> List.toArray |> Array.map (Member.visit ctx)
             }
         let visit ctx value =
@@ -1052,7 +1054,7 @@ module KeyResolution =
                     |> Array.append (List.toArray value.Heritage.Extends)
                     |> Array.map (TypeReference.visit ctx >> _.typeKey)
                 Source = ctx.createSourceKey value
-                TypeParameters = value.TypeParameters |> List.toArray |> Array.map (TypeParameter.visit ctx >> _.typeKey)
+                TypeParameters = value.TypeParameters |> List.toArray |> Array.map (snd >> TypeParameter.visit ctx >> _.typeKey)
                 Members = value.Members |> List.toArray |> Array.map (Member.visit ctx)
                 Constructors = value.Constructors |> List.toArray |> Array.map (Constructor.visit ctx >> _.typeKey)
             }
@@ -1346,6 +1348,7 @@ module KeyResolution =
         | TsType.Predicate glueTypePredicate -> Predicate.resolve ctx glueTypePredicate 
         | TsType.TypeLiteral glueTypeLiteral -> TypeLiteral.resolve ctx glueTypeLiteral
         | TsType.TemplateLiteral tsTemplateLiteralType -> failwith "todo"
+        | TsType.Optional tsTypeReference -> TypeReference.resolve ctx tsTypeReference
 
     let nodeStoreVisitor (ctx: KeyResolutionContext) nodeStore =
         match nodeStore with
@@ -1354,13 +1357,11 @@ module KeyResolution =
         | NodeStore.Parameter glueParameter -> Parameter.resolve ctx glueParameter
         | NodeStore.Method glueMethod -> Method.resolve ctx glueMethod
         | NodeStore.Constructor glueConstructor -> Constructor.resolve ctx glueConstructor
-        | NodeStore.Optional glueTypeReference -> TypeReference.resolve ctx glueTypeReference
         | NodeStore.ConstructSignature glueConstruct -> ConstructSignature.resolve ctx glueConstruct
         | NodeStore.IndexSignature glueIndexSignature -> IndexSignature.resolve ctx glueIndexSignature
         | NodeStore.GetAccessor glueGetAccessor -> GetAccessor.resolve ctx glueGetAccessor
         | NodeStore.SetAccessor glueSetAccessor -> SetAccessor.resolve ctx glueSetAccessor
         | NodeStore.SubstitutionType glueSubstitutionType -> failwith "todo"
-        | NodeStore.Unhandled s -> failwith "todo"
 
     let visitor (ctx: KeyResolutionContext) (result: Result<TsType, NodeStore>) =
         match result with

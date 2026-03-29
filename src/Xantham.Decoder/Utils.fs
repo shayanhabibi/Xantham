@@ -47,12 +47,13 @@ let rec getKeys typ =
         yield!
             glueInterface.Members
             |> List.collect getKeysFromMember
+        yield! glueInterface.TypeParameters |> List.map fst
         yield!
             glueInterface.TypeParameters
-            |> List.choose _.Default
+            |> List.choose (snd >> _.Default)
         yield!
             glueInterface.TypeParameters
-            |> List.choose _.Constraint
+            |> List.choose (snd >> _.Constraint)
         yield!
             glueInterface.Heritage.Extends
             |> List.collect (fun heritage -> heritage.Type :: heritage.TypeArguments)
@@ -61,12 +62,13 @@ let rec getKeys typ =
         yield!
             glueClass.Members
             |> List.collect getKeysFromMember
+        yield! glueClass.TypeParameters |> List.map fst
         yield!
             glueClass.TypeParameters
-            |> List.choose _.Default
+            |> List.choose (snd >> _.Default)
         yield!
             glueClass.TypeParameters
-            |> List.choose _.Constraint
+            |> List.choose (snd >> _.Constraint)
         yield!
             glueClass.Heritage.Extends
             |> List.collect (fun heritage -> heritage.Type :: heritage.TypeArguments)
@@ -87,8 +89,9 @@ let rec getKeys typ =
             yield!
                 glueTypeAlias.TypeParameters
                 |> List.collect (function
-                    { Constraint = c; Default = d } ->
+                    typ,{ Constraint = c; Default = d } ->
                         [
+                            typ
                             match c with Some v -> v | _ -> ()
                             match d with Some v -> v | _ -> ()
                         ])
@@ -101,8 +104,9 @@ let rec getKeys typ =
             yield!
                 glueFunctionDeclaration.TypeParameters
                 |> List.collect (function
-                    { Constraint = c; Default = d } ->
+                    typ,{ Constraint = c; Default = d } ->
                         [
+                            typ
                             match c with Some v -> v | _ -> ()
                             match d with Some v -> v | _ -> ()
                         ])

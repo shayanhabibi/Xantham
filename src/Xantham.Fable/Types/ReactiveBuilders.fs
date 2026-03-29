@@ -16,7 +16,6 @@
 [<AutoOpen>]
 module Xantham.Fable.Types.ReactiveBuilders
 
-open TypeScript
 open Xantham
 open Xantham.Fable
 open Xantham.Fable.Types.Signal
@@ -130,6 +129,13 @@ type STypeParameterBuilder = {
           Constraint = this.Constraint |> ValueOption.map _.Value |> ValueOption.toOption
           Default     = this.Default   |> ValueOption.map _.Value |> ValueOption.toOption
           Documentation = this.Documentation }
+
+type InlinedSTypeParameterBuilder = {
+    Type: TypeKey
+    TypeParameter: STypeParameterBuilder
+} with
+    member this.Build(): TypeKey * TsTypeParameter =
+        this.Type, this.TypeParameter.Build()
 
 /// Signal-based equivalent of <c>TsPropertyBuilder</c>, builds to <see cref="T:Xantham.TsProperty"/>.
 type SPropertyBuilder = {
@@ -324,7 +330,7 @@ type SInterfaceBuilder = {
     Enumerable: bool
     Name: string
     Members: Signal<SMemberBuilder voption> array
-    TypeParameters: Signal<STypeParameterBuilder voption> array
+    TypeParameters: Signal<InlinedSTypeParameterBuilder voption> array
     Documentation: TsComment list
     Heritage: Signal<SInterfaceHeritageBuilder voption>
 } with
@@ -362,7 +368,7 @@ type SAliasBuilder = {
     FullyQualifiedName: string array
     Name: string
     Type: TypeSignal
-    TypeParameters: Signal<STypeParameterBuilder voption> array
+    TypeParameters: Signal<InlinedSTypeParameterBuilder voption> array
     Documentation: TsComment list
 } with
     member this.Build() : TsTypeAlias =
@@ -410,7 +416,7 @@ type SClassBuilder = {
     Name: string
     Constructors: Signal<SConstructorBuilder voption> array
     Members: Signal<SMemberBuilder voption> array
-    TypeParameters: Signal<STypeParameterBuilder voption> array
+    TypeParameters: Signal<InlinedSTypeParameterBuilder voption> array
     Heritage: Signal<SClassHeritageBuilder voption>
 } with
     member this.Build() : TsClass =
@@ -455,7 +461,7 @@ type SFunctionBuilder = {
     IsDeclared: bool
     Type: TypeSignal
     Parameters: Signal<SParameterBuilder voption> array
-    TypeParameters: Signal<STypeParameterBuilder voption> array
+    TypeParameters: Signal<InlinedSTypeParameterBuilder voption> array
     Documentation: TsComment list
 } with
     member this.Build() : TsFunction =

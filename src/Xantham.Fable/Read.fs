@@ -23,7 +23,7 @@ module Internal =
             if alias.Type = typKey then
                 Log.error $"Alias {alias.Name} points to itself"
             alias.TypeParameters
-            |> List.map TsAstNode.TypeParameter
+            |> List.map (snd >> TsAstNode.TypeParameter)
             |> List.iter (healthCheckNode typKey)
         | TsAstNode.TemplateLiteral node ->
             if node.Types |> List.contains typKey then
