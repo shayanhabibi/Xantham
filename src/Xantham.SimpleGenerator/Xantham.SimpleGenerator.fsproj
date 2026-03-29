@@ -1,0 +1,64 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <RootNamespace>Xantham.SimpleGenerator</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Utils.fs" />
+        <Compile Include="Types\Measures.fs" />
+        <Compile Include="Types\KeyNodes.fs" />
+        <Compile Include="Types\Hashing.fs" />
+        <Compile Include="Types\Index.fs" />
+        <Compile Include="Types\HashTypes.fs" />
+        <Compile Include="Types\Patterns.fs" />
+        <Compile Include="Types\KeyPath.fs" />
+        <Compile Include="Types\Generator.fs" />
+        <Compile Include="Generator\Prelude.fs" />
+        <Compile Include="Generator\DocumentationRender.fs" />
+        <Compile Include="Generator\ParameterRender.fs" />
+        <Compile Include="Generator\MethodRender.fs" />
+        <Compile Include="Generator\CallSignatureRender.fs" />
+        <Compile Include="Generator\ConstructSignatureRender.fs" />
+        <Compile Include="Generator\IndexSignatureRender.fs" />
+        <Compile Include="Generator\PropertyRender.fs" />
+        <Compile Include="Generator\GetterSetterRender.fs" />
+        <Compile Include="Generator\MemberRender.fs" />
+        <Compile Include="Generator\TypeParameterRender.fs" />
+        <Compile Include="Generator\TypeReferenceRender.fs" />
+        <Compile Include="Generator\ErasedUnionRender.fs" />
+        <Compile Include="Generator\IndexAccessRender.fs" />
+        <Compile Include="Generator\TypeLiteralRender.fs" />
+        <Compile Include="Generator\ConstructorRender.fs" />
+        <Compile Include="Generator\ClassRender.fs" />
+        <Compile Include="Generator\InterfaceRender.fs" />
+        <Compile Include="Generator\EnumCaseRender.fs" />
+        <Compile Include="Generator\EnumRender.fs" />
+        <Compile Include="Generator\UnionRender.fs" />
+        <Compile Include="Generator\IndexRender.fs" />
+        <Compile Include="Generator\VariableRender.fs" />
+        <Compile Include="Generator\FunctionRender.fs" />
+        <Compile Include="Generator\TupleElementRender.fs" />
+        <Compile Include="Generator\TupleRender.fs" />
+        <Compile Include="Generator\TypeAliasRender.fs" />
+        <Compile Include="Generator\TypeResolver.fs" />
+        <Compile Include="Program.fs"/>
+        <Content Include="README.md" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Xantham.Decoder\Xantham.Decoder.fsproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Fabulous.AST" Version="2.0.0-pre06" />
+      <PackageReference Include="FSharp.Logf" Version="1.2.2" />
+      <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.3" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.3" />
+      <PackageReference Update="FSharp.Core" Version="10.0.103" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="11.0.0-preview.1.26104.118" />
+    </ItemGroup>
+
+</Project>
