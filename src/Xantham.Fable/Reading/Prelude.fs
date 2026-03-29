@@ -101,6 +101,7 @@ module TypeStore =
                 // boolean type, so all predicates would share the boolean TypeKey. Generated key
                 // gives each predicate node its own unique TypeStore entry.
                 | XanTagKind.TypeNode (TypeNode.TypePredicate _) -> true
+                | XanTagKind.ModulesAndExports _ -> true
                 | _ -> false
 
             let create (ctx: TypeScriptReader) (tag: XanthamTag) =

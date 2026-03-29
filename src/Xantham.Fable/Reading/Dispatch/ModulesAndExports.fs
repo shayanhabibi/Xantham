@@ -34,12 +34,10 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
                 |> Option.defaultValue [||]
             match declarations with
             | [||] -> ()
-            | _ -> ()
-                // let decl = declarations[0]
-                // GuardedData.TypeSignal.getOrSetDefault xanTag
-                // |> Signal.fulfillWith (fun () -> (GuardedData.TypeSignal.getOrSetDefault decl).Value)
-                // GuardedData.AstNodeBuilder.getOrSetDefault xanTag
-                // |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.getOrSetDefault decl).Value)
+            | _ -> 
+                let decl = declarations[0]
+                GuardedData.AstNodeBuilder.getOrSetDefault xanTag
+                |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.getOrSetDefault decl).Value)
         | None -> Log.error "failed to get symbol"
     | ModulesAndExports.NamedExports namedExports -> ()
     | ModulesAndExports.NamespaceExport namespaceExportDeclaration -> ()
