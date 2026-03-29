@@ -13,7 +13,33 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
     | ModulesAndExports.ImportClause mportClause -> ()
     | ModulesAndExports.NamespaceImport namespaceImport -> ()
     | ModulesAndExports.NamedImports namedImports -> ()
-    | ModulesAndExports.ImportSpecifier mportSpecifier -> ()
+    | ModulesAndExports.ImportSpecifier mportSpecifier ->
+        match
+            ctx.checker.getSymbolAtLocation(mportSpecifier.name)
+            |> Option.map ctx.checker.getAliasedSymbol
+        with
+        | Some symbol ->
+            let declarations =
+                symbol.declarations
+                |> Option.map (
+                    _.AsArray
+                    >> Array.map (
+                        ctx.CreateXanthamTag >> fst >> function
+                            | TagState.Unvisited tag ->
+                                pushToStack ctx tag
+                                tag
+                            | TagState.Visited tag ->
+                                tag
+                        )
+                    )
+                |> Option.defaultValue [||]
+            match declarations with
+            | [||] -> ()
+            | _ -> 
+                let decl = declarations[0]
+                GuardedData.AstNodeBuilder.getOrSetDefault xanTag
+                |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.getOrSetDefault decl).Value)
+        | None -> Log.error "failed to get symbol"
     | ModulesAndExports.ImportEqualsDeclaration mportEqualsDeclaration -> ()
     | ModulesAndExports.AssertClause assertClause -> ()
     | ModulesAndExports.ExportAssignment exportAssignment -> ()
