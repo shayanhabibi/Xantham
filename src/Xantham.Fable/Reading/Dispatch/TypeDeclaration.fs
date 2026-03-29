@@ -93,10 +93,17 @@ let private getTypeParamSlots (ctx: TypeScriptReader) (typeParams: ResizeArray<T
         >> fst >> function
         | TagState.Unvisited tag ->
             pushToStack ctx tag
+            GuardedData.TypeSignal.getOrSetDefault tag,
             GuardedData.AstNodeBuilder.getOrSetDefault tag
-        | TagState.Visited tag -> GuardedData.AstNodeBuilder.getOrSetDefault tag
-        >> Signal.map (function
-            | ValueSome (STsAstNodeBuilder.TypeParameter tp) -> ValueSome tp
+        | TagState.Visited tag ->
+            GuardedData.TypeSignal.getOrSetDefault tag,
+            GuardedData.AstNodeBuilder.getOrSetDefault tag
+        >> fun signals -> signals ||> Signal.map2 (fun typeKey -> function
+            | ValueSome (STsAstNodeBuilder.TypeParameter tp) ->
+                ValueSome {
+                    Type = typeKey
+                    TypeParameter = tp
+                }
             | _ -> ValueNone
             )
         )
