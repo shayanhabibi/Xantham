@@ -3,6 +3,8 @@
 open Xantham
 open Xantham.Decoder
 
+type ShapeSourceMaybe<^T when ^T:(member Source: string option)> = ^T
+
 module PrimitiveKey =
     let create (value: TypeKindPrimitive): PrimitiveKey =
         value.GetHashCode() |> LanguagePrimitives.Int32WithMeasure<primitiveKey>
@@ -18,6 +20,9 @@ module CyclicKey =
         key
         |> HashTypeKey.create
         |> fromHashTypeKey
+
+type Name with
+    static member inline get<^T when ^T:(member Name: string)>(value: ^T): string = value.Name
 
 module NameKey =
     let inline create (value: ^T): NameKey =
