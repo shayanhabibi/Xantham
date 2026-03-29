@@ -1,0 +1,275 @@
+﻿namespace Xantham.Decoder
+
+open System.Text.RegularExpressions
+open Fantomas.FCS.Syntax.PrettyNaming
+
+/// <summary>
+/// Utility type for working with names or manipulating the
+/// names of types and members while preserving the original source.
+/// </summary>
+[<Struct>]
+type Name =
+    | Modified of original: string * modified: string
+    | Source of original: string
+    member this.ValueOrSource =
+        match this with
+        | Modified(original = source) | Source(source) -> source
+    member this.ValueOrModified =
+        match this with
+        | Modified(modified = modified) | Source(modified) -> modified
+    static member Create(value: string) = Source value
+    static member Create(original: string, modified: string) = Modified(original, modified)
+    static member CreateModified(original: string, modified: string) = Modified(original, modified)
+
+
+/// Provide static typing over the casing of a name
+[<MeasureAnnotatedAbbreviation>] type Name<[<Measure>] 'u> = Name
+
+module Case =
+    type [<Measure>] pascal
+    type [<Measure>] camel
+    type [<Measure>] modulename
+    type [<Measure>] typar
+
+    let inline addMeasure<[<Measure>] 'u> (name: Name): Name<'u> = unbox name
+    let inline withoutMeasure (name: Name<'u>): Name = unbox name
+    let inline unboxMeasure (name: Name<'u>): Name<'t> = unbox name
+    let inline addPascalMeasure (name: Name) = addMeasure<pascal> name
+    let inline addCamelMeasure (name: Name) = addMeasure<camel> name
+    let inline addModuleMeasure (name: Name) = addMeasure<modulename> name
+    let inline addTyparMeasure (name: Name) = addMeasure<typar> name
+    
+
+[<Struct; RequireQualifiedAccess>]
+type CasedName =
+    | Pascal of Name<Case.pascal>
+    | Camel of Name<Case.camel>
+    | Module of Name<Case.modulename>
+    | Typar of Name<Case.typar>
+    member inline this.Value =
+        match this with
+        | Pascal name -> unbox<Name> name
+        | Camel name -> unbox name
+        | Module name -> unbox name
+        | Typar name -> unbox name
+
+module Name =
+    /// Creates a Name from a string. Will automatically normalize the name with backticks if required..
+    /// Use the static member Create if you don't want automatic normalization.
+    let create value =
+        // Source value
+        let name = NormalizeIdentifierBackticks value
+        if value <> name then
+            Modified(value, name)
+        else Source value
+    /// Creates a modified Name DU.
+    let inline createModified original modified = Modified(original, modified)
+    /// Retrieves the original source value for a name.
+    let valueOrSource: Name -> string = _.ValueOrSource
+    /// Retrieves the modified value for a name if it exists; otherwise returns the original source value.
+    let valueOrModified: Name -> string = _.ValueOrModified
+    /// <summary>
+    /// Map a function over the current (modified or original if unmodified) name.
+    /// </summary>
+    /// <remarks>
+    /// If the output matches the original, then you will receive a <c>Name.Source</c> case
+    /// instead of a <c>Name.Modified</c> case, even if it was Modified before.
+    /// </remarks>
+    /// <param name="f"></param>
+    /// <param name="name"></param>
+    let map (f: string -> string) (name: Name) =
+        match name with
+        | Modified(original, modified) -> Modified(original, f modified)
+        | Source original when f original <> original ->
+            Modified(original, f original)
+        | _ -> name
+    /// <summary>
+    /// Map a function over the original source name.
+    /// </summary>
+    /// <remarks>
+    /// If the output differs from the original, you will receive a <c>Name.Modified</c> case.
+    /// </remarks>
+    /// <param name="f"></param>
+    /// <param name="name"></param>
+    let mapSource (f: string -> string) (name: Name) =
+        match name with
+        | Source original
+        | Modified(original,_) when f original <> original ->
+            Modified(original, f original)
+        | Modified(original,_) | Source(original) ->
+            Source(original)
+    /// <summary>
+    /// Map a function over the modified name. Does not apply if the name is not modified.
+    /// </summary>
+    /// <param name="f"></param>
+    /// <param name="name"></param>
+    let mapModified (f: string -> string) (name: Name) =
+        match name with
+        | Modified(original, modified) when f modified <> original ->
+            Modified(original, f modified)
+        | Source original 
+        | Modified(original, _) ->
+            Source(original)
+    module private Internal =
+        let pascalCaseRegex = Regex(@"(?:^|[-_])(.)", RegexOptions.Compiled)
+        let toPascalCase (s: string) = pascalCaseRegex.Replace(s, _.Groups.[1].Value.ToUpperInvariant())
+        let stripBackticks (s: string) =
+            if s.StartsWith("``") && s.EndsWith("``") then s.Trim('`') else s
+        let normalizeString = NormalizeIdentifierBackticks
+    /// Normalizes the name by adding backticks if needed
+    let normalize (name: Name) = name |> map NormalizeIdentifierBackticks
+    /// Removes backticks, applies casing, and then reapplies backticks if necessary.
+    let private _pascalCase (fn: (string -> string) -> Name -> Name) name =
+        name |> fn (Internal.stripBackticks >> Internal.toPascalCase >> Internal.normalizeString)
+    /// Removes backticks, applies casing, and then reapplies backticks if necessary.
+    let private _capitalize (fn: (string -> string) -> Name -> Name) name =
+        name |> fn (
+            Internal.stripBackticks
+            >> fun s -> s.Substring(0, 1).ToUpperInvariant() + s.Substring(1)
+            >> Internal.normalizeString
+            )
+    /// Removes backticks, applies casing, and then reapplies backticks if necessary.
+    let private _camelCase (fn: (string -> string) -> Name -> Name) name =
+        name |> fn (
+            Internal.stripBackticks
+            >> fun s -> s.Substring(0, 1).ToLowerInvariant() + s.Substring(1)
+            >> Internal.normalizeString
+            )
+        
+    /// <summary>
+    /// Applies Pascal Casing to the name.
+    /// </summary>
+    /// <remarks>
+    /// <para>Backticks are removed prior to applying casing. Normalization is reapplied
+    /// after casing is applied.</para>
+    /// <para>If the name was modified, then the function is applied against the <i>Modified</i> value.</para>
+    /// </remarks>
+    let pascalCase (name: Name) = _pascalCase map name
+    /// <summary>
+    /// Applies Pascal Casing to the source name.
+    /// </summary>
+    /// <remarks>
+    /// <para>Backticks are removed prior to applying casing. Normalization is reapplied
+    /// after casing is applied.</para>
+    /// <para>The function is applied to the source string, even if the name is modified</para>
+    /// </remarks>
+    let sourcePascalCase (name: Name) = _pascalCase mapSource name
+    /// <summary>
+    /// Capitalizes the name.
+    /// </summary>
+    /// <remarks>
+    /// <para>Backticks are removed prior to applying casing. Normalization is reapplied
+    /// after casing is applied.</para>
+    /// </remarks>
+    let capitalize (name: Name) = _capitalize map name
+    /// <summary>
+    /// Capitalizes the source name.
+    /// </summary>
+    /// <remarks>
+    /// <para>Backticks are removed prior to applying casing. Normalization is reapplied
+    /// after casing is applied.</para>
+    /// <para>The function is applied to the source string, even if the name is modified</para>
+    /// </remarks>
+    let sourceCapitalize (name: Name) = _capitalize mapSource name
+    /// <summary>
+    /// Applies camel casing to the name.
+    /// </summary>
+    /// <remarks>
+    /// <para>Backticks are removed prior to applying casing. Normalization is reapplied
+    /// after casing is applied.</para>
+    /// </remarks>
+    let camelCase (name: Name) = _camelCase map name
+    /// <summary>
+    /// Applies camel casing to the source name.
+    /// </summary>
+    /// <remarks>
+    /// <para>Backticks are removed prior to applying casing. Normalization is reapplied
+    /// after casing is applied.</para>
+    /// <para>The function is applied to the source string, even if the name is modified</para>
+    /// </remarks>
+    let sourceCamelCase (name: Name) = _camelCase mapSource name
+    /// Normalizes name for types. Uses PascalCase.
+    let normalizeForType = pascalCase
+    /// Normalizes name for types. Uses PascalCase.
+    let sourceNormalizeForType = sourcePascalCase
+    /// Normalizes name for parameters. Uses camelCase.
+    let normalizeForParameter = camelCase
+    /// Normalizes name for parameters. Uses camelCase.
+    let sourceNormalizeForParameter = sourceCamelCase
+    /// Normalizes name for properties. Uses camelCase.
+    let normalizeForProperty = camelCase
+    /// Normalizes name for properties. Uses camelCase.
+    let sourceNormalizeForProperty = sourceCamelCase
+    /// Normalizes name for methods. Uses camelCase.
+    let normalizeForMethod = camelCase
+    /// Normalizes name for methods. Uses camelCase.
+    let sourceNormalizeForMethod = sourceCamelCase
+    /// Normalizes name for enum cases. Uses PascalCase.
+    let normalizeForEnumCase = pascalCase
+    /// Normalizes name for enum cases. Uses PascalCase.
+    let sourceNormalizeForEnumCase = sourcePascalCase
+    /// <summary>
+    /// Pascal cases the name, and prefixes with a single quote.
+    /// </summary>
+    /// <remarks>
+    /// <para>Backticks are removed prior to applying casing. Normalization is reapplied
+    /// after casing is applied.</para>
+    /// </remarks>
+    let normalizeForTypeParameter = pascalCase >> map (sprintf "'%s")
+    /// <summary>
+    /// Pascal cases the source name, and prefixes with a single quote.
+    /// </summary>
+    /// <remarks>
+    /// <para>Backticks are removed prior to applying casing. Normalization is reapplied
+    /// after casing is applied.</para>
+    /// <para>The function is applied to the source string, even if the name is modified</para>
+    /// </remarks>
+    let sourceNormalizeForTypeParameter = sourcePascalCase >> mapSource (sprintf "'%s")
+    /// <summary>
+    /// Pascal cases the name, and prefixes with <c>I</c>.
+    /// </summary>
+    /// <remarks>
+    /// <para>Backticks are removed prior to applying casing. Normalization is reapplied
+    /// after casing is applied.</para>
+    /// </remarks>
+    let mapToModuleName = pascalCase >> map (sprintf "I%s")
+    /// <summary>
+    /// Pascal cases the source name, and then prefixes with <c>I</c>.
+    /// </summary>
+    /// <remarks>
+    /// <para>Backticks are removed prior to applying casing. Normalization is reapplied
+    /// after casing is applied.</para>
+    /// <para>The function is applied to the source string, even if the name is modified</para>
+    /// </remarks>
+    let sourceMapToModuleName = sourcePascalCase >> mapSource (sprintf "I%s")
+ 
+    /// <summary>
+    /// Provides some equivalency functions for working with Names that have measures.
+    /// </summary>
+    module Case =
+        let inline valueOrModified (name: Name<'u>) = Case.withoutMeasure name |> valueOrModified
+        let inline valueOrSource (name: Name<'u>) = Case.withoutMeasure name |>valueOrSource
+        let inline map fn (name: Name<'u>) = Case.withoutMeasure name |> map fn
+        let inline mapSource fn (name: Name<'u>) = Case.withoutMeasure name |> mapSource fn
+        let inline isModified (name: Name<'u>) = Case.withoutMeasure name |> _.IsModified
+        let inline isSource (name: Name<'u>) = Case.withoutMeasure name |> _.IsSource
+    /// Provides means for working with Pascal case measure annotated names directly.
+    module Pascal =
+        let fromName = sourcePascalCase >> Case.addPascalMeasure
+        let create = create >> fromName
+        let inline fromCase name = Case.withoutMeasure name |> fromName
+    /// Provides means for working with Camel case measure annotated names directly.
+    module Camel =
+        let fromName = sourceCamelCase >> Case.addCamelMeasure
+        let create = create >> fromName
+        let inline fromCase name = Case.withoutMeasure name |> fromName
+    /// Provides means for working with Module measure annotated names directly.
+    module Module =
+        let fromName = sourceMapToModuleName >> Case.addModuleMeasure
+        let create = create >> fromName
+        let inline fromCase name = Case.withoutMeasure name |> fromName
+    /// Provides means for working with Typar measure annotated names directly.
+    module Typar =
+        let fromName = sourceNormalizeForTypeParameter >> Case.addTyparMeasure
+        let create = create >> fromName
+        let inline fromCase name = Case.withoutMeasure name |> fromName

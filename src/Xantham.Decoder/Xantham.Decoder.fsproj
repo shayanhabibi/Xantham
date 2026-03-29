@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+<!--        <OutputType>Exe</OutputType>-->
+        <TargetFramework>net10.0</TargetFramework>
+        <RootNamespace>Xantham.Decoder</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="EasyBuild.FileSystemProvider" Version="1.1.0" />
+        <PackageReference Include="Fabulous.AST" Version="2.0.0-pre06" />
+        <PackageReference Include="FsToolkit.ErrorHandling" Version="5.1.0" />
+        <PackageReference Include="Thoth.Json.Net" Version="12.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="Types\Decoding.Types.fs" />
+        <Compile Include="Types\Name.fs" />
+        <Compile Include="Types\Frozen.Extensions.fs" />
+      <Compile Include="Utils.fs" />
+      <Compile Include="Core.fs" />
+      <Compile Include="Runtime.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Xantham.Common\Xantham.Common.fsproj" />
+    </ItemGroup>
+</Project>

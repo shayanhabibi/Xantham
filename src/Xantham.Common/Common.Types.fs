@@ -561,8 +561,6 @@ and [<RequireQualifiedAccess>] TsType =
     | Variable of TsVariable
     | Primitive of TypeKindPrimitive
     | Enum of TsEnumType
-
-    // GlueEnum cases can be used as a literal type.
     | EnumCase of TsEnumCase
     | TypeAlias of TsTypeAlias
     | Function of TsFunction
@@ -580,6 +578,7 @@ and [<RequireQualifiedAccess>] TsType =
     | Predicate of TsTypePredicate
     | TypeLiteral of TsTypeLiteral
     | TemplateLiteral of TsTemplateLiteralType
+    | Optional of TsTypeReference
 
     /// Discriminated union of all high-level TypeScript type shapes the reader can produce.
     /// Each case mirrors a concrete TS type or declaration form (see individual types above).
