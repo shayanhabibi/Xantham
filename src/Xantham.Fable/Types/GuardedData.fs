@@ -109,3 +109,22 @@ module TypeSignal =
         let getOrMapSet fn tag = Helpers.Keyed.getOrMapSet symbol fn tag
         let getOrSetDefault tag = getOrSetWith (fun () -> TypeSignal.pending()) tag
 
+/// <summary>
+/// Source file/module. Since symbols can be re-exported, we need to have some contextual
+/// method of linking paths of exported types/symbols to the highest level export point.
+/// </summary>
+module Source =
+    let symbol = SymbolTypeKey.create<Signal<ModuleName>> "Source"
+    let get tag = Helpers.get symbol tag
+    let has tag = Helpers.has symbol tag
+    let set value tag = Helpers.set symbol value tag
+    let clear tag = Helpers.clear symbol tag
+    let getOrSetWith fn tag = Helpers.getOrSetWith symbol fn tag
+    let getOrMapSet fn tag = Helpers.getOrMapSet symbol fn tag
+    module Keyed =
+        let get tag = Helpers.Keyed.get symbol tag
+        let has tag = Helpers.Keyed.has symbol tag
+        let set value tag = Helpers.Keyed.set symbol value tag
+        let clear tag = Helpers.Keyed.clear symbol tag
+        let getOrSetWith fn tag = Helpers.Keyed.getOrSetWith symbol fn tag
+        let getOrMapSet fn tag = Helpers.Keyed.getOrMapSet symbol fn tag

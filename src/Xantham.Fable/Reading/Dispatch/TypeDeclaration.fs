@@ -140,7 +140,7 @@ module TypeParameter =
 module Interface =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.InterfaceDeclaration) (source: ModuleName) =
         {
-            Source = ValueSome source
+            Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Enumerable = false
             SInterfaceBuilder.Name = NameHelpers.getName node.name
@@ -190,7 +190,7 @@ module Interface =
 module TypeAlias =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.TypeAliasDeclaration) (source: ModuleName) =
         {
-            SAliasBuilder.Source = ValueSome source
+            SAliasBuilder.Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             Type = getTypeSignalFromNode ctx node.``type``
@@ -377,7 +377,7 @@ module Enum =
 
     let readDeclaration (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.EnumDeclaration) (source: ModuleName) =
         {
-            SEnumTypeBuilder.Source = ValueSome source
+            SEnumTypeBuilder.Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             Members = node.members.AsArray |> Array.map (resolveEnumMemberSlot ctx)
@@ -398,7 +398,7 @@ module Enum =
                 )
             |> Option.defaultValue (TsLiteral.String (NameHelpers.getName node.name))
         {
-            SEnumCaseBuilder.Source = ValueSome (ctx.moduleMap.Item(node.parent.getSourceFile()))
+            SEnumCaseBuilder.Source = trySetSourceForTag xanTag (ctx.moduleMap.Item(node.parent.getSourceFile()))
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             Value = value
@@ -412,7 +412,7 @@ module Enum =
 module Variable =
     let readDeclaration (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.VariableDeclaration) (source: ModuleName) =
         {
-            SVariableBuilder.Source = ValueSome source
+            SVariableBuilder.Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             Type =
@@ -429,7 +429,7 @@ module Variable =
 module FunctionDecl =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.FunctionDeclaration) (source: ModuleName) =
         {
-            SFunctionBuilder.Source = ValueSome source
+            SFunctionBuilder.Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             IsDeclared = node.body.IsNone
@@ -517,7 +517,7 @@ module Class =
             node.members.AsArray
             |> Array.partition (fun elem -> (unbox<Ts.Node> elem).kind = Ts.SyntaxKind.Constructor)
         {
-            SClassBuilder.Source = ValueSome source
+            SClassBuilder.Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Enumerable = false
             Name = NameHelpers.getName node.name
@@ -555,7 +555,7 @@ module Module =
 
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.ModuleDeclaration) (source: ModuleName) =
         {
-            SModuleBuilder.Source = ValueSome source
+            SModuleBuilder.Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             IsNamespace = node.flags.HasFlag(Ts.NodeFlags.Namespace)

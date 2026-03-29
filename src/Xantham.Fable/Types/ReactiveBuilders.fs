@@ -55,14 +55,14 @@ let inline private resolve (slots: Signal<'a voption> array) =
 
 /// Signal-based equivalent of <c>TsEnumCaseBuilder</c>, builds to <see cref="T:Xantham.TsEnumCase"/>.
 type SEnumCaseBuilder = {
-    Source: ModuleName voption
+    Source: Signal<ModuleName>
     FullyQualifiedName: string array
     Name: string
     Value: TsLiteral
     Documentation: TsComment list
 } with
     member this.Build() : TsEnumCase =
-        { Source = this.Source |> ValueOption.toOption |> Option.map (fun (ModuleName s) -> s)
+        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Name = this.Name
           Value = this.Value
@@ -70,7 +70,7 @@ type SEnumCaseBuilder = {
 
 /// Signal-based equivalent of <c>TsEnumTypeBuilder</c>, builds to <see cref="T:Xantham.TsEnumType"/>.
 type SEnumTypeBuilder = {
-    Source: ModuleName voption
+    Source: Signal<ModuleName>
     FullyQualifiedName: string array
     Name: string
     /// Reactive slots; each is filled when an enum case is processed.
@@ -78,7 +78,7 @@ type SEnumTypeBuilder = {
     Documentation: TsComment list
 } with
     member this.Build() : TsEnumType =
-        { Source = this.Source |> ValueOption.toOption |> Option.map (fun (ModuleName s) -> s)
+        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Name = this.Name
           Members =
@@ -89,14 +89,14 @@ type SEnumTypeBuilder = {
 
 /// Signal-based equivalent of <c>TsVariableBuilder</c>, builds to <see cref="T:Xantham.TsVariable"/>.
 type SVariableBuilder = {
-    Source: ModuleName voption
+    Source: Signal<ModuleName>
     FullyQualifiedName: string array
     Name: string
     Type: TypeSignal
     Documentation: TsComment list
 } with
     member this.Build() : TsVariable =
-        { Source = this.Source |> ValueOption.toOption |> Option.map (fun (ModuleName s) -> s)
+        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Name = this.Name
           Type = this.Type.Value
@@ -325,7 +325,7 @@ type SClassHeritageBuilder = {
 
 /// Signal-based equivalent of <c>TsInterfaceBuilder</c>, builds to <see cref="T:Xantham.TsInterface"/>.
 type SInterfaceBuilder = {
-    Source: ModuleName voption
+    Source: Signal<ModuleName>
     FullyQualifiedName: string array
     Enumerable: bool
     Name: string
@@ -335,7 +335,7 @@ type SInterfaceBuilder = {
     Heritage: Signal<SInterfaceHeritageBuilder voption>
 } with
     member this.Build() : TsInterface =
-        { Source = this.Source |> ValueOption.toOption |> Option.map (fun (ModuleName s) -> s)
+        { Source = this.Source.Value |> (fun (ModuleName s) -> Some s)
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Enumerable = this.Enumerable
           Name = this.Name
@@ -364,7 +364,7 @@ type SIndexAccessTypeBuilder = {
 
 /// Signal-based equivalent of <c>TsTypeAliasBuilder</c>, builds to <see cref="T:Xantham.TsTypeAlias"/>.
 type SAliasBuilder = {
-    Source: ModuleName voption
+    Source: Signal<ModuleName>
     FullyQualifiedName: string array
     Name: string
     Type: TypeSignal
@@ -372,7 +372,7 @@ type SAliasBuilder = {
     Documentation: TsComment list
 } with
     member this.Build() : TsTypeAlias =
-        { Source = this.Source |> ValueOption.toOption |> Option.map (fun (ModuleName s) -> s)
+        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Name = this.Name
           Type = this.Type.Value
@@ -384,7 +384,7 @@ type SAliasBuilder = {
 
 /// Signal-based equivalent of <c>TsModuleBuilder</c>, builds to <see cref="T:Xantham.TsModule"/>.
 type SModuleBuilder = {
-    Source: ModuleName voption
+    Source: Signal<ModuleName>
     FullyQualifiedName: string array
     Name: string
     IsNamespace: bool
@@ -393,7 +393,7 @@ type SModuleBuilder = {
     Types: TypeSignal array
 } with
     member this.Build() : TsModule =
-        { Source = this.Source |> ValueOption.toOption |> Option.map (fun (ModuleName s) -> s)
+        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Name = this.Name
           IsNamespace = this.IsNamespace
@@ -410,7 +410,7 @@ type SSubstitutionTypeBuilder = {
 
 /// Signal-based equivalent of <c>TsClassBuilder</c>, builds to <see cref="T:Xantham.TsClass"/>.
 type SClassBuilder = {
-    Source: ModuleName voption
+    Source: Signal<ModuleName>
     FullyQualifiedName: string array
     Enumerable: bool
     Name: string
@@ -420,7 +420,7 @@ type SClassBuilder = {
     Heritage: Signal<SClassHeritageBuilder voption>
 } with
     member this.Build() : TsClass =
-        { Source = this.Source |> ValueOption.toOption |> Option.map (fun (ModuleName s) -> s)
+        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Enumerable = this.Enumerable
           Name = this.Name
@@ -455,7 +455,7 @@ type SConditionalTypeBuilder = {
 
 /// Signal-based equivalent of <c>TsFunctionBuilder</c>, builds to <see cref="T:Xantham.TsFunction"/>.
 type SFunctionBuilder = {
-    Source: ModuleName voption
+    Source: Signal<ModuleName>
     FullyQualifiedName: string array
     Name: string
     IsDeclared: bool
@@ -465,7 +465,7 @@ type SFunctionBuilder = {
     Documentation: TsComment list
 } with
     member this.Build() : TsFunction =
-        { Source = this.Source |> ValueOption.toOption |> Option.map (fun (ModuleName s) -> s)
+        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Name = this.Name
           IsDeclared = this.IsDeclared
@@ -818,13 +818,13 @@ module TypeStore =
         |> ValueOption.toOption
         |> Option.bind (fun b ->
             match b with
-            | Patterns.SBuilder.Interface b        -> b.Source |> ValueOption.toOption |> unbox
-            | Patterns.SBuilder.Class b            -> b.Source |> ValueOption.toOption |> unbox
-            | Patterns.SBuilder.Enum b             -> b.Source |> ValueOption.toOption |> unbox
-            | Patterns.SBuilder.Alias b            -> b.Source |> ValueOption.toOption |> unbox
-            | Patterns.SBuilder.Variable b         -> b.Source |> ValueOption.toOption |> unbox
-            | Patterns.SBuilder.FunctionDeclaration b -> b.Source |> ValueOption.toOption |> unbox
-            | Patterns.SBuilder.Module b           -> b.Source |> ValueOption.toOption |> unbox
+            | Patterns.SBuilder.Interface b        -> b.Source.Value |> unbox
+            | Patterns.SBuilder.Class b            -> b.Source.Value |> unbox
+            | Patterns.SBuilder.Enum b             -> b.Source.Value |> unbox
+            | Patterns.SBuilder.Alias b            -> b.Source.Value  |> unbox
+            | Patterns.SBuilder.Variable b         -> b.Source.Value  |> unbox
+            | Patterns.SBuilder.FunctionDeclaration b -> b.Source.Value  |> unbox
+            | Patterns.SBuilder.Module b           -> b.Source.Value  |> unbox
             | _                                    -> None)
 
     /// <c>true</c> when the builder is filled and its primary type slot still holds

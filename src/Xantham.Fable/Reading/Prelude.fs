@@ -139,9 +139,20 @@ type TypeScriptReader with
         this.typeSignal tag
         |> Signal.fulfillWith(fun () -> signal.Value)
         signal
+    /// The tags source is filled by the given source signal
+    member this.routeSourceTo (tag: XanthamTag) (source: Signal<ModuleName>) =
+        GuardedData.Source.getOrSetWith (fun () -> source) tag
+        |> Signal.fulfillWith(fun () -> source.Value)
 
 let setTypeKeyForTag (tag: XanthamTag) (typ: TypeKey) =
     (GuardedData.TypeSignal.getOrSetDefault tag).Set typ
+
+/// Sets the source if it doesn't have a connected signal
+let trySetSourceForTag (tag: XanthamTag) (source: ModuleName) =
+    GuardedData.Source.getOrSetWith (fun () -> Signal.source source) tag
+let setSourceForTag (tag: XanthamTag) (source: ModuleName) =
+    GuardedData.Source.getOrSetWith (fun () -> Signal.source source) tag
+    |> _.Set(source)
 
 let tagPrimitives (ctx: TypeScriptReader) =
     let checker = ctx.checker

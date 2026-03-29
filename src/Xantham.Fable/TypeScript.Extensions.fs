@@ -117,7 +117,7 @@ type ObjectTypeDeclaration =
     | InterfaceDeclaration of Ts.InterfaceDeclaration
     | TypeLiteralNode of Ts.TypeLiteralNode
 
-type ModuleName =
+type TsModuleName =
     | Identifier of Ts.Identifier
     | StringLiteral of Ts.StringLiteral
 
@@ -2127,8 +2127,8 @@ module Patterns =
         | Node.TypeLiteralNode node -> ObjectTypeDeclaration.TypeLiteralNode node |> Some
         | _ -> None
     let (|ModuleName|_|) = function
-        | Node.Identifier node -> ModuleName.Identifier node |> Some
-        | Node.StringLiteral node -> ModuleName.StringLiteral node |> Some
+        | Node.Identifier node -> TsModuleName.Identifier node |> Some
+        | Node.StringLiteral node -> TsModuleName.StringLiteral node |> Some
         | _ -> None
     let (|JSDocComment|_|) = function
         | SyntaxKind.JSDocText node -> JSDocComment.JSDocText node |> Some

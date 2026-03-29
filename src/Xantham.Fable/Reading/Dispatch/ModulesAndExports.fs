@@ -19,6 +19,9 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
     | ModulesAndExports.ExportAssignment exportAssignment -> ()
     | ModulesAndExports.ExportDeclaration exportDeclaration -> ()
     | ModulesAndExports.ExportSpecifier exportSpecifier ->
+        let source =
+            xanTag
+            |> GuardedData.Source.getOrSetWith (fun () -> Signal.source <| ctx.moduleMap.Item(exportSpecifier.getSourceFile()))
         match ctx.checker.getExportSpecifierLocalTargetSymbol (!^ exportSpecifier) with
         | Some symbol ->
             let declarations =
@@ -27,8 +30,13 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
                     _.AsArray
                     >> Array.map (
                         ctx.CreateXanthamTag >> fst >> function
-                            | TagState.Unvisited tag -> pushToStack ctx tag; tag
-                            | TagState.Visited tag -> tag
+                            | TagState.Unvisited tag ->
+                                ctx.routeSourceTo tag source
+                                pushToStack ctx tag
+                                tag
+                            | TagState.Visited tag ->
+                                ctx.routeSourceTo tag source
+                                tag
                         )
                     )
                 |> Option.defaultValue [||]
