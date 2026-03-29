@@ -284,24 +284,6 @@ module Internal =
             Dispatcher.dispatch reader stackEntry
         reader
 
-    let read (reader: TypeScriptReader) : Dictionary<TypeKey, TsAstNode> =
-        tagPrimitives reader
-        |> _.program.getSourceFile(reader.entryFile).Value
-        |> getDeclarations reader
-        |> Array.apply (pushToStack reader)
-        |> ignore
-
-        let mutable stackEntry = Unchecked.defaultof<XanthamTag>
-        while reader.stack.TryPop(&stackEntry) do
-            Dispatcher.dispatch reader stackEntry
-
-        let results = assembleResults reader
-        let split = exciseDuplicateKeys results
-        let resolved = resolveDuplicates split.DuplicateGroups
-        Seq.append split.NonDuplicates resolved
-        |> Seq.map (fun ir -> KeyValuePair(ir.Key, ir.Node))
-        |> Dictionary
-
 let readAndWrite (outputDestination: string) (reader: TypeScriptReader) =
     let exports =
         Internal.initialise reader

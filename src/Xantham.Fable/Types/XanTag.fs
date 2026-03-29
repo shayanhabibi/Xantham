@@ -1938,6 +1938,17 @@ type TypeFlagPrimary =
     static member inline CreateFrom(value: Ts.TemplateLiteralType) = TemplateLiteral value
     static member inline CreateFrom(value: Ts.StringMappingType) = StringMapping value
 
+type IgnoredNode =
+    | Modifier of Modifiers
+    static member IsIgnoredNode (node: Ts.Node) =
+        Modifiers.IsModifierKind node || ModulesAndExports.IsModulesAndExportsKind node
+    static member Create(node: Ts.Node) =
+        if Modifiers.IsModifierKind node then Modifier(Modifiers.Create node)
+        else failwithf "Unknown IgnoredNode %A" node
+    member this.Value =
+        match this with
+        | Modifier m -> m.Value :> Ts.Node
+
 type XanTagKind =
     /// <summary>
     /// The tag wraps a resolved TypeScript <c>Ts.Type</c> object, classified into a <c>TypeFlagPrimary</c>
@@ -1992,7 +2003,10 @@ type XanTagKind =
     /// <c>LiteralType</c> node.
     /// </remarks>
     | LiteralTokenNode of LiteralTokenNodes
-    | Ignore
+    
+    | ModulesAndExports of ModulesAndExports
+    
+    | Ignore of IgnoredNode
     member this.Value: U2<Ts.Type, Ts.Node> =
         match this with
         | Type t -> t.Value |> (!^)
@@ -2000,7 +2014,8 @@ type XanTagKind =
         | TypeNode typeNode -> unbox<Ts.Node> typeNode.Value |> (!^)
         | JSDocTag jsDocTags -> unbox<Ts.Node> jsDocTags.Value |> (!^)
         | LiteralTokenNode literalTokenNodes -> literalTokenNodes.Value |> (!^)
-        | Ignore -> JS.undefined
+        | ModulesAndExports modulesAndExports -> modulesAndExports.Value |> (!^)
+        | Ignore node -> node.Value |> (!^)
 
     member this.UnderlyingValue =
         match this with
@@ -2027,18 +2042,15 @@ type XanTagKind =
         then LiteralTokenNodes.Create node
             |> LiteralTokenNode
         elif ModulesAndExports.IsModulesAndExportsKind node
-        then Ignore // Intentionally ignored — see CLAUDE.md "Removed XanTagKind cases"
+        then ModulesAndExports.Create node
+            |> ModulesAndExports
+        elif IgnoredNode.IsIgnoredNode node
+        then IgnoredNode.Create node // Intentionally ignored — see CLAUDE.md "Removed XanTagKind cases"
+            |> Ignore
         else
             Log.warn $"Unrecognized node kind: {node.kind.Name}"
-            Ignore
+            Ignore JS.undefined
     static member Create(node: Ts.Type) =
-        // if node.TypeKey = TypeKey 210
-        // then
-        //     Log.traceTo 0 node
-        //     node.flags.Debug()
-        //     node :?> Ts.ObjectType
-        //     |> _.objectFlags.Debug()
-        //     failwith "TA"
         TypeFlagPrimary.Create node
         |> Type
 
@@ -2215,6 +2227,9 @@ type XanTagHelpers =
         | TypeNode typeNode -> typeNode.Value |> unbox |> Choice2Of2
         | JSDocTag jsDocTags -> jsDocTags.Value |> unbox |> Choice2Of2
         | LiteralTokenNode literalTokenNodes -> literalTokenNodes.Value |> unbox |> Choice2Of2
+        | ModulesAndExports modulesAndExports -> modulesAndExports.Value |> unbox |> Choice2Of2
+        | Ignore _ -> failwith "Ignored node accessed"
+
     [<Extension>]
     static member ToNode(this: XanthamTag) =
         let nodeType = this.Value.Value 
