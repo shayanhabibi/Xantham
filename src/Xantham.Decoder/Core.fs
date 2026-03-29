@@ -4,12 +4,12 @@ open Xantham
 open System.IO
 
 // Json Typing
-type private DuplicateMap = Map<TypeKey, TsAstNode array>
+type private DuplicateMap = Map<TypeKey, TsAstNode * TsAstNode array>
 type private TopLevelKeys = TypeKey array
 type private GlueNodeMap = Map<TypeKey, TsAstNode>
 type private EncodedResult = GlueNodeMap * DuplicateMap * TopLevelKeys
 
-module Diagnostics =
+module private Diagnostics =
     let healthCheck (encodedResult: TypeMap * NodeMap * TopLevelKeys) =
         let typeMap, nodeStore, _ = encodedResult
         let trueTypeKeys =
@@ -32,7 +32,8 @@ module Diagnostics =
         let foundKeysInNodeStore = foundKeysInNodeStore |> Set.toList |> List.sort
         
         {| MissingTypeKeys = trueTypeMissingKeys; FoundKeysInNodeStore = foundKeysInNodeStore; UnemittedKeys = unemittedKeys |}
-        
+    let inline isHealthy (healthCheck: {| FoundKeysInNodeStore: TypeKey list; MissingTypeKeys: TypeKey list; UnemittedKeys: TypeKey list |}) =
+        healthCheck.UnemittedKeys |> List.isEmpty
     let printHealthCheck (healthCheck: {| FoundKeysInNodeStore: TypeKey list; MissingTypeKeys: TypeKey list; UnemittedKeys: TypeKey list |}) =
         let missingTypeKeys = {| Keys = healthCheck.MissingTypeKeys; Length = healthCheck.MissingTypeKeys.Length |}
         let foundKeysInNodeStore = {| Keys = healthCheck.FoundKeysInNodeStore; Length = healthCheck.FoundKeysInNodeStore.Length |}

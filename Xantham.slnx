@@ -2,7 +2,9 @@
   <Folder Name="/ai/">
     <File Path="CLAUDE.md" />
   </Folder>
-  <Folder Name="/docs/" />
+  <Folder Name="/docs/">
+    <File Path="docs/README.md" />
+  </Folder>
   <Folder Name="/misc/">
     <File Path="package.json" />
     <File Path="README.md" />

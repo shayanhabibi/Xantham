@@ -232,7 +232,22 @@ module Internal =
         }
         {| DuplicateGroups = duplicateGroups; NonDuplicates = nonDuplicates |}
 
-    let writeOutput (destination: string) (exports: XanthamTag array) (duplicates: Dictionary<TypeKey, TsAstNode array>) (result: Dictionary<TypeKey, TsAstNode>)  =
+    let filterConflictDuplicatesOnly (groups: {| Key: TypeKey; Results: IRResult array |} seq) =
+        seq {
+            for group in groups do
+                let sorted = group.Results |> Array.sortBy (fun ir -> identityPriority ir.Identity)
+                let winner = sorted[0]
+                let hasConflict = sorted |> Array.exists (fun ir -> ir.Node <> winner.Node)
+                if hasConflict then
+                    {| Key = group.Key
+                       Losers = sorted |> Array.filter (fun ir -> ir.Node <> winner.Node)
+                       Winner = winner |}
+        }
+    
+    let writeOutput (destination: string)
+                    (exports: XanthamTag array)
+                    (duplicates: Dictionary<TypeKey, TsAstNode * TsAstNode array>)
+                    (result: Dictionary<TypeKey, TsAstNode>)  =
         let destination =
             if destination = null then
                 path.join(__SOURCE_DIRECTORY__, "output.json")
@@ -295,10 +310,11 @@ let readAndWrite (outputDestination: string) (reader: TypeScriptReader) =
     |> Internal.assembleResults
     |> Internal.exciseDuplicateKeys
     |> fun split ->
-        let splitMap = Dictionary<TypeKey, TsAstNode array>()
+        let splitMap = Dictionary<TypeKey, TsAstNode * TsAstNode array>()
         split.DuplicateGroups
+        |> Internal.filterConflictDuplicatesOnly
         |> Seq.iter (fun group ->
-            splitMap.Add(group.Key, group.Results |> Array.map _.Node)
+            splitMap.Add(group.Key, (group.Winner.Node, group.Losers |> Array.map _.Node))
             )
         Internal.resolveDuplicates split.DuplicateGroups
         |> Seq.append split.NonDuplicates

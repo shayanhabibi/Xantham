@@ -4,13 +4,7 @@
 // CLI implementation
 // ====================
 
-open Xantham
 open Xantham.Fable
-open Node.Api
-open TypeScript
-open Fable.Core
-open Fable.Core.JsInterop
-open Thoth.Json
 open Xantham.Fable.Types
 
 let private readFile (file: string) (destination: string) =
@@ -31,13 +25,11 @@ USAGE
 """
     |> printfn "%s"
     
-#if !DEBUG
 [<EntryPoint>]
 let main argv =
     let argv = argv |> Array.toList
     match argv with
-    | [] ->
-        printHelp()
+    | args when args |> List.contains "--help" || args = [] -> printHelp()
     | input :: "--output" :: [ output ] ->
         readFile input output
     | [ input ] ->
@@ -45,4 +37,3 @@ let main argv =
     | _ ->
         printHelp()
     0
-#endif
