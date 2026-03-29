@@ -36,6 +36,7 @@
         <Compile Include="Reading\Dispatch\TypeFlagObject.fs" />
         <Compile Include="Reading\Dispatch\TypeFlagPrimary.fs" />
         <Compile Include="Reading\Dispatch\TypeNode.fs" />
+        <Compile Include="Reading\Dispatch\ModulesAndExports.fs" />
         <Compile Include="Reading\Dispatcher.fs" />
         <Compile Include="Reading\Entry.fs" />
         <Compile Include="Read.fs" />

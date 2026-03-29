@@ -16,8 +16,10 @@ let inline setAstSignal (tag: XanthamTag) astValue =
 
 let dispatch (ctx: TypeScriptReader) (tag: XanthamTag) =
     match tag.Value with
-    | Ignore -> ()
+    | Ignore _ -> ()
     | _ when tryGetOrRegisterStore ctx tag |> Option.isNone -> ()
+    | XanTagKind.ModulesAndExports modulesAndExports ->
+        ModulesAndExports.dispatch ctx tag modulesAndExports
     | XanTagKind.Type typeFlagPrimary ->
         TypeFlagPrimary.dispatch ctx tag typeFlagPrimary
     | XanTagKind.TypeDeclaration typeDeclaration ->
