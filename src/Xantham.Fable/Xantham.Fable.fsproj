@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <DefineConstants>FABLE_COMPILER</DefineConstants>
+        <RootNamespace>Xantham.Fable</RootNamespace>
+    </PropertyGroup>
+
+
+    <ItemGroup>
+        <Compile Include="..\Xantham.Common\Common.Types.fs" />
+        <Compile Include="TypeScript.fs" />
+        <Compile Include="Utils\String.fs" />
+        <Compile Include="Utils\Array.fs" />
+        <Compile Include="Utils\Utils.fs" />
+        <Compile Include="TypeScript.Extensions.fs" />
+        <Compile Include="Types\TypeKeyExtensions.fs" />
+        <Compile Include="Types\Signal.fs" />
+        <Compile Include="Types\Symbol.fs" />
+        <Compile Include="Types\Tracer.fs" />
+        <Compile Include="Types\XanTag.fs" />
+        <Compile Include="Types\ModuleMap.fs" />
+        <Compile Include="Types\ReactiveBuilders.fs" />
+        <Compile Include="Types\Reader.fs" />
+        <Compile Include="Types\GuardedData.fs" />
+        <Compile Include="Types\Reader.Extensions.fs" />
+        <Compile Include="Reading\Prelude.fs" />
+        <Compile Include="Reading\JSDocTags.fs" />
+        <Compile Include="Reading\TupleTypeMember.fs" />
+        <Compile Include="Reading\TypeReference.fs" />
+        <Compile Include="Reading\Member.fs" />
+        <Compile Include="Reading\Dispatch\TypeDeclaration.fs" />
+        <Compile Include="Reading\Dispatch\LiteralTokenNode.fs" />
+        <Compile Include="Reading\Dispatch\TypeFlagLiteral.fs" />
+        <Compile Include="Reading\Dispatch\TypeFlagObject.fs" />
+        <Compile Include="Reading\Dispatch\TypeFlagPrimary.fs" />
+        <Compile Include="Reading\Dispatch\TypeNode.fs" />
+        <Compile Include="Reading\Dispatcher.fs" />
+        <Compile Include="Reading\Entry.fs" />
+        <Compile Include="Read.fs" />
+        <Compile Include="Program.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Fable.Core" Version="5.0.0-beta.3" />
+      <PackageReference Include="Fable.Node" Version="1.6.0" />
+      <PackageReference Include="Glutinum.Chalk" Version="1.0.0" />
+      <PackageReference Include="Thoth.Json" Version="10.4.1" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/ai/">
+    <File Path="CLAUDE.md" />
+  </Folder>
+  <Folder Name="/docs/" />
+  <Folder Name="/misc/" >
+    <File Path="package.json"/>
+    <File Path="README.md"/>
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Xantham.Common/Xantham.Common.fsproj" />
+    <Project Path="src/Xantham.Fable/Xantham.Fable.fsproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <File Path="tests/Signal.test.fsx" />
+  </Folder>
+</Solution>
