@@ -117,6 +117,12 @@ type TsTypeParameter = {
     Documentation: TsComment list
 }
 
+/// <summary>
+/// A tuple to be used by types which inline <c>TsTypeParameter</c>s rather than referencing by TypeKey.
+/// The tuple is used to preserve information for the container type that inlines them.
+/// </summary>
+type InlinedTsTypeParameter = TypeKey * TsTypeParameter
+
 /// Represents a method-like member (class or interface) or signature-like method.
 ///
 /// Reflects: `MethodDeclaration` (class), `MethodSignature` (interface), and function-like members
@@ -254,7 +260,7 @@ type TsFunction = {
     Name: string
     Type: TypeKey
     Parameters: TsParameter list
-    TypeParameters: TsTypeParameter list
+    TypeParameters: InlinedTsTypeParameter list
 }
 
 /// Represents a conditional type `T extends U ? X : Y`.
@@ -378,7 +384,7 @@ type TsInterface = {
     Enumerable: bool
     Name: string
     Members: TsMember list
-    TypeParameters: TsTypeParameter list
+    TypeParameters: InlinedTsTypeParameter list
     Documentation: TsComment list
     Heritage: TsInterfaceHeritage
 }
@@ -418,7 +424,7 @@ type TsTypeAlias = {
     FullyQualifiedName: string list
     Name: string
     Type: TypeKey
-    TypeParameters: TsTypeParameter list
+    TypeParameters: InlinedTsTypeParameter list
     Documentation: TsComment list
 }
 
@@ -461,7 +467,7 @@ type TsClass = {
     Name: string
     Constructors: TsConstructor list
     Members: TsMember list
-    TypeParameters: TsTypeParameter list
+    TypeParameters: InlinedTsTypeParameter list
     Heritage: TsClassHeritage
 }
 
