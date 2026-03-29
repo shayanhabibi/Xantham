@@ -266,7 +266,11 @@ module Internal =
                     | typeKey when typeKey <> TypeKey.Unknown -> typeKey
                     | _ -> ()
             |]
-        let json = Encode.Auto.toString(4, resultTuple)
+        #if DEBUG
+        let json = Encode.Auto.toString(1, resultTuple)
+        #else
+        let json = Encode.Auto.toString(resultTuple)
+        #endif
         fs.writeFile(destination, json, None, callback = ignore)
 
     let initialise (reader: TypeScriptReader) =
