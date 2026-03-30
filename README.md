@@ -121,8 +121,8 @@ An example generator demonstrating a minimal end‑to‑end flow from decoded sc
 
 | Function | Module | Status | Notes                                                                                                                                                                                                      |
 |:---------|:--|:------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Schema | Xantham.Common |   🟡   | Stable. There are still considerations being made towards 'Source' and 'Qualifier' fields.                                                                                                                 |
-| Reader   | Xantham.Fable |   🟡   | Release Candidate.                                                                                                                                                                                         |
+| Schema | Xantham.Common |   🟡   | Beta                                                                                                                                                                                                       |
+| Reader   | Xantham.Fable |   🟡   | Beta                                                                                                                                                                                                       |
 | Decoder | Xantham.Decoder |   🟡   | The decoder naturally functions in regards to parsing the JSON, but utility methods and functions are still being considered and reworked pending on what I find would likely be used widely by consumers. |
 | Generator | Xantham.Generator |   🔴   | Needs to be rejigged to the new reader standards.                                                                                                                                                          |
 
