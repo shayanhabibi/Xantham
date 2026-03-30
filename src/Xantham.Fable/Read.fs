@@ -53,8 +53,8 @@ module Internal =
         | TsAstNode.IndexAccessType tsIndexAccessType ->
             if typKey = tsIndexAccessType.Object then Log.error $"IndexAccessType {tsIndexAccessType} points to itself"
             elif typKey = tsIndexAccessType.Index then Log.error $"IndexAccessType {tsIndexAccessType} points to itself"
-        | TsAstNode.FunctionDeclaration tsFunction -> if typKey = tsFunction.Type then Log.error $"FunctionDeclaration {tsFunction.Name} points to itself"
-        | TsAstNode.Method tsMethod -> if typKey = tsMethod.Type then Log.error $"Method {tsMethod.Name} points to itself"
+        | TsAstNode.FunctionDeclaration tsFunction -> for tsFunction in tsFunction.Values do if typKey = tsFunction.Type then Log.error $"FunctionDeclaration {tsFunction.Name} points to itself"
+        | TsAstNode.Method tsMethod -> for tsMethod in tsMethod.Values do if typKey = tsMethod.Type then Log.error $"Method {tsMethod.Name} points to itself"
         | TsAstNode.Constructor tsConstructor -> ()
         | TsAstNode.ConstructSignature tsConstructSignature -> ()
         | TsAstNode.IndexSignature tsIndexSignature -> if typKey = tsIndexSignature.Type then Log.error $"IndexSignature {tsIndexSignature} points to itself"
@@ -83,7 +83,7 @@ module Internal =
         | TsAstNode.Optional tsTypeReference -> if typKey = tsTypeReference.Type then Log.error $"Optional {tsTypeReference} points to itself"
         | TsAstNode.GetAccessor tsGetAccessor -> if typKey = tsGetAccessor.Type then Log.error $"GetAccessor {tsGetAccessor} points to itself"
         | TsAstNode.SetAccessor tsSetAccessor -> if typKey = tsSetAccessor.ArgumentType then Log.error $"SetAccessor {tsSetAccessor} points to itself"
-        | TsAstNode.CallSignature tsCallSignature -> if typKey = tsCallSignature.Type then Log.error $"CallSignature {tsCallSignature} points to itself"
+        | TsAstNode.CallSignature tsCallSignature -> for tsCallSignature in tsCallSignature.Values do if typKey = tsCallSignature.Type then Log.error $"CallSignature {tsCallSignature} points to itself"
         | TsAstNode.Module tsModule -> ()
 
     type IRResult = {
@@ -106,17 +106,17 @@ module Internal =
         | TsAstNode.Property p ->
             [ if p.Type = u then "Property.Type" ]
         | TsAstNode.Method m ->
-            [ if m.Type = u then "Method.Type" ]
+            [ for m in m.Values do if m.Type = u then "Method.Type" ]
         | TsAstNode.FunctionDeclaration f ->
-            [ if f.Type = u then "FunctionDeclaration.Type" ]
+            [ for f in f.Values do if f.Type = u then "FunctionDeclaration.Type" ]
         | TsAstNode.GetAccessor g ->
             [ if g.Type = u then "GetAccessor.Type" ]
         | TsAstNode.SetAccessor s ->
             [ if s.ArgumentType = u then "SetAccessor.ArgumentType" ]
         | TsAstNode.CallSignature cs ->
-            [ if cs.Type = u then "CallSignature.Type" ]
+            [ for cs in cs.Values do if cs.Type = u then "CallSignature.Type" ]
         | TsAstNode.ConstructSignature cs ->
-            [ if cs.Type = u then "ConstructSignature.Type" ]
+            [ for cs in cs.Values do if cs.Type = u then "ConstructSignature.Type" ]
         | TsAstNode.IndexSignature idx ->
             [ if idx.Type = u then "IndexSignature.Type" ]
         | TsAstNode.Index idx ->
@@ -193,7 +193,66 @@ module Internal =
         | IdentityKey.Symbol _              -> 1
         | IdentityKey.AliasSymbol _         -> 2
         | IdentityKey.Id _                  -> 3
-
+    let mergeOverloads (groups: {| Key: TypeKey; Results: IRResult array |} seq): {| Key: TypeKey; Results: IRResult array |} seq =
+        groups
+        |> Seq.map (fun group ->
+            let sorted = group.Results |> Array.sortBy (fun ir -> identityPriority ir.Identity)
+            let winner = sorted[0]
+            // early exit
+            if sorted |> Array.exists (fun ir -> ir.Node <> winner.Node) |> not then group else
+            // merge
+            let isOverloadable, nonOverloadable =
+                match winner.Node with
+                | TsAstNode.FunctionDeclaration _
+                | TsAstNode.Method _
+                | TsAstNode.Constructor _
+                | TsAstNode.ConstructSignature _
+                | TsAstNode.CallSignature _ ->
+                    sorted
+                    |> Array.partition (function
+                        | { Node = node } when node <> winner.Node -> true
+                        | _ -> false
+                        )
+                    |> (function
+                        | [||], _ -> ValueNone, sorted
+                        | values, sorted ->
+                            values
+                            |> Array.map _.Node
+                            |> ValueSome, sorted |> Array.filter (fun { Node = node } -> node <> winner.Node))
+                | _ -> ValueNone, sorted
+            isOverloadable
+            |> ValueOption.map (fun overloads ->
+                let inline combine
+                        (a: TsOverloadableConstruct<'T>)
+                        (recreate: TsOverloadableConstruct<'T> -> TsAstNode)
+                        (b: TsAstNode -> TsOverloadableConstruct<'T> option) =
+                    seq { yield a; yield! overloads |> Seq.choose b }
+                    |> TsOverloadableConstruct.Create
+                    |> recreate
+                match winner.Node with
+                | TsAstNode.FunctionDeclaration node ->
+                    function TsAstNode.FunctionDeclaration node -> Some node | _ -> None
+                    |> combine node  TsAstNode.FunctionDeclaration
+                | TsAstNode.Method node ->
+                    function TsAstNode.Method node -> Some node | _ -> None
+                    |> combine node  TsAstNode.Method
+                | TsAstNode.Constructor node ->
+                    function TsAstNode.Constructor node -> Some node | _ -> None
+                    |> combine node  TsAstNode.Constructor
+                | TsAstNode.ConstructSignature node ->
+                    function TsAstNode.ConstructSignature node -> Some node | _ -> None
+                    |> combine node  TsAstNode.ConstructSignature
+                | TsAstNode.CallSignature node ->
+                    function TsAstNode.CallSignature node -> Some node | _ -> None
+                    |> combine node  TsAstNode.CallSignature
+                | _ -> failwith "Should be unreachable"
+                )
+            |> ValueOption.map (fun merged ->
+                {| Key = group.Key; Results = Array.append [| { winner with Node = merged } |] nonOverloadable |}
+                )
+            |> ValueOption.defaultValue group
+            )
+       
     /// For each group of entries sharing a TypeKey, select the highest-priority winner.
     /// Only logs groups where the winner's node differs from at least one other entry (genuine
     /// conflicts). Same-builder duplicates (lib overloads, Id shadows) are silently discarded.
@@ -232,6 +291,7 @@ module Internal =
         }
         {| DuplicateGroups = duplicateGroups; NonDuplicates = nonDuplicates |}
 
+        
     let filterConflictDuplicatesOnly (groups: {| Key: TypeKey; Results: IRResult array |} seq) =
         seq {
             for group in groups do
@@ -297,12 +357,16 @@ let readAndWrite (outputDestination: string) (reader: TypeScriptReader) =
     |> Internal.exciseDuplicateKeys
     |> fun split ->
         let splitMap = Dictionary<TypeKey, TsAstNode * TsAstNode array>()
-        split.DuplicateGroups
+        let mergedDuplicates =
+            split.DuplicateGroups
+            |> Internal.mergeOverloads
+        mergedDuplicates
         |> Internal.filterConflictDuplicatesOnly
         |> Seq.iter (fun group ->
             splitMap.Add(group.Key, (group.Winner.Node, group.Losers |> Array.map _.Node))
             )
-        Internal.resolveDuplicates split.DuplicateGroups
+        
+        Internal.resolveDuplicates mergedDuplicates
         |> Seq.append split.NonDuplicates
         |> Seq.sortBy _.Key
         |> Seq.map (fun ir -> KeyValuePair(ir.Key, ir.Node))

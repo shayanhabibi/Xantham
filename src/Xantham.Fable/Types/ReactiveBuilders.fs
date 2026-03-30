@@ -192,6 +192,7 @@ type SMethodBuilder = {
     IsStatic: bool
     Documentation: TsComment list
 } with
+    interface IOverloadable
     member this.Build() : TsMethod =
         { Name = this.Name
           Parameters =
@@ -209,6 +210,7 @@ type SCallSignatureBuilder = {
     Type: TypeSignal
     Documentation: TsComment list
 } with
+    interface IOverloadable
     member this.Build() : TsCallSignature =
         { Parameters =
               this.Parameters
@@ -222,6 +224,7 @@ type SConstructSignatureBuilder = {
     Type: TypeSignal
     Parameters: Signal<SParameterBuilder voption> array
 } with
+    interface IOverloadable
     member this.Build() : TsConstructSignature =
         { Type = this.Type.Value
           Parameters =
@@ -234,6 +237,7 @@ type SConstructorBuilder = {
     Parameters: Signal<SParameterBuilder voption> array
     Documentation: TsComment list
 } with
+    interface IOverloadable
     member this.Build() : TsConstructor =
         { Parameters =
               this.Parameters
@@ -268,13 +272,13 @@ type SMemberBuilder =
     | ConstructSignature of SConstructSignatureBuilder
     member this.Build() : TsMember =
         match this with
-        | Method m            -> m.Build() |> TsMember.Method
+        | Method m            -> m.Build() |> TsOverloadableConstruct.Create |> TsMember.Method
         | Property p          -> p.Build() |> TsMember.Property
         | GetAccessor g       -> g.Build() |> TsMember.GetAccessor
         | SetAccessor s       -> s.Build() |> TsMember.SetAccessor
-        | CallSignature c     -> c.Build() |> TsMember.CallSignature
+        | CallSignature c     -> c.Build() |> TsOverloadableConstruct.Create |> TsMember.CallSignature
         | IndexSignature i    -> i.Build() |> TsMember.IndexSignature
-        | ConstructSignature c -> c.Build() |> TsMember.ConstructSignature
+        | ConstructSignature c -> c.Build() |> TsOverloadableConstruct.Create |> TsMember.ConstructSignature
 
 /// Signal-based equivalent of <c>TsTypeLiteralBuilder</c>, builds to <see cref="T:Xantham.TsTypeLiteral"/>.
 type STypeLiteralBuilder = {
@@ -611,11 +615,11 @@ type STsAstNodeBuilder =
         | Parameter v            -> v.Build() |> TsAstNode.Parameter
         | TypeParameter v        -> v.Build() |> TsAstNode.TypeParameter
         | IndexAccessType v      -> v.Build() |> TsAstNode.IndexAccessType
-        | FunctionDeclaration v  -> v.Build() |> TsAstNode.FunctionDeclaration
-        | Method v               -> v.Build() |> TsAstNode.Method
+        | FunctionDeclaration v  -> v.Build() |> TsOverloadableConstruct.Create |> TsAstNode.FunctionDeclaration
+        | Method v               -> v.Build() |> TsOverloadableConstruct.Create |> TsAstNode.Method
         | Alias v                -> v.Build() |> TsAstNode.Alias
-        | Constructor v          -> v.Build() |> TsAstNode.Constructor
-        | ConstructSignature v   -> v.Build() |> TsAstNode.ConstructSignature
+        | Constructor v          -> v.Build() |> TsOverloadableConstruct.Create |> TsAstNode.Constructor
+        | ConstructSignature v   -> v.Build() |> TsOverloadableConstruct.Create |> TsAstNode.ConstructSignature
         | IndexSignature v       -> v.Build() |> TsAstNode.IndexSignature
         | Index v                -> v.Build() |> TsAstNode.Index
         | TypeReference v        -> v.Build() |> TsAstNode.TypeReference
@@ -630,7 +634,7 @@ type STsAstNodeBuilder =
         | Optional v             -> v.Build() |> TsAstNode.Optional
         | GetAccessor v          -> v.Build() |> TsAstNode.GetAccessor
         | SetAccessor v          -> v.Build() |> TsAstNode.SetAccessor
-        | CallSignature v        -> v.Build() |> TsAstNode.CallSignature
+        | CallSignature v        -> v.Build() |> TsOverloadableConstruct.Create |> TsAstNode.CallSignature
         | Module v               -> v.Build() |> TsAstNode.Module
         | TemplateLiteral v      -> v.Build() |> TsAstNode.TemplateLiteral
 

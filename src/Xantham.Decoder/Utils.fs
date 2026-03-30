@@ -8,25 +8,29 @@ open Xantham
 
 let rec private getKeysFromMember (memberInfo: TsMember) =
     match memberInfo with
-    | TsMember.Method glueMethod -> [ glueMethod.Type ]
+    | TsMember.Method glueMethod -> glueMethod.ToList() |> List.map _.Type
     | TsMember.Property glueProperty -> [ glueProperty.Type ]
     | TsMember.GetAccessor glueGetAccessor -> [ glueGetAccessor.Type ]
     | TsMember.SetAccessor glueSetAccessor -> [ glueSetAccessor.ArgumentType ]
     | TsMember.CallSignature glueCallSignature ->
-        [
-            glueCallSignature.Type
-            yield! glueCallSignature.Parameters |> List.map _.Type
-        ]
+        glueCallSignature.ToList()
+        |> List.collect (fun glueCallSignature ->
+            [
+                glueCallSignature.Type
+                yield! glueCallSignature.Parameters |> List.map _.Type
+            ]
+        )
     | TsMember.IndexSignature glueIndexSignature ->
         [
             glueIndexSignature.Type
             yield! glueIndexSignature.Parameters |> List.map _.Type
         ]
     | TsMember.ConstructSignature glueConstruct ->
-        [
-            glueConstruct.Type
-            yield! glueConstruct.Parameters |> List.map _.Type
-        ]
+        glueConstruct.ToList() |> List.collect (fun glueConstruct ->
+            [
+                glueConstruct.Type
+                yield! glueConstruct.Parameters |> List.map _.Type
+            ])
 
 /// <summary>
 /// <b>For Debugging Purposes Primarily:</b><br/>
@@ -96,7 +100,8 @@ let rec getKeys typ =
                             match d with Some v -> v | _ -> ()
                         ])
         ]
-    | TsType.Function glueFunctionDeclaration -> [
+    | TsType.Function glueFunctionDeclaration -> glueFunctionDeclaration.ToList() |> List.collect (fun glueFunctionDeclaration ->
+        [
             glueFunctionDeclaration.Type
             yield!
                 glueFunctionDeclaration.Parameters
@@ -110,7 +115,7 @@ let rec getKeys typ =
                             match c with Some v -> v | _ -> ()
                             match d with Some v -> v | _ -> ()
                         ])
-        ]
+        ])
     | TsType.Intersection (TsTypeIntersection values) 
     | TsType.Union (TsTypeUnion values) -> values
     | TsType.Literal _ -> []
