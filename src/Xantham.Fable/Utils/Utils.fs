@@ -10,7 +10,7 @@ type System.Collections.Generic.List<'T> with
 module Log =
     open Glutinum.Chalk
 
-    let inline private emit text = JS.console.error text
+    let inline emit text = JS.console.error text
 
     let success (text: string) = chalk.greenBright.Invoke text |> emit
     let log (text: string) = text |> emit
