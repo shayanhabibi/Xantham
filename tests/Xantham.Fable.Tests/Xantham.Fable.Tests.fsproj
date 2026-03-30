@@ -12,6 +12,12 @@
         <TypeScriptCompile Include="TypeFiles\merge.d.ts" />
         <TypeScriptCompile Include="TypeFiles\extends.d.ts" />
         <TypeScriptCompile Include="TypeFiles\multiple-extends.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\enum.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\members.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\function.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\generics.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\overloads.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\optional-readonly.d.ts" />
     </ItemGroup>
 
     <ItemGroup>

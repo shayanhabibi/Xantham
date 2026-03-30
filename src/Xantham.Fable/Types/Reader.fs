@@ -80,7 +80,7 @@ module TypeScriptReader =
         let libCache = HashSet()
         let program = createProgramForFiles entryFiles
         let checker = program.getTypeChecker()
-        #if DEBUG
+        #if DEBUG && !FABLE_TEST
         do Log.debug $"Starting XanthamFableRuntime for files: %A{entryFiles}"
         #endif
         {
