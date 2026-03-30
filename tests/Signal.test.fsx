@@ -17,7 +17,7 @@ let mutable private _suite  = ""
 /// Opens a named test suite. Purely decorative — groups console output.
 let describe (name: string) (f: unit -> unit) =
     _suite <- name
-    printfn "\n  %s" name
+    printfn $"\n  %s{name}"
     f ()
     _suite <- ""
 
@@ -25,17 +25,17 @@ let describe (name: string) (f: unit -> unit) =
 let it (name: string) (f: unit -> unit) =
     try
         f ()
-        printfn "    \u2713 %s" name   // ✓
+        printfn $"    \u2713 %s{name}" // ✓
         _passed <- _passed + 1
     with ex ->
-        printfn "    \u2717 %s" name   // ✗
-        printfn "      %s" ex.Message
+        printfn $"    \u2717 %s{name}" // ✗
+        printfn $"      %s{ex.Message}"
         _failed <- _failed + 1
 
 /// Asserts structural equality; throws with a diff message on mismatch.
 let shouldEqual<'a when 'a : equality> (expected: 'a) (actual: 'a) =
     if actual <> expected then
-        failwithf "  expected: %A\n       got: %A" expected actual
+        failwithf $"  expected: %A{expected}\n       got: %A{actual}"
 
 /// Asserts a boolean condition.
 let shouldBeTrue (msg: string) (condition: bool) =
@@ -272,9 +272,10 @@ describe "Signal.effect" (fun () ->
 // ---------------------------------------------------------------------------
 
 let total = _passed + _failed
-printfn "\n  %d/%d passing" _passed total
+printfn $"\n  %d{_passed}/%d{total} passing"
+
 if _failed > 0 then
-    printfn "  %d failing\n" _failed
-    failwithf "%d test(s) failed" _failed
+    printfn $"  %d{_failed} failing\n"
+    failwithf $"%d{_failed} test(s) failed"
 else
     printfn ""
