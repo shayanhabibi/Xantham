@@ -17,6 +17,23 @@ open Xantham.Fable.Types
 open Xantham.Fable.Types.Tracer
 
 module Internal =
+    
+    type IRResult = {
+        Identity: IdentityKey
+        Key: TypeKey
+        Node: TsAstNode
+    }
+    type IRResultDuplicates = {
+        Key: TypeKey
+        Results: IRResult array
+    }
+    [<MeasureAnnotatedAbbreviation>] type IRResultDuplicates<[<Measure>] 'U> = IRResultDuplicates
+    type [<Measure>] idPrioritySorted
+    let inline prune (typ: IRResultDuplicates<_>): IRResultDuplicates = unbox typ
+    let inline plant<[<Measure>] 'u> (typ: IRResultDuplicates): IRResultDuplicates<'u> = unbox typ
+    let inline graft<[<Measure>] 'n>(typ: IRResultDuplicates<_>): IRResultDuplicates<'n> = unbox typ
+    let inline (|IRResultDuplicates|) value = prune value
+    
     let rec healthCheckNode (typKey: TypeKey) (node: TsAstNode) =
         match node with
         | TsAstNode.Alias alias ->
@@ -85,12 +102,6 @@ module Internal =
         | TsAstNode.SetAccessor tsSetAccessor -> if typKey = tsSetAccessor.ArgumentType then Log.error $"SetAccessor {tsSetAccessor} points to itself"
         | TsAstNode.CallSignature tsCallSignature -> for tsCallSignature in tsCallSignature.Values do if typKey = tsCallSignature.Type then Log.error $"CallSignature {tsCallSignature} points to itself"
         | TsAstNode.Module tsModule -> ()
-
-    type IRResult = {
-        Identity: IdentityKey
-        Key: TypeKey
-        Node: TsAstNode
-    }
 
     let private unknownKey = TypeKindPrimitive.Unknown.TypeKey
 
@@ -193,13 +204,17 @@ module Internal =
         | IdentityKey.Symbol _              -> 1
         | IdentityKey.AliasSymbol _         -> 2
         | IdentityKey.Id _                  -> 3
-    let mergeOverloads (groups: {| Key: TypeKey; Results: IRResult array |} seq): {| Key: TypeKey; Results: IRResult array |} seq =
+    let sortResultGroups (groups: IRResultDuplicates seq) =
         groups
         |> Seq.map (fun group ->
-            let sorted = group.Results |> Array.sortBy (fun ir -> identityPriority ir.Identity)
+            { group with Results = group.Results |> Array.sortBy (fun ir -> identityPriority ir.Identity) }
+            |> graft<idPrioritySorted>)
+    let mergeOverloads (groups: IRResultDuplicates<idPrioritySorted> seq): IRResultDuplicates<idPrioritySorted> seq =
+        groups
+        |> Seq.map (fun (IRResultDuplicates group) ->
+            let sorted = group.Results
             let winner = sorted[0]
-            // early exit
-            if sorted |> Array.exists (fun ir -> ir.Node <> winner.Node) |> not then group else
+            if sorted |> Array.exists (fun ir -> ir.Node <> winner.Node) |> not then plant group else
             // merge
             let isOverloadable, nonOverloadable =
                 match winner.Node with
@@ -248,15 +263,70 @@ module Internal =
                 | _ -> failwith "Should be unreachable"
                 )
             |> ValueOption.map (fun merged ->
-                {| Key = group.Key; Results = Array.append [| { winner with Node = merged } |] nonOverloadable |}
+                { Key = group.Key; Results = Array.append [| { winner with Node = merged } |] nonOverloadable }
+                |> plant
                 )
-            |> ValueOption.defaultValue group
+            |> ValueOption.defaultValue (plant group)
             )
-       
+    let mergeMembersIntoWinner (groups: IRResultDuplicates<idPrioritySorted> seq): IRResultDuplicates<idPrioritySorted> seq =
+        groups
+        |> Seq.map (fun (IRResultDuplicates group) ->
+            let sorted = group.Results
+            let winner = sorted[0]
+            match winner.Node with
+            | TsAstNode.Interface tsInterface when sorted.Length > 1 ->
+                let mergeAbleMembers, unmergeableMembers =
+                    sorted[1..]
+                    |> Array.partition (fun result ->
+                        result.Node.IsInterface
+                        && result.Identity.IsDeclarationPosition)
+                    ||> (fun mergeable unmergeable ->
+                        mergeable
+                        |> Array.map (function
+                            | { Node = TsAstNode.Interface nestedInterface } ->
+                                nestedInterface.Members
+                            | _ -> []
+                            ), unmergeable
+                        )
+                mergeAbleMembers
+                |> Array.fold (fun acc members ->
+                    Set.union acc (Set members)
+                    ) (Set tsInterface.Members)
+                |> Set.toList
+                |> fun members ->
+                    [| { winner with Node = TsAstNode.Interface { tsInterface with Members = members } }
+                       yield! unmergeableMembers |]
+            | TsAstNode.Class tsClass when sorted.Length > 1 ->
+                let mergeAbleMembers, unmergeableMembers =
+                    sorted[1..]
+                    |> Array.partition (fun result ->
+                        result.Node.IsClass
+                        && result.Identity.IsDeclarationPosition)
+                    ||> (fun mergeable unmergeable ->
+                        mergeable
+                        |> Array.map (function
+                            | { Node = TsAstNode.Class nestedClass } ->
+                                nestedClass.Members
+                            | _ -> []
+                            ), unmergeable
+                        )
+                mergeAbleMembers
+                |> Array.fold (fun acc members ->
+                    Set.union acc (Set members)
+                    ) (Set tsClass.Members)
+                |> Set.toList
+                |> fun members ->
+                    [| { winner with Node = TsAstNode.Class { tsClass with Members = members } }
+                       yield! unmergeableMembers |]
+            | node -> sorted
+            |> fun sorted ->
+                { group with Results = sorted }
+                |> plant
+            )
     /// For each group of entries sharing a TypeKey, select the highest-priority winner.
     /// Only logs groups where the winner's node differs from at least one other entry (genuine
     /// conflicts). Same-builder duplicates (lib overloads, Id shadows) are silently discarded.
-    let resolveDuplicates (groups: {| Key: TypeKey; Results: IRResult array |} seq) : IRResult seq =
+    let resolveDuplicates (groups: IRResultDuplicates seq) : IRResult seq =
         seq {
             for group in groups do
                 let sorted = group.Results |> Array.sortBy (fun ir -> identityPriority ir.Identity)
@@ -282,8 +352,8 @@ module Internal =
         let duplicateGroups = seq {
             for { Key = key } in results |> Seq.distinctBy _.Key do
             if count[key] > 1 then
-                {| Key = key
-                   Results = results |> Array.filter (fun ir -> ir.Key = key) |}
+                { Key = key
+                  Results = results |> Array.filter (fun ir -> ir.Key = key) }
         }
         let nonDuplicates = seq {
             for ir in results do
@@ -292,10 +362,10 @@ module Internal =
         {| DuplicateGroups = duplicateGroups; NonDuplicates = nonDuplicates |}
 
         
-    let filterConflictDuplicatesOnly (groups: {| Key: TypeKey; Results: IRResult array |} seq) =
+    let filterConflictDuplicatesOnly (groups: IRResultDuplicates<idPrioritySorted> seq) =
         seq {
-            for group in groups do
-                let sorted = group.Results |> Array.sortBy (fun ir -> identityPriority ir.Identity)
+            for IRResultDuplicates group in groups do
+                let sorted = group.Results
                 let winner = sorted[0]
                 let hasConflict = sorted |> Array.exists (fun ir -> ir.Node <> winner.Node)
                 if hasConflict then
@@ -357,16 +427,18 @@ let readAndWrite (outputDestination: string) (reader: TypeScriptReader) =
     |> Internal.exciseDuplicateKeys
     |> fun split ->
         let splitMap = Dictionary<TypeKey, TsAstNode * TsAstNode array>()
+        let orderedDuplicates = split.DuplicateGroups |> Internal.sortResultGroups
         let mergedDuplicates =
-            split.DuplicateGroups
+            orderedDuplicates
             |> Internal.mergeOverloads
+            |> Internal.mergeMembersIntoWinner
         mergedDuplicates
         |> Internal.filterConflictDuplicatesOnly
         |> Seq.iter (fun group ->
             splitMap.Add(group.Key, (group.Winner.Node, group.Losers |> Array.map _.Node))
             )
         
-        Internal.resolveDuplicates mergedDuplicates
+        Internal.resolveDuplicates (Seq.map Internal.prune mergedDuplicates)
         |> Seq.append split.NonDuplicates
         |> Seq.sortBy _.Key
         |> Seq.map (fun ir -> KeyValuePair(ir.Key, ir.Node))
