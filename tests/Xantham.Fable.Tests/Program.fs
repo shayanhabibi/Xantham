@@ -557,12 +557,32 @@ let indexAccessTests =
                 $"Type should be boolean instead of: {findType accessedProperty.Type result}"
                 |> Expect.isTrue (match typ with TsAstNode.Primitive TypeKindPrimitive.Boolean -> true | _ -> false)
         ]
-        testCase "Unresolved access preserves type access semantics" <| fun _ ->
-            let accessedInterface = findInterface "GenericTest" result
-            let property = findProperty "accessedProperty" accessedInterface.Members
-            let typ = result |> findType property.Type
-            "Type should be unknown"
-            |> Expect.isTrue typ.IsIndexAccessType
+        let accessedInterface = findInterface "GenericTest" result
+        let property = findProperty "accessedProperty" accessedInterface.Members
+        let typ = result |> findType property.Type
+        testList "Unresolved access preserves type access semantics" [
+            testCase "Underlying type preserves semantics" <| fun _ ->
+                "Type should be IndexAccess"
+                |> Expect.isTrue typ.IsIndexAccessType
+            let indexAccessType =
+                match typ with
+                | TsAstNode.IndexAccessType indexAccess -> indexAccess
+                | _ -> failwith "Type is not IndexAccessType"
+            testCase "Index is type parameter" <| fun _ ->
+                let typ = findType indexAccessType.Index result
+                "Type should be a type parameter"
+                |> Expect.isTrue typ.IsTypeParameter
+            testCase "Object accessed is 'AccessedInterface'" <| fun _ ->
+                let nestedType =
+                    findType indexAccessType.Object result 
+                "Type should be an interface by the name of AccessedInterface"
+                |> Expect.isTrue (
+                    match nestedType with
+                    | TsAstNode.Interface { Name = "AccessedInterface" } -> true
+                    | _ -> false
+                    )
+        ]
+            
     ]
 
 // -----------------------------------------------------------------------
