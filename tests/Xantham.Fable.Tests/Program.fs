@@ -26,6 +26,7 @@ let runReader (reader: TypeScriptReader) =
         let mergedDuplicates =
             orderedDuplicates
             |> Internal.mergeOverloads
+            |> Internal.mergeMembersIntoWinner
         mergedDuplicates
         |> Internal.filterConflictDuplicatesOnly
         |> Seq.iter (fun group -> splitMap.Add(group.Key, (group.Winner.Node, group.Losers |> Array.map _.Node)) )
@@ -39,7 +40,7 @@ let runReader (reader: TypeScriptReader) =
 
 let tests =
     testList "Tests" [
-        testCase "Test 1" <| fun _ ->
+        testCase "Test members emitted" <| fun _ ->
             let result =
                 createTestReader "basic"
                 |> runReader
@@ -58,7 +59,58 @@ let tests =
                 |> Seq.length
             ""
             |> Expect.equal result 2
-            
+        testCase "Merge members for interfaces" <| fun _ ->
+            let result =
+                createTestReader "merge"
+                |> runReader
+                |> Seq.find _.Value.IsInterface
+                |> _.Value
+                |> function
+                    | TsAstNode.Interface interfaceType -> interfaceType
+                    | _ -> failwith "Should be an interface"
+            ""
+            |> Expect.hasLength result.Members 2
+        testCase "Two interfaces total 2 props" <| fun _ ->
+            let result =
+                createTestReader "merge"
+                |> runReader
+                |> fun data ->
+                    Internal.writeOutput (path.join(__SOURCE_DIRECTORY__, "output.json")) [||] (Dictionary()) data
+                    data
+                |> Seq.filter _.Value.IsInterface
+                |> Seq.toArray
+            ""
+            |> Expect.hasLength result 2
+        testCase "Extending interface" <| fun _ ->
+            let reader =
+                createTestReader "extends"
+            let result = runReader reader
+            result
+            |> Seq.pick (function
+                | KeyValue(_, TsAstNode.Interface { Heritage = { Extends = [ extend ] } }) ->
+                    Some extend.Type
+                | _ -> None
+                )
+            |> fun typeKey ->
+                "Contains extended key"
+                |> Expect.exists result (_.Key >> (=) typeKey)
+        testCase "Multiple extensions of the same interface" <| fun _ ->
+            let reader =
+                createTestReader "multiple-extends"
+            let result = runReader reader
+            result
+            |> Seq.choose (function
+                | KeyValue(_, TsAstNode.Interface { Heritage = { Extends = [ extend ] } }) -> Some extend.Type
+                | _ -> None
+                )
+            |> Seq.toArray
+            |> fun typeKeys ->
+                let resultKeys =
+                    result.Keys
+                    |> Seq.toArray
+                "Contains all extended keys"
+                |> Expect.containsAll resultKeys typeKeys
+        
     ]
 
 Mocha.runTests tests |> ignore

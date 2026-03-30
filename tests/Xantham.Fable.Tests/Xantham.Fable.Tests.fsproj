@@ -9,6 +9,9 @@
     <ItemGroup>
         <Compile Include="Program.fs"/>
         <TypeScriptCompile Include="TypeFiles\basic.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\merge.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\extends.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\multiple-extends.d.ts" />
     </ItemGroup>
 
     <ItemGroup>

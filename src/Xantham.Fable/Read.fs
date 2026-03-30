@@ -301,8 +301,9 @@ module Internal =
                         )
                 mergeAbleMembers
                 |> Array.fold (fun acc members ->
-                    acc @ members
-                    ) tsInterface.Members
+                    Set.union acc (Set members)
+                    ) (Set tsInterface.Members)
+                |> Set.toList
                 |> fun members ->
                     [| { winner with Node = TsAstNode.Interface { tsInterface with Members = members } }
                        yield! unmergeableMembers |]
@@ -449,13 +450,12 @@ let readAndWrite (outputDestination: string) (reader: TypeScriptReader) =
         let mergedDuplicates =
             orderedDuplicates
             |> Internal.mergeOverloads
-            // |> Internal.mergeMembersIntoWinner
+            |> Internal.mergeMembersIntoWinner
         mergedDuplicates
         |> Internal.filterConflictDuplicatesOnly
         |> Seq.iter (fun group ->
             splitMap.Add(group.Key, (group.Winner.Node, group.Losers |> Array.map _.Node))
             )
-        
         Internal.resolveDuplicates (Seq.map Internal.prune mergedDuplicates)
         |> Seq.append split.NonDuplicates
         |> Seq.sortBy _.Key
