@@ -18,6 +18,7 @@
         <TypeScriptCompile Include="TypeFiles\generics.d.ts" />
         <TypeScriptCompile Include="TypeFiles\overloads.d.ts" />
         <TypeScriptCompile Include="TypeFiles\optional-readonly.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\index-access.d.ts" />
     </ItemGroup>
 
     <ItemGroup>

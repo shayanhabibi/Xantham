@@ -83,6 +83,10 @@ let findMethod name (members: TsMember list) =
         | TsMember.Method m when m.ValueOrHead.Name = name -> Some m
         | _ -> None)
 
+let findType (typeKey: TypeKey) (result: Dictionary<TypeKey, TsAstNode>) =
+    result
+    |> Seq.pick (fun (KeyValue(key, node)) -> if key = typeKey then Some node else None)
+
 // -----------------------------------------------------------------------
 // Fixture: basic.d.ts
 //   export type BaseObject    = { name: string }
@@ -494,43 +498,71 @@ let genericsTests =
 // -----------------------------------------------------------------------
 let functionTests =
     testList "function.d.ts" [
+        let fd = createTestReader "function" |> runReader 
         testCase "'greet' has exactly 2 parameters" <| fun _ ->
-            let fd = createTestReader "function" |> runReader |> findFunction "greet"
+            let fd = fd |> findFunction "greet"
             "" |> Expect.hasLength fd.ValueOrHead.Parameters 2
 
         testCase "'greet' first parameter 'name' is not optional" <| fun _ ->
-            let fd = createTestReader "function" |> runReader |> findFunction "greet"
+            let fd = fd |> findFunction "greet"
             let p = fd.ValueOrHead.Parameters |> List.find (fun p -> p.Name = "name")
             "name param should not be optional" |> Expect.isFalse p.IsOptional
 
         testCase "'greet' first parameter 'name' is not a spread" <| fun _ ->
-            let fd = createTestReader "function" |> runReader |> findFunction "greet"
+            let fd = fd |> findFunction "greet"
             let p = fd.ValueOrHead.Parameters |> List.find (fun p -> p.Name = "name")
             "name param should not be spread" |> Expect.isFalse p.IsSpread
 
         testCase "'greet' second parameter 'greeting' is optional" <| fun _ ->
-            let fd = createTestReader "function" |> runReader |> findFunction "greet"
+            let fd = fd |> findFunction "greet"
             let p = fd.ValueOrHead.Parameters |> List.find (fun p -> p.Name = "greeting")
             "greeting param should be optional" |> Expect.isTrue p.IsOptional
 
         testCase "'collect' has exactly 1 parameter" <| fun _ ->
-            let fd = createTestReader "function" |> runReader |> findFunction "collect"
+            let fd = fd |> findFunction "collect"
             "" |> Expect.hasLength fd.ValueOrHead.Parameters 1
 
         testCase "'collect' parameter 'items' is a spread (rest) param" <| fun _ ->
-            let fd = createTestReader "function" |> runReader |> findFunction "collect"
+            let fd = fd |> findFunction "collect"
             let p = fd.ValueOrHead.Parameters.[0]
             "items should be spread" |> Expect.isTrue p.IsSpread
 
         testCase "'collect' spread parameter 'items' is not optional" <| fun _ ->
             // Rest parameters cannot be optional in TypeScript
-            let fd = createTestReader "function" |> runReader |> findFunction "collect"
+            let fd = fd |> findFunction "collect"
             let p = fd.ValueOrHead.Parameters.[0]
             "items should not be optional" |> Expect.isFalse p.IsOptional
 
         testCase "'ping' has 0 parameters" <| fun _ ->
-            let fd = createTestReader "function" |> runReader |> findFunction "ping"
+            let fd = fd |> findFunction "ping"
             "" |> Expect.hasLength fd.ValueOrHead.Parameters 0
+    ]
+
+let indexAccessTests =
+    testList "index-access.d.ts" [
+        let result = createTestReader "index-access" |> runReader
+        testList "Known access is resolved to underlying types" [
+            let accessedInterface = findInterface "TestedInterface" result
+            testCase "stringAccess resolves to string" <| fun _ ->
+                let accessedProperty = findProperty "stringAccess" accessedInterface.Members
+                "Type should be string"
+                |> Expect.equal accessedProperty.Type TypeKindPrimitive.String.TypeKey
+            testCase "numberAccess resolves to number" <| fun _ ->
+                let accessedProperty = findProperty "numberAccess" accessedInterface.Members
+                "Type should be number"
+                |> Expect.equal accessedProperty.Type TypeKindPrimitive.Number.TypeKey
+            testCase "booleanAccess resolves to boolean" <| fun _ ->
+                let accessedProperty = findProperty "booleanAccess" accessedInterface.Members
+                let typ = findType accessedProperty.Type result
+                $"Type should be boolean instead of: {findType accessedProperty.Type result}"
+                |> Expect.isTrue (match typ with TsAstNode.Primitive TypeKindPrimitive.Boolean -> true | _ -> false)
+        ]
+        testCase "Unresolved access preserves type access semantics" <| fun _ ->
+            let accessedInterface = findInterface "GenericTest" result
+            let property = findProperty "accessedProperty" accessedInterface.Members
+            let typ = result |> findType property.Type
+            "Type should be unknown"
+            |> Expect.isTrue typ.IsIndexAccessType
     ]
 
 // -----------------------------------------------------------------------
@@ -549,6 +581,7 @@ let tests =
         enumTests
         genericsTests
         functionTests
+        indexAccessTests
     ]
 
 Mocha.runTests tests |> ignore
