@@ -8,15 +8,15 @@ open Xantham.Fable
 open Node.Api
 open Xantham.Fable.Types
 
-// let dtsFile = path.join(__SOURCE_DIRECTORY__, "../../node_modules/solid-js/types/index.d.ts")
-let dtsFile file = path.join(__SOURCE_DIRECTORY__, $"../../node_modules/{file}")
-let reader =
-    // dtsFile "solid-js/types/index.d.ts"
-    dtsFile "typescript/lib/typescript.d.ts"
-    |> TypeScriptReader.create 
-
-reader
-|> readAndWrite (__SOURCE_DIRECTORY__ + "/output.json")
+// // let dtsFile = path.join(__SOURCE_DIRECTORY__, "../../node_modules/solid-js/types/index.d.ts")
+// let dtsFile file = path.join(__SOURCE_DIRECTORY__, $"../../node_modules/{file}")
+// let reader =
+//     // dtsFile "solid-js/types/index.d.ts"
+//     dtsFile "typescript/lib/typescript.d.ts"
+//     |> TypeScriptReader.create 
+//
+// reader
+// |> readAndWrite (__SOURCE_DIRECTORY__ + "/output.json")
 
 let private readFile (file: string) (destination: string) =
     TypeScriptReader.create file
@@ -35,7 +35,7 @@ USAGE
     xantham <input> [--output <output>]
 """
     |> printfn "%s"
-    
+#if !FABLE_TEST
 [<EntryPoint>]
 let main argv =
     let argv = argv |> Array.toList
@@ -48,3 +48,4 @@ let main argv =
     | _ ->
         printHelp()
     0
+#endif
