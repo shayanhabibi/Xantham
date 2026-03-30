@@ -9,10 +9,14 @@ open Node.Api
 open Xantham.Fable.Types
 
 // let dtsFile = path.join(__SOURCE_DIRECTORY__, "../../node_modules/solid-js/types/index.d.ts")
-// let reader = TypeScriptReader.create dtsFile
-//
-// reader
-// |> readAndWrite (__SOURCE_DIRECTORY__ + "/output.json")
+let dtsFile file = path.join(__SOURCE_DIRECTORY__, $"../../node_modules/{file}")
+let reader =
+    // dtsFile "solid-js/types/index.d.ts"
+    dtsFile "typescript/lib/typescript.d.ts"
+    |> TypeScriptReader.create 
+
+reader
+|> readAndWrite (__SOURCE_DIRECTORY__ + "/output.json")
 
 let private readFile (file: string) (destination: string) =
     TypeScriptReader.create file

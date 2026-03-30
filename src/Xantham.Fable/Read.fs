@@ -166,11 +166,17 @@ module Internal =
         | _ -> []
 
     let assembleResults (reader: TypeScriptReader) = Array.ofSeq <| seq {
+         let keys =
+             reader.signalCache.Values
+             |> Seq.choose (fun kv ->
+                 if kv.Builder.Value.IsSome then Some kv.Key else None
+                 )
+             |> Set
          for kv in reader.signalCache do
              let identity = kv.Key
              let { Key = typeKey; Builder = builder } = kv.Value
              match builder.Value with
-             | ValueNone ->
+             | ValueNone when keys.Contains typeKey |> not ->
                  let error (pos: obj) = (chalk.redBright.Invoke "[MISSREF]" + $" - TypeKey {chalk.yellowBright.Invoke typeKey} - Missing builder value.\n         - {chalk.dim.yellowBright.Invoke pos}") |> Log.emit
                  match identity with
                  | IdentityKey.DeclarationPosition(file, pos, endPos) ->
@@ -178,7 +184,7 @@ module Internal =
                      | Some file ->
                          let start = file.getLineAndCharacterOfPosition(pos)
                          let endPos = file.getLineAndCharacterOfPosition(endPos)
-                         error $"%A{file.fileName} ({start.line},{start.character}) ({endPos.line},{endPos.character})"
+                         error $"file:///%A{file.fileName}:{start.line + 1.}:{start.character + 1.} (end {endPos.line + 1.}:{endPos.character + 1.})"
                      | None ->
                          error $"{file} ({pos},{endPos})"
                  | IdentityKey.Symbol sym ->
@@ -189,6 +195,7 @@ module Internal =
                      // and have no meaningful identity to report.
                      error $"%A{identity}"
                  | _ -> error $"%A{identity}"
+             | ValueNone -> ()
              | ValueSome builder ->
                  let builtNode = builder.Build()
                  healthCheckNode typeKey builtNode
@@ -283,9 +290,7 @@ module Internal =
             | TsAstNode.Interface tsInterface when sorted.Length > 1 ->
                 let mergeAbleMembers, unmergeableMembers =
                     sorted[1..]
-                    |> Array.partition (fun result ->
-                        result.Node.IsInterface
-                        && result.Identity.IsDeclarationPosition)
+                    |> Array.partition _.Node.IsInterface
                     ||> (fun mergeable unmergeable ->
                         mergeable
                         |> Array.map (function
@@ -296,18 +301,15 @@ module Internal =
                         )
                 mergeAbleMembers
                 |> Array.fold (fun acc members ->
-                    Set.union acc (Set members)
-                    ) (Set tsInterface.Members)
-                |> Set.toList
+                    acc @ members
+                    ) tsInterface.Members
                 |> fun members ->
                     [| { winner with Node = TsAstNode.Interface { tsInterface with Members = members } }
                        yield! unmergeableMembers |]
             | TsAstNode.Class tsClass when sorted.Length > 1 ->
                 let mergeAbleMembers, unmergeableMembers =
                     sorted[1..]
-                    |> Array.partition (fun result ->
-                        result.Node.IsClass
-                        && result.Identity.IsDeclarationPosition)
+                    |> Array.partition _.Node.IsClass
                     ||> (fun mergeable unmergeable ->
                         mergeable
                         |> Array.map (function
@@ -338,6 +340,7 @@ module Internal =
                 let sorted = group.Results |> Array.sortBy (fun ir -> identityPriority ir.Identity)
                 let winner = sorted[0]
                 let hasConflict = sorted |> Array.exists (fun ir -> ir.Node <> winner.Node)
+                // if false then
                 if hasConflict then
                     Log.emit <| chalk.redBright.Invoke "[COLLIDE]" + " - " + $"TypeKey {chalk.yellowBright.Invoke group.Key} - Duplicate builder values for the same key."
                     let inline emit (s: obj) = Log.emit $"  {s}"
@@ -446,7 +449,7 @@ let readAndWrite (outputDestination: string) (reader: TypeScriptReader) =
         let mergedDuplicates =
             orderedDuplicates
             |> Internal.mergeOverloads
-            |> Internal.mergeMembersIntoWinner
+            // |> Internal.mergeMembersIntoWinner
         mergedDuplicates
         |> Internal.filterConflictDuplicatesOnly
         |> Seq.iter (fun group ->

@@ -44,3 +44,5 @@ open Xantham.Decoder
 [<Measure>] type masterKey; type MasterKey = int<masterKey>
 [<Measure>] type cyclicKey; type CyclicKey = int<cyclicKey>
 [<Measure>] type indexKey; type IndexKey = int<indexKey>
+[<Measure>] type arrayKey; type ArrayKey = int<arrayKey>
+[<Measure>] type templateLiteralKey; type TemplateLiteralKey = int<templateLiteralKey>
