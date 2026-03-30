@@ -11,7 +11,44 @@ type TypeKey = System.Int32
 module TypeKey =
     let inline createWith (i: int) = i
 #endif
-    
+
+/// <summary>
+/// Indicates a type can be a member of a <c>TsOverloadableConstruct</c> collection.
+/// </summary>
+type IOverloadable = interface end
+
+type TsOverloadableConstruct<'T when 'T:>IOverloadable and 'T : equality and 'T : comparison> =
+    | NoOverloads of 'T
+    | Overloaded of 'T Set
+    member this.ValueOrHead =
+        match this with
+        | NoOverloads value -> value
+        | Overloaded values -> Set.maxElement values
+    member inline this.ToList() =
+        match this with
+        | NoOverloads value -> [ value ]
+        | Overloaded values -> Set.toList values
+    member inline this.ToSeq() =
+        match this with
+        | NoOverloads value -> seq { value }
+        | Overloaded values -> values
+    member inline this.ToArray() =
+        match this with
+        | NoOverloads value -> [| value |]
+        | Overloaded values -> values |> Set.toArray
+    static member inline Create(value: 'T when 'T :> IOverloadable) = NoOverloads value
+    static member inline Create(values: 'T seq when 'T :> IOverloadable) =
+        if values |> Seq.isEmpty then failwith "Invalid TsOverloadableConstruct; require at least one value"
+        elif Seq.length values = 1 then NoOverloads (values |> Seq.head)
+        else Overloaded (values |> Set.ofSeq)
+    static member Create(overloads: TsOverloadableConstruct<'T> seq) =
+        overloads |> Seq.collect _.ToSeq()
+        |> function
+            | values when Seq.length values > 1 -> Overloaded (values |> Set.ofSeq)
+            | values when Seq.isEmpty values -> failwith "Invalid TsOverloadableConstruct; require at least one value"
+            | values -> NoOverloads (values |> Seq.head)
+    member this.Values = this.ToArray()
+
 [<RequireQualifiedAccess>]
 type TsComment =
     | Summary of string list
@@ -139,7 +176,7 @@ type TsMethod = {
     IsOptional: bool
     IsStatic: bool
     Documentation: TsComment list
-}
+} with interface IOverloadable
 
 /// Represents a call signature in a type literal or interface.
 ///
@@ -152,7 +189,7 @@ type TsCallSignature = {
     Documentation: TsComment list
     Parameters: TsParameter list
     Type: TypeKey
-}
+} with interface IOverloadable
 
 /// Represents a construct signature (the type of `new` for a value).
 ///
@@ -164,7 +201,7 @@ type TsCallSignature = {
 type TsConstructSignature = {
     Type: TypeKey
     Parameters: TsParameter list
-}
+} with interface IOverloadable
 
 /// Represents a class constructor declaration.
 ///
@@ -176,7 +213,8 @@ type TsConstructSignature = {
 type TsConstructor = {
     Documentation: TsComment list
     Parameters: TsParameter list
-}
+} with interface IOverloadable
+        
 
 [<RequireQualifiedAccess>]
 type TsAccessor =
@@ -261,7 +299,7 @@ type TsFunction = {
     Type: TypeKey
     Parameters: TsParameter list
     TypeParameters: InlinedTsTypeParameter list
-}
+} with interface IOverloadable
 
 /// Represents a conditional type `T extends U ? X : Y`.
 ///
@@ -279,13 +317,13 @@ type TsConditionalType = {
 
 [<RequireQualifiedAccess>]
 type TsMember =
-    | Method of TsMethod
+    | Method of TsOverloadableConstruct<TsMethod>
     | Property of TsProperty
     | GetAccessor of TsGetAccessor
     | SetAccessor of TsSetAccessor
-    | CallSignature of TsCallSignature
+    | CallSignature of TsOverloadableConstruct<TsCallSignature>
     | IndexSignature of TsIndexSignature
-    | ConstructSignature of TsConstructSignature
+    | ConstructSignature of TsOverloadableConstruct<TsConstructSignature>
 
     /// <summary>
     /// For SRTP
@@ -569,7 +607,7 @@ and [<RequireQualifiedAccess>] TsType =
     | Enum of TsEnumType
     | EnumCase of TsEnumCase
     | TypeAlias of TsTypeAlias
-    | Function of TsFunction
+    | Function of TsOverloadableConstruct<TsFunction>
     | Union of TsTypeUnion
     | Intersection of TsTypeIntersection
     | Literal of TsLiteral
@@ -634,11 +672,11 @@ type [<RequireQualifiedAccess>] TsAstNode =
     | Parameter of TsParameter
     | TypeParameter of TsTypeParameter
     | IndexAccessType of TsIndexAccessType
-    | FunctionDeclaration of TsFunction
-    | Method of TsMethod
+    | FunctionDeclaration of TsOverloadableConstruct<TsFunction>
+    | Method of TsOverloadableConstruct<TsMethod>
     | Alias of TsTypeAlias
-    | Constructor of TsConstructor
-    | ConstructSignature of TsConstructSignature
+    | Constructor of TsOverloadableConstruct<TsConstructor>
+    | ConstructSignature of TsOverloadableConstruct<TsConstructSignature>
     | IndexSignature of TsIndexSignature
     | Index of TsIndex
     | TypeReference of TsTypeReference
@@ -653,7 +691,7 @@ type [<RequireQualifiedAccess>] TsAstNode =
     | Optional of TsTypeReference
     | GetAccessor of TsGetAccessor
     | SetAccessor of TsSetAccessor
-    | CallSignature of TsCallSignature
+    | CallSignature of TsOverloadableConstruct<TsCallSignature>
     | Module of TsModule
 
 

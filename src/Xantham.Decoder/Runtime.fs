@@ -9,7 +9,7 @@ module Map =
     let inline choose (fn: 'Key -> 'Item -> 'Outcome option) (map: Map<'Key, 'Item>) = Map.fold (fun acc key item -> match fn key item with Some value -> Map.add key value acc | None -> acc) (Map []) map
 
 type IDictionaryTypeAccess =
-    abstract member Funcs: FrozenDictionary<TypeKey, TsFunction>
+    abstract member Funcs: FrozenDictionary<TypeKey, TsOverloadableConstruct<TsFunction>>
     abstract member Conditionals: FrozenDictionary<TypeKey, TsConditionalType>
     abstract member Interfaces: FrozenDictionary<TypeKey, TsInterface>
     abstract member Classes: FrozenDictionary<TypeKey, TsClass>
@@ -75,8 +75,8 @@ type XanthamTree(fileName: string) =
         | TsType.Enum { Source = source }
         | TsType.Variable { Source = source }
         | TsType.Interface { Source = source }
-        | TsType.Class { Source = source }
-        | TsType.Function { Source = source } -> source
+        | TsType.Class { Source = source } -> source
+        | TsType.Function functions -> functions.ValueOrHead.Source
         | TsType.ReadOnly node
         | TsType.Array node -> getSourceFromGlueType node
         | _ -> None

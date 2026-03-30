@@ -8,14 +8,14 @@ open Xantham
 type NodeStore =
     | Property of TsProperty
     | Parameter of TsParameter
-    | Method of TsMethod
-    | Constructor of TsConstructor
+    | Method of TsOverloadableConstruct<TsMethod>
+    | Constructor of TsOverloadableConstruct<TsConstructor>
     | SubstitutionType of TsSubstitutionType
-    | ConstructSignature of TsConstructSignature
+    | ConstructSignature of TsOverloadableConstruct<TsConstructSignature>
     | IndexSignature of TsIndexSignature
     | GetAccessor of TsGetAccessor
     | SetAccessor of TsSetAccessor
-    | CallSignature of TsCallSignature
+    | CallSignature of TsOverloadableConstruct<TsCallSignature>
 
 type TypeMap = Map<TypeKey, TsType>
 type NodeMap = Map<TypeKey, NodeStore>

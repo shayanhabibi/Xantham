@@ -4,6 +4,48 @@ Xantham is a hard fork of Glutinum that tackles the TypeScript-to-.NET bindings 
 
 > Resilience to change is a key concern. With the emergence of the TypeScript GO compiler, we can adapt by updating only the encoder (e.g., to a TSGO‑native implementation, or by providing a standalone GO encoder). The decoder and downstream generators remain unchanged as long as the common schema stays stable.
 
+### Current Status
+
+#### Reader
+
+- [x] Read `.d.ts` files using the TypeScript Compiler API
+- [x] Crawl the AST to extract type information
+- [x] **Ensuring any referenced types are also extracted (crosses multiple files).**
+- [x] **Extract exported type information from the AST across multiple files**
+- [x] Extract barrel file exports
+- [x] Cache computations, resilience to recursive type references.
+    - [x] Process massive type hierarchy trees such as `solid-js` efficiently
+    - [x] Stack-overflow protection (stack based reading > tail-calls)
+        - Node.js does not perform tail-call optimisation. This is not an issue until you start processing massive type hierarchies laden with transient types.
+- [x] Evaluate the 'import' module statement for a source file.
+  - [ ] Evaluate import correctly statements for internally referenced types exported via barrel files
+- [x] Resolve types with the type checker (e.g. template strings are resolved to a flat string enum if all variables are known).
+- [ ] Flatten output by merging duplicate transient types (such as generic type parameters that have no information and share the same name).
+- [x] Encode the extracted data into a JSON schema
+
+#### Decoder
+
+- [x] Process Reader output into F# types
+- [x] Utility organisation of output
+- [x] Check output for dangling references or missing types
+- [ ] Efficient memory usage/fast processing of JSON
+  - Thoth carries more burden on the .NET processing side, but it is very easy to use.
+
+#### Schema
+
+Fairly happy with the information we are carrying to .NET. Perhaps will want to adjust the schema to include source
+files, exports etc, and make it more '1-1'. In a sense, it means less work for the encoder. But that cost would be
+paid by the decoder? When we're creating bindings, we're very often just shooting our tool at a single library and
+letting it do its work. Source files locations could be considered 'noise'.
+
+This would have to be decided upon prior to a stable release, as any change in the schema would entail a breaking change.
+in the entire chain.
+
+#### Generator
+
+Several changes in the schema/reader have rendered my previous iteration a bit broken; I'll need to ensure the reader 
+produces correct output before I go back and fix it.
+
 ### Glutinum Pipeline
 
 ```mermaid
@@ -121,8 +163,8 @@ An example generator demonstrating a minimal end‑to‑end flow from decoded sc
 
 | Function | Module | Status | Notes                                                                                                                                                                                                      |
 |:---------|:--|:------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Schema | Xantham.Common |   🟡   | Stable. There are still considerations being made towards 'Source' and 'Qualifier' fields.                                                                                                                 |
-| Reader   | Xantham.Fable |   🟡   | Release Candidate.                                                                                                                                                                                         |
+| Schema | Xantham.Common |   🟡   | Beta                                                                                                                                                                                                       |
+| Reader   | Xantham.Fable |   🟡   | Beta                                                                                                                                                                                                       |
 | Decoder | Xantham.Decoder |   🟡   | The decoder naturally functions in regards to parsing the JSON, but utility methods and functions are still being considered and reworked pending on what I find would likely be used widely by consumers. |
 | Generator | Xantham.Generator |   🔴   | Needs to be rejigged to the new reader standards.                                                                                                                                                          |
 
