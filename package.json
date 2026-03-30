@@ -5,6 +5,9 @@
         "node": ">=16"
     },
     "scripts": {
+        "pretest": "dotnet fable -c Debug --cwd tests/Xantham.Fable.Tests -o dist/tests",
+        "test": "mocha tests/Xantham.Fable.Tests/dist/tests",
+        "watch-test": "dotnet fable --cwd tests/Xantham.Fable.Tests --noCache --watch --runWatch mocha Program.fs.js",
         "prestart": "dotnet fable --cwd src/Xantham.Fable",
         "start": "node src/Xantham.Fable/Program.fs.js",
         "run": "dotnet fable --cwd src/Xantham.Fable --noCache --run node Program.fs.js",
@@ -12,6 +15,7 @@
         "test:signal": "dotnet fable --cwd tests/ --noCache Signal.test.fsx && node tests/Signal.test.fs.js"
     },
     "devDependencies": {
+        "mocha": "^11.7.5",
         "@iconify-icons/lucide": "^1.2.135",
         "@iconify-icons/simple-icons": "^1.2.74",
         "@iconify/react": "^4.1.1",

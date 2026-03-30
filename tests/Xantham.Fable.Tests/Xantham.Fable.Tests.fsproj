@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TestProject>true</TestProject>
+        <DefineConstants>FABLE_TEST</DefineConstants>
+        <TargetFramework>net10.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Program.fs"/>
+        <TypeScriptCompile Include="TypeFiles\basic.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\merge.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\extends.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\multiple-extends.d.ts" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\Xantham.Fable\Xantham.Fable.fsproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Fable.Mocha" Version="2.17.0" />
+    </ItemGroup>
+
+</Project>

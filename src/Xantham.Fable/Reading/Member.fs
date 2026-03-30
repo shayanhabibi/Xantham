@@ -8,7 +8,7 @@ open Xantham.Fable.Types.Signal
 let resolveToMemberBuilder (ctx: TypeScriptReader) (node: Ts.TypeElement) =
     let tagVisitedState = ctx.CreateXanthamTag node |> fst
     let tag = tagVisitedState.Value
-    if tagVisitedState.IsVisited then
+    if tagVisitedState.IsUnvisited then
         pushToStack ctx tag
     tag
     |> GuardedData.AstNodeBuilder.getOrSetDefault

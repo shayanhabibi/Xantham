@@ -17,7 +17,7 @@ open Xantham.Fable.Types
 open Xantham.Fable.Types.Tracer
 
 module Internal =
-    
+    open Glutinum.Chalk
     type IRResult = {
         Identity: IdentityKey
         Key: TypeKey
@@ -33,18 +33,21 @@ module Internal =
     let inline plant<[<Measure>] 'u> (typ: IRResultDuplicates): IRResultDuplicates<'u> = unbox typ
     let inline graft<[<Measure>] 'n>(typ: IRResultDuplicates<_>): IRResultDuplicates<'n> = unbox typ
     let inline (|IRResultDuplicates|) value = prune value
-    
+    module Log =
+        let prefix = chalk.redBright.Invoke "[CIRCREF]"
+        let inline healthCheckError<'T> (typ: 'T) (o: obj) = Log.emit $"{prefix} - { chalk.yellowBright.Invoke typeof<'T>.Name}: {o} references itself"
+            
     let rec healthCheckNode (typKey: TypeKey) (node: TsAstNode) =
         match node with
         | TsAstNode.Alias alias ->
             if alias.Type = typKey then
-                Log.error $"Alias {alias.Name} points to itself"
+                Log.healthCheckError alias alias.Name
             alias.TypeParameters
             |> List.map (snd >> TsAstNode.TypeParameter)
             |> List.iter (healthCheckNode typKey)
         | TsAstNode.TemplateLiteral node ->
             if node.Types |> List.contains typKey then
-                Log.error $"TemplateLiteral {node} points to itself"
+                Log.healthCheckError node node
         | TsAstNode.GlobalThis -> ()
         | TsAstNode.Tuple tsTuple ->
             tsTuple.Types
@@ -53,54 +56,54 @@ module Internal =
                 | TsTupleElement.Fixed { Type = key }
                 | TsTupleElement.FixedLabeled(_, { Type = key }) ->
                     if key = typKey then
-                        Log.error $"Tuple {tsTuple} points to itself"
+                        Log.healthCheckError tsTuple tsTuple
                 )
         | TsAstNode.Interface tsInterface -> ()
         | TsAstNode.Variable tsVariable ->
-            if typKey = tsVariable.Type then Log.error $"Variable {tsVariable.Name} points to itself"
+            if typKey = tsVariable.Type then Log.healthCheckError tsVariable tsVariable.Name
         | TsAstNode.Primitive typeKindPrimitive -> ()
         | TsAstNode.Predicate tsTypePredicate -> ()
         | TsAstNode.Literal tsLiteral -> ()
         | TsAstNode.TypeLiteral tsTypeLiteral -> ()
-        | TsAstNode.Property tsProperty -> if typKey = tsProperty.Type then Log.error $"Property {tsProperty.Name} points to itself"
-        | TsAstNode.Parameter tsParameter -> if typKey = tsParameter.Type then Log.error $"Parameter {tsParameter.Name} points to itself"
+        | TsAstNode.Property tsProperty -> if typKey = tsProperty.Type then Log.healthCheckError tsProperty tsProperty.Name
+        | TsAstNode.Parameter tsParameter -> if typKey = tsParameter.Type then Log.healthCheckError tsParameter tsParameter.Name
         | TsAstNode.TypeParameter tsTypeParameter ->
-            if Some typKey = tsTypeParameter.Constraint then Log.error $"TypeParameter {tsTypeParameter.Name} points to itself"
-            elif Some typKey = tsTypeParameter.Default then Log.error $"TypeParameter {tsTypeParameter.Name} points to itself"
+            if Some typKey = tsTypeParameter.Constraint then Log.healthCheckError tsTypeParameter tsTypeParameter.Name
+            elif Some typKey = tsTypeParameter.Default then Log.healthCheckError tsTypeParameter tsTypeParameter.Name
         | TsAstNode.IndexAccessType tsIndexAccessType ->
-            if typKey = tsIndexAccessType.Object then Log.error $"IndexAccessType {tsIndexAccessType} points to itself"
-            elif typKey = tsIndexAccessType.Index then Log.error $"IndexAccessType {tsIndexAccessType} points to itself"
-        | TsAstNode.FunctionDeclaration tsFunction -> for tsFunction in tsFunction.Values do if typKey = tsFunction.Type then Log.error $"FunctionDeclaration {tsFunction.Name} points to itself"
-        | TsAstNode.Method tsMethod -> for tsMethod in tsMethod.Values do if typKey = tsMethod.Type then Log.error $"Method {tsMethod.Name} points to itself"
+            if typKey = tsIndexAccessType.Object then Log.healthCheckError tsIndexAccessType tsIndexAccessType
+            elif typKey = tsIndexAccessType.Index then Log.healthCheckError tsIndexAccessType tsIndexAccessType
+        | TsAstNode.FunctionDeclaration tsFunction -> for tsFunction in tsFunction.Values do if typKey = tsFunction.Type then Log.healthCheckError tsFunction tsFunction.Name
+        | TsAstNode.Method tsMethod -> for tsMethod in tsMethod.Values do if typKey = tsMethod.Type then Log.healthCheckError tsMethod tsMethod.Name
         | TsAstNode.Constructor tsConstructor -> ()
         | TsAstNode.ConstructSignature tsConstructSignature -> ()
-        | TsAstNode.IndexSignature tsIndexSignature -> if typKey = tsIndexSignature.Type then Log.error $"IndexSignature {tsIndexSignature} points to itself"
-        | TsAstNode.Index tsIndex -> if typKey = tsIndex.Type then Log.error $"Index {tsIndex} points to itself"
+        | TsAstNode.IndexSignature tsIndexSignature -> if typKey = tsIndexSignature.Type then Log.healthCheckError tsIndexSignature tsIndexSignature
+        | TsAstNode.Index tsIndex -> if typKey = tsIndex.Type then Log.healthCheckError tsIndex tsIndex
         | TsAstNode.TypeReference tsTypeReference ->
-            if typKey = tsTypeReference.Type then Log.error $"TypeReference {tsTypeReference} points to itself"
-            elif Some typKey = tsTypeReference.ResolvedType then Log.error $"TypeReference {tsTypeReference} points to itself"
+            if typKey = tsTypeReference.Type then Log.healthCheckError tsTypeReference tsTypeReference
+            elif Some typKey = tsTypeReference.ResolvedType then Log.healthCheckError tsTypeReference tsTypeReference
         | TsAstNode.Array tsTypeReference ->
-            if typKey = tsTypeReference.Type then Log.error $"Array {tsTypeReference} points to itself"
-            elif Some typKey = tsTypeReference.ResolvedType then Log.error $"Array {tsTypeReference} points to itself"
+            if typKey = tsTypeReference.Type then Log.healthCheckError [] tsTypeReference
+            elif Some typKey = tsTypeReference.ResolvedType then Log.healthCheckError [] tsTypeReference
         | TsAstNode.Enum tsEnumType -> ()
         | TsAstNode.EnumCase tsEnumCase -> ()
         | TsAstNode.SubstitutionType tsSubstitutionType -> ()
         | TsAstNode.Conditional tsConditionalType ->
-            if typKey = tsConditionalType.Check then Log.error $"Conditional {tsConditionalType} points to itself"
-            elif typKey = tsConditionalType.Extends then Log.error $"Conditional {tsConditionalType} points to itself"
-            elif typKey = tsConditionalType.True then Log.error $"Conditional {tsConditionalType} points to itself"
-            elif typKey = tsConditionalType.False then Log.error $"Conditional {tsConditionalType} points to itself"
+            if typKey = tsConditionalType.Check then Log.healthCheckError tsConditionalType tsConditionalType
+            elif typKey = tsConditionalType.Extends then Log.healthCheckError tsConditionalType tsConditionalType
+            elif typKey = tsConditionalType.True then Log.healthCheckError tsConditionalType tsConditionalType
+            elif typKey = tsConditionalType.False then Log.healthCheckError tsConditionalType tsConditionalType
         | TsAstNode.Class tsClass -> ()
         | TsAstNode.Union tsTypeUnion ->
             if tsTypeUnion.Types |> List.contains typKey then
-                Log.error $"Union {tsTypeUnion} points to itself"
+                Log.healthCheckError tsTypeUnion tsTypeUnion
         | TsAstNode.Intersection tsTypeIntersection ->
             if tsTypeIntersection.Types |> List.contains typKey then
-                Log.error $"Intersection {tsTypeIntersection} points to itself"
-        | TsAstNode.Optional tsTypeReference -> if typKey = tsTypeReference.Type then Log.error $"Optional {tsTypeReference} points to itself"
-        | TsAstNode.GetAccessor tsGetAccessor -> if typKey = tsGetAccessor.Type then Log.error $"GetAccessor {tsGetAccessor} points to itself"
-        | TsAstNode.SetAccessor tsSetAccessor -> if typKey = tsSetAccessor.ArgumentType then Log.error $"SetAccessor {tsSetAccessor} points to itself"
-        | TsAstNode.CallSignature tsCallSignature -> for tsCallSignature in tsCallSignature.Values do if typKey = tsCallSignature.Type then Log.error $"CallSignature {tsCallSignature} points to itself"
+                Log.healthCheckError tsTypeIntersection tsTypeIntersection
+        | TsAstNode.Optional tsTypeReference -> if typKey = tsTypeReference.Type then Log.healthCheckError None tsTypeReference
+        | TsAstNode.GetAccessor tsGetAccessor -> if typKey = tsGetAccessor.Type then Log.healthCheckError tsGetAccessor tsGetAccessor
+        | TsAstNode.SetAccessor tsSetAccessor -> if typKey = tsSetAccessor.ArgumentType then Log.healthCheckError tsSetAccessor tsSetAccessor
+        | TsAstNode.CallSignature tsCallSignature -> for tsCallSignature in tsCallSignature.Values do if typKey = tsCallSignature.Type then Log.healthCheckError tsCallSignature tsCallSignature
         | TsAstNode.Module tsModule -> ()
 
     let private unknownKey = TypeKindPrimitive.Unknown.TypeKey
@@ -163,34 +166,44 @@ module Internal =
         | _ -> []
 
     let assembleResults (reader: TypeScriptReader) = Array.ofSeq <| seq {
+         let keys =
+             reader.signalCache.Values
+             |> Seq.choose (fun kv ->
+                 if kv.Builder.Value.IsSome then Some kv.Key else None
+                 )
+             |> Set
          for kv in reader.signalCache do
              let identity = kv.Key
              let { Key = typeKey; Builder = builder } = kv.Value
              match builder.Value with
-             | ValueNone ->
+             | ValueNone when keys.Contains typeKey |> not ->
+                 let error (pos: obj) = (chalk.redBright.Invoke "[MISSREF]" + $" - TypeKey {chalk.yellowBright.Invoke typeKey} - Missing builder value.\n         - {chalk.dim.yellowBright.Invoke pos}") |> Log.emit
                  match identity with
                  | IdentityKey.DeclarationPosition(file, pos, endPos) ->
                      match reader.program.getSourceFile(file) with
                      | Some file ->
                          let start = file.getLineAndCharacterOfPosition(pos)
                          let endPos = file.getLineAndCharacterOfPosition(endPos)
-                         Log.error $"[{typeKey}] Missing builder for: %A{file.fileName} ({start.line},{start.character}) ({endPos.line},{endPos.character})"
+                         error $"file:///%A{file.fileName}:{start.line + 1.}:{start.character + 1.} (end {endPos.line + 1.}:{endPos.character + 1.})"
                      | None ->
-                         Log.error $"[{typeKey}] Missing builder for: {file} ({pos},{endPos})"
+                         error $"{file} ({pos},{endPos})"
                  | IdentityKey.Symbol sym ->
-                     Log.error $"[{typeKey}] Missing builder for: {sym.name}"
+                     error $"{sym.name}"
                  | IdentityKey.Id _ ->
                      // Anonymous types with no symbol or declaration — complex generic internals.
                      // These are expected for highly generic signatures (splitProps, mergeProps, etc.)
                      // and have no meaningful identity to report.
-                     Log.warn $"[{typeKey}] Missing builder for: %A{identity}"
-                 | _ -> Log.error $"[{typeKey}] Missing builder for: %A{identity}"
+                     error $"%A{identity}"
+                 | _ -> error $"%A{identity}"
+             | ValueNone -> ()
              | ValueSome builder ->
                  let builtNode = builder.Build()
                  healthCheckNode typeKey builtNode
                  let unknownFields = findUnknownFields builtNode
                  if unknownFields.Length > 0 then
-                     Log.warn $"""[{typeKey}] %A{identity}: Unknown TypeKey in fields: {String.concat ", " unknownFields}"""
+                     Log.emit <| chalk.dim.Invoke(
+                         chalk.redBright.Invoke "[STUBREF]" + $" - TypeKey {chalk.yellowBright.Invoke typeKey} - Unknown fields: " + $"""{String.concat ", " unknownFields}"""
+                         )
                  { Identity = identity
                    Key = typeKey
                    Node = builtNode }
@@ -277,9 +290,7 @@ module Internal =
             | TsAstNode.Interface tsInterface when sorted.Length > 1 ->
                 let mergeAbleMembers, unmergeableMembers =
                     sorted[1..]
-                    |> Array.partition (fun result ->
-                        result.Node.IsInterface
-                        && result.Identity.IsDeclarationPosition)
+                    |> Array.partition _.Node.IsInterface
                     ||> (fun mergeable unmergeable ->
                         mergeable
                         |> Array.map (function
@@ -299,9 +310,7 @@ module Internal =
             | TsAstNode.Class tsClass when sorted.Length > 1 ->
                 let mergeAbleMembers, unmergeableMembers =
                     sorted[1..]
-                    |> Array.partition (fun result ->
-                        result.Node.IsClass
-                        && result.Identity.IsDeclarationPosition)
+                    |> Array.partition _.Node.IsClass
                     ||> (fun mergeable unmergeable ->
                         mergeable
                         |> Array.map (function
@@ -318,7 +327,7 @@ module Internal =
                 |> fun members ->
                     [| { winner with Node = TsAstNode.Class { tsClass with Members = members } }
                        yield! unmergeableMembers |]
-            | node -> sorted
+            | _ -> sorted
             |> fun sorted ->
                 { group with Results = sorted }
                 |> plant
@@ -332,14 +341,24 @@ module Internal =
                 let sorted = group.Results |> Array.sortBy (fun ir -> identityPriority ir.Identity)
                 let winner = sorted[0]
                 let hasConflict = sorted |> Array.exists (fun ir -> ir.Node <> winner.Node)
+                // if false then
                 if hasConflict then
-                    Log.warn $"| Duplicate entries for key %A{group.Key}"
+                    Log.emit <| chalk.redBright.Invoke "[COLLIDE]" + " - " + $"TypeKey {chalk.yellowBright.Invoke group.Key} - Duplicate builder values for the same key."
+                    let inline emit (s: obj) = Log.emit $"  {s}"
                     for ir in sorted do
-                        Log.debug $" * %A{ir.Identity} ->"
-                        Log.log $" %A{ir.Node}"
-                    Log.success $"| Winner: %A{winner.Identity}"
-                    Log.debug $" {winner.Node}"
-                    Log.info "_______________________________________"
+                        if ir.Identity = winner.Identity then
+                            chalk.yellowBright.Invoke "[EMIT]" + $" - %A{ir.Identity}"
+                            |> emit
+                            $"%A{ir.Node}"
+                            |> String.splitLines
+                            |> Array.iter emit
+                        else
+                            chalk.gray.bold.Invoke "[DISC]" + $" - %A{chalk.gray.Invoke ir.Identity}"
+                            |> emit
+                            $"%A{chalk.dim.Invoke ir.Node}"
+                            |> String.splitLines
+                            |> Array.iter emit
+                    emit <| chalk.dim.Invoke "----------------------------------------------------------------"
                 winner
         }
 
@@ -437,7 +456,6 @@ let readAndWrite (outputDestination: string) (reader: TypeScriptReader) =
         |> Seq.iter (fun group ->
             splitMap.Add(group.Key, (group.Winner.Node, group.Losers |> Array.map _.Node))
             )
-        
         Internal.resolveDuplicates (Seq.map Internal.prune mergedDuplicates)
         |> Seq.append split.NonDuplicates
         |> Seq.sortBy _.Key

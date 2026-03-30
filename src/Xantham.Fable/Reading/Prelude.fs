@@ -72,7 +72,12 @@ module TypeStore =
                     | TypeDeclaration.CallSignature _
                     | TypeDeclaration.ConstructSignature _
                     | TypeDeclaration.IndexSignature _
-                    | TypeDeclaration.HeritageClause _
+                    
+                    // | TypeDeclaration.HeritageClause _
+                    (* Generating keys for heritage members causes chaotic MISSREF
+                    errors to fire if the type is extended more than once. The actual
+                    output is fine, but the dangling builder messages is a frustrating UX.*)
+                    
                     | TypeDeclaration.ExpressionWithTypeArguments _
                     | TypeDeclaration.EnumMember _
                     | TypeDeclaration.TypeAlias _
