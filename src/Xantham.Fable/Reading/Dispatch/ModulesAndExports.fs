@@ -99,6 +99,8 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
             | [||] -> ()
             | _ -> 
                 let decl = declarations[0]
+                GuardedData.TypeSignal.getOrSetDefault xanTag
+                |> Signal.fulfillWith (fun () -> (GuardedData.TypeSignal.getOrSetDefault decl).Value)
                 GuardedData.AstNodeBuilder.getOrSetDefault xanTag
                 |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.getOrSetDefault decl).Value)
         | None -> Log.error "failed to get symbol"

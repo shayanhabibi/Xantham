@@ -27,7 +27,35 @@ let inline isModuleFileStable (sourceFile: Ts.SourceFile) =
 let isModuleFile (sourceFile: Ts.SourceFile) =
     isModuleFileFast sourceFile || isModuleFileStable sourceFile
 let isAmbientFile: Ts.SourceFile -> _ = isModuleFile >> not 
-    
+let expandDeclarations (ctx: TypeScriptReader) (declarations: XanthamTag array): XanthamTag array =
+    [|
+        for declaration in declarations do
+            let decl =
+                match declaration.Value with
+                | TypeDeclaration (TypeDeclaration.Interface interfaceDeclaration) -> interfaceDeclaration :> Ts.Node |> Some
+                | TypeDeclaration (TypeDeclaration.FunctionDeclaration functionDeclaration) -> functionDeclaration :> Ts.Node |> Some
+                | _ -> None
+            if decl.IsNone then
+                yield declaration
+            else
+            let decl = decl.Value
+            yield!
+                ctx.checker.getSymbolAtLocation decl
+                |> Option.orElseWith (fun () ->
+                    ctx.checker.getTypeAtLocation decl
+                    |> fun symb ->
+                        symb.aliasSymbol
+                        |> Option.orElse (symb.getSymbol())
+                    )
+                |> Option.bind _.getDeclarations()
+                |> Option.map (
+                    _.AsArray
+                    >> Array.map (
+                        ctx.CreateXanthamTag
+                        >> fst >> TagState.value)
+                    )
+                |> Option.defaultValue [| declaration |]
+    |]
 
 let getDeclarations (ctx: TypeScriptReader) (sourceFile: Ts.SourceFile) =
     let checker = ctx.checker
@@ -41,6 +69,7 @@ let getDeclarations (ctx: TypeScriptReader) (sourceFile: Ts.SourceFile) =
                 sym.declarations
                 |> Option.bind (fun decls -> decls |> Seq.tryHead)
                 |> Option.map (fun decl -> ctx.CreateXanthamTag(decl) |> fst |> TagState.value))
+            >> expandDeclarations ctx
             )
         |> Option.defaultWith(fun () -> failwith "Source file exported/declared no known declarations")
     else

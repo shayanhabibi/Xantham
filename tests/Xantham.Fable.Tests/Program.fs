@@ -50,7 +50,7 @@ let runReader (reader: TypeScriptReader) =
 /// Find the first interface in the result whose Name matches, or None.
 let tryFindInterface name (result: Dictionary<TypeKey, TsAstNode>) =
     result |> Seq.tryPick (function
-        | KeyValue(_, TsAstNode.Interface iface) when iface.Name = name -> Some iface
+        | KeyValue(key, TsAstNode.Interface iface) when key > TypeKey 0 && iface.Name = name -> Some iface
         | _ -> None)
 
 /// Find the first interface in the result whose Name matches; throws on miss.
@@ -68,7 +68,7 @@ let findEnum name (result: Dictionary<TypeKey, TsAstNode>) =
 /// Works for both NoOverloads (single) and Overloaded (merged) constructs.
 let findFunction name (result: Dictionary<TypeKey, TsAstNode>) =
     result |> Seq.pick (function
-        | KeyValue(_, TsAstNode.FunctionDeclaration fd) when fd.ValueOrHead.Name = name -> Some fd
+        | KeyValue(k, TsAstNode.FunctionDeclaration fd) when k > TypeKey 0 && fd.ValueOrHead.Name = name -> Some fd
         | _ -> None)
 
 /// Return the TsProperty record for a named property in a member list; throws on miss.

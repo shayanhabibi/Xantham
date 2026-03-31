@@ -9,8 +9,6 @@ export interface MergeProps {
     name: string;
 }
 
-export type Dummy = {}
-
 export interface MergeProps {
     age: number;
 }
