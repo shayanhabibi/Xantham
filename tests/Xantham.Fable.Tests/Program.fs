@@ -17,6 +17,15 @@ let createTestReader (fileName: string) =
     let reader = TypeScriptReader.create filePath
     reader
 
+let createMultiFileTestReader (fileNames: string array) =
+    fileNames
+    |> Array.map (fun f -> path.join(__SOURCE_DIRECTORY__, "TypeFiles", $"{f}.d.ts"))
+    |> TypeScriptReader.createFor
+
+let createSubdirTestReader (relPath: string) =
+    let filePath = path.join(__SOURCE_DIRECTORY__, "TypeFiles", $"{relPath}.d.ts")
+    TypeScriptReader.create filePath
+
 let runReader (reader: TypeScriptReader) =
     let _exports =
         Internal.initialise reader
@@ -103,6 +112,12 @@ let findClass name (result: Dictionary<TypeKey, TsAstNode>) =
 let findVariable name (result: Dictionary<TypeKey, TsAstNode>) =
     result |> Seq.pick (function
         | KeyValue(_, TsAstNode.Variable v) when v.Name = name -> Some v
+        | _ -> None)
+
+/// Find the first module/namespace whose Name matches; throws on miss.
+let findModule name (result: Dictionary<TypeKey, TsAstNode>) =
+    result |> Seq.pick (function
+        | KeyValue(_, TsAstNode.Module m) when m.Name = name -> Some m
         | _ -> None)
 
 // -----------------------------------------------------------------------
@@ -956,6 +971,315 @@ let typeOperatorTests =
     ]
 
 // -----------------------------------------------------------------------
+// Fixture: enum-nonsequential.d.ts
+//   export enum HttpStatus   { Ok = 200, NotFound = 404, ServerError = 500 }
+//   export enum Temperature  { AbsoluteZero = -273, Freezing = 0, Boiling = 100 }
+// -----------------------------------------------------------------------
+
+let enumNonSequentialTests =
+    testList "enum-nonsequential.d.ts" [
+        let result = createTestReader "enum-nonsequential" |> runReader
+
+        testCase "'HttpStatus' enum is present in result" <| fun _ ->
+            "HttpStatus should be in result"
+            |> Expect.exists result (function
+                | KeyValue(_, TsAstNode.Enum e) when e.Name = "HttpStatus" -> true
+                | _ -> false)
+
+        testCase "'HttpStatus' has exactly 3 members" <| fun _ ->
+            "" |> Expect.hasLength (result |> findEnum "HttpStatus").Members 3
+
+        testCase "'HttpStatus.Ok' has value 200" <| fun _ ->
+            let m = result |> findEnum "HttpStatus" |> _.Members |> List.find (fun c -> c.Name = "Ok")
+            "" |> Expect.equal m.Value (TsLiteral.Int 200)
+
+        testCase "'HttpStatus.NotFound' has value 404" <| fun _ ->
+            let m = result |> findEnum "HttpStatus" |> _.Members |> List.find (fun c -> c.Name = "NotFound")
+            "" |> Expect.equal m.Value (TsLiteral.Int 404)
+
+        testCase "'HttpStatus.ServerError' has value 500" <| fun _ ->
+            let m = result |> findEnum "HttpStatus" |> _.Members |> List.find (fun c -> c.Name = "ServerError")
+            "" |> Expect.equal m.Value (TsLiteral.Int 500)
+
+        testCase "'Temperature.AbsoluteZero' has negative value -273" <| fun _ ->
+            let m = result |> findEnum "Temperature" |> _.Members |> List.find (fun c -> c.Name = "AbsoluteZero")
+            "" |> Expect.equal m.Value (TsLiteral.Int -273)
+
+        testCase "'Temperature.Freezing' = 0 and 'Boiling' = 100" <| fun _ ->
+            let e = result |> findEnum "Temperature"
+            let fz = e.Members |> List.find (fun c -> c.Name = "Freezing")
+            let bo = e.Members |> List.find (fun c -> c.Name = "Boiling")
+            "" |> Expect.equal fz.Value (TsLiteral.Int 0)
+            "" |> Expect.equal bo.Value (TsLiteral.Int 100)
+    ]
+
+// -----------------------------------------------------------------------
+// Fixture: enum-string.d.ts
+//   export enum Color { Red = "RED", Green = "GREEN", Blue = "BLUE" }
+// -----------------------------------------------------------------------
+
+let enumStringTests =
+    testList "enum-string.d.ts" [
+        let result = createTestReader "enum-string" |> runReader
+
+        testCase "'Color' enum is present in result" <| fun _ ->
+            "Color should be in result"
+            |> Expect.exists result (function
+                | KeyValue(_, TsAstNode.Enum e) when e.Name = "Color" -> true
+                | _ -> false)
+
+        testCase "'Color' has exactly 3 members" <| fun _ ->
+            "" |> Expect.hasLength (result |> findEnum "Color").Members 3
+
+        testCase "'Color' all members have TsLiteral.String values" <| fun _ ->
+            "All Color members should have String values"
+            |> Expect.all (result |> findEnum "Color").Members (fun c ->
+                match c.Value with TsLiteral.String _ -> true | _ -> false)
+
+        testCase "'Color.Red' has value \"RED\"" <| fun _ ->
+            let m = result |> findEnum "Color" |> _.Members |> List.find (fun c -> c.Name = "Red")
+            "" |> Expect.equal m.Value (TsLiteral.String "RED")
+
+        testCase "'Color.Green' has value \"GREEN\"" <| fun _ ->
+            let m = result |> findEnum "Color" |> _.Members |> List.find (fun c -> c.Name = "Green")
+            "" |> Expect.equal m.Value (TsLiteral.String "GREEN")
+
+        testCase "'Color.Blue' has value \"BLUE\"" <| fun _ ->
+            let m = result |> findEnum "Color" |> _.Members |> List.find (fun c -> c.Name = "Blue")
+            "" |> Expect.equal m.Value (TsLiteral.String "BLUE")
+    ]
+
+// -----------------------------------------------------------------------
+// Fixture: accessors.d.ts
+//   export interface WithAccessors {
+//     get readable(): string;  set writable(value: string)
+//     get readWrite(): number; set readWrite(value: number)
+//   }
+// -----------------------------------------------------------------------
+
+let accessorTests =
+    testList "accessors.d.ts" [
+        let result = createTestReader "accessors" |> runReader
+        let iface = result |> findInterface "WithAccessors"
+
+        testCase "'WithAccessors' has a GetAccessor named 'readable'" <| fun _ ->
+            "Should have GetAccessor 'readable'"
+            |> Expect.exists iface.Members (function
+                | TsMember.GetAccessor g when g.Name = "readable" -> true
+                | _ -> false)
+
+        testCase "'WithAccessors' has a SetAccessor named 'writable'" <| fun _ ->
+            "Should have SetAccessor 'writable'"
+            |> Expect.exists iface.Members (function
+                | TsMember.SetAccessor s when s.Name = "writable" -> true
+                | _ -> false)
+
+        testCase "'readable' GetAccessor Type resolves to string primitive" <| fun _ ->
+            let g =
+                iface.Members
+                |> List.pick (function TsMember.GetAccessor g when g.Name = "readable" -> Some g | _ -> None)
+            "" |> Expect.equal g.Type TypeKindPrimitive.String.TypeKey
+
+        testCase "'readWrite' has both a GetAccessor and a SetAccessor entry" <| fun _ ->
+            let gets = iface.Members |> List.filter (function TsMember.GetAccessor g when g.Name = "readWrite" -> true | _ -> false)
+            let sets = iface.Members |> List.filter (function TsMember.SetAccessor s when s.Name = "readWrite" -> true | _ -> false)
+            "" |> Expect.hasLength gets 1
+            "" |> Expect.hasLength sets 1
+    ]
+
+// -----------------------------------------------------------------------
+// Fixture: namespace.d.ts
+//   declare namespace Geometry { interface Point { x; y }; interface Circle { center; radius } }
+// -----------------------------------------------------------------------
+
+let namespaceTests =
+    testList "namespace.d.ts" [
+        let result = createTestReader "namespace" |> runReader
+
+        testCase "'Geometry' module is present in result" <| fun _ ->
+            "Geometry should be in result"
+            |> Expect.exists result (function
+                | KeyValue(_, TsAstNode.Module m) when m.Name = "Geometry" -> true
+                | _ -> false)
+
+        let m = result |> findModule "Geometry"
+
+        testCase "'Geometry' IsNamespace = true" <| fun _ ->
+            "" |> Expect.isTrue m.IsNamespace
+
+        testCase "'Geometry' Types list has exactly 2 entries" <| fun _ ->
+            "" |> Expect.hasLength m.Types 2
+
+        testCase "all types in 'Geometry' resolve to interfaces" <| fun _ ->
+            "All Geometry.Types should resolve to Interface nodes"
+            |> Expect.all m.Types (fun tk -> (result |> findType tk).IsInterface)
+
+        testCase "'Point' and 'Circle' interfaces are in the result" <| fun _ ->
+            let names =
+                result
+                |> Seq.choose (function KeyValue(_, TsAstNode.Interface i) -> Some i.Name | _ -> None)
+                |> Seq.toArray
+            "" |> Expect.containsAll names [ "Point"; "Circle" ]
+
+        testCase "'Point' has members named 'x' and 'y'" <| fun _ ->
+            let names =
+                (result |> findInterface "Point").Members
+                |> List.choose (function TsMember.Property p -> Some p.Name | _ -> None)
+            "" |> Expect.containsAll names [ "x"; "y" ]
+    ]
+
+// -----------------------------------------------------------------------
+// Fixture: conditional.d.ts
+//   export type IsString<T> = T extends string ? true : false
+// -----------------------------------------------------------------------
+
+let conditionalTests =
+    testList "conditional.d.ts" [
+        let result = createTestReader "conditional" |> runReader
+        let alias = result |> findAlias "IsString"
+
+        testCase "'IsString' alias Type resolves to TsAstNode.Conditional" <| fun _ ->
+            "IsString.Type should be Conditional"
+            |> Expect.isTrue (result |> findType alias.Type).IsConditional
+
+        testCase "'IsString' Conditional.Extends resolves to string primitive" <| fun _ ->
+            match result |> findType alias.Type with
+            | TsAstNode.Conditional c -> "" |> Expect.equal c.Extends TypeKindPrimitive.String.TypeKey
+            | _ -> failwith "Expected Conditional"
+
+        testCase "'IsString' Conditional.True resolves to TsLiteral.Bool true" <| fun _ ->
+            match result |> findType alias.Type with
+            | TsAstNode.Conditional c ->
+                match result |> findType c.True with
+                | TsAstNode.Literal (TsLiteral.Bool b) -> "" |> Expect.isTrue b
+                | _ -> failwith "Expected Bool literal"
+            | _ -> failwith "Expected Conditional"
+
+        testCase "'IsString' Conditional.False resolves to TsLiteral.Bool false" <| fun _ ->
+            match result |> findType alias.Type with
+            | TsAstNode.Conditional c ->
+                match result |> findType c.False with
+                | TsAstNode.Literal (TsLiteral.Bool b) -> "" |> Expect.isFalse b
+                | _ -> failwith "Expected Bool literal"
+            | _ -> failwith "Expected Conditional"
+    ]
+
+// -----------------------------------------------------------------------
+// Fixture: template-literal.d.ts
+//   export type EventName    = `on${string}`           → texts=["on",""]    types=[string]
+//   export type KeyValuePair = `${string}:${string}`   → texts=["",":",""]  types=[string,string]
+// -----------------------------------------------------------------------
+
+let templateLiteralTests =
+    testList "template-literal.d.ts" [
+        let result = createTestReader "template-literal" |> runReader
+        let eventAlias = result |> findAlias "EventName"
+
+        testCase "'EventName' alias Type resolves to TsAstNode.TemplateLiteral" <| fun _ ->
+            "EventName.Type should be TemplateLiteral"
+            |> Expect.isTrue (result |> findType eventAlias.Type).IsTemplateLiteral
+
+        testCase "'EventName' has 2 Texts entries" <| fun _ ->
+            match result |> findType eventAlias.Type with
+            | TsAstNode.TemplateLiteral t -> "" |> Expect.hasLength t.Texts 2
+            | _ -> failwith "Expected TemplateLiteral"
+
+        testCase "'EventName' first text segment is \"on\"" <| fun _ ->
+            match result |> findType eventAlias.Type with
+            | TsAstNode.TemplateLiteral t -> "" |> Expect.equal (List.head t.Texts) "on"
+            | _ -> failwith "Expected TemplateLiteral"
+
+        testCase "'EventName' has 1 interpolated Type entry" <| fun _ ->
+            match result |> findType eventAlias.Type with
+            | TsAstNode.TemplateLiteral t -> "" |> Expect.hasLength t.Types 1
+            | _ -> failwith "Expected TemplateLiteral"
+
+        testCase "'EventName' interpolated type is string primitive" <| fun _ ->
+            match result |> findType eventAlias.Type with
+            | TsAstNode.TemplateLiteral t -> "" |> Expect.equal t.Types.[0] TypeKindPrimitive.String.TypeKey
+            | _ -> failwith "Expected TemplateLiteral"
+
+        testCase "'KeyValuePair' has 2 interpolated Type entries" <| fun _ ->
+            let kv = result |> findAlias "KeyValuePair"
+            match result |> findType kv.Type with
+            | TsAstNode.TemplateLiteral t -> "" |> Expect.hasLength t.Types 2
+            | _ -> failwith "Expected TemplateLiteral"
+
+        testCase "'KeyValuePair' separator text segment is \":\"" <| fun _ ->
+            let kv = result |> findAlias "KeyValuePair"
+            match result |> findType kv.Type with
+            | TsAstNode.TemplateLiteral t ->
+                // texts = [""; ":"; ""] — index 1 is the separator between the two interpolations
+                "" |> Expect.equal t.Texts.[1] ":"
+            | _ -> failwith "Expected TemplateLiteral"
+    ]
+
+let multiFileTests =
+    testList "multi-file/vectors.d.ts" [
+        let result = createTestReader "multi-file/vectors" |> runReader
+        testCase "vectors.d.ts types are present" <| fun _ ->
+            let vector2d = result |> tryFindInterface "Vector2D"
+            let vector3d = result |> tryFindInterface "Vector3D"
+            "Vector2D should be in result"
+            |> Expect.isSome vector2d
+            "Vector3D should be in result"
+            |> Expect.isSome vector3d
+        testCase "shapes.d.ts imported types are present" <| fun _ ->
+            let point2d = result |> tryFindInterface "Point2D"
+            "Point2D should be in result"
+            |> Expect.isSome point2d
+        testCase "non-imported shapes.d.ts types are absent" <| fun _ ->
+            "Scalar should be unreachable"
+            |> Expect.throws (fun () ->
+                result
+                |> findAlias "Scalar"
+                |> ignore
+                )
+        testCase "Vector2D extends Point2D" <| fun _ ->
+            let heritage =
+                result
+                |> findInterface "Vector2D"
+                |> _.Heritage.Extends
+            "Only one type should be in heritage"
+            |> Expect.hasLength heritage 1
+            let resolvedTypeKey =
+                heritage
+                |> List.head
+                |> function
+                    | { ResolvedType = Some typeKey }
+                    | { Type = typeKey } -> typeKey
+            match
+                result
+                |> findType resolvedTypeKey
+            with
+            | TsAstNode.Interface { Name = name } ->
+                "Interface should be Point2D"
+                |> Expect.equal name "Point2D"
+            | _ -> failwith "Expected Interface"
+        testCase "Vector3D extends Vector2D" <| fun _ ->
+            let heritage =
+                result
+                |> findInterface "Vector3D"
+                |> _.Heritage.Extends
+            "Only one type should be in heritage"
+            |> Expect.hasLength heritage 1
+            let resolvedTypeKey =
+                heritage
+                |> List.head
+                |> function
+                    | { ResolvedType = Some typeKey }
+                    | { Type = typeKey } -> typeKey
+            match
+                result
+                |> findType resolvedTypeKey
+            with
+            | TsAstNode.Interface { Name = name } ->
+                "Interface should be Vector2D"
+                |> Expect.equal name "Vector2D"
+            | _ -> failwith "Expected Interface"           
+    ]
+
+// -----------------------------------------------------------------------
 // Suite
 // -----------------------------------------------------------------------
 
@@ -969,6 +1293,8 @@ let tests =
         overloadTests
         modifierTests
         enumTests
+        enumNonSequentialTests
+        enumStringTests
         genericsTests
         functionTests
         indexAccessTests
@@ -979,6 +1305,11 @@ let tests =
         variableTests
         utilityTests
         typeOperatorTests
+        accessorTests
+        namespaceTests
+        conditionalTests
+        templateLiteralTests
+        multiFileTests
     ]
 
 Mocha.runTests tests |> ignore

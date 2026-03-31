@@ -26,6 +26,16 @@
         <TypeScriptCompile Include="TypeFiles\intersection.d.ts" />
         <TypeScriptCompile Include="TypeFiles\utility-types.d.ts" />
         <TypeScriptCompile Include="TypeFiles\type-operators.d.ts" />
+        <Content Include="TypeFiles\packages\ui-kit\package.json" />
+        <TypeScriptCompile Include="TypeFiles\packages\ui-kit\index.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\multi-file\vectors.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\multi-file\shapes.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\accessors.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\namespace.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\conditional.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\enum-string.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\template-literal.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\enum-nonsequential.d.ts" />
     </ItemGroup>
 
     <ItemGroup>
