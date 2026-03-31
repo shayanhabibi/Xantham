@@ -816,6 +816,157 @@ let variableTests =
             let v = result |> findVariable "PI"
             "" |> Expect.equal v.Type TypeKindPrimitive.Number.TypeKey
     ]
+    
+let utilityTests =
+    testList "utility.d.ts" [
+        let result = createTestReader "utility-types" |> runReader
+        let utilityInterface = findInterface "IUtilityInterface" result
+        testCase "'UtilityInterface' is present and correctly resolved" <| fun _ ->
+            let stringProperty = findProperty "stringProperty" utilityInterface.Members
+            let numberProperty = findProperty "numberProperty" utilityInterface.Members
+            let booleanProperty = findProperty "booleanProperty" utilityInterface.Members
+            "All properties are required"
+            |> Expect.isFalse (stringProperty.IsOptional || numberProperty.IsOptional || booleanProperty.IsOptional)
+        testCase "All utility definitions are present" <| fun _ ->
+            let utilityTypes =
+                result
+                |> Seq.choose (_.Value  >> function
+                    | TsAstNode.Alias a -> Some a
+                    | _ -> None
+                    )
+            "5 Aliases are present"
+            |> Expect.hasLength utilityTypes 5
+        testCase "Partial utility definition is correct" <| fun _ ->
+            let partialUtility = result |> findAlias "PartialInterface"
+            let partialUtilityType =
+                result
+                |> findType partialUtility.Type
+                |> function
+                    | TsAstNode.TypeReference { ResolvedType = Some typeKey } ->
+                        findType typeKey result
+                    | _ -> failwith "Expected TypeReference"
+                |> function
+                    | TsAstNode.TypeLiteral { Members = members } ->
+                        members
+                    | _ -> failwith "Expected TypeLiteral"
+            "Partial is a resolved type reference to a type literal with 3 members"
+            |> Expect.hasLength partialUtilityType 3
+            "Partial is a resolved type reference to a type literal with 3 optional members"
+            |> Expect.all partialUtilityType (function
+                | TsMember.Property { IsOptional = true } -> true
+                | _ -> false
+                )
+        testCase "Omit utility definition is correct" <| fun _ ->
+            let omitUtility = result |> findAlias "OmitInterface"
+            let omitUtilityMembers =
+                result
+                |> findType omitUtility.Type
+                |> function
+                    | TsAstNode.TypeReference { ResolvedType = Some typeKey } ->
+                        findType typeKey result
+                    | _ -> failwith "Expected TypeReference"
+                |> function
+                    | TsAstNode.TypeLiteral { Members = members } ->
+                        members
+                    | _ -> failwith "Expected TypeLiteral"
+            "Omit is resolved to type reference -> type literal -> 2 members"
+            |> Expect.hasLength omitUtilityMembers 2
+            "Omit does not contain 'omitted' member stringProperty"
+            |> Expect.isFalse (omitUtilityMembers |> List.exists (function TsMember.Property { Name = "stringProperty" } -> true | _ -> false))
+        testCase "Pick utility definition is correct" <| fun _ ->
+            let pickUtility = result |> findAlias "PickInterface"
+            let pickUtilityMembers =
+                result
+                |> findType pickUtility.Type
+                |> function
+                    | TsAstNode.TypeReference { ResolvedType = Some typeKey } ->
+                        findType typeKey result
+                    | _ -> failwith "Expected TypeReference"
+                |> function
+                    | TsAstNode.TypeLiteral { Members = members } ->
+                        members
+                    | _ -> failwith "Expected TypeLiteral"
+            "Pick is resolved to type reference -> type literal -> 1 member"
+            |> Expect.hasLength pickUtilityMembers 1
+            "Pick is resolved to string property"
+            |> Expect.isTrue (
+                match pickUtilityMembers with
+                | TsMember.Property { Name = "stringProperty"; IsOptional = false } :: _ -> true
+                | _ -> false
+                )
+        testCase "Nested utility types flatten at first type reference" <| fun _ ->
+            let nestedUtility = result |> findAlias "DerivedInterface"
+            let nestedUtilityMembers =
+                result
+                |> findType nestedUtility.Type
+                |> function
+                    | TsAstNode.TypeReference { ResolvedType = Some typeKey } ->
+                        findType typeKey result
+                    | _ -> failwith "Expected TypeReference"
+                |> function
+                    | TsAstNode.TypeLiteral { Members = members } ->
+                        members
+                    | _ -> failwith "Expected TypeLiteral"
+            "Utility type is resolved to type literal with 2 members"
+            |> Expect.hasLength nestedUtilityMembers 2
+            "Utility type is resolved to optional members"
+            |> Expect.all nestedUtilityMembers (function
+                | TsMember.Property { IsOptional = true } -> true
+                | _ -> false
+                )
+        testList "Generic utility types preserves semantic information" [
+            let genericUtility = result |> findAlias "GenericUtility"
+            let genericUtilityType =
+                result
+                |> findType genericUtility.Type
+                |> function
+                    | TsAstNode.TypeReference typeRef -> typeRef
+                    | _ -> failwith "Expected TypeReference"
+            // Type checker actually still resolves the type down to a type literal
+            // with an index signature on any object.
+            ptestCase "Utility type is unresolved type reference" <| fun _ ->
+                "" |> Expect.isTrue genericUtilityType.ResolvedType.IsNone
+            // Semantic/syntactic information is lost.
+            // We again receive a type literal with an index signature on any object.
+            // likely because we use type checker immediately on type references?
+            testCase "Utility type preserves semantic information" <| fun _ ->
+                let typ = findType genericUtilityType.Type result
+                "Expect to keep semantic info of: GenericUtility<T extends keyof IUtilityInterface> = Pick<PartialInterface, T>" |> Expect.equal (typ.ToString()) ""
+        ]
+    ]
+
+let typeOperatorTests =
+    testList "type-operators.d.ts" [
+        let result = createTestReader "type-operators" |> runReader
+        testCase "'InterfaceKey' is present" <| fun _ ->
+            try
+            findAlias "InterfaceKey" result
+            |> Ok
+            with _ -> Error ()
+            |> Expect.isOk
+            <| "Expected to find 'InterfaceKey' in result"
+        testCase "'InterfaceKey' resolves to union of string literals" <| fun _ ->
+            let alias = findAlias "InterfaceKey" result
+            let aliasType = result |> findType alias.Type
+            "Expected 'InterfaceKey' to be a Alias -> Union"
+            |> Expect.isTrue aliasType.IsUnion
+            let types =
+                match aliasType with
+                | TsAstNode.Union (TsTypeUnion types) -> types
+                | _ -> failwith "Expected Union"
+            "Expected union to contain 3 members"
+            |> Expect.hasLength types 3
+            "Expected union to contain literals only"
+            |> Expect.all types (findType >> (fun fn -> fn result) >> _.IsLiteral)
+            "Expected union to contain strings 'stringProperty'; 'numberProperty'; 'booleanProperty'"
+            |> Expect.containsAll (
+                List.map (fun typ ->
+                    match findType typ result with
+                    | TsAstNode.Literal (TsLiteral.String s) -> s
+                    | _ -> failwith "Expected Literal"
+                    ) types
+                ) [ "stringProperty"; "numberProperty"; "booleanProperty" ]
+    ]
 
 // -----------------------------------------------------------------------
 // Suite
@@ -839,6 +990,8 @@ let tests =
         tupleTests
         classTests
         variableTests
+        utilityTests
+        typeOperatorTests
     ]
 
 Mocha.runTests tests |> ignore

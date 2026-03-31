@@ -24,6 +24,8 @@
         <TypeScriptCompile Include="TypeFiles\union.d.ts" />
         <TypeScriptCompile Include="TypeFiles\variable.d.ts" />
         <TypeScriptCompile Include="TypeFiles\intersection.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\utility-types.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\type-operators.d.ts" />
     </ItemGroup>
 
     <ItemGroup>
