@@ -19,6 +19,11 @@
         <TypeScriptCompile Include="TypeFiles\overloads.d.ts" />
         <TypeScriptCompile Include="TypeFiles\optional-readonly.d.ts" />
         <TypeScriptCompile Include="TypeFiles\index-access.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\class.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\tuple.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\union.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\variable.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\intersection.d.ts" />
     </ItemGroup>
 
     <ItemGroup>

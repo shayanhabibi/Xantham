@@ -1,4 +1,10 @@
-﻿export interface BaseInterface {
+// TEST TARGET: multiple interfaces extending a common base
+//
+// Verifies that all heritage TypeKeys produced by ExtendedInterface and
+// ExtendedInterface2 resolve to nodes in the result and that both extending
+// interfaces are emitted with their own members intact.
+
+export interface BaseInterface {
     parentProp: string;
 }
 

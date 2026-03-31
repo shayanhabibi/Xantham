@@ -1,4 +1,11 @@
-﻿export interface AccessedInterface {
+// TEST TARGET: indexed access type resolution
+//
+// Concrete accesses (AccessedInterface['prop']) must be resolved to the
+// underlying primitive TypeKey.  Generic accesses (AccessedInterface[T]) must
+// preserve TsAstNode.IndexAccessType semantics with the correct Index (type
+// parameter) and Object (interface reference) type entries in the result.
+
+export interface AccessedInterface {
     stringProperty: string;
     numberProperty: number;
     booleanProperty: boolean;

@@ -26,21 +26,67 @@ let private libCacheMemoryHandler (ctx: TypeScriptReader) (tag: XanthamTag) =
 
 
 module TypeStore =
+    /// Nodes whose TypeStore.Key must be a generated unique value, NOT getTypeAtLocation.
+    ///
+    /// Member-level nodes: getTypeAtLocation returns the member's *type* (e.g. string),
+    /// which equals the member's own Type field → self-referential entry.
+    ///
+    /// TypeAlias nodes: getTypeAtLocation returns the aliased type's TypeKey, which is
+    /// the same value that SAliasBuilder.Type resolves to → self-referential entry.
+    /// (The old Reader.fs used TypeKey.create() for TypeAlias for this reason.)
+    let private usesGeneratedKey (tag: XanthamTag) =
+        match tag.Value with
+        | XanTagKind.TypeDeclaration decl ->
+            match decl with
+            | TypeDeclaration.Parameter _
+            | TypeDeclaration.PropertySignature _
+            | TypeDeclaration.Property _
+            | TypeDeclaration.MethodSignature _
+            | TypeDeclaration.Method _
+            | TypeDeclaration.GetAccessor _
+            | TypeDeclaration.SetAccessor _
+            | TypeDeclaration.Constructor _
+            | TypeDeclaration.CallSignature _
+            | TypeDeclaration.ConstructSignature _
+            | TypeDeclaration.IndexSignature _
+            
+            // | TypeDeclaration.HeritageClause _
+            (* Generating keys for heritage members causes chaotic MISSREF
+            errors to fire if the type is extended more than once. The actual
+            output is fine, but the dangling builder messages is a frustrating UX.*)
+            
+            | TypeDeclaration.ExpressionWithTypeArguments _
+            | TypeDeclaration.EnumMember _
+            | TypeDeclaration.TypeAlias _
+            | TypeDeclaration.VariableDeclaration _
+            // TypeDeclaration.TypeParameter: getTypeAtLocation on a TypeParameterDeclaration
+            // returns the same type object as TypeFlagPrimary.TypeParameter (type-level), causing
+            // their TypeStore entries to collide when their constraint representations differ.
+            // Generated key keeps each declaration-level TypeParameter entry separate.
+            | TypeDeclaration.TypeParameter _ -> true
+            | _ -> false
+        // TypeNode.TypeReference with explicit type arguments: resolveBase may return the
+        // same TypeKey as the instantiated type (e.g. Foo<T> where T = default type arg),
+        // creating a self-referential TypeReference entry. Generated key avoids this.
+        // Non-generic TypeReferences use routeViaChecker and are not affected.
+        | XanTagKind.TypeNode (TypeNode.TypeReference typeRef) ->
+            typeRef.typeArguments |> Option.map (fun a -> a.Count > 0) |> Option.defaultValue false
+        // TypeNode.UnionType and TypeNode.IntersectionType: getTypeFromTypeNode expands
+        // structural members (e.g. `keyof T` in a union becomes a 200-member union at
+        // the type level). The TypeStore.Key would collide with the expanded semantic
+        // type's entry while the builder represents only the syntactic members. Generated
+        // key gives each union/intersection node its own identity, separate from the
+        // semantic type produced by the checker.
+        | XanTagKind.TypeNode (TypeNode.UnionType _)
+        | XanTagKind.TypeNode (TypeNode.IntersectionType _) -> true
+        // TypeNode.TypePredicate: getTypeFromTypeNode on a TypePredicate node returns the
+        // boolean type, so all predicates would share the boolean TypeKey. Generated key
+        // gives each predicate node its own unique TypeStore entry.
+        | XanTagKind.TypeNode (TypeNode.TypePredicate _) -> true
+        | XanTagKind.ModulesAndExports _ -> true
+        | _ -> false
+
     module Create =
-        let fromType (typ: Ts.Type) (builder: PendingSignal<STsAstNodeBuilder>) =
-            { Key = typ.TypeKey; Builder = builder }
-        let fromNode (ctx: TypeScriptReader) (node: Ts.Node) (builder: PendingSignal<STsAstNodeBuilder>) =
-            { Key = ctx.checker.getTypeAtLocation node |> _.TypeKey; Builder = builder }
-        let fromSignature (ctx: TypeScriptReader) (sign: Ts.Signature) (builder: PendingSignal<STsAstNodeBuilder>) =
-            {
-                Key =
-                    ctx.checker.getTypeAtLocation <| (sign.getDeclaration() |> unbox<Ts.SignatureDeclarationBase>)
-                    |> _.TypeKey
-                Builder = builder
-            }
-        module GeneratedKey =
-            let create (builder: PendingSignal<STsAstNodeBuilder>) =
-                { Key = TypeKey.create(); Builder = builder }
         module XanthamTag =
 
             let withTypeKeyMap (map: Choice<Ts.Type, Ts.Node> -> TypeKey) (tag: XanthamTag) : TypeStore =
@@ -48,77 +94,15 @@ module TypeStore =
 
             let withGeneratedKey (tag: XanthamTag) =
                 withTypeKeyMap (fun _ -> TypeKey.create()) tag
-
-            /// Nodes whose TypeStore.Key must be a generated unique value, NOT getTypeAtLocation.
-            ///
-            /// Member-level nodes: getTypeAtLocation returns the member's *type* (e.g. string),
-            /// which equals the member's own Type field → self-referential entry.
-            ///
-            /// TypeAlias nodes: getTypeAtLocation returns the aliased type's TypeKey, which is
-            /// the same value that SAliasBuilder.Type resolves to → self-referential entry.
-            /// (The old Reader.fs used TypeKey.create() for TypeAlias for this reason.)
-            let private usesGeneratedKey (tag: XanthamTag) =
-                match tag.Value with
-                | XanTagKind.TypeDeclaration decl ->
-                    match decl with
-                    | TypeDeclaration.Parameter _
-                    | TypeDeclaration.PropertySignature _
-                    | TypeDeclaration.Property _
-                    | TypeDeclaration.MethodSignature _
-                    | TypeDeclaration.Method _
-                    | TypeDeclaration.GetAccessor _
-                    | TypeDeclaration.SetAccessor _
-                    | TypeDeclaration.Constructor _
-                    | TypeDeclaration.CallSignature _
-                    | TypeDeclaration.ConstructSignature _
-                    | TypeDeclaration.IndexSignature _
-                    
-                    // | TypeDeclaration.HeritageClause _
-                    (* Generating keys for heritage members causes chaotic MISSREF
-                    errors to fire if the type is extended more than once. The actual
-                    output is fine, but the dangling builder messages is a frustrating UX.*)
-                    
-                    | TypeDeclaration.ExpressionWithTypeArguments _
-                    | TypeDeclaration.EnumMember _
-                    | TypeDeclaration.TypeAlias _
-                    | TypeDeclaration.VariableDeclaration _
-                    // TypeDeclaration.TypeParameter: getTypeAtLocation on a TypeParameterDeclaration
-                    // returns the same type object as TypeFlagPrimary.TypeParameter (type-level), causing
-                    // their TypeStore entries to collide when their constraint representations differ.
-                    // Generated key keeps each declaration-level TypeParameter entry separate.
-                    | TypeDeclaration.TypeParameter _ -> true
-                    | _ -> false
-                // TypeNode.TypeReference with explicit type arguments: resolveBase may return the
-                // same TypeKey as the instantiated type (e.g. Foo<T> where T = default type arg),
-                // creating a self-referential TypeReference entry. Generated key avoids this.
-                // Non-generic TypeReferences use routeViaChecker and are not affected.
-                | XanTagKind.TypeNode (TypeNode.TypeReference typeRef) ->
-                    typeRef.typeArguments |> Option.map (fun a -> a.Count > 0) |> Option.defaultValue false
-                // TypeNode.UnionType and TypeNode.IntersectionType: getTypeFromTypeNode expands
-                // structural members (e.g. `keyof T` in a union becomes a 200-member union at
-                // the type level). The TypeStore.Key would collide with the expanded semantic
-                // type's entry while the builder represents only the syntactic members. Generated
-                // key gives each union/intersection node its own identity, separate from the
-                // semantic type produced by the checker.
-                | XanTagKind.TypeNode (TypeNode.UnionType _)
-                | XanTagKind.TypeNode (TypeNode.IntersectionType _) -> true
-                // TypeNode.TypePredicate: getTypeFromTypeNode on a TypePredicate node returns the
-                // boolean type, so all predicates would share the boolean TypeKey. Generated key
-                // gives each predicate node its own unique TypeStore entry.
-                | XanTagKind.TypeNode (TypeNode.TypePredicate _) -> true
-                | XanTagKind.ModulesAndExports _ -> true
-                | _ -> false
-
+                
             let create (ctx: TypeScriptReader) (tag: XanthamTag) =
                 if usesGeneratedKey tag then
                     withGeneratedKey tag
-                else
-                    tag
-                    |> withTypeKeyMap (function
-                        | Choice1Of2 typ -> typ.TypeKey
-                        | Choice2Of2 node ->
-                            ctx.checker.getTypeAtLocation node
-                            |> _.TypeKey)
+                else tag |> withTypeKeyMap (function
+                    | Choice1Of2 typ -> typ.TypeKey
+                    | Choice2Of2 node ->
+                        ctx.checker.getTypeAtLocation node
+                        |> _.TypeKey)
 
 let addToMemory (ctx: TypeScriptReader) (tag: XanthamTag) =
     if ctx.signalCache.ContainsKey(tag.IdentityKey)

@@ -87,6 +87,24 @@ let findType (typeKey: TypeKey) (result: Dictionary<TypeKey, TsAstNode>) =
     result
     |> Seq.pick (fun (KeyValue(key, node)) -> if key = typeKey then Some node else None)
 
+/// Find the first type alias whose Name matches; throws on miss.
+let findAlias name (result: Dictionary<TypeKey, TsAstNode>) =
+    result |> Seq.pick (function
+        | KeyValue(_, TsAstNode.Alias a) when a.Name = name -> Some a
+        | _ -> None)
+
+/// Find the first class whose Name matches; throws on miss.
+let findClass name (result: Dictionary<TypeKey, TsAstNode>) =
+    result |> Seq.pick (function
+        | KeyValue(_, TsAstNode.Class c) when c.Name = name -> Some c
+        | _ -> None)
+
+/// Find the first variable whose Name matches; throws on miss.
+let findVariable name (result: Dictionary<TypeKey, TsAstNode>) =
+    result |> Seq.pick (function
+        | KeyValue(_, TsAstNode.Variable v) when v.Name = name -> Some v
+        | _ -> None)
+
 // -----------------------------------------------------------------------
 // Fixture: basic.d.ts
 //   export type BaseObject    = { name: string }
@@ -586,6 +604,220 @@ let indexAccessTests =
     ]
 
 // -----------------------------------------------------------------------
+// Fixture: union.d.ts
+//   export type StringOrNumber = string | number
+//   export type ThreeWay       = string | number | null
+// -----------------------------------------------------------------------
+
+let unionTests =
+    testList "union.d.ts" [
+        let result = createTestReader "union" |> runReader
+
+        testCase "'StringOrNumber' alias is present in result" <| fun _ ->
+            "StringOrNumber should be in result"
+            |> Expect.exists result (function
+                | KeyValue(_, TsAstNode.Alias a) when a.Name = "StringOrNumber" -> true
+                | _ -> false)
+
+        let strOrNum = result |> findAlias "StringOrNumber"
+
+        testCase "'StringOrNumber' Type resolves to TsAstNode.Union" <| fun _ ->
+            let node = result |> findType strOrNum.Type
+            "StringOrNumber.Type should be Union" |> Expect.isTrue node.IsUnion
+
+        testCase "'StringOrNumber' union has exactly 2 members" <| fun _ ->
+            match result |> findType strOrNum.Type with
+            | TsAstNode.Union u -> "" |> Expect.hasLength u.Types 2
+            | _ -> failwith "Expected Union"
+
+        testCase "'StringOrNumber' union members include string and number TypeKeys" <| fun _ ->
+            match result |> findType strOrNum.Type with
+            | TsAstNode.Union u ->
+                "" |> Expect.containsAll u.Types [ TypeKindPrimitive.String.TypeKey; TypeKindPrimitive.Number.TypeKey ]
+            | _ -> failwith "Expected Union"
+
+        testCase "'ThreeWay' union has exactly 3 members" <| fun _ ->
+            let threeWay = result |> findAlias "ThreeWay"
+            match result |> findType threeWay.Type with
+            | TsAstNode.Union u -> "" |> Expect.hasLength u.Types 3
+            | _ -> failwith "Expected Union"
+    ]
+
+// -----------------------------------------------------------------------
+// Fixture: intersection.d.ts
+//   export interface Named { name: string; }
+//   export interface Aged  { age: number; }
+//   export type Person = Named & Aged
+// -----------------------------------------------------------------------
+
+let intersectionTests =
+    testList "intersection.d.ts" [
+        let result = createTestReader "intersection" |> runReader
+
+        testCase "'Named' and 'Aged' interfaces are both in result" <| fun _ ->
+            let names =
+                result
+                |> Seq.choose (function
+                    | KeyValue(_, TsAstNode.Interface iface) -> Some iface.Name
+                    | _ -> None)
+                |> Seq.toArray
+            "" |> Expect.containsAll names [ "Named"; "Aged" ]
+
+        let person = result |> findAlias "Person"
+
+        testCase "'Person' alias Type resolves to TsAstNode.Intersection" <| fun _ ->
+            let node = result |> findType person.Type
+            "Person.Type should be Intersection" |> Expect.isTrue node.IsIntersection
+
+        testCase "'Person' intersection has exactly 2 entries" <| fun _ ->
+            match result |> findType person.Type with
+            | TsAstNode.Intersection i -> "" |> Expect.hasLength i.Types 2
+            | _ -> failwith "Expected Intersection"
+    ]
+
+// -----------------------------------------------------------------------
+// Fixture: tuple.d.ts
+//   export type Coord        = [number, number]
+//   export type Triple       = [string, number, boolean]
+//   export type WithOptional = [string, number?]
+//   export type WithRest     = [string, ...number[]]
+// -----------------------------------------------------------------------
+
+let tupleTests =
+    testList "tuple.d.ts" [
+        let result = createTestReader "tuple" |> runReader
+
+        testCase "'Coord' alias Type resolves to TsAstNode.Tuple" <| fun _ ->
+            let alias = result |> findAlias "Coord"
+            let node = result |> findType alias.Type
+            "Coord.Type should be Tuple" |> Expect.isTrue node.IsTuple
+
+        testCase "'Coord' has FixedLength 2 and MinRequired 2" <| fun _ ->
+            let alias = result |> findAlias "Coord"
+            match result |> findType alias.Type with
+            | TsAstNode.Tuple t ->
+                "" |> Expect.equal t.FixedLength 2
+                "" |> Expect.equal t.MinRequired 2
+            | _ -> failwith "Expected Tuple"
+
+        testCase "'Triple' has FixedLength 3 and MinRequired 3" <| fun _ ->
+            let alias = result |> findAlias "Triple"
+            match result |> findType alias.Type with
+            | TsAstNode.Tuple t ->
+                "" |> Expect.equal t.FixedLength 3
+                "" |> Expect.equal t.MinRequired 3
+            | _ -> failwith "Expected Tuple"
+
+        testCase "'WithOptional' has FixedLength 2 and MinRequired 1" <| fun _ ->
+            let alias = result |> findAlias "WithOptional"
+            match result |> findType alias.Type with
+            | TsAstNode.Tuple t ->
+                "" |> Expect.equal t.FixedLength 2
+                "" |> Expect.equal t.MinRequired 1
+            | _ -> failwith "Expected Tuple"
+
+        testCase "'WithRest' has FixedLength 1 and MinRequired 1" <| fun _ ->
+            let alias = result |> findAlias "WithRest"
+            match result |> findType alias.Type with
+            | TsAstNode.Tuple t ->
+                "" |> Expect.equal t.FixedLength 1
+                "" |> Expect.equal t.MinRequired 1
+            | _ -> failwith "Expected Tuple"
+
+        testCase "'WithRest' has 2 Types entries and last entry IsRest" <| fun _ ->
+            let alias = result |> findAlias "WithRest"
+            match result |> findType alias.Type with
+            | TsAstNode.Tuple t ->
+                "" |> Expect.hasLength t.Types 2
+                "" |> Expect.isTrue (List.last t.Types).IsRest
+            | _ -> failwith "Expected Tuple"
+    ]
+
+// -----------------------------------------------------------------------
+// Fixture: class.d.ts
+//   export class Animal {
+//       constructor(name: string, age: number);
+//       speak(): string;
+//       readonly name: string;
+//   }
+// -----------------------------------------------------------------------
+
+let classTests =
+    testList "class.d.ts" [
+        let result = createTestReader "class" |> runReader
+
+        testCase "'Animal' class is present in result" <| fun _ ->
+            "Animal should be in result"
+            |> Expect.exists result (function
+                | KeyValue(_, TsAstNode.Class c) when c.Name = "Animal" -> true
+                | _ -> false)
+
+        let cls = result |> findClass "Animal"
+
+        testCase "'Animal' has exactly 1 constructor" <| fun _ ->
+            "" |> Expect.hasLength cls.Constructors 1
+
+        testCase "'Animal' constructor has 2 parameters" <| fun _ ->
+            "" |> Expect.hasLength cls.Constructors.[0].Parameters 2
+
+        testCase "'Animal' constructor parameter names are 'name' and 'age'" <| fun _ ->
+            let names = cls.Constructors.[0].Parameters |> List.map _.Name
+            "" |> Expect.containsAll names [ "name"; "age" ]
+
+        testCase "'Animal' has a 'speak' method member" <| fun _ ->
+            "Animal should have 'speak' method"
+            |> Expect.exists cls.Members (function
+                | TsMember.Method m when m.ValueOrHead.Name = "speak" -> true
+                | _ -> false)
+
+        testCase "'Animal' has a 'name' property member" <| fun _ ->
+            "Animal should have 'name' property"
+            |> Expect.exists cls.Members (function
+                | TsMember.Property p when p.Name = "name" -> true
+                | _ -> false)
+
+        testCase "'Animal.name' property is ReadOnly" <| fun _ ->
+            let prop = findProperty "name" cls.Members
+            "" |> Expect.equal prop.Accessor TsAccessor.ReadOnly
+    ]
+
+// -----------------------------------------------------------------------
+// Fixture: variable.d.ts
+//   export declare const VERSION: string;
+//   export declare let   count:   number;
+//   export declare const PI:      number;
+// -----------------------------------------------------------------------
+
+let variableTests =
+    testList "variable.d.ts" [
+        let result = createTestReader "variable" |> runReader
+
+        testCase "'VERSION' variable is present in result" <| fun _ ->
+            "VERSION should be in result"
+            |> Expect.exists result (function
+                | KeyValue(_, TsAstNode.Variable v) when v.Name = "VERSION" -> true
+                | _ -> false)
+
+        testCase "'VERSION' Type resolves to string primitive" <| fun _ ->
+            let v = result |> findVariable "VERSION"
+            "" |> Expect.equal v.Type TypeKindPrimitive.String.TypeKey
+
+        testCase "'count' variable is present in result" <| fun _ ->
+            "count should be in result"
+            |> Expect.exists result (function
+                | KeyValue(_, TsAstNode.Variable v) when v.Name = "count" -> true
+                | _ -> false)
+
+        testCase "'count' Type resolves to number primitive" <| fun _ ->
+            let v = result |> findVariable "count"
+            "" |> Expect.equal v.Type TypeKindPrimitive.Number.TypeKey
+
+        testCase "'PI' Type resolves to number primitive" <| fun _ ->
+            let v = result |> findVariable "PI"
+            "" |> Expect.equal v.Type TypeKindPrimitive.Number.TypeKey
+    ]
+
+// -----------------------------------------------------------------------
 // Suite
 // -----------------------------------------------------------------------
 
@@ -602,6 +834,11 @@ let tests =
         genericsTests
         functionTests
         indexAccessTests
+        unionTests
+        intersectionTests
+        tupleTests
+        classTests
+        variableTests
     ]
 
 Mocha.runTests tests |> ignore
