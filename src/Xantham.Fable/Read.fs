@@ -65,8 +65,6 @@ module Internal =
         | TsAstNode.Predicate tsTypePredicate -> ()
         | TsAstNode.Literal tsLiteral -> ()
         | TsAstNode.TypeLiteral tsTypeLiteral -> ()
-        | TsAstNode.Property tsProperty -> if typKey = tsProperty.Type then Log.healthCheckError tsProperty tsProperty.Name
-        | TsAstNode.Parameter tsParameter -> if typKey = tsParameter.Type then Log.healthCheckError tsParameter tsParameter.Name
         | TsAstNode.TypeParameter tsTypeParameter ->
             if Some typKey = tsTypeParameter.Constraint then Log.healthCheckError tsTypeParameter tsTypeParameter.Name
             elif Some typKey = tsTypeParameter.Default then Log.healthCheckError tsTypeParameter tsTypeParameter.Name
@@ -74,10 +72,6 @@ module Internal =
             if typKey = tsIndexAccessType.Object then Log.healthCheckError tsIndexAccessType tsIndexAccessType
             elif typKey = tsIndexAccessType.Index then Log.healthCheckError tsIndexAccessType tsIndexAccessType
         | TsAstNode.FunctionDeclaration tsFunction -> for tsFunction in tsFunction.Values do if typKey = tsFunction.Type then Log.healthCheckError tsFunction tsFunction.Name
-        | TsAstNode.Method tsMethod -> for tsMethod in tsMethod.Values do if typKey = tsMethod.Type then Log.healthCheckError tsMethod tsMethod.Name
-        | TsAstNode.Constructor tsConstructor -> ()
-        | TsAstNode.ConstructSignature tsConstructSignature -> ()
-        | TsAstNode.IndexSignature tsIndexSignature -> if typKey = tsIndexSignature.Type then Log.healthCheckError tsIndexSignature tsIndexSignature
         | TsAstNode.Index tsIndex -> if typKey = tsIndex.Type then Log.healthCheckError tsIndex tsIndex
         | TsAstNode.TypeReference tsTypeReference ->
             if typKey = tsTypeReference.Type then Log.healthCheckError tsTypeReference tsTypeReference
@@ -101,13 +95,30 @@ module Internal =
             if tsTypeIntersection.Types |> List.contains typKey then
                 Log.healthCheckError tsTypeIntersection tsTypeIntersection
         | TsAstNode.Optional tsTypeReference -> if typKey = tsTypeReference.Type then Log.healthCheckError None tsTypeReference
-        | TsAstNode.GetAccessor tsGetAccessor -> if typKey = tsGetAccessor.Type then Log.healthCheckError tsGetAccessor tsGetAccessor
-        | TsAstNode.SetAccessor tsSetAccessor -> if typKey = tsSetAccessor.ArgumentType then Log.healthCheckError tsSetAccessor tsSetAccessor
-        | TsAstNode.CallSignature tsCallSignature -> for tsCallSignature in tsCallSignature.Values do if typKey = tsCallSignature.Type then Log.healthCheckError tsCallSignature tsCallSignature
         | TsAstNode.Module tsModule -> ()
 
     let private unknownKey = TypeKindPrimitive.Unknown.TypeKey
 
+    let private findUnknownMemberFields (node: TsMember) : string list =
+        let u = unknownKey
+        match node with
+        | TsMember.Property p ->
+            [ if p.Type = u then "Property.Type" ]
+        | TsMember.Method m ->
+            [ for m in m.Values do if m.Type = u then "Method.Type" ]
+        | TsMember.GetAccessor g ->
+            [ if g.Type = u then "GetAccessor.Type" ]
+        | TsMember.SetAccessor s ->
+            [ if s.ArgumentType = u then "SetAccessor.ArgumentType" ]
+        | TsMember.CallSignature cs ->
+            [ for cs in cs.Values do if cs.Type = u then "CallSignature.Type" ]
+        | TsMember.ConstructSignature cs ->
+            [ for cs in cs.Values do if cs.Type = u then "ConstructSignature.Type" ]
+        | TsMember.IndexSignature idx ->
+            [ if idx.Type = u then "IndexSignature.Type" ]
+    let private findUnknownParameterFields (node: TsParameter) : string list =
+        let u = unknownKey
+        [ if node.Type = u then "Parameter.Type" ]
     /// Scan a built node for TypeKey fields set to Unknown (-14).
     /// Returns a list of (fieldName, value) pairs for any Unknown fields found.
     let private findUnknownFields (node: TsAstNode) : string list =
@@ -117,22 +128,8 @@ module Internal =
             [ if a.Type = u then "Alias.Type" ]
         | TsAstNode.Variable v ->
             [ if v.Type = u then "Variable.Type" ]
-        | TsAstNode.Property p ->
-            [ if p.Type = u then "Property.Type" ]
-        | TsAstNode.Method m ->
-            [ for m in m.Values do if m.Type = u then "Method.Type" ]
         | TsAstNode.FunctionDeclaration f ->
             [ for f in f.Values do if f.Type = u then "FunctionDeclaration.Type" ]
-        | TsAstNode.GetAccessor g ->
-            [ if g.Type = u then "GetAccessor.Type" ]
-        | TsAstNode.SetAccessor s ->
-            [ if s.ArgumentType = u then "SetAccessor.ArgumentType" ]
-        | TsAstNode.CallSignature cs ->
-            [ for cs in cs.Values do if cs.Type = u then "CallSignature.Type" ]
-        | TsAstNode.ConstructSignature cs ->
-            [ for cs in cs.Values do if cs.Type = u then "ConstructSignature.Type" ]
-        | TsAstNode.IndexSignature idx ->
-            [ if idx.Type = u then "IndexSignature.Type" ]
         | TsAstNode.Index idx ->
             [ if idx.Type = u then "Index.Type" ]
         | TsAstNode.TypeReference tr ->
@@ -159,8 +156,6 @@ module Internal =
         | TsAstNode.TypeParameter tp ->
             [ if tp.Constraint = Some u then "TypeParameter.Constraint"
               if tp.Default = Some u then "TypeParameter.Default" ]
-        | TsAstNode.Parameter p ->
-            [ if p.Type = u then "Parameter.Type" ]
         | TsAstNode.TemplateLiteral tl ->
             [ if tl.Types |> List.exists ((=) u) then "TemplateLiteral.Types[]" ]
         | _ -> []
@@ -220,7 +215,7 @@ module Internal =
     let sortResultGroups (groups: IRResultDuplicates seq) =
         groups
         |> Seq.map (fun group ->
-            { group with Results = group.Results |> Array.sortBy (fun ir -> identityPriority ir.Identity) }
+            { group with Results = group.Results |> Array.sortBy (fun ir -> identityPriority ir.Identity) |> Array.distinctBy _.Node }
             |> graft<idPrioritySorted>)
     let mergeOverloads (groups: IRResultDuplicates<idPrioritySorted> seq): IRResultDuplicates<idPrioritySorted> seq =
         groups
@@ -231,11 +226,7 @@ module Internal =
             // merge
             let isOverloadable, nonOverloadable =
                 match winner.Node with
-                | TsAstNode.FunctionDeclaration _
-                | TsAstNode.Method _
-                | TsAstNode.Constructor _
-                | TsAstNode.ConstructSignature _
-                | TsAstNode.CallSignature _ ->
+                | TsAstNode.FunctionDeclaration _ ->
                     sorted
                     |> Array.partition (function
                         | { Node = node } when node <> winner.Node -> true
@@ -261,18 +252,6 @@ module Internal =
                 | TsAstNode.FunctionDeclaration node ->
                     function TsAstNode.FunctionDeclaration node -> Some node | _ -> None
                     |> combine node  TsAstNode.FunctionDeclaration
-                | TsAstNode.Method node ->
-                    function TsAstNode.Method node -> Some node | _ -> None
-                    |> combine node  TsAstNode.Method
-                | TsAstNode.Constructor node ->
-                    function TsAstNode.Constructor node -> Some node | _ -> None
-                    |> combine node  TsAstNode.Constructor
-                | TsAstNode.ConstructSignature node ->
-                    function TsAstNode.ConstructSignature node -> Some node | _ -> None
-                    |> combine node  TsAstNode.ConstructSignature
-                | TsAstNode.CallSignature node ->
-                    function TsAstNode.CallSignature node -> Some node | _ -> None
-                    |> combine node  TsAstNode.CallSignature
                 | _ -> failwith "Should be unreachable"
                 )
             |> ValueOption.map (fun merged ->
@@ -287,6 +266,26 @@ module Internal =
             let sorted = group.Results
             let winner = sorted[0]
             match winner.Node with
+            | TsAstNode.TypeLiteral tsLiteral when sorted.Length > 1 ->
+                let mergeAbleMembers, unmergeableMembers =
+                    sorted[1..]
+                    |> Array.partition _.Node.IsTypeLiteral
+                    ||> (fun mergeable unmergeable ->
+                        mergeable
+                        |> Array.map (function
+                            | { Node = TsAstNode.TypeLiteral { Members = members } } ->
+                                members
+                            | _ -> []
+                            ), unmergeable
+                        )
+                mergeAbleMembers
+                |> Array.fold (fun acc members ->
+                    Set.union acc (Set members)
+                    ) (Set tsLiteral.Members)
+                |> Set.toList
+                |> fun members ->
+                    [| { winner with Node = TsAstNode.TypeLiteral { Members = members }}
+                       yield! unmergeableMembers |]
             | TsAstNode.Interface tsInterface when sorted.Length > 1 ->
                 let mergeAbleMembers, unmergeableMembers =
                     sorted[1..]
@@ -339,6 +338,16 @@ module Internal =
         seq {
             for group in groups do
                 let sorted = group.Results |> Array.sortBy (fun ir -> identityPriority ir.Identity)
+                match sorted with
+                | [| _; _ |] when
+                    sorted
+                    |> Array.exists _.Node.IsArray
+                    &&
+                    sorted
+                    |> Array.exists _.Node.IsTypeReference ->
+                    sorted
+                    |> Array.find _.Node.IsArray
+                | _ ->
                 let winner = sorted[0]
                 let hasConflict = sorted |> Array.exists (fun ir -> ir.Node <> winner.Node)
                 // if false then

@@ -5,6 +5,7 @@ open Fable.Core.JsInterop
 open TypeScript
 open Xantham
 open Xantham.Fable
+open Xantham.Fable.Reading.Member
 open Xantham.Fable.Types
 open Xantham.Fable.Types.Signal
 
@@ -73,15 +74,7 @@ let private signatureToParamSlots (ctx: TypeScriptReader) (signature: Ts.Signatu
     signature.getParameters().AsArray
     |> Array.map (fun sym ->
         match sym.valueDeclaration with
-        | Some decl ->
-            let state = ctx.CreateXanthamTag (unbox<Ts.Node> decl) |> fst
-            let t = state.Value
-            if state.IsUnvisited then pushToStack ctx t
-            GuardedData.AstNodeBuilder.getOrSetDefault t
-            |> Signal.map (function
-                | ValueSome (STsAstNodeBuilder.Parameter p) -> ValueSome p
-                | _ -> ValueNone
-                )
+        | Some decl -> Member.resolveToParameterBuilder ctx (unbox decl)
         | None ->
             // Synthesized parameter — build inline from the checker
             let t =
@@ -103,14 +96,7 @@ let private signatureToParamSlots (ctx: TypeScriptReader) (signature: Ts.Signatu
 let private callSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Signature) : Signal<SMemberBuilder voption> =
     let decl = signature.getDeclaration()
     if !!decl then
-        let state = ctx.CreateXanthamTag (unbox<Ts.Node> decl) |> fst
-        let t = state.Value
-        if state.IsUnvisited then pushToStack ctx t
-        GuardedData.AstNodeBuilder.getOrSetDefault t
-        |> Signal.map (function
-            | ValueSome (STsAstNodeBuilder.CallSignature cs) -> SMemberBuilder.CallSignature cs |> ValueSome
-            | _ -> ValueNone
-            )
+        resolveToMemberBuilder ctx !!decl
     else
         let returnTag =
             match ctx.CreateXanthamTag (ctx.checker.getReturnTypeOfSignature signature) |> fst with
@@ -129,14 +115,7 @@ let private callSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Signature
 let private constructSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Signature) : Signal<SMemberBuilder voption> =
     let decl = signature.getDeclaration()
     if !!decl then
-        let state = ctx.CreateXanthamTag (unbox<Ts.Node> decl) |> fst
-        let t = state.Value
-        if state.IsUnvisited then pushToStack ctx t
-        GuardedData.AstNodeBuilder.getOrSetDefault t
-        |> Signal.map (function
-            | ValueSome (STsAstNodeBuilder.ConstructSignature cs) -> SMemberBuilder.ConstructSignature cs |> ValueSome
-            | _ -> ValueNone
-            )
+        resolveToMemberBuilder ctx !!decl
     else
         let returnTag =
             match ctx.CreateXanthamTag (ctx.checker.getReturnTypeOfSignature signature) |> fst with
@@ -154,21 +133,7 @@ let private constructSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Sign
 let private propertySymToMemberSlot (ctx: TypeScriptReader) (sym: Ts.Symbol) : Signal<SMemberBuilder voption> =
     match sym.valueDeclaration with
     | Some decl ->
-        let state = ctx.CreateXanthamTag (unbox<Ts.Node> decl) |> fst
-        let t = state.Value
-        if state.IsUnvisited then pushToStack ctx t
-        GuardedData.AstNodeBuilder.getOrSetDefault t
-        |> Signal.map (function
-            | ValueNone -> ValueNone
-            | ValueSome b ->
-                match b with
-                | Property p       -> SMemberBuilder.Property p       |> ValueSome
-                | Method m         -> SMemberBuilder.Method m         |> ValueSome
-                | GetAccessor g    -> SMemberBuilder.GetAccessor g    |> ValueSome
-                | SetAccessor s    -> SMemberBuilder.SetAccessor s    |> ValueSome
-                | CallSignature cs -> SMemberBuilder.CallSignature cs |> ValueSome
-                | _ -> ValueNone
-            )
+        resolveToMemberBuilder ctx !!decl
     | None ->
         // Synthesized / computed property — build inline from the checker
         let t =

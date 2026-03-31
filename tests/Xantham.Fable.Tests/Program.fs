@@ -239,19 +239,20 @@ let multipleExtendsTests =
 let memberTests =
     testList "members.d.ts" [
 
+        let result = createTestReader "members" |> runReader
+        
         // --- WithProperties: member count and kinds ---
-
         testCase "WithProperties has exactly 3 members" <| fun _ ->
-            let iface = createTestReader "members" |> runReader |> findInterface "WithProperties"
+            let iface = result |> findInterface "WithProperties"
             "" |> Expect.hasLength iface.Members 3
 
         testCase "WithProperties all members are TsMember.Property" <| fun _ ->
-            let iface = createTestReader "members" |> runReader |> findInterface "WithProperties"
+            let iface = result |> findInterface "WithProperties"
             "All members should be Property"
             |> Expect.all iface.Members (function TsMember.Property _ -> true | _ -> false)
 
         testCase "WithProperties has properties named 'name', 'age', 'active'" <| fun _ ->
-            let iface = createTestReader "members" |> runReader |> findInterface "WithProperties"
+            let iface = result |> findInterface "WithProperties"
             let names =
                 iface.Members |> List.choose (function TsMember.Property p -> Some p.Name | _ -> None)
             "" |> Expect.containsAll names ["name"; "age"; "active"]
@@ -259,62 +260,54 @@ let memberTests =
         // --- WithProperties: IsOptional flag ---
 
         testCase "'name' is not optional (required property)" <| fun _ ->
-            let result = createTestReader "members" |> runReader
             let p = findInterface "WithProperties" result |> _.Members |> findProperty "name"
             "name.IsOptional should be false" |> Expect.isFalse p.IsOptional
 
         testCase "'age' is optional (declared with ?)" <| fun _ ->
-            let result = createTestReader "members" |> runReader
             let p = findInterface "WithProperties" result |> _.Members |> findProperty "age"
             "age.IsOptional should be true" |> Expect.isTrue p.IsOptional
 
         // --- WithProperties: Accessor flag ---
 
         testCase "'name' has ReadWrite accessor (mutable)" <| fun _ ->
-            let result = createTestReader "members" |> runReader
             let p = findInterface "WithProperties" result |> _.Members |> findProperty "name"
             "name.Accessor should be ReadWrite" |> Expect.equal p.Accessor TsAccessor.ReadWrite
 
         testCase "'active' has ReadOnly accessor (declared readonly)" <| fun _ ->
-            let result = createTestReader "members" |> runReader
             let p = findInterface "WithProperties" result |> _.Members |> findProperty "active"
             "active.Accessor should be ReadOnly" |> Expect.equal p.Accessor TsAccessor.ReadOnly
 
         // --- WithMethods ---
 
         testCase "WithMethods has exactly 2 members" <| fun _ ->
-            let iface = createTestReader "members" |> runReader |> findInterface "WithMethods"
+            let iface = result |> findInterface "WithMethods"
             "" |> Expect.hasLength iface.Members 2
 
         testCase "WithMethods all members are TsMember.Method" <| fun _ ->
-            let iface = createTestReader "members" |> runReader |> findInterface "WithMethods"
+            let iface = result |> findInterface "WithMethods"
             "All members should be Method"
             |> Expect.all iface.Members (function TsMember.Method _ -> true | _ -> false)
 
         testCase "WithMethods has methods named 'greet' and 'add'" <| fun _ ->
-            let iface = createTestReader "members" |> runReader |> findInterface "WithMethods"
+            let iface = result |> findInterface "WithMethods"
             let names =
                 iface.Members |> List.choose (function TsMember.Method m -> Some m.ValueOrHead.Name | _ -> None)
             "" |> Expect.containsAll names ["greet"; "add"]
 
         testCase "'greet' method has 1 parameter" <| fun _ ->
-            let result = createTestReader "members" |> runReader
             let m = findInterface "WithMethods" result |> _.Members |> findMethod "greet"
             "" |> Expect.hasLength m.ValueOrHead.Parameters 1
 
         testCase "'greet' parameter is named 'message'" <| fun _ ->
-            let result = createTestReader "members" |> runReader
             let m = findInterface "WithMethods" result |> _.Members |> findMethod "greet"
             let p = m.ValueOrHead.Parameters.[0]
             "greet param should be named message" |> Expect.equal p.Name "message"
 
         testCase "'add' method has 2 parameters" <| fun _ ->
-            let result = createTestReader "members" |> runReader
             let m = findInterface "WithMethods" result |> _.Members |> findMethod "add"
             "" |> Expect.hasLength m.ValueOrHead.Parameters 2
 
         testCase "'add' parameter names are 'a' and 'b'" <| fun _ ->
-            let result = createTestReader "members" |> runReader
             let m = findInterface "WithMethods" result |> _.Members |> findMethod "add"
             let names = m.ValueOrHead.Parameters |> List.map _.Name
             "" |> Expect.containsAll names ["a"; "b"]
@@ -322,17 +315,17 @@ let memberTests =
         // --- WithSignatures ---
 
         testCase "WithSignatures has a TsMember.CallSignature" <| fun _ ->
-            let iface = createTestReader "members" |> runReader |> findInterface "WithSignatures"
+            let iface = result |> findInterface "WithSignatures"
             "Should have a CallSignature"
             |> Expect.exists iface.Members (function TsMember.CallSignature _ -> true | _ -> false)
 
         testCase "WithSignatures has a TsMember.ConstructSignature" <| fun _ ->
-            let iface = createTestReader "members" |> runReader |> findInterface "WithSignatures"
+            let iface = result |> findInterface "WithSignatures"
             "Should have a ConstructSignature"
             |> Expect.exists iface.Members (function TsMember.ConstructSignature _ -> true | _ -> false)
 
         testCase "WithSignatures has a TsMember.IndexSignature" <| fun _ ->
-            let iface = createTestReader "members" |> runReader |> findInterface "WithSignatures"
+            let iface = result |> findInterface "WithSignatures"
             "Should have an IndexSignature"
             |> Expect.exists iface.Members (function TsMember.IndexSignature _ -> true | _ -> false)
     ]
@@ -345,8 +338,8 @@ let memberTests =
 // -----------------------------------------------------------------------
 let overloadTests =
     testList "overloads.d.ts" [
+        let result = createTestReader "overloads" |> runReader
         testCase "both 'process' and 'identity' are present in result" <| fun _ ->
-            let result = createTestReader "overloads" |> runReader
             let names =
                 result
                 |> Seq.choose (function
@@ -357,18 +350,18 @@ let overloadTests =
 
         testCase "'process' is emitted as TsOverloadableConstruct.Overloaded" <| fun _ ->
             // Two distinct declarations → pipeline must merge into Overloaded
-            let fd = createTestReader "overloads" |> runReader |> findFunction "process"
+            let fd = result |> findFunction "process"
             match fd with
             | Overloaded _ -> Expect.pass()
             | NoOverloads _ -> failwith "'process' should be Overloaded, not NoOverloads"
 
         testCase "'process' Overloaded set contains 2 variants" <| fun _ ->
-            let fd = createTestReader "overloads" |> runReader |> findFunction "process"
+            let fd = result |> findFunction "process"
             "process should have 2 overload variants" |> Expect.equal fd.Values.Length 2
 
         testCase "'identity' is emitted as TsOverloadableConstruct.NoOverloads" <| fun _ ->
             // Single declaration → no merging needed, must remain NoOverloads
-            let fd = createTestReader "overloads" |> runReader |> findFunction "identity"
+            let fd = result |> findFunction "identity"
             match fd with
             | NoOverloads _ -> Expect.pass()
             | Overloaded _ -> failwith "'identity' should be NoOverloads, not Overloaded"
@@ -385,51 +378,44 @@ let overloadTests =
 // -----------------------------------------------------------------------
 let modifierTests =
     testList "optional-readonly.d.ts" [
+        let result = createTestReader "optional-readonly" |> runReader
         testCase "Modifiers interface has exactly 4 properties" <| fun _ ->
-            let iface = createTestReader "optional-readonly" |> runReader |> findInterface "Modifiers"
+            let iface = result |> findInterface "Modifiers"
             "" |> Expect.hasLength iface.Members 4
 
         // IsOptional flag
 
         testCase "'required' IsOptional = false" <| fun _ ->
-            let result = createTestReader "optional-readonly" |> runReader
             let p = findInterface "Modifiers" result |> _.Members |> findProperty "required"
             "required.IsOptional should be false" |> Expect.isFalse p.IsOptional
 
         testCase "'optional' IsOptional = true" <| fun _ ->
-            let result = createTestReader "optional-readonly" |> runReader
             let p = findInterface "Modifiers" result |> _.Members |> findProperty "optional"
             "optional.IsOptional should be true" |> Expect.isTrue p.IsOptional
 
         testCase "'readonlyProp' IsOptional = false" <| fun _ ->
-            let result = createTestReader "optional-readonly" |> runReader
             let p = findInterface "Modifiers" result |> _.Members |> findProperty "readonlyProp"
             "readonlyProp.IsOptional should be false" |> Expect.isFalse p.IsOptional
 
         testCase "'optReadonly' IsOptional = true" <| fun _ ->
-            let result = createTestReader "optional-readonly" |> runReader
             let p = findInterface "Modifiers" result |> _.Members |> findProperty "optReadonly"
             "optReadonly.IsOptional should be true" |> Expect.isTrue p.IsOptional
 
         // Accessor flag
 
         testCase "'required' Accessor = ReadWrite (mutable)" <| fun _ ->
-            let result = createTestReader "optional-readonly" |> runReader
             let p = findInterface "Modifiers" result |> _.Members |> findProperty "required"
             "required.Accessor should be ReadWrite" |> Expect.equal p.Accessor TsAccessor.ReadWrite
 
         testCase "'optional' Accessor = ReadWrite (mutable)" <| fun _ ->
-            let result = createTestReader "optional-readonly" |> runReader
             let p = findInterface "Modifiers" result |> _.Members |> findProperty "optional"
             "optional.Accessor should be ReadWrite" |> Expect.equal p.Accessor TsAccessor.ReadWrite
 
         testCase "'readonlyProp' Accessor = ReadOnly" <| fun _ ->
-            let result = createTestReader "optional-readonly" |> runReader
             let p = findInterface "Modifiers" result |> _.Members |> findProperty "readonlyProp"
             "readonlyProp.Accessor should be ReadOnly" |> Expect.equal p.Accessor TsAccessor.ReadOnly
 
         testCase "'optReadonly' Accessor = ReadOnly" <| fun _ ->
-            let result = createTestReader "optional-readonly" |> runReader
             let p = findInterface "Modifiers" result |> _.Members |> findProperty "optReadonly"
             "optReadonly.Accessor should be ReadOnly" |> Expect.equal p.Accessor TsAccessor.ReadOnly
     ]
@@ -440,33 +426,33 @@ let modifierTests =
 // -----------------------------------------------------------------------
 let enumTests =
     testList "enum.d.ts" [
+        let result = createTestReader "enum" |> runReader
         testCase "'Direction' enum is present in result" <| fun _ ->
-            let result = createTestReader "enum" |> runReader
             "Direction should be in result"
             |> Expect.exists result (function
                 | KeyValue(_, TsAstNode.Enum e) -> e.Name = "Direction"
                 | _ -> false)
 
         testCase "'Direction' has exactly 4 members" <| fun _ ->
-            let e = createTestReader "enum" |> runReader |> findEnum "Direction"
+            let e = result |> findEnum "Direction"
             "" |> Expect.hasLength e.Members 4
 
         testCase "'Direction' member names are Up, Down, Left, Right" <| fun _ ->
-            let e = createTestReader "enum" |> runReader |> findEnum "Direction"
+            let e = result |> findEnum "Direction"
             "" |> Expect.containsAll (e.Members |> List.map _.Name) ["Up"; "Down"; "Left"; "Right"]
 
         testCase "'Up' has TsLiteral.Int 0" <| fun _ ->
-            let e = createTestReader "enum" |> runReader |> findEnum "Direction"
+            let e = result |> findEnum "Direction"
             let up = e.Members |> List.find (fun c -> c.Name = "Up")
             "Up.Value should be Int 0" |> Expect.equal up.Value (TsLiteral.Int 0)
 
         testCase "'Down' has TsLiteral.Int 1" <| fun _ ->
-            let e = createTestReader "enum" |> runReader |> findEnum "Direction"
+            let e = result |> findEnum "Direction"
             let down = e.Members |> List.find (fun c -> c.Name = "Down")
             "Down.Value should be Int 1" |> Expect.equal down.Value (TsLiteral.Int 1)
 
         testCase "'Right' has TsLiteral.Int 3" <| fun _ ->
-            let e = createTestReader "enum" |> runReader |> findEnum "Direction"
+            let e = result |> findEnum "Direction"
             let right = e.Members |> List.find (fun c -> c.Name = "Right")
             "Right.Value should be Int 3" |> Expect.equal right.Value (TsLiteral.Int 3)
     ]
@@ -478,31 +464,32 @@ let enumTests =
 // -----------------------------------------------------------------------
 let genericsTests =
     testList "generics.d.ts" [
+        let result = createTestReader "generics" |> runReader
         testCase "'Box' has exactly 1 type parameter" <| fun _ ->
-            let iface = createTestReader "generics" |> runReader |> findInterface "Box"
+            let iface = result |> findInterface "Box"
             "" |> Expect.hasLength iface.TypeParameters 1
 
         testCase "'Box' type parameter is named 'T'" <| fun _ ->
-            let iface = createTestReader "generics" |> runReader |> findInterface "Box"
+            let iface = result |> findInterface "Box"
             let (_, tp) = iface.TypeParameters.[0]
             "Box type param should be T" |> Expect.equal tp.Name "T"
 
         testCase "'Box' has a member named 'value'" <| fun _ ->
-            let iface = createTestReader "generics" |> runReader |> findInterface "Box"
+            let iface = result |> findInterface "Box"
             "Box should have property 'value'"
             |> Expect.exists iface.Members (function TsMember.Property p -> p.Name = "value" | _ -> false)
 
         testCase "'Pair' has exactly 2 type parameters" <| fun _ ->
-            let iface = createTestReader "generics" |> runReader |> findInterface "Pair"
+            let iface = result |> findInterface "Pair"
             "" |> Expect.hasLength iface.TypeParameters 2
 
         testCase "'Pair' type parameter names are 'A' and 'B'" <| fun _ ->
-            let iface = createTestReader "generics" |> runReader |> findInterface "Pair"
+            let iface = result |> findInterface "Pair"
             let names = iface.TypeParameters |> List.map (fun (_, tp) -> tp.Name)
             "" |> Expect.containsAll names ["A"; "B"]
 
         testCase "'Pair' has members named 'first' and 'second'" <| fun _ ->
-            let iface = createTestReader "generics" |> runReader |> findInterface "Pair"
+            let iface = result |> findInterface "Pair"
             let names =
                 iface.Members |> List.choose (function TsMember.Property p -> Some p.Name | _ -> None)
             "" |> Expect.containsAll names ["first"; "second"]

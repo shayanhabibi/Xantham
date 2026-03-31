@@ -40,7 +40,36 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
                 GuardedData.AstNodeBuilder.getOrSetDefault xanTag
                 |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.getOrSetDefault decl).Value)
         | None -> Log.error "failed to get symbol"
-    | ModulesAndExports.ImportEqualsDeclaration mportEqualsDeclaration -> ()
+    | ModulesAndExports.ImportEqualsDeclaration mportEqualsDeclaration ->
+        match
+            ctx.checker.getSymbolAtLocation !!mportEqualsDeclaration.moduleReference
+            |> Option.map (fun symbol ->
+                if symbol.flags.HasFlag Ts.SymbolFlags.Alias
+                then ctx.checker.getAliasedSymbol symbol
+                else symbol)
+        with
+        | Some symbol ->
+            let declarations =
+                symbol.declarations
+                |> Option.map (
+                    _.AsArray
+                    >> Array.map (
+                        ctx.CreateXanthamTag >> fst >> function
+                            | TagState.Unvisited tag ->
+                                pushToStack ctx tag
+                                tag
+                            | TagState.Visited tag ->
+                                tag
+                        )
+                    )
+                |> Option.defaultValue [||]
+            match declarations with
+            | [||] -> ()
+            | _ -> 
+                let decl = declarations[0]
+                GuardedData.AstNodeBuilder.getOrSetDefault xanTag
+                |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.getOrSetDefault decl).Value)
+        | None -> Log.error "failed to get symbol"
     | ModulesAndExports.AssertClause assertClause -> ()
     | ModulesAndExports.ExportAssignment exportAssignment -> ()
     | ModulesAndExports.ExportDeclaration exportDeclaration -> ()

@@ -19,6 +19,7 @@
         <Compile Include="Types\Signal.fs" />
         <Compile Include="Types\Symbol.fs" />
         <Compile Include="Types\Tracer.fs" />
+        <Compile Include="Types\XanTagKind.fs" />
         <Compile Include="Types\XanTag.fs" />
         <Compile Include="Types\ModuleMap.fs" />
         <Compile Include="Types\ReactiveBuilders.fs" />
@@ -31,6 +32,7 @@
         <Compile Include="Reading\TypeReference.fs" />
         <Compile Include="Reading\Member.fs" />
         <Compile Include="Reading\Dispatch\TypeDeclaration.fs" />
+        <Compile Include="Reading\Dispatch\MemberDeclaration.fs" />
         <Compile Include="Reading\Dispatch\LiteralTokenNode.fs" />
         <Compile Include="Reading\Dispatch\TypeFlagLiteral.fs" />
         <Compile Include="Reading\Dispatch\TypeFlagObject.fs" />

@@ -33,16 +33,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
     /// Build parameter slots from a list of ParameterDeclarations.
     let inline getParamSlots (parameters: ResizeArray<Ts.ParameterDeclaration>) =
         parameters.AsArray
-        |> Array.map (fun p ->
-            let state = ctx.CreateXanthamTag (unbox<Ts.Node> p) |> fst
-            let t = state.Value
-            if state.IsUnvisited then pushToStack ctx t
-            GuardedData.AstNodeBuilder.getOrSetDefault t
-            |> Signal.map (function
-                | ValueSome (STsAstNodeBuilder.Parameter p) -> ValueSome p
-                | _ -> ValueNone
-                )
-            )
+        |> Array.map (Member.resolveToParameterBuilder ctx)
     match tag with
     | TypeNode.AnyKeyword _       -> setKeyword TypeKindPrimitive.Any
     | TypeNode.StringKeyword _    -> setKeyword TypeKindPrimitive.String
@@ -288,20 +279,34 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
     | TypeNode.FunctionType funcTypeNode ->
         // (x: T) => R — emit as a CallSignature (type params not captured; schema has no slot)
         {
-            SCallSignatureBuilder.Parameters = getParamSlots funcTypeNode.parameters
-            Type = getTypeSignalFromNode funcTypeNode.``type``
-            Documentation = []
+            Members = [|
+                {
+                    SCallSignatureBuilder.Parameters = getParamSlots funcTypeNode.parameters
+                    Type = getTypeSignalFromNode funcTypeNode.``type``
+                    Documentation = []
+                }
+                |> SMemberBuilder.CallSignature
+                |> ValueSome
+                |> Signal.source
+            |]
         }
-        |> STsAstNodeBuilder.CallSignature
+        |> STsAstNodeBuilder.TypeLiteral
         |> setAstSignal
         setTypeKeyFromNode funcTypeNode
     | TypeNode.ConstructorType ctorTypeNode ->
         // new (x: T) => R — emit as a ConstructSignature
         {
-            SConstructSignatureBuilder.Parameters = getParamSlots ctorTypeNode.parameters
-            Type = getTypeSignalFromNode ctorTypeNode.``type``
+            Members = [|
+                {
+                    SConstructSignatureBuilder.Parameters = getParamSlots ctorTypeNode.parameters
+                    Type = getTypeSignalFromNode ctorTypeNode.``type``
+                }
+                |> SMemberBuilder.ConstructSignature
+                |> ValueSome
+                |> Signal.source
+            |]
         }
-        |> STsAstNodeBuilder.ConstructSignature
+        |> STsAstNodeBuilder.TypeLiteral
         |> setAstSignal
         setTypeKeyFromNode ctorTypeNode
     | TypeNode.TypeLiteral typeLiteralNode ->

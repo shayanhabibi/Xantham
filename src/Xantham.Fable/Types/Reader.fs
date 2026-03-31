@@ -59,6 +59,7 @@ type TypeScriptReader = {
     Warnings: ResizeArray<string>
     ModuleMap: ModuleMap
     SignalCache: Dictionary<IdentityKey, TypeStore>
+    MemberCache: Dictionary<IdentityKey, MemberStore>
     LibCache: HashSet<IdentityKey>
 } with
     member inline this.stack = this.Stack
@@ -69,6 +70,7 @@ type TypeScriptReader = {
     member inline this.warnings = this.Warnings
     member inline this.moduleMap = this.ModuleMap
     member inline this.signalCache = this.SignalCache
+    member inline this.memberCache = this.MemberCache
     member inline this.libCache = this.LibCache
 
 module TypeScriptReader =
@@ -77,6 +79,7 @@ module TypeScriptReader =
         let stack = Stack<XanthamTag>()
         let warnings = ResizeArray<string>()
         let signalCache = Dictionary()
+        let memberCache = Dictionary()
         let libCache = HashSet()
         let program = createProgramForFiles entryFiles
         let checker = program.getTypeChecker()
@@ -92,6 +95,7 @@ module TypeScriptReader =
             ModuleMap = ModuleMap.Create program
             SignalCache = signalCache
             LibCache = libCache
+            MemberCache = memberCache
         }
     let inline create (entryFile: string) =
         createFor [| entryFile |]

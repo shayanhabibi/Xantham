@@ -85,7 +85,6 @@ let rec getKeys typ =
             glueClass.Constructors
             |> List.collect (_.Parameters >> List.map _.Type)
         ]
-    | TsType.Variable glueVariable -> [ glueVariable.Type ]
     | TsType.Primitive _ -> []
     | TsType.Enum _ -> []
     | TsType.TypeAlias glueTypeAlias -> [
@@ -100,22 +99,7 @@ let rec getKeys typ =
                             match d with Some v -> v | _ -> ()
                         ])
         ]
-    | TsType.Function glueFunctionDeclaration -> glueFunctionDeclaration.ToList() |> List.collect (fun glueFunctionDeclaration ->
-        [
-            glueFunctionDeclaration.Type
-            yield!
-                glueFunctionDeclaration.Parameters
-                |> List.map _.Type
-            yield!
-                glueFunctionDeclaration.TypeParameters
-                |> List.collect (function
-                    typ,{ Constraint = c; Default = d } ->
-                        [
-                            typ
-                            match c with Some v -> v | _ -> ()
-                            match d with Some v -> v | _ -> ()
-                        ])
-        ])
+
     | TsType.Intersection (TsTypeIntersection values) 
     | TsType.Union (TsTypeUnion values) -> values
     | TsType.Literal _ -> []
@@ -150,3 +134,23 @@ let rec getKeys typ =
     | TsType.EnumCase _ -> []
     | TsType.TemplateLiteral tsTemplateLiteralType -> tsTemplateLiteralType.Types
     | TsType.Optional tsTypeReference -> getKeys (TsType.TypeReference tsTypeReference)
+and getKeysFromExport export =
+    match export with
+    | TsExportDeclaration.Variable glueVariable -> [ glueVariable.Type ]
+    | TsExportDeclaration.Function glueFunctionDeclaration -> glueFunctionDeclaration.ToList() |> List.collect (fun glueFunctionDeclaration ->
+        [
+            glueFunctionDeclaration.Type
+            yield!
+                glueFunctionDeclaration.Parameters
+                |> List.map _.Type
+            yield!
+                glueFunctionDeclaration.TypeParameters
+                |> List.collect (function
+                    typ,{ Constraint = c; Default = d } ->
+                        [
+                            typ
+                            match c with Some v -> v | _ -> ()
+                            match d with Some v -> v | _ -> ()
+                        ])
+        ])
+    | _ -> []

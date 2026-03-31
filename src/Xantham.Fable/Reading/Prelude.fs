@@ -38,18 +38,6 @@ module TypeStore =
         match tag.Value with
         | XanTagKind.TypeDeclaration decl ->
             match decl with
-            | TypeDeclaration.Parameter _
-            | TypeDeclaration.PropertySignature _
-            | TypeDeclaration.Property _
-            | TypeDeclaration.MethodSignature _
-            | TypeDeclaration.Method _
-            | TypeDeclaration.GetAccessor _
-            | TypeDeclaration.SetAccessor _
-            | TypeDeclaration.Constructor _
-            | TypeDeclaration.CallSignature _
-            | TypeDeclaration.ConstructSignature _
-            | TypeDeclaration.IndexSignature _
-            
             // | TypeDeclaration.HeritageClause _
             (* Generating keys for heritage members causes chaotic MISSREF
             errors to fire if the type is extended more than once. The actual
@@ -84,6 +72,7 @@ module TypeStore =
         // gives each predicate node its own unique TypeStore entry.
         | XanTagKind.TypeNode (TypeNode.TypePredicate _) -> true
         | XanTagKind.ModulesAndExports _ -> true
+        | XanTagKind.MemberDeclaration _ -> true
         | _ -> false
 
     module Create =
@@ -96,6 +85,7 @@ module TypeStore =
                 withTypeKeyMap (fun _ -> TypeKey.create()) tag
                 
             let create (ctx: TypeScriptReader) (tag: XanthamTag) =
+                if tag.Value.IsMemberDeclaration then failwith "Attempted to create TypeStore for member declaration"
                 if usesGeneratedKey tag then
                     withGeneratedKey tag
                 else tag |> withTypeKeyMap (function
@@ -104,14 +94,46 @@ module TypeStore =
                         ctx.checker.getTypeAtLocation node
                         |> _.TypeKey)
 
-let addToMemory (ctx: TypeScriptReader) (tag: XanthamTag) =
-    if ctx.signalCache.ContainsKey(tag.IdentityKey)
-    then Result.Error MemoryHandlerError.DuplicateValue else
+module MemberStore =
+    module Parameter =
+        let create (ctx: TypeScriptReader) (tag: XanthamTag) =
+            GuardedData.ParameterBuilder.getOrSetDefault tag
+            |> MemberStore.Parameter
+    module Member =
+        let create (ctx: TypeScriptReader) (tag: XanthamTag) =
+            GuardedData.MemberBuilder.getOrSetDefault tag
+            |> MemberStore.Member
+    module Constructor =
+        let create (ctx: TypeScriptReader) (tag: XanthamTag) =
+            GuardedData.ConstructorBuilder.getOrSetDefault tag
+            |> MemberStore.Constructor
+    let create (ctx: TypeScriptReader) (tag: XanthamTag) =
+        match tag.Value with
+        | MemberDeclaration (MemberDeclaration.Parameter _) ->
+            Parameter.create ctx tag
+        | MemberDeclaration (MemberDeclaration.Constructor _) ->
+            Constructor.create ctx tag
+        | MemberDeclaration _ ->
+            Member.create ctx tag
+        | _ -> failwith "Attempted to create MemberStore for non-member declaration"
 
-    libCacheMemoryHandler ctx tag
-    let store = TypeStore.Create.XanthamTag.create ctx tag
-    ctx.signalCache.Add(tag.IdentityKey, store)
-    Result.Ok()
+let addToMemory (ctx: TypeScriptReader) (tag: XanthamTag) =
+    match tag.Value with
+    | XanTagKind.MemberDeclaration _ ->
+        if ctx.memberCache.ContainsKey(tag.IdentityKey)
+        then Result.Error MemoryHandlerError.DuplicateValue else
+        
+        let store = MemberStore.create ctx tag
+        ctx.memberCache.Add(tag.IdentityKey, store)
+        Ok()
+    | _ ->
+        if ctx.signalCache.ContainsKey(tag.IdentityKey)
+        then Result.Error MemoryHandlerError.DuplicateValue else
+
+        libCacheMemoryHandler ctx tag
+        let store = TypeStore.Create.XanthamTag.create ctx tag
+        ctx.signalCache.Add(tag.IdentityKey, store)
+        Result.Ok()
 
 
 let setDeclarationNodeBuilderSignal (declaration: XanthamTag) =
@@ -216,6 +238,26 @@ let tagPrimitives (ctx: TypeScriptReader) =
             ctx.signalCache.Add(identity, value)
         )
     ctx
+
+let tryGetOrRegisterMemberStore (ctx: TypeScriptReader) (tag: XanthamTag) : MemberStore option =
+    let key = tag.IdentityKey
+    match ctx.memberCache.TryGetValue key with
+    | true, MemberStore.Constructor store ->
+        GuardedData.ConstructorBuilder.getOrSetDefault tag
+        |> Signal.fulfillWith (fun () -> store.Value)
+        None
+    | true, MemberStore.Parameter store ->
+        GuardedData.ParameterBuilder.getOrSetDefault tag
+        |> Signal.fulfillWith (fun () -> store.Value)
+        None
+    | true, MemberStore.Member store ->
+        GuardedData.MemberBuilder.getOrSetDefault tag
+        |> Signal.fulfillWith (fun () -> store.Value)
+        None
+    | false, _ ->
+        let store = MemberStore.create ctx tag
+        ctx.memberCache.Add(key, store)
+        Some store
 
 /// Returns Some store if newly registered (dispatch should proceed),
 /// or None if already cached (signal wired to cached store, skip dispatch).

@@ -6,7 +6,7 @@
 /// <c>TypeSignal</c>) represents one logical piece of data that readers may attach to a tag.
 /// All modules follow the same shape: <c>get</c>, <c>has</c>, <c>set</c>, <c>clear</c>,
 /// <c>getOrSetWith</c>, <c>getOrMapSet</c> operating on the <b>tag bag</b> (stored on the tag
-/// object itself), plus a <c>Keyed</c> sub-module operating on the <b>keyed bag</c> (stored on
+/// object itself), plus a <c>Keyed</c> sub-module operating on the <b>keyed bag</b> (stored on
 /// the guard object, partitioned by identity).
 /// <para>
 /// The internal <c>Helpers</c> module wraps the raw <c>XanthamTag</c> member calls and is
@@ -72,6 +72,60 @@ module Documentation =
         let clear tag = Helpers.Keyed.clear symbol tag
         let getOrSetWith fn tag = Helpers.Keyed.getOrSetWith symbol fn tag
         let getOrMapSet fn tag = Helpers.Keyed.getOrMapSet symbol fn tag
+[<RequireQualifiedAccess>]
+module ParameterBuilder =
+    let symbol = SymbolTypeKey.create<PendingSignal<SParameterBuilder>> "ParameterBuilder"
+    let get tag = Helpers.get symbol tag
+    let has tag = Helpers.has symbol tag
+    let set value tag = Helpers.set symbol value tag
+    let clear tag = Helpers.clear symbol tag
+    let getOrSetWith fn tag = Helpers.getOrSetWith symbol fn tag
+    let getOrMapSet fn tag = Helpers.getOrMapSet symbol fn tag
+    let getOrSetDefault tag = getOrSetWith (fun () -> Signal.pending<SParameterBuilder>()) tag
+    module Keyed =
+        let get tag = Helpers.Keyed.get symbol tag
+        let has tag = Helpers.Keyed.has symbol tag
+        let set value tag = Helpers.Keyed.set symbol value tag
+        let clear tag = Helpers.Keyed.clear symbol tag
+        let getOrSetWith fn tag = Helpers.Keyed.getOrSetWith symbol fn tag
+        let getOrMapSet fn tag = Helpers.Keyed.getOrMapSet symbol fn tag
+        let getOrSetDefault tag = getOrSetWith (fun () -> Signal.pending<SParameterBuilder>()) tag
+[<RequireQualifiedAccess>]
+module ConstructorBuilder =
+    let symbol = SymbolTypeKey.create<PendingSignal<SConstructorBuilder>> "ConstructorBuilder"
+    let get tag = Helpers.get symbol tag
+    let has tag = Helpers.has symbol tag
+    let set value tag = Helpers.set symbol value tag
+    let clear tag = Helpers.clear symbol tag
+    let getOrSetWith fn tag = Helpers.getOrSetWith symbol fn tag
+    let getOrMapSet fn tag = Helpers.getOrMapSet symbol fn tag
+    let getOrSetDefault tag = getOrSetWith (fun () -> Signal.pending<SConstructorBuilder>()) tag
+    module Keyed =
+        let get tag = Helpers.Keyed.get symbol tag
+        let has tag = Helpers.Keyed.has symbol tag
+        let set value tag = Helpers.Keyed.set symbol value tag
+        let clear tag = Helpers.Keyed.clear symbol tag
+        let getOrSetWith fn tag = Helpers.Keyed.getOrSetWith symbol fn tag
+        let getOrMapSet fn tag = Helpers.Keyed.getOrMapSet symbol fn tag
+        let getOrSetDefault tag = getOrSetWith (fun () -> Signal.pending<SConstructorBuilder>()) tag
+[<RequireQualifiedAccess>]
+module MemberBuilder =
+    let symbol = SymbolTypeKey.create<PendingSignal<SMemberBuilder>> "MemberBuilder"
+    let get tag = Helpers.get symbol tag
+    let has tag = Helpers.has symbol tag
+    let set value tag = Helpers.set symbol value tag
+    let clear tag = Helpers.clear symbol tag
+    let getOrSetWith fn tag = Helpers.getOrSetWith symbol fn tag
+    let getOrMapSet fn tag = Helpers.getOrMapSet symbol fn tag
+    let getOrSetDefault tag = getOrSetWith (fun () -> Signal.pending<SMemberBuilder>()) tag
+    module Keyed =
+        let get tag = Helpers.Keyed.get symbol tag
+        let has tag = Helpers.Keyed.has symbol tag
+        let set value tag = Helpers.Keyed.set symbol value tag
+        let clear tag = Helpers.Keyed.clear symbol tag
+        let getOrSetWith fn tag = Helpers.Keyed.getOrSetWith symbol fn tag
+        let getOrMapSet fn tag = Helpers.Keyed.getOrMapSet symbol fn tag
+        let getOrSetDefault tag = getOrSetWith (fun () -> Signal.pending<SMemberBuilder>()) tag
 [<RequireQualifiedAccess>]
 module AstNodeBuilder =
     let symbol = SymbolTypeKey.create<PendingSignal<STsAstNodeBuilder>> "AstNodeBuilder"

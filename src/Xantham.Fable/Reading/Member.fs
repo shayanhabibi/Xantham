@@ -10,29 +10,25 @@ let resolveToMemberBuilder (ctx: TypeScriptReader) (node: Ts.TypeElement) =
     let tag = tagVisitedState.Value
     if tagVisitedState.IsUnvisited then
         pushToStack ctx tag
-    tag
-    |> GuardedData.AstNodeBuilder.getOrSetDefault
-    |> Signal.map (function
-        // emit error?
-        | ValueNone -> ValueNone
-        | ValueSome builder ->
-            match builder with
-            | Property sPropertyBuilder ->
-                SMemberBuilder.Property sPropertyBuilder |> ValueSome
-            | Method sMethodBuilder ->
-                SMemberBuilder.Method sMethodBuilder |> ValueSome
-            | ConstructSignature sConstructSignatureBuilder ->
-                SMemberBuilder.ConstructSignature sConstructSignatureBuilder |> ValueSome
-            | IndexSignature sIndexSignatureBuilder ->
-                SMemberBuilder.IndexSignature sIndexSignatureBuilder |> ValueSome
-            | GetAccessor sGetAccessorBuilder ->
-                SMemberBuilder.GetAccessor sGetAccessorBuilder |> ValueSome
-            | SetAccessor sSetAccessorBuilder ->
-                SMemberBuilder.SetAccessor sSetAccessorBuilder |> ValueSome
-            | CallSignature sCallSignatureBuilder ->
-                SMemberBuilder.CallSignature sCallSignatureBuilder |> ValueSome
-            | _ ->
-                // emit error?
-                ValueNone
-        )
-    
+    tag |> GuardedData.MemberBuilder.getOrSetDefault
+
+let resolveClassMemberBuilder (ctx: TypeScriptReader) (node: Ts.ClassElement) =
+    let tagVisitedState = ctx.CreateXanthamTag node |> fst
+    let tag = tagVisitedState.Value
+    if tagVisitedState.IsUnvisited then
+        pushToStack ctx tag
+    tag |> GuardedData.MemberBuilder.getOrSetDefault
+
+let resolveToConstructorBuilder (ctx: TypeScriptReader) (node: Ts.ConstructorDeclaration) =
+    let tagVisitedState = ctx.CreateXanthamTag node |> fst
+    let tag = tagVisitedState.Value
+    if tagVisitedState.IsUnvisited then
+        pushToStack ctx tag
+    tag |> GuardedData.ConstructorBuilder.getOrSetDefault
+
+let resolveToParameterBuilder (ctx: TypeScriptReader) (node: Ts.ParameterDeclaration) =
+    let tagVisitedState = ctx.CreateXanthamTag node |> fst
+    let tag = tagVisitedState.Value
+    if tagVisitedState.IsUnvisited then
+        pushToStack ctx tag
+    tag |> GuardedData.ParameterBuilder.getOrSetDefault

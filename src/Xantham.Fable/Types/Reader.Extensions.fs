@@ -69,3 +69,30 @@ type XanthamTag with
         and set(value: STsAstNodeBuilder) =
             GuardedData.AstNodeBuilder.getOrSetDefault this
             |> Signal.fill value
+    member this.MemberBuilder
+        with get() =
+            if GuardedData.MemberBuilder.has this then
+                GuardedData.MemberBuilder.get this
+                |> ValueSome
+            else ValueNone
+        and set(value: SMemberBuilder) =
+            GuardedData.MemberBuilder.getOrSetDefault this
+            |> Signal.fill value
+    member this.ParameterBuilder
+        with get() =
+            if GuardedData.ParameterBuilder.has this then
+                GuardedData.ParameterBuilder.get this
+                |> ValueSome
+            else ValueNone
+        and set(value: SParameterBuilder) =
+            GuardedData.ParameterBuilder.getOrSetDefault this
+            |> Signal.fill value
+    member this.ConstructorBuilder
+        with get() =
+            if GuardedData.ConstructorBuilder.has this then
+                GuardedData.ConstructorBuilder.get this
+                |> ValueSome
+            else ValueNone
+        and set(value: SConstructorBuilder) =
+            GuardedData.ConstructorBuilder.getOrSetDefault this
+            |> Signal.fill value

@@ -3,6 +3,8 @@ module Xantham.Fable.Utils
 
 open Fable.Core
 
+let inline funApply args f = f args
+
 type System.Collections.Generic.List<'T> with
     [<Emit "$0">]
     member inline this.AsArray: 'T array = unbox this

@@ -575,16 +575,10 @@ type STsAstNodeBuilder =
     | Predicate of SPredicateBuilder
     | Literal of TsLiteral
     | TypeLiteral of STypeLiteralBuilder
-    | Property of SPropertyBuilder
-    | Parameter of SParameterBuilder
     | TypeParameter of STypeParameterBuilder
     | IndexAccessType of SIndexAccessTypeBuilder
     | FunctionDeclaration of SFunctionBuilder
-    | Method of SMethodBuilder
     | Alias of SAliasBuilder
-    | Constructor of SConstructorBuilder
-    | ConstructSignature of SConstructSignatureBuilder
-    | IndexSignature of SIndexSignatureBuilder
     | Index of SIndexBuilder
     | TypeReference of STypeReferenceBuilder
     | Array of STypeReferenceBuilder
@@ -596,9 +590,6 @@ type STsAstNodeBuilder =
     | Union of STypeUnionBuilder
     | Intersection of STypeIntersectionBuilder
     | Optional of STypeReferenceBuilder
-    | GetAccessor of SGetAccessorBuilder
-    | SetAccessor of SSetAccessorBuilder
-    | CallSignature of SCallSignatureBuilder
     | Module of SModuleBuilder
     | TemplateLiteral of STemplateLiteralTypeBuilder
     member this.Build() : TsAstNode =
@@ -611,16 +602,10 @@ type STsAstNodeBuilder =
         | Predicate v            -> v.Build() |> TsAstNode.Predicate
         | Literal v              -> TsAstNode.Literal v
         | TypeLiteral v          -> v.Build() |> TsAstNode.TypeLiteral
-        | Property v             -> v.Build() |> TsAstNode.Property
-        | Parameter v            -> v.Build() |> TsAstNode.Parameter
         | TypeParameter v        -> v.Build() |> TsAstNode.TypeParameter
         | IndexAccessType v      -> v.Build() |> TsAstNode.IndexAccessType
         | FunctionDeclaration v  -> v.Build() |> TsOverloadableConstruct.Create |> TsAstNode.FunctionDeclaration
-        | Method v               -> v.Build() |> TsOverloadableConstruct.Create |> TsAstNode.Method
         | Alias v                -> v.Build() |> TsAstNode.Alias
-        | Constructor v          -> v.Build() |> TsOverloadableConstruct.Create |> TsAstNode.Constructor
-        | ConstructSignature v   -> v.Build() |> TsOverloadableConstruct.Create |> TsAstNode.ConstructSignature
-        | IndexSignature v       -> v.Build() |> TsAstNode.IndexSignature
         | Index v                -> v.Build() |> TsAstNode.Index
         | TypeReference v        -> v.Build() |> TsAstNode.TypeReference
         | Array v                -> v.Build() |> TsAstNode.Array
@@ -632,9 +617,6 @@ type STsAstNodeBuilder =
         | Union v                -> v.Build() |> TsAstNode.Union
         | Intersection v         -> v.Build() |> TsAstNode.Intersection
         | Optional v             -> v.Build() |> TsAstNode.Optional
-        | GetAccessor v          -> v.Build() |> TsAstNode.GetAccessor
-        | SetAccessor v          -> v.Build() |> TsAstNode.SetAccessor
-        | CallSignature v        -> v.Build() |> TsOverloadableConstruct.Create |> TsAstNode.CallSignature
         | Module v               -> v.Build() |> TsAstNode.Module
         | TemplateLiteral v      -> v.Build() |> TsAstNode.TemplateLiteral
 
@@ -677,10 +659,6 @@ module Patterns =
         let inline (|Primitive|_|)          (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Primitive      x -> Some x  | _ -> None
         let inline (|Literal|_|)            (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Literal        x -> Some x  | _ -> None
         let inline (|TypeLiteral|_|)        (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.TypeLiteral    x -> Some x  | _ -> None
-        let inline (|Property|_|)           (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Property       x -> Some x  | _ -> None
-        let inline (|Method|_|)             (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Method         x -> Some x  | _ -> None
-        let inline (|Constructor|_|)        (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Constructor    x -> Some x  | _ -> None
-        let inline (|Parameter|_|)          (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Parameter      x -> Some x  | _ -> None
         let inline (|TypeParameter|_|)      (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.TypeParameter  x -> Some x  | _ -> None
         let inline (|TypeReference|_|)      (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.TypeReference  x -> Some x  | _ -> None
         let inline (|Array|_|)              (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Array          x -> Some x  | _ -> None
@@ -690,19 +668,20 @@ module Patterns =
         let inline (|Tuple|_|)              (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Tuple          x -> Some x  | _ -> None
         let inline (|Conditional|_|)        (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Conditional    x -> Some x  | _ -> None
         let inline (|IndexAccessType|_|)    (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.IndexAccessType x -> Some x | _ -> None
-        let inline (|IndexSignature|_|)     (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.IndexSignature  x -> Some x | _ -> None
         let inline (|Index|_|)              (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Index           x -> Some x | _ -> None
         let inline (|SubstitutionType|_|)   (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.SubstitutionType x -> Some x | _ -> None
-        let inline (|CallSignature|_|)      (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.CallSignature   x -> Some x | _ -> None
-        let inline (|ConstructSignature|_|) (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.ConstructSignature x -> Some x | _ -> None
-        let inline (|GetAccessor|_|)        (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.GetAccessor     x -> Some x | _ -> None
-        let inline (|SetAccessor|_|)        (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.SetAccessor     x -> Some x | _ -> None
         let inline (|Predicate|_|)          (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Predicate       x -> Some x | _ -> None
         let inline (|TemplateLiteral|_|)    (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.TemplateLiteral  x -> Some x | _ -> None
 
 // -----------------------------------------------------------------------
 // Reactive TypeStore
 // -----------------------------------------------------------------------
+
+
+type MemberStore =
+    | Parameter of PendingSignal<SParameterBuilder>
+    | Member of PendingSignal<SMemberBuilder>
+    | Constructor of PendingSignal<SConstructorBuilder>
 
 /// <summary>
 /// A reactive store entry keyed by <c>IdentityKey</c> in <c>TypeScriptReader.SignalCache</c>.
@@ -765,11 +744,6 @@ module TypeStore =
             | Patterns.SBuilder.Variable b         -> Some b.Name
             | Patterns.SBuilder.FunctionDeclaration b -> Some b.Name
             | Patterns.SBuilder.Module b           -> Some b.Name
-            | Patterns.SBuilder.Property b         -> Some b.Name
-            | Patterns.SBuilder.Method b           -> Some b.Name
-            | Patterns.SBuilder.GetAccessor b      -> Some b.Name
-            | Patterns.SBuilder.SetAccessor b      -> Some b.Name
-            | Patterns.SBuilder.Parameter b        -> Some b.Name
             | Patterns.SBuilder.TypeParameter b    -> Some b.Name
             | _                                    -> None)
 
@@ -784,13 +758,6 @@ module TypeStore =
             | Patterns.SBuilder.Alias b             -> Some b.Type.Value
             | Patterns.SBuilder.Variable b          -> Some b.Type.Value
             | Patterns.SBuilder.FunctionDeclaration b -> Some b.Type.Value
-            | Patterns.SBuilder.Property b          -> Some b.Type.Value
-            | Patterns.SBuilder.Method b            -> Some b.Type.Value
-            | Patterns.SBuilder.CallSignature b     -> Some b.Type.Value
-            | Patterns.SBuilder.ConstructSignature b -> Some b.Type.Value
-            | Patterns.SBuilder.IndexSignature b    -> Some b.Type.Value
-            | Patterns.SBuilder.GetAccessor b       -> Some b.Type.Value
-            | Patterns.SBuilder.SetAccessor b       -> Some b.ArgumentType.Value
             | Patterns.SBuilder.Index b             -> Some b.Type.Value
             | Patterns.SBuilder.Predicate b         -> Some b.Type.Value
             | Patterns.SBuilder.TypeReference b
@@ -840,9 +807,5 @@ module TypeStore =
             match b with
             | Patterns.SBuilder.Alias b            -> b.Type.Value = TypeKindPrimitive.Unknown.TypeKey
             | Patterns.SBuilder.Variable b         -> b.Type.Value = TypeKindPrimitive.Unknown.TypeKey
-            | Patterns.SBuilder.Property b         -> b.Type.Value = TypeKindPrimitive.Unknown.TypeKey
-            | Patterns.SBuilder.Method b           -> b.Type.Value = TypeKindPrimitive.Unknown.TypeKey
-            | Patterns.SBuilder.CallSignature b    -> b.Type.Value = TypeKindPrimitive.Unknown.TypeKey
-            | Patterns.SBuilder.ConstructSignature b -> b.Type.Value = TypeKindPrimitive.Unknown.TypeKey
             | Patterns.SBuilder.Index b            -> b.Type.Value = TypeKindPrimitive.Unknown.TypeKey
             | _                                    -> false)

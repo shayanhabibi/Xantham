@@ -1,22 +1,15 @@
 ﻿module Xantham.Fable.Reading.Dispatcher
 
-open Xantham
 open Xantham.Fable
 open Xantham.Fable.Types
-open Xantham.Fable.Types.Tracer
-open TypeScript
-open Fable.Core
-open Fable.Core.JsInterop
-open Xantham.Fable.Types.Signal
-
-let inline setAstSignal (tag: XanthamTag) astValue =
-    tag
-    |> GuardedData.AstNodeBuilder.getOrSetWith (fun () -> Signal.pending<STsAstNodeBuilder>())
-    |> Signal.fill astValue
 
 let dispatch (ctx: TypeScriptReader) (tag: XanthamTag) =
     match tag.Value with
     | Ignore _ -> ()
+    | XanTagKind.MemberDeclaration _ when
+        tryGetOrRegisterMemberStore ctx tag |> Option.isNone -> ()
+    | XanTagKind.MemberDeclaration memberDeclaration ->
+        MemberDeclaration.dispatch ctx tag memberDeclaration
     | _ when tryGetOrRegisterStore ctx tag |> Option.isNone -> ()
     | XanTagKind.ModulesAndExports modulesAndExports ->
         ModulesAndExports.dispatch ctx tag modulesAndExports

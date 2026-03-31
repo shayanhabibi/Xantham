@@ -602,12 +602,10 @@ and [<RequireQualifiedAccess>] TsType =
     | Conditional of TsConditionalType
     | Interface of TsInterface
     | Class of TsClass
-    | Variable of TsVariable
     | Primitive of TypeKindPrimitive
     | Enum of TsEnumType
     | EnumCase of TsEnumCase
     | TypeAlias of TsTypeAlias
-    | Function of TsOverloadableConstruct<TsFunction>
     | Union of TsTypeUnion
     | Intersection of TsTypeIntersection
     | Literal of TsLiteral
@@ -658,6 +656,16 @@ and [<RequireQualifiedAccess>] TypeKindPrimitive =
         | ESSymbol -> TypeKey.createWith -11
         | NonPrimitive -> TypeKey.createWith -10
 
+[<RequireQualifiedAccess>]
+type TsExportDeclaration =
+    | Variable of TsVariable
+    | Interface of TsInterface
+    | TypeAlias of TsTypeAlias
+    | Class of TsClass
+    | Enum of TsEnumType
+    | Module of TsModule
+    | Function of TsOverloadableConstruct<TsFunction>
+
 type [<RequireQualifiedAccess>] TsAstNode =
     | TemplateLiteral of TsTemplateLiteralType
     | GlobalThis
@@ -668,16 +676,10 @@ type [<RequireQualifiedAccess>] TsAstNode =
     | Predicate of TsTypePredicate
     | Literal of TsLiteral
     | TypeLiteral of TsTypeLiteral
-    | Property of TsProperty
-    | Parameter of TsParameter
     | TypeParameter of TsTypeParameter
     | IndexAccessType of TsIndexAccessType
     | FunctionDeclaration of TsOverloadableConstruct<TsFunction>
-    | Method of TsOverloadableConstruct<TsMethod>
     | Alias of TsTypeAlias
-    | Constructor of TsOverloadableConstruct<TsConstructor>
-    | ConstructSignature of TsOverloadableConstruct<TsConstructSignature>
-    | IndexSignature of TsIndexSignature
     | Index of TsIndex
     | TypeReference of TsTypeReference
     | Array of TsTypeReference
@@ -689,9 +691,6 @@ type [<RequireQualifiedAccess>] TsAstNode =
     | Union of TsTypeUnion
     | Intersection of TsTypeIntersection
     | Optional of TsTypeReference
-    | GetAccessor of TsGetAccessor
-    | SetAccessor of TsSetAccessor
-    | CallSignature of TsOverloadableConstruct<TsCallSignature>
     | Module of TsModule
 
 
