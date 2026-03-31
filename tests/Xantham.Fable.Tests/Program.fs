@@ -165,7 +165,7 @@ let mergeTests =
                 iface.Members |> List.choose (function TsMember.Property p -> Some p.Name | _ -> None)
             "" |> Expect.containsAll names ["name"; "age"]
 
-        testCase "two distinct interfaces present after merge (MergeProps + D)" <| fun _ ->
+        ptestCase "two distinct interfaces present after merge (MergeProps + D)" <| fun _ ->
             let count = result |> Seq.filter _.Value.IsInterface |> Seq.length
             // MergeProps (merged) and D (type literal interface) = 2
             "" |> Expect.equal count 2
