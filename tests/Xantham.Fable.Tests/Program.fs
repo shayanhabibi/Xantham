@@ -1280,6 +1280,81 @@ let multiFileTests =
     ]
 
 // -----------------------------------------------------------------------
+// Source / import name resolution
+// -----------------------------------------------------------------------
+
+// Fixture: packages/ui-kit/index.d.ts  (has package.json with name "ui-kit")
+//   Button   : interface
+//   ButtonSize : type alias
+//
+// Expected: Source = Some "ui-kit" for all exported types
+let packageSourceTests =
+    testList "source: package.json name" [
+        let result = createSubdirTestReader "packages/ui-kit/index" |> runReader
+        testCase "Button interface Source = 'ui-kit'" <| fun _ ->
+            let iface = result |> findInterface "Button"
+            "Source should be Some 'ui-kit'"
+            |> Expect.equal iface.Source (Some "ui-kit")
+        testCase "ButtonSize alias Source = 'ui-kit'" <| fun _ ->
+            let alias = result |> findAlias "ButtonSize"
+            "Source should be Some 'ui-kit'"
+            |> Expect.equal alias.Source (Some "ui-kit")
+        testCase "createButton function Source = 'ui-kit'" <| fun _ ->
+            let fn = result |> findFunction "createButton"
+            "Source should be Some 'ui-kit'"
+            |> Expect.equal fn.ValueOrHead.Source (Some "ui-kit")
+        testCase "DEFAULT_SIZE variable Source = 'ui-kit'" <| fun _ ->
+            let v = result |> findVariable "DEFAULT_SIZE"
+            "Source should be Some 'ui-kit'"
+            |> Expect.equal v.Source (Some "ui-kit")
+        testCase "ButtonVariant enum Source = 'ui-kit'" <| fun _ ->
+            let e = result |> findEnum "ButtonVariant"
+            "Source should be Some 'ui-kit'"
+            |> Expect.equal e.Source (Some "ui-kit")
+        testCase "ButtonGroup class Source = 'ui-kit'" <| fun _ ->
+            let c = result |> findClass "ButtonGroup"
+            "Source should be Some 'ui-kit'"
+            |> Expect.equal c.Source (Some "ui-kit")
+    ]
+
+// Fixture: multi-file/vectors.d.ts imports { Point2D } from "./shapes"
+//
+// shapes.d.ts is resolved via the import specifier "./shapes", so types
+// originating from shapes.d.ts should have Source = Some "./shapes".
+// vectors.d.ts is the entry file — its Source comes from the fallback
+// (no import points *to* it), so it should still be Some _.
+let importSourceTests =
+    testList "source: import specifier" [
+        let result = createTestReader "multi-file/vectors" |> runReader
+        testCase "Point2D Source = './shapes' (imported module specifier)" <| fun _ ->
+            let iface = result |> findInterface "Point2D"
+            "Source should be Some './shapes'"
+            |> Expect.equal iface.Source (Some "./shapes")
+        testCase "Vector2D Source is Some (entry file fallback)" <| fun _ ->
+            let iface = result |> findInterface "Vector2D"
+            "Source should be Some _"
+            |> Expect.isSome iface.Source
+        testCase "Vector3D Source matches Vector2D Source (same file)" <| fun _ ->
+            let v2 = result |> findInterface "Vector2D"
+            let v3 = result |> findInterface "Vector3D"
+            "Types from the same file should share Source"
+            |> Expect.equal v3.Source v2.Source
+    ]
+
+// Fixture: basic.d.ts — single file, no package.json with a name in its tree
+//
+// The fallback path resolver produces a Source from the directory path.
+// We just verify it's non-None (the exact value depends on the filesystem).
+let fallbackSourceTests =
+    testList "source: fallback path" [
+        let result = createTestReader "basic" |> runReader
+        testCase "BaseInterface Source is Some" <| fun _ ->
+            let iface = result |> findInterface "BaseInterface"
+            "Source should be Some _"
+            |> Expect.isSome iface.Source
+    ]
+
+// -----------------------------------------------------------------------
 // Suite
 // -----------------------------------------------------------------------
 
@@ -1310,6 +1385,9 @@ let tests =
         conditionalTests
         templateLiteralTests
         multiFileTests
+        packageSourceTests
+        importSourceTests
+        fallbackSourceTests
     ]
 
 Mocha.runTests tests |> ignore

@@ -340,8 +340,8 @@ module Internal =
                 let sorted = group.Results |> Array.sortBy (fun ir -> identityPriority ir.Identity)
                 match sorted with
                 // early exit condition
-                | [| { Node = TsAstNode.Array _ } as node; { Node = TsAstNode.TypeReference _ } |]
-                | [| { Node = TsAstNode.TypeReference _ }; { Node = TsAstNode.Array _ } as node |] -> node
+                | [| { Node = (TsAstNode.Array _ | TsAstNode.Tuple _) } as node; { Node = TsAstNode.TypeReference _ } |]
+                | [| { Node = TsAstNode.TypeReference _ }; { Node = (TsAstNode.Array _ | TsAstNode.Tuple _) } as node |] -> node
                 | _ ->
                 let winner = sorted[0]
                 let hasConflict = sorted |> Array.exists (fun ir -> ir.Node <> winner.Node)

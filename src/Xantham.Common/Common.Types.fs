@@ -621,6 +621,7 @@ and [<RequireQualifiedAccess>] TsType =
     | TypeLiteral of TsTypeLiteral
     | TemplateLiteral of TsTemplateLiteralType
     | Optional of TsTypeReference
+    | Substitution of TsSubstitutionType
 
     /// Discriminated union of all high-level TypeScript type shapes the reader can produce.
     /// Each case mirrors a concrete TS type or declaration form (see individual types above).

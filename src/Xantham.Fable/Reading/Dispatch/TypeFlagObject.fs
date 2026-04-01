@@ -94,40 +94,40 @@ let private signatureToParamSlots (ctx: TypeScriptReader) (signature: Ts.Signatu
 
 /// Convert a Ts.Signature to a call-signature member slot.
 let private callSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Signature) : Signal<SMemberBuilder voption> =
-    let decl = signature.getDeclaration()
-    if !!decl then
-        resolveToMemberBuilder ctx !!decl
-    else
-        let returnTag =
-            match ctx.CreateXanthamTag (ctx.checker.getReturnTypeOfSignature signature) |> fst with
-            | TagState.Unvisited t -> pushToStack ctx t; t
-            | TagState.Visited t -> t
-        {
-            SCallSignatureBuilder.Parameters = signatureToParamSlots ctx signature
-            Type = ctx.typeSignal returnTag
-            Documentation = []
-        }
-        |> SMemberBuilder.CallSignature
-        |> ValueSome
-        |> Signal.source
+    // let decl = signature.getDeclaration()
+    // if !!decl then
+    //     resolveToMemberBuilder ctx !!decl
+    // else
+    let returnTag =
+        match ctx.CreateXanthamTag (ctx.checker.getReturnTypeOfSignature signature) |> fst with
+        | TagState.Unvisited t -> pushToStack ctx t; t
+        | TagState.Visited t -> t
+    {
+        SCallSignatureBuilder.Parameters = signatureToParamSlots ctx signature
+        Type = ctx.typeSignal returnTag
+        Documentation = []
+    }
+    |> SMemberBuilder.CallSignature
+    |> ValueSome
+    |> Signal.source
 
 /// Convert a Ts.Signature to a construct-signature member slot.
 let private constructSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Signature) : Signal<SMemberBuilder voption> =
-    let decl = signature.getDeclaration()
-    if !!decl then
-        resolveToMemberBuilder ctx !!decl
-    else
-        let returnTag =
-            match ctx.CreateXanthamTag (ctx.checker.getReturnTypeOfSignature signature) |> fst with
-            | TagState.Unvisited t -> pushToStack ctx t; t
-            | TagState.Visited t -> t
-        {
-            SConstructSignatureBuilder.Parameters = signatureToParamSlots ctx signature
-            Type = ctx.typeSignal returnTag
-        }
-        |> SMemberBuilder.ConstructSignature
-        |> ValueSome
-        |> Signal.source
+    // let decl = signature.getDeclaration()
+    // if !!decl then
+    //     resolveToMemberBuilder ctx !!decl
+    // else
+    let returnTag =
+        match ctx.CreateXanthamTag (ctx.checker.getReturnTypeOfSignature signature) |> fst with
+        | TagState.Unvisited t -> pushToStack ctx t; t
+        | TagState.Visited t -> t
+    {
+        SConstructSignatureBuilder.Parameters = signatureToParamSlots ctx signature
+        Type = ctx.typeSignal returnTag
+    }
+    |> SMemberBuilder.ConstructSignature
+    |> ValueSome
+    |> Signal.source
 
 /// Convert a property symbol to a member slot.
 let private propertySymToMemberSlot (ctx: TypeScriptReader) (sym: Ts.Symbol) : Signal<SMemberBuilder voption> =

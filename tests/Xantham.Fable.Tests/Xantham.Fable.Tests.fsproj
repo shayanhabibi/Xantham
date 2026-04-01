@@ -36,6 +36,7 @@
         <TypeScriptCompile Include="TypeFiles\enum-string.d.ts" />
         <TypeScriptCompile Include="TypeFiles\template-literal.d.ts" />
         <TypeScriptCompile Include="TypeFiles\enum-nonsequential.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\function-ref.d.ts" />
     </ItemGroup>
 
     <ItemGroup>

@@ -203,6 +203,32 @@ type SMethodBuilder = {
           IsOptional = this.IsOptional
           IsStatic = this.IsStatic
           Documentation = this.Documentation }
+/// Signal-based equivalent of <c>TsFunctionBuilder</c>, builds to <see cref="T:Xantham.TsFunction"/>.
+type SFunctionBuilder = {
+    Source: Signal<ModuleName>
+    FullyQualifiedName: string array
+    Name: string
+    IsDeclared: bool
+    Type: TypeSignal
+    Parameters: Signal<SParameterBuilder voption> array
+    TypeParameters: Signal<InlinedSTypeParameterBuilder voption> array
+    Documentation: TsComment list
+} with
+    member this.Build() : TsFunction =
+        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
+          FullyQualifiedName = Array.toList this.FullyQualifiedName
+          Name = this.Name
+          IsDeclared = this.IsDeclared
+          Type = this.Type.Value
+          Parameters =
+              this.Parameters
+              |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
+              |> Array.toList
+          TypeParameters =
+              this.TypeParameters
+              |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
+              |> Array.toList
+          Documentation = this.Documentation }
 
 /// Signal-based equivalent of <c>TsCallSignatureBuilder</c>, builds to <see cref="T:Xantham.TsCallSignature"/>.
 type SCallSignatureBuilder = {
@@ -457,32 +483,6 @@ type SConditionalTypeBuilder = {
         { Check = this.Check.Value; Extends = this.Extends.Value
           True = this.True.Value; False = this.False.Value }
 
-/// Signal-based equivalent of <c>TsFunctionBuilder</c>, builds to <see cref="T:Xantham.TsFunction"/>.
-type SFunctionBuilder = {
-    Source: Signal<ModuleName>
-    FullyQualifiedName: string array
-    Name: string
-    IsDeclared: bool
-    Type: TypeSignal
-    Parameters: Signal<SParameterBuilder voption> array
-    TypeParameters: Signal<InlinedSTypeParameterBuilder voption> array
-    Documentation: TsComment list
-} with
-    member this.Build() : TsFunction =
-        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
-          FullyQualifiedName = Array.toList this.FullyQualifiedName
-          Name = this.Name
-          IsDeclared = this.IsDeclared
-          Type = this.Type.Value
-          Parameters =
-              this.Parameters
-              |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
-              |> Array.toList
-          TypeParameters =
-              this.TypeParameters
-              |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
-              |> Array.toList
-          Documentation = this.Documentation }
 
 /// Signal-based equivalent of <c>TsTypeUnionBuilder</c>, builds to <see cref="T:Xantham.TsTypeUnion"/>.
 type STypeUnionBuilder = {
