@@ -4,6 +4,7 @@
 // CLI implementation
 // ====================
 
+open TypeScript
 open Xantham.Fable
 open Node.Api
 open Xantham.Fable.Types
@@ -14,8 +15,21 @@ let dtsFile file = path.join(__SOURCE_DIRECTORY__, $"../../node_modules/{file}")
 let reader =
     // dtsFile "solid-js/types/index.d.ts"
     dtsFile "typescript/lib/typescript.d.ts"
+    // path.join(__SOURCE_DIRECTORY__, $"../../tests/Xantham.Fable.Tests/TypeFiles/function-ref.d.ts")
     |> TypeScriptReader.create 
 
+// let mergeProps =
+//     reader
+//     |> Internal.initialise
+//     |> Internal.getAndPrepareExports
+//     |> Array.iter (_.Value.Value >> unbox<Ts.Node> >> _.kind.Name >> Log.traceTo 0)
+    // |> Array.item 0
+    // |> _.Value.Value
+    // |> unbox<Ts.Node>
+// mergeProps
+// |> reader.checker.getTypeAtLocation
+// |> _.symbol
+// |> Log.trace
 reader
 |> readAndWrite (__SOURCE_DIRECTORY__ + "/output.json")
 #endif

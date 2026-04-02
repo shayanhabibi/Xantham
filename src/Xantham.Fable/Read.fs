@@ -15,6 +15,7 @@ open Xantham.Fable.Reading
 open Xantham.Fable.Reading.Entry
 open Xantham.Fable.Types
 open Xantham.Fable.Types.Tracer
+open Xantham.Internal
 
 module Internal =
     open Glutinum.Chalk
@@ -347,6 +348,7 @@ module Internal =
                 let hasConflict = sorted |> Array.exists (fun ir -> ir.Node <> winner.Node)
                 // if false then
                 if hasConflict then
+                    
                     Log.emit <| chalk.redBright.Invoke "[COLLIDE]" + " - " + $"TypeKey {chalk.yellowBright.Invoke group.Key} - Duplicate builder values for the same key."
                     let inline emit (s: obj) = Log.emit $"  {s}"
                     for ir in sorted do
@@ -399,8 +401,8 @@ module Internal =
     
     let writeOutput (destination: string)
                     (exports: XanthamTag array)
-                    (duplicates: Dictionary<TypeKey, TsAstNode * TsAstNode array>)
-                    (result: Dictionary<TypeKey, TsAstNode>)  =
+                    (result: Dictionary<TypeKey, Internal.EncodedDuplicateNode array>)
+                    (nonDuplicates: Dictionary<TypeKey, TsAstNode>)=
         let destination =
             if destination = null then
                 path.join(__SOURCE_DIRECTORY__, "output.json")
@@ -408,17 +410,28 @@ module Internal =
                 destination
             else path.join(destination, "output.json")
         let resultTuple =
-            [| for kv in result do kv.Key, kv.Value |],
-            [| for kv in duplicates do kv.Key, kv.Value |],
-            [|
-                for export in exports do
-                    match
-                        GuardedData.TypeSignal.get export
-                        |> _.Value
-                    with
-                    | typeKey when typeKey <> TypeKey.Unknown -> typeKey
-                    | _ -> ()
-            |]
+            {
+                EncodedResult.NonDuplicateNodes = unbox nonDuplicates
+                EncodedResult.DuplicateNodes =
+                    [|
+                        for kv in result do
+                            {
+                                Key = kv.Key
+                                Duplicates =
+                                    unbox kv.Value
+                            }
+                    |]
+                TopLevelExports =
+                    [|
+                        for export in exports do
+                            match
+                                GuardedData.TypeSignal.get export
+                                |> _.Value
+                            with
+                            | typeKey when typeKey <> TypeKey.Unknown -> typeKey
+                            | _ -> ()
+                    |]
+            }
         #if DEBUG
         let json = Encode.Auto.toString(1, resultTuple)
         #else
@@ -442,6 +455,12 @@ module Internal =
         reader
 
 let readAndWrite (outputDestination: string) (reader: TypeScriptReader) =
+    let makeEncodedResultNode (node: Internal.IRResult) =
+        {
+            Internal.EncodedDuplicateNode.Id =
+                reader.ToTsIdentityKey node.Identity
+            Internal.EncodedDuplicateNode.Node = node.Node
+        }
     let exports =
         Internal.initialise reader
         |> Internal.getAndPrepareExports
@@ -449,19 +468,23 @@ let readAndWrite (outputDestination: string) (reader: TypeScriptReader) =
     |> Internal.assembleResults
     |> Internal.exciseDuplicateKeys
     |> fun split ->
-        let splitMap = Dictionary<TypeKey, TsAstNode * TsAstNode array>()
+        let splitMap = Dictionary<TypeKey, Internal.EncodedDuplicateNode array>()
         let orderedDuplicates = split.DuplicateGroups |> Internal.sortResultGroups
-        let mergedDuplicates =
-            orderedDuplicates
-            |> Internal.mergeOverloads
-            |> Internal.mergeMembersIntoWinner
-        mergedDuplicates
+        // let mergedDuplicates =
+        //     orderedDuplicates
+        //     |> Internal.mergeOverloads
+        //     |> Internal.mergeMembersIntoWinner
+        orderedDuplicates
         |> Internal.filterConflictDuplicatesOnly
         |> Seq.iter (fun group ->
-            splitMap.Add(group.Key, (group.Winner.Node, group.Losers |> Array.map _.Node))
+            splitMap.Add(group.Key, (group.Losers |> Array.insertAt 0 group.Winner |> Array.map makeEncodedResultNode))
             )
-        Internal.resolveDuplicates (Seq.map Internal.prune mergedDuplicates)
-        |> Seq.append split.NonDuplicates
+        #if DEBUG && !FABLE_TEST
+        Internal.resolveDuplicates (Seq.map Internal.prune orderedDuplicates)
+        |> Seq.toArray
+        |> Array.iter ignore
+        #endif
+        split.NonDuplicates
         |> Seq.sortBy _.Key
         |> Seq.map (fun ir -> KeyValuePair(ir.Key, ir.Node))
         |> Dictionary

@@ -1352,6 +1352,230 @@ let fallbackSourceTests =
             let iface = result |> findInterface "BaseInterface"
             "Source should be Some _"
             |> Expect.isSome iface.Source
+        testCase "BaseObject alias Source matches BaseInterface Source (same file)" <| fun _ ->
+            let iface = result |> findInterface "BaseInterface"
+            let alias = result |> findAlias "BaseObject"
+            "Types in the same file should share Source"
+            |> Expect.equal alias.Source iface.Source
+    ]
+
+// Fixture: namespace.d.ts — namespace Geometry { Point, Circle }
+//
+// TsModule.Source should be set (same file as its children).
+let namespaceSourceTests =
+    testList "source: namespace" [
+        let result = createTestReader "namespace" |> runReader
+        testCase "Geometry module Source is Some" <| fun _ ->
+            let m = result |> findModule "Geometry"
+            "Source should be Some _"
+            |> Expect.isSome m.Source
+        testCase "nested interfaces share the namespace Source" <| fun _ ->
+            let m = result |> findModule "Geometry"
+            let point = result |> findInterface "Point"
+            "Nested interface should have the same Source as its namespace"
+            |> Expect.equal point.Source m.Source
+    ]
+
+// Fixture: import-package.d.ts — imports Button from ./packages/ui-kit/index
+//
+// The import specifier is "./packages/ui-kit/index", so types from
+// ui-kit/index.d.ts should have Source = Some "./packages/ui-kit/index".
+// AppButton (declared in this file) gets a different Source (fallback).
+let importPackageSourceTests =
+    testList "source: cross-file package import" [
+        let result = createTestReader "import-package" |> runReader
+        testCase "AppButton Source is Some (local file)" <| fun _ ->
+            let iface = result |> findInterface "AppButton"
+            "Source should be Some _"
+            |> Expect.isSome iface.Source
+        testCase "Button Source = './packages/ui-kit/index' (import specifier)" <| fun _ ->
+            let iface = result |> findInterface "Button"
+            "Source should be Some './packages/ui-kit/index'"
+            |> Expect.equal iface.Source (Some "./packages/ui-kit/index")
+        testCase "AppButton and Button have different Sources (different files)" <| fun _ ->
+            let app = result |> findInterface "AppButton"
+            let btn = result |> findInterface "Button"
+            "Sources from different files should differ"
+            |> Expect.notEqual app.Source btn.Source
+        testCase "ButtonLabel alias has same Source as AppButton (same file)" <| fun _ ->
+            let app = result |> findInterface "AppButton"
+            let label = result |> findAlias "ButtonLabel"
+            "Types from same file should share Source"
+            |> Expect.equal label.Source app.Source
+    ]
+
+// Fixture: multi-file with both files as explicit entry points
+//
+// When both vectors.d.ts and shapes.d.ts are provided via createMultiFileTestReader,
+// shapes.d.ts types still get Source = "./shapes" (from the import map), not the
+// fallback path, because vectors.d.ts imports from "./shapes".
+let multiFileSourceTests =
+    testList "source: multi-file entry" [
+        let result = createMultiFileTestReader [| "multi-file/vectors"; "multi-file/shapes" |] |> runReader
+        testCase "Point2D Source = './shapes' (imported file)" <| fun _ ->
+            let iface = result |> findInterface "Point2D"
+            "Source should be Some './shapes'"
+            |> Expect.equal iface.Source (Some "./shapes")
+        testCase "Vector3D Source matches Vector2D Source (same entry file)" <| fun _ ->
+            let v2 = result |> findInterface "Vector2D"
+            let v3 = result |> findInterface "Vector3D"
+            "Types from the same entry file should share Source"
+            |> Expect.equal v3.Source v2.Source
+        testCase "Vector2D Source differs from Point2D Source" <| fun _ ->
+            let v2 = result |> findInterface "Vector2D"
+            let p2d = result |> findInterface "Point2D"
+            "Entry file Source should differ from imported file Source"
+            |> Expect.notEqual v2.Source p2d.Source
+    ]
+
+// -----------------------------------------------------------------------
+// Source: cross-package (two sibling packages)
+// -----------------------------------------------------------------------
+
+// packages/data-layer/ imports from ../validators/index
+// data-layer entry types → fallback → package.json "@app/data-layer"
+// validators types → import specifier "../validators/index"
+let crossPackageSourceTests =
+    testList "source: cross-package siblings" [
+        let result = createSubdirTestReader "packages/data-layer/index" |> runReader
+        testCase "DataModel Source = '@app/data-layer' (entry file package.json)" <| fun _ ->
+            let iface = result |> findInterface "DataModel"
+            "Source should be '@app/data-layer'"
+            |> Expect.equal iface.Source (Some "@app/data-layer")
+        testCase "ModelId alias Source = '@app/data-layer'" <| fun _ ->
+            let alias = result |> findAlias "ModelId"
+            "Source should be '@app/data-layer'"
+            |> Expect.equal alias.Source (Some "@app/data-layer")
+        testCase "Validator Source = '../validators/index' (import specifier)" <| fun _ ->
+            let iface = result |> findInterface "Validator"
+            "Source should be '../validators/index'"
+            |> Expect.equal iface.Source (Some "../validators/index")
+        testCase "DataModel and Validator have different Sources" <| fun _ ->
+            let dm = result |> findInterface "DataModel"
+            let v = result |> findInterface "Validator"
+            "Types from different packages should have different Sources"
+            |> Expect.notEqual dm.Source v.Source
+    ]
+
+// Load validators directly — fallback should use its own package.json
+let validatorsDirectSourceTests =
+    testList "source: validators package direct" [
+        let result = createSubdirTestReader "packages/validators/index" |> runReader
+        testCase "Validator Source = '@app/validators' (own package.json)" <| fun _ ->
+            let iface = result |> findInterface "Validator"
+            "Source should be '@app/validators'"
+            |> Expect.equal iface.Source (Some "@app/validators")
+        testCase "ValidationResult Source = '@app/validators'" <| fun _ ->
+            let alias = result |> findAlias "ValidationResult"
+            "Source should be '@app/validators'"
+            |> Expect.equal alias.Source (Some "@app/validators")
+    ]
+
+// -----------------------------------------------------------------------
+// Source: nested sub-package (package.json at two levels)
+// -----------------------------------------------------------------------
+
+// framework/index.d.ts imports from ./plugins/index
+// framework types → fallback → "@app/framework"
+// plugin types → import specifier → "./plugins/index"
+let nestedSubPackageSourceTests =
+    testList "source: nested sub-package via import" [
+        let result = createSubdirTestReader "packages/framework/index" |> runReader
+        testCase "Framework Source = '@app/framework' (entry package.json)" <| fun _ ->
+            let iface = result |> findInterface "Framework"
+            "Source should be '@app/framework'"
+            |> Expect.equal iface.Source (Some "@app/framework")
+        testCase "FrameworkConfig Source = '@app/framework'" <| fun _ ->
+            let iface = result |> findInterface "FrameworkConfig"
+            "Source should match Framework (same file)"
+            |> Expect.equal iface.Source (Some "@app/framework")
+        testCase "Plugin Source = './plugins/index' (import specifier)" <| fun _ ->
+            let iface = result |> findInterface "Plugin"
+            "Source should be './plugins/index'"
+            |> Expect.equal iface.Source (Some "./plugins/index")
+        testCase "Framework and Plugin have different Sources" <| fun _ ->
+            let fw = result |> findInterface "Framework"
+            let pl = result |> findInterface "Plugin"
+            "Parent and sub-package types should have different Sources"
+            |> Expect.notEqual fw.Source pl.Source
+    ]
+
+// Load plugins directly as entry — fallback should find the sub-package's
+// own package.json "@app/framework-plugins", NOT the parent "@app/framework"
+let subPackageDirectSourceTests =
+    testList "source: sub-package loaded directly" [
+        let result = createSubdirTestReader "packages/framework/plugins/index" |> runReader
+        testCase "Plugin Source = '@app/framework-plugins' (own package.json)" <| fun _ ->
+            let iface = result |> findInterface "Plugin"
+            "Source should be '@app/framework-plugins'"
+            |> Expect.equal iface.Source (Some "@app/framework-plugins")
+        testCase "PluginFactory Source = '@app/framework-plugins'" <| fun _ ->
+            let alias = result |> findAlias "PluginFactory"
+            "Source should be '@app/framework-plugins'"
+            |> Expect.equal alias.Source (Some "@app/framework-plugins")
+    ]
+
+// -----------------------------------------------------------------------
+// Source: deep transitive imports (3-level chain)
+// -----------------------------------------------------------------------
+
+// index.d.ts → views/dashboard.d.ts → components/widget.d.ts
+// AppConfig  → "my-app" (entry fallback)
+// Dashboard  → "./views/dashboard" (import specifier from index)
+// Widget     → "../components/widget" (import specifier from dashboard)
+let deepTransitiveSourceTests =
+    testList "source: deep transitive imports" [
+        let result = createSubdirTestReader "packages/app/index" |> runReader
+        testCase "AppConfig Source = 'my-app' (entry package.json)" <| fun _ ->
+            let iface = result |> findInterface "AppConfig"
+            "Source should be 'my-app'"
+            |> Expect.equal iface.Source (Some "my-app")
+        testCase "Dashboard Source = './views/dashboard' (1st-level import)" <| fun _ ->
+            let iface = result |> findInterface "Dashboard"
+            "Source should be './views/dashboard'"
+            |> Expect.equal iface.Source (Some "./views/dashboard")
+        testCase "Widget Source = '../components/widget' (2nd-level transitive import)" <| fun _ ->
+            let iface = result |> findInterface "Widget"
+            "Source should be '../components/widget'"
+            |> Expect.equal iface.Source (Some "../components/widget")
+        testCase "all three files have distinct Sources" <| fun _ ->
+            let app = result |> findInterface "AppConfig"
+            let dash = result |> findInterface "Dashboard"
+            let widget = result |> findInterface "Widget"
+            let sources = set [ app.Source; dash.Source; widget.Source ]
+            "Three files should produce three distinct Sources"
+            |> Expect.hasLength sources 3
+    ]
+
+// Load the middle file (views/dashboard) as entry directly.
+// It imports from ../components/widget, and its own fallback should walk
+// up to packages/app/package.json → "my-app".
+let middleOfChainDirectSourceTests =
+    testList "source: middle of chain loaded directly" [
+        let result = createSubdirTestReader "packages/app/views/dashboard" |> runReader
+        testCase "Dashboard Source = 'my-app' (walks up to app package.json)" <| fun _ ->
+            let iface = result |> findInterface "Dashboard"
+            "Source should be 'my-app' (nearest package.json with name)"
+            |> Expect.equal iface.Source (Some "my-app")
+        testCase "Widget Source = '../components/widget' (import specifier)" <| fun _ ->
+            let iface = result |> findInterface "Widget"
+            "Source should be '../components/widget'"
+            |> Expect.equal iface.Source (Some "../components/widget")
+    ]
+
+// Load the leaf file (components/widget) as entry directly.
+// No imports; fallback walks up to packages/app/package.json → "my-app".
+let leafDirectSourceTests =
+    testList "source: leaf file loaded directly" [
+        let result = createSubdirTestReader "packages/app/components/widget" |> runReader
+        testCase "Widget Source = 'my-app' (walks up to app package.json)" <| fun _ ->
+            let iface = result |> findInterface "Widget"
+            "Source should be 'my-app'"
+            |> Expect.equal iface.Source (Some "my-app")
+        testCase "WidgetSize Source = 'my-app'" <| fun _ ->
+            let alias = result |> findAlias "WidgetSize"
+            "Source should match Widget (same file)"
+            |> Expect.equal alias.Source (Some "my-app")
     ]
 
 // -----------------------------------------------------------------------
@@ -1388,6 +1612,16 @@ let tests =
         packageSourceTests
         importSourceTests
         fallbackSourceTests
+        namespaceSourceTests
+        importPackageSourceTests
+        multiFileSourceTests
+        crossPackageSourceTests
+        validatorsDirectSourceTests
+        nestedSubPackageSourceTests
+        subPackageDirectSourceTests
+        deepTransitiveSourceTests
+        middleOfChainDirectSourceTests
+        leafDirectSourceTests
     ]
 
 Mocha.runTests tests |> ignore

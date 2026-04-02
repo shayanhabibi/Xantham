@@ -1,125 +1,67 @@
 ﻿namespace Xantham.Decoder
 open Thoth.Json.Net
 open Xantham
+open Xantham.Internal
 open System.IO
 
-// Json Typing
-type private DuplicateMap = Map<TypeKey, TsAstNode * TsAstNode array>
-type private TopLevelKeys = TypeKey array
-type private GlueNodeMap = Map<TypeKey, TsAstNode>
-type private EncodedResult = GlueNodeMap * DuplicateMap * TopLevelKeys
+type TopLevelKeys = TypeKey array
 
 module private Diagnostics =
-    let healthCheck (encodedResult: TypeMap * NodeMap * TopLevelKeys) =
-        let typeMap, nodeStore, _ = encodedResult
+    let healthCheck (processedResult: {| Types: TypeMap; Exports: ExportArray; TopLevelExports: ExportArray |}) =
+        let typeMap = processedResult.Types
         let trueTypeKeys =
             typeMap
             |> Map.fold (fun acc _ -> Utils.getKeys >> (@) acc) []
+            |> List.append (
+                processedResult.Exports
+                |> Seq.append processedResult.TopLevelExports
+                |> Seq.map Utils.getKeysFromExport
+                |> Seq.collect id
+                |> Seq.toList
+                )
         let trueTypeMissingKeys =
             typeMap.Keys
             |> Set
             |> Set.difference (Set trueTypeKeys)
-        let foundKeysInNodeStore =
-            trueTypeMissingKeys
-            |> Set.intersect (Set nodeStore.Keys)
-        let unemittedKeys =
-            Set.difference
-                trueTypeMissingKeys
-                foundKeysInNodeStore
-            |> Set.toList
-            |> List.sort
         let trueTypeMissingKeys = trueTypeMissingKeys |> Set.toList |> List.sort
-        let foundKeysInNodeStore = foundKeysInNodeStore |> Set.toList |> List.sort
-        
-        {| MissingTypeKeys = trueTypeMissingKeys; FoundKeysInNodeStore = foundKeysInNodeStore; UnemittedKeys = unemittedKeys |}
-    let inline isHealthy (healthCheck: {| FoundKeysInNodeStore: TypeKey list; MissingTypeKeys: TypeKey list; UnemittedKeys: TypeKey list |}) =
-        healthCheck.UnemittedKeys |> List.isEmpty
-    let printHealthCheck (healthCheck: {| FoundKeysInNodeStore: TypeKey list; MissingTypeKeys: TypeKey list; UnemittedKeys: TypeKey list |}) =
-        let missingTypeKeys = {| Keys = healthCheck.MissingTypeKeys; Length = healthCheck.MissingTypeKeys.Length |}
-        let foundKeysInNodeStore = {| Keys = healthCheck.FoundKeysInNodeStore; Length = healthCheck.FoundKeysInNodeStore.Length |}
-        if healthCheck.UnemittedKeys |> List.isEmpty then
+        trueTypeMissingKeys
+    let inline isHealthy (healthCheck: TypeKey list) =
+        healthCheck |> List.isEmpty
+    let printHealthCheck (healthCheck: TypeKey list ) =
+        if healthCheck |> List.isEmpty then
             [
                 "✔️ All TypeKeys are accounted for."
-                if missingTypeKeys.Length > 0 then
-                    $"   %i{missingTypeKeys.Length} Type Keys are found in the NodeStore: %A{missingTypeKeys.Keys}"
-                    ""
-                    "   Generation using this type-set should still be safe."
             ]
             |> String.concat "\n"
         else
-            let unemittedKeys = {| Keys = healthCheck.UnemittedKeys; Length = healthCheck.UnemittedKeys.Length |}
+            let unemittedKeys = {| Keys = healthCheck; Length = healthCheck.Length |}
             [
                 $"❌ Missing %i{unemittedKeys.Length} TypeKeys: %A{unemittedKeys.Keys}"
-                $"   %i{missingTypeKeys.Length} Type Keys were missing from the TypeStore: %A{missingTypeKeys.Keys}"
-                $"   %i{foundKeysInNodeStore.Length} Type Keys are found in the NodeStore: %A{foundKeysInNodeStore.Keys}"
                 ""
                 "   Generation using this type-set may cause errors."
             ]
             |> String.concat "\n"
         |> System.Console.WriteLine
-        
 
 module Decoder =
-    let private mapAstToType (node: TsAstNode) =
-        match node with
-        | TsAstNode.Alias node -> TsType.TypeAlias node |> Ok
-        | TsAstNode.Tuple node -> TsType.Tuple node |> Ok
-        | TsAstNode.Interface node -> TsType.Interface node |> Ok
-        | TsAstNode.Variable node -> TsType.Variable node |> Ok
-        | TsAstNode.Primitive node -> TsType.Primitive node |> Ok
-        | TsAstNode.Predicate node -> TsType.Predicate node |> Ok
-        | TsAstNode.Literal node -> TsType.Literal node |> Ok
-        | TsAstNode.TypeLiteral node -> TsType.TypeLiteral node |> Ok
-        | TsAstNode.TypeParameter node -> TsType.TypeParameter node |> Ok
-        | TsAstNode.IndexAccessType node -> TsType.IndexedAccess node |> Ok
-        | TsAstNode.FunctionDeclaration node -> TsType.Function node |> Ok
-        | TsAstNode.TypeReference node -> TsType.TypeReference node |> Ok
-        | TsAstNode.Index node -> TsType.Index node |> Ok
-        | TsAstNode.Array node -> node |> TsType.TypeReference |> TsType.Array |> Ok
-        | TsAstNode.Class node -> TsType.Class node |> Ok
-        | TsAstNode.Conditional node -> TsType.Conditional node |> Ok
-        | TsAstNode.Union node -> TsType.Union node |> Ok
-        | TsAstNode.Intersection node -> TsType.Intersection node |> Ok
-        | TsAstNode.Module node -> TsType.Module node |> Ok
-        | TsAstNode.Enum node -> TsType.Enum node |> Ok
-        | TsAstNode.Property node -> NodeStore.Property node |> Error
-        | TsAstNode.Parameter node -> NodeStore.Parameter node |> Error
-        | TsAstNode.Method node -> NodeStore.Method node |> Error
-        | TsAstNode.Constructor node -> NodeStore.Constructor node |> Error
-        | TsAstNode.EnumCase node -> TsType.EnumCase node |> Ok
-        | TsAstNode.SubstitutionType node -> NodeStore.SubstitutionType node |> Error
-        | TsAstNode.Optional node -> TsType.Optional node |> Ok
-        | TsAstNode.ConstructSignature node -> NodeStore.ConstructSignature node |> Error
-        | TsAstNode.IndexSignature node -> NodeStore.IndexSignature node |> Error
-        | TsAstNode.GetAccessor node -> NodeStore.GetAccessor node |> Error
-        | TsAstNode.SetAccessor node -> NodeStore.SetAccessor node |> Error
-        | TsAstNode.CallSignature node -> node |> NodeStore.CallSignature |> Error
-        | TsAstNode.GlobalThis -> TsType.GlobalThis |> Ok
-        | TsAstNode.TemplateLiteral tsTemplateLiteralType -> TsType.TemplateLiteral tsTemplateLiteralType |> Ok
-        
-    let read fileName =
+    let readWithOptions options =
+        let fileName = options.File
+        let typeRemap = options.Remap
+        let duplicateRemap = options.DuplicateRemap
         File.ReadAllText(fileName)
         |> Decode.Auto.fromString<EncodedResult>
-        |> Result.map(function
-            | map, duplicateMap, topLevelKeys ->
-                let types, others =
-                    map
-                    |> Map.map(fun _ -> mapAstToType)
-                    |> Map.partition(fun _ -> _.IsOk)
-                let types =
-                    types
-                    |> Map.map(fun _ -> function Ok value -> value | _ -> failwith "Unreachable")
-                let others =
-                    others
-                    |> Map.map(fun _ -> function Error value -> value | _ -> failwith "Unreachable")
+        |> Result.map(Post.Result.processResult >> fun result ->
                 #if DEBUG
-                Diagnostics.healthCheck (types, others, topLevelKeys)
+                Diagnostics.healthCheck result
                 |> Diagnostics.printHealthCheck
                 #endif
                 {
-                    TypeMap = types
+                    TypeMap = result.Types
+                    Exports = result.Exports |> Array.append result.TopLevelExports
                     LibSet = Set [] // todo - reinstate
-                    NodeMap = others
-                    TopLevelKeys = topLevelKeys |> Array.toList
+                    PrimaryExports = result.TopLevelExports
+                    DuplicateMap = Map.empty
                 }
             )
+    let read fileName =
+        readWithOptions { File = fileName; Remap = ValueNone; DuplicateRemap = ValueNone }

@@ -5,12 +5,24 @@ open TypeScript
 open Xantham
 open Xantham.Fable
 open Xantham.Fable.Types.Signal
+open Xantham.Fable.Types.Tracer
 
 type TypeScriptReader with
     member this.CreateXanthamTag(node: Ts.Node) =
         XanthamTag.Create(node, this.checker)
     member this.CreateXanthamTag(typ: Ts.Type) =
         XanthamTag.Create(typ, this.checker)
+    member this.ToTsIdentityKey (key: IdentityKey) =
+        match key with
+        | IdentityKey.Id typeKey ->
+            TsIdentityKey.Transient typeKey
+        | IdentityKey.Symbol symbol 
+        | IdentityKey.AliasSymbol symbol ->
+            TsIdentityKey.Symbol symbol.name
+        | IdentityKey.DeclarationPosition(file, pos, endPos) ->
+            TsIdentityKey.Declaration(file, int pos, int endPos)
+    member this.ToTsIdentityKey (tag: XanthamTag) =
+        this.ToTsIdentityKey tag.IdentityKey
 
 module XanthamTag =
     let createForNode (ctx: TypeScriptReader) (node: Ts.Node) = ctx.CreateXanthamTag node

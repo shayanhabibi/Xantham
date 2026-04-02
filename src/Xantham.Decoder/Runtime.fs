@@ -9,11 +9,9 @@ module Map =
     let inline choose (fn: 'Key -> 'Item -> 'Outcome option) (map: Map<'Key, 'Item>) = Map.fold (fun acc key item -> match fn key item with Some value -> Map.add key value acc | None -> acc) (Map []) map
 
 type IDictionaryTypeAccess =
-    abstract member Funcs: FrozenDictionary<TypeKey, TsOverloadableConstruct<TsFunction>>
     abstract member Conditionals: FrozenDictionary<TypeKey, TsConditionalType>
     abstract member Interfaces: FrozenDictionary<TypeKey, TsInterface>
     abstract member Classes: FrozenDictionary<TypeKey, TsClass>
-    abstract member Variables: FrozenDictionary<TypeKey, TsVariable>
     abstract member Primitives: FrozenDictionary<TypeKey, TypeKindPrimitive>
     abstract member EnumCases: FrozenDictionary<TypeKey, TsEnumCase>
     abstract member PathToEnum: FrozenDictionary<string list, TypeKey>
@@ -32,6 +30,9 @@ type IDictionaryTypeAccess =
     abstract member Indexes: FrozenDictionary<TypeKey, TsIndex>
     abstract member Predicates: FrozenDictionary<TypeKey, TsTypePredicate>
     abstract member TypeLiterals: FrozenDictionary<TypeKey, TsTypeLiteral>
+    abstract member TemplateLiterals: FrozenDictionary<TypeKey, TsTemplateLiteralType>
+    abstract member Optional: FrozenDictionary<TypeKey, TsTypeReference>
+    abstract member Substitutions: FrozenDictionary<TypeKey, TsSubstitutionType>
 
 type IDictionaryTypeAccess with
     member this.TryGetEnumForCase (key: TsEnumCase) =
@@ -39,33 +40,26 @@ type IDictionaryTypeAccess with
         |> List.truncate (List.length key.FullyQualifiedName - 1)
         |> this.PathToEnum.TryFind 
 
-type XanthamTree(fileName: string) =
+type XanthamTree (config: RuntimeOptions) =
     let decodedResult =
-        match Decoder.read fileName with
+        match Decoder.readWithOptions config with
         | Ok result -> result
         | Error error -> failwith error
     let typeMap = decodedResult.TypeMap.ToFrozenDictionary()
-    let nodeMap = decodedResult.NodeMap.ToFrozenDictionary()
     let libSet = decodedResult.LibSet.ToFrozenSet()
-    let topLevelKeys =
-        decodedResult.TopLevelKeys
-        |> List.map (fun key ->
-            KeyValuePair(
-                key, typeMap[key]
-                )
-            )
+    let exports = decodedResult.Exports
+    let topLevelKeys = decodedResult.PrimaryExports
+    let duplicateMap =
+        decodedResult.DuplicateMap
+        |> Map.map (fun _ (v, vals) -> vals |> Array.insertAt 0 v)
         |> _.ToFrozenDictionary()
     /// Determines if the given key is a type from the standard library.
     let isEsType key = libSet.Contains key
-    /// Gets the type for the given key; if the key actually points to a node,
-    /// then an error with that node is returned instead.
+    /// Gets the type for the given key
     let getTypeForKey key =
         match typeMap.TryFind key with
-        | Some node -> Ok node
-        | _ ->
-            match nodeMap.TryFind key with
-            | Some node -> Error node
-            | _ -> failwith $"Type not found for key {key}"
+        | Some node -> node
+        | _ -> failwith $"Type not found for key {key}"
     let rec getSourceFromGlueType = function
         | TsType.TypeLiteral _
         | TsType.Primitive _ -> None
@@ -73,32 +67,18 @@ type XanthamTree(fileName: string) =
         | TsType.Module { Source = source }
         | TsType.TypeAlias { Source = source }
         | TsType.Enum { Source = source }
-        | TsType.Variable { Source = source }
         | TsType.Interface { Source = source }
         | TsType.Class { Source = source } -> source
-        | TsType.Function functions -> functions.ValueOrHead.Source
         | TsType.ReadOnly node
         | TsType.Array node -> getSourceFromGlueType node
         | _ -> None
-
-    let typeMapFuncs = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.Function value -> Some value | _ -> None) |> _.ToFrozenDictionary()
     let typeMapConditionals = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.Conditional value -> Some value | _ -> None) |> _.ToFrozenDictionary()
     let typeMapInterfaces = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.Interface value -> Some value | _ -> None) |> _.ToFrozenDictionary()
     let typeMapClasses = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.Class value -> Some value | _ -> None) |> _.ToFrozenDictionary()
-    let typeMapVariables = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.Variable value -> Some value | _ -> None) |> _.ToFrozenDictionary()
     let typeMapPrimitives = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.Primitive value -> Some value | _ -> None) |> _.ToFrozenDictionary()
     let typeMapEnums = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.Enum value -> Some value | _ -> None) |> _.ToFrozenDictionary()
     let typeMapEnumCases = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.EnumCase value -> Some value | _ -> None) |> _.ToFrozenDictionary()
-    // The generated type keys of our aliases are useless here. We'll want to return to the
-    // underlying type.
-    let typeMapTypeAliases =
-        decodedResult.TypeMap
-        |> Map.choose (fun _ -> function TsType.TypeAlias value -> Some value | _ -> None)
-        |> Seq.map(fun kv ->
-            kv.Value.Type, kv.Value
-            )
-        |> Map
-        |> _.ToFrozenDictionary()
+    let typeMapTypeAliases = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.TypeAlias value -> Some value | _ -> None) |> _.ToFrozenDictionary()
     let typeMapUnions = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.Union value -> Some value | _ -> None) |> _.ToFrozenDictionary()
     let typeMapIntersections = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.Intersection value -> Some value | _ -> None) |> _.ToFrozenDictionary()
     let typeMapLiterals = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.Literal value -> Some value | _ -> None) |> _.ToFrozenDictionary()
@@ -124,6 +104,9 @@ type XanthamTree(fileName: string) =
     let typeMapIndexes = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.Index value -> Some value | _ -> None) |> _.ToFrozenDictionary()
     let typeMapPredicates = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.Predicate value -> Some value | _ -> None) |> _.ToFrozenDictionary()
     let typeMapTypeLiterals = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.TypeLiteral value -> Some value | _ -> None) |> _.ToFrozenDictionary()
+    let typeMapTemplateLiterals = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.TemplateLiteral value -> Some value | _ -> None) |> _.ToFrozenDictionary()
+    let typeMapOptional = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.Optional value -> Some value | _ -> None) |> _.ToFrozenDictionary()
+    let typeMapSubstitutions = decodedResult.TypeMap |> Map.choose (fun _ -> function TsType.Substitution value -> Some value | _ -> None) |> _.ToFrozenDictionary()
     let typeMapEnumCasesToTypes =
         typeMapEnums
         |> Seq.map (fun kv -> kv.Value.FullyQualifiedName, kv.Key)
@@ -140,13 +123,14 @@ type XanthamTree(fileName: string) =
         |> Map.map (fun _ -> _.ToFrozenDictionary())
         |> _.ToFrozenDictionary()
     /// <summary>
-    /// A map of type keys to GlueTypes.
+    /// The duplicate map containing the raw nodes for each type key before
+    /// selection was made. The head of each array is the <i>winning</i> node.
+    /// </summary>
+    member val DuplicateMap = duplicateMap with get
+    /// <summary>
+    /// A map of type keys to TsTypes.
     /// </summary>
     member val TypeDict = typeMap with get
-    /// <summary>
-    /// A map of type keys to exclusively non-glue types
-    /// </summary>
-    member val NodeDict = nodeMap with get
     /// <summary>
     /// A set of keys which refer to types from the standard library.
     /// </summary>
@@ -156,17 +140,19 @@ type XanthamTree(fileName: string) =
     /// </summary>
     member val SourceDict = sourceMap with get
     /// <summary>
+    /// All exportable definitions from crawling the source file, and their imports.
+    /// </summary>
+    member val Exports = exports with get
+    /// <summary>
     /// All the primary exports from the decoded file; a subset of the TypeDict.
     /// </summary>
-    member val ExportsDict = topLevelKeys with get
+    member val PrimaryExports = topLevelKeys with get
     interface IDictionaryTypeAccess with
         member this.Enums = typeMapEnums
         member this.EnumCases = typeMapEnumCases
-        member this.Funcs = typeMapFuncs
         member this.Conditionals = typeMapConditionals
         member this.Interfaces = typeMapInterfaces
         member this.Classes = typeMapClasses
-        member this.Variables = typeMapVariables
         member this.Primitives = typeMapPrimitives
         member this.TypeAliases = typeMapTypeAliases
         member this.Unions = typeMapUnions
@@ -183,6 +169,9 @@ type XanthamTree(fileName: string) =
         member this.Predicates = typeMapPredicates
         member this.TypeLiterals = typeMapTypeLiterals
         member this.PathToEnum = typeMapEnumCasesToTypes
+        member this.TemplateLiterals = typeMapTemplateLiterals
+        member this.Optional = typeMapOptional
+        member this.Substitutions = typeMapSubstitutions
 
     /// <summary>
     /// A convenience property for accessing filtered GlueTypes and non-GlueTypes
@@ -194,29 +183,23 @@ type XanthamTree(fileName: string) =
     /// </summary>
     member this.IsEsType = isEsType
     /// <summary>
-    /// Gets the GlueType for the given key, or returns the node if the key did not match a GlueType.
-    /// </summary>
-    member this.TryGetTypeForKey = getTypeForKey
-    /// <summary>
     /// Gets the GlueType for the given key, or throws an exception if the key did not match a GlueType.
     /// </summary>
     /// <param name="key"></param>
     member this.GetTypeForKey key =
-        match getTypeForKey key with
-        | Ok value -> value
-        | Error value -> failwithf $"No concrete type was found for key %i{key}, but a node was found instead:\n%A{value}"
-    /// <summary>
-    /// Gets the non-GlueType node for the given key, or throws an exception if the key did not match a non-GlueType.
-    /// </summary>
-    /// <param name="key"></param>
-    member this.GetNodeForKey key =
-        match getTypeForKey key with
-        | Ok value -> failwithf $"No node was found for key %i{key}, but a concrete type was found instead:\n%A{value}"
-        | Error value -> value
+        getTypeForKey key
     
+    new(fileName: string) = XanthamTree({
+        File = fileName
+        Remap = ValueNone
+        DuplicateRemap = ValueNone
+    })
 
 /// Creates a utility type with common handling operations and optimized access
 /// using FrozenDictionaries and FrozenSets for the result of a decoded xantham json file.
-let create fileName = XanthamTree(fileName)
+let create (fileName: string) = XanthamTree(fileName)
 
-// create "../Xantham.Fable/output.json"
+[<EntryPoint>]
+let main _ =
+    create <| System.IO.Path.Join(__SOURCE_DIRECTORY__,"../Xantham.Fable/output.json")
+    0

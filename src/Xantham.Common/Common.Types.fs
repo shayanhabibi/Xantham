@@ -12,6 +12,12 @@ module TypeKey =
     let inline createWith (i: int) = i
 #endif
 
+[<RequireQualifiedAccess>]
+type TsIdentityKey =
+    | Declaration of fileName: string * startPos: int * endPos: int
+    | Symbol of symbolName: string
+    | Transient of key: TypeKey
+
 /// <summary>
 /// Indicates a type can be a member of a <c>TsOverloadableConstruct</c> collection.
 /// </summary>
@@ -694,4 +700,33 @@ type [<RequireQualifiedAccess>] TsAstNode =
     | Optional of TsTypeReference
     | Module of TsModule
 
-
+/// <summary>
+/// Types detailing contracts between the reader and the decoder.
+/// </summary>
+module Internal =
+    type EncodedWrapper<'T, 'U when 'T: comparison> =
+        #if FABLE
+        System.Collections.Generic.Dictionary<'T, 'U>
+        #else
+        Map<'T, 'U>
+        #endif
+    type EncodedDuplicateNode = { Id: TsIdentityKey; Node: TsAstNode }
+    type EncodedDuplicateNodeArray = EncodedDuplicateNode[]
+    /// <summary>
+    /// Pre-sorted by Reader
+    /// </summary>
+    type EncodedDuplicateResult = { Key: TypeKey; Duplicates: EncodedDuplicateNodeArray } with
+        /// <summary>
+        /// Retrieves the Duplicates without the measure.
+        /// The measure is present as an assurance that the array is sorted by Id on creation..
+        /// </summary>
+        member this.Results =
+            unbox<EncodedDuplicateNodeArray> this.Duplicates
+    /// <summary>
+    /// Output from the reader.
+    /// </summary>
+    type EncodedResult = {
+        NonDuplicateNodes: EncodedWrapper<TypeKey, TsAstNode>
+        DuplicateNodes: EncodedDuplicateResult array
+        TopLevelExports: TypeKey array
+    }

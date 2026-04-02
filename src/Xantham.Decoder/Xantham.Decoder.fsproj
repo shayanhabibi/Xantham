@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-<!--        <OutputType>Exe</OutputType>-->
+        <OutputType>Exe</OutputType>
         <TargetFramework>net10.0</TargetFramework>
         <RootNamespace>Xantham.Decoder</RootNamespace>
     </PropertyGroup>
@@ -18,6 +18,8 @@
         <Compile Include="Types\Name.fs" />
         <Compile Include="Types\Frozen.Extensions.fs" />
       <Compile Include="Utils.fs" />
+      <Compile Include="Post\Duplicates.fs" />
+      <Compile Include="Post\Result.fs" />
       <Compile Include="Core.fs" />
       <Compile Include="Runtime.fs" />
     </ItemGroup>

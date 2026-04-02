@@ -134,6 +134,8 @@ let rec getKeys typ =
     | TsType.EnumCase _ -> []
     | TsType.TemplateLiteral tsTemplateLiteralType -> tsTemplateLiteralType.Types
     | TsType.Optional tsTypeReference -> getKeys (TsType.TypeReference tsTypeReference)
+    | TsType.Substitution tsSubstitutionType -> [ tsSubstitutionType.Base; tsSubstitutionType.Constraint ]
+
 and getKeysFromExport export =
     match export with
     | TsExportDeclaration.Variable glueVariable -> [ glueVariable.Type ]
