@@ -15,7 +15,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
     let inline setAstSignal builder =
         xanTag.Builder <- builder
     let inline setKeyword (prim: TypeKindPrimitive) =
-        prim |> STsAstNodeBuilder.Primitive |> setAstSignal
+        prim |> SType.Primitive |> setAstSignal
         prim.TypeKey |> setTypeKeyForTag xanTag
     let inline setTypeKeyFromNode (node: Ts.TypeNode) =
         ctx.checker.getTypeFromTypeNode node |> _.TypeKey |> setTypeKeyForTag xanTag
@@ -26,10 +26,10 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
             match ctx.CreateXanthamTag resolved |> fst with
             | TagState.Unvisited t -> pushToStack ctx t; t
             | TagState.Visited t -> t
-        ctx.typeSignal xanTag
-        |> Signal.fulfillWith (fun () -> (ctx.typeSignal innerTag).Value)
-        GuardedData.AstNodeBuilder.getOrSetDefault xanTag
-        |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.getOrSetDefault innerTag).Value)
+        xanTag.TypeSignal
+        |> Signal.fulfillWith (fun () -> innerTag.TypeSignal.Value)
+        xanTag.Builder
+        |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
     /// Build parameter slots from a list of ParameterDeclarations.
     let inline getParamSlots (parameters: ResizeArray<Ts.ParameterDeclaration>) =
         parameters.AsArray
@@ -64,7 +64,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
             setKeyword TypeKindPrimitive.Boolean
         else
             { STypeUnionBuilder.Types = Array.map getTypeSignalFromNode types }
-            |> STsAstNodeBuilder.Union
+            |> SType.Union
             |> setAstSignal
             setTypeKeyFromNode unionTypeNode
             // TypeStore.Key is generated (see Prelude.usesGeneratedKey) but TypeSignal is set to
@@ -81,7 +81,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
                 intersectionTypeNode.types.AsArray
                 |> Array.map getTypeSignalFromNode
         }
-        |> STsAstNodeBuilder.Intersection
+        |> SType.Intersection
         |> setAstSignal
         setTypeKeyFromNode intersectionTypeNode
         // Same pattern as UnionType: TypeStore.Key is generated but TypeSignal is the semantic
@@ -105,7 +105,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
                 TypeArguments = [||]
                 ResolvedType = ValueNone
             }
-            |> STsAstNodeBuilder.Array
+            |> SType.Array
             )
         setTypeKeyFromNode arrayTypeNode
     | TypeNode.TupleType tupleTypeNode ->
@@ -134,7 +134,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
                 tupleTypeNode.elements.AsArray
                 |> Array.map (unbox<Ts.TypeNode> >> TupleTypeMember.forNode ctx)
         }
-        |> STsAstNodeBuilder.Tuple
+        |> SType.Tuple
         |> setAstSignal
         setTypeKeyFromNode tupleTypeNode
     | TypeNode.NamedTupleMember namedTupleMemberNode ->
@@ -163,7 +163,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         }
         |> STupleElementBuilder.Fixed
         |> xanTag.Set
-        STsAstNodeBuilder.Optional {
+        SType.Optional {
             Type = optionalTypeNode.``type`` |> getTypeSignalFromNode
             TypeArguments = [||]
             ResolvedType = ValueNone
@@ -176,11 +176,9 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         let builder =
             Tracer.unsafeGet<XanTagKind> typeNode.``type`` :?> XanthamTag
             |> GuardedData.AstNodeBuilder.getOrSetDefault
-        xanTag
-        |> GuardedData.AstNodeBuilder.getOrSetDefault
+        xanTag.Builder
         |> Signal.fulfillWith (fun () -> builder.Value)
-        xanTag
-        |> ctx.typeSignal
+        xanTag.TypeSignal
         |> Signal.fulfillWith (fun () -> typeSignal.Value)
     | TypeNode.TypeReference typeReferenceNode ->
         // Non-generic TypeReferences (no explicit type arguments) forward directly to the resolved
@@ -198,10 +196,10 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         let state = ctx.CreateXanthamTag (unbox<Ts.Node> inferTypeNode.typeParameter) |> fst
         let t = state.Value
         if state.IsUnvisited then pushToStack ctx t
-        ctx.typeSignal xanTag
-        |> Signal.fulfillWith (fun () -> (ctx.typeSignal t).Value)
-        GuardedData.AstNodeBuilder.getOrSetDefault xanTag
-        |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.getOrSetDefault t).Value)
+        xanTag.TypeSignal
+        |> Signal.fulfillWith (fun () -> t.TypeSignal.Value)
+        xanTag.Builder
+        |> Signal.fulfillWith (fun () -> t.Builder.Value)
     | TypeNode.TypePredicate typePredicateNode ->
         let paramName =
             if (unbox<Ts.Node> typePredicateNode.parameterName).kind = Ts.SyntaxKind.Identifier
@@ -216,7 +214,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
             Type = typeSignal
             IsAssertion = typePredicateNode.assertsModifier.IsSome
         }
-        |> STsAstNodeBuilder.Predicate
+        |> SType.Predicate
         |> setAstSignal
         // TypeStore.Key is a generated unique key (see Prelude.usesGeneratedKey). Use that key
         // for the TypeSignal — getTypeFromTypeNode on a TypePredicate returns the boolean type,
@@ -237,7 +235,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
                 SIndexAccessTypeBuilder.Object = getTypeSignalFromNode indexedAccessTypeNode.objectType
                 Index = getTypeSignalFromNode indexedAccessTypeNode.indexType
             }
-            |> STsAstNodeBuilder.IndexAccessType
+            |> SType.IndexAccessType
             |> setAstSignal
             resolved.TypeKey |> setTypeKeyForTag xanTag
         else
@@ -246,10 +244,10 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
                 match ctx.CreateXanthamTag resolved |> fst with
                 | TagState.Unvisited tag -> pushToStack ctx tag; tag
                 | TagState.Visited tag -> tag
-            ctx.typeSignal xanTag
-            |> Signal.fulfillWith (fun () -> (GuardedData.TypeSignal.get innerTag).Value)
-            GuardedData.AstNodeBuilder.getOrSetDefault xanTag
-            |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.get innerTag).Value)
+            xanTag.TypeSignal
+            |> Signal.fulfillWith (fun () -> innerTag.TypeSignal.Value)
+            xanTag.Builder
+            |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
     | TypeNode.MappedType mappedTypeNode ->
         // { [K in keyof T]: T[K] } — route via checker to ObjectFlags.Mapped at the type layer
         routeViaChecker mappedTypeNode
@@ -260,7 +258,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
             True = conditionalTypeNode.trueType |> getTypeSignalFromNode
             False = conditionalTypeNode.falseType |> getTypeSignalFromNode
         }
-        |> STsAstNodeBuilder.Conditional
+        |> SType.Conditional
         |> setAstSignal
         setTypeKeyFromNode conditionalTypeNode
     | TypeNode.TemplateLiteralType templateLiteralTypeNode ->
@@ -268,10 +266,10 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
             match ctx.checker.getTypeAtLocation templateLiteralTypeNode |> ctx.CreateXanthamTag |> fst with
             | TagState.Unvisited tag -> pushToStack ctx tag; tag
             | TagState.Visited tag -> tag
-        ctx.typeSignal xanTag
-        |> Signal.fulfillWith (fun () -> (GuardedData.TypeSignal.get innerTag).Value)
-        GuardedData.AstNodeBuilder.getOrSetDefault xanTag
-        |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.get innerTag).Value)
+        xanTag.TypeSignal
+        |> Signal.fulfillWith (fun () -> innerTag.TypeSignal.Value)
+        xanTag.Builder
+        |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
     | TypeNode.TemplateLiteralTypeSpan _ -> () // only reached as child of TemplateLiteralType; handled above
     | TypeNode.ImportType importTypeNode ->
         // import("module").TypeName — resolve via checker
@@ -290,7 +288,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
                 |> Signal.source
             |]
         }
-        |> STsAstNodeBuilder.TypeLiteral
+        |> SType.TypeLiteral
         |> setAstSignal
         setTypeKeyFromNode funcTypeNode
     | TypeNode.ConstructorType ctorTypeNode ->
@@ -306,7 +304,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
                 |> Signal.source
             |]
         }
-        |> STsAstNodeBuilder.TypeLiteral
+        |> SType.TypeLiteral
         |> setAstSignal
         setTypeKeyFromNode ctorTypeNode
     | TypeNode.TypeLiteral typeLiteralNode ->
@@ -315,7 +313,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
                 typeLiteralNode.members.AsArray
                 |> Array.map (Member.resolveToMemberBuilder ctx)
         }
-        |> STsAstNodeBuilder.TypeLiteral
+        |> SType.TypeLiteral
         |> setAstSignal
         setTypeKeyFromNode typeLiteralNode
     | TypeNode.LiteralType literalToken ->
@@ -333,19 +331,16 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         with
         | _, TagState.Visited guard when ctx.signalCache.ContainsKey(guard.Value) ->
             let store = ctx.signalCache[ guard.Value ]
-            ctx.typeSignal xanTag
+            xanTag.TypeSignal
             |> Signal.fulfillWith(fun () -> store.Key)
-            GuardedData.AstNodeBuilder.getOrSetDefault xanTag
+            xanTag.Builder
             |> Signal.fulfillWith(fun () -> store.Builder.Value)
         | tagState, _ ->
-            let tag = tagState.Value
-            if tagState.IsUnvisited then
-                pushToStack ctx tag
-            let typeSignal = ctx.typeSignal tag
-            let builder = GuardedData.AstNodeBuilder.getOrSetDefault tag
-            ctx.typeSignal xanTag
+            let typeSignal, builder =
+                tagState |> stackPushAndThen ctx (fun tag -> tag.TypeSignal, tag.Builder)
+            xanTag.TypeSignal
             |> Signal.fulfillWith(fun () -> typeSignal.Value)
-            GuardedData.AstNodeBuilder.getOrSetDefault xanTag
+            xanTag.Builder
             |> Signal.fulfillWith(fun () -> builder.Value)
         
     | TypeNode.SatisfiesExpression _ -> ()

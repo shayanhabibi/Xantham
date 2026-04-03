@@ -9,19 +9,16 @@ open Xantham.Fable.Types
 open Xantham.Fable.Types.Signal
 open Xantham.Fable.Types.Tracer
 
-let inline private setAstSignal (tag: XanthamTag) (astValue: STsAstNodeBuilder) =
-    tag
-    |> GuardedData.AstNodeBuilder.getOrSetDefault
-    |> Signal.fill astValue
+let inline private setAstSignal (tag: XanthamTag) (astValue: SType) = tag.Builder |> Signal.fill astValue
 
 // ---------------------------------------------------------------------------
 // Module-level helpers (shared across all declaration sub-readers)
 // ---------------------------------------------------------------------------
 
 let inline private getTypeSignalFromNode (ctx: TypeScriptReader) (node: Ts.TypeNode) =
-    match ctx.CreateXanthamTag node with
-    | TagState.Unvisited tag, _ -> pushToStack ctx tag; ctx.typeSignal tag
-    | TagState.Visited tag, _ -> ctx.typeSignal tag
+    ctx.CreateXanthamTag node
+    |> fst
+    |> stackPushAndThen ctx _.TypeSignal
 
 /// Returns Void TypeSignal when the type annotation is absent.
 let inline private getReturnTypeSignal (ctx: TypeScriptReader) (typeNode: Ts.TypeNode option) =
@@ -30,42 +27,54 @@ let inline private getReturnTypeSignal (ctx: TypeScriptReader) (typeNode: Ts.Typ
     |> Option.defaultValue (TypeSignal.ofKey TypeKindPrimitive.Void.TypeKey)
 
 /// Resolves an optional TypeNode to a TypeSignal, falling back to checker.getTypeAtLocation when None.
-let private getSignalFromTypeNodeOption (ctx: TypeScriptReader) (typ: Ts.TypeNode option) (node: Ts.Node) =
+let private getSignalsFromTypeNodeOption (ctx: TypeScriptReader) (typ: Ts.TypeNode option) (node: Ts.Node) =
     typ
-    |> Option.map (getTypeSignalFromNode ctx)
-    |> Option.orElseWith (fun () ->
+    |> Option.map (
+        ctx.CreateXanthamTag
+        >> fst
+        >> stackPushAndThen ctx (fun tag -> tag.TypeSignal, tag.Builder)
+        )
+    |> Option.defaultWith (fun () ->
         match
             ctx.checker.getTypeAtLocation node
             |> ctx.CreateXanthamTag
         with
         | _, TagState.Visited guard when ctx.signalCache.ContainsKey(guard.Value) ->
-            TypeSignal.ofKey ctx.signalCache[guard.Value].Key |> Some
-        | TagState.Unvisited typeTag, _ ->
-            pushToStack ctx typeTag
-            ctx.typeSignal typeTag |> Some
-        | TagState.Visited typeTag, _ ->
-            ctx.typeSignal typeTag |> Some
-        )
-    |> Option.defaultValue (TypeSignal.ofKey TypeKindPrimitive.Any.TypeKey)
+            TypeSignal.ofKey ctx.signalCache[guard.Value].Key, ctx.signalCache[guard.Value].Builder
+        | tagState, _ -> stackPushAndThen ctx (fun tag -> tag.TypeSignal, tag.Builder) tagState)
 
 /// Returns TypeSignal voption for constraint/default slots on type parameters.
 let inline getTypeSignalFromOption (ctx: TypeScriptReader) (typ: Ts.TypeNode option) =
     typ
-    |> Option.map (ctx.CreateXanthamTag >> function
-        | TagState.Unvisited tag, _ ->
-            pushToStack ctx tag
-            ctx.typeSignal tag
-        | TagState.Visited tag, _ -> ctx.typeSignal tag
-        )
+    |> Option.map (ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx _.TypeSignal)
     |> Option.toValueOption
 
 let inline getFullyQualifiedName (ctx: TypeScriptReader) (tag: XanthamTag) =
-    match tag.IdentityKey with
-    | IdentityKey.AliasSymbol symbol | IdentityKey.Symbol symbol ->
-        let name = ctx.checker.getFullyQualifiedName symbol
+    let name =
+        match tag.IdentityKey with
+        | IdentityKey.DeclarationPosition _ ->
+            match tag.ToUnderlyingValue() with
+            | Choice1Of2 typ ->
+                typ.aliasSymbol
+                |> Option.orElse (typ.getSymbol())
+                |> Option.map ctx.checker.getFullyQualifiedName
+            | Choice2Of2 decl ->
+                ctx.checker.getSymbolAtLocation decl
+                |> Option.orElseWith (fun () ->
+                    let typ = ctx.checker.getTypeAtLocation decl
+                    typ.aliasSymbol
+                    |> Option.orElse (typ.getSymbol())
+                    )
+                |> Option.map ctx.checker.getFullyQualifiedName
+        | IdentityKey.AliasSymbol symbol | IdentityKey.Symbol symbol ->
+            ctx.checker.getFullyQualifiedName symbol
+            |> Some
+        | _ -> None
+    match name with
+    | Some name ->
         if name.StartsWith("{") then [||]
         else name.Split('.')
-    | _ -> [||]
+    | None -> [||]
 
 /// Maps parameter declarations to reactive builder slots.
 let private getParameterSlots (ctx: TypeScriptReader) (parameters: ResizeArray<Ts.ParameterDeclaration>) =
@@ -79,16 +88,9 @@ let private getTypeParamSlots (ctx: TypeScriptReader) (typeParams: ResizeArray<T
     |> Option.defaultValue [||]
     |> Array.map (
         ctx.CreateXanthamTag
-        >> fst >> function
-        | TagState.Unvisited tag ->
-            pushToStack ctx tag
-            GuardedData.TypeSignal.getOrSetDefault tag,
-            GuardedData.AstNodeBuilder.getOrSetDefault tag
-        | TagState.Visited tag ->
-            GuardedData.TypeSignal.getOrSetDefault tag,
-            GuardedData.AstNodeBuilder.getOrSetDefault tag
+        >> fst >> stackPushAndThen ctx (fun tag -> tag.TypeSignal, tag.Builder)
         >> fun signals -> signals ||> Signal.map2 (fun typeKey -> function
-            | ValueSome (STsAstNodeBuilder.TypeParameter tp) ->
+            | ValueSome (SType.TypeParameter tp) ->
                 ValueSome {
                     Type = typeKey
                     TypeParameter = tp
@@ -109,7 +111,7 @@ module TypeParameter =
             Default = getTypeSignalFromOption ctx node.``default``
             Documentation = JSDocTags.resolveDocsForTag ctx xanTag
         }
-        |> STsAstNodeBuilder.TypeParameter
+        |> SType.TypeParameter
         |> setAstSignal xanTag
         // TypeStore.Key is a generated unique key (see Prelude.usesGeneratedKey). Use that key
         // for the TypeSignal — getTypeAtLocation on a TypeParameterDeclaration returns the same
@@ -122,13 +124,11 @@ module TypeParameter =
         // signals via getTypeSignal/routeViaChecker. If this declaration is never encountered via
         // those paths, the natural TypeKey is absent from the output and the generator fails.
         let paramType = ctx.checker.getTypeAtLocation node
-        match ctx.CreateXanthamTag paramType |> fst with
-        | TagState.Unvisited typeTag -> pushToStack ctx typeTag
-        | TagState.Visited _ -> ()
+        pushToStackIfTypeUnseen ctx paramType
 
 module Interface =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.InterfaceDeclaration) (source: ModuleName) =
-        {
+        let builder = {
             Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Enumerable = false
@@ -141,12 +141,13 @@ module Interface =
             Heritage =
                 let clauses =
                     node.heritageClauses
-                    |> Option.map (_.AsArray >> Array.map (ctx.CreateXanthamTag >> fst >> function
-                        | TagState.Unvisited tag ->
-                            pushToStack ctx tag
-                            ctx.typeSignal tag, GuardedData.AstNodeBuilder.getOrSetDefault tag
-                        | TagState.Visited tag -> ctx.typeSignal tag, GuardedData.AstNodeBuilder.getOrSetDefault tag
-                        ))
+                    |> Option.map (
+                        _.AsArray
+                        >> Array.map (
+                            ctx.CreateXanthamTag
+                            >> fst
+                            >> stackPushAndThen ctx (fun tag ->
+                                tag.TypeSignal, tag.Builder)))
                     |> Option.defaultValue [||]
                 clauses
                 |> Array.collect (fun (typeSignal, builderSignal) -> [| typeSignal.Invalidated; builderSignal.Invalidated |])
@@ -157,7 +158,7 @@ module Interface =
                             clauses
                             |> Array.map (fun (typeSignal, builderSignal) ->
                                 match builderSignal.Value with
-                                | ValueSome (STsAstNodeBuilder.TypeReference typeReferenceBuilder) ->
+                                | ValueSome (SType.TypeReference typeReferenceBuilder) ->
                                     typeReferenceBuilder
                                 | _ ->
                                     {
@@ -171,23 +172,28 @@ module Interface =
                     }
                     )
         }
-        |> STsAstNodeBuilder.Interface
-        |> setAstSignal xanTag
+        xanTag.ExportBuilder <- STsExportDeclaration.Interface builder
+        xanTag.Builder <- SType.Interface builder
         ctx.checker.getTypeAtLocation node |> _.TypeKey
         |> setTypeKeyForTag xanTag
 
 module TypeAlias =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.TypeAliasDeclaration) (source: ModuleName) =
-        {
+        let innerTypeSignal, innerBuilderSignal =
+            ctx.CreateXanthamTag node.``type``
+            |> fst
+            |> stackPushAndThen ctx (fun tag -> tag.TypeSignal, tag.Builder)
+        let builder = {
             SAliasBuilder.Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
-            Type = getTypeSignalFromNode ctx node.``type``
+            Type = innerTypeSignal |> ctx.routeTypeTo xanTag
             TypeParameters = getTypeParamSlots ctx node.typeParameters
             Documentation = JSDocTags.resolveDocsForTag ctx xanTag
         }
-        |> STsAstNodeBuilder.Alias
-        |> setAstSignal xanTag
+        xanTag.Builder
+        |> Signal.fulfillWith (fun () -> innerBuilderSignal.Value)
+        xanTag.ExportBuilder <- STsExportDeclaration.TypeAlias builder
         // TypeStore.Key is a generated TypeKey (see Prelude.usesGeneratedKey). Use that same key
         // for the TypeSignal so TypeStore.Key == TypeSignal.Value and downstream refs are consistent.
         ctx.signalCache[xanTag.IdentityKey].Key
@@ -202,20 +208,20 @@ module Enum =
         tag
         |> GuardedData.AstNodeBuilder.getOrSetDefault
         |> Signal.map (function
-            | ValueSome (STsAstNodeBuilder.EnumCase c) -> ValueSome c
+            | ValueSome (SType.EnumCase c) -> ValueSome c
             | _ -> ValueNone
             )
 
     let readDeclaration (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.EnumDeclaration) (source: ModuleName) =
-        {
+        let builder = {
             SEnumTypeBuilder.Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             Members = node.members.AsArray |> Array.map (resolveEnumMemberSlot ctx)
             Documentation = JSDocTags.resolveDocsForTag ctx xanTag
         }
-        |> STsAstNodeBuilder.Enum
-        |> setAstSignal xanTag
+        xanTag.Builder <- SType.Enum builder
+        xanTag.ExportBuilder <- STsExportDeclaration.Enum builder
         ctx.checker.getTypeAtLocation node |> _.TypeKey
         |> setTypeKeyForTag xanTag
 
@@ -230,36 +236,44 @@ module Enum =
             |> Option.defaultValue (TsLiteral.String (NameHelpers.getName node.name))
         {
             SEnumCaseBuilder.Source = trySetSourceForTag xanTag (ctx.moduleMap.Item(node.parent.getSourceFile()))
+            Parent = ctx.CreateXanthamTag node.parent |> fst |> stackPushAndThen ctx _.TypeSignal
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             Value = value
             Documentation = JSDocTags.resolveDocsForTag ctx xanTag
         }
-        |> STsAstNodeBuilder.EnumCase
+        |> SType.EnumCase
         |> setAstSignal xanTag
         ctx.checker.getTypeAtLocation node |> _.TypeKey
         |> setTypeKeyForTag xanTag
 
 module Variable =
     let readDeclaration (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.VariableDeclaration) (source: ModuleName) =
-        {
+        let innerTypeSignal, innerBuilderSignal =
+            getSignalsFromTypeNodeOption ctx node.``type`` (unbox<Ts.Node> node)
+        let variableBuilder = {
             SVariableBuilder.Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             Type =
-                getSignalFromTypeNodeOption ctx node.``type`` (unbox<Ts.Node> node)
-                |> ctx.routeTypeTo xanTag
+                innerTypeSignal
             Documentation = JSDocTags.resolveDocsForTag ctx xanTag
         }
-        |> STsAstNodeBuilder.Variable
-        |> setAstSignal xanTag
-        // TypeStore.Key is a generated TypeKey (see Prelude.usesGeneratedKey).
-        ctx.signalCache[xanTag.IdentityKey].Key
-        |> setTypeKeyForTag xanTag
+        xanTag.ExportBuilder <- STsExportDeclaration.Variable variableBuilder
+        xanTag.Builder
+        |> Signal.fulfillWith(fun () -> innerBuilderSignal.Value)
 
 module FunctionDecl =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.FunctionDeclaration) (source: ModuleName) =
-        {
+        // the underlying type will have the 'reference' type representation of the function
+        let signature = ctx.checker.getTypeAtLocation node |> ctx.CreateXanthamTag |> fst // get underlying type
+        let typeSignal, builderSignal = stackPushAndThen ctx (fun tag -> tag.TypeSignal, tag.Builder) signature
+        xanTag.TypeSignal // fulfill this nodes typesignal with the representation of the function
+        |> Signal.fulfillWith (fun () -> typeSignal.Value)
+        xanTag.Builder // fulfill this nodes builder with the representation of the function
+        |> Signal.fulfillWith (fun () -> builderSignal.Value)
+        // fulfill this nodes builder with the representation of the function
+        let fnBuilder = { // create the export builder
             SFunctionBuilder.Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
@@ -268,18 +282,17 @@ module FunctionDecl =
             Parameters = getParameterSlots ctx node.parameters
             TypeParameters = getTypeParamSlots ctx node.typeParameters
             Documentation = JSDocTags.resolveDocsForTag ctx xanTag
+            SignatureKey = typeSignal
         }
-        |> STsAstNodeBuilder.FunctionDeclaration
-        |> setAstSignal xanTag
-        ctx.checker.getTypeAtLocation node |> _.TypeKey
-        |> setTypeKeyForTag xanTag
+        xanTag.ExportBuilder <- STsExportDeclaration.Function fnBuilder // fill the export builder
 module Class =
     let private exprWithTypeArgsToRefSlot (ctx: TypeScriptReader) (expr: Ts.ExpressionWithTypeArguments) =
         let typeSignal =
-            let typ = ctx.checker.getTypeAtLocation expr
-            match ctx.CreateXanthamTag typ |> fst with
-            | TagState.Unvisited tag -> pushToStack ctx tag; ctx.typeSignal tag
-            | TagState.Visited tag -> ctx.typeSignal tag
+            expr
+            |> ctx.checker.getTypeAtLocation
+            |> ctx.CreateXanthamTag
+            |> fst
+            |> stackPushAndThen ctx _.TypeSignal
         // Type arguments from the expression (syntactic) since checker.getTypeArguments needs a TypeReference
         let typeArgs =
             expr.typeArguments
@@ -316,7 +329,7 @@ module Class =
         let ctors, members =
             node.members.AsArray
             |> Array.partition (fun elem -> (unbox<Ts.Node> elem).kind = Ts.SyntaxKind.Constructor)
-        {
+        let builder = {
             SClassBuilder.Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Enumerable = false
@@ -326,8 +339,8 @@ module Class =
             TypeParameters = getTypeParamSlots ctx node.typeParameters
             Heritage = resolveHeritage ctx node.heritageClauses
         }
-        |> STsAstNodeBuilder.Class
-        |> setAstSignal xanTag
+        xanTag.Builder <- SType.Class builder
+        xanTag.ExportBuilder <- STsExportDeclaration.Class builder
         ctx.checker.getTypeAtLocation node |> _.TypeKey
         |> setTypeKeyForTag xanTag
         
@@ -340,32 +353,37 @@ module Module =
             match unbox body with
             | Patterns.Node.ModuleBlock block ->
                 block.statements.AsArray
-                |> Array.map (fun stmt ->
-                    let state = ctx.CreateXanthamTag (unbox<Ts.Node> stmt) |> fst
-                    let tag = state.Value
-                    if state.IsUnvisited then pushToStack ctx tag
-                    ctx.typeSignal tag
+                |> Array.map (
+                    unbox<Ts.Node>
+                    >> ctx.CreateXanthamTag
+                    >> fst
+                    >> stackPushAndThen ctx _.ExportBuilder
                     )
             | Patterns.Node.ModuleDeclaration nested ->
-                let state = ctx.CreateXanthamTag (unbox<Ts.Node> nested) |> fst
-                let tag = state.Value
-                if state.IsUnvisited then pushToStack ctx tag
-                [| ctx.typeSignal tag |]
+                unbox<Ts.Node> nested
+                |> ctx.CreateXanthamTag
+                |> fst
+                |> stackPushAndThen ctx _.ExportBuilder
+                |> Array.singleton
             | _ -> [||]
 
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.ModuleDeclaration) (source: ModuleName) =
-        {
+        let moduleBuilder = {
             SModuleBuilder.Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             IsNamespace = node.flags.HasFlag(Ts.NodeFlags.Namespace)
             IsRecursive = false
-            Types = collectModuleTypes ctx !!node.body
+            Exports = collectModuleTypes ctx !!node.body
         }
-        |> STsAstNodeBuilder.Module
-        |> setAstSignal xanTag
-        ctx.checker.getTypeAtLocation node |> _.TypeKey
-        |> setTypeKeyForTag xanTag
+        xanTag.ExportBuilder <- STsExportDeclaration.Module moduleBuilder
+        let typeSignal, builderSignal =
+            ctx.checker.getTypeAtLocation node
+            |> ctx.CreateXanthamTag
+            |> fst
+            |> stackPushAndThen ctx (fun tag -> tag.TypeSignal, tag.Builder)
+        xanTag.TypeSignal |> Signal.fulfillWith (fun () -> typeSignal.Value)
+        xanTag.Builder |> Signal.fulfillWith (fun () -> builderSignal.Value)
 
 // ---------------------------------------------------------------------------
 // Dispatch
@@ -394,21 +412,18 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
                 | TagState.Unvisited tag, _ ->
                     pushToStack ctx tag; tag
                 | TagState.Visited tag, _ -> tag
-            ctx.typeSignal xanTag
-            |> Signal.fulfillWith (fun () -> (ctx.typeSignal innerTag).Value)
-            GuardedData.AstNodeBuilder.getOrSetDefault xanTag
-            |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.getOrSetDefault innerTag).Value)
+            xanTag.TypeSignal
+            |> Signal.fulfillWith (fun () -> innerTag.TypeSignal.Value)
+            xanTag.Builder
+            |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
     | TypeDeclaration.ExpressionWithTypeArguments exprWithTypeArgs ->
         // Route via checker; consumers look up TypeSignal/Builder on this tag.
         let resolvedType = ctx.checker.getTypeAtLocation exprWithTypeArgs
-        let innerTag =
-            match ctx.CreateXanthamTag resolvedType |> fst with
-            | TagState.Unvisited tag -> pushToStack ctx tag; tag
-            | TagState.Visited tag -> tag
-        ctx.typeSignal xanTag
-        |> Signal.fulfillWith (fun () -> (ctx.typeSignal innerTag).Value)
-        GuardedData.AstNodeBuilder.getOrSetDefault xanTag
-        |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.getOrSetDefault innerTag).Value)
+        let innerTag = ctx.CreateXanthamTag resolvedType |> fst |> stackPushAndThen ctx id
+        xanTag.TypeSignal
+        |> Signal.fulfillWith (fun () -> innerTag.TypeSignal.Value)
+        xanTag.Builder
+        |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
     | TypeDeclaration.Enum enumDeclaration ->
         Enum.readDeclaration ctx xanTag enumDeclaration source
     | TypeDeclaration.EnumMember enumMember ->
@@ -417,19 +432,18 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
         // Push each inner VariableDeclaration and wire this tag's signals to the first one.
         let tags =
             variableStatement.declarationList.declarations.AsArray
-            |> Array.map (fun decl ->
-                let state = ctx.CreateXanthamTag (unbox<Ts.Node> decl) |> fst
-                if state.IsUnvisited then pushToStack ctx state.Value
-                state.Value
+            |> Array.map (
+                unbox<Ts.Node>
+                >> ctx.CreateXanthamTag >> fst
+                >> stackPushAndThen ctx id
                 )
         match tags with
         | [||] -> ()
         | tags ->
             let firstTag = tags[0]
-            GuardedData.AstNodeBuilder.getOrSetDefault xanTag
-            |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.getOrSetDefault firstTag).Value)
-            ctx.typeSignal xanTag
-            |> Signal.fulfillWith (fun () -> (ctx.typeSignal firstTag).Value)
+            xanTag.Builder |> Signal.fulfillWith (fun () -> firstTag.Builder.Value)
+            xanTag.TypeSignal |> Signal.fulfillWith (fun () -> firstTag.TypeSignal.Value)
+            xanTag.ExportBuilder |> Signal.fulfillWith(fun () -> firstTag.ExportBuilder.Value)
     | TypeDeclaration.VariableDeclaration variableDeclaration ->
         Variable.readDeclaration ctx xanTag variableDeclaration source
     | TypeDeclaration.FunctionDeclaration functionDeclaration ->

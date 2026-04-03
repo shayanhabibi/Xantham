@@ -59,6 +59,7 @@ type TypeScriptReader = {
     Warnings: ResizeArray<string>
     ModuleMap: ModuleMap
     SignalCache: Dictionary<IdentityKey, TypeStore>
+    ExportCache: Dictionary<IdentityKey, ExportStore>
     MemberCache: Dictionary<IdentityKey, MemberStore>
     LibCache: HashSet<IdentityKey>
 } with
@@ -72,6 +73,7 @@ type TypeScriptReader = {
     member inline this.signalCache = this.SignalCache
     member inline this.memberCache = this.MemberCache
     member inline this.libCache = this.LibCache
+    member inline this.exportCache = this.ExportCache
 
 module TypeScriptReader =
     let createFor (entryFiles: string array) =
@@ -83,6 +85,7 @@ module TypeScriptReader =
         let libCache = HashSet()
         let program = createProgramForFiles entryFiles
         let checker = program.getTypeChecker()
+        let exportCache = Dictionary()
         #if DEBUG && !FABLE_TEST
         do Log.debug $"Starting XanthamFableRuntime for files: %A{entryFiles}"
         #endif
@@ -96,6 +99,7 @@ module TypeScriptReader =
             SignalCache = signalCache
             LibCache = libCache
             MemberCache = memberCache
+            ExportCache = exportCache
         }
     let inline create (entryFile: string) =
         createFor [| entryFile |]

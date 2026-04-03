@@ -26,10 +26,10 @@ let private resolveBase (ctx: TypeScriptReader) (_xanTag: XanthamTag) (node: Ts.
             TypeSignal.ofKey ctx.signalCache[ guard.Value ].Key
         else
             match tagState with
-            | TagState.Visited tag -> tag |> ctx.typeSignal
+            | TagState.Visited tag -> tag.TypeSignal
             | TagState.Unvisited tag ->
                 pushToStack ctx tag
-                ctx.typeSignal tag
+                tag.TypeSignal
     match getSymbol node.typeName with
     | Some symbol when GuardTracer.has symbol && ctx.signalCache.ContainsKey(GuardTracer.unsafeGet symbol |> _.Value) ->
         let store =
@@ -76,10 +76,10 @@ let private resolveTypeBase (ctx: TypeScriptReader) (xanTag: XanthamTag) (typ: T
         else TypeSignal.ofKey cachedKey
     else
         match tagState with
-        | TagState.Visited tag -> tag |> ctx.typeSignal
+        | TagState.Visited tag -> tag.TypeSignal
         | TagState.Unvisited tag ->
             pushToStack ctx tag
-            ctx.typeSignal tag
+            tag.TypeSignal
 
 let private resolveTypeArgumentsFromType (ctx: TypeScriptReader) (_xanTag: XanthamTag) (typ: Ts.Type) =
     // Use checker.getTypeArguments on the semantic TypeReference so that default
@@ -88,12 +88,7 @@ let private resolveTypeArgumentsFromType (ctx: TypeScriptReader) (_xanTag: Xanth
         let objType = unbox<Ts.ObjectType> typ
         if objType.objectFlags.HasFlag Ts.ObjectFlags.Reference then
             ctx.checker.getTypeArguments(unbox<Ts.TypeReference> typ).AsArray
-            |> Array.map (fun t ->
-                match ctx.CreateXanthamTag t |> fst with
-                | TagState.Visited tag -> ctx.typeSignal tag
-                | TagState.Unvisited tag ->
-                    pushToStack ctx tag
-                    ctx.typeSignal tag)
+            |> Array.map (ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx _.TypeSignal)
         else [||]
     else [||]
 
@@ -111,22 +106,22 @@ let fromNode (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.TypeReferenc
             match resolvedTypeTag with
             | _, tagstate when tagstate.Value = xanTag.Guard -> ValueNone
             | TagState.Visited tag, _ ->
-                ctx.typeSignal tag
+                tag.TypeSignal
                 |> Signal.map (fun typeKey ->
-                    match xanTag.TypeSignal with
+                    match xanTag.TryTypeSignal with
                     | ValueSome typeSignal when typeSignal.Value = typeKey -> ValueNone
                     | _ -> ValueSome typeKey)
                 |> ValueSome
             | TagState.Unvisited tag, _ ->
                 pushToStack ctx tag
-                ctx.typeSignal tag
+                tag.TypeSignal
                 |> Signal.map (fun typeKey ->
-                    match xanTag.TypeSignal with
+                    match xanTag.TryTypeSignal with
                     | ValueSome typeSignal when typeSignal.Value = typeKey -> ValueNone
                     | _ -> ValueSome typeKey)
                 |> ValueSome
     }
-    |> STsAstNodeBuilder.TypeReference
+    |> SType.TypeReference
     |> fun builder -> xanTag.Builder <- builder
     // TypeStore.Key is a generated unique key (see Prelude.usesGeneratedKey). Use that key for
     // the TypeSignal so TypeStore.Key == TypeSignal.Value (avoids self-referential entries when
@@ -139,14 +134,9 @@ let fromType (ctx: TypeScriptReader) (xanTag: XanthamTag) (typ: Ts.TypeReference
         STypeReferenceBuilder.Type = resolveTypeBase ctx xanTag typ
         TypeArguments =
             ctx.checker.getTypeArguments(typ).AsArray
-            |> Array.map (fun t ->
-                match ctx.CreateXanthamTag t |> fst with
-                | TagState.Visited tag -> ctx.typeSignal tag
-                | TagState.Unvisited tag ->
-                    pushToStack ctx tag
-                    ctx.typeSignal tag)
+            |> Array.map (ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx _.TypeSignal)
         ResolvedType = ValueNone
     }
-    |> STsAstNodeBuilder.TypeReference
+    |> SType.TypeReference
     |> fun builder -> xanTag.Builder <- builder
     

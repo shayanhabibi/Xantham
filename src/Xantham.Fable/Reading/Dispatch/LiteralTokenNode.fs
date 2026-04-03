@@ -40,7 +40,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: LiteralTokenNode
         | _ -> TsLiteral.Null
     | LiteralTokenNodes.NoSubstitutionTemplateLiteral noSubstitutionTemplateLiteral ->
         TsLiteral.String noSubstitutionTemplateLiteral.text
-    |> STsAstNodeBuilder.Literal
+    |> SType.Literal
     |> setAstSignal
     ctx.checker.getTypeAtLocation tag.Value
     |> _.TypeKey

@@ -238,6 +238,7 @@ type XanTagHelpers =
         | JSDocTag jsDocTags -> jsDocTags.Value |> unbox |> Choice2Of2
         | LiteralTokenNode literalTokenNodes -> literalTokenNodes.Value |> unbox |> Choice2Of2
         | ModulesAndExports modulesAndExports -> modulesAndExports.Value |> unbox |> Choice2Of2
+        | MemberDeclaration memberDeclaration -> memberDeclaration.Value |> Choice2Of2
         | Ignore _ -> failwith "Ignored node accessed"
 
     [<Extension>]

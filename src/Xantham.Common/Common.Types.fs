@@ -5,7 +5,6 @@ open Fable.Core
 type TypeKey = TypeKey of int
 module TypeKey =
     let inline createWith (i: int) = TypeKey i
-
 #else
 type TypeKey = System.Int32
 module TypeKey =
@@ -47,6 +46,14 @@ type TsOverloadableConstruct<'T when 'T:>IOverloadable and 'T : equality and 'T 
             | values when Seq.length values > 1 -> Overloaded (values |> Set.ofSeq)
             | values when Seq.isEmpty values -> failwith "Invalid TsOverloadableConstruct; require at least one value"
             | values -> NoOverloads (values |> Seq.head)
+    static member Combine (lhs: TsOverloadableConstruct<'T>) (rhs: TsOverloadableConstruct<'T>) =
+        match lhs, rhs with
+        | NoOverloads l, NoOverloads r when l <> r ->
+            Set [| l; r |] |> Overloaded
+        | NoOverloads l, NoOverloads _ -> NoOverloads l
+        | Overloaded l, NoOverloads r -> Overloaded (Set.add r l)
+        | Overloaded l, Overloaded r -> Overloaded (Set.union l r)
+        | NoOverloads l, Overloaded r -> Overloaded (Set.add l r)
     member this.Values = this.ToArray()
 
 [<RequireQualifiedAccess>]
@@ -80,6 +87,7 @@ type TsLiteral =
 /// </code>
 /// </example>
 type TsEnumCase = {
+    Parent: TypeKey
     Source: string option
     FullyQualifiedName: string list
     Name: string
@@ -299,6 +307,11 @@ type TsFunction = {
     Type: TypeKey
     Parameters: TsParameter list
     TypeParameters: InlinedTsTypeParameter list
+    /// <summary>
+    /// The type key or signature key of the function's signature.
+    /// This key should return a type literal with call signatures.
+    /// </summary>
+    SignatureKey: TypeKey
 } with interface IOverloadable
 
 /// Represents a conditional type `T extends U ? X : Y`.
@@ -466,21 +479,7 @@ type TsTypeAlias = {
     Documentation: TsComment list
 }
 
-/// Represents a `namespace` or `module` declaration and the collected types within it.
-///
-/// Reflects: `ModuleDeclaration`, `ModuleBlock`, and `NamespaceExportDeclaration`.
-/// Example (TS):
-/// ```ts
-/// declare namespace MyLib { const version: string }
-/// ```
-type TsModule = {
-    Source: string option
-    FullyQualifiedName: string list
-    Name: string
-    IsNamespace: bool
-    IsRecursive: bool
-    Types: TypeKey list
-}
+
 
 /// Represents a substitution type: a type parameter substituted with a concrete type
 /// under its constraint context.
@@ -596,7 +595,21 @@ type TsTypePredicate = {
     Type: TypeKey
     IsAssertion: bool
 }
-
+/// Represents a `namespace` or `module` declaration and the collected types within it.
+///
+/// Reflects: `ModuleDeclaration`, `ModuleBlock`, and `NamespaceExportDeclaration`.
+/// Example (TS):
+/// ```ts
+/// declare namespace MyLib { const version: string }
+/// ```
+type TsModule = {
+    Source: string option
+    FullyQualifiedName: string list
+    Name: string
+    IsNamespace: bool
+    IsRecursive: bool
+    Exports: TsExportDeclaration list
+}
 and [<RequireQualifiedAccess>] TsType =
     | GlobalThis
     | Conditional of TsConditionalType
@@ -605,12 +618,10 @@ and [<RequireQualifiedAccess>] TsType =
     | Primitive of TypeKindPrimitive
     | Enum of TsEnumType
     | EnumCase of TsEnumCase
-    | TypeAlias of TsTypeAlias
     | Union of TsTypeUnion
     | Intersection of TsTypeIntersection
     | Literal of TsLiteral
     | IndexedAccess of TsIndexAccessType
-    | Module of TsModule
     | TypeReference of TsTypeReference
     | Array of TsType
     | TypeParameter of TsTypeParameter
@@ -657,8 +668,7 @@ and [<RequireQualifiedAccess>] TypeKindPrimitive =
         | ESSymbol -> TypeKey.createWith -11
         | NonPrimitive -> TypeKey.createWith -10
 
-[<RequireQualifiedAccess>]
-type TsExportDeclaration =
+and [<RequireQualifiedAccess>] TsExportDeclaration =
     | Variable of TsVariable
     | Interface of TsInterface
     | TypeAlias of TsTypeAlias
@@ -667,7 +677,7 @@ type TsExportDeclaration =
     | Module of TsModule
     | Function of TsOverloadableConstruct<TsFunction>
 
-type [<RequireQualifiedAccess>] TsAstNode =
+and [<RequireQualifiedAccess>] TsAstNode =
     | TemplateLiteral of TsTemplateLiteralType
     | GlobalThis
     | Tuple of TsTuple
@@ -693,5 +703,130 @@ type [<RequireQualifiedAccess>] TsAstNode =
     | Intersection of TsTypeIntersection
     | Optional of TsTypeReference
     | Module of TsModule
+    member this.IsExport =
+        match this with
+        | Class _
+        | Interface _
+        | Variable _
+        | FunctionDeclaration _
+        | Alias _
+        | Enum _
+        | Module _ -> true
+        | TemplateLiteral _
+        | GlobalThis 
+        | Tuple _
+        | Primitive _
+        | Predicate _
+        | Literal _
+        | TypeLiteral _
+        | TypeParameter _
+        | IndexAccessType _
+        | Index _
+        | TypeReference _
+        | Array _
+        | EnumCase _
+        | SubstitutionType _
+        | Conditional _
+        | Union _
+        | Intersection _
+        | Optional _ -> false
+    member this.IsType =
+        match this with
+        | FunctionDeclaration _
+        | Alias _
+        | Module _
+        | Variable _ -> false
+        | Class _
+        | Interface _
+        | Enum _
+        | TemplateLiteral _
+        | GlobalThis 
+        | Tuple _
+        | Primitive _
+        | Predicate _
+        | Literal _
+        | TypeLiteral _
+        | TypeParameter _
+        | IndexAccessType _
+        | Index _
+        | TypeReference _
+        | Array _
+        | EnumCase _
+        | SubstitutionType _
+        | Conditional _
+        | Union _
+        | Intersection _
+        | Optional _ -> true
+    member this.ToType() =
+        match this with
+        | FunctionDeclaration _
+        | Alias _
+        | Module _
+        | Variable _ -> ValueNone
+        | Class v -> TsType.Class v |> ValueSome
+        | Interface v -> TsType.Interface v |> ValueSome
+        | Enum v -> TsType.Enum v |> ValueSome
+        | TemplateLiteral v -> TsType.TemplateLiteral v |> ValueSome
+        | GlobalThis -> TsType.GlobalThis |> ValueSome
+        | Tuple v -> TsType.Tuple v |> ValueSome
+        | Primitive v -> TsType.Primitive v |> ValueSome
+        | Predicate v -> TsType.Predicate v |> ValueSome
+        | Literal v -> TsType.Literal v |> ValueSome
+        | TypeLiteral v -> TsType.TypeLiteral v |> ValueSome
+        | TypeParameter v -> TsType.TypeParameter v |> ValueSome
+        | IndexAccessType v -> TsType.IndexedAccess v |> ValueSome
+        | Index v -> TsType.Index v |> ValueSome
+        | TypeReference v -> TsType.TypeReference v |> ValueSome
+        | Array v -> (TsType.TypeReference >> TsType.Array >> ValueSome) v
+        | EnumCase v -> TsType.EnumCase v |> ValueSome
+        | SubstitutionType v -> TsType.Substitution v |> ValueSome
+        | Conditional v -> TsType.Conditional v |> ValueSome
+        | Union v -> TsType.Union v |> ValueSome
+        | Intersection v -> TsType.Intersection v |> ValueSome
+        | Optional v -> TsType.Optional v |> ValueSome
+    member this.ToExportDeclaration() =
+        match this with
+        | Class v -> TsExportDeclaration.Class v |> ValueSome
+        | Interface v -> TsExportDeclaration.Interface v |> ValueSome
+        | Variable v -> TsExportDeclaration.Variable v |> ValueSome
+        | FunctionDeclaration v -> TsExportDeclaration.Function v |> ValueSome
+        | Alias v -> TsExportDeclaration.TypeAlias v |> ValueSome
+        | Enum v -> TsExportDeclaration.Enum v |> ValueSome
+        | Module v -> TsExportDeclaration.Module v |> ValueSome
+        | TemplateLiteral _
+        | GlobalThis 
+        | Tuple _
+        | Primitive _
+        | Predicate _
+        | Literal _
+        | TypeLiteral _
+        | TypeParameter _
+        | IndexAccessType _
+        | Index _
+        | TypeReference _
+        | Array _
+        | EnumCase _
+        | SubstitutionType _
+        | Conditional _
+        | Union _
+        | Intersection _
+        | Optional _ -> ValueNone
+    member this.ToTypeExportDeclaration() =
+        this.ToType(), this.ToExportDeclaration()
 
-
+module Schema =
+    type TsIdentityKey =
+        | DeclarationFile of file: string * startPos: int * endPos: int
+        | Symbol of name: string
+        | Type of TypeKey
+    type DuplicateEncoding<'T> = {
+        Identity: TsIdentityKey
+        Value: 'T
+    }
+    type EncodedResult = {
+        ExportedDeclarations: Map<TypeKey, TsExportDeclaration>
+        Types: Map<TypeKey, TsType>
+        DuplicateExports: Map<TypeKey, DuplicateEncoding<TsExportDeclaration> list>
+        DuplicateTypes: Map<TypeKey, DuplicateEncoding<TsType> list>
+        TopLevelExports: TypeKey list
+    }

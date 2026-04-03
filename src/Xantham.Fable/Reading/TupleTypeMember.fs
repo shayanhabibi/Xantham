@@ -6,11 +6,9 @@ open Xantham.Fable.Types
 open Xantham.Fable.Types.Tracer
 
 let inline private getTypeSignalFromNode (ctx: TypeScriptReader) (node: Ts.TypeNode) =
-    match ctx.CreateXanthamTag node |> fst with
-    | TagState.Visited tag -> GuardedData.TypeSignal.get tag
-    | TagState.Unvisited tag ->
-        pushToStack ctx tag
-        ctx.typeSignal tag
+    ctx.CreateXanthamTag node
+    |> fst
+    |> stackPushAndThen ctx _.TypeSignal
 
 let private namedTupleMemberToTupleElementBuilder (ctx: TypeScriptReader) (namedTupleMember: Ts.NamedTupleMember) =
     STupleElementBuilder.FixedLabeled(
@@ -49,12 +47,7 @@ let forNode (ctx: TypeScriptReader) (node: Ts.TypeNode) =
             }
         | _ ->
             STupleElementBuilder.Fixed {
-                Type =
-                    match tagState with
-                    | TagState.Unvisited tag ->
-                        pushToStack ctx tag
-                        ctx.typeSignal tag
-                    | TagState.Visited tag -> GuardedData.TypeSignal.get tag
+                Type = stackPushAndThen ctx _.TypeSignal tagState
                 IsRest = false
                 IsOptional = false
             }
