@@ -28,6 +28,18 @@
         <TypeScriptCompile Include="TypeFiles\type-operators.d.ts" />
         <Content Include="TypeFiles\packages\ui-kit\package.json" />
         <TypeScriptCompile Include="TypeFiles\packages\ui-kit\index.d.ts" />
+        <Content Include="TypeFiles\packages\validators\package.json" />
+        <TypeScriptCompile Include="TypeFiles\packages\validators\index.d.ts" />
+        <Content Include="TypeFiles\packages\framework\plugins\package.json" />
+        <TypeScriptCompile Include="TypeFiles\packages\framework\plugins\index.d.ts" />
+        <Content Include="TypeFiles\packages\framework\package.json" />
+        <TypeScriptCompile Include="TypeFiles\packages\framework\index.d.ts" />
+        <Content Include="TypeFiles\packages\data-layer\package.json" />
+        <TypeScriptCompile Include="TypeFiles\packages\data-layer\index.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\packages\app\views\dashboard.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\packages\app\components\widget.d.ts" />
+        <Content Include="TypeFiles\packages\app\package.json" />
+        <TypeScriptCompile Include="TypeFiles\packages\app\index.d.ts" />
         <TypeScriptCompile Include="TypeFiles\multi-file\vectors.d.ts" />
         <TypeScriptCompile Include="TypeFiles\multi-file\shapes.d.ts" />
         <TypeScriptCompile Include="TypeFiles\accessors.d.ts" />
@@ -38,6 +50,7 @@
         <TypeScriptCompile Include="TypeFiles\enum-nonsequential.d.ts" />
         <TypeScriptCompile Include="TypeFiles\function-ref.d.ts" />
         <TypeScriptCompile Include="TypeFiles\ref-enum.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\import-package.d.ts" />
     </ItemGroup>
 
     <ItemGroup>

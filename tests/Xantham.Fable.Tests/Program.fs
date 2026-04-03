@@ -1207,6 +1207,181 @@ let templateLiteralTests =
             | _ -> failwith "Expected TemplateLiteral"
     ]
 
+// -----------------------------------------------------------------------
+// Fixture: ref-enum.d.ts
+//   export declare enum RefEnum { Number5 = 5, Number9 = 9, Number2 = 2 }
+//   export type RefEnumUnion = RefEnum.Number5 | RefEnum.Number9
+//
+// Tests that enum members used as types in a union resolve to TsType.EnumCase
+// entries, and that the enum itself is emitted with all 3 cases in order.
+// -----------------------------------------------------------------------
+
+let refEnumTests =
+    testList "ref-enum.d.ts" [
+        let result = createTestReader "ref-enum" |> runReader
+
+        testCase "'RefEnum' is present in result" <| fun _ ->
+            "'RefEnum' should appear in result"
+            |> Expect.exists result.Types (function
+                | KeyValue(_, TsType.Enum e) when e.Name = "RefEnum" -> true
+                | _ -> false)
+
+        let enum = result |> findEnum "RefEnum"
+
+        testCase "'RefEnum' has exactly 3 members" <| fun _ ->
+            "" |> Expect.hasLength enum.Members 3
+
+        testCase "'RefEnum' member names are Number5, Number9, Number2" <| fun _ ->
+            let names = enum.Members |> List.map _.Name
+            "" |> Expect.containsAll names [ "Number5"; "Number9"; "Number2" ]
+
+        testCase "'RefEnum.Number5' has value Int 5" <| fun _ ->
+            let m = enum.Members |> List.find (fun c -> c.Name = "Number5")
+            "" |> Expect.equal m.Value (TsLiteral.Int 5)
+
+        testCase "'RefEnum.Number9' has value Int 9" <| fun _ ->
+            let m = enum.Members |> List.find (fun c -> c.Name = "Number9")
+            "" |> Expect.equal m.Value (TsLiteral.Int 9)
+
+        testCase "'RefEnum.Number2' has value Int 2" <| fun _ ->
+            let m = enum.Members |> List.find (fun c -> c.Name = "Number2")
+            "" |> Expect.equal m.Value (TsLiteral.Int 2)
+
+        testCase "'RefEnumUnion' alias is present" <| fun _ ->
+            "'RefEnumUnion' should be in result"
+            |> Expect.exists result.ExportedDeclarations (function
+                | KeyValue(_, TsExportDeclaration.TypeAlias a) when a.Name = "RefEnumUnion" -> true
+                | _ -> false)
+
+        let union = result |> findAlias "RefEnumUnion"
+
+        testCase "'RefEnumUnion' type resolves to TsType.Union" <| fun _ ->
+            "RefEnumUnion.Type should be Union"
+            |> Expect.isTrue (match result |> findType union.Type with TsType.Union _ -> true | _ -> false)
+
+        testCase "'RefEnumUnion' union has exactly 2 members" <| fun _ ->
+            match result |> findType union.Type with
+            | TsType.Union u -> "" |> Expect.hasLength u.Types 2
+            | _ -> failwith "Expected Union"
+
+        testCase "'RefEnumUnion' both union members resolve to TsType.EnumCase" <| fun _ ->
+            match result |> findType union.Type with
+            | TsType.Union u ->
+                "Both union members should be EnumCase nodes"
+                |> Expect.all u.Types (fun key ->
+                    match result |> findType key with
+                    | TsType.EnumCase _ -> true
+                    | _ -> false)
+            | _ -> failwith "Expected Union"
+
+        testCase "'RefEnumUnion' contains enum cases Number5 and Number9" <| fun _ ->
+            match result |> findType union.Type with
+            | TsType.Union u ->
+                let caseNames =
+                    u.Types
+                    |> List.choose (fun key ->
+                        match result |> findType key with
+                        | TsType.EnumCase c -> Some c.Name
+                        | _ -> None)
+                "" |> Expect.containsAll caseNames [ "Number5"; "Number9" ]
+            | _ -> failwith "Expected Union"
+
+        testCase "'RefEnumUnion' case values are Int 5 and Int 9" <| fun _ ->
+            match result |> findType union.Type with
+            | TsType.Union u ->
+                let values =
+                    u.Types
+                    |> List.choose (fun key ->
+                        match result |> findType key with
+                        | TsType.EnumCase c -> Some c.Value
+                        | _ -> None)
+                "" |> Expect.containsAll values [ TsLiteral.Int 5; TsLiteral.Int 9 ]
+            | _ -> failwith "Expected Union"
+    ]
+
+// -----------------------------------------------------------------------
+// Fixture: function-ref.d.ts
+//   export declare function getPerson(name: string): object;
+//   export interface Api { person: typeof getPerson }
+//
+// Tests that `typeof X` (TypeQuery) on a function reference resolves to a
+// TypeLiteral containing a CallSignature matching the function's signature.
+// -----------------------------------------------------------------------
+
+let functionRefTests =
+    testList "function-ref.d.ts" [
+        let result = createTestReader "function-ref" |> runReader
+
+        testCase "'getPerson' function is present" <| fun _ ->
+            "'getPerson' should be in result"
+            |> Expect.exists result.ExportedDeclarations (function
+                | KeyValue(_, TsExportDeclaration.Function f) when f.ValueOrHead.Name = "getPerson" -> true
+                | _ -> false)
+
+        testCase "'getPerson' has 1 parameter" <| fun _ ->
+            let fn = result |> findFunction "getPerson"
+            "" |> Expect.hasLength fn.ValueOrHead.Parameters 1
+
+        testCase "'getPerson' parameter is named 'name'" <| fun _ ->
+            let fn = result |> findFunction "getPerson"
+            "" |> Expect.equal fn.ValueOrHead.Parameters.[0].Name "name"
+
+        testCase "'getPerson' parameter 'name' is type string" <| fun _ ->
+            let fn = result |> findFunction "getPerson"
+            "" |> Expect.equal fn.ValueOrHead.Parameters.[0].Type TypeKindPrimitive.String.TypeKey
+
+        testCase "'Api' interface is present" <| fun _ ->
+            "'Api' should be in result"
+            |> Expect.exists result.ExportedDeclarations (function
+                | KeyValue(_, TsExportDeclaration.Interface i) when i.Name = "Api" -> true
+                | _ -> false)
+
+        let api = result |> findInterface "Api"
+
+        testCase "'Api' has a 'person' property member" <| fun _ ->
+            "Api should have member 'person'"
+            |> Expect.exists api.Members (function
+                | TsMember.Property p when p.Name = "person" -> true
+                | _ -> false)
+
+        testCase "'Api.person' type resolves to TypeLiteral (typeof getPerson)" <| fun _ ->
+            let prop = api.Members |> findProperty "person"
+            let typ = result |> findType prop.Type
+            "typeof getPerson should be a TypeLiteral (anonymous function type)"
+            |> Expect.isTrue (match typ with TsType.TypeLiteral _ -> true | _ -> false)
+
+        testCase "'Api.person' TypeLiteral has exactly 1 CallSignature" <| fun _ ->
+            let prop = api.Members |> findProperty "person"
+            match result |> findType prop.Type with
+            | TsType.TypeLiteral { Members = members } ->
+                let callSigs = members |> List.filter (function TsMember.CallSignature _ -> true | _ -> false)
+                "" |> Expect.hasLength callSigs 1
+            | _ -> failwith "Expected TypeLiteral"
+
+        testCase "'Api.person' call signature has 1 parameter named 'name'" <| fun _ ->
+            let prop = api.Members |> findProperty "person"
+            match result |> findType prop.Type with
+            | TsType.TypeLiteral { Members = members } ->
+                match members |> List.pick (function TsMember.CallSignature c -> Some c | _ -> None) with
+                | TsOverloadableConstruct.NoOverloads cs ->
+                    "" |> Expect.hasLength cs.Parameters 1
+                    "" |> Expect.equal cs.Parameters.[0].Name "name"
+                | _ -> failwith "Expected NoOverloads call signature"
+            | _ -> failwith "Expected TypeLiteral"
+
+        testCase "'Api.person' call signature return type is NonPrimitive (object)" <| fun _ ->
+            let prop = api.Members |> findProperty "person"
+            match result |> findType prop.Type with
+            | TsType.TypeLiteral { Members = members } ->
+                match members |> List.pick (function TsMember.CallSignature c -> Some c | _ -> None) with
+                | TsOverloadableConstruct.NoOverloads cs ->
+                    let returnType = result |> findType cs.Type
+                    "Return type of getPerson is 'object' → NonPrimitive"
+                    |> Expect.equal returnType (TsType.Primitive TypeKindPrimitive.NonPrimitive)
+                | _ -> failwith "Expected NoOverloads"
+            | _ -> failwith "Expected TypeLiteral"
+    ]
+
 let multiFileTests =
     testList "multi-file/vectors.d.ts" [
         let result = createTestReader "multi-file/vectors" |> runReader
@@ -1345,39 +1520,234 @@ let fallbackSourceTests =
             let iface = result |> findInterface "BaseInterface"
             "Source should be Some _"
             |> Expect.isSome iface.Source
+        testCase "BaseObject alias Source matches BaseInterface Source (same file)" <| fun _ ->
+            let iface = result |> findInterface "BaseInterface"
+            let alias = result |> findAlias "BaseObject"
+            "Types in the same file should share Source"
+            |> Expect.equal alias.Source iface.Source
     ]
 
-let refEnumTests =
-    testList "ref-enum.d.ts" [
-        let result = createTestReader "ref-enum" |> runReader
-        testCase "Results contain an Enum and a Type Alias" <| fun _ ->
-            let values =
-                result.ExportedDeclarations.Values
-                |> Seq.filter (function TsExportDeclaration.Enum _ | TsExportDeclaration.TypeAlias _ -> true | _ -> false)
-            ""
-            |> Expect.hasLength values 2
-        testCase "Enum has exactly 3 members" <| fun _ ->
-            let e = result |> findEnum "RefEnum"
-            "" |> Expect.hasLength e.Members 3
-        testCase "Type Alias is a union" <| fun _ ->
-            let alias = result |> findAlias "RefEnumUnion"
-            let aliasType = result |> findType alias.Type
-            "Expected TypeAlias to resolve to a union"
-            |> Expect.isTrue aliasType.IsUnion
-        testCase "Type Alias union members are valid pointers" <| fun _ ->
-            let alias = result |> findAlias "RefEnumUnion"
-            let unionTypes =
-                result
-                |> findType alias.Type
-                |> function TsType.Union (TsTypeUnion types) -> types | _ -> []
-            let unknownMembers =
-                unionTypes
-                |> List.except result.Types.Keys
-            $"{unknownMembers}"
-            |> Expect.isEmpty unknownMembers
-            
-            
-                
+// Fixture: namespace.d.ts — namespace Geometry { Point, Circle }
+//
+// TsModule.Source should be set; nested interfaces share the module's Source.
+let namespaceSourceTests =
+    testList "source: namespace" [
+        let result = createTestReader "namespace" |> runReader
+        testCase "Geometry module Source is Some" <| fun _ ->
+            let m = result |> findModule "Geometry"
+            "Source should be Some _"
+            |> Expect.isSome m.Source
+        testCase "nested interfaces share the namespace Source" <| fun _ ->
+            let m = result |> findModule "Geometry"
+            let point = result |> findInterface "Point"
+            "Nested interface should have the same Source as its namespace"
+            |> Expect.equal point.Source m.Source
+    ]
+
+// Fixture: import-package.d.ts — imports Button from ./packages/ui-kit/index
+//
+// The import specifier is "./packages/ui-kit/index", so types from
+// ui-kit/index.d.ts get Source = Some "./packages/ui-kit/index" (not the
+// package.json name — import specifier takes priority for resolved files).
+// AppButton (declared locally) gets a different Source via fallback.
+let importPackageSourceTests =
+    testList "source: cross-file package import" [
+        let result = createTestReader "import-package" |> runReader
+        testCase "AppButton Source is Some (local file)" <| fun _ ->
+            let iface = result |> findInterface "AppButton"
+            "Source should be Some _"
+            |> Expect.isSome iface.Source
+        testCase "Button Source = './packages/ui-kit/index' (import specifier)" <| fun _ ->
+            let iface = result |> findInterface "Button"
+            "Source should be Some './packages/ui-kit/index'"
+            |> Expect.equal iface.Source (Some "./packages/ui-kit/index")
+        testCase "AppButton and Button have different Sources (different files)" <| fun _ ->
+            let app = result |> findInterface "AppButton"
+            let btn = result |> findInterface "Button"
+            "Sources from different files should differ"
+            |> Expect.notEqual app.Source btn.Source
+        testCase "ButtonLabel alias has same Source as AppButton (same file)" <| fun _ ->
+            let app = result |> findInterface "AppButton"
+            let label = result |> findAlias "ButtonLabel"
+            "Types from same file should share Source"
+            |> Expect.equal label.Source app.Source
+    ]
+
+// Fixture: multi-file/vectors.d.ts + shapes.d.ts — both as explicit entry points
+//
+// Import-map priority holds even when both files are entry points:
+// shapes.d.ts types still get Source = "./shapes".
+let multiFileSourceTests =
+    testList "source: multi-file entry" [
+        let result = createMultiFileTestReader [| "multi-file/vectors"; "multi-file/shapes" |] |> runReader
+        testCase "Point2D Source = './shapes' (imported file)" <| fun _ ->
+            let iface = result |> findInterface "Point2D"
+            "Source should be Some './shapes'"
+            |> Expect.equal iface.Source (Some "./shapes")
+        testCase "Vector3D Source matches Vector2D Source (same entry file)" <| fun _ ->
+            let v2 = result |> findInterface "Vector2D"
+            let v3 = result |> findInterface "Vector3D"
+            "Types from the same entry file should share Source"
+            |> Expect.equal v3.Source v2.Source
+        testCase "Vector2D Source differs from Point2D Source" <| fun _ ->
+            let v2 = result |> findInterface "Vector2D"
+            let p2d = result |> findInterface "Point2D"
+            "Entry file Source should differ from imported file Source"
+            |> Expect.notEqual v2.Source p2d.Source
+    ]
+
+// -----------------------------------------------------------------------
+// Source: cross-package (two sibling packages)
+// -----------------------------------------------------------------------
+
+// packages/data-layer/ imports from ../validators/index
+// data-layer entry types → fallback → "@app/data-layer" (own package.json)
+// validators types → import specifier → "../validators/index"
+let crossPackageSourceTests =
+    testList "source: cross-package siblings" [
+        let result = createSubdirTestReader "packages/data-layer/index" |> runReader
+        testCase "DataModel Source = '@app/data-layer' (entry file package.json)" <| fun _ ->
+            let iface = result |> findInterface "DataModel"
+            "Source should be '@app/data-layer'"
+            |> Expect.equal iface.Source (Some "@app/data-layer")
+        testCase "ModelId alias Source = '@app/data-layer'" <| fun _ ->
+            let alias = result |> findAlias "ModelId"
+            "Source should be '@app/data-layer'"
+            |> Expect.equal alias.Source (Some "@app/data-layer")
+        testCase "Validator Source = '../validators/index' (import specifier)" <| fun _ ->
+            let iface = result |> findInterface "Validator"
+            "Source should be '../validators/index'"
+            |> Expect.equal iface.Source (Some "../validators/index")
+        testCase "DataModel and Validator have different Sources" <| fun _ ->
+            let dm = result |> findInterface "DataModel"
+            let v = result |> findInterface "Validator"
+            "Types from different packages should have different Sources"
+            |> Expect.notEqual dm.Source v.Source
+    ]
+
+// Fixture: packages/validators/index.d.ts — loaded directly as entry
+//
+// Fallback walks up to its own package.json → "@app/validators".
+let validatorsDirectSourceTests =
+    testList "source: validators package direct" [
+        let result = createSubdirTestReader "packages/validators/index" |> runReader
+        testCase "Validator Source = '@app/validators' (own package.json)" <| fun _ ->
+            let iface = result |> findInterface "Validator"
+            "Source should be '@app/validators'"
+            |> Expect.equal iface.Source (Some "@app/validators")
+        testCase "ValidationResult Source = '@app/validators'" <| fun _ ->
+            let alias = result |> findAlias "ValidationResult"
+            "Source should be '@app/validators'"
+            |> Expect.equal alias.Source (Some "@app/validators")
+    ]
+
+// -----------------------------------------------------------------------
+// Source: nested sub-package (package.json at two levels)
+// -----------------------------------------------------------------------
+
+// framework/index.d.ts imports from ./plugins/index.
+// The plugins/ subfolder has its OWN package.json ("@app/framework-plugins").
+// Entry types → fallback → "@app/framework" (outer package.json).
+// Plugin types → import specifier → "./plugins/index".
+let nestedSubPackageSourceTests =
+    testList "source: nested sub-package via import" [
+        let result = createSubdirTestReader "packages/framework/index" |> runReader
+        testCase "Framework Source = '@app/framework' (entry package.json)" <| fun _ ->
+            let iface = result |> findInterface "Framework"
+            "Source should be '@app/framework'"
+            |> Expect.equal iface.Source (Some "@app/framework")
+        testCase "FrameworkConfig Source = '@app/framework'" <| fun _ ->
+            let iface = result |> findInterface "FrameworkConfig"
+            "Source should match Framework (same file)"
+            |> Expect.equal iface.Source (Some "@app/framework")
+        testCase "Plugin Source = './plugins/index' (import specifier)" <| fun _ ->
+            let iface = result |> findInterface "Plugin"
+            "Source should be './plugins/index'"
+            |> Expect.equal iface.Source (Some "./plugins/index")
+        testCase "Framework and Plugin have different Sources" <| fun _ ->
+            let fw = result |> findInterface "Framework"
+            let pl = result |> findInterface "Plugin"
+            "Parent and sub-package types should have different Sources"
+            |> Expect.notEqual fw.Source pl.Source
+    ]
+
+// Fixture: packages/framework/plugins/index.d.ts — loaded directly as entry.
+// Fallback finds the sub-package's OWN package.json → "@app/framework-plugins",
+// NOT the parent's "@app/framework".
+let subPackageDirectSourceTests =
+    testList "source: sub-package loaded directly" [
+        let result = createSubdirTestReader "packages/framework/plugins/index" |> runReader
+        testCase "Plugin Source = '@app/framework-plugins' (own package.json)" <| fun _ ->
+            let iface = result |> findInterface "Plugin"
+            "Source should be '@app/framework-plugins'"
+            |> Expect.equal iface.Source (Some "@app/framework-plugins")
+        testCase "PluginFactory Source = '@app/framework-plugins'" <| fun _ ->
+            let alias = result |> findAlias "PluginFactory"
+            "Source should be '@app/framework-plugins'"
+            |> Expect.equal alias.Source (Some "@app/framework-plugins")
+    ]
+
+// -----------------------------------------------------------------------
+// Source: deep transitive imports (3-level chain)
+// -----------------------------------------------------------------------
+
+// packages/app/index.d.ts → views/dashboard.d.ts → components/widget.d.ts
+// AppConfig  → "my-app" (entry, fallback to package.json)
+// Dashboard  → "./views/dashboard" (1st-level import specifier)
+// Widget     → "../components/widget" (2nd-level, from dashboard's import)
+let deepTransitiveSourceTests =
+    testList "source: deep transitive imports" [
+        let result = createSubdirTestReader "packages/app/index" |> runReader
+        testCase "AppConfig Source = 'my-app' (entry package.json)" <| fun _ ->
+            let iface = result |> findInterface "AppConfig"
+            "Source should be 'my-app'"
+            |> Expect.equal iface.Source (Some "my-app")
+        testCase "Dashboard Source = './views/dashboard' (1st-level import)" <| fun _ ->
+            let iface = result |> findInterface "Dashboard"
+            "Source should be './views/dashboard'"
+            |> Expect.equal iface.Source (Some "./views/dashboard")
+        testCase "Widget Source = '../components/widget' (2nd-level transitive)" <| fun _ ->
+            let iface = result |> findInterface "Widget"
+            "Source should be '../components/widget'"
+            |> Expect.equal iface.Source (Some "../components/widget")
+        testCase "all three files have distinct Sources" <| fun _ ->
+            let app = result |> findInterface "AppConfig"
+            let dash = result |> findInterface "Dashboard"
+            let widget = result |> findInterface "Widget"
+            let sources = set [ app.Source; dash.Source; widget.Source ]
+            "Three files should produce three distinct Sources"
+            |> Expect.hasLength sources 3
+    ]
+
+// Fixture: packages/app/views/dashboard.d.ts — loaded as entry directly.
+// Own fallback walks up to packages/app/package.json → "my-app".
+// Its own import of ../components/widget is still resolved via specifier.
+let middleOfChainDirectSourceTests =
+    testList "source: middle of chain loaded directly" [
+        let result = createSubdirTestReader "packages/app/views/dashboard" |> runReader
+        testCase "Dashboard Source = 'my-app' (walks up to app package.json)" <| fun _ ->
+            let iface = result |> findInterface "Dashboard"
+            "Source should be 'my-app'"
+            |> Expect.equal iface.Source (Some "my-app")
+        testCase "Widget Source = '../components/widget' (import specifier)" <| fun _ ->
+            let iface = result |> findInterface "Widget"
+            "Source should be '../components/widget'"
+            |> Expect.equal iface.Source (Some "../components/widget")
+    ]
+
+// Fixture: packages/app/components/widget.d.ts — loaded as entry directly.
+// No imports; fallback walks up to packages/app/package.json → "my-app".
+let leafDirectSourceTests =
+    testList "source: leaf file loaded directly" [
+        let result = createSubdirTestReader "packages/app/components/widget" |> runReader
+        testCase "Widget Source = 'my-app' (walks up to app package.json)" <| fun _ ->
+            let iface = result |> findInterface "Widget"
+            "Source should be 'my-app'"
+            |> Expect.equal iface.Source (Some "my-app")
+        testCase "WidgetSize Source = 'my-app'" <| fun _ ->
+            let alias = result |> findAlias "WidgetSize"
+            "Source should match Widget (same file)"
+            |> Expect.equal alias.Source (Some "my-app")
     ]
 
 // -----------------------------------------------------------------------
@@ -1410,11 +1780,22 @@ let tests =
         namespaceTests
         conditionalTests
         templateLiteralTests
+        refEnumTests
+        functionRefTests
         multiFileTests
         packageSourceTests
         importSourceTests
         fallbackSourceTests
-        refEnumTests
+        namespaceSourceTests
+        importPackageSourceTests
+        multiFileSourceTests
+        crossPackageSourceTests
+        validatorsDirectSourceTests
+        nestedSubPackageSourceTests
+        subPackageDirectSourceTests
+        deepTransitiveSourceTests
+        middleOfChainDirectSourceTests
+        leafDirectSourceTests
     ]
 
 Mocha.runTests tests |> ignore

@@ -11,7 +11,8 @@ module private Diagnostics =
         let exportStore = encodedResult.ExportedDeclarations
         let trueTypeKeys =
             typeMap
-            |> Map.fold (fun acc _ -> Utils.getKeys >> (@) acc) []
+            |> Map.toArray
+            |> Array.Parallel.collect (fun (_, value) -> Utils.getKeys value)
         let trueTypeMissingKeys =
             typeMap.Keys
             |> Set
@@ -60,15 +61,28 @@ module Decoder =
     let read fileName =
         File.ReadAllText(fileName)
         |> Decode.Auto.fromString<Schema.EncodedResult>
-        |> Result.map(fun result ->
+        |> Result.map(Utils.compress >> fun result ->
                 #if DEBUG
                 Diagnostics.healthCheck result
                 |> Diagnostics.printHealthCheck
                 #endif
-                // {
-                //     TypeMap = types
-                //     LibSet = Set [] // todo - reinstate
-                //     NodeMap = others
-                //     TopLevelKeys = topLevelKeys |> Array.toList
-                // }
+                
+                {
+                    TypeMap = result.Types
+                    ExportTypeMap = result.ExportedDeclarations
+                    ExportMap =
+                        result.ExportedDeclarations
+                        |> Seq.map (fun kv ->
+                            match kv.Value with
+                            | TsExportDeclaration.Variable { Source = source } 
+                            | TsExportDeclaration.Interface { Source = source } 
+                            | TsExportDeclaration.TypeAlias { Source = source } 
+                            | TsExportDeclaration.Class { Source = source } 
+                            | TsExportDeclaration.Enum { Source = source } 
+                            | TsExportDeclaration.Module { Source = source } -> source.Value, kv.Value
+                            | TsExportDeclaration.Function funs ->
+                                funs.ValueOrHead.Source.Value, kv.Value
+                            )
+                        |> Map
+                }
             )
