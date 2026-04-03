@@ -4,14 +4,11 @@ open Xantham
 open System.IO
 
 // Json Typing
-type private DuplicateMap = Map<TypeKey, TsAstNode * TsAstNode array>
-type private TopLevelKeys = TypeKey array
-type private GlueNodeMap = Map<TypeKey, TsAstNode>
-type private EncodedResult = GlueNodeMap * DuplicateMap * TopLevelKeys
-
 module private Diagnostics =
-    let healthCheck (encodedResult: TypeMap * NodeMap * TopLevelKeys) =
-        let typeMap, nodeStore, _ = encodedResult
+    open Schema
+    let healthCheck (encodedResult: EncodedResult) =
+        let typeMap = encodedResult.Types
+        let exportStore = encodedResult.ExportedDeclarations
         let trueTypeKeys =
             typeMap
             |> Map.fold (fun acc _ -> Utils.getKeys >> (@) acc) []
@@ -21,7 +18,7 @@ module private Diagnostics =
             |> Set.difference (Set trueTypeKeys)
         let foundKeysInNodeStore =
             trueTypeMissingKeys
-            |> Set.intersect (Set nodeStore.Keys)
+            |> Set.intersect (Set exportStore.Keys)
         let unemittedKeys =
             Set.difference
                 trueTypeMissingKeys
@@ -60,66 +57,18 @@ module private Diagnostics =
         
 
 module Decoder =
-    let private mapAstToType (node: TsAstNode) =
-        match node with
-        | TsAstNode.Alias node -> TsType.TypeAlias node |> Ok
-        | TsAstNode.Tuple node -> TsType.Tuple node |> Ok
-        | TsAstNode.Interface node -> TsType.Interface node |> Ok
-        | TsAstNode.Variable node -> TsType.Variable node |> Ok
-        | TsAstNode.Primitive node -> TsType.Primitive node |> Ok
-        | TsAstNode.Predicate node -> TsType.Predicate node |> Ok
-        | TsAstNode.Literal node -> TsType.Literal node |> Ok
-        | TsAstNode.TypeLiteral node -> TsType.TypeLiteral node |> Ok
-        | TsAstNode.TypeParameter node -> TsType.TypeParameter node |> Ok
-        | TsAstNode.IndexAccessType node -> TsType.IndexedAccess node |> Ok
-        | TsAstNode.FunctionDeclaration node -> TsType.Function node |> Ok
-        | TsAstNode.TypeReference node -> TsType.TypeReference node |> Ok
-        | TsAstNode.Index node -> TsType.Index node |> Ok
-        | TsAstNode.Array node -> node |> TsType.TypeReference |> TsType.Array |> Ok
-        | TsAstNode.Class node -> TsType.Class node |> Ok
-        | TsAstNode.Conditional node -> TsType.Conditional node |> Ok
-        | TsAstNode.Union node -> TsType.Union node |> Ok
-        | TsAstNode.Intersection node -> TsType.Intersection node |> Ok
-        | TsAstNode.Module node -> TsType.Module node |> Ok
-        | TsAstNode.Enum node -> TsType.Enum node |> Ok
-        | TsAstNode.Property node -> NodeStore.Property node |> Error
-        | TsAstNode.Parameter node -> NodeStore.Parameter node |> Error
-        | TsAstNode.Method node -> NodeStore.Method node |> Error
-        | TsAstNode.Constructor node -> NodeStore.Constructor node |> Error
-        | TsAstNode.EnumCase node -> TsType.EnumCase node |> Ok
-        | TsAstNode.SubstitutionType node -> NodeStore.SubstitutionType node |> Error
-        | TsAstNode.Optional node -> TsType.Optional node |> Ok
-        | TsAstNode.ConstructSignature node -> NodeStore.ConstructSignature node |> Error
-        | TsAstNode.IndexSignature node -> NodeStore.IndexSignature node |> Error
-        | TsAstNode.GetAccessor node -> NodeStore.GetAccessor node |> Error
-        | TsAstNode.SetAccessor node -> NodeStore.SetAccessor node |> Error
-        | TsAstNode.CallSignature node -> node |> NodeStore.CallSignature |> Error
-        | TsAstNode.GlobalThis -> TsType.GlobalThis |> Ok
-        | TsAstNode.TemplateLiteral tsTemplateLiteralType -> TsType.TemplateLiteral tsTemplateLiteralType |> Ok
-        
     let read fileName =
         File.ReadAllText(fileName)
-        |> Decode.Auto.fromString<EncodedResult>
-        |> Result.map(function
-            | map, duplicateMap, topLevelKeys ->
-                let types, others =
-                    map
-                    |> Map.map(fun _ -> mapAstToType)
-                    |> Map.partition(fun _ -> _.IsOk)
-                let types =
-                    types
-                    |> Map.map(fun _ -> function Ok value -> value | _ -> failwith "Unreachable")
-                let others =
-                    others
-                    |> Map.map(fun _ -> function Error value -> value | _ -> failwith "Unreachable")
+        |> Decode.Auto.fromString<Schema.EncodedResult>
+        |> Result.map(fun result ->
                 #if DEBUG
-                Diagnostics.healthCheck (types, others, topLevelKeys)
+                Diagnostics.healthCheck result
                 |> Diagnostics.printHealthCheck
                 #endif
-                {
-                    TypeMap = types
-                    LibSet = Set [] // todo - reinstate
-                    NodeMap = others
-                    TopLevelKeys = topLevelKeys |> Array.toList
-                }
+                // {
+                //     TypeMap = types
+                //     LibSet = Set [] // todo - reinstate
+                //     NodeMap = others
+                //     TopLevelKeys = topLevelKeys |> Array.toList
+                // }
             )

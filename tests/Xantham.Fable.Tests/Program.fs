@@ -1347,6 +1347,39 @@ let fallbackSourceTests =
             |> Expect.isSome iface.Source
     ]
 
+let refEnumTests =
+    testList "ref-enum.d.ts" [
+        let result = createTestReader "ref-enum" |> runReader
+        testCase "Results contain an Enum and a Type Alias" <| fun _ ->
+            let values =
+                result.ExportedDeclarations.Values
+                |> Seq.filter (function TsExportDeclaration.Enum _ | TsExportDeclaration.TypeAlias _ -> true | _ -> false)
+            ""
+            |> Expect.hasLength values 2
+        testCase "Enum has exactly 3 members" <| fun _ ->
+            let e = result |> findEnum "RefEnum"
+            "" |> Expect.hasLength e.Members 3
+        testCase "Type Alias is a union" <| fun _ ->
+            let alias = result |> findAlias "RefEnumUnion"
+            let aliasType = result |> findType alias.Type
+            "Expected TypeAlias to resolve to a union"
+            |> Expect.isTrue aliasType.IsUnion
+        testCase "Type Alias union members are valid pointers" <| fun _ ->
+            let alias = result |> findAlias "RefEnumUnion"
+            let unionTypes =
+                result
+                |> findType alias.Type
+                |> function TsType.Union (TsTypeUnion types) -> types | _ -> []
+            let unknownMembers =
+                unionTypes
+                |> List.except result.Types.Keys
+            $"{unknownMembers}"
+            |> Expect.isEmpty unknownMembers
+            
+            
+                
+    ]
+
 // -----------------------------------------------------------------------
 // Suite
 // -----------------------------------------------------------------------
@@ -1381,6 +1414,7 @@ let tests =
         packageSourceTests
         importSourceTests
         fallbackSourceTests
+        refEnumTests
     ]
 
 Mocha.runTests tests |> ignore

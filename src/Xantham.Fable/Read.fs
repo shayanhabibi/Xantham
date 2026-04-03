@@ -31,13 +31,13 @@ module Internal =
     }
     module Log =
         let prefix = chalk.redBright.Invoke "[CIRCREF]"
-        let inline healthCheckError<'T> (typ: 'T) (o: obj) = Log.emit $"{prefix} - { chalk.yellowBright.Invoke typeof<'T>.Name}: {o} references itself"
+        let inline healthCheckError<'T> (typeKey: TypeKey) (typ: 'T) (o: obj) = Log.emit $"{prefix} - { chalk.yellowBright.Invoke typeof<'T>.Name}: {o} references itself [{chalk.yellowBright.Invoke typeKey}]"
             
     let rec healthCheckType (typKey: TypeKey) (node: TsType) =
         match node with
         | TsType.TemplateLiteral node ->
             if node.Types |> List.contains typKey then
-                Log.healthCheckError node node
+                Log.healthCheckError typKey node node
         | TsType.GlobalThis -> ()
         | TsType.Tuple tsTuple ->
             tsTuple.Types
@@ -46,7 +46,7 @@ module Internal =
                 | TsTupleElement.Fixed { Type = key }
                 | TsTupleElement.FixedLabeled(_, { Type = key }) ->
                     if key = typKey then
-                        Log.healthCheckError tsTuple tsTuple
+                        Log.healthCheckError typKey tsTuple tsTuple
                 )
         | TsType.Interface tsInterface -> ()
         | TsType.Primitive typeKindPrimitive -> ()
@@ -54,36 +54,36 @@ module Internal =
         | TsType.Literal tsLiteral -> ()
         | TsType.TypeLiteral tsTypeLiteral -> ()
         | TsType.TypeParameter tsTypeParameter ->
-            if Some typKey = tsTypeParameter.Constraint then Log.healthCheckError tsTypeParameter tsTypeParameter.Name
-            elif Some typKey = tsTypeParameter.Default then Log.healthCheckError tsTypeParameter tsTypeParameter.Name
-        | TsType.Index tsIndex -> if typKey = tsIndex.Type then Log.healthCheckError tsIndex tsIndex
+            if Some typKey = tsTypeParameter.Constraint then Log.healthCheckError typKey tsTypeParameter tsTypeParameter.Name
+            elif Some typKey = tsTypeParameter.Default then Log.healthCheckError typKey tsTypeParameter tsTypeParameter.Name
+        | TsType.Index tsIndex -> if typKey = tsIndex.Type then Log.healthCheckError typKey tsIndex tsIndex
         | TsType.TypeReference tsTypeReference ->
-            if typKey = tsTypeReference.Type then Log.healthCheckError tsTypeReference tsTypeReference
-            elif Some typKey = tsTypeReference.ResolvedType then Log.healthCheckError tsTypeReference tsTypeReference
+            if typKey = tsTypeReference.Type then Log.healthCheckError typKey tsTypeReference tsTypeReference
+            elif Some typKey = tsTypeReference.ResolvedType then Log.healthCheckError typKey tsTypeReference tsTypeReference
         | TsType.Enum tsEnumType -> ()
         | TsType.EnumCase tsEnumCase -> ()
         | TsType.Substitution tsSubstitutionType -> ()
         | TsType.Conditional tsConditionalType ->
-            if typKey = tsConditionalType.Check then Log.healthCheckError tsConditionalType tsConditionalType
-            elif typKey = tsConditionalType.Extends then Log.healthCheckError tsConditionalType tsConditionalType
-            elif typKey = tsConditionalType.True then Log.healthCheckError tsConditionalType tsConditionalType
-            elif typKey = tsConditionalType.False then Log.healthCheckError tsConditionalType tsConditionalType
+            if typKey = tsConditionalType.Check then Log.healthCheckError typKey tsConditionalType tsConditionalType
+            elif typKey = tsConditionalType.Extends then Log.healthCheckError typKey tsConditionalType tsConditionalType
+            elif typKey = tsConditionalType.True then Log.healthCheckError typKey tsConditionalType tsConditionalType
+            elif typKey = tsConditionalType.False then Log.healthCheckError typKey tsConditionalType tsConditionalType
         | TsType.Class tsClass -> ()
         | TsType.Union tsTypeUnion ->
             if tsTypeUnion.Types |> List.contains typKey then
-                Log.healthCheckError tsTypeUnion tsTypeUnion
+                Log.healthCheckError typKey tsTypeUnion tsTypeUnion
         | TsType.Intersection tsTypeIntersection ->
             if tsTypeIntersection.Types |> List.contains typKey then
-                Log.healthCheckError tsTypeIntersection tsTypeIntersection
-        | TsType.Optional tsTypeReference -> if typKey = tsTypeReference.Type then Log.healthCheckError None tsTypeReference
+                Log.healthCheckError typKey tsTypeIntersection tsTypeIntersection
+        | TsType.Optional tsTypeReference -> if typKey = tsTypeReference.Type then Log.healthCheckError typKey None tsTypeReference
         | TsType.IndexedAccess tsIndexAccessType ->
             if typKey = tsIndexAccessType.Object || typKey = tsIndexAccessType.Index
-            then Log.healthCheckError tsIndexAccessType tsIndexAccessType
+            then Log.healthCheckError typKey tsIndexAccessType tsIndexAccessType
         | TsType.ReadOnly tsType
         | TsType.Array tsType ->
             match tsType with
             | TsType.TypeReference { ResolvedType = Some key }
-            | TsType.TypeReference { Type = key } when key = typKey -> Log.healthCheckError tsType tsType
+            | TsType.TypeReference { Type = key } when key = typKey -> Log.healthCheckError typKey tsType tsType
             | _ -> ()
 
     let private unknownKey = TypeKindPrimitive.Unknown.TypeKey

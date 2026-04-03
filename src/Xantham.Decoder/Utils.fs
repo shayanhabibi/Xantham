@@ -87,18 +87,6 @@ let rec getKeys typ =
         ]
     | TsType.Primitive _ -> []
     | TsType.Enum _ -> []
-    | TsType.TypeAlias glueTypeAlias -> [
-            glueTypeAlias.Type
-            yield!
-                glueTypeAlias.TypeParameters
-                |> List.collect (function
-                    typ,{ Constraint = c; Default = d } ->
-                        [
-                            typ
-                            match c with Some v -> v | _ -> ()
-                            match d with Some v -> v | _ -> ()
-                        ])
-        ]
 
     | TsType.Intersection (TsTypeIntersection values) 
     | TsType.Union (TsTypeUnion values) -> values
@@ -108,7 +96,6 @@ let rec getKeys typ =
             glueIndexAccessType.Object
             glueIndexAccessType.Index
         ]
-    | TsType.Module glueModuleDeclaration -> glueModuleDeclaration.Types
     | TsType.TypeReference glueTypeReference ->
         [
             glueTypeReference.Type
@@ -134,6 +121,8 @@ let rec getKeys typ =
     | TsType.EnumCase _ -> []
     | TsType.TemplateLiteral tsTemplateLiteralType -> tsTemplateLiteralType.Types
     | TsType.Optional tsTypeReference -> getKeys (TsType.TypeReference tsTypeReference)
+    | TsType.Substitution tsSubstitutionType -> [ tsSubstitutionType.Base; tsSubstitutionType.Constraint ]
+
 and getKeysFromExport export =
     match export with
     | TsExportDeclaration.Variable glueVariable -> [ glueVariable.Type ]
@@ -153,4 +142,19 @@ and getKeysFromExport export =
                             match d with Some v -> v | _ -> ()
                         ])
         ])
-    | _ -> []
+    | TsExportDeclaration.TypeAlias glueTypeAlias -> [
+            glueTypeAlias.Type
+            yield!
+                glueTypeAlias.TypeParameters
+                |> List.collect (function
+                    typ,{ Constraint = c; Default = d } ->
+                        [
+                            typ
+                            match c with Some v -> v | _ -> ()
+                            match d with Some v -> v | _ -> ()
+                        ])
+        ]
+    | TsExportDeclaration.Module glueModuleDeclaration -> glueModuleDeclaration.Exports |> List.collect getKeysFromExport
+    | TsExportDeclaration.Interface tsInterface -> TsType.Interface tsInterface |> getKeys
+    | TsExportDeclaration.Class tsClass -> TsType.Class tsClass |> getKeys
+    | TsExportDeclaration.Enum _ -> []

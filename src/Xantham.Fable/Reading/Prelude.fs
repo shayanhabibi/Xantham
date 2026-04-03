@@ -44,9 +44,13 @@ module TypeStore =
             output is fine, but the dangling builder messages is a frustrating UX.*)
             
             | TypeDeclaration.ExpressionWithTypeArguments _
-            | TypeDeclaration.EnumMember _
+            // now that we separate types and export declarations, we hit missing
+            // refs as the connection to the type signals is broken. The easier fix
+            // is removing this since it no longer is required.
+            // | TypeDeclaration.EnumMember _
             | TypeDeclaration.TypeAlias _
             | TypeDeclaration.VariableDeclaration _
+            | TypeDeclaration.VariableStatement _
             // TypeDeclaration.TypeParameter: getTypeAtLocation on a TypeParameterDeclaration
             // returns the same type object as TypeFlagPrimary.TypeParameter (type-level), causing
             // their TypeStore entries to collide when their constraint representations differ.
