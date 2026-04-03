@@ -23,22 +23,17 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
                 symbol.declarations
                 |> Option.map (
                     _.AsArray
-                    >> Array.map (
-                        ctx.CreateXanthamTag >> fst >> function
-                            | TagState.Unvisited tag ->
-                                pushToStack ctx tag
-                                tag
-                            | TagState.Visited tag ->
-                                tag
-                        )
+                    >> Array.map ( ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx id )
                     )
                 |> Option.defaultValue [||]
             match declarations with
             | [||] -> ()
             | _ -> 
                 let decl = declarations[0]
-                GuardedData.AstNodeBuilder.getOrSetDefault xanTag
-                |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.getOrSetDefault decl).Value)
+                xanTag.Builder
+                |> Signal.fulfillWith (fun () -> decl.Builder.Value)
+                xanTag.ExportBuilder
+                |> Signal.fulfillWith (fun () -> decl.ExportBuilder.Value)
         | None -> Log.error "failed to get symbol"
     | ModulesAndExports.ImportEqualsDeclaration mportEqualsDeclaration ->
         match
@@ -53,22 +48,17 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
                 symbol.declarations
                 |> Option.map (
                     _.AsArray
-                    >> Array.map (
-                        ctx.CreateXanthamTag >> fst >> function
-                            | TagState.Unvisited tag ->
-                                pushToStack ctx tag
-                                tag
-                            | TagState.Visited tag ->
-                                tag
-                        )
+                    >> Array.map ( ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx id )
                     )
                 |> Option.defaultValue [||]
             match declarations with
             | [||] -> ()
             | _ -> 
                 let decl = declarations[0]
-                GuardedData.AstNodeBuilder.getOrSetDefault xanTag
-                |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.getOrSetDefault decl).Value)
+                xanTag.Builder
+                |> Signal.fulfillWith (fun () -> decl.Builder.Value)
+                xanTag.ExportBuilder
+                |> Signal.fulfillWith (fun () -> decl.ExportBuilder.Value)
         | None -> Log.error "failed to get symbol"
     | ModulesAndExports.AssertClause assertClause -> ()
     | ModulesAndExports.ExportAssignment exportAssignment -> ()
@@ -83,26 +73,17 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
                 symbol.declarations
                 |> Option.map (
                     _.AsArray
-                    >> Array.map (
-                        ctx.CreateXanthamTag >> fst >> function
-                            | TagState.Unvisited tag ->
-                                ctx.routeSourceTo tag source
-                                pushToStack ctx tag
-                                tag
-                            | TagState.Visited tag ->
-                                ctx.routeSourceTo tag source
-                                tag
-                        )
+                    >> Array.map ( ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx (fun tag -> ctx.routeSourceTo tag source; tag ))
                     )
                 |> Option.defaultValue [||]
             match declarations with
             | [||] -> ()
             | _ -> 
                 let decl = declarations[0]
-                GuardedData.TypeSignal.getOrSetDefault xanTag
-                |> Signal.fulfillWith (fun () -> (GuardedData.TypeSignal.getOrSetDefault decl).Value)
-                GuardedData.AstNodeBuilder.getOrSetDefault xanTag
-                |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.getOrSetDefault decl).Value)
+                xanTag.TypeSignal
+                |> Signal.fulfillWith (fun () -> decl.TypeSignal.Value)
+                xanTag.Builder
+                |> Signal.fulfillWith (fun () -> decl.Builder.Value)
         | None -> Log.error "failed to get symbol"
     | ModulesAndExports.NamedExports namedExports -> ()
     | ModulesAndExports.NamespaceExport namespaceExportDeclaration -> ()

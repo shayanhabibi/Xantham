@@ -5,12 +5,18 @@ open Xantham.Fable.Types
 
 let dispatch (ctx: TypeScriptReader) (tag: XanthamTag) =
     match tag.Value with
+    // noop
     | Ignore _ -> ()
-    | XanTagKind.MemberDeclaration _ when
-        tryGetOrRegisterMemberStore ctx tag |> Option.isNone -> ()
+    // ====== Member-Level Dispatch ========
+    // Already dispatched - noop
+    | XanTagKind.MemberDeclaration _ when tryGetOrRegisterMemberStore ctx tag |> Option.isNone -> ()
+    // Dispatch
     | XanTagKind.MemberDeclaration memberDeclaration ->
         MemberDeclaration.dispatch ctx tag memberDeclaration
+    // ====== Type-Level Dispatch ========
+    // Already dispatched - noop
     | _ when tryGetOrRegisterStore ctx tag |> Option.isNone -> ()
+    | Patterns.XanTagKind.CanBeExported when tryGetOrRegisterExportedStore ctx tag |> Option.isNone -> ()
     | XanTagKind.ModulesAndExports modulesAndExports ->
         ModulesAndExports.dispatch ctx tag modulesAndExports
     | XanTagKind.Type typeFlagPrimary ->

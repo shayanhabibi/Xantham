@@ -56,13 +56,15 @@ let inline private resolve (slots: Signal<'a voption> array) =
 /// Signal-based equivalent of <c>TsEnumCaseBuilder</c>, builds to <see cref="T:Xantham.TsEnumCase"/>.
 type SEnumCaseBuilder = {
     Source: Signal<ModuleName>
+    Parent: TypeSignal
     FullyQualifiedName: string array
     Name: string
     Value: TsLiteral
     Documentation: TsComment list
 } with
     member this.Build() : TsEnumCase =
-        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
+        { Parent = this.Parent.Value
+          Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Name = this.Name
           Value = this.Value
@@ -213,6 +215,7 @@ type SFunctionBuilder = {
     Parameters: Signal<SParameterBuilder voption> array
     TypeParameters: Signal<InlinedSTypeParameterBuilder voption> array
     Documentation: TsComment list
+    SignatureKey: TypeSignal
 } with
     member this.Build() : TsFunction =
         { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
@@ -228,7 +231,8 @@ type SFunctionBuilder = {
               this.TypeParameters
               |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
               |> Array.toList
-          Documentation = this.Documentation }
+          Documentation = this.Documentation
+          SignatureKey = this.SignatureKey.Value }
 
 /// Signal-based equivalent of <c>TsCallSignatureBuilder</c>, builds to <see cref="T:Xantham.TsCallSignature"/>.
 type SCallSignatureBuilder = {
@@ -412,23 +416,6 @@ type SAliasBuilder = {
               |> Array.toList
           Documentation = this.Documentation }
 
-/// Signal-based equivalent of <c>TsModuleBuilder</c>, builds to <see cref="T:Xantham.TsModule"/>.
-type SModuleBuilder = {
-    Source: Signal<ModuleName>
-    FullyQualifiedName: string array
-    Name: string
-    IsNamespace: bool
-    IsRecursive: bool
-    /// Each slot is filled with the TypeKey of a resolved member type.
-    Types: TypeSignal array
-} with
-    member this.Build() : TsModule =
-        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
-          FullyQualifiedName = Array.toList this.FullyQualifiedName
-          Name = this.Name
-          IsNamespace = this.IsNamespace
-          IsRecursive = this.IsRecursive
-          Types = this.Types |> Array.map _.Value |> Array.toList }
 
 /// Signal-based equivalent of <c>TsSubstitutionTypeBuilder</c>, builds to <see cref="T:Xantham.TsSubstitutionType"/>.
 type SSubstitutionTypeBuilder = {
@@ -557,28 +544,38 @@ type SPredicateBuilder = {
           Type = this.Type.Value
           IsAssertion = this.IsAssertion }
 
+/// Signal-based equivalent of <c>TsModuleBuilder</c>, builds to <see cref="T:Xantham.TsModule"/>.
+type SModuleBuilder = {
+    Source: Signal<ModuleName>
+    FullyQualifiedName: string array
+    Name: string
+    IsNamespace: bool
+    IsRecursive: bool
+    /// Each slot is filled with the TypeKey of a resolved member type.
+    Exports: PendingSignal<STsExportDeclaration> array
+} with
+    member this.Build() : TsModule =
+        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
+          FullyQualifiedName = Array.toList this.FullyQualifiedName
+          Name = this.Name
+          IsNamespace = this.IsNamespace
+          IsRecursive = this.IsRecursive
+          Exports = this.Exports |> Array.choose (_.Value >> ValueOption.map _.Build() >> ValueOption.toOption) |> Array.toList }
+        
 // -----------------------------------------------------------------------
 // Top-level reactive builder DU
 // -----------------------------------------------------------------------
 
-/// <summary>
-/// Signal-based equivalent of <c>TsAstNodeBuilder</c>.
-/// Each case wraps the corresponding <c>SXxx</c> builder type.
-/// Call <c>.Build()</c> to snapshot all signal values into a <see cref="T:PartasTypes.TsAstNode"/>.
-/// </summary>
-type STsAstNodeBuilder =
+and [<RequireQualifiedAccess>] SType =
     | GlobalThis
     | Tuple of STupleBuilder
     | Interface of SInterfaceBuilder
-    | Variable of SVariableBuilder
     | Primitive of TypeKindPrimitive
     | Predicate of SPredicateBuilder
     | Literal of TsLiteral
     | TypeLiteral of STypeLiteralBuilder
     | TypeParameter of STypeParameterBuilder
     | IndexAccessType of SIndexAccessTypeBuilder
-    | FunctionDeclaration of SFunctionBuilder
-    | Alias of SAliasBuilder
     | Index of SIndexBuilder
     | TypeReference of STypeReferenceBuilder
     | Array of STypeReferenceBuilder
@@ -590,88 +587,48 @@ type STsAstNodeBuilder =
     | Union of STypeUnionBuilder
     | Intersection of STypeIntersectionBuilder
     | Optional of STypeReferenceBuilder
-    | Module of SModuleBuilder
     | TemplateLiteral of STemplateLiteralTypeBuilder
-    member this.Build() : TsAstNode =
+    member this.Build() : TsType =
         match this with
-        | GlobalThis             -> TsAstNode.GlobalThis
-        | Tuple v                -> v.Build() |> TsAstNode.Tuple
-        | Interface v            -> v.Build() |> TsAstNode.Interface
-        | Variable v             -> v.Build() |> TsAstNode.Variable
-        | Primitive v            -> TsAstNode.Primitive v
-        | Predicate v            -> v.Build() |> TsAstNode.Predicate
-        | Literal v              -> TsAstNode.Literal v
-        | TypeLiteral v          -> v.Build() |> TsAstNode.TypeLiteral
-        | TypeParameter v        -> v.Build() |> TsAstNode.TypeParameter
-        | IndexAccessType v      -> v.Build() |> TsAstNode.IndexAccessType
-        | FunctionDeclaration v  -> v.Build() |> TsOverloadableConstruct.Create |> TsAstNode.FunctionDeclaration
-        | Alias v                -> v.Build() |> TsAstNode.Alias
-        | Index v                -> v.Build() |> TsAstNode.Index
-        | TypeReference v        -> v.Build() |> TsAstNode.TypeReference
-        | Array v                -> v.Build() |> TsAstNode.Array
-        | Enum v                 -> v.Build() |> TsAstNode.Enum
-        | EnumCase v             -> v.Build() |> TsAstNode.EnumCase
-        | SubstitutionType v     -> v.Build() |> TsAstNode.SubstitutionType
-        | Conditional v          -> v.Build() |> TsAstNode.Conditional
-        | Class v                -> v.Build() |> TsAstNode.Class
-        | Union v                -> v.Build() |> TsAstNode.Union
-        | Intersection v         -> v.Build() |> TsAstNode.Intersection
-        | Optional v             -> v.Build() |> TsAstNode.Optional
-        | Module v               -> v.Build() |> TsAstNode.Module
-        | TemplateLiteral v      -> v.Build() |> TsAstNode.TemplateLiteral
+        | GlobalThis -> TsType.GlobalThis
+        | Tuple sTupleBuilder -> sTupleBuilder.Build() |> TsType.Tuple
+        | Interface sInterfaceBuilder -> sInterfaceBuilder.Build() |> TsType.Interface
+        | Primitive typeKindPrimitive -> typeKindPrimitive |> TsType.Primitive
+        | Predicate sPredicateBuilder -> sPredicateBuilder.Build() |> TsType.Predicate
+        | Literal tsLiteral -> tsLiteral |> TsType.Literal
+        | TypeLiteral sTypeLiteralBuilder -> sTypeLiteralBuilder.Build() |> TsType.TypeLiteral
+        | TypeParameter sTypeParameterBuilder -> sTypeParameterBuilder.Build() |> TsType.TypeParameter
+        | IndexAccessType sIndexAccessTypeBuilder -> sIndexAccessTypeBuilder.Build() |> TsType.IndexedAccess
+        | Index sIndexBuilder -> sIndexBuilder.Build() |> TsType.Index
+        | TypeReference sTypeReferenceBuilder -> sTypeReferenceBuilder.Build() |> TsType.TypeReference
+        | Array sTypeReferenceBuilder -> sTypeReferenceBuilder.Build() |> TsType.TypeReference |> TsType.Array
+        | Enum sEnumTypeBuilder -> sEnumTypeBuilder.Build() |> TsType.Enum
+        | EnumCase sEnumCaseBuilder -> sEnumCaseBuilder.Build() |> TsType.EnumCase
+        | SubstitutionType sSubstitutionTypeBuilder -> sSubstitutionTypeBuilder.Build() |> TsType.Substitution
+        | Conditional sConditionalTypeBuilder -> sConditionalTypeBuilder.Build() |> TsType.Conditional
+        | Class sClassBuilder -> sClassBuilder.Build() |> TsType.Class
+        | Union sTypeUnionBuilder -> sTypeUnionBuilder.Build() |> TsType.Union
+        | Intersection sTypeIntersectionBuilder -> sTypeIntersectionBuilder.Build() |> TsType.Intersection
+        | Optional sTypeReferenceBuilder -> sTypeReferenceBuilder.Build() |> TsType.Optional
+        | TemplateLiteral sTemplateLiteralTypeBuilder -> sTemplateLiteralTypeBuilder.Build() |> TsType.TemplateLiteral
 
-// -----------------------------------------------------------------------
-// Active patterns
-// -----------------------------------------------------------------------
-
-/// <summary>
-/// Active patterns for <c>TsAstNodeBuilder</c> (the original ref-based DU)
-/// and <c>STsAstNodeBuilder</c> (the signal-based DU).
-/// </summary>
-/// <example>
-/// <code lang="fsharp">
-/// match store.Glue with
-/// | Patterns.Builder.Interface b -> b.Name
-/// | Patterns.Builder.Method m    -> m.Name
-/// | _                            -> "?"
-///
-/// match sstore.Glue with
-/// | Patterns.SBuilder.Interface b -> b.Name
-/// | Patterns.SBuilder.Method m    -> m.Name
-/// | _                             -> "?"
-/// </code>
-/// </example>
-[<AutoOpen>]
-module Patterns =
-
-    // --- STsAstNodeBuilder (signal-based) ---
-    [<RequireQualifiedAccess>]
-    module SBuilder =
-        let inline (|GlobalThis|_|)         (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.GlobalThis       -> Some () | _ -> None
-        let inline (|Interface|_|)          (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Interface      x -> Some x  | _ -> None
-        let inline (|Class|_|)              (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Class          x -> Some x  | _ -> None
-        let inline (|Enum|_|)               (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Enum           x -> Some x  | _ -> None
-        let inline (|EnumCase|_|)           (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.EnumCase       x -> Some x  | _ -> None
-        let inline (|Alias|_|)              (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Alias          x -> Some x  | _ -> None
-        let inline (|Variable|_|)           (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Variable       x -> Some x  | _ -> None
-        let inline (|FunctionDeclaration|_|)(b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.FunctionDeclaration x -> Some x | _ -> None
-        let inline (|Module|_|)             (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Module         x -> Some x  | _ -> None
-        let inline (|Primitive|_|)          (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Primitive      x -> Some x  | _ -> None
-        let inline (|Literal|_|)            (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Literal        x -> Some x  | _ -> None
-        let inline (|TypeLiteral|_|)        (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.TypeLiteral    x -> Some x  | _ -> None
-        let inline (|TypeParameter|_|)      (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.TypeParameter  x -> Some x  | _ -> None
-        let inline (|TypeReference|_|)      (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.TypeReference  x -> Some x  | _ -> None
-        let inline (|Array|_|)              (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Array          x -> Some x  | _ -> None
-        let inline (|Optional|_|)           (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Optional       x -> Some x  | _ -> None
-        let inline (|Union|_|)              (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Union          x -> Some x  | _ -> None
-        let inline (|Intersection|_|)       (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Intersection   x -> Some x  | _ -> None
-        let inline (|Tuple|_|)              (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Tuple          x -> Some x  | _ -> None
-        let inline (|Conditional|_|)        (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Conditional    x -> Some x  | _ -> None
-        let inline (|IndexAccessType|_|)    (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.IndexAccessType x -> Some x | _ -> None
-        let inline (|Index|_|)              (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Index           x -> Some x | _ -> None
-        let inline (|SubstitutionType|_|)   (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.SubstitutionType x -> Some x | _ -> None
-        let inline (|Predicate|_|)          (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.Predicate       x -> Some x | _ -> None
-        let inline (|TemplateLiteral|_|)    (b: STsAstNodeBuilder) = match b with STsAstNodeBuilder.TemplateLiteral  x -> Some x | _ -> None
+and [<RequireQualifiedAccess>] STsExportDeclaration =
+    | Interface of SInterfaceBuilder
+    | Class of SClassBuilder
+    | Enum of SEnumTypeBuilder
+    | Variable of SVariableBuilder
+    | Function of SFunctionBuilder
+    | TypeAlias of SAliasBuilder
+    | Module of SModuleBuilder
+    member this.Build() : TsExportDeclaration =
+        match this with
+        | Interface v -> v.Build() |> TsExportDeclaration.Interface 
+        | Class v -> v.Build() |> TsExportDeclaration.Class 
+        | Enum v -> v.Build() |> TsExportDeclaration.Enum 
+        | Variable v -> v.Build() |> TsExportDeclaration.Variable 
+        | Function v -> v.Build() |> TsOverloadableConstruct.Create |> TsExportDeclaration.Function 
+        | TypeAlias v -> v.Build() |> TsExportDeclaration.TypeAlias 
+        | Module v -> v.Build() |> TsExportDeclaration.Module 
 
 // -----------------------------------------------------------------------
 // Reactive TypeStore
@@ -682,6 +639,12 @@ type MemberStore =
     | Parameter of PendingSignal<SParameterBuilder>
     | Member of PendingSignal<SMemberBuilder>
     | Constructor of PendingSignal<SConstructorBuilder>
+
+type ExportStore = {
+    RefKey: TypeKey
+    Builder: PendingSignal<STsExportDeclaration>
+}
+
 
 /// <summary>
 /// A reactive store entry keyed by <c>IdentityKey</c> in <c>TypeScriptReader.SignalCache</c>.
@@ -714,98 +677,5 @@ type TypeStore = {
     Key: TypeKey
     /// Pending signal for the builder. Fulfilled by the dispatcher; read via
     /// <c>.Value</c> to get the current <c>STsAstNodeBuilder voption</c>.
-    Builder: PendingSignal<STsAstNodeBuilder>
+    Builder: PendingSignal<SType>
 }
-
-[<RequireQualifiedAccess>]
-module TypeStore =
-
-    /// Snapshot the current builder to a plain <c>TsAstNode</c>, or <c>ValueNone</c>
-    /// if the builder signal has not been filled yet.
-    let build (s: TypeStore) : TsAstNode voption =
-        s.Builder.Value |> ValueOption.map (fun b -> b.Build())
-
-    // -----------------------------------------------------------------------
-    // Reactive projections — read inside Signal.auto to auto-track.
-    // -----------------------------------------------------------------------
-
-    /// Display name if the builder carries one; <c>None</c> otherwise.
-    /// Returns <c>None</c> when the builder signal is still pending.
-    let name (s: TypeStore) : string option =
-        s.Builder.Value
-        |> ValueOption.toOption
-        |> Option.bind (fun b ->
-            match b with
-            | Patterns.SBuilder.Interface b        -> Some b.Name
-            | Patterns.SBuilder.Class b            -> Some b.Name
-            | Patterns.SBuilder.Enum b             -> Some b.Name
-            | Patterns.SBuilder.EnumCase b         -> Some b.Name
-            | Patterns.SBuilder.Alias b            -> Some b.Name
-            | Patterns.SBuilder.Variable b         -> Some b.Name
-            | Patterns.SBuilder.FunctionDeclaration b -> Some b.Name
-            | Patterns.SBuilder.Module b           -> Some b.Name
-            | Patterns.SBuilder.TypeParameter b    -> Some b.Name
-            | _                                    -> None)
-
-    /// The primary resolved <c>TypeKey</c> if the builder carries one;
-    /// reading this inside <c>Signal.auto</c> auto-tracks the slot.
-    /// Returns <c>None</c> when the builder signal is still pending.
-    let primaryType (s: TypeStore) : TypeKey option =
-        s.Builder.Value
-        |> ValueOption.toOption
-        |> Option.bind (fun b ->
-            match b with
-            | Patterns.SBuilder.Alias b             -> Some b.Type.Value
-            | Patterns.SBuilder.Variable b          -> Some b.Type.Value
-            | Patterns.SBuilder.FunctionDeclaration b -> Some b.Type.Value
-            | Patterns.SBuilder.Index b             -> Some b.Type.Value
-            | Patterns.SBuilder.Predicate b         -> Some b.Type.Value
-            | Patterns.SBuilder.TypeReference b
-            | Patterns.SBuilder.Array b
-            | Patterns.SBuilder.Optional b          -> Some b.Type.Value
-            | Patterns.SBuilder.SubstitutionType b  -> Some b.Base.Value
-            | _                                     -> None)
-
-    /// Fully-qualified name segments if present.
-    /// Returns <c>None</c> when the builder signal is still pending.
-    let fullyQualifiedName (s: TypeStore) : string array option =
-        s.Builder.Value
-        |> ValueOption.toOption
-        |> Option.bind (fun b ->
-            match b with
-            | Patterns.SBuilder.Interface b        -> Some b.FullyQualifiedName
-            | Patterns.SBuilder.Class b            -> Some b.FullyQualifiedName
-            | Patterns.SBuilder.Enum b             -> Some b.FullyQualifiedName
-            | Patterns.SBuilder.Alias b            -> Some b.FullyQualifiedName
-            | Patterns.SBuilder.Variable b         -> Some b.FullyQualifiedName
-            | Patterns.SBuilder.FunctionDeclaration b -> Some b.FullyQualifiedName
-            | Patterns.SBuilder.Module b           -> Some b.FullyQualifiedName
-            | _                                    -> None)
-
-    /// Source module string if present.
-    /// Returns <c>None</c> when the builder signal is still pending.
-    let source (s: TypeStore) : string option =
-        s.Builder.Value
-        |> ValueOption.toOption
-        |> Option.bind (fun b ->
-            match b with
-            | Patterns.SBuilder.Interface b        -> b.Source.Value |> unbox
-            | Patterns.SBuilder.Class b            -> b.Source.Value |> unbox
-            | Patterns.SBuilder.Enum b             -> b.Source.Value |> unbox
-            | Patterns.SBuilder.Alias b            -> b.Source.Value  |> unbox
-            | Patterns.SBuilder.Variable b         -> b.Source.Value  |> unbox
-            | Patterns.SBuilder.FunctionDeclaration b -> b.Source.Value  |> unbox
-            | Patterns.SBuilder.Module b           -> b.Source.Value  |> unbox
-            | _                                    -> None)
-
-    /// <c>true</c> when the builder is filled and its primary type slot still holds
-    /// <c>TypeKey.Unknown</c>. Reading inside <c>Signal.auto</c> auto-tracks both the
-    /// builder signal and the inner slot.
-    let isPending (s: TypeStore) : bool =
-        s.Builder.Value
-        |> ValueOption.exists (fun b ->
-            match b with
-            | Patterns.SBuilder.Alias b            -> b.Type.Value = TypeKindPrimitive.Unknown.TypeKey
-            | Patterns.SBuilder.Variable b         -> b.Type.Value = TypeKindPrimitive.Unknown.TypeKey
-            | Patterns.SBuilder.Index b            -> b.Type.Value = TypeKindPrimitive.Unknown.TypeKey
-            | _                                    -> false)

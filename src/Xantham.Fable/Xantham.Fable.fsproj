@@ -14,7 +14,7 @@
         <Compile Include="Utils\String.fs" />
         <Compile Include="Utils\Array.fs" />
         <Compile Include="Utils\Utils.fs" />
-        <Compile Include="TypeScript.Extensions.fs" />
+        <Compile Include="Utils\TypeScript.Extensions.fs" />
         <Compile Include="Types\TypeKeyExtensions.fs" />
         <Compile Include="Types\Signal.fs" />
         <Compile Include="Types\Symbol.fs" />
@@ -26,6 +26,7 @@
         <Compile Include="Types\Reader.fs" />
         <Compile Include="Types\GuardedData.fs" />
         <Compile Include="Types\Reader.Extensions.fs" />
+        <Compile Include="Types\XanTag.Extensions.fs" />
         <Compile Include="Reading\Prelude.fs" />
         <Compile Include="Reading\JSDocTags.fs" />
         <Compile Include="Reading\TupleTypeMember.fs" />

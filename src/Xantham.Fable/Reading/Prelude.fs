@@ -117,37 +117,37 @@ module MemberStore =
             Member.create ctx tag
         | _ -> failwith "Attempted to create MemberStore for non-member declaration"
 
-let addToMemory (ctx: TypeScriptReader) (tag: XanthamTag) =
-    match tag.Value with
-    | XanTagKind.MemberDeclaration _ ->
-        if ctx.memberCache.ContainsKey(tag.IdentityKey)
-        then Result.Error MemoryHandlerError.DuplicateValue else
-        
-        let store = MemberStore.create ctx tag
-        ctx.memberCache.Add(tag.IdentityKey, store)
-        Ok()
-    | _ ->
-        if ctx.signalCache.ContainsKey(tag.IdentityKey)
-        then Result.Error MemoryHandlerError.DuplicateValue else
+module ExportStore =
+    let usesGeneratedKey (tag: XanthamTag) =
+        match tag.Value with
+        | XanTagKind.TypeDeclaration tdecl ->
+            match tdecl with
+            | TypeDeclaration.VariableDeclaration _
+            | TypeDeclaration.VariableStatement _ -> true
+            | _ -> false
+        | _ -> false
 
-        libCacheMemoryHandler ctx tag
-        let store = TypeStore.Create.XanthamTag.create ctx tag
-        ctx.signalCache.Add(tag.IdentityKey, store)
-        Result.Ok()
-
-
-let setDeclarationNodeBuilderSignal (declaration: XanthamTag) =
-    declaration
-    |> GuardedData.AstNodeBuilder.getOrSetWith (fun () -> Signal.pending<STsAstNodeBuilder>())
-let setTypeSignal (declaration: XanthamTag) =
-    declaration
-    |> GuardedData.TypeSignal.getOrSetWith (fun () -> TypeSignal.pending())
-
+    let create (ctx: TypeScriptReader) (tag: XanthamTag) =
+        let key =
+            if usesGeneratedKey tag then TypeKey.create() else
+            match tag.Value.UnderlyingValue with
+            | Choice1Of2 typ -> typ.TypeKey
+            | Choice2Of2 node ->
+                ctx.checker.getTypeAtLocation node
+                |> _.TypeKey
+        {
+            RefKey = key
+            Builder = GuardedData.ExportBuilder.getOrSetDefault tag
+        }
+    let tryCreate (_ctx: TypeScriptReader) (tag: XanthamTag) =
+        if GuardedData.OutputKind.isExported tag then
+            create _ctx tag
+            |> ValueSome
+        else ValueNone
+    
 type TypeScriptReader with
-    member inline this.typeSignal (tag: XanthamTag) =
-        GuardedData.TypeSignal.getOrSetDefault tag
     member this.routeTypeTo (tag: XanthamTag) (signal: TypeSignal) =
-        this.typeSignal tag
+        tag.TypeSignal
         |> Signal.fulfillWith(fun () -> signal.Value)
         signal
     /// The tags source is filled by the given source signal
@@ -166,6 +166,24 @@ let setSourceForTag (tag: XanthamTag) (source: ModuleName) =
     |> _.Set(source)
 
 let tagPrimitives (ctx: TypeScriptReader) =
+    let addToMemory (tag: XanthamTag) =
+        match tag.Value with
+        | XanTagKind.MemberDeclaration _ ->
+            if ctx.memberCache.ContainsKey(tag.IdentityKey)
+            then Result.Error MemoryHandlerError.DuplicateValue else
+            
+            let store = MemberStore.create ctx tag
+            ctx.memberCache.Add(tag.IdentityKey, store)
+            Ok()
+        | _ ->
+            if ctx.signalCache.ContainsKey(tag.IdentityKey)
+            then Result.Error MemoryHandlerError.DuplicateValue else
+
+            libCacheMemoryHandler ctx tag
+            let store = TypeStore.Create.XanthamTag.create ctx tag
+            ctx.signalCache.Add(tag.IdentityKey, store)
+            Result.Ok()
+
     let checker = ctx.checker
     // Register the predefined literals
     [|
@@ -178,15 +196,11 @@ let tagPrimitives (ctx: TypeScriptReader) =
         |> fst
         |> TagState.value
         |> fun tag ->
-            tag
-            |> setDeclarationNodeBuilderSignal
-            |> Signal.fill (TsLiteral.Bool value |> STsAstNodeBuilder.Literal)
-            tag
-            |> setTypeSignal
-            |> _.Set(typ.TypeKey)
+            tag.Builder <- TsLiteral.Bool value |> SType.Literal
+            tag.TypeSignal <- typ.TypeKey
             // register to memory
             tag
-            |> addToMemory ctx
+            |> addToMemory
             |> ignore)
     // Register predefined primitives
     [|
@@ -201,14 +215,10 @@ let tagPrimitives (ctx: TypeScriptReader) =
     |]
     |> Array.iter (fun (typeKindPrimitive, typ) ->
         let tag = ctx.CreateXanthamTag typ |> fst |> TagState.value
+        tag.Builder <- SType.Primitive typeKindPrimitive
+        tag.TypeSignal <- typ.TypeKey
         tag
-        |> setDeclarationNodeBuilderSignal
-        |> Signal.fill (STsAstNodeBuilder.Primitive typeKindPrimitive)
-        tag
-        |> setTypeSignal
-        |> _.Set(typ.TypeKey)
-        tag
-        |> addToMemory ctx
+        |> addToMemory 
         |> ignore
         )
     [|
@@ -230,14 +240,28 @@ let tagPrimitives (ctx: TypeScriptReader) =
         let identity = IdentityKey.Id typeKindPrimitive.TypeKey
         let value = {
             Key = typeKindPrimitive.TypeKey
-            Builder = Signal.pending<STsAstNodeBuilder>()
+            Builder = Signal.pending<SType>()
         }
         value.Builder
-        |> Signal.fill (STsAstNodeBuilder.Primitive typeKindPrimitive)
+        |> Signal.fill (SType.Primitive typeKindPrimitive)
         if ctx.signalCache.ContainsKey(identity) |> not then
             ctx.signalCache.Add(identity, value)
         )
     ctx
+
+let tryGetOrRegisterExportedStore (ctx: TypeScriptReader) (tag: XanthamTag) : ExportStore option =
+    let key = tag.IdentityKey
+    match ctx.exportCache.TryGetValue key with
+    | true, store ->
+        GuardedData.ExportBuilder.getOrSetDefault tag
+        |> Signal.fulfillWith (fun () -> store.Builder.Value)
+        GuardedData.TypeSignal.getOrSetDefault tag
+        |> _.Set(store.RefKey)
+        None
+    | false, _ ->
+        let store = ExportStore.create ctx tag
+        ctx.exportCache.Add(key, store)
+        Some store
 
 let tryGetOrRegisterMemberStore (ctx: TypeScriptReader) (tag: XanthamTag) : MemberStore option =
     let key = tag.IdentityKey
@@ -299,9 +323,23 @@ let tryGetOrRegisterStore (ctx: TypeScriptReader) (tag: XanthamTag) : TypeStore 
         ctx.signalCache.Add(key, store)
         Some store
 
+let stackPushAndThen (ctx: TypeScriptReader) (f: XanthamTag -> 'a) (tag: TagState<XanthamTag>): 'a =
+    match tag with
+    | TagState.Visited tag -> f tag
+    | TagState.Unvisited tag ->
+        ctx.stack.Push tag
+        f tag
+
+let pushToStackIfNodeUnseen (ctx: TypeScriptReader) (node: Ts.Node) =
+    ctx.CreateXanthamTag node |> fst |> stackPushAndThen ctx ignore
+let pushToStackIfTypeUnseen (ctx: TypeScriptReader) (node: Ts.Type) =
+    ctx.CreateXanthamTag node |> fst |> stackPushAndThen ctx ignore
+
 let pushToStack (ctx: TypeScriptReader) (tag: XanthamTag) =
-    setDeclarationNodeBuilderSignal tag |> ignore
-    ctx.typeSignal tag |> ignore
+    // trigger default bags to be created on tags if they don't
+    // already exist
+    tag.Builder |> ignore
+    tag.TypeSignal |> ignore
     ctx.stack.Push tag
 let arrayHasModifier (modifier: Modifiers -> bool) (arr: ResizeArray<Ts.Modifier>) =
     arr.AsArray |> Array.exists (Modifiers.Create >> modifier)

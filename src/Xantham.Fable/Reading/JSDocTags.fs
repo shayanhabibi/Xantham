@@ -19,7 +19,7 @@ let read (reader: TypeScriptReader) (xanTag: XanthamTag) (tag: JSDocTags) =
         match getText tag map with
         | Some text -> [| text |]
         | _ -> [||]
-    if xanTag.Documentation.IsNone then
+    if xanTag.TryDocumentation.IsNone then
         xanTag.Documentation <-
         match tag with
         | JSDocTags.ParameterTag jsDocParameterTag ->
@@ -57,7 +57,7 @@ let read (reader: TypeScriptReader) (xanTag: XanthamTag) (tag: JSDocTags) =
         
 // Credit to MangelMaxine for the original implementation of this function
 let readSummary (reader: TypeScriptReader) (xanTag: XanthamTag) =
-    if xanTag.SummaryDocumentation.IsNone then
+    if xanTag.TrySummaryDocumentation.IsNone then
         match xanTag.Guard.Value with
         | IdentityKey.Symbol sym | IdentityKey.AliasSymbol sym ->
             sym.getDocumentationComment(Some reader.checker) |> Some
@@ -79,11 +79,11 @@ let readDocsForTag (ctx: TypeScriptReader) (xanTag: XanthamTag) =
             let jsDocTag = JSDocTags.Create node
             let xanthamTag = ctx.CreateXanthamTag node |> fst |> _.Value
             read ctx xanthamTag jsDocTag
-            xanthamTag.Documentation
+            xanthamTag.TryDocumentation
             |> ValueOption.defaultValue [||]
             )
     readSummary ctx xanTag
-    if xanTag.Documentation.IsSome then () else
+    if xanTag.TryDocumentation.IsSome then () else
     match xanTag.Value.UnderlyingValue with
     | Choice2Of2 node ->
         xanTag.Documentation <- getJSDocTagsForNode node
@@ -100,6 +100,6 @@ let readDocsForTag (ctx: TypeScriptReader) (xanTag: XanthamTag) =
 let resolveDocsForTag (ctx: TypeScriptReader) (xanTag: XanthamTag) =
     readDocsForTag ctx xanTag
     [
-        if xanTag.SummaryDocumentation.IsSome then yield xanTag.SummaryDocumentation.Value
-        if xanTag.Documentation.IsSome then yield! xanTag.Documentation.Value
+        if xanTag.TrySummaryDocumentation.IsSome then yield xanTag.TrySummaryDocumentation.Value
+        if xanTag.TryDocumentation.IsSome then yield! xanTag.TryDocumentation.Value
     ]

@@ -57,7 +57,13 @@ type IdentityKey =
     | Symbol of Ts.Symbol
     | DeclarationPosition of file: string * pos: float * endPos: float
     static member Create(node: Ts.Node) =
-        DeclarationPosition(node.getSourceFile().fileName, node.getStart(), node.getEnd())
+        let sf = node.getSourceFile()
+        let startPos = node.getStart()
+        let endPos = node.getEnd()
+        let start = sf.getLineAndCharacterOfPosition(startPos)
+        let end' = sf.getLineAndCharacterOfPosition(endPos)
+        let fileString = $"file:///%s{sf.fileName}:{start.line + 1.}:{start.character + 1.} (end {end'.line + 1.}:{end'.character + 1.})"
+        DeclarationPosition(fileString, startPos, endPos)
     static member Create(typ: Ts.Type) =
         typ.aliasSymbol
         |> Option.map AliasSymbol

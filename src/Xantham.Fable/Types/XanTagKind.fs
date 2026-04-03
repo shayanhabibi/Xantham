@@ -1724,3 +1724,50 @@ type XanTagKind with
         TypeFlagPrimary.Create node
         |> Type
         
+module Patterns =
+    module XanTagKind =
+        module TypeDeclaration =
+            let (|IsExported|IsType|IsExportedType|) = function
+                | TypeDeclaration.HeritageClause _ 
+                | TypeDeclaration.ExpressionWithTypeArguments _
+                | TypeDeclaration.EnumMember _
+                | TypeDeclaration.TypeParameter _ as typ -> IsType typ
+                | TypeDeclaration.Class _ 
+                | TypeDeclaration.Enum _
+                | TypeDeclaration.Interface _ as decl -> IsExportedType decl
+                | TypeDeclaration.Namespace _
+                | TypeDeclaration.Module _
+                | TypeDeclaration.ModuleBlock _
+                | TypeDeclaration.TypeAlias _
+                | TypeDeclaration.VariableStatement _
+                | TypeDeclaration.VariableDeclaration _
+                | TypeDeclaration.FunctionDeclaration _ as decl -> IsExported decl
+            let (|CanBeExported|_|): _ -> bool = function
+                | IsExportedType _
+                | IsExported _ -> true
+                | _ -> false
+            let (|CanBeType|_|): _ -> bool = function
+                | IsType _ 
+                | IsExportedType _ -> true
+                | _ -> false
+
+        let (|IsExported|IsType|IsExportedType|IsMember|IsDocsOrOther|) (x: XanTagKind) =
+            match x with
+            | LiteralTokenNode _
+            | TypeNode _
+            | Type _ as node -> IsType node
+            | ModulesAndExports _ as node -> IsExported node
+            | TypeDeclaration typeDeclaration as node ->
+                match typeDeclaration with
+                | TypeDeclaration.IsExported _ -> IsExported node
+                | TypeDeclaration.IsType _ -> IsType node
+                | TypeDeclaration.IsExportedType _ -> IsExportedType node
+            | MemberDeclaration node -> IsMember node
+            | Ignore _
+            | JSDocTag _ as node -> IsDocsOrOther node
+        let (|CanBeExported|_|): _ -> bool = function
+            | IsExported _ | IsExportedType _ -> true
+            | _ -> false
+        let (|CanBeType|_|): _ -> bool = function
+            | IsType _ | IsExportedType _ -> true
+            | _ -> false

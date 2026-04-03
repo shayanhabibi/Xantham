@@ -34,11 +34,7 @@ let private makeIndexSlot (ctx: TypeScriptReader) (primitiveType: TypeKindPrimit
                 match ctx.CreateXanthamTag typ with
                 | _, TagState.Visited guard when ctx.signalCache.ContainsKey(guard.Value) ->
                     TypeSignal.ofKey ctx.signalCache[guard.Value].Key
-                | TagState.Unvisited tag, _ ->
-                    pushToStack ctx tag
-                    ctx.typeSignal tag
-                | TagState.Visited tag, _ ->
-                    ctx.typeSignal tag
+                | tagState, _ -> stackPushAndThen ctx _.TypeSignal tagState
             IsReadOnly = false
         }
         |> SMemberBuilder.IndexSignature
@@ -64,10 +60,10 @@ let private forwardToSymbolDeclaration (ctx: TypeScriptReader) (xanTag: XanthamT
             match ctx.CreateXanthamTag (unbox<Ts.Node> (decl :> obj)) |> fst with
             | TagState.Unvisited t -> pushToStack ctx t; t
             | TagState.Visited t -> t
-        ctx.typeSignal xanTag
-        |> Signal.fulfillWith (fun () -> (ctx.typeSignal innerTag).Value)
-        GuardedData.AstNodeBuilder.getOrSetDefault xanTag
-        |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.getOrSetDefault innerTag).Value)
+        xanTag.TypeSignal
+        |> Signal.fulfillWith (fun () -> innerTag.TypeSignal.Value)
+        xanTag.Builder
+        |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
 
 /// Build parameter slots from the checker-level parameters of a Ts.Signature.
 let private signatureToParamSlots (ctx: TypeScriptReader) (signature: Ts.Signature) =
@@ -78,14 +74,15 @@ let private signatureToParamSlots (ctx: TypeScriptReader) (signature: Ts.Signatu
         | None ->
             // Synthesized parameter — build inline from the checker
             let t =
-                match ctx.CreateXanthamTag (ctx.checker.getTypeOfSymbol sym) |> fst with
-                | TagState.Unvisited t -> pushToStack ctx t; t
-                | TagState.Visited t -> t
+                ctx.checker.getTypeOfSymbol sym
+                |> ctx.CreateXanthamTag
+                |> fst
+                |> stackPushAndThen ctx id
             {
                 SParameterBuilder.Name = sym.name
                 IsOptional = sym.flags.HasFlag Ts.SymbolFlags.Optional
                 IsSpread = false
-                Type = ctx.typeSignal t
+                Type = t.TypeSignal
                 Documentation = []
             }
             |> ValueSome
@@ -104,7 +101,7 @@ let private callSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Signature
         | TagState.Visited t -> t
     {
         SCallSignatureBuilder.Parameters = signatureToParamSlots ctx signature
-        Type = ctx.typeSignal returnTag
+        Type = returnTag.TypeSignal
         Documentation = []
     }
     |> SMemberBuilder.CallSignature
@@ -123,7 +120,7 @@ let private constructSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Sign
         | TagState.Visited t -> t
     {
         SConstructSignatureBuilder.Parameters = signatureToParamSlots ctx signature
-        Type = ctx.typeSignal returnTag
+        Type = returnTag.TypeSignal
     }
     |> SMemberBuilder.ConstructSignature
     |> ValueSome
@@ -135,14 +132,14 @@ let private propertySymToMemberSlot (ctx: TypeScriptReader) (sym: Ts.Symbol) : S
     | Some decl ->
         resolveToMemberBuilder ctx !!decl
     | None ->
-        // Synthesized / computed property — build inline from the checker
-        let t =
-            match ctx.CreateXanthamTag (ctx.checker.getTypeOfSymbol sym) |> fst with
-            | TagState.Unvisited t -> pushToStack ctx t; t
-            | TagState.Visited t -> t
         {
             SPropertyBuilder.Name = sym.name
-            Type = ctx.typeSignal t
+            Type =
+                // Synthesized / computed property — build inline from the checker
+                ctx.checker.getTypeOfSymbol sym
+                |> ctx.CreateXanthamTag
+                |> fst
+                |> stackPushAndThen ctx _.TypeSignal
             IsStatic = false
             IsOptional = sym.flags.HasFlag Ts.SymbolFlags.Optional
             IsPrivate = false
@@ -179,14 +176,14 @@ let private buildMembersFromType (ctx: TypeScriptReader) (objType: Ts.ObjectType
 // ---------------------------------------------------------------------------
 
 let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) =
-    let inline setAstSignal (astValue: STsAstNodeBuilder) =
+    let inline setAstSignal (astValue: SType) =
         xanTag.Builder <- astValue
     match tag with
     | TypeFlagObject.Anonymous anonType ->
         {
             STypeLiteralBuilder.Members = buildMembersFromType ctx anonType
         }
-        |> STsAstNodeBuilder.TypeLiteral
+        |> SType.TypeLiteral
         |> setAstSignal
         anonType.TypeKey
         |> setTypeKeyForTag xanTag
@@ -238,7 +235,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) 
         {
             STypeLiteralBuilder.Members = members
         }
-        |> STsAstNodeBuilder.TypeLiteral
+        |> SType.TypeLiteral
         |> setAstSignal
         mappedType.TypeKey
         |> setTypeKeyForTag xanTag
@@ -274,7 +271,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) 
                 match ctx.CreateXanthamTag typ |> fst with
                 | TagState.Unvisited t -> pushToStack ctx t; t
                 | TagState.Visited t -> t
-            let typeSignal = ctx.typeSignal typeTag
+            let typeSignal = typeTag.TypeSignal
             if flags.HasFlag Ts.ElementFlags.Variadic || flags.HasFlag Ts.ElementFlags.Rest then
                 STupleElementBuilder.Variadic typeSignal
             else
@@ -300,7 +297,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) 
             MinRequired = int tupleType.minLength
             Types = Array.map3 buildElement elementTypes elementFlags labeledDecls
         }
-        |> STsAstNodeBuilder.Tuple
+        |> SType.Tuple
         |> setAstSignal
         tupleType.TypeKey |> setTypeKeyForTag xanTag
 

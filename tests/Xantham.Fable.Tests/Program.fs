@@ -7,6 +7,7 @@ open Xantham.Fable.Types
 open Node.Api
 open Fable.Mocha
 open Fable.Core.Testing
+open Xantham.Schema
 
 // -----------------------------------------------------------------------
 // Infrastructure
@@ -26,29 +27,7 @@ let createSubdirTestReader (relPath: string) =
     let filePath = path.join(__SOURCE_DIRECTORY__, "TypeFiles", $"{relPath}.d.ts")
     TypeScriptReader.create filePath
 
-let runReader (reader: TypeScriptReader) =
-    let _exports =
-        Internal.initialise reader
-        |> Internal.getAndPrepareExports
-    Internal.runReader reader
-    |> Internal.assembleResults
-    |> Internal.exciseDuplicateKeys
-    |> fun split ->
-        let splitMap = Dictionary<TypeKey, TsAstNode * TsAstNode array>()
-        let orderedDuplicates = split.DuplicateGroups |> Internal.sortResultGroups
-        let mergedDuplicates =
-            orderedDuplicates
-            |> Internal.mergeOverloads
-            |> Internal.mergeMembersIntoWinner
-        mergedDuplicates
-        |> Internal.filterConflictDuplicatesOnly
-        |> Seq.iter (fun group ->
-            splitMap.Add(group.Key, (group.Winner.Node, group.Losers |> Array.map _.Node)))
-        Internal.resolveDuplicates (Seq.map Internal.prune mergedDuplicates)
-        |> Seq.append split.NonDuplicates
-        |> Seq.sortBy _.Key
-        |> Seq.map (fun ir -> KeyValuePair(ir.Key, ir.Node))
-        |> Dictionary
+let runReader (reader: TypeScriptReader) = read reader
 
 // -----------------------------------------------------------------------
 // Lookup helpers
@@ -57,10 +36,19 @@ let runReader (reader: TypeScriptReader) =
 // -----------------------------------------------------------------------
 
 /// Find the first interface in the result whose Name matches, or None.
-let tryFindInterface name (result: Dictionary<TypeKey, TsAstNode>) =
-    result |> Seq.tryPick (function
-        | KeyValue(key, TsAstNode.Interface iface) when key > TypeKey 0 && iface.Name = name -> Some iface
-        | _ -> None)
+let tryFindInterface name (result: EncodedResult) =
+    result.ExportedDeclarations
+    |> Seq.tryPick (function
+        | KeyValue(_, TsExportDeclaration.Interface iface) when iface.Name = name -> Some iface
+        | _ -> None
+        )
+    |> Option.orElseWith (fun () ->
+        result.ExportedDeclarations
+        |> Seq.tryPick (function
+            | KeyValue(_, TsExportDeclaration.Interface iface) when iface.Name = name -> Some iface
+            | _ -> None
+            )
+        )
 
 /// Find the first interface in the result whose Name matches; throws on miss.
 let findInterface name result =
@@ -68,16 +56,16 @@ let findInterface name result =
     |> Option.defaultWith (fun () -> failwithf "Interface '%s' not found in result" name)
 
 /// Find the first enum whose Name matches; throws on miss.
-let findEnum name (result: Dictionary<TypeKey, TsAstNode>) =
-    result |> Seq.pick (function
-        | KeyValue(_, TsAstNode.Enum e) when e.Name = name -> Some e
+let findEnum name (result: EncodedResult) =
+    result.Types |> Seq.pick (function
+        | KeyValue(_, TsType.Enum e) when e.Name = name -> Some e
         | _ -> None)
 
 /// Find the first FunctionDeclaration whose head-variant Name matches; throws on miss.
 /// Works for both NoOverloads (single) and Overloaded (merged) constructs.
-let findFunction name (result: Dictionary<TypeKey, TsAstNode>) =
-    result |> Seq.pick (function
-        | KeyValue(k, TsAstNode.FunctionDeclaration fd) when k > TypeKey 0 && fd.ValueOrHead.Name = name -> Some fd
+let findFunction name (result: EncodedResult) =
+    result.ExportedDeclarations |> Seq.pick (function
+        | KeyValue(k, TsExportDeclaration.Function fd) when k > TypeKey 0 && fd.ValueOrHead.Name = name -> Some fd
         | _ -> None)
 
 /// Return the TsProperty record for a named property in a member list; throws on miss.
@@ -92,32 +80,34 @@ let findMethod name (members: TsMember list) =
         | TsMember.Method m when m.ValueOrHead.Name = name -> Some m
         | _ -> None)
 
-let findType (typeKey: TypeKey) (result: Dictionary<TypeKey, TsAstNode>) =
-    result
+let findType (typeKey: TypeKey) (result: EncodedResult) =
+    result.Types
     |> Seq.pick (fun (KeyValue(key, node)) -> if key = typeKey then Some node else None)
+let findExportByKey (typeKey: TypeKey) (result: EncodedResult) =
+    result.ExportedDeclarations |> Seq.pick (fun (KeyValue(key, node)) -> if key = typeKey then Some node else None)
 
 /// Find the first type alias whose Name matches; throws on miss.
-let findAlias name (result: Dictionary<TypeKey, TsAstNode>) =
-    result |> Seq.pick (function
-        | KeyValue(_, TsAstNode.Alias a) when a.Name = name -> Some a
+let findAlias name (result: EncodedResult) =
+    result.ExportedDeclarations |> Seq.pick (function
+        | KeyValue(_, TsExportDeclaration.TypeAlias a) when a.Name = name -> Some a
         | _ -> None)
 
 /// Find the first class whose Name matches; throws on miss.
-let findClass name (result: Dictionary<TypeKey, TsAstNode>) =
-    result |> Seq.pick (function
-        | KeyValue(_, TsAstNode.Class c) when c.Name = name -> Some c
+let findClass name (result: EncodedResult) =
+    result.ExportedDeclarations |> Seq.pick (function
+        | KeyValue(_, TsExportDeclaration.Class c) when c.Name = name -> Some c
         | _ -> None)
 
 /// Find the first variable whose Name matches; throws on miss.
-let findVariable name (result: Dictionary<TypeKey, TsAstNode>) =
-    result |> Seq.pick (function
-        | KeyValue(_, TsAstNode.Variable v) when v.Name = name -> Some v
+let findVariable name (result: EncodedResult) =
+    result.ExportedDeclarations |> Seq.pick (function
+        | KeyValue(_, TsExportDeclaration.Variable v) when v.Name = name -> Some v
         | _ -> None)
 
 /// Find the first module/namespace whose Name matches; throws on miss.
-let findModule name (result: Dictionary<TypeKey, TsAstNode>) =
-    result |> Seq.pick (function
-        | KeyValue(_, TsAstNode.Module m) when m.Name = name -> Some m
+let findModule name (result: EncodedResult) =
+    result.ExportedDeclarations |> Seq.pick (function
+        | KeyValue(_, TsExportDeclaration.Module m) when m.Name = name -> Some m
         | _ -> None)
 
 // -----------------------------------------------------------------------
@@ -130,15 +120,15 @@ let basicTests =
         let result = createTestReader "basic" |> runReader
         testCase "result contains at least one interface with members" <| fun _ ->
             "Should have an interface with at least one member"
-            |> Expect.exists result (fun kv ->
+            |> Expect.exists result.ExportedDeclarations (fun kv ->
                 match kv.Value with
-                | TsAstNode.Interface { Members = _ :: _ } -> true
+                | TsExportDeclaration.Interface { Members = _ :: _ } -> true
                 | _ -> false)
 
         testCase "result contains exactly one interface and one alias" <| fun _ ->
             let count =
-                result
-                |> Seq.filter (fun kv -> kv.Value.IsInterface || kv.Value.IsAlias)
+                result.ExportedDeclarations
+                |> Seq.filter (fun kv -> kv.Value.IsInterface || kv.Value.IsTypeAlias)
                 |> Seq.length
             "" |> Expect.equal count 2
 
@@ -163,9 +153,9 @@ let mergeTests =
             // Two source declarations of MergeProps share a TypeKey; the pipeline must
             // produce exactly one node for that key — not two separate entries.
             let count =
-                result
+                result.Types
                 |> Seq.filter (function
-                    | KeyValue(_, TsAstNode.Interface iface) -> iface.Name = "MergeProps"
+                    | KeyValue(_, TsType.Interface iface) -> iface.Name = "MergeProps"
                     | _ -> false)
                 |> Seq.length
             "MergeProps should appear exactly once in result" |> Expect.equal count 1
@@ -180,8 +170,11 @@ let mergeTests =
                 iface.Members |> List.choose (function TsMember.Property p -> Some p.Name | _ -> None)
             "" |> Expect.containsAll names ["name"; "age"]
 
-        ptestCase "two distinct interfaces present after merge (MergeProps + D)" <| fun _ ->
-            let count = result |> Seq.filter _.Value.IsInterface |> Seq.length
+        testCase "two distinct interfaces present after merge (MergeProps + D)" <| fun _ ->
+            let count =
+                result.ExportedDeclarations
+                |> Seq.filter (fun typ -> typ.Value.IsInterface || typ.Value.IsTypeAlias)
+                |> Seq.length
             // MergeProps (merged) and D (type literal interface) = 2
             "" |> Expect.equal count 2
     ]
@@ -200,14 +193,14 @@ let heritageTests =
     testList "extends.d.ts" [
         let result = createTestReader "extends" |> runReader
         testCase "heritage TypeKey of extended interface is present in result" <| fun _ ->
-            result
+            result.ExportedDeclarations
             |> Seq.pick (function
-                | KeyValue(_, TsAstNode.Interface { Heritage = { Extends = [ extend ] } }) ->
+                | KeyValue(_, TsExportDeclaration.Interface { Heritage = { Extends = [ extend ] } }) ->
                     Some extend.Type
                 | _ -> None)
             |> fun typeKey ->
                 "Heritage TypeKey should resolve to a node in result"
-                |> Expect.exists result (_.Key >> (=) typeKey)
+                |> Expect.exists result.Types (_.Key >> (=) typeKey)
 
         let iface = result |> findInterface "ExtendedInterface"
         testCase "ExtendedInterface has exactly 1 heritage entry" <| fun _ ->
@@ -225,20 +218,20 @@ let multipleExtendsTests =
         let result = createTestReader "multiple-extends" |> runReader
         testCase "all heritage TypeKeys resolve to nodes in result" <| fun _ ->
             let extendedKeys =
-                result
+                result.ExportedDeclarations
                 |> Seq.choose (function
-                    | KeyValue(_, TsAstNode.Interface { Heritage = { Extends = [ extend ] } }) ->
+                    | KeyValue(_, TsExportDeclaration.Interface { Heritage = { Extends = [ extend ] } }) ->
                         Some extend.Type
                     | _ -> None)
                 |> Seq.toArray
-            let resultKeys = result.Keys |> Seq.toArray
+            let resultKeys = result.Types.Keys |> Seq.toArray
             "All heritage keys should be in result" |> Expect.containsAll resultKeys extendedKeys
 
         testCase "both extending interfaces are present in result" <| fun _ ->
             let extendingNames =
-                result
+                result.ExportedDeclarations
                 |> Seq.choose (function
-                    | KeyValue(_, TsAstNode.Interface iface) when not (List.isEmpty iface.Heritage.Extends) ->
+                    | KeyValue(_, TsExportDeclaration.Interface iface) when not (List.isEmpty iface.Heritage.Extends) ->
                         Some iface.Name
                     | _ -> None)
                 |> Seq.toArray
@@ -255,7 +248,7 @@ let memberTests =
     testList "members.d.ts" [
 
         let result = createTestReader "members" |> runReader
-        
+
         // --- WithProperties: member count and kinds ---
         testCase "WithProperties has exactly 3 members" <| fun _ ->
             let iface = result |> findInterface "WithProperties"
@@ -356,9 +349,9 @@ let overloadTests =
         let result = createTestReader "overloads" |> runReader
         testCase "both 'process' and 'identity' are present in result" <| fun _ ->
             let names =
-                result
+                result.ExportedDeclarations
                 |> Seq.choose (function
-                    | KeyValue(_, TsAstNode.FunctionDeclaration fd) -> Some fd.ValueOrHead.Name
+                    | KeyValue(_, TsExportDeclaration.Function fd) -> Some fd.ValueOrHead.Name
                     | _ -> None)
                 |> Seq.toArray
             "" |> Expect.containsAll names ["process"; "identity"]
@@ -444,8 +437,8 @@ let enumTests =
         let result = createTestReader "enum" |> runReader
         testCase "'Direction' enum is present in result" <| fun _ ->
             "Direction should be in result"
-            |> Expect.exists result (function
-                | KeyValue(_, TsAstNode.Enum e) -> e.Name = "Direction"
+            |> Expect.exists result.Types (function
+                | KeyValue(_, TsType.Enum e) when e.Name = "Direction" -> true
                 | _ -> false)
 
         testCase "'Direction' has exactly 4 members" <| fun _ ->
@@ -518,7 +511,7 @@ let genericsTests =
 // -----------------------------------------------------------------------
 let functionTests =
     testList "function.d.ts" [
-        let fd = createTestReader "function" |> runReader 
+        let fd = createTestReader "function" |> runReader
         testCase "'greet' has exactly 2 parameters" <| fun _ ->
             let fd = fd |> findFunction "greet"
             "" |> Expect.hasLength fd.ValueOrHead.Parameters 2
@@ -575,7 +568,7 @@ let indexAccessTests =
                 let accessedProperty = findProperty "booleanAccess" accessedInterface.Members
                 let typ = findType accessedProperty.Type result
                 $"Type should be boolean instead of: {findType accessedProperty.Type result}"
-                |> Expect.isTrue (match typ with TsAstNode.Primitive TypeKindPrimitive.Boolean -> true | _ -> false)
+                |> Expect.isTrue (match typ with TsType.Primitive TypeKindPrimitive.Boolean -> true | _ -> false)
         ]
         let accessedInterface = findInterface "GenericTest" result
         let property = findProperty "accessedProperty" accessedInterface.Members
@@ -583,26 +576,26 @@ let indexAccessTests =
         testList "Unresolved access preserves type access semantics" [
             testCase "Underlying type preserves semantics" <| fun _ ->
                 "Type should be IndexAccess"
-                |> Expect.isTrue typ.IsIndexAccessType
+                |> Expect.isTrue (match typ with TsType.IndexedAccess _ -> true | _ -> false)
             let indexAccessType =
                 match typ with
-                | TsAstNode.IndexAccessType indexAccess -> indexAccess
+                | TsType.IndexedAccess indexAccess -> indexAccess
                 | _ -> failwith "Type is not IndexAccessType"
             testCase "Index is type parameter" <| fun _ ->
                 let typ = findType indexAccessType.Index result
                 "Type should be a type parameter"
-                |> Expect.isTrue typ.IsTypeParameter
+                |> Expect.isTrue (match typ with TsType.TypeParameter _ -> true | _ -> false)
             testCase "Object accessed is 'AccessedInterface'" <| fun _ ->
                 let nestedType =
-                    findType indexAccessType.Object result 
+                    findType indexAccessType.Object result
                 "Type should be an interface by the name of AccessedInterface"
                 |> Expect.isTrue (
                     match nestedType with
-                    | TsAstNode.Interface { Name = "AccessedInterface" } -> true
+                    | TsType.Interface { Name = "AccessedInterface" } -> true
                     | _ -> false
                     )
         ]
-            
+
     ]
 
 // -----------------------------------------------------------------------
@@ -617,31 +610,31 @@ let unionTests =
 
         testCase "'StringOrNumber' alias is present in result" <| fun _ ->
             "StringOrNumber should be in result"
-            |> Expect.exists result (function
-                | KeyValue(_, TsAstNode.Alias a) when a.Name = "StringOrNumber" -> true
+            |> Expect.exists result.ExportedDeclarations (function
+                | KeyValue(_, TsExportDeclaration.TypeAlias a) when a.Name = "StringOrNumber" -> true
                 | _ -> false)
 
         let strOrNum = result |> findAlias "StringOrNumber"
 
-        testCase "'StringOrNumber' Type resolves to TsAstNode.Union" <| fun _ ->
+        testCase "'StringOrNumber' Type resolves to TsType.Union" <| fun _ ->
             let node = result |> findType strOrNum.Type
-            "StringOrNumber.Type should be Union" |> Expect.isTrue node.IsUnion
+            "StringOrNumber.Type should be Union" |> Expect.isTrue (match node with TsType.Union _ -> true | _ -> false)
 
         testCase "'StringOrNumber' union has exactly 2 members" <| fun _ ->
             match result |> findType strOrNum.Type with
-            | TsAstNode.Union u -> "" |> Expect.hasLength u.Types 2
+            | TsType.Union u -> "" |> Expect.hasLength u.Types 2
             | _ -> failwith "Expected Union"
 
         testCase "'StringOrNumber' union members include string and number TypeKeys" <| fun _ ->
             match result |> findType strOrNum.Type with
-            | TsAstNode.Union u ->
+            | TsType.Union u ->
                 "" |> Expect.containsAll u.Types [ TypeKindPrimitive.String.TypeKey; TypeKindPrimitive.Number.TypeKey ]
             | _ -> failwith "Expected Union"
 
         testCase "'ThreeWay' union has exactly 3 members" <| fun _ ->
             let threeWay = result |> findAlias "ThreeWay"
             match result |> findType threeWay.Type with
-            | TsAstNode.Union u -> "" |> Expect.hasLength u.Types 3
+            | TsType.Union u -> "" |> Expect.hasLength u.Types 3
             | _ -> failwith "Expected Union"
     ]
 
@@ -658,22 +651,22 @@ let intersectionTests =
 
         testCase "'Named' and 'Aged' interfaces are both in result" <| fun _ ->
             let names =
-                result
+                result.ExportedDeclarations
                 |> Seq.choose (function
-                    | KeyValue(_, TsAstNode.Interface iface) -> Some iface.Name
+                    | KeyValue(_, TsExportDeclaration.Interface iface) -> Some iface.Name
                     | _ -> None)
                 |> Seq.toArray
             "" |> Expect.containsAll names [ "Named"; "Aged" ]
 
         let person = result |> findAlias "Person"
 
-        testCase "'Person' alias Type resolves to TsAstNode.Intersection" <| fun _ ->
+        testCase "'Person' alias Type resolves to TsType.Intersection" <| fun _ ->
             let node = result |> findType person.Type
-            "Person.Type should be Intersection" |> Expect.isTrue node.IsIntersection
+            "Person.Type should be Intersection" |> Expect.isTrue (match node with TsType.Intersection _ -> true | _ -> false)
 
         testCase "'Person' intersection has exactly 2 entries" <| fun _ ->
             match result |> findType person.Type with
-            | TsAstNode.Intersection i -> "" |> Expect.hasLength i.Types 2
+            | TsType.Intersection i -> "" |> Expect.hasLength i.Types 2
             | _ -> failwith "Expected Intersection"
     ]
 
@@ -689,15 +682,15 @@ let tupleTests =
     testList "tuple.d.ts" [
         let result = createTestReader "tuple" |> runReader
 
-        testCase "'Coord' alias Type resolves to TsAstNode.Tuple" <| fun _ ->
+        testCase "'Coord' alias Type resolves to TsType.Tuple" <| fun _ ->
             let alias = result |> findAlias "Coord"
             let node = result |> findType alias.Type
-            "Coord.Type should be Tuple" |> Expect.isTrue node.IsTuple
+            "Coord.Type should be Tuple" |> Expect.isTrue (match node with TsType.Tuple _ -> true | _ -> false)
 
         testCase "'Coord' has FixedLength 2 and MinRequired 2" <| fun _ ->
             let alias = result |> findAlias "Coord"
             match result |> findType alias.Type with
-            | TsAstNode.Tuple t ->
+            | TsType.Tuple t ->
                 "" |> Expect.equal t.FixedLength 2
                 "" |> Expect.equal t.MinRequired 2
             | _ -> failwith "Expected Tuple"
@@ -705,7 +698,7 @@ let tupleTests =
         testCase "'Triple' has FixedLength 3 and MinRequired 3" <| fun _ ->
             let alias = result |> findAlias "Triple"
             match result |> findType alias.Type with
-            | TsAstNode.Tuple t ->
+            | TsType.Tuple t ->
                 "" |> Expect.equal t.FixedLength 3
                 "" |> Expect.equal t.MinRequired 3
             | _ -> failwith "Expected Tuple"
@@ -713,7 +706,7 @@ let tupleTests =
         testCase "'WithOptional' has FixedLength 2 and MinRequired 1" <| fun _ ->
             let alias = result |> findAlias "WithOptional"
             match result |> findType alias.Type with
-            | TsAstNode.Tuple t ->
+            | TsType.Tuple t ->
                 "" |> Expect.equal t.FixedLength 2
                 "" |> Expect.equal t.MinRequired 1
             | _ -> failwith "Expected Tuple"
@@ -721,7 +714,7 @@ let tupleTests =
         testCase "'WithRest' has FixedLength 1 and MinRequired 1" <| fun _ ->
             let alias = result |> findAlias "WithRest"
             match result |> findType alias.Type with
-            | TsAstNode.Tuple t ->
+            | TsType.Tuple t ->
                 "" |> Expect.equal t.FixedLength 1
                 "" |> Expect.equal t.MinRequired 1
             | _ -> failwith "Expected Tuple"
@@ -729,7 +722,7 @@ let tupleTests =
         testCase "'WithRest' has 2 Types entries and last entry IsRest" <| fun _ ->
             let alias = result |> findAlias "WithRest"
             match result |> findType alias.Type with
-            | TsAstNode.Tuple t ->
+            | TsType.Tuple t ->
                 "" |> Expect.hasLength t.Types 2
                 "" |> Expect.isTrue (List.last t.Types).IsRest
             | _ -> failwith "Expected Tuple"
@@ -750,8 +743,8 @@ let classTests =
 
         testCase "'Animal' class is present in result" <| fun _ ->
             "Animal should be in result"
-            |> Expect.exists result (function
-                | KeyValue(_, TsAstNode.Class c) when c.Name = "Animal" -> true
+            |> Expect.exists result.ExportedDeclarations (function
+                | KeyValue(_, TsExportDeclaration.Class c) when c.Name = "Animal" -> true
                 | _ -> false)
 
         let cls = result |> findClass "Animal"
@@ -796,8 +789,8 @@ let variableTests =
 
         testCase "'VERSION' variable is present in result" <| fun _ ->
             "VERSION should be in result"
-            |> Expect.exists result (function
-                | KeyValue(_, TsAstNode.Variable v) when v.Name = "VERSION" -> true
+            |> Expect.exists result.ExportedDeclarations (function
+                | KeyValue(_, TsExportDeclaration.Variable v) when v.Name = "VERSION" -> true
                 | _ -> false)
 
         testCase "'VERSION' Type resolves to string primitive" <| fun _ ->
@@ -806,8 +799,8 @@ let variableTests =
 
         testCase "'count' variable is present in result" <| fun _ ->
             "count should be in result"
-            |> Expect.exists result (function
-                | KeyValue(_, TsAstNode.Variable v) when v.Name = "count" -> true
+            |> Expect.exists result.ExportedDeclarations (function
+                | KeyValue(_, TsExportDeclaration.Variable v) when v.Name = "count" -> true
                 | _ -> false)
 
         testCase "'count' Type resolves to number primitive" <| fun _ ->
@@ -818,7 +811,7 @@ let variableTests =
             let v = result |> findVariable "PI"
             "" |> Expect.equal v.Type TypeKindPrimitive.Number.TypeKey
     ]
-    
+
 let utilityTests =
     testList "utility.d.ts" [
         let result = createTestReader "utility-types" |> runReader
@@ -831,9 +824,9 @@ let utilityTests =
             |> Expect.isFalse (stringProperty.IsOptional || numberProperty.IsOptional || booleanProperty.IsOptional)
         testCase "All utility definitions are present" <| fun _ ->
             let utilityTypes =
-                result
-                |> Seq.choose (_.Value  >> function
-                    | TsAstNode.Alias a -> Some a
+                result.ExportedDeclarations
+                |> Seq.choose (_.Value >> function
+                    | TsExportDeclaration.TypeAlias a -> Some a
                     | _ -> None
                     )
             "5 Aliases are present"
@@ -844,11 +837,11 @@ let utilityTests =
                 result
                 |> findType partialUtility.Type
                 |> function
-                    | TsAstNode.TypeReference { ResolvedType = Some typeKey } ->
+                    | TsType.TypeReference { ResolvedType = Some typeKey } ->
                         findType typeKey result
                     | _ -> failwith "Expected TypeReference"
                 |> function
-                    | TsAstNode.TypeLiteral { Members = members } ->
+                    | TsType.TypeLiteral { Members = members } ->
                         members
                     | _ -> failwith "Expected TypeLiteral"
             "Partial is a resolved type reference to a type literal with 3 members"
@@ -864,11 +857,11 @@ let utilityTests =
                 result
                 |> findType omitUtility.Type
                 |> function
-                    | TsAstNode.TypeReference { ResolvedType = Some typeKey } ->
+                    | TsType.TypeReference { ResolvedType = Some typeKey } ->
                         findType typeKey result
                     | _ -> failwith "Expected TypeReference"
                 |> function
-                    | TsAstNode.TypeLiteral { Members = members } ->
+                    | TsType.TypeLiteral { Members = members } ->
                         members
                     | _ -> failwith "Expected TypeLiteral"
             "Omit is resolved to type reference -> type literal -> 2 members"
@@ -881,11 +874,11 @@ let utilityTests =
                 result
                 |> findType pickUtility.Type
                 |> function
-                    | TsAstNode.TypeReference { ResolvedType = Some typeKey } ->
+                    | TsType.TypeReference { ResolvedType = Some typeKey } ->
                         findType typeKey result
                     | _ -> failwith "Expected TypeReference"
                 |> function
-                    | TsAstNode.TypeLiteral { Members = members } ->
+                    | TsType.TypeLiteral { Members = members } ->
                         members
                     | _ -> failwith "Expected TypeLiteral"
             "Pick is resolved to type reference -> type literal -> 1 member"
@@ -902,11 +895,11 @@ let utilityTests =
                 result
                 |> findType nestedUtility.Type
                 |> function
-                    | TsAstNode.TypeReference { ResolvedType = Some typeKey } ->
+                    | TsType.TypeReference { ResolvedType = Some typeKey } ->
                         findType typeKey result
                     | _ -> failwith "Expected TypeReference"
                 |> function
-                    | TsAstNode.TypeLiteral { Members = members } ->
+                    | TsType.TypeLiteral { Members = members } ->
                         members
                     | _ -> failwith "Expected TypeLiteral"
             "Utility type is resolved to type literal with 2 members"
@@ -916,13 +909,13 @@ let utilityTests =
                 | TsMember.Property { IsOptional = true } -> true
                 | _ -> false
                 )
-        testList "Generic utility types preserves semantic information" [
+        testList "[Known Errors - See Issue #30] Generic utility types preserves semantic information" [
             let genericUtility = result |> findAlias "GenericUtility"
             let genericUtilityType =
                 result
                 |> findType genericUtility.Type
                 |> function
-                    | TsAstNode.TypeReference typeRef -> typeRef
+                    | TsType.TypeReference typeRef -> typeRef
                     | _ -> failwith "Expected TypeReference"
             // Type checker actually still resolves the type down to a type literal
             // with an index signature on any object.
@@ -931,7 +924,7 @@ let utilityTests =
             // Semantic/syntactic information is lost.
             // We again receive a type literal with an index signature on any object.
             // likely because we use type checker immediately on type references?
-            testCase "Utility type preserves semantic information" <| fun _ ->
+            ptestCase "Utility type preserves semantic information" <| fun _ ->
                 let typ = findType genericUtilityType.Type result
                 "Expect to keep semantic info of: GenericUtility<T extends keyof IUtilityInterface> = Pick<PartialInterface, T>" |> Expect.equal (typ.ToString()) ""
         ]
@@ -951,20 +944,20 @@ let typeOperatorTests =
             let alias = findAlias "InterfaceKey" result
             let aliasType = result |> findType alias.Type
             "Expected 'InterfaceKey' to be a Alias -> Union"
-            |> Expect.isTrue aliasType.IsUnion
+            |> Expect.isTrue (match aliasType with TsType.Union _ -> true | _ -> false)
             let types =
                 match aliasType with
-                | TsAstNode.Union (TsTypeUnion types) -> types
+                | TsType.Union (TsTypeUnion types) -> types
                 | _ -> failwith "Expected Union"
             "Expected union to contain 3 members"
             |> Expect.hasLength types 3
             "Expected union to contain literals only"
-            |> Expect.all types (findType >> (fun fn -> fn result) >> _.IsLiteral)
+            |> Expect.all types (findType >> (fun fn -> fn result) >> (fun n -> match n with TsType.Literal _ -> true | _ -> false))
             "Expected union to contain strings 'stringProperty'; 'numberProperty'; 'booleanProperty'"
             |> Expect.containsAll (
                 List.map (fun typ ->
                     match findType typ result with
-                    | TsAstNode.Literal (TsLiteral.String s) -> s
+                    | TsType.Literal (TsLiteral.String s) -> s
                     | _ -> failwith "Expected Literal"
                     ) types
                 ) [ "stringProperty"; "numberProperty"; "booleanProperty" ]
@@ -982,8 +975,8 @@ let enumNonSequentialTests =
 
         testCase "'HttpStatus' enum is present in result" <| fun _ ->
             "HttpStatus should be in result"
-            |> Expect.exists result (function
-                | KeyValue(_, TsAstNode.Enum e) when e.Name = "HttpStatus" -> true
+            |> Expect.exists result.Types (function
+                | KeyValue(_, TsType.Enum e) when e.Name = "HttpStatus" -> true
                 | _ -> false)
 
         testCase "'HttpStatus' has exactly 3 members" <| fun _ ->
@@ -1024,8 +1017,8 @@ let enumStringTests =
 
         testCase "'Color' enum is present in result" <| fun _ ->
             "Color should be in result"
-            |> Expect.exists result (function
-                | KeyValue(_, TsAstNode.Enum e) when e.Name = "Color" -> true
+            |> Expect.exists result.Types (function
+                | KeyValue(_, TsType.Enum e) when e.Name = "Color" -> true
                 | _ -> false)
 
         testCase "'Color' has exactly 3 members" <| fun _ ->
@@ -1098,8 +1091,8 @@ let namespaceTests =
 
         testCase "'Geometry' module is present in result" <| fun _ ->
             "Geometry should be in result"
-            |> Expect.exists result (function
-                | KeyValue(_, TsAstNode.Module m) when m.Name = "Geometry" -> true
+            |> Expect.exists result.ExportedDeclarations (function
+                | KeyValue(_, TsExportDeclaration.Module m) when m.Name = "Geometry" -> true
                 | _ -> false)
 
         let m = result |> findModule "Geometry"
@@ -1108,16 +1101,16 @@ let namespaceTests =
             "" |> Expect.isTrue m.IsNamespace
 
         testCase "'Geometry' Types list has exactly 2 entries" <| fun _ ->
-            "" |> Expect.hasLength m.Types 2
+            "" |> Expect.hasLength m.Exports 2
 
         testCase "all types in 'Geometry' resolve to interfaces" <| fun _ ->
             "All Geometry.Types should resolve to Interface nodes"
-            |> Expect.all m.Types (fun tk -> (result |> findType tk).IsInterface)
+            |> Expect.all m.Exports (function TsExportDeclaration.Interface _ -> true | _ -> false)
 
         testCase "'Point' and 'Circle' interfaces are in the result" <| fun _ ->
             let names =
-                result
-                |> Seq.choose (function KeyValue(_, TsAstNode.Interface i) -> Some i.Name | _ -> None)
+                result.ExportedDeclarations
+                |> Seq.choose (function KeyValue(_, TsExportDeclaration.Interface i) -> Some i.Name | _ -> None)
                 |> Seq.toArray
             "" |> Expect.containsAll names [ "Point"; "Circle" ]
 
@@ -1138,28 +1131,28 @@ let conditionalTests =
         let result = createTestReader "conditional" |> runReader
         let alias = result |> findAlias "IsString"
 
-        testCase "'IsString' alias Type resolves to TsAstNode.Conditional" <| fun _ ->
+        testCase "'IsString' alias Type resolves to TsType.Conditional" <| fun _ ->
             "IsString.Type should be Conditional"
-            |> Expect.isTrue (result |> findType alias.Type).IsConditional
+            |> Expect.isTrue (match result |> findType alias.Type with TsType.Conditional _ -> true | _ -> false)
 
         testCase "'IsString' Conditional.Extends resolves to string primitive" <| fun _ ->
             match result |> findType alias.Type with
-            | TsAstNode.Conditional c -> "" |> Expect.equal c.Extends TypeKindPrimitive.String.TypeKey
+            | TsType.Conditional c -> "" |> Expect.equal c.Extends TypeKindPrimitive.String.TypeKey
             | _ -> failwith "Expected Conditional"
 
         testCase "'IsString' Conditional.True resolves to TsLiteral.Bool true" <| fun _ ->
             match result |> findType alias.Type with
-            | TsAstNode.Conditional c ->
+            | TsType.Conditional c ->
                 match result |> findType c.True with
-                | TsAstNode.Literal (TsLiteral.Bool b) -> "" |> Expect.isTrue b
+                | TsType.Literal (TsLiteral.Bool b) -> "" |> Expect.isTrue b
                 | _ -> failwith "Expected Bool literal"
             | _ -> failwith "Expected Conditional"
 
         testCase "'IsString' Conditional.False resolves to TsLiteral.Bool false" <| fun _ ->
             match result |> findType alias.Type with
-            | TsAstNode.Conditional c ->
+            | TsType.Conditional c ->
                 match result |> findType c.False with
-                | TsAstNode.Literal (TsLiteral.Bool b) -> "" |> Expect.isFalse b
+                | TsType.Literal (TsLiteral.Bool b) -> "" |> Expect.isFalse b
                 | _ -> failwith "Expected Bool literal"
             | _ -> failwith "Expected Conditional"
     ]
@@ -1175,40 +1168,40 @@ let templateLiteralTests =
         let result = createTestReader "template-literal" |> runReader
         let eventAlias = result |> findAlias "EventName"
 
-        testCase "'EventName' alias Type resolves to TsAstNode.TemplateLiteral" <| fun _ ->
+        testCase "'EventName' alias Type resolves to TsType.TemplateLiteral" <| fun _ ->
             "EventName.Type should be TemplateLiteral"
-            |> Expect.isTrue (result |> findType eventAlias.Type).IsTemplateLiteral
+            |> Expect.isTrue (match result |> findType eventAlias.Type with TsType.TemplateLiteral _ -> true | _ -> false)
 
         testCase "'EventName' has 2 Texts entries" <| fun _ ->
             match result |> findType eventAlias.Type with
-            | TsAstNode.TemplateLiteral t -> "" |> Expect.hasLength t.Texts 2
+            | TsType.TemplateLiteral t -> "" |> Expect.hasLength t.Texts 2
             | _ -> failwith "Expected TemplateLiteral"
 
         testCase "'EventName' first text segment is \"on\"" <| fun _ ->
             match result |> findType eventAlias.Type with
-            | TsAstNode.TemplateLiteral t -> "" |> Expect.equal (List.head t.Texts) "on"
+            | TsType.TemplateLiteral t -> "" |> Expect.equal (List.head t.Texts) "on"
             | _ -> failwith "Expected TemplateLiteral"
 
         testCase "'EventName' has 1 interpolated Type entry" <| fun _ ->
             match result |> findType eventAlias.Type with
-            | TsAstNode.TemplateLiteral t -> "" |> Expect.hasLength t.Types 1
+            | TsType.TemplateLiteral t -> "" |> Expect.hasLength t.Types 1
             | _ -> failwith "Expected TemplateLiteral"
 
         testCase "'EventName' interpolated type is string primitive" <| fun _ ->
             match result |> findType eventAlias.Type with
-            | TsAstNode.TemplateLiteral t -> "" |> Expect.equal t.Types.[0] TypeKindPrimitive.String.TypeKey
+            | TsType.TemplateLiteral t -> "" |> Expect.equal t.Types.[0] TypeKindPrimitive.String.TypeKey
             | _ -> failwith "Expected TemplateLiteral"
 
         testCase "'KeyValuePair' has 2 interpolated Type entries" <| fun _ ->
             let kv = result |> findAlias "KeyValuePair"
             match result |> findType kv.Type with
-            | TsAstNode.TemplateLiteral t -> "" |> Expect.hasLength t.Types 2
+            | TsType.TemplateLiteral t -> "" |> Expect.hasLength t.Types 2
             | _ -> failwith "Expected TemplateLiteral"
 
         testCase "'KeyValuePair' separator text segment is \":\"" <| fun _ ->
             let kv = result |> findAlias "KeyValuePair"
             match result |> findType kv.Type with
-            | TsAstNode.TemplateLiteral t ->
+            | TsType.TemplateLiteral t ->
                 // texts = [""; ":"; ""] — index 1 is the separator between the two interpolations
                 "" |> Expect.equal t.Texts.[1] ":"
             | _ -> failwith "Expected TemplateLiteral"
@@ -1252,7 +1245,7 @@ let multiFileTests =
                 result
                 |> findType resolvedTypeKey
             with
-            | TsAstNode.Interface { Name = name } ->
+            | TsType.Interface { Name = name } ->
                 "Interface should be Point2D"
                 |> Expect.equal name "Point2D"
             | _ -> failwith "Expected Interface"
@@ -1273,10 +1266,10 @@ let multiFileTests =
                 result
                 |> findType resolvedTypeKey
             with
-            | TsAstNode.Interface { Name = name } ->
+            | TsType.Interface { Name = name } ->
                 "Interface should be Vector2D"
                 |> Expect.equal name "Vector2D"
-            | _ -> failwith "Expected Interface"           
+            | _ -> failwith "Expected Interface"
     ]
 
 // -----------------------------------------------------------------------

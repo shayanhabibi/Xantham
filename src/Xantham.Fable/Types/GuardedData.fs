@@ -22,163 +22,93 @@ open Xantham.Fable
 open Xantham.Fable.Types
 open Xantham.Fable.Types.Signal
 
+type KeyedSymbolSlot<'T> =
+    abstract member get: XanthamTag -> 'T
+    abstract member has: XanthamTag -> bool
+    abstract member set: 'T -> XanthamTag -> XanthamTag
+    abstract member clear: XanthamTag -> XanthamTag
+    abstract member getOrSetWith: (unit -> 'T) -> XanthamTag -> 'T
+    abstract member getOrMapSet: (XanTagKind -> 'T) -> XanthamTag -> 'T
+type SymbolSlot<'T> =
+    inherit KeyedSymbolSlot<'T>
+    abstract Keyed: KeyedSymbolSlot<'T>
+type KeyedSymbolSlotWithDefault<'T> =
+    inherit KeyedSymbolSlot<'T>
+    abstract getOrSetDefault: XanthamTag -> 'T
+type SymbolSlotWithDefault<'T> =
+    inherit SymbolSlot<'T>
+    abstract getOrSetDefault: XanthamTag -> 'T
+type KeyedPendingSymbolSlot<'T> =
+    inherit KeyedSymbolSlotWithDefault<PendingSignal<'T>>
+type PendingSymbolSlot<'T> =
+    inherit SymbolSlotWithDefault<PendingSignal<'T>>
+
+
 [<EditorBrowsable(EditorBrowsableState.Never)>]
 [<RequireQualifiedAccess>]
 module Helpers =
-    let inline get symbol (tag: XanthamTag) = tag.Get(symbol)
-    let inline has symbol (tag: XanthamTag) = tag.Has(symbol)
-    let inline set symbol value (tag: XanthamTag) = tag.Set(symbol, value); tag
-    let inline clear symbol (tag: XanthamTag) = tag.Clear(symbol); tag
-    let inline getOrSetWith symbol (fn: unit -> _) (tag: XanthamTag) = tag.GetOrInit(symbol, fn)
-    let inline getOrMapSet symbol (fn: XanTagKind -> _) (tag: XanthamTag) = tag.GetOrInit(symbol, fun () -> fn tag.Value)
-    module Keyed =
-        let inline get symbol (tag: XanthamTag) = tag.KeyedGet(symbol)
-        let inline has symbol (tag: XanthamTag) = tag.KeyedHas(symbol)
-        let inline set symbol value (tag: XanthamTag) = tag.KeyedSet(symbol, value); tag
-        let inline clear symbol (tag: XanthamTag) = tag.KeyedClear(symbol); tag
-        let inline getOrSetWith symbol (fn: unit -> _) (tag: XanthamTag) = tag.KeyedGetOrInit(symbol, fn)
-        let inline getOrMapSet symbol (fn: XanTagKind -> _) (tag: XanthamTag) = tag.KeyedGetOrInit(symbol, fun () -> fn tag.Value)
-            
+    let inline makeSlotWithDefault<'T> thunk name =
+        let symbol = SymbolTypeKey.create<'T> name
+        { new SymbolSlotWithDefault<'T> with
+            member _.get tag = tag.Get(symbol)
+            member _.has tag = tag.Has(symbol)
+            member _.set value tag = tag.Set(symbol, value); tag
+            member _.clear tag = tag.Clear(symbol); tag
+            member _.getOrSetWith thunk tag = tag.GetOrInit(symbol, thunk)
+            member _.getOrMapSet thunk tag = tag.GetOrInit(symbol, fun () -> thunk tag.Value)
+            member _.getOrSetDefault tag = tag.GetOrInit(symbol, thunk)
+            member _.Keyed = {
+                new KeyedSymbolSlotWithDefault<'T> with
+                    member _.get tag = tag.KeyedGet(symbol)
+                    member _.has tag = tag.KeyedHas(symbol)
+                    member _.set value tag = tag.KeyedSet(symbol, value); tag
+                    member _.clear tag = tag.KeyedClear(symbol); tag
+                    member _.getOrSetWith thunk tag = tag.KeyedGetOrInit(symbol, thunk)
+                    member _.getOrMapSet thunk tag = tag.KeyedGetOrInit(symbol, fun () -> thunk tag.Value)
+                    member _.getOrSetDefault tag = tag.KeyedGetOrInit(symbol, thunk)
+            }
+        }
+    let inline makeSlot<'T> name =
+        makeSlotWithDefault<'T>
+            (fun () -> Fable.Core.JS.undefined)
+            name
+        :> SymbolSlot<'T>
+    let inline makePendingSlot<'T> name =
+        makeSlotWithDefault<PendingSignal<'T>>
+            (fun () -> Signal.pending())
+            name
+        :?> PendingSymbolSlot<'T>
 
-[<RequireQualifiedAccess>]
-module SummaryContent =
-    let symbol = SymbolTypeKey.create<TsComment> "SummaryContent"
-    let get tag = Helpers.get symbol tag
-    let has tag = Helpers.has symbol tag
-    let set value tag = Helpers.set symbol value tag
-    let clear tag = Helpers.clear symbol tag
-    let getOrSetWith fn tag = Helpers.getOrSetWith symbol fn tag
-    let getOrMapSet fn tag = Helpers.getOrMapSet symbol fn tag
-    module Keyed =
-        let get tag = Helpers.Keyed.get symbol tag
-        let has tag = Helpers.Keyed.has symbol tag
-        let set value tag = Helpers.Keyed.set symbol value tag
-        let clear tag = Helpers.Keyed.clear symbol tag
-        let getOrSetWith fn tag = Helpers.Keyed.getOrSetWith symbol fn tag
-        let getOrMapSet fn tag = Helpers.Keyed.getOrMapSet symbol fn tag
-[<RequireQualifiedAccess>]
-module Documentation =
-    let symbol = SymbolTypeKey.create<TsComment array> "Documentation"
-    let get tag = Helpers.get symbol tag
-    let has tag = Helpers.has symbol tag
-    let set value tag = Helpers.set symbol value tag
-    let clear tag = Helpers.clear symbol tag
-    let getOrSetWith fn tag = Helpers.getOrSetWith symbol fn tag
-    let getOrMapSet fn tag = Helpers.getOrMapSet symbol fn tag
-    module Keyed =
-        let get tag = Helpers.Keyed.get symbol tag
-        let has tag = Helpers.Keyed.has symbol tag
-        let set value tag = Helpers.Keyed.set symbol value tag
-        let clear tag = Helpers.Keyed.clear symbol tag
-        let getOrSetWith fn tag = Helpers.Keyed.getOrSetWith symbol fn tag
-        let getOrMapSet fn tag = Helpers.Keyed.getOrMapSet symbol fn tag
-[<RequireQualifiedAccess>]
-module ParameterBuilder =
-    let symbol = SymbolTypeKey.create<PendingSignal<SParameterBuilder>> "ParameterBuilder"
-    let get tag = Helpers.get symbol tag
-    let has tag = Helpers.has symbol tag
-    let set value tag = Helpers.set symbol value tag
-    let clear tag = Helpers.clear symbol tag
-    let getOrSetWith fn tag = Helpers.getOrSetWith symbol fn tag
-    let getOrMapSet fn tag = Helpers.getOrMapSet symbol fn tag
-    let getOrSetDefault tag = getOrSetWith (fun () -> Signal.pending<SParameterBuilder>()) tag
-    module Keyed =
-        let get tag = Helpers.Keyed.get symbol tag
-        let has tag = Helpers.Keyed.has symbol tag
-        let set value tag = Helpers.Keyed.set symbol value tag
-        let clear tag = Helpers.Keyed.clear symbol tag
-        let getOrSetWith fn tag = Helpers.Keyed.getOrSetWith symbol fn tag
-        let getOrMapSet fn tag = Helpers.Keyed.getOrMapSet symbol fn tag
-        let getOrSetDefault tag = getOrSetWith (fun () -> Signal.pending<SParameterBuilder>()) tag
-[<RequireQualifiedAccess>]
-module ConstructorBuilder =
-    let symbol = SymbolTypeKey.create<PendingSignal<SConstructorBuilder>> "ConstructorBuilder"
-    let get tag = Helpers.get symbol tag
-    let has tag = Helpers.has symbol tag
-    let set value tag = Helpers.set symbol value tag
-    let clear tag = Helpers.clear symbol tag
-    let getOrSetWith fn tag = Helpers.getOrSetWith symbol fn tag
-    let getOrMapSet fn tag = Helpers.getOrMapSet symbol fn tag
-    let getOrSetDefault tag = getOrSetWith (fun () -> Signal.pending<SConstructorBuilder>()) tag
-    module Keyed =
-        let get tag = Helpers.Keyed.get symbol tag
-        let has tag = Helpers.Keyed.has symbol tag
-        let set value tag = Helpers.Keyed.set symbol value tag
-        let clear tag = Helpers.Keyed.clear symbol tag
-        let getOrSetWith fn tag = Helpers.Keyed.getOrSetWith symbol fn tag
-        let getOrMapSet fn tag = Helpers.Keyed.getOrMapSet symbol fn tag
-        let getOrSetDefault tag = getOrSetWith (fun () -> Signal.pending<SConstructorBuilder>()) tag
-[<RequireQualifiedAccess>]
-module MemberBuilder =
-    let symbol = SymbolTypeKey.create<PendingSignal<SMemberBuilder>> "MemberBuilder"
-    let get tag = Helpers.get symbol tag
-    let has tag = Helpers.has symbol tag
-    let set value tag = Helpers.set symbol value tag
-    let clear tag = Helpers.clear symbol tag
-    let getOrSetWith fn tag = Helpers.getOrSetWith symbol fn tag
-    let getOrMapSet fn tag = Helpers.getOrMapSet symbol fn tag
-    let getOrSetDefault tag = getOrSetWith (fun () -> Signal.pending<SMemberBuilder>()) tag
-    module Keyed =
-        let get tag = Helpers.Keyed.get symbol tag
-        let has tag = Helpers.Keyed.has symbol tag
-        let set value tag = Helpers.Keyed.set symbol value tag
-        let clear tag = Helpers.Keyed.clear symbol tag
-        let getOrSetWith fn tag = Helpers.Keyed.getOrSetWith symbol fn tag
-        let getOrMapSet fn tag = Helpers.Keyed.getOrMapSet symbol fn tag
-        let getOrSetDefault tag = getOrSetWith (fun () -> Signal.pending<SMemberBuilder>()) tag
-[<RequireQualifiedAccess>]
-module AstNodeBuilder =
-    let symbol = SymbolTypeKey.create<PendingSignal<STsAstNodeBuilder>> "AstNodeBuilder"
-    let get tag = Helpers.get symbol tag
-    let has tag = Helpers.has symbol tag
-    let set value tag = Helpers.set symbol value tag
-    let clear tag = Helpers.clear symbol tag
-    let getOrSetWith fn tag = Helpers.getOrSetWith symbol fn tag
-    let getOrMapSet fn tag = Helpers.getOrMapSet symbol fn tag
-    let getOrSetDefault tag = getOrSetWith (fun () -> Signal.pending<STsAstNodeBuilder>()) tag
-    module Keyed =
-        let get tag = Helpers.Keyed.get symbol tag
-        let has tag = Helpers.Keyed.has symbol tag
-        let set value tag = Helpers.Keyed.set symbol value tag
-        let clear tag = Helpers.Keyed.clear symbol tag
-        let getOrSetWith fn tag = Helpers.Keyed.getOrSetWith symbol fn tag
-        let getOrMapSet fn tag = Helpers.Keyed.getOrMapSet symbol fn tag
-        let getOrSetDefault tag = getOrSetWith (fun () -> Signal.pending<STsAstNodeBuilder>()) tag
-[<RequireQualifiedAccess>]
-module TypeSignal =
-    let symbol = SymbolTypeKey.create<TypeSignal> "TypeSignal"
-    let get tag = Helpers.get symbol tag
-    let has tag = Helpers.has symbol tag
-    let set value tag = Helpers.set symbol value tag
-    let clear tag = Helpers.clear symbol tag
-    let getOrSetWith fn tag = Helpers.getOrSetWith symbol fn tag
-    let getOrMapSet fn tag = Helpers.getOrMapSet symbol fn tag
-    let getOrSetDefault tag = getOrSetWith (fun () -> TypeSignal.pending()) tag
-    module Keyed =
-        let get tag = Helpers.Keyed.get symbol tag
-        let has tag = Helpers.Keyed.has symbol tag
-        let set value tag = Helpers.Keyed.set symbol value tag
-        let clear tag = Helpers.Keyed.clear symbol tag
-        let getOrSetWith fn tag = Helpers.Keyed.getOrSetWith symbol fn tag
-        let getOrMapSet fn tag = Helpers.Keyed.getOrMapSet symbol fn tag
-        let getOrSetDefault tag = getOrSetWith (fun () -> TypeSignal.pending()) tag
-
-/// <summary>
-/// Source file/module. Since symbols can be re-exported, we need to have some contextual
-/// method of linking paths of exported types/symbols to the highest level export point.
-/// </summary>
-module Source =
-    let symbol = SymbolTypeKey.create<Signal<ModuleName>> "Source"
-    let get tag = Helpers.get symbol tag
-    let has tag = Helpers.has symbol tag
-    let set value tag = Helpers.set symbol value tag
-    let clear tag = Helpers.clear symbol tag
-    let getOrSetWith fn tag = Helpers.getOrSetWith symbol fn tag
-    let getOrMapSet fn tag = Helpers.getOrMapSet symbol fn tag
-    module Keyed =
-        let get tag = Helpers.Keyed.get symbol tag
-        let has tag = Helpers.Keyed.has symbol tag
-        let set value tag = Helpers.Keyed.set symbol value tag
-        let clear tag = Helpers.Keyed.clear symbol tag
-        let getOrSetWith fn tag = Helpers.Keyed.getOrSetWith symbol fn tag
-        let getOrMapSet fn tag = Helpers.Keyed.getOrMapSet symbol fn tag
+let SummaryContent = Helpers.makeSlot<TsComment> "SummaryContent"
+let Documentation = Helpers.makeSlot<TsComment array> "Documentation"
+let ParameterBuilder = Helpers.makePendingSlot<SParameterBuilder> "ParameterBuilder"
+let ConstructorBuilder = Helpers.makePendingSlot<SConstructorBuilder> "ConstructorBuilder"
+let MemberBuilder = Helpers.makePendingSlot<SMemberBuilder> "MemberBuilder"
+let AstNodeBuilder = Helpers.makePendingSlot<SType> "AstNodeBuilder"
+let TypeSignal = Helpers.makeSlotWithDefault<TypeSignal> (fun () -> TypeSignal.pending()) "TypeSignal"
+let Source = Helpers.makeSlot<Signal<ModuleName>> "Source"
+let ExportBuilder = Helpers.makePendingSlot<STsExportDeclaration> "ExportBuilder"
+type OutputKind =
+    | None = 0
+    | Type = (1 <<< 0)
+    | Member = (1 <<< 1)
+    | DocsOrOther = (1 <<< 2)
+    | Exported = (1 <<< 3)
+module OutputKind =
+    let symbol = SymbolTypeKey.create<OutputKind> "OutputKind"
+    let get (tag: XanthamTag) =
+        tag.GetOrInit(symbol, fun () ->
+            match tag.Value with
+            | Patterns.XanTagKind.IsType _ -> OutputKind.Type
+            | Patterns.XanTagKind.IsMember _ -> OutputKind.Member
+            | Patterns.XanTagKind.IsDocsOrOther _ -> OutputKind.DocsOrOther
+            | Patterns.XanTagKind.IsExported _ -> OutputKind.Exported
+            | Patterns.XanTagKind.IsExportedType _ -> OutputKind.Exported ||| OutputKind.Type
+        )
+    let isType: XanthamTag -> bool = get >> _.HasFlag(OutputKind.Type)
+    let isMember: XanthamTag -> bool = get >> _.HasFlag(OutputKind.Member)
+    let isDocsOrOther: XanthamTag -> bool = get >> _.HasFlag(OutputKind.DocsOrOther)
+    let isExported: XanthamTag -> bool = get >> _.HasFlag(OutputKind.Exported)
+    let isTypeOnly tag = isType tag && not(isExported tag)
+    let isExportedOnly tag = isExported tag && not(isType tag)
+    

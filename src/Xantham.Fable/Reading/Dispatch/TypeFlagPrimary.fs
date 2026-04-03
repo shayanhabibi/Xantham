@@ -51,10 +51,10 @@ module private EnumUnionReduction =
             | TagState.Unvisited tag -> pushToStack ctx tag; tag
             | TagState.Visited tag -> tag
 
-        GuardedData.AstNodeBuilder.getOrSetDefault xanTag
-        |> Signal.fulfillWith (fun () -> (GuardedData.AstNodeBuilder.getOrSetDefault enumTag).Value)
-        ctx.typeSignal xanTag
-        |> Signal.fulfillWith (fun () -> (ctx.typeSignal enumTag).Value)
+        xanTag.Builder
+        |> Signal.fulfillWith (fun () -> enumTag.Builder.Value)
+        xanTag.TypeSignal
+        |> Signal.fulfillWith (fun () -> enumTag.TypeSignal.Value)
         true
 
 let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary) =
@@ -62,11 +62,9 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
     /// Retrieves type signal from type tag; pushes to stack prn
     /// </summary>
     let inline getTypeSignal (typ: Ts.Type) =
-        match ctx.CreateXanthamTag typ with
-        | TagState.Unvisited tag, _ ->
-            pushToStack ctx tag
-            ctx.typeSignal tag
-        | TagState.Visited tag, _ -> ctx.typeSignal tag
+        ctx.CreateXanthamTag typ
+        |> fst
+        |> stackPushAndThen ctx _.TypeSignal
     /// <summary>
     /// Sets current xantags builder signal to the given value
     /// </summary>
@@ -80,16 +78,14 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
             match ctx.CreateXanthamTag typ |> fst with
             | TagState.Unvisited tag -> pushToStack ctx tag; tag
             | TagState.Visited tag -> tag
-        let underlyingTypeSignal = ctx.typeSignal underlyingType
-        let underlyingBuilderSignal = GuardedData.AstNodeBuilder.getOrSetDefault underlyingType
-        xanTag
-        |> ctx.typeSignal
+        let underlyingTypeSignal = underlyingType.TypeSignal
+        let underlyingBuilderSignal = underlyingType.Builder
+        xanTag.TypeSignal
         |> Signal.fulfillWith (fun () -> underlyingTypeSignal.Value)
-        xanTag
-        |> GuardedData.AstNodeBuilder.getOrSetDefault
+        xanTag.Builder
         |> Signal.fulfillWith (fun () -> underlyingBuilderSignal.Value)
     let setPrimitive = fun prim ->
-        STsAstNodeBuilder.Primitive prim
+        SType.Primitive prim
         |> setAstSignal
         prim.TypeKey
         |> setTypeKeyForTag xanTag
@@ -115,13 +111,13 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
                 intersectionType.types.AsArray
                 |> Array.map getTypeSignal
         }
-        |> STsAstNodeBuilder.Intersection
+        |> SType.Intersection
         |> setAstSignal
         intersectionType.TypeKey
         |> setTypeKeyForTag xanTag
     | TypeFlagPrimary.Index indexType ->
         { SIndexBuilder.Type = unbox<Ts.Type> indexType.``type`` |> getTypeSignal }
-        |> STsAstNodeBuilder.Index
+        |> SType.Index
         |> setAstSignal
         indexType.TypeKey
         |> setTypeKeyForTag xanTag
@@ -136,17 +132,13 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
                 SIndexAccessTypeBuilder.Object = getTypeSignal indexedAccessType.objectType
                 Index = getTypeSignal indexedAccessType.indexType
             }
-            |> STsAstNodeBuilder.IndexAccessType
+            |> SType.IndexAccessType
             |> setAstSignal
             indexedAccessType.TypeKey
             |> setTypeKeyForTag xanTag
     | TypeFlagPrimary.Conditional conditionalType ->
         let inline getTypeSignalFromNode (node: Ts.TypeNode) =
-            match ctx.CreateXanthamTag node with
-            | TagState.Unvisited tag, _ ->
-                pushToStack ctx tag
-                ctx.typeSignal tag
-            | TagState.Visited tag, _ -> GuardedData.TypeSignal.get tag
+            ctx.CreateXanthamTag node |> fst |> stackPushAndThen ctx _.TypeSignal
         {
             SConditionalTypeBuilder.Check = getTypeSignal conditionalType.checkType
             Extends = getTypeSignal conditionalType.extendsType
@@ -161,7 +153,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
                 |> Option.defaultWith (fun () ->
                     getTypeSignalFromNode conditionalType.root.node.falseType)
         }
-        |> STsAstNodeBuilder.Conditional
+        |> SType.Conditional
         |> setAstSignal
         conditionalType.TypeKey |> setTypeKeyForTag xanTag
     | TypeFlagPrimary.Substitution subType -> routeToType subType.baseType
@@ -170,7 +162,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
             STemplateLiteralTypeBuilder.Texts = templateLiteralType.texts.AsArray
             Types = templateLiteralType.types.AsArray |> Array.map getTypeSignal
         }
-        |> STsAstNodeBuilder.TemplateLiteral
+        |> SType.TemplateLiteral
         |> setAstSignal
         templateLiteralType.TypeKey
         |> setTypeKeyForTag xanTag
@@ -187,7 +179,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
         elif EnumUnionReduction.tryRoute ctx xanTag types then ()
         else
         { STypeUnionBuilder.Types = types |> Array.map getTypeSignal }
-        |> STsAstNodeBuilder.Union
+        |> SType.Union
         |> setAstSignal
         unionType.TypeKey
         |> setTypeKeyForTag xanTag
@@ -202,7 +194,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
             Default = typ.getDefault() |> Option.map getTypeSignal |> Option.toValueOption
             Documentation = JSDocTags.resolveDocsForTag ctx xanTag
         }
-        |> STsAstNodeBuilder.TypeParameter
+        |> SType.TypeParameter
         |> setAstSignal
         typ.TypeKey
         |> setTypeKeyForTag xanTag
