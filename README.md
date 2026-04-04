@@ -70,7 +70,7 @@ The common schema is the single hand-off point. Generators consume `Xantham.Deco
 |--------|------|
 | **Xantham.Common** | Shared type schema (`Common.Types.fs`) — the contract between extractor and generators. Not compiled as a separate assembly; included directly by `Xantham.Fable` and `Xantham.Decoder`. |
 | **Xantham.Fable** | TypeScript extractor — compiled to JS via Fable. Crawls `.d.ts` files via the TSC API (ts-morph) and emits JSON conforming to the common schema. |
-| **Xantham.Fable.Core** | Minimal Fable bindings stub. |
+| **Xantham.Fable.Core** | Minimal Fable bindings stub. Provides F# representations of TypeScript type-system idioms (`keyof`, indexed access types, heterogeneous property unions). See [Xantham.Fable.Core README](src/Xantham.Fable.Core/README.md). |
 | **Xantham.Decoder** | .NET library. Decodes the JSON schema into strongly-typed F# structures. Provides a utility layer for convenient generator consumption. |
 | **Xantham.SimpleGenerator** | Example generator — demonstrates a minimal end-to-end flow from decoded schema to F# bindings using Fabulous.AST. |
 

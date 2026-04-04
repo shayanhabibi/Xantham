@@ -20,8 +20,13 @@ let private libCacheMemoryHandler (ctx: TypeScriptReader) (tag: XanthamTag) =
         ctx.libCache.Add(tag.IdentityKey) |> ignore
     | IdentityKey.AliasSymbol sym when Some sym |> isFromEs5Lib ->
         ctx.libCache.Add(tag.IdentityKey) |> ignore
-    | IdentityKey.DeclarationPosition(file, _, _) when isLibFile file ->
-        ctx.libCache.Add(tag.IdentityKey) |> ignore
+    | IdentityKey.DeclarationPosition _ ->
+        match tag.ToUnderlyingValue() with
+        | Choice2Of2 node when node.getSourceFile().fileName |> isLibFile ->
+            ctx.libCache.Add(tag.IdentityKey) |> ignore
+        | Choice1Of2 typ when typ.aliasSymbol |> isFromEs5Lib || typ.getSymbol() |> isFromEs5Lib ->
+            ctx.libCache.Add(tag.IdentityKey) |> ignore
+        | _ -> ()
     | _ -> ()
 
 

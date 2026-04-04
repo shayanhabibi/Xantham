@@ -16,6 +16,9 @@ module TypeKey =
 /// </summary>
 type IOverloadable = interface end
 
+/// <summary>
+/// Represents a non-empty collection of overloads of a type.
+/// </summary>
 type TsOverloadableConstruct<'T when 'T:>IOverloadable and 'T : equality and 'T : comparison> =
     | NoOverloads of 'T
     | Overloaded of 'T Set
@@ -168,15 +171,15 @@ type TsTypeParameter = {
 /// </summary>
 type InlinedTsTypeParameter = TypeKey * TsTypeParameter
 
-/// Represents a method-like member (class or interface) or signature-like method.
-///
-/// Reflects: `MethodDeclaration` (class), `MethodSignature` (interface), and function-like members
-/// including optional `?` and `static` modifiers.
-/// Example (TS):
-/// ```ts
+/// <summary>
+/// <para>Represents a method-like member (class or interface) or signature-like method.</para>
+/// <para>Reflects: `MethodDeclaration` (class), `MethodSignature` (interface), and function-like members
+/// including optional `?` and `static` modifiers.</para>
+/// <example><code lang="ts">
 /// interface I { foo(x: number): string }
 /// class C { static bar(): void {} }
-/// ```
+/// </code></example>
+/// </summary>
 type TsMethod = {
     Name: string
     Parameters: TsParameter list
@@ -186,26 +189,26 @@ type TsMethod = {
     Documentation: TsComment list
 } with interface IOverloadable
 
-/// Represents a call signature in a type literal or interface.
-///
-/// Reflects: `CallSignatureDeclaration`.
-/// Example (TS):
-/// ```ts
+/// <summary>
+/// <para>Represents a call signature in a type literal or interface.</para>
+/// <para>Reflects: `CallSignatureDeclaration`.</para>
+/// <example><code lang="ts">
 /// interface FnLike { (x: number, y: number): number }
-/// ```
+/// </code></example>
+/// </summary>
 type TsCallSignature = {
     Documentation: TsComment list
     Parameters: TsParameter list
     Type: TypeKey
 } with interface IOverloadable
 
-/// Represents a construct signature (the type of `new` for a value).
-///
-/// Reflects: `ConstructSignatureDeclaration`.
-/// Example (TS):
-/// ```ts
+/// <summary>
+/// <para>Represents a construct signature (the type of `new` for a value).</para>
+/// <para>Reflects: `ConstructSignatureDeclaration`.</para>
+/// <example><code lang="ts">
 /// interface CtorLike { new (x: number): Date }
-/// ```
+/// </code></example>
+/// </summary>
 type TsConstructSignature = {
     Type: TypeKey
     Parameters: TsParameter list
@@ -595,13 +598,16 @@ type TsTypePredicate = {
     Type: TypeKey
     IsAssertion: bool
 }
-/// Represents a `namespace` or `module` declaration and the collected types within it.
-///
-/// Reflects: `ModuleDeclaration`, `ModuleBlock`, and `NamespaceExportDeclaration`.
-/// Example (TS):
-/// ```ts
+/// <summary>
+/// Represents a <c>namespace</c> or <c>module</c> declaration and the collected types within it.
+/// 
+/// Reflects: <c>ModuleDeclaration</c>, <c>ModuleBlock</c>, and <c>NamespaceExportDeclaration</c>.
+/// </summary>
+/// <example>
+/// <code lang="ts">
 /// declare namespace MyLib { const version: string }
-/// ```
+/// </code>
+/// </example>
 type TsModule = {
     Source: string option
     FullyQualifiedName: string list
@@ -829,4 +835,5 @@ module Schema =
         DuplicateExports: Map<TypeKey, DuplicateEncoding<TsExportDeclaration> list>
         DuplicateTypes: Map<TypeKey, DuplicateEncoding<TsType> list>
         TopLevelExports: TypeKey list
+        LibEsExports: TypeKey list
     }

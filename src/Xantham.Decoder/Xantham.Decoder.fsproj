@@ -14,6 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="..\Xantham.Common\Common.Types.fs" />
         <Compile Include="Types\Decoding.Types.fs" />
         <Compile Include="Types\Name.fs" />
         <Compile Include="Types\Frozen.Extensions.fs" />

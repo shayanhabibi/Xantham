@@ -1,13 +1,14 @@
 ﻿/// <summary>
-/// Utility functions and types that make working with the xantham paths and
-/// output easier.
+/// Utility functions and types, mostly for internal Decoder use.
 /// </summary>
-module Xantham.Decoder.Utils
+module private Xantham.Decoder.Utils
 
-open System.Collections.Frozen
 open System.Collections.Generic
 open Xantham
 
+/// <summary>
+/// Collects keys from <c>TsMember</c>'s
+/// </summary>
 let rec private getKeysFromMember (memberInfo: TsMember) =
     match memberInfo with
     | TsMember.Method glueMethod -> glueMethod.ToArray() |> Array.map _.Type
@@ -36,7 +37,7 @@ let rec private getKeysFromMember (memberInfo: TsMember) =
 
 /// <summary>
 /// <b>For Debugging Purposes Primarily:</b><br/>
-/// Recursively collects all keys from a GlueType.
+/// Recursively collects all keys from a TsType.
 /// </summary>
 let rec getKeys typ =
     match typ with
@@ -128,6 +129,9 @@ let rec getKeys typ =
     | TsType.Optional tsTypeReference -> getKeys (TsType.TypeReference tsTypeReference)
     | TsType.Substitution tsSubstitutionType -> [| tsSubstitutionType.Base; tsSubstitutionType.Constraint |]
 
+/// <summary>
+/// Recursively collects all keys from a <c>TsExportDeclaration</c>.
+/// </summary>
 and getKeysFromExport export =
     match export with
     | TsExportDeclaration.Variable glueVariable -> [| glueVariable.Type |]
@@ -164,7 +168,11 @@ and getKeysFromExport export =
     | TsExportDeclaration.Class tsClass -> TsType.Class tsClass |> getKeys
     | TsExportDeclaration.Enum _ -> [||]
 
-let compressWithMap (types: Map<TypeKey, TsType>) (compressions: Dictionary<TypeKey, TypeKey>) =
+/// <summary>
+/// Uses the given compression remap dictionary to repopulat the <c>types</c> map with the new type shapes that
+/// use the new type keys.
+/// </summary>
+let private compressWithMap (types: Map<TypeKey, TsType>) (compressions: Dictionary<TypeKey, TypeKey>) =
     let inline swap key = compressions[key]
     let swapParameter (parameter: TsParameter) = { parameter with Type = swap parameter.Type }
     let swapMember = function
@@ -332,23 +340,55 @@ let compressWithMap (types: Map<TypeKey, TsType>) (compressions: Dictionary<Type
     |> Map.ofArray
     , compressions
 
-let compressResult (types: Map<TypeKey, TsType>) =
+let private compressResult (types: Map<TypeKey, TsType>) (protectedKeys: TypeKey list) =
+    // Collect duplicate type shapes over multiple type keys
     let dupeCollections = Dictionary<TsType, TypeKey ResizeArray>()
     let addTypeToDupes key typ =
         match dupeCollections.TryGetValue(typ) with
         | true, dupes -> dupes.Add(key)
         | _ -> dupeCollections.Add(typ, ResizeArray([ key ]))
+    let primitives = Map [
+        TypeKindPrimitive.Any.TypeKey, TsType.Primitive TypeKindPrimitive.Any
+        TypeKindPrimitive.Any.TypeKey, TsType.Primitive TypeKindPrimitive.Any
+        TypeKindPrimitive.Unknown.TypeKey, TsType.Primitive TypeKindPrimitive.Unknown
+        TypeKindPrimitive.Never.TypeKey, TsType.Primitive TypeKindPrimitive.Never
+        TypeKindPrimitive.Void.TypeKey, TsType.Primitive TypeKindPrimitive.Void
+        TypeKindPrimitive.Undefined.TypeKey, TsType.Primitive TypeKindPrimitive.Undefined
+        TypeKindPrimitive.Null.TypeKey, TsType.Primitive TypeKindPrimitive.Null
+        TypeKindPrimitive.String.TypeKey, TsType.Primitive TypeKindPrimitive.String
+        TypeKindPrimitive.Integer.TypeKey, TsType.Primitive TypeKindPrimitive.Integer
+        TypeKindPrimitive.Number.TypeKey, TsType.Primitive TypeKindPrimitive.Number
+        TypeKindPrimitive.Boolean.TypeKey, TsType.Primitive TypeKindPrimitive.Boolean
+        TypeKindPrimitive.BigInt.TypeKey, TsType.Primitive TypeKindPrimitive.BigInt
+        TypeKindPrimitive.ESSymbol.TypeKey, TsType.Primitive TypeKindPrimitive.ESSymbol
+        TypeKindPrimitive.NonPrimitive.TypeKey, TsType.Primitive TypeKindPrimitive.NonPrimitive
+    ]
+    primitives
+    |> Map.iter addTypeToDupes
     types
     |> Map.iter addTypeToDupes
     dupeCollections
     |> Seq.collect (fun (KeyValue(key, dupes)) ->
-        let key = dupes |> Seq.max
+        let key =
+            if primitives.Values.Contains(key) then
+                primitives
+                |> Seq.find (fun (KeyValue(_, value)) -> key = value)
+                |> _.Key
+            else dupes |> Seq.max
         dupes
         |> Seq.map (fun dupe -> KeyValuePair(dupe, key))
         )
+    |> Seq.distinctBy _.Key
     |> Dictionary
+    |> fun remap ->
+        for protectedKey in protectedKeys do
+            if remap.ContainsKey(protectedKey) then
+                remap[protectedKey] <- protectedKey
+        remap
     |> compressWithMap types
-let compressExports (exports: Map<TypeKey, TsExportDeclaration>) (compressions: Dictionary<TypeKey, TypeKey>) =
+
+
+let private compressExports (exports: Map<TypeKey, TsExportDeclaration>) (compressions: Dictionary<TypeKey, TypeKey>) =
     let inline swap key = compressions[key]
     let swapParameter (parameter: TsParameter) = { parameter with Type = swap parameter.Type }
     let swapMember = function
@@ -448,26 +488,46 @@ let compressExports (exports: Map<TypeKey, TsExportDeclaration>) (compressions: 
                     Parameters = tsOverloadableConstruct.Parameters |> List.map swapParameter
                     Type = swap tsOverloadableConstruct.Type
                     TypeParameters = tsOverloadableConstruct.TypeParameters |> List.map (fun (key, typeParameter) -> swap key, swapTypar typeParameter)
+                    SignatureKey = swap tsOverloadableConstruct.SignatureKey
             })
             |> TsOverloadableConstruct.Create
             |> TsExportDeclaration.Function
     exports
     |> Map.toArray
     |> Array.Parallel.filter (fun (key, _) ->
-        (compressions.ContainsKey(key) && compressions.ContainsValue(key))
-        || not(compressions.ContainsKey(key) || compressions.ContainsValue(key)))
+        let conservative =
+            (compressions.ContainsKey(key) && compressions.ContainsValue(key))
+            || not(compressions.ContainsKey(key) || compressions.ContainsValue(key))
+        conservative)
     |> Array.Parallel.map (fun (key, value) -> key, swapExport value)
     |> Map.ofArray
 
+/// <summary>
+/// <para>Compresses a <c>Schema.EncodedResult</c> to a smaller typemap.</para>
+/// <para>Collects duplicate type shapes, and remaps them to a common typekey, which
+/// is then propagated through all types and exports.</para>
+/// <para>This is a recursive process, so it will continue to compress until no more
+/// changes are made.</para>
+/// <para>This is a deterministic process, and will always produce the same output.</para>
+/// <para>This will not remove/change keys which are export keys.</para>
+/// </summary>
 let compress (result: Schema.EncodedResult) =
     printfn "Compressing..."
+    // for diagnostics
+    let initialCount = result.Types.Count
+    let mutable cycle = 0
+    // condition check to prevent infinite loops
     let mutable lastCount = 0
+    // interim store of results
     let mutable types = result.Types
     let mutable exports = result.ExportedDeclarations
+    // top level keys to protect
+    let topLevelKeys = result.TopLevelExports
     while lastCount <> types.Count do
         lastCount <- types.Count
-        let newTypes, compressions = compressResult types
+        let newTypes, compressions = compressResult types (topLevelKeys |> List.append (result.ExportedDeclarations.Keys |> Seq.toList))
         types <- newTypes
         exports <- compressExports exports compressions
-        printfn "%i %i; %i" lastCount types.Count exports.Count
+        cycle <- cycle + 1
+    printfn $"Compressed typemap from %i{initialCount} to %i{types.Count} types over %i{cycle} cycles."
     { result with Types = types; ExportedDeclarations = exports }

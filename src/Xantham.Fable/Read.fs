@@ -347,12 +347,14 @@ module Internal =
         { result with
             Types = mergeWinnersInto result.DuplicateTypes result.Types
             ExportedDeclarations = mergeWinnersInto result.DuplicateExports result.ExportedDeclarations }
-
 open Schema
 let read (reader: TypeScriptReader) =
     let exportTags =
         Internal.initialise reader
         |> Internal.getAndPrepareExports
+    let exportTagIdentities =
+        exportTags
+        |> Array.map _.IdentityKey
     let typeResults, exportResults =
         Internal.runReader reader
         |> Internal.assembleResults
@@ -404,11 +406,16 @@ let read (reader: TypeScriptReader) =
                 )
             |> Map
         TopLevelExports =
-            exportTags
-            |> Array.map (fun tag ->
-                reader.exportCache[tag.IdentityKey].RefKey
+            exportTagIdentities
+            |> Array.map (fun key ->
+                reader.exportCache[key].RefKey
                 )
             |> Array.distinct
+            |> Array.toList
+        LibEsExports =
+            exportTagIdentities
+            |> Array.filter reader.libCache.Contains
+            |> Array.map (fun key -> reader.exportCache[key].RefKey)
             |> Array.toList
     }
     |> Internal.trimTypeReferenceArrayTupleDuplicates
