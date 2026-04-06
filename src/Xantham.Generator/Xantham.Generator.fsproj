@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Utils.fs" />
+        <Compile Include="Types\Index.fs" />
+        <Compile Include="Types\Generator.fs" />
+        <Compile Include="Types\TypeKey.AssociationSets.fs" />
+        <Compile Include="Generator\Entry.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Xantham.Decoder\Xantham.Decoder.fsproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Fabulous.AST" Version="2.0.0-pre06" />
+      <PackageReference Include="FSharp.Logf" Version="1.2.2" />
+    </ItemGroup>
+
+</Project>

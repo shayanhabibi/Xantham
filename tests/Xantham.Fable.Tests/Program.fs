@@ -1544,6 +1544,25 @@ let namespaceSourceTests =
             |> Expect.equal point.Source m.Source
     ]
 
+let remappedSourceTests =
+    testList "source: remapped barrel file sources" [
+        let result = createSubdirTestReader "packages/solid-js/types/index" |> runReader
+        // todo - why don't these type files pick up the package.json source?
+        ptestCase "Top level interface source = 'solid-js'" <| fun _ ->
+            let iface = result |> findInterface "InterfaceProp"
+            "Source should be some"
+            |> Expect.isSome iface.Source
+            "Interface should have source 'solid-js'"
+            |> Expect.equal iface.Source (Some "solid-js")
+        // todo - why don't these type files pick up the package.json source?
+        ptestCase "Exports JSX namespace with source 'solid-js'" <| fun _ ->
+            let m = result |> findModule "JSX"
+            "Source should be some"
+            |> Expect.isSome m.Source
+            "JSX namespace defined in another file should have source 'solid-js'"
+            |> Expect.equal m.Source (Some "solid-js")
+    ]
+
 // Fixture: import-package.d.ts — imports Button from ./packages/ui-kit/index
 //
 // The import specifier is "./packages/ui-kit/index", so types from
@@ -1789,6 +1808,7 @@ let tests =
         namespaceSourceTests
         importPackageSourceTests
         multiFileSourceTests
+        remappedSourceTests
         crossPackageSourceTests
         validatorsDirectSourceTests
         nestedSubPackageSourceTests

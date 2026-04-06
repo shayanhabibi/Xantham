@@ -61,14 +61,20 @@ let getDeclarations (ctx: TypeScriptReader) (sourceFile: Ts.SourceFile) =
     let checker = ctx.checker
     if isModuleFile sourceFile then
         sourceFile
-        |> checker.getSymbolAtLocation
+        |> checker.getSymbolAtLocation // get source file symbol
         |> Option.map (
-            ctx.checker.getExportsOfModule
+            ctx.checker.getExportsOfModule // get export declaration symbols
             >> _.AsArray
             >> Array.choose (fun (sym: Ts.Symbol) ->
-                sym.declarations
+                sym.declarations // get lead declaration symbols
                 |> Option.bind (fun decls -> decls |> Seq.tryHead)
-                |> Option.map (fun decl -> ctx.CreateXanthamTag(decl) |> fst |> TagState.value))
+                |> Option.map (fun decl ->
+                    ctx.CreateXanthamTag(decl) |> fst |> TagState.value |> fun tag ->
+                        tag // route symbol source in case of barrel exports
+                        |> GuardedData.Source.Keyed.getOrSetWith (fun _ -> Signal.source ctx.moduleMap[sourceFile])
+                        |> _.Set(ctx.moduleMap[sourceFile])
+                        tag
+                    ))
             >> expandDeclarations ctx
             )
         |> Option.defaultWith(fun () -> failwith "Source file exported/declared no known declarations")

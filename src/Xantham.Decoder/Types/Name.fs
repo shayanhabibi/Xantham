@@ -54,11 +54,29 @@ type CasedName =
         | Typar name -> unbox name
 
 module Name =
+    module Normalization =
+        type Setting =
+            | Backticks
+            | SafeCustom of (string -> string)
+            | Custom of (string -> string)
+            static member inline Default = Setting.Backticks
+        let mutable private setting = Setting.Default
+        let mutable private normalize_ = NormalizeIdentifierBackticks
+        let normalize text = normalize_ text
+        let setNormalizeSetting (newSetting: Setting) =
+            setting <- newSetting
+            match newSetting with
+            | Backticks ->
+                normalize_ <- NormalizeIdentifierBackticks
+            | SafeCustom stringFunc ->
+                normalize_ <- stringFunc >> NormalizeIdentifierBackticks
+            | Custom stringFunc ->
+                normalize_ <- stringFunc
     /// Creates a Name from a string. Will automatically normalize the name with backticks if required..
     /// Use the static member Create if you don't want automatic normalization.
     let create value =
         // Source value
-        let name = NormalizeIdentifierBackticks value
+        let name = Normalization.normalize value
         if value <> name then
             Modified(value, name)
         else Source value
@@ -115,9 +133,9 @@ module Name =
         let toPascalCase (s: string) = pascalCaseRegex.Replace(s, _.Groups.[1].Value.ToUpperInvariant())
         let stripBackticks (s: string) =
             if s.StartsWith("``") && s.EndsWith("``") then s.Trim('`') else s
-        let normalizeString = NormalizeIdentifierBackticks
+        let normalizeString = Normalization.normalize
     /// Normalizes the name by adding backticks if needed
-    let normalize (name: Name) = name |> map NormalizeIdentifierBackticks
+    let normalize (name: Name) = name |> map Normalization.normalize
     /// Removes backticks, applies casing, and then reapplies backticks if necessary.
     let private _pascalCase (fn: (string -> string) -> Name -> Name) name =
         name |> fn (Internal.stripBackticks >> Internal.toPascalCase >> Internal.normalizeString)

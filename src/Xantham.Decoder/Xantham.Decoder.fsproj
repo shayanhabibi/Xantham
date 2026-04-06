@@ -18,6 +18,8 @@
         <Compile Include="Types\Decoding.Types.fs" />
         <Compile Include="Types\Name.fs" />
         <Compile Include="Types\Frozen.Extensions.fs" />
+        <Compile Include="Types\CodedTypeKey.fs" />
+        <Compile Include="Types\Arena.Interner.fs" />
       <Compile Include="Utils.fs" />
       <Compile Include="Core.fs" />
       <Compile Include="Runtime.fs" />

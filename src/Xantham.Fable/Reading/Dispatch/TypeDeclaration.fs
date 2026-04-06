@@ -346,7 +346,7 @@ module Class =
         
 
 module Module =
-    let private collectModuleTypes (ctx: TypeScriptReader) (body: Ts.ModuleBody option) =
+    let private collectModuleTypes (ctx: TypeScriptReader) (body: Ts.ModuleBody option) (source: ModuleName) =
         match body with
         | None -> [||]
         | Some body ->
@@ -357,13 +357,16 @@ module Module =
                     unbox<Ts.Node>
                     >> ctx.CreateXanthamTag
                     >> fst
-                    >> stackPushAndThen ctx _.ExportBuilder
+                    >> stackPushAndThen ctx (fun tag ->
+                        trySetSourceForTag tag source
+                        |> ignore
+                        tag.ExportBuilder)
                     )
             | Patterns.Node.ModuleDeclaration nested ->
                 unbox<Ts.Node> nested
                 |> ctx.CreateXanthamTag
                 |> fst
-                |> stackPushAndThen ctx _.ExportBuilder
+                |> stackPushAndThen ctx (fun tag -> ignore(trySetSourceForTag tag source); tag.ExportBuilder)
                 |> Array.singleton
             | _ -> [||]
 
@@ -374,7 +377,7 @@ module Module =
             Name = NameHelpers.getName node.name
             IsNamespace = node.flags.HasFlag(Ts.NodeFlags.Namespace)
             IsRecursive = false
-            Exports = collectModuleTypes ctx !!node.body
+            Exports = collectModuleTypes ctx !!node.body source
         }
         xanTag.ExportBuilder <- STsExportDeclaration.Module moduleBuilder
         let typeSignal, builderSignal =
@@ -390,7 +393,13 @@ module Module =
 // ---------------------------------------------------------------------------
 
 let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration) =
-    let source = ctx.moduleMap[node]
+    let source =
+        if xanTag |> GuardedData.Source.Keyed.has then
+            xanTag
+            |> GuardedData.Source.Keyed.get
+            |> _.Value
+        else
+        ctx.moduleMap[node]
     match node with
     | TypeDeclaration.TypeParameter typeParameterDeclaration ->
         TypeParameter.read ctx xanTag typeParameterDeclaration

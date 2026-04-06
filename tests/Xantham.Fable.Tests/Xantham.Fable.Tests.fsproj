@@ -40,6 +40,9 @@
         <TypeScriptCompile Include="TypeFiles\packages\app\components\widget.d.ts" />
         <Content Include="TypeFiles\packages\app\package.json" />
         <TypeScriptCompile Include="TypeFiles\packages\app\index.d.ts" />
+        <Content Include="TypeFiles\packages\solid-js\package.json" />
+        <TypeScriptCompile Include="TypeFiles\packages\solid-js\types\index.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\packages\solid-js\types\jsx.d.ts" />
         <TypeScriptCompile Include="TypeFiles\multi-file\vectors.d.ts" />
         <TypeScriptCompile Include="TypeFiles\multi-file\shapes.d.ts" />
         <TypeScriptCompile Include="TypeFiles\accessors.d.ts" />
