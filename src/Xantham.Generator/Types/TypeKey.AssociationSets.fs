@@ -1,5 +1,5 @@
 ﻿[<AutoOpen>]
-module Xantham.Generator.Types.TypeKeyAssociationSets
+module Xantham.Generator.TypeKeyAssociationSets
 
 open System.Collections.Generic
 open Xantham

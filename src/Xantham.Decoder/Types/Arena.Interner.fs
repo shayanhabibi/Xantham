@@ -54,7 +54,7 @@ open Xantham
 open Xantham.Decoder
 
 
-type ResolvedType =
+type [<RequireQualifiedAccess>] ResolvedType =
     | GlobalThis
     | Conditional of ConditionalType
     | Interface of Interface
@@ -78,7 +78,7 @@ type ResolvedType =
     | Optional of TypeReference
     | Substitution of SubstitutionType
 
-and ResolvedExport =
+and [<RequireQualifiedAccess>] ResolvedExport =
     | Variable of Variable
     | Interface of Interface
     | TypeAlias of TypeAlias
@@ -114,6 +114,26 @@ and [<ReferenceEquality>] TupleElement =
     | Variadic of LazyResolvedType
     | FixedLabel of string * TupleElementType
     | Fixed of TupleElementType
+    member this.Label =
+        match this with
+        | FixedLabel(label, _) -> ValueSome label
+        | _ -> ValueNone
+    member this.IsOptional =
+        match this with
+        | Fixed { IsOptional = value }
+        | FixedLabel(_, { IsOptional = value }) -> value
+        | _ -> false
+    member this.IsRest =
+        match this with
+        | Fixed { IsRest = value }
+        | FixedLabel(_, { IsRest = value }) -> value
+        | Variadic _ -> true
+    member inline this.Name = this.Label
+    member this.Type =
+        match this with
+        | Variadic value
+        | Fixed { Type = value }
+        | FixedLabel(_, { Type = value }) -> value
     
 and [<ReferenceEquality>] Tuple = {
     IsReadOnly: bool
@@ -251,7 +271,7 @@ and [<ReferenceEquality>] ConditionalType = {
     False: LazyResolvedType
 }
 
-and Member =
+and [<RequireQualifiedAccess>] Member =
     | Method of Method list
     | Property of Property
     | GetAccessor of GetAccessor

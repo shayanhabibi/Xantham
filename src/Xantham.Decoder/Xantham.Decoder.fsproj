@@ -25,7 +25,4 @@
       <Compile Include="Runtime.fs" />
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\Xantham.Common\Xantham.Common.fsproj" />
-    </ItemGroup>
 </Project>

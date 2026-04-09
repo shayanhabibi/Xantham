@@ -43,6 +43,7 @@ dotnet test
 | `Xantham.Fable` | TypeScript extractor — compiled to JS via Fable, uses TSC API (ts-morph) |
 | `Xantham.Fable.Core` | Minimal Fable bindings stub |
 | `Xantham.Decoder` | .NET library for decoding the JSON schema and providing path utilities |
+| `Xantham.Generator` | Core rendering library — path system, type-ref model, and F# AST helpers for building generators |
 | `Xantham.SimpleGenerator` | Example generator using Fabulous.AST for F# code output |
 | `Xantham.Fable.Tests` | Fable/Mocha integration tests for the extractor pipeline; fixtures in `tests/Xantham.Fable.Tests/TypeFiles/*.d.ts` |
 
@@ -102,6 +103,79 @@ The separation of `TypeNodeKind` (syntactic) vs `TypeKind` (semantic) is importa
 - **`Utils.fs`** — Decoder utility helpers
 - **`Core.fs`** — Thoth.Json.Net decoding of the JSON schema
 - **`Runtime.fs`** — Decoded tree management
+- **`Types/Arena.Interner.fs`** — `ArenaInterner`: pre-resolves the flat `TypeKey`-keyed maps from `DecodedResult` into a lazy object graph. Each `TypeKey` reference becomes a `Lazy<ResolvedType>` — following a reference is forcing a lazy, no map lookup needed. Results are memoised by `TypeKey`; all record types carry `[<ReferenceEquality>]` so sharing detection is identity-based. Cycles are broken naturally by the lazy boundaries (construction never forces outgoing lazies). `ResolvedType` DU mirrors `TsType` with all `TypeKey` fields replaced by `Lazy<ResolvedType>`. `ResolvedExport` DU mirrors `TsExportDeclaration`. `LazyResolvedType = Lazy<ResolvedType>`. `ArenaInterner { ResolveType: TypeKey → ResolvedType; ResolveExport: TypeKey → Result<ResolvedExport, ResolvedType>; ExportMap: Map<string, ResolvedExport list> }`. `ArenaInterner.create: DecodedResult → ArenaInterner` shells the entire export map eagerly and defers nested type resolution. Active pattern `(|Resolve|) (value: Lazy<'T>)` for ergonomic lazy forcing in match expressions.
+
+### Xantham.Generator (Core Rendering Library)
+
+Compilation order (as declared in `Xantham.Generator.fsproj`):
+
+- **`Utils.fs`** — `[<AutoOpen>]` module. `Dictionary` helpers (`tryItem`, `tryAdd`, `addOrReplace`, `tryAddOrGet`, `addOrModify`, `addOrMutate` and `Flip.*` variants). `FrozenDictionary` helpers. `Set.tryIntersectMany`/`tryUnionMany`. `Stack.tryPeek`/`tryPop`.
+- **`Types/Index.fs`** — `VisitationFlags` bitmask enum used to track type properties during visitation: `WouldYieldInt/Bool/Null/Float`, `HasSource`, `HasMembers`, `HasTypeParameters`, `IsSymbolMember`, `IsFullyQualified`, `IsEsLib`, `IsNeverTyped`, `ContainsCyclicReference`. `VisitationFlagDictionaryExtensions` provides `has`, `hasMask`, `add`, `remove`, `set` on `Dictionary<TypeKey, VisitationFlags>`.
+- **`Types/TypeKey.AssociationSets.fs`** — `TypeKey.Association = TypeKey * Set<TypeKey>` and `TypeKey.AssociationMap = Map<TypeKey, Set<TypeKey>>`. `shallowCollectMembers`, `shallowCollectTypes`, `shallowCollectExports`: one-level-deep `TypeKey` collectors for building dependency graphs.
+- **`Types/NamePath.fs`** — Hierarchical, type-safe path model for generated F# code layout. See **Path System** below.
+- **`Types/TypeRefRender.fs`** — Three-layer F# type representation model. See **TypeRef/Render System** below.
+- **`Types/BuildersAndPreludes.fs`** — `Types` module: Fabulous.AST widget constants for primitives (`string`, `int`, `float`, `bool`, `bigint`, `obj`, `objNull`, `char`, `unit`, `array`, `arrayType`, `keyofType`, `globalThis`, `recordType`, `record`, etc.) and helpers (`UnionBuilder` for erased `UX<...>` unions, `Attributes` for `[<Erase>]`/`[<CompiledName>]` etc., `attributes {}` CE for conditional attribute list building).
+- **`Types/Generator.fs`** — `GeneratorContext`: mutable render cache. Fields: `TypeRefRenders: Dictionary<ResolvedType, TypeRefRender>`, `ExportRefRenders: Dictionary<ResolvedExport, TypeRefRender>`, `TypeRenders: Dictionary<ResolvedType, Render>`, `ExportRenders: Dictionary<ResolvedExport, Render>`. `GeneratorContext.getTypeRef`/`getExportRef`/`addTypeRef` helpers. `SRTPHelper` dispatches `TryGetRef`/`TryAddRef` over `ResolvedType | ResolvedExport`.
+- **`Generator/Path.fs`** — Derives `TypePath`/`MemberPath` from decoded `ResolvedExport` and `ResolvedType` by parsing `FullyQualifiedName` via `QualifiedNamePart.parse`/`QualifiedName.create` and threading through `createModulePath`. Public entry points: `fromVariable → MemberPath`, `fromInterface → TypePath`, `fromTypeAlias → TypePath`, `fromClass → TypePath`, `fromEnum → TypePath`, `fromExport → Path`, `fromResolvedType → TransientTypePath`.
+- **`Generator/Entry.fs`** — `ResolvedTypeCategories { EnumLike; LiteralLike; Primitives; Others; Nullable }` with `empty`, `addX`, `nullable`, `unify` helpers. `categorize: ResolvedType → ResolvedTypeCategories → ResolvedTypeCategories` dispatches `ResolvedType` into its render category (nullable primitives → `Nullable`, Enum/Index → `EnumLike`, EnumCase/TemplateLiteral/Literal → `LiteralLike`, others → `Others`). `typeRender`/`refTypeRender` build `TypeRender`/`TypeRefRender` from `ResolvedType` using `GeneratorContext`.
+- **`Generator/TypeRefRender.fs`** — `fromPrimitiveKind: bool → TypeKindPrimitive → TypeRefRender`. `fromResolvedType: bool → ResolvedType → TypeRefRender` (main recursive type-to-ref-render function; several cases still `failwith "todo"`: TypeParameter, Tuple, Predicate, TypeLiteral, TemplateLiteral, Substitution).
+- **`Generator/Render.Primitive.fs`** — `[<AutoOpen>]`. `Primitive.render: TypeKindPrimitive → Render` (maps all primitive kinds to `Render.createRefOnly`). `GlobalThis.render: Render`.
+- **`Generator/Render.fs`** — Module shell, currently empty.
+
+#### Path System
+
+`NamePath.fs` provides a three-level hierarchy: **anchored** (fully resolved, absolute) → **transient** (partially resolved, relative) → **path** (umbrella).
+
+Anchored path types:
+- `ModulePath { Parent: ModulePath voption; Name: Name<Case.pascal>; Depth: int }` — module/namespace node
+- `TypePath { Parent: ModulePath; Name: Name<Case.pascal> }` — a named type within a module
+- `MemberPath { Parent: MemberPathParent; Name: Name<Case.camel> }` — member on a `Type` or `Module`
+- `ParameterPath { Parent: MemberPath; Name: Name<Case.camel>; Index: int }` — parameter on a member
+- `TypeParamPath { Parent: TypeParamPathParent; Name: Name<Case.typar> }` — type parameter (parent is `Type | Member | Parameter`)
+- `AnchorPath = TypeParam | Parameter | Type | Member | Module` — the canonical root anchor for transient resolution
+
+Transient path types (not yet bound to a concrete root):
+- `TransientModulePath = Anchored | Moored of TransientModulePath * Name<Case.pascal>`
+- `TransientTypePath = Anchored | TransientModulePath | TypeParam of TransientTypePath`
+- `TransientMemberPath`, `TransientParameterPath` — similar chained forms
+
+`TransientXxxPath.anchor (anchorPath: AnchorPath)` converts a transient path to its concrete anchored form by prepending the anchor's module trace. `TransientPath.getRelativePath (target: TypePath) (from: AnchorPath)` computes the shortest relative module path from the anchor to the target (strips the common module prefix).
+
+Module helpers: `ModulePath.init`, `create`, `createWithName`, `createFromList`, `graft`, `flatten`. `TypePath.flatten`, `traceToParentModule`. `MemberPath.createOnType`, `createOnModule`. `QualifiedName.create`/`parse` parse `string list` qualified names from the decoder's `FullyQualifiedName` field.
+
+#### TypeRef/Render System
+
+A three-layer, compositional model for representing F# types before code emission.
+
+**Layer 1 — `TypeRefAtom`** (leaf):
+- `Widget of WidgetBuilder<Type>` — a raw Fabulous.AST type node (used for primitives, `obj`, `unit`, etc.)
+- `AnchorPath of TypePath` — a reference to a type at an absolute path
+- `TransientPath of TransientTypePath` — a relative/deferred path reference (resolved via `TypeRefAtom.anchor`/`localisePaths`)
+
+**Layer 2 — `TypeRefMolecule`** (composite):
+- `Tuple of TypeRefRender list`
+- `Union of TypeRefRender list` — rendered as erased `U2<A,B>` etc.
+- `Function of TypeRefRender list * TypeRefRender` — parameters + return type
+- `Prefix of TypeRefRender * TypeRefRender list` — generic application `Prefix<Arg1, Arg2>`
+
+**Layer 3 — `TypeRefRender`**: `{ Kind: TypeRefKind; Nullable: bool }` where `TypeRefKind = Atom of TypeRefAtom | Molecule of TypeRefMolecule`. Nullable wraps the final F# type in `option`.
+
+Supporting types:
+- `TypedNameTraits`: flags (`Writable`, `Static`, `Optional`, etc.)
+- `TypedNameRender { Name: Name<Case.camel>; Type: TypeRefRender; Traits: TypedNameTraits }` — a named, typed node (property, parameter)
+- `FunctionLikeSignature { Parameters: TypedNameRender array; ReturnType: TypeRefRender; Traits: TypedNameTraits }` — unnamed function signature
+- `FunctionLikeRender { Name: Name<Case.camel>; ...; Traits }` — named function/method
+- `TypeParameterRender = Name<Case.typar>` — type parameter render (name only)
+- `LiteralCaseRender<'value> { Name: Name<Case.pascal>; Value: 'value }` — enum/literal case
+- `LiteralUnionRender<'value> { Name: Name<Case.pascal>; Cases: LiteralCaseRender<'value> list }` — literal union type
+- `TypeLikeRender { Name: Name<Case.pascal>; ... }` — interface/class render shell
+- `TypeRender = RefOnly of TypeRefRender | Render of TypeRefRender * TypeRender` — either a cross-reference (externally defined type) or a full in-place rendering
+
+SRTP smart constructors (`TypeRefRender.create`, `TypeRender.create`, `Render.createRefOnly`, `Render.create`) dispatch on the value type via `SRTPHelper` — callers pass a widget/path/list-pair/etc. and get the correct constructor without specifying it.
+
+`TypeRefRender.anchor anchorPath` resolves all `TransientPath` atoms to concrete `AnchorPath` atoms.
+`TypeRefRender.localisePaths anchorPath` shortens absolute `AnchorPath` references that share a module prefix with the anchor to relative paths.
+`TypeRefRender.simpleRender` converts a fully anchored `TypeRefRender` to a `WidgetBuilder<Type>` for emission.
 
 ### Xantham.SimpleGenerator (Example Generator)
 
