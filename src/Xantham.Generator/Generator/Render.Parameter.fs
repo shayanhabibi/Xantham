@@ -3,7 +3,6 @@ module Xantham.Generator.Generator.Render_Parameter
 
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
-open Xantham.Generator.Generator.Entry.RefRenderPhase
 open Xantham.Generator.TypeRefRender
 
 
@@ -11,7 +10,7 @@ module Parameter =
     let render (ctx: GeneratorContext) (param: Parameter) =
         let ref =
             param.Type.Value
-            |> refTypeRender ctx
+            |> TypeRefRender.prerender ctx
         let traits =
             if param.IsOptional || ref.Nullable then
                 TypedNameTraits.Optional

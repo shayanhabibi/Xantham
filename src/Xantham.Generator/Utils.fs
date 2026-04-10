@@ -1,11 +1,39 @@
 ﻿[<AutoOpen>]
 module Xantham.Generator.Utils
 
+open System.Collections.Concurrent
 open System.Collections.Frozen
 open System.Collections.Generic
 
 [<AutoOpen>]
 module DictionaryExtensions =
+    module ConcurrentDictionary =
+        let inline item (key: 'Key) (dict: ConcurrentDictionary<'Key, 'Value>): 'Value = dict[key]
+        let inline tryItem (key: 'Key) (dict: ConcurrentDictionary<'Key, 'Value>): 'Value voption =
+            match dict.TryGetValue key with
+            | true, value -> ValueSome value
+            | _ -> ValueNone
+        let inline tryAdd (key: 'Key) (value: 'Value) (dict: ConcurrentDictionary<'Key, 'Value>) =
+            dict.TryAdd(key, value) |> ignore
+        let inline addOrReplace (key: 'Key) (value: 'Value) (dict: ConcurrentDictionary<'Key, 'Value>) =
+            dict.AddOrUpdate(key, value, fun _ _ -> value)
+            |> ignore
+        let inline tryAddOrGet (key: 'Key) (value: 'Value) (dict: ConcurrentDictionary<'Key, 'Value>) =
+            dict.GetOrAdd(key, value)
+        let inline tryAddKeyPassthrough (key: 'Key) (value: 'Value) (dict: ConcurrentDictionary<'Key, 'Value>) =
+            tryAdd key value dict
+            key
+        let inline addOrModify (key: 'Key) (fn: 'Value -> 'Value) (value: 'Value) (dict: ConcurrentDictionary<'Key, 'Value>) =
+            dict.AddOrUpdate(key, value, fun _ -> fn)
+        module Flip =
+            let inline item dict key = item key dict
+            let inline tryItem dict key = tryItem key dict
+            let inline tryAdd dict key value = tryAdd key value dict
+            let inline addOrReplace dict key value = addOrReplace key value dict
+            let inline tryAddOrGet dict key value = tryAddOrGet key value dict
+            let inline addOrModify dict key fn value =
+                addOrModify key fn value dict
+            let inline tryAddKeyPassthrough dict value key  = tryAddKeyPassthrough key value dict
     module Dictionary =
         let inline item (key: 'Key) (dict: Dictionary<'Key, 'Value>): 'Value = dict[key]
         let inline tryItem (key: 'Key) (dict: Dictionary<'Key, 'Value>): 'Value voption =

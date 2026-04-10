@@ -16,10 +16,14 @@
         <Compile Include="Generator\TypeRefRender.Render.fs" />
         <Compile Include="Generator\TypeRefRender.Paths.fs" />
         <Compile Include="Generator\ResolvedType.Categorization.fs" />
-        <Compile Include="Generator\Entry.fs" />
+        <Compile Include="Generator\TypeRefRender.Prerender.fs" />
         <Compile Include="Generator\Render.Primitive.fs" />
+        <Compile Include="Generator\Render.TypeParameter.fs" />
         <Compile Include="Generator\Render.Parameter.fs" />
         <Compile Include="Generator\Render.Member.fs" />
+        <Compile Include="Generator\Render.TypeShapes.fs" />
+        <Compile Include="Generator\Render.Enum.fs" />
+        <Compile Include="Generator\TypeRender.Render.fs" />
         <Compile Include="Generator\Render.fs" />
     </ItemGroup>
 

@@ -3,7 +3,6 @@
 open System
 open Xantham
 open Xantham.Generator
-open Xantham.Generator.Generator.Entry
 open Fabulous.AST
 
 [<EntryPoint>]
@@ -12,7 +11,7 @@ let main argv =
     let tree = Decoder.Runtime.create file
     let interner = tree.GetArenaInterner()
     let generatorContext = GeneratorContext.Empty
-    RefRenderPhase.prerenderTypeRefs
+    Prerender.prerenderTypeRefs
         generatorContext
         (
             interner.ExportMap

@@ -4,7 +4,6 @@ module Xantham.Generator.Generator.RenderMember
 open Xantham.Decoder
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
-open Xantham.Generator.Generator.Entry.RefRenderPhase
 open Xantham.Generator.TypeRefRender
 open Xantham
 
@@ -15,7 +14,7 @@ module CallSignature =
              |> List.map (Parameter.render ctx)
          let returnType =
              callSignature.Type.Value
-             |> refTypeRender ctx
+             |> TypeRefRender.prerender ctx
          
          {
              FunctionLikeSignature.Parameters = parameters |> List.toArray
@@ -50,7 +49,7 @@ module Method =
                      |> List.toArray
                  ReturnType =
                      method.Type.Value
-                     |> refTypeRender ctx
+                     |> TypeRefRender.prerender ctx
                  Traits = TypedNameTraits.None
                  TypeParameters = [||]
                  Documentation = []
@@ -91,7 +90,7 @@ module GetAccessor =
             }
             |> MemberRender.Method
         | resolvedType ->
-            let ref = refTypeRender ctx resolvedType
+            let ref = TypeRefRender.prerender ctx resolvedType
             {
                 TypedNameRender.Name = getter.Name
                 Type = ref
@@ -109,7 +108,7 @@ module SetAccessor =
         ||| TypedNameTraits.Writable
     
     let render (ctx: GeneratorContext) (setter: SetAccessor) =
-        let ref = setter.ArgumentType.Value |> refTypeRender ctx
+        let ref = setter.ArgumentType.Value |> TypeRefRender.prerender ctx
         {
             TypedNameRender.Name = setter.Name
             Type = ref
@@ -132,7 +131,7 @@ module IndexSignature =
                         indexSignature.Parameters
                         |> List.map (Parameter.render ctx)
                         |> List.toArray
-                    ReturnType = indexSignature.Type.Value |> refTypeRender ctx
+                    ReturnType = indexSignature.Type.Value |> TypeRefRender.prerender ctx
                     Traits = TypedNameTraits.JSIndexer
                     TypeParameters = [||]
                     Documentation = []
@@ -163,7 +162,7 @@ module ConstructSignature =
                             |> List.toArray
                         ReturnType =
                             constructSignature.Type.Value
-                            |> refTypeRender ctx
+                            |> TypeRefRender.prerender ctx
                         Traits = TypedNameTraits.JSConstructor
                         TypeParameters = [||]
                         Documentation = []
@@ -209,7 +208,7 @@ module Property =
             |> renderMethodLike ctx prop
             |> MemberRender.Method
         | resolvedType ->
-            let ref = refTypeRender ctx resolvedType
+            let ref = TypeRefRender.prerender ctx resolvedType
             {
                 TypedNameRender.Name = prop.Name
                 Type = ref

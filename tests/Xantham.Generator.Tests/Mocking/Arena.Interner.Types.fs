@@ -71,21 +71,21 @@ module ResolvedType =
         let create name =
             { IsLibEs = false
               Source = None
-              Interface.FullyQualifiedName = [ name ]
+              Interface.FullyQualifiedName = [ QualifiedNamePart.Normal name ]
               Name = Name.Pascal.create name
               Members = []
               TypeParameters = []
               Documentation = []
               Heritage = { Extends = [] } }
         let withPath modules iface =
-            { iface with Interface.FullyQualifiedName = modules @ iface.FullyQualifiedName }
-        let withSource source iface = { iface with Interface.Source = Some source }
+            { iface with Interface.FullyQualifiedName = (List.map QualifiedNamePart.Normal modules) @ iface.FullyQualifiedName }
+        let withSource source iface = { iface with Interface.Source = Some (QualifiedNamePart.Normal source) }
         let esLib iface = { iface with Interface.IsLibEs = true }
     module Enum =
         let wrap = ResolvedType.Enum
         let create name = { IsLibEs = false
                             Source = None
-                            FullyQualifiedName = [ name ]
+                            FullyQualifiedName = [ QualifiedNamePart.Normal name ]
                             EnumType.Name = Name.Pascal.create name
                             Members = []
                             Documentation = [] }
@@ -99,7 +99,7 @@ module ResolvedType =
                                        EnumCase.Value = value
                                        EnumCase.Parent = Lazy.CreateFromValue enum
                                        Source = None
-                                       FullyQualifiedName = [ yield! enum.FullyQualifiedName ; name ]
+                                       FullyQualifiedName = [ yield! enum.FullyQualifiedName ; QualifiedNamePart.Normal name ]
                                        Documentation = [] }
     module Literal =
         let wrap = ResolvedType.Literal
@@ -130,7 +130,7 @@ module ResolvedType =
         let create innerType name = {
             IsLibEs = false
             Source = None
-            FullyQualifiedName = [ name ]
+            FullyQualifiedName = [ QualifiedNamePart.Normal name ]
             Name = Name.Pascal.create name
             TypeAlias.Type = Lazy.CreateFromValue innerType
             TypeParameters = []

@@ -253,6 +253,24 @@ type AttributesBuilder() =
     [<CustomOperation("emitPropertyOrErase")>]
     member inline _.EmitPropertyErase(state, value: Name<_>) =
         AttributesBuilder.MakeAttributeIfModifiedElse value Attributes.emitProperty Attributes.erase :: state
+    [<CustomOperation "compiledName">]
+    member inline _.CompiledName(state, value: string) =
+        Attributes.compiledName value :: state
+    [<CustomOperation "compiledValue">]
+    member inline _.CompiledValue(state, value: int) =
+        Attributes.compiledValue value :: state
+    [<CustomOperation "compiledValue">]
+    member inline _.CompiledValue(state, value: float) =
+        Attributes.compiledValue value :: state
+    [<CustomOperation "compiledValue">]
+    member inline _.CompiledValue(state, value: bool) =
+        Attributes.compiledValue value :: state
+    [<CustomOperation "requireQualifiedAccess">]
+    member inline _.RequireQualifiedAccess(state) =
+        Attributes.requireQualifiedAccess :: state
+    [<CustomOperation "stringEnum">]
+    member inline _.StringEnum(state) =
+        Attributes.stringEnum :: state
         
     member inline _.Run(state: WidgetBuilder<AttributeNode> list) =
         state

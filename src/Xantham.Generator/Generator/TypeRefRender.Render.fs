@@ -1,4 +1,5 @@
-﻿module Xantham.Generator.Generator.TypeRefRender
+﻿[<AutoOpen>]
+module Xantham.Generator.Generator.TypeRefRender
 
 open System.ComponentModel
 open Fabulous.AST

@@ -5,7 +5,7 @@ open Fabulous.AST
 open Xantham
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
-open Xantham.Generator.Generator.Entry.RefRenderPhase
+open Xantham.Generator.Generator
 open Xantham.Generator.NamePath
 open Xantham.Generator.TypeRefRender
 open Xantham.Generator.Generator.TypeRefRender
@@ -26,14 +26,14 @@ let testTypeRef (expectedTypeText: string) (ref: TypeRefRender) =
     |> Gen.run
     |> _.Trim()
 let testRender (expectedTypeText: string) (ref: ResolvedType) =
-    refTypeRender ctx ref
+    TypeRefRender.prerender ctx ref
     |> testTypeRef expectedTypeText
 let testAnchoredRender (anchorPosition: AnchorPath) (expectedTypeText: string) (ref: ResolvedType) =
-    refTypeRender ctx ref
+    TypeRefRender.prerender ctx ref
     |> TypeRefRender.anchor anchorPosition
     |> testTypeRef expectedTypeText
 let testAnchoredRelativeRender (relativePosition: AnchorPath) (anchorPosition: AnchorPath) (expectedTypeText: string) (ref: ResolvedType) =
-    refTypeRender ctx ref
+    TypeRefRender.prerender ctx ref
     |> TypeRefRender.anchor anchorPosition
     |> TypeRefRender.localisePaths relativePosition
     |> testTypeRef expectedTypeText
@@ -418,7 +418,7 @@ let contextPersistanceTests = testList "Context memoization" [
             |> ValueOption.toOption
         getRef()
         |> Flip.Expect.isNone "Should not have seen primitive"
-        cachedRefTypeRender ctx newRef
+        TypeRefRender.prerender ctx newRef
         |> ignore
         getRef()
         |> Flip.Expect.isSome "Should have seen primitive"
@@ -441,6 +441,7 @@ let contextPersistanceTests = testList "Context memoization" [
 
 [<Tests>]
 let tests = testList "TypeRef" [
+    contextPersistanceTests
     primitiveTests
     primitiveTuples
     primitiveArrays
@@ -448,7 +449,6 @@ let tests = testList "TypeRef" [
     typeReferenceTests
     unionTests
     callSignatureTests
-    contextPersistanceTests
     testCase "Simple tuple with optional element" <| fun _ ->
         [
             primitive TypeKindPrimitive.String
