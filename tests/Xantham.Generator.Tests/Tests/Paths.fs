@@ -1,6 +1,7 @@
 ﻿module Xantham.Generator.Tests.Tests.Paths
 
 open Expecto
+open Xantham.Generator
 open Xantham.Generator.NamePath
 open Xantham
 open Xantham.Decoder
@@ -61,4 +62,35 @@ let tests =
     ]
     
 [<Tests>]
-let tests2 = testList "Transient Path Interactions" []
+let tests2 = testList "Transient Path Interactions" [
+    testCase "T" <| fun _ ->
+        let anchorPath =
+            ModulePath.createFromList [ "Root"; "Anchor" ]
+            |> TypePath.create "Foo"
+            |> MemberPath.createOnType "bar"
+            |> ParameterPath.create "options"
+            |> AnchorPath.Parameter
+        let transientParameterType = TransientTypePath.Anchored
+        let transientMemberPath =
+            TransientMemberPath.createOnTransientType "optionProp" transientParameterType
+        let subTransientType = TransientTypePath.Anchored
+        let subTransientMember =
+            TransientMemberPath.createOnTransientType "subOptionProp" subTransientType
+        TransientTypePath.anchor anchorPath transientParameterType
+        |> AnchorPath.Type
+        |> TransientMemberPath.anchor
+        |> funApply transientMemberPath
+        |> AnchorPath.Member
+        |> TransientTypePath.anchor
+        |> funApply subTransientType
+        |> AnchorPath.Type
+        |> TransientMemberPath.anchor
+        |> funApply subTransientMember
+        |> AnchorPath.Member
+        |> TransientTypePath.anchor
+        |> funApply TransientTypePath.Anchored
+        |> TypePath.flatten
+        |> List.map Name.Case.valueOrModified
+        |> Flip.Expect.equal "" [ "Root"; "Anchor"; "Foo"; "Bar"; "Options"; "OptionProp"; "SubOptionProp" ]
+        
+]

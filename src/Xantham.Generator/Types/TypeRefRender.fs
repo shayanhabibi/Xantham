@@ -54,6 +54,7 @@ type TypedNameTraits =
     | JSSetter = (1 <<< 7)
     | JSIndexer = (1 <<< 8)
     | JSConstructor = (1 <<< 9)
+    | JSCallSignature = (1 <<< 10)
 
 module TypedNameTraits =
     [<Literal>]
@@ -136,78 +137,14 @@ type TypeRender =
     | Variable of TypedNameRender
 
 [<RequireQualifiedAccess>]
+type MemberRender =
+    | Property of TypedNameRender
+    | Method of FunctionLikeRender
+
+[<RequireQualifiedAccess>]
 type Render =
     | RefOnly of TypeRefRender
     | Render of TypeRefRender * TypeRender
-
-module private Implementation =
-    let rec isFunctionRender (render: TypeRefRender) =
-        match render.Kind with
-        | TypeRefKind.Molecule (TypeRefMolecule.Function _) -> true
-        | _ -> false
-    let renderAtom (atom: TypeRefAtom) =
-        match atom with
-        | TypeRefAtom.Widget widgetBuilder ->
-            widgetBuilder
-        | TypeRefAtom.AnchorPath typePath ->
-            TypePath.flatten typePath
-            |> List.map Name.Case.valueOrModified
-            |> Ast.LongIdent
-        | TypeRefAtom.TransientPath transientTypePath ->
-            TransientTypePath.toAnchored transientTypePath
-            |> List.map Name.Case.valueOrModified
-            |> Ast.LongIdent
-    let rec renderMolecule (molecule: TypeRefMolecule) =
-        match molecule with
-        | TypeRefMolecule.Tuple typeRefRenders ->
-            typeRefRenders
-            |> List.map render
-            |> Ast.Tuple
-        | TypeRefMolecule.Union typeRefRenders ->
-            typeRefRenders
-            |> List.map render
-            |> function
-                | [] -> Ast.Unit()
-                | [ widget ] -> widget
-                | types ->
-                    let length = List.length types
-                    let prefix = Ast.Anon $"U{length}"
-                    Ast.AppPrefix(prefix, types)
-        // if we have no parameters, then we render a unit function
-        | TypeRefMolecule.Function([], returnType) ->
-            let returnType = render returnType
-            Ast.Funs(Ast.Unit(), returnType)
-        | TypeRefMolecule.Function(parameters, returnType) ->
-            let parameters =
-                parameters
-                |> List.map (fun ref ->
-                    render ref
-                    |> if isFunctionRender ref
-                        then Ast.Paren
-                        else id)
-            let returnType = render returnType
-            Ast.Funs(parameters, returnType)
-        | TypeRefMolecule.Prefix(prefix, args) ->
-            let isNullable = prefix.Nullable
-            let prefix = render { prefix with Nullable = false }
-            let args = args |> List.map render
-            Ast.AppPrefix(prefix, args)
-            |> if isNullable then Ast.OptionPrefix else id
-
-    and render (typeRefRender: TypeRefRender): WidgetBuilder<Type> =
-        match typeRefRender.Kind with
-        | TypeRefKind.Atom typeRefAtom ->
-            renderAtom typeRefAtom
-        | TypeRefKind.Molecule typeRefMolecule ->
-            renderMolecule typeRefMolecule
-        |> if typeRefRender.Nullable then
-            Ast.OptionPrefix 
-            else id
-       
-
-[<EditorBrowsable(EditorBrowsableState.Never)>]
-module TestHelpers =
-    let simpleRender (typeRefRender: TypeRefRender): WidgetBuilder<Type> = Implementation.render typeRefRender
 
 module TypeRefAtom =
     let createWidget (widget: WidgetBuilder<Type>) =
@@ -246,8 +183,6 @@ module TypeRefAtom =
     
     let inline create (value: ^T) = ((^T or SRTPHelper): (static member Create: ^T -> TypeRefAtom) value)
 
-    let render (atom: TypeRefAtom) = Implementation.renderAtom atom
-
 module TypeRefMolecule =
     let createTuple (atoms: TypeRefRender list) =
         TypeRefMolecule.Tuple atoms
@@ -270,8 +205,6 @@ module TypeRefMolecule =
         
     let inline create (value: ^T) = ((^T or SRTPHelper): (static member Create: ^T -> TypeRefMolecule) value)
     
-    let render (molecule: TypeRefMolecule) = Implementation.renderMolecule molecule
-
 module TypeRefKind =
     let createWidget (widget: WidgetBuilder<Type>) =
         TypeRefKind.Atom (TypeRefAtom.createWidget widget)
@@ -426,8 +359,6 @@ module TypeRefRender =
                 |> TypeRefKind.Molecule
                 |> wrap
     
-    let render (typeRefRender: TypeRefRender) = Implementation.render typeRefRender
-                
     [<EditorBrowsable(EditorBrowsableState.Never)>]
     type SRTPHelper =
         static member inline Create(tuple, nullable) = createTuple nullable (List.ofArray tuple)

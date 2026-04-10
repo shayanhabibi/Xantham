@@ -4,130 +4,12 @@ open Fabulous.AST
 open Xantham
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
+open Xantham.Generator.Generator.Path
+open Xantham.Generator.Generator.ResolvedTypeCategorization
 open Xantham.Generator.TypeRefRender
 open Xantham.Generator.NamePath
 open Xantham.Generator.Generator
 open Xantham.Decoder
-
-type ResolvedTypeCategories = {
-    EnumLike: ResolvedType list
-    LiteralLike: ResolvedType list
-    Primitives: ResolvedType list
-    Others: ResolvedType list
-    Nullable: bool
-}
-
-module ResolvedTypeCategories =
-    let empty = { EnumLike = []
-                  LiteralLike = []
-                  Primitives = []
-                  Others = []
-                  Nullable = false }
-    let addOthers categories resolved = { categories with Others = resolved :: categories.Others }
-    let addPrimitives categories resolved = { categories with Primitives = resolved :: categories.Primitives }
-    let addLiteralLike categories resolved = { categories with LiteralLike = resolved :: categories.LiteralLike }
-    let addEnumLike categories resolved = { categories with EnumLike = resolved :: categories.EnumLike }
-    let nullable categories = { categories with ResolvedTypeCategories.Nullable = true }
-    let unify a b =
-        let literals =
-            (a.LiteralLike @ b.LiteralLike)
-            |> List.distinct
-        let primitives =
-            (a.Primitives @ b.Primitives)
-            |> List.distinct
-        let others =
-            (a.Others @ b.Others)
-            |> List.distinct
-        let enums =
-            (a.EnumLike @ b.EnumLike)
-            |> List.distinct
-        {
-            EnumLike = enums
-            LiteralLike = literals
-            Primitives = primitives
-            Others = others
-            Nullable = a.Nullable || b.Nullable
-        }
-        
-open ResolvedTypeCategories
-
-let categorize (resolved: ResolvedType) =
-    let rec categorize (categories: ResolvedTypeCategories) (resolved: ResolvedType) =
-        match resolved with
-        // we ignore these and just make the entire structure nullable
-        | ResolvedType.Primitive (
-            TypeKindPrimitive.Never
-           | TypeKindPrimitive.Undefined
-           | TypeKindPrimitive.Null
-           | TypeKindPrimitive.Void
-            ) -> nullable categories
-        // make the structure nullable, and remap to a non-nullable primitive
-        // with the same intent
-        | ResolvedType.Primitive (TypeKindPrimitive.Unknown | TypeKindPrimitive.Any) ->
-            nullable categories
-            |> addPrimitives
-            |> funApply (ResolvedType.Primitive TypeKindPrimitive.NonPrimitive)
-        // unify primitives with the same intent to a single primitive type
-        // any (already handled); essymbol; nonprimitive; unknown (already handled)
-        | ResolvedType.Primitive (
-            TypeKindPrimitive.ESSymbol
-           | TypeKindPrimitive.NonPrimitive
-            ) ->
-            ResolvedType.Primitive TypeKindPrimitive.NonPrimitive
-            |> addPrimitives categories
-        // can now safely intake any other primitive
-        | ResolvedType.Primitive _ ->
-            addPrimitives categories resolved
-            
-        | ResolvedType.Conditional conditionalType ->
-            [
-                conditionalType.True.Value
-                conditionalType.False.Value
-            ]
-            |> List.fold categorize categories
-        | ResolvedType.Union union ->
-            union.Types
-            |> List.map _.Value
-            |> List.fold categorize categories
-        | ResolvedType.Optional { ResolvedType = Some (Resolve value) } 
-        | ResolvedType.Optional { Type = Resolve value } ->
-            categorize (nullable categories) value
-        | ResolvedType.TypeReference { ResolvedType = Some (Resolve value) } 
-        | ResolvedType.TypeParameter { Constraint = Some (Resolve value) } 
-        | ResolvedType.ReadOnly value
-        | ResolvedType.TypeReference { Type = Resolve value } ->
-            categorize categories value
-        // treat like a bool
-        | ResolvedType.Predicate _ ->
-            addPrimitives categories resolved
-        | ResolvedType.IndexedAccess _ 
-        | ResolvedType.Intersection _ 
-        | ResolvedType.Class _ 
-        | ResolvedType.GlobalThis 
-        | ResolvedType.TypeLiteral _
-        | ResolvedType.Array _
-        | ResolvedType.TypeParameter _
-        | ResolvedType.Tuple _
-        | ResolvedType.Interface _ ->
-            addOthers categories resolved
-        | ResolvedType.Enum _
-        | ResolvedType.Index _ ->
-            addEnumLike categories resolved
-        | ResolvedType.EnumCase _
-        | ResolvedType.TemplateLiteral _
-        | ResolvedType.Literal _ ->
-            addLiteralLike categories resolved
-        | ResolvedType.Substitution substitutionType ->
-            categorize categories substitutionType.Base.Value
-    let cat = categorize empty resolved
-    {
-        Primitives = cat.Primitives |> Seq.distinct |> Seq.rev |> Seq.toList
-        LiteralLike = cat.LiteralLike |> Seq.distinct |> Seq.rev |> Seq.toList
-        EnumLike = cat.EnumLike |> Seq.distinct |> Seq.rev |> Seq.toList
-        Others = cat.Others |> Seq.distinct |> Seq.rev |> Seq.toList
-        Nullable = cat.Nullable
-    }
-    
 
 module RefRenderPhase =
     let rec typeRender (ctx: GeneratorContext) (resolved: ResolvedType) =
@@ -140,6 +22,14 @@ module RefRenderPhase =
             |> TypePath.create "Window"
             |> create
         | ResolvedType.Conditional conditionalType ->
+            if [
+                conditionalType.True.Value
+                conditionalType.False.Value
+            ] |> List.contains resolved
+            then
+                Types.obj
+                |> createOptional
+            else
             [
                 refTypeRender ctx conditionalType.True.Value
                 refTypeRender ctx conditionalType.False.Value
@@ -171,7 +61,7 @@ module RefRenderPhase =
             | TypeKindPrimitive.Boolean -> create Types.bool 
             | TypeKindPrimitive.BigInt -> create Types.bigint 
         | ResolvedType.Union _ ->
-            match categorize resolved with
+            match ResolvedTypeCategories.create resolved with
             | { Others = []; LiteralLike = []; EnumLike = []; Primitives = [] } ->
                 Types.obj
                 |> createOptional
@@ -270,4 +160,153 @@ module RefRenderPhase =
 
     and refTypeRender (ctx: GeneratorContext) (resolved: ResolvedType) =
         GeneratorContext.getTypeRef ctx resolved
-        |> ValueOption.defaultWith(fun () -> typeRender ctx resolved)
+        |> ValueOption.defaultWith(fun () ->
+            GeneratorContext.addRef ctx resolved (
+                TypeRefRender.create false Types.obj
+                )
+            let render = typeRender ctx resolved
+            GeneratorContext.addRef ctx resolved render
+            render)
+    module Prerender =
+        let rec prerenderResolvedType ctx (resolvedType: LazyResolvedType) =
+            if resolvedType.IsValueCreated then () else
+            let resolvedType = resolvedType.Value
+            refTypeRender ctx resolvedType
+            |> ignore
+            match resolvedType with
+            | ResolvedType.GlobalThis 
+            | ResolvedType.Primitive _
+            | ResolvedType.Literal _
+            | ResolvedType.Enum _
+            | ResolvedType.EnumCase _ -> ()
+            | ResolvedType.Conditional conditionalType ->
+                [
+                    conditionalType.Check
+                    conditionalType.Extends
+                    conditionalType.True
+                    conditionalType.False
+                ]
+                |> List.iter (prerenderResolvedType ctx)
+            | ResolvedType.Class classType ->
+                classType.Heritage.Extends
+                |> List.iter (ResolvedType.TypeReference >> Lazy.CreateFromValue >> prerenderResolvedType ctx)
+                classType.Heritage.Implements
+                |> Option.iter (ResolvedType.TypeReference >> Lazy.CreateFromValue >> prerenderResolvedType ctx)
+                classType.Constructors
+                |> List.iter (prerenderConstructor ctx)
+                classType.Members
+                |> List.iter (prerenderMember ctx)
+            | ResolvedType.Interface iface ->
+                iface.Heritage.Extends
+                |> List.iter (ResolvedType.TypeReference >> Lazy.CreateFromValue >> prerenderResolvedType ctx)
+                iface.TypeParameters
+                |> List.iter (prerenderTypeParameter ctx)
+                iface.Members
+                |> List.iter (prerenderMember ctx)
+            | ResolvedType.Union union ->
+                union.Types
+                |> List.iter (prerenderResolvedType ctx)
+            | ResolvedType.Intersection intersection ->
+                intersection.Types
+                |> List.iter (prerenderResolvedType ctx)
+            | ResolvedType.IndexedAccess indexAccessType ->
+                [
+                    indexAccessType.Index
+                    indexAccessType.Object
+                ]
+                |> List.iter (prerenderResolvedType ctx)
+            | ResolvedType.Index index -> index.Type |> prerenderResolvedType ctx
+            | ResolvedType.Optional typeReference 
+            | ResolvedType.TypeReference typeReference ->
+                typeReference.ResolvedType
+                |> Option.iter (prerenderResolvedType ctx)
+                typeReference.TypeArguments
+                |> List.iter (prerenderResolvedType ctx)
+                typeReference.Type
+                |> prerenderResolvedType ctx
+            | ResolvedType.ReadOnly resolvedType 
+            | ResolvedType.Array resolvedType -> prerenderResolvedType ctx (lazy resolvedType)
+            | ResolvedType.TypeParameter typeParameter -> prerenderTypeParameter ctx (lazy typeParameter)
+            | ResolvedType.Tuple tuple ->
+                tuple.Types
+                |> List.iter (_.Type >> prerenderResolvedType ctx)
+            | ResolvedType.Predicate predicate ->
+                predicate.Type |> prerenderResolvedType ctx
+            | ResolvedType.TypeLiteral typeLiteral ->
+                typeLiteral.Members |> List.iter (prerenderMember ctx)
+            | ResolvedType.TemplateLiteral templateLiteral ->
+                templateLiteral.Types
+                |> List.iter (prerenderResolvedType ctx)
+            | ResolvedType.Substitution substitutionType ->
+                [
+                    substitutionType.Base
+                    substitutionType.Constraint
+                ]
+                |> List.iter (prerenderResolvedType ctx)
+        and prerenderConstructor ctx (constructor: Constructor) =
+            constructor.Parameters
+            |> List.iter (_.Type >> prerenderResolvedType ctx)
+        and prerenderMember ctx = function
+            | Member.CallSignature callSignatures ->
+                callSignatures
+                |> List.collect _.Parameters
+                |> List.iter (_.Type >> prerenderResolvedType ctx)
+                callSignatures
+                |> List.map _.Type
+                |> List.iter (prerenderResolvedType ctx)
+            | Member.Method methods ->
+                methods
+                |> List.collect _.Parameters
+                |> List.iter (_.Type >> prerenderResolvedType ctx)
+                methods
+                |> List.map _.Type
+                |> List.iter (prerenderResolvedType ctx)
+            | Member.Property property -> property.Type |> prerenderResolvedType ctx
+            | Member.GetAccessor accessor -> accessor.Type |> prerenderResolvedType ctx
+            | Member.SetAccessor accessor -> accessor.ArgumentType |> prerenderResolvedType ctx
+            | Member.IndexSignature indexSignature ->
+                indexSignature.Type |> prerenderResolvedType ctx
+                indexSignature.Parameters
+                |> List.iter (_.Type >> prerenderResolvedType ctx)
+            | Member.ConstructSignature constructSignatures ->
+                constructSignatures
+                |> List.collect _.Parameters
+                |> List.iter (_.Type >> prerenderResolvedType ctx)
+                constructSignatures
+                |> List.iter (_.Type >> prerenderResolvedType ctx)
+
+        and prerenderTypeParameter ctx (typParam: Lazy<TypeParameter>) =
+            if typParam.IsValueCreated then () else
+            let typParam = typParam.Value
+            typParam.Constraint
+            |> Option.iter (prerenderResolvedType ctx)
+            typParam.Default
+            |> Option.iter (prerenderResolvedType ctx)
+        and prerenderExport ctx export =
+            match export with
+            | ResolvedExport.Interface export -> ResolvedType.Interface export |> Lazy.CreateFromValue |> prerenderResolvedType ctx
+            | ResolvedExport.Variable variable ->
+                variable.Type |> prerenderResolvedType ctx
+            | ResolvedExport.TypeAlias typeAlias ->
+                typeAlias.Type |> prerenderResolvedType ctx
+            | ResolvedExport.Class ``class`` -> Lazy.CreateFromValue (ResolvedType.Class ``class``) |> prerenderResolvedType ctx
+            | ResolvedExport.Enum enumType -> ResolvedType.Enum enumType |> Lazy.CreateFromValue |> prerenderResolvedType ctx
+            | ResolvedExport.Function functions ->
+                functions
+                |> List.collect _.TypeParameters
+                |> List.iter (prerenderTypeParameter ctx)
+                functions
+                |> List.collect _.Parameters
+                |> List.iter (_.Type >> prerenderResolvedType ctx)
+                functions
+                |> List.iter (_.Type >> prerenderResolvedType ctx)
+                functions
+                |> List.iter (_.SignatureKey.Value >> ResolvedType.TypeLiteral >> Lazy.CreateFromValue >> prerenderResolvedType ctx)
+            | ResolvedExport.Module ``module`` ->
+                ``module``.Exports
+                |> List.iter (prerenderExport ctx)
+
+    let prerenderTypeRefs (ctx: GeneratorContext) (decodedResults: ResolvedExport list) =
+        decodedResults
+        |> prepopulateTypeRefRendersForAliases ctx
+        decodedResults |> List.iter (Prerender.prerenderExport ctx)

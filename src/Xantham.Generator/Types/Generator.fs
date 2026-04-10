@@ -19,6 +19,7 @@ type GeneratorContext =
         TypeRenders = Dictionary<ResolvedType, Render>()
         ExportRenders = Dictionary<ResolvedExport, Render>()
     }
+    override this.ToString() = $"GeneratorContext(%d{this.TypeRefRenders.Count})"
 
 module GeneratorContext =
     let getTypeRef (context: GeneratorContext) (resolvedType: ResolvedType) =
@@ -26,9 +27,9 @@ module GeneratorContext =
     let getExportRef (context: GeneratorContext) (resolvedExport: ResolvedExport) =
         Dictionary.tryItem resolvedExport context.ExportRefRenders
     let addTypeRef (context: GeneratorContext) (resolvedType: ResolvedType) (typeRefRender: TypeRefRender) =
-        Dictionary.tryAdd resolvedType typeRefRender context.TypeRefRenders
+        Dictionary.addOrReplace resolvedType typeRefRender context.TypeRefRenders
     let addExportRef (context: GeneratorContext) (resolvedExport: ResolvedExport) (typeRefRender: TypeRefRender) =
-        Dictionary.tryAdd resolvedExport typeRefRender context.ExportRefRenders
+        Dictionary.addOrReplace resolvedExport typeRefRender context.ExportRefRenders
     [<EditorBrowsable(EditorBrowsableState.Never)>]
     type SRTPHelper =
         static member inline TryGetRef(context: GeneratorContext, resolvedType: ResolvedType) = getTypeRef context resolvedType

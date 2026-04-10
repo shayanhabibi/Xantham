@@ -8,8 +8,7 @@ open Xantham.Generator
 open Xantham.Generator.Generator.Entry.RefRenderPhase
 open Xantham.Generator.NamePath
 open Xantham.Generator.TypeRefRender
-open Xantham.Generator.TypeRefRender.TestHelpers
-open Xantham.Generator.Generator
+open Xantham.Generator.Generator.TypeRefRender
 open Mocking.ArenaInterner.ResolvedType
 
 let ctx = GeneratorContext.Empty
@@ -20,7 +19,7 @@ let testTypeRef (expectedTypeText: string) (ref: TypeRefRender) =
     $"let _: %s{expectedTypeText} = JS.undefined",
     Ast.Oak() {
         Ast.AnonymousModule() {
-            Ast.Value("_", Exprs.jsUndefined, simpleRender ref)
+            Ast.Value("_", Exprs.jsUndefined, TypeRefRender.render ref)
         }
     }
     |> Gen.mkOak
@@ -406,7 +405,37 @@ let callSignatureTests = testList "Call Signatures" [
         |> funApply TypeLiteral.empty
         |> TypeLiteral.wrap
         |> testRender "int -> (bool -> int) -> string"
-        ||> Flip.Expect.equal ""
+        ||> Flip.Expect.equal " \
+The intent behind a signature such as `int -> bool -> int -> string` is inherently different from
+`int -> (bool -> int) -> string`. The latter prescribes a function that takes a function as an argument."
+]
+
+let contextPersistanceTests = testList "Context memoization" [
+    testCase "Unseen primitive" <| fun _ ->
+        let newRef = primitive TypeKindPrimitive.String
+        let getRef () =
+            GeneratorContext.getRef ctx newRef
+            |> ValueOption.toOption
+        getRef()
+        |> Flip.Expect.isNone "Should not have seen primitive"
+        cachedRefTypeRender ctx newRef
+        |> ignore
+        getRef()
+        |> Flip.Expect.isSome "Should have seen primitive"
+    testCase "Nested seen type memoization" <| fun _ ->
+        let nestedType =
+            primitive TypeKindPrimitive.String
+            |> TypeReference.create
+            |> TypeReference.wrap
+        GeneratorContext.getRef ctx nestedType
+        |> ValueOption.toOption
+        |> Flip.Expect.isNone "Should not have seen wrapper type"
+        match nestedType with
+        | ResolvedType.TypeReference { Type = Resolve resolvedType } ->
+            GeneratorContext.getRef ctx resolvedType
+            |> ValueOption.toOption
+            |> Flip.Expect.isSome "Should have seen resolved nested type"
+        | _ -> failwith "Expected resolved reference type"
     
 ]
 
@@ -419,6 +448,7 @@ let tests = testList "TypeRef" [
     typeReferenceTests
     unionTests
     callSignatureTests
+    contextPersistanceTests
     testCase "Simple tuple with optional element" <| fun _ ->
         [
             primitive TypeKindPrimitive.String

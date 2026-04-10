@@ -13,10 +13,13 @@
         <Compile Include="Types\TypeRefRender.fs" />
         <Compile Include="Types\BuildersAndPreludes.fs" />
         <Compile Include="Types\Generator.fs" />
-        <Compile Include="Generator\Path.fs" />
+        <Compile Include="Generator\TypeRefRender.Render.fs" />
+        <Compile Include="Generator\TypeRefRender.Paths.fs" />
+        <Compile Include="Generator\ResolvedType.Categorization.fs" />
         <Compile Include="Generator\Entry.fs" />
-        <Compile Include="Generator\TypeRefRender.fs" />
         <Compile Include="Generator\Render.Primitive.fs" />
+        <Compile Include="Generator\Render.Parameter.fs" />
+        <Compile Include="Generator\Render.Member.fs" />
         <Compile Include="Generator\Render.fs" />
     </ItemGroup>
 

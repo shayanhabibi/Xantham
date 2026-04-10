@@ -136,13 +136,3 @@ let create (fileName: string) = XanthamTree(fileName)
 /// Creates a utility type with common handling operations and optimized access
 /// using FrozenDictionaries and FrozenSets for the result of a decoded xantham json file.
 let createWith (fn: Settings -> Settings) (fileName: string) = XanthamTree(Settings.Create fn fileName)
-
-let tree = 
-    IO.Path.Join(__SOURCE_DIRECTORY__, "../Xantham.Fable/output.json")
-    |> create
-let interner =
-    tree
-    |> _.GetArenaInterner()
-printfn "%A" interner
-
-    

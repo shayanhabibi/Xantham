@@ -26,8 +26,20 @@ module QualifiedNamePart =
             let acc = MemberPath path :: acc
             foldParse rest acc
     
-    let parse (qualifiedName: string list) =
-        foldParse qualifiedName []
+    let private normalizeParts (qualifiedName: ArenaInterner.QualifiedNamePart list) =
+        qualifiedName
+        |> List.map (function
+            | ArenaInterner.QualifiedNamePart.Abnormal(value, diagnostic)
+                when diagnostic.HasFlag(
+                    ArenaInterner.QualifiedNamePartDiagnostic.ContainsQuotationMarks
+                    ) ->
+                value.Trim('"')
+            | ArenaInterner.QualifiedNamePart.Abnormal(value, _) -> value
+            | ArenaInterner.QualifiedNamePart.Normal(value) -> value)
+    let parse (qualifiedName: ArenaInterner.QualifiedNamePart list) =
+        normalizeParts qualifiedName
+        |> foldParse
+        |> funApply []
     
     // The name should always be the most specific part of a qualified name, and should be the last part of the list.
     // This will reorder the list if it's not in the correct order.
@@ -58,7 +70,7 @@ module QualifiedName =
                 |> Option.toValueOption
         }
     
-    let parse (qualifiedName: string list) =
+    let parse (qualifiedName: ArenaInterner.QualifiedNamePart list) =
         QualifiedNamePart.parse qualifiedName
         |> create
 
@@ -381,6 +393,8 @@ module AnchorPath =
         
     
 module TransientModulePath =
+    let createOnTransientModule name transientParent =
+        TransientModulePath.Moored(transientParent, Name.Pascal.create name)
     let rec toAnchored (transientModulePath: TransientModulePath) =
         match transientModulePath with
         | TransientModulePath.Anchored -> []
@@ -393,6 +407,9 @@ module TransientModulePath =
         |> List.fold (fun acc name -> ModulePath.createWithName (Name.Pascal.fromName name) acc) modulePath
 
 module TransientTypePath =
+    let createOnTransientModule name transientParent =
+        TransientTypePath.Moored(transientParent, Name.Pascal.create name)
+    
     let rec toAnchored (transientTypePath: TransientTypePath) =
         match transientTypePath with
         | TransientTypePath.Anchored -> []
@@ -411,6 +428,8 @@ module TransientTypePath =
         |> TypePath.createWithName typeName
 
 module TransientMemberPath =
+    let createOnTransientType name transientParent =
+        TransientMemberPath.Moored(transientParent, Name.Camel.create name)
     let rec toAnchored (transientMemberPath: TransientMemberPath) =
         match transientMemberPath with
         | TransientMemberPath.Anchored -> []
@@ -434,6 +453,8 @@ module TransientMemberPath =
         | [] -> failwith "Did not expect empty transient member path"
 
 module TransientParameterPath =
+    let createOnTransientMember name transientParent =
+        TransientParameterPath.Moored(transientParent, Name.Camel.create name)
     let rec toAnchored (transientParameterPath: TransientParameterPath) =
         match transientParameterPath with
         | TransientParameterPath.Anchored -> []
@@ -459,7 +480,7 @@ module TransientParameterPath =
             |> MemberPath.createOnModuleWithName (Name.Camel.fromCase memberName)
             |> ParameterPath.createWithName (Name.Camel.fromCase parameterName)
             |> funApply 0
-        | data -> failwith "Did not expect transient parameter path to have less than 3 elements"
+        | _ -> failwith "Did not expect transient parameter path to have less than 3 elements"
 
 module TransientPath =
     let toAnchored (transientPath: TransientPath) =
@@ -482,6 +503,172 @@ module TransientPath =
         | TransientPath.TypeParam transientTypePath ->
             TransientTypePath.anchor anchorPath transientTypePath
             |> AnchorPath.Type
+    
+    module private Helpers =
+        type FlattenedTransientPath =
+            | Type of TransientTypePath
+            | Member of TransientMemberPath
+            | Parameter of TransientParameterPath
+            | TypeParam of TransientTypePath
+            | Module of TransientModulePath
+        let toFlattenedPath = function
+            | TransientPath.Type transientTypePath -> Type transientTypePath
+            | TransientPath.Member transientMemberPath -> Member transientMemberPath
+            | TransientPath.Parameter transientParameterPath -> Parameter transientParameterPath
+            | TransientPath.TypeParam transientTypePath -> TypeParam transientTypePath
+        let private flattenTransientPath (transientPath: TransientPath) =
+                
+            let rec flattenTransientPath (path: FlattenedTransientPath) =
+                match path with
+                | Type transientTypePath ->
+                    match transientTypePath with
+                    | TransientTypePath.AnchoredAndMoored _
+                    | TransientTypePath.Anchored -> [ path ]
+                    | TransientTypePath.Moored(parent, _) ->
+                        path :: flattenTransientPath (Module parent)
+                | Member transientMemberPath ->
+                    match transientMemberPath with
+                    | TransientMemberPath.Anchored
+                    | TransientMemberPath.AnchoredAndMoored _ -> [ path ]
+                    | TransientMemberPath.Moored(parent, _) ->
+                        path :: flattenTransientPath (Type parent)
+                | Parameter transientParameterPath ->
+                    match transientParameterPath with
+                    | TransientParameterPath.Anchored 
+                    | TransientParameterPath.AnchoredAndMoored _ -> [ path ]
+                    | TransientParameterPath.Moored(parent, _) ->
+                        path :: flattenTransientPath (Member parent)
+                | TypeParam transientTypePath ->
+                    match transientTypePath with
+                    | TransientTypePath.Anchored 
+                    | TransientTypePath.AnchoredAndMoored _ -> [ path ]
+                    | TransientTypePath.Moored(parent, _) ->
+                        path :: flattenTransientPath (Module parent)
+                | Module transientModulePath ->
+                    match transientModulePath with
+                    | TransientModulePath.Anchored 
+                    | TransientModulePath.AnchoredAndMoored _ -> [ path ]
+                    | TransientModulePath.Moored(parent, _) ->
+                        path :: flattenTransientPath (Module parent)
+
+            toFlattenedPath transientPath
+            |> flattenTransientPath
+            |> List.rev
+        let private reformTransientPath (flattenedTransientPath: FlattenedTransientPath list) =
+            let modules, nonModules =
+                flattenedTransientPath
+                |> List.partition _.IsModule
+            let modules =
+                modules
+                |> List.map (function
+                    | Module transientModulePath -> transientModulePath
+                    | _ -> failwith "Expected only modules in transient path")
+            let nonModules =
+                nonModules
+                |> List.map (function
+                    | Type transientTypePath -> TransientPath.Type transientTypePath
+                    | Member transientMemberPath -> TransientPath.Member transientMemberPath
+                    | Parameter transientParameterPath -> TransientPath.Parameter transientParameterPath
+                    | TypeParam transientTypePath -> TransientPath.TypeParam transientTypePath
+                    | Module _ -> failwith "Expected only non-modules")
+            let moduleRoot = 
+                match modules with
+                | [] -> ValueNone
+                | headModule :: tailModules ->
+                    let headModule =
+                        match headModule with
+                        | TransientModulePath.Moored(parent, name) ->
+                            TransientModulePath.AnchoredAndMoored(name)
+                        | TransientModulePath.Anchored 
+                        | TransientModulePath.AnchoredAndMoored _ -> headModule
+                    if tailModules |> List.isEmpty then ValueSome headModule else
+                    (headModule :: tailModules)
+                    |> List.reduce (fun l r ->
+                        match r with
+                        | TransientModulePath.Moored(_, name) -> TransientModulePath.Moored(l, name)
+                        | _ -> r
+                        )
+                    |> ValueSome
+            match nonModules with
+            | [] -> failwith "empty flattened path should not be possible"
+            | head :: tail ->
+                let head =
+                    match head with
+                    | TransientPath.Type (TransientTypePath.Moored(_, name)) when moduleRoot.IsSome ->
+                        TransientTypePath.Moored(moduleRoot.Value, name)
+                        |> TransientPath.Type
+                    | _ -> head
+                (head :: tail)
+                |> List.reduce (fun l r ->
+                    match l,r with
+                    | TransientPath.Type typePath, TransientPath.Member (TransientMemberPath.Moored(_, name)) ->
+                        TransientMemberPath.Moored(typePath, name)
+                        |> TransientPath.Member
+                    | TransientPath.Member memberPath, TransientPath.Parameter (TransientParameterPath.Moored(_, name)) ->
+                        TransientParameterPath.Moored(memberPath, name)
+                        |> TransientPath.Parameter
+                    | _ -> r)
+
+        let removeCommonRoots (target: TransientPath) (transient: TransientPath) =
+            let rec getCommonIdxOfTransientPathsImpl idx (l: FlattenedTransientPath list) (r: FlattenedTransientPath list) =
+                match l, r with
+                | [], _ | _, []
+                | [], [] -> idx
+                | head :: tail, head' :: tail' when head = head' ->
+                    getCommonIdxOfTransientPathsImpl (idx + 1) tail tail'
+                | _ -> idx
+            let targetList = flattenTransientPath target
+            let transientList = flattenTransientPath transient
+            let commonIdx = getCommonIdxOfTransientPathsImpl -1 targetList transientList
+            targetList
+            |> List.skip (commonIdx + 1)
+            |> reformTransientPath
+        let rec toTransientModulePath (transientPath: TransientPath) =
+            match transientPath with
+            | TransientPath.Type transientTypePath ->
+                match transientTypePath with
+                | TransientTypePath.Anchored -> TransientModulePath.Anchored
+                | TransientTypePath.Moored(parent, name) ->
+                    TransientModulePath.Moored(parent, name)
+                | TransientTypePath.AnchoredAndMoored name -> TransientModulePath.AnchoredAndMoored name
+            | TransientPath.Member transientMemberPath ->
+                match transientMemberPath with
+                | TransientMemberPath.Anchored -> TransientModulePath.Anchored
+                | TransientMemberPath.Moored(parent, name) ->
+                    TransientPath.Type parent
+                    |> toTransientModulePath
+                    |> TransientModulePath.createOnTransientModule (Name.Case.valueOrSource name)
+                | TransientMemberPath.AnchoredAndMoored name ->
+                    TransientModulePath.AnchoredAndMoored (Name.Pascal.fromCase name)
+            | TransientPath.Parameter transientParameterPath ->
+                match transientParameterPath with
+                | TransientParameterPath.Anchored -> TransientModulePath.Anchored
+                | TransientParameterPath.Moored(parent, name) ->
+                    TransientPath.Member parent
+                    |> toTransientModulePath
+                    |> TransientModulePath.createOnTransientModule (Name.Case.valueOrSource name)
+                | TransientParameterPath.AnchoredAndMoored name ->
+                    TransientModulePath.AnchoredAndMoored (Name.Pascal.fromCase name)
+            | TransientPath.TypeParam transientTypePath ->
+                TransientPath.Type transientTypePath
+                |> toTransientModulePath
+                
+
+    // let transientAnchor (transientAnchor: TransientPath) (transientVessel: TransientPath) =
+    //     let transientVessel = Helpers.removeCommonRoots transientAnchor transientVessel
+    //     let newAncestor = Helpers.toTransientModulePath transientVessel
+    //     let rec setAncestor (transientPath: TransientPath) =
+    //         match transientPath with
+    //         | TransientPath.Type transientTypePath ->
+    //             match transientTypePath with
+    //             | TransientTypePath.Anchored -> newAncestor
+    //             | TransientTypePath.Moored(parent, name) ->
+    //                 setAncestor 
+    //             | TransientTypePath.AnchoredAndMoored name -> failwith "todo"
+    //         | TransientPath.Member transientMemberPath -> failwith "todo"
+    //         | TransientPath.Parameter transientParameterPath -> failwith "todo"
+    //         | TransientPath.TypeParam transientTypePath -> failwith "todo"
+
 
 module Path =
     module private RelativeHelper =
@@ -520,5 +707,4 @@ module Path =
         // add leaf name
         relativeRoot @ [ target.Name ]
 
-        
         

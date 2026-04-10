@@ -53,6 +53,15 @@ open System.Collections.Generic
 open Xantham
 open Xantham.Decoder
 
+type QualifiedNamePartDiagnostic =
+    | ContainsQuotationMarks = (1 <<< 0)
+    | ContainsSlash = (1 <<< 1)
+    | ContainsPeriod = (1 <<< 2)
+
+[<Struct>]
+type QualifiedNamePart =
+    | Abnormal of part: string * diagnostic: QualifiedNamePartDiagnostic
+    | Normal of part: string
 
 type [<RequireQualifiedAccess>] ResolvedType =
     | GlobalThis
@@ -92,8 +101,8 @@ and LazyResolvedExport = Lazy<ResolvedExport>
 
 and [<ReferenceEquality>] Module = {
     IsLibEs: bool
-    Source: string option
-    FullyQualifiedName: string list
+    Source: QualifiedNamePart option
+    FullyQualifiedName: QualifiedNamePart list
     Name: Name<Case.pascal>
     IsNamespace: bool
     IsRecursive: bool
@@ -162,24 +171,24 @@ and [<ReferenceEquality>] Predicate = {
 
 and [<ReferenceEquality>] EnumType = {
     IsLibEs: bool
-    Source: string option
-    FullyQualifiedName: string list
+    Source: QualifiedNamePart option
+    FullyQualifiedName: QualifiedNamePart list
     Name: Name<Case.pascal>
     Members: Lazy<EnumCase> list
     Documentation: TsComment list
 }
 and [<ReferenceEquality>] EnumCase = {
     Parent: Lazy<EnumType>
-    Source: string option
-    FullyQualifiedName: string list
+    Source: QualifiedNamePart option
+    FullyQualifiedName: QualifiedNamePart list
     Name: Name<Case.pascal>
     Value: TsLiteral
     Documentation: TsComment list
 }
 and [<ReferenceEquality>] Variable = {
     IsLibEs: bool
-    Source: string option
-    FullyQualifiedName: string list
+    Source: QualifiedNamePart option
+    FullyQualifiedName: QualifiedNamePart list
     Name: Name<Case.camel>
     Type: LazyResolvedType
     Documentation: TsComment list
@@ -253,8 +262,8 @@ and [<ReferenceEquality>] IndexSignature = {
 }
 and [<ReferenceEquality>] Function = {
     IsLibEs: bool
-    Source: string option
-    FullyQualifiedName: string list
+    Source: QualifiedNamePart option
+    FullyQualifiedName: QualifiedNamePart list
     Documentation: TsComment list
     IsDeclared: bool
     Name: Name<Case.camel>
@@ -294,8 +303,8 @@ and [<ReferenceEquality>] ClassHeritage = {
 }
 and [<ReferenceEquality>] Interface = {
     IsLibEs: bool
-    Source: string option
-    FullyQualifiedName: string list
+    Source: QualifiedNamePart option
+    FullyQualifiedName: QualifiedNamePart list
     Name: Name<Case.pascal>
     Members: Member list
     TypeParameters: Lazy<TypeParameter> list
@@ -304,8 +313,8 @@ and [<ReferenceEquality>] Interface = {
 }
 and [<ReferenceEquality>] Class = {
     IsLibEs: bool
-    Source: string option
-    FullyQualifiedName: string list
+    Source: QualifiedNamePart option
+    FullyQualifiedName: QualifiedNamePart list
     Name: Name<Case.pascal>
     Members: Member list
     TypeParameters: Lazy<TypeParameter> list
@@ -322,8 +331,8 @@ and [<ReferenceEquality>] IndexAccessType = {
 }
 and [<ReferenceEquality>] TypeAlias = {
     IsLibEs: bool
-    Source: string option
-    FullyQualifiedName: string list
+    Source: QualifiedNamePart option
+    FullyQualifiedName: QualifiedNamePart list
     Name: Name<Case.pascal>
     Type: LazyResolvedType
     TypeParameters: Lazy<TypeParameter> list
@@ -338,7 +347,24 @@ type ArenaInterner = {
     ResolveType: TypeKey -> ResolvedType
     ResolveExport: TypeKey -> Result<ResolvedExport, ResolvedType>
     ExportMap: Map<string, ResolvedExport list>
-}
+} with
+    override this.ToString() = $"ArenaInterner(%d{this.ExportMap.Count})"
+
+module private QualifiedNamePart =
+    let create (value: string) =
+        let hasQuotations = value.Contains '"'
+        let hasSlashes = value.Contains '/' || value.Contains '\\'
+        let hasPeriod = value.Contains '.'
+        [|
+            hasQuotations, QualifiedNamePartDiagnostic.ContainsQuotationMarks
+            hasSlashes, QualifiedNamePartDiagnostic.ContainsSlash
+            hasPeriod, QualifiedNamePartDiagnostic.ContainsPeriod
+        |]
+        |> Array.fold (fun acc (has, diagnostic) ->
+            if has then acc ||| diagnostic else acc) (enum 0)
+        |> function
+            | diagnostic when diagnostic = enum 0 -> QualifiedNamePart.Normal value
+            | diagnostic -> QualifiedNamePart.Abnormal(value, diagnostic)
 
 module ArenaInterner =
     let create (decodedResult: DecodedResult) =
@@ -378,16 +404,16 @@ module ArenaInterner =
             match export with
             | TsExportDeclaration.Variable tsVariable -> ResolvedExport.Variable {
                     IsLibEs = isLibEs
-                    Source = tsVariable.Source
-                    FullyQualifiedName = tsVariable.FullyQualifiedName
+                    Source = tsVariable.Source |> Option.map QualifiedNamePart.create
+                    FullyQualifiedName = tsVariable.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Variable.Name = Name.Camel.create tsVariable.Name
                     Type = lazyResolve tsVariable.Type
                     Documentation = tsVariable.Documentation
                 }
             | TsExportDeclaration.Interface tsInterface -> ResolvedExport.Interface {
                     IsLibEs = isLibEs
-                    Source = tsInterface.Source
-                    FullyQualifiedName = tsInterface.FullyQualifiedName
+                    Source = tsInterface.Source |> Option.map QualifiedNamePart.create
+                    FullyQualifiedName = tsInterface.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsInterface.Name
                     Members = tsInterface.Members |> List.map buildFromMember
                     TypeParameters =
@@ -398,8 +424,8 @@ module ArenaInterner =
                 }
             | TsExportDeclaration.Class tsClass -> ResolvedExport.Class {
                     IsLibEs = isLibEs
-                    Source = tsClass.Source
-                    FullyQualifiedName = tsClass.FullyQualifiedName
+                    Source = tsClass.Source |> Option.map QualifiedNamePart.create
+                    FullyQualifiedName = tsClass.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsClass.Name
                     Members = tsClass.Members |> List.map buildFromMember
                     TypeParameters = tsClass.TypeParameters |> List.map buildFromTypeParameter
@@ -415,8 +441,8 @@ module ArenaInterner =
             | TsExportDeclaration.TypeAlias tsTypeAlias ->
                 ResolvedExport.TypeAlias {
                     IsLibEs = isLibEs
-                    Source = tsTypeAlias.Source
-                    FullyQualifiedName = tsTypeAlias.FullyQualifiedName
+                    Source = tsTypeAlias.Source |> Option.map QualifiedNamePart.create
+                    FullyQualifiedName = tsTypeAlias.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsTypeAlias.Name
                     Type = tsTypeAlias.Type |> lazyResolve
                     TypeParameters =
@@ -426,8 +452,8 @@ module ArenaInterner =
                 }
             | TsExportDeclaration.Enum tsEnumType -> ResolvedExport.Enum {
                     IsLibEs = isLibEs
-                    Source = tsEnumType.Source
-                    FullyQualifiedName = tsEnumType.FullyQualifiedName
+                    Source = tsEnumType.Source |> Option.map QualifiedNamePart.create
+                    FullyQualifiedName = tsEnumType.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsEnumType.Name
                     Members = tsEnumType.Members |> List.map (fun value ->
                         lazy {
@@ -436,8 +462,8 @@ module ArenaInterner =
                                     match resolve value.Parent with
                                     | ResolvedType.Enum enum -> enum
                                     | _ -> failwith "Inlining an enum returned a non enum type."
-                            EnumCase.Source = value.Source
-                            FullyQualifiedName = value.FullyQualifiedName
+                            EnumCase.Source = value.Source |> Option.map QualifiedNamePart.create
+                            FullyQualifiedName = value.FullyQualifiedName |> List.map QualifiedNamePart.create
                             Name = Name.Pascal.create value.Name
                             Value = value.Value
                             Documentation = value.Documentation
@@ -447,8 +473,8 @@ module ArenaInterner =
             | TsExportDeclaration.Module tsModule ->
                 ResolvedExport.Module {
                     IsLibEs = isLibEs
-                    Source = tsModule.Source
-                    FullyQualifiedName = tsModule.FullyQualifiedName
+                    Source = tsModule.Source |> Option.map QualifiedNamePart.create
+                    FullyQualifiedName = tsModule.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsModule.Name
                     IsNamespace = tsModule.IsNamespace
                     IsRecursive = tsModule.IsRecursive
@@ -461,8 +487,8 @@ module ArenaInterner =
                 |> List.map (fun func ->
                     {
                         IsLibEs = isLibEs
-                        Function.Source = func.Source
-                        FullyQualifiedName = func.FullyQualifiedName
+                        Function.Source = func.Source |> Option.map QualifiedNamePart.create
+                        FullyQualifiedName = func.FullyQualifiedName |> List.map QualifiedNamePart.create
                         Documentation = func.Documentation
                         IsDeclared = func.IsDeclared
                         Name = Name.Camel.create func.Name
@@ -493,8 +519,8 @@ module ArenaInterner =
                 }
             | TsType.Interface tsInterface -> ResolvedType.Interface {
                     IsLibEs = isLibEs
-                    Source = tsInterface.Source
-                    FullyQualifiedName = tsInterface.FullyQualifiedName
+                    Source = tsInterface.Source |> Option.map QualifiedNamePart.create
+                    FullyQualifiedName = tsInterface.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsInterface.Name
                     Members = tsInterface.Members |> List.map buildFromMember
                     TypeParameters =
@@ -505,8 +531,8 @@ module ArenaInterner =
                 }
             | TsType.Class tsClass -> ResolvedType.Class {
                     IsLibEs = isLibEs
-                    Source = tsClass.Source
-                    FullyQualifiedName = tsClass.FullyQualifiedName
+                    Source = tsClass.Source |> Option.map QualifiedNamePart.create
+                    FullyQualifiedName = tsClass.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsClass.Name
                     Members = tsClass.Members |> List.map buildFromMember
                     TypeParameters = tsClass.TypeParameters |> List.map buildFromTypeParameter
@@ -522,8 +548,8 @@ module ArenaInterner =
             | TsType.Primitive typeKindPrimitive -> ResolvedType.Primitive typeKindPrimitive
             | TsType.Enum tsEnumType -> ResolvedType.Enum {
                     IsLibEs = isLibEs
-                    Source = tsEnumType.Source
-                    FullyQualifiedName = tsEnumType.FullyQualifiedName
+                    Source = tsEnumType.Source |> Option.map QualifiedNamePart.create
+                    FullyQualifiedName = tsEnumType.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsEnumType.Name
                     Members = tsEnumType.Members |> List.map (fun value ->
                         lazy {
@@ -532,8 +558,8 @@ module ArenaInterner =
                                     match resolve value.Parent with
                                     | ResolvedType.Enum enum -> enum
                                     | _ -> failwith "Inlining an enum returned a non enum type."
-                            EnumCase.Source = value.Source
-                            FullyQualifiedName = value.FullyQualifiedName
+                            EnumCase.Source = value.Source |> Option.map QualifiedNamePart.create
+                            FullyQualifiedName = value.FullyQualifiedName |> List.map QualifiedNamePart.create
                             Name = Name.Pascal.create value.Name
                             Value = value.Value
                             Documentation = value.Documentation
@@ -547,9 +573,9 @@ module ArenaInterner =
                         | ResolvedType.Enum enum -> enum
                         | _ -> failwith "Inlining an enum case returned a non enum type."
                         )
-                    Source = tsEnumCase.Source
-                    FullyQualifiedName = tsEnumCase.FullyQualifiedName
-                    Name = Name.Pascal.create tsEnumCase.Name
+                    Source = tsEnumCase.Source |> Option.map QualifiedNamePart.create
+                    FullyQualifiedName = tsEnumCase.FullyQualifiedName |> List.map QualifiedNamePart.create
+                    Name = Name.Pascal.create tsEnumCase.Name 
                     Value = tsEnumCase.Value
                     Documentation = tsEnumCase.Documentation
                 }

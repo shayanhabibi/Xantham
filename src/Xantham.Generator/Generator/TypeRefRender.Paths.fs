@@ -1,21 +1,53 @@
 ﻿module Xantham.Generator.Generator.Path
+
+open Xantham.Generator
 open Xantham.Generator.NamePath
 open Xantham.Decoder.ArenaInterner
 open Xantham.Decoder
 
-let inline private getQualifiedName (container: ^T when ^T:(member FullyQualifiedName: string list)) =
+let inline private getQualifiedName (container: ^T when ^T:(member FullyQualifiedName: ArenaInterner.QualifiedNamePart list)) =
     container.FullyQualifiedName
     |> QualifiedNamePart.parse
     |> QualifiedName.create
 
-let inline private createModulePath (qualifiedName: QualifiedName) (source: string option) =
+let inline private createModulePath (qualifiedName: QualifiedName) (source: ArenaInterner.QualifiedNamePart option) =
+    let hasNodeModuleFilePath =
+        qualifiedName.FilePath
+        |> List.exists _.Contains("node_modules")
     match source, qualifiedName.MemberPath with
     | None, [] -> ModulePath.init "Global"
     | None, head :: tail ->
         let init = ModulePath.init head
         tail
         |> List.fold (fun acc s -> ModulePath.create s acc) init
-    | Some s, path ->
+    // ================================
+    // TODO - should this be done?
+    // abnormal qualified source name - likely not a 'module' import, but a file import from
+    // a declaration file. The qualified name also contains the file path.
+    | Some (ArenaInterner.QualifiedNamePart.Abnormal (s, _)), path when hasNodeModuleFilePath ->
+        // proceed if the abnormal source name contains the file name from the qualified name
+        if s.Contains(System.IO.Path.GetFileNameWithoutExtension qualifiedName.FilePath.Head) then
+            // extract path after node_modules for direct file import
+            let fileNameParts =
+                qualifiedName.FilePath.Head
+                |> _.Split("node_modules")
+                |> Array.last
+                |> _.Split([|'\\'; '/'|], System.StringSplitOptions.RemoveEmptyEntries)
+            // change the source name to the first qualifier in the file path
+            let s = fileNameParts |> Array.head
+            // add the remaining qualifiers to the head of the path
+            fileNameParts
+            |> Array.tail
+            |> Array.toList
+            |> List.append
+            |> funApply path
+            // proceed as normal
+            |> List.fold (fun acc s -> ModulePath.create s acc) (ModulePath.init s)
+        else
+            path
+            |> List.fold (fun acc s -> ModulePath.create s acc) (ModulePath.init s)
+    // ==================================
+    | Some (ArenaInterner.QualifiedNamePart.Abnormal(s, _) | ArenaInterner.QualifiedNamePart.Normal s), path ->
         path
         |> List.fold (fun acc s -> ModulePath.create s acc) (ModulePath.init s)
 
@@ -83,39 +115,14 @@ let fromResolvedExport (resolvedExport: ResolvedExport) =
         fromFunction func |> AnchorPath.Member
     | ResolvedExport.Function [] -> failwith "Resolved export contained no functions for the function case."
     | ResolvedExport.Module ``module`` -> fromModule ``module`` |> AnchorPath.Module
-
-let fromIntersection (intersection: Intersection) =
-    TransientTypePath.Anchored
-
-let fromTypeLiteral (typeLiteral: TypeLiteral) =
-    TransientTypePath.Anchored
-
-let fromResolvedType (resolvedType: ResolvedType) =
-    match resolvedType with
-    | ResolvedType.GlobalThis ->
-        ModulePath.init "Browser"
-        |> ModulePath.create "Dom"
-        |> TypePath.create "Window"
-    // | ResolvedType.Conditional conditionalType ->
-    //     TransientModulePath.Anchored
-    | ResolvedType.Interface ``interface`` ->
-        fromInterface ``interface``
-    | ResolvedType.Class ``class`` -> fromClass ``class``
-    | ResolvedType.Primitive typeKindPrimitive -> failwith "todo"
-    | ResolvedType.Union union -> failwith "todo"
-    | ResolvedType.Intersection intersection -> failwith "todo"
-    | ResolvedType.Literal tsLiteral -> failwith "todo"
-    | ResolvedType.IndexedAccess indexAccessType -> failwith "todo"
-    | ResolvedType.Index index -> failwith "todo"
-    | ResolvedType.TypeReference typeReference -> failwith "todo"
-    | ResolvedType.Array resolvedType -> failwith "todo"
-    | ResolvedType.Enum enumType -> failwith "todo"
-    | ResolvedType.EnumCase enumCase -> failwith "todo"
-    | ResolvedType.TypeParameter typeParameter -> failwith "todo"
-    | ResolvedType.ReadOnly resolvedType -> failwith "todo"
-    | ResolvedType.Tuple tuple -> failwith "todo"
-    | ResolvedType.Predicate predicate -> failwith "todo"
-    | ResolvedType.TypeLiteral typeLiteral -> failwith "todo"
-    | ResolvedType.TemplateLiteral templateLiteral -> failwith "todo"
-    | ResolvedType.Optional typeReference -> failwith "todo"
-    | ResolvedType.Substitution substitutionType -> failwith "todo"
+    
+let prepopulateTypeRefRendersForAliases (ctx: GeneratorContext) (exports: ResolvedExport list) =
+    exports
+    |> List.iter (function
+        | ResolvedExport.TypeAlias typeAlias ->
+            let resolvedType = typeAlias.Type.Value
+            let typePath = fromTypeAlias typeAlias
+            TypeRefRender.TypeRefRender.createAnchorPath false typePath
+            |> GeneratorContext.addTypeRef ctx resolvedType
+        | _ -> ()
+        )
