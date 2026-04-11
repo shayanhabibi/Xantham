@@ -8,6 +8,8 @@ open System.Collections.Generic
 [<AutoOpen>]
 module DictionaryExtensions =
     module ConcurrentDictionary =
+        let inline tryItemOrAdd (fn: 'Key -> 'Value) (key: 'Key) (dict: ConcurrentDictionary<'Key, 'Value>) =
+            dict.GetOrAdd(key, fn)
         let inline item (key: 'Key) (dict: ConcurrentDictionary<'Key, 'Value>): 'Value = dict[key]
         let inline tryItem (key: 'Key) (dict: ConcurrentDictionary<'Key, 'Value>): 'Value voption =
             match dict.TryGetValue key with

@@ -432,6 +432,7 @@ let contextPersistanceTests = testList "Context memoization" [
         |> Flip.Expect.isNone "Should not have seen wrapper type"
         match nestedType with
         | ResolvedType.TypeReference { Type = Resolve resolvedType } ->
+            TypeRefRender.prerender ctx resolvedType |> ignore
             GeneratorContext.getRef ctx resolvedType
             |> ValueOption.toOption
             |> Flip.Expect.isSome "Should have seen resolved nested type"

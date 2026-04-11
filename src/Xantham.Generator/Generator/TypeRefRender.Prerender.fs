@@ -159,14 +159,7 @@ module private Render =
         | ResolvedType.Substitution _ -> create Types.obj
 
     and refTypeRender (ctx: GeneratorContext) (resolved: ResolvedType) =
-        GeneratorContext.getTypeRef ctx resolved
-        |> ValueOption.defaultWith(fun () ->
-            GeneratorContext.addRef ctx resolved (
-                TypeRefRender.create false Types.obj
-                )
-            let render = typeRender ctx resolved
-            GeneratorContext.addRef ctx resolved render
-            render)
+        GeneratorContext.getTypeRefWith ctx resolved (typeRender ctx)
 
 module TypeRefRender =
     let prerender (ctx: GeneratorContext) (resolved: ResolvedType) =

@@ -3,6 +3,15 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net10.0</TargetFramework>
+<!--
+    DefineConstants OPTIONS:
+        1. CONCURRENT_DICT:
+            Uses concurrent dictionaries for the generator context caches.
+            This is primarily to allow default IDE test runners to run the
+            tests without issues.
+            If off, standard dictionaries are used.
+-->
+        <DefineConstants>CONCURRENT_DICT</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>
