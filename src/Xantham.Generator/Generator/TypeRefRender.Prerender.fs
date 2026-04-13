@@ -65,22 +65,33 @@ module private Render =
             | { Others = []; LiteralLike = []; EnumLike = []; Primitives = [] } ->
                 Types.obj
                 |> createOptional
-            | { Others = []; EnumLike = []; Primitives = [ i ]; LiteralLike = []; Nullable = true } 
-            | { Others = []; EnumLike = [ i ]; Primitives = []; LiteralLike = []; Nullable = true } 
-            | { Others = [ i ]; EnumLike = []; Primitives = []; LiteralLike = []; Nullable = true } ->
+            | { Others = []; EnumLike = []; Primitives = [ ResolvedTypeCategories.AsResolvedType i ]; LiteralLike = []; Nullable = true } 
+            | { Others = []; EnumLike = [ ResolvedTypeCategories.AsResolvedType i ]; Primitives = []; LiteralLike = []; Nullable = true } 
+            | { Others = [ ResolvedTypeCategories.AsResolvedType i ]; EnumLike = []; Primitives = []; LiteralLike = []; Nullable = true } ->
                 refTypeRender ctx i
                 |> TypeRefRender.nullable
             | { Others = []; EnumLike = []; Primitives = []; LiteralLike = _; Nullable = isNullable } ->
                 TransientTypePath.Anchored
                 |> TypeRefRender.create isNullable
             | { Others = others; EnumLike = enums; Primitives = primitives; LiteralLike = []; Nullable = isNullable } ->
-                primitives @ others @ enums
-                |> List.map (refTypeRender ctx >> if isNullable then TypeRefRender.nonNullable else id)
+                seq {
+                    for primitive in primitives do primitive.AsResolvedType
+                    for other in others do other.AsResolvedType
+                    for enum in enums do enum.AsResolvedType
+                }
+                |> Seq.map (refTypeRender ctx >> if isNullable then TypeRefRender.nonNullable else id)
+                |> Seq.toList
                 |> TypeRefRender.create isNullable
             | { Others = others; EnumLike = enums; Primitives = primitives; LiteralLike = literals; Nullable = isNullable } ->
                 let refs =
-                    primitives @ others @ enums @ literals
-                    |> List.map (refTypeRender ctx >> if isNullable then TypeRefRender.nonNullable else id)
+                    seq {
+                        for primitive in primitives do primitive.AsResolvedType
+                        for other in others do other.AsResolvedType
+                        for enum in enums do enum.AsResolvedType
+                        for literal in literals do literal.AsResolvedType
+                    }
+                    |> Seq.map (refTypeRender ctx >> if isNullable then TypeRefRender.nonNullable else id)
+                    |> Seq.toList
                 create TransientTypePath.Anchored :: refs
                 |> TypeRefRender.create isNullable
         | ResolvedType.Literal _
@@ -161,10 +172,10 @@ module private Render =
     and refTypeRender (ctx: GeneratorContext) (resolved: ResolvedType) =
         GeneratorContext.getTypeRefWith ctx resolved (typeRender ctx)
 
-module TypeRefRender =
+module TestHelper =
     let prerender (ctx: GeneratorContext) (resolved: ResolvedType) =
         Render.refTypeRender ctx resolved
-        
+
 module Prerender =
     let rec private prerenderResolvedType ctx (resolvedType: LazyResolvedType) =
         if resolvedType.IsValueCreated then () else

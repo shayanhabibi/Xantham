@@ -26,14 +26,14 @@ let testTypeRef (expectedTypeText: string) (ref: TypeRefRender) =
     |> Gen.run
     |> _.Trim()
 let testRender (expectedTypeText: string) (ref: ResolvedType) =
-    TypeRefRender.prerender ctx ref
+    TestHelper.prerender ctx ref
     |> testTypeRef expectedTypeText
 let testAnchoredRender (anchorPosition: AnchorPath) (expectedTypeText: string) (ref: ResolvedType) =
-    TypeRefRender.prerender ctx ref
+    TestHelper.prerender ctx ref
     |> TypeRefRender.anchor anchorPosition
     |> testTypeRef expectedTypeText
 let testAnchoredRelativeRender (relativePosition: AnchorPath) (anchorPosition: AnchorPath) (expectedTypeText: string) (ref: ResolvedType) =
-    TypeRefRender.prerender ctx ref
+    TestHelper.prerender ctx ref
     |> TypeRefRender.anchor anchorPosition
     |> TypeRefRender.localisePaths relativePosition
     |> testTypeRef expectedTypeText
@@ -418,7 +418,7 @@ let contextPersistanceTests = testList "Context memoization" [
             |> ValueOption.toOption
         getRef()
         |> Flip.Expect.isNone "Should not have seen primitive"
-        TypeRefRender.prerender ctx newRef
+        TestHelper.prerender ctx newRef
         |> ignore
         getRef()
         |> Flip.Expect.isSome "Should have seen primitive"
@@ -432,7 +432,7 @@ let contextPersistanceTests = testList "Context memoization" [
         |> Flip.Expect.isNone "Should not have seen wrapper type"
         match nestedType with
         | ResolvedType.TypeReference { Type = Resolve resolvedType } ->
-            TypeRefRender.prerender ctx resolvedType |> ignore
+            TestHelper.prerender ctx resolvedType |> ignore
             GeneratorContext.getRef ctx resolvedType
             |> ValueOption.toOption
             |> Flip.Expect.isSome "Should have seen resolved nested type"

@@ -1,16 +1,16 @@
 ﻿[<AutoOpen>]
 module Xantham.Generator.Generator.Render_Parameter
 
+open System.ComponentModel
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
 open Xantham.Generator.TypeRefRender
 
 
 module Parameter =
-    let render (ctx: GeneratorContext) (param: Parameter) =
+    let renderWithMetadata (ctx: GeneratorContext) (param: Parameter) (metadata: RenderMetadata) =
         let ref =
-            param.Type.Value
-            |> TypeRefRender.prerender ctx
+            ctx.render param.Type.Value
         let traits =
             if param.IsOptional || ref.Nullable then
                 TypedNameTraits.Optional
@@ -21,8 +21,15 @@ module Parameter =
             else TypedNameTraits.None
         {
             TypedNameRender.Name = param.Name
+            Metadata = metadata
             Type = ref
             Traits = traits
             TypeParameters = [||]
             Documentation = param.Documentation
         }
+        
+    let render ctx param = renderWithMetadata ctx param RenderMetadata.empty
+    
+    let inline renderWithPath ctx param path =
+        RenderMetadata.create path
+        |> renderWithMetadata ctx param

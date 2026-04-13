@@ -54,7 +54,7 @@ let inline private createModulePath (qualifiedName: QualifiedName) (source: Aren
 let fromVariable (variable: Variable) =
     let qualifiedName = getQualifiedName variable
     let source = variable.Source
-    let renderName = Name.Case.valueOrModified variable.Name
+    let renderName = Name.Case.valueOrSource variable.Name
     let path =
         createModulePath qualifiedName source
         |> MemberPath.createOnModule renderName
@@ -63,7 +63,7 @@ let fromVariable (variable: Variable) =
 let fromInterface (iface: Interface) =
     let qualifiedName = getQualifiedName iface
     let source = iface.Source
-    let renderName = Name.Case.valueOrModified iface.Name
+    let renderName = Name.Case.valueOrSource iface.Name
     let path =
         createModulePath qualifiedName source
         |> TypePath.create renderName
@@ -72,35 +72,40 @@ let fromInterface (iface: Interface) =
 let fromTypeAlias (typeAlias: TypeAlias) =
     let qualifiedName = getQualifiedName typeAlias
     let source = typeAlias.Source
-    let renderName = Name.Case.valueOrModified typeAlias.Name
+    let renderName = Name.Case.valueOrSource typeAlias.Name
     createModulePath qualifiedName source
     |> TypePath.create renderName
 
 let fromClass (cls: Class) =
     let qualifiedName = getQualifiedName cls
     let source = cls.Source
-    let renderName = Name.Case.valueOrModified cls.Name
+    let renderName = Name.Case.valueOrSource cls.Name
     createModulePath qualifiedName source
     |> TypePath.create renderName
 
 let fromEnum (enum: EnumType) =
     let qualifiedName = getQualifiedName enum
     let source = enum.Source
-    let renderName = Name.Case.valueOrModified enum.Name
+    let renderName = Name.Case.valueOrSource enum.Name
     createModulePath qualifiedName source
     |> TypePath.create renderName
+
+let fromEnumCase (parentPath: TypePath) (enum: EnumCase) =
+    parentPath
+    |> MemberPath.createOnType (enum.Name |> Name.Case.valueOrSource)
+    
 
 let fromFunction (function': Function) =
     let qualifiedName = getQualifiedName function'
     let source = function'.Source
-    let renderName = Name.Case.valueOrModified function'.Name
+    let renderName = Name.Case.valueOrSource function'.Name
     createModulePath qualifiedName source
     |> MemberPath.createOnModule renderName
 
 let fromModule (module': Module) =
     let qualifiedName = getQualifiedName module'
     let source = module'.Source
-    let renderName = Name.Case.valueOrModified module'.Name
+    let renderName = Name.Case.valueOrSource module'.Name
     createModulePath qualifiedName source
     |> ModulePath.create renderName
 

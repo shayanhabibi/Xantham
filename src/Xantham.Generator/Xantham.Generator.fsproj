@@ -32,8 +32,10 @@
         <Compile Include="Generator\Render.Member.fs" />
         <Compile Include="Generator\Render.TypeShapes.fs" />
         <Compile Include="Generator\Render.Enum.fs" />
+        <Compile Include="Generator\Render.TypeAlias.fs" />
         <Compile Include="Generator\TypeRender.Render.fs" />
         <Compile Include="Generator\Render.fs" />
+        <Compile Include="Generator\Renderer.fs" />
     </ItemGroup>
 
     <ItemGroup>

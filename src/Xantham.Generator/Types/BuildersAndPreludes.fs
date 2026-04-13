@@ -271,6 +271,12 @@ type AttributesBuilder() =
     [<CustomOperation "stringEnum">]
     member inline _.StringEnum(state) =
         Attributes.stringEnum :: state
+    [<CustomOperation "paramArray">]
+    member inline _.ParamArray(state) =
+        Attributes.paramArray :: state
+    [<CustomOperation "paramArray">]
+    member inline _.ParamArray(state, value: bool) =
+        if value then Attributes.paramArray :: state else state
         
     member inline _.Run(state: WidgetBuilder<AttributeNode> list) =
         state

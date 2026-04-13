@@ -16,7 +16,12 @@ type DictionaryImpl<'Key, 'Value> =
     Dictionary<'Key, 'Value>
     #endif
 
-type GeneratorHooks = {
+type Generators = {
+    TypeRefRender: GeneratorContext -> ResolvedType -> Render
+    ExportRender: GeneratorContext -> ResolvedExport -> Render list
+}
+
+and GeneratorHooks = {
     /// if you want default handling for the resolved type, you can return None
     TypeRefPrerender: (GeneratorContext -> ResolvedType -> TypeRefRender option) list
     ExportRefPrerender: (GeneratorContext -> ResolvedExport -> TypeRefRender option) list
@@ -32,17 +37,30 @@ and GeneratorContext =
         TypeRefRenders: DictionaryImpl<ResolvedType, TypeRefRender>
         ExportRefRenders: DictionaryImpl<ResolvedExport, TypeRefRender>
         TypeRenders: DictionaryImpl<ResolvedType, Render>
-        ExportRenders: DictionaryImpl<ResolvedExport, Render>
+        /// <summary>
+        /// An export render may involve rendering multiple types, so
+        /// each export can potentially lift multiple renders.
+        /// </summary>
+        ExportRenders: DictionaryImpl<ResolvedExport, Render list>
         Hooks: GeneratorHooks option
+        Generators: Generators
     }
-    static member Empty = {
+    static member Create(generators: Generators) = {
         TypeRefRenders = DictionaryImpl<ResolvedType, TypeRefRender>()
         ExportRefRenders = DictionaryImpl<ResolvedExport, TypeRefRender>()
         TypeRenders = DictionaryImpl<ResolvedType, Render>()
-        ExportRenders = DictionaryImpl<ResolvedExport, Render>()
+        ExportRenders = DictionaryImpl<ResolvedExport, Render list>()
         Hooks = None
+        Generators = generators
     }
+    static member Create(generators: Generators, hooks: GeneratorHooks) =
+        { GeneratorContext.Create generators with Hooks = Some hooks }
+    
     override this.ToString() = $"GeneratorContext(%d{this.TypeRefRenders.Count})"
+    
+    /// For usage in generator
+    member inline this.render (resolvedType: ResolvedType) =
+        this.Generators.TypeRefRender this resolvedType
 
 module GeneratorContext =
     /// <summary>
@@ -216,3 +234,4 @@ module GeneratorContext =
         Operation.tryGet resolvedType context.TypeRenders
     let getExportRender (context: GeneratorContext) (resolvedExport: ResolvedExport) =
         Operation.tryGet resolvedExport context.ExportRenders
+    

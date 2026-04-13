@@ -8,7 +8,7 @@ open Xantham.Generator.NamePath
 open Xantham.Generator.TypeRefRender
 
 module Interface =
-    let render (ctx: GeneratorContext) (shape: Interface) =
+    let renderWithMetadata (ctx: GeneratorContext) (shape: Interface) metadata =
         let members, functions =
             shape.Members
             |> Seq.collect (Member.render ctx)
@@ -18,6 +18,7 @@ module Interface =
                 | MemberRender.Method functionLikeRender -> members, functionLikeRender :: functions
                 ) ([], [])
         {
+            Metadata = metadata
             TypeLikeRender.Name = shape.Name
             TypeParameters =
                 shape.TypeParameters
@@ -31,14 +32,22 @@ module Interface =
                 |> List.toArray
             Inheritance =
                 shape.Heritage.Extends
-                |> List.map (ResolvedType.TypeReference >> TypeRefRender.prerender ctx)
+                |> List.map (ResolvedType.TypeReference >> ctx.render)
                 |> List.toArray
             Constructors = [||]
             Documentation = shape.Documentation
         }
+    let render (ctx: GeneratorContext) (shape: Interface) =
+        Path.fromInterface shape
+        |> RenderMetadata.create
+        |> renderWithMetadata ctx shape 
+    
+    let inline renderWithPath (ctx: GeneratorContext) (shape: Interface) (path: ^T) =
+        RenderMetadata.create path
+        |> renderWithMetadata ctx shape
 
 module Class =
-    let render (ctx: GeneratorContext) (shape: Class) =
+    let renderWithMetadata (ctx: GeneratorContext) (shape: Class) metadata =
         let members, functions =
             shape.Members
             |> Seq.collect (Member.render ctx)
@@ -48,6 +57,7 @@ module Class =
                 | MemberRender.Method functionLikeRender -> members, functionLikeRender :: functions
                 ) ([], [])
         {
+            Metadata = metadata
             TypeLikeRender.Name = shape.Name
             TypeParameters =
                 shape.TypeParameters
@@ -60,7 +70,7 @@ module Class =
                 |> Option.map List.singleton
                 |> Option.defaultValue []
                 |> List.append shape.Heritage.Extends
-                |> List.map (ResolvedType.TypeReference >> TypeRefRender.prerender ctx)
+                |> List.map (ResolvedType.TypeReference >> ctx.render)
                 |> List.toArray
             Constructors =
                 shape.Constructors
@@ -68,6 +78,13 @@ module Class =
                 |> List.toArray
             Documentation = []
         }
+    let render (ctx: GeneratorContext) (shape: Class) =
+        Path.fromClass shape
+        |> RenderMetadata.create
+        |> renderWithMetadata ctx shape 
+    let inline renderWithPath (ctx: GeneratorContext) (shape: Class) (path: ^T) =
+        RenderMetadata.create path
+        |> renderWithMetadata ctx shape
 
 module TypeLiteral =
     let prerender (ctx: GeneratorContext) (shape: TypeLiteral) =
@@ -84,6 +101,7 @@ module TypeLiteral =
         let members, functions = prerender ctx shape
         fun name ->
             {
+                Metadata = RenderMetadata.empty
                 TypeLikeRender.Name = name
                 TypeParameters = [||]
                 Members = List.toArray members
@@ -100,6 +118,7 @@ module TypeLiteral =
         fun concretePath ->
             let typePath = TransientTypePath.anchor concretePath path
             {
+                Metadata = RenderMetadata.empty
                 TypeLikeRender.Name = typePath.Name
                 TypeParameters = [||]
                 Members = List.toArray members
