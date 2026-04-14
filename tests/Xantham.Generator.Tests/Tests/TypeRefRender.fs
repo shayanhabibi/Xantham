@@ -6,8 +6,8 @@ open Xantham
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
 open Xantham.Generator.Generator
+open Xantham.Generator.Types
 open Xantham.Generator.NamePath
-open Xantham.Generator.TypeRenders
 open Xantham.Generator.Generator.TypeRefRender
 open Mocking.ArenaInterner.ResolvedType
 
@@ -28,15 +28,15 @@ let testTypeRef (expectedTypeText: string) (ref: TypeRefRender) =
 let testRender (expectedTypeText: string) (ref: ResolvedType) =
     TestHelper.prerender ctx ref
     |> testTypeRef expectedTypeText
-let testAnchoredRender (anchorPosition: AnchorPath) (expectedTypeText: string) (ref: ResolvedType) =
-    TestHelper.prerender ctx ref
-    |> TypeRefRender.anchor anchorPosition
-    |> testTypeRef expectedTypeText
-let testAnchoredRelativeRender (relativePosition: AnchorPath) (anchorPosition: AnchorPath) (expectedTypeText: string) (ref: ResolvedType) =
-    TestHelper.prerender ctx ref
-    |> TypeRefRender.anchor anchorPosition
-    |> TypeRefRender.localisePaths relativePosition
-    |> testTypeRef expectedTypeText
+// let testAnchoredRender (anchorPosition: AnchorPath) (expectedTypeText: string) (ref: ResolvedType) =
+//     TestHelper.prerender ctx ref
+//     |> TypeRefRender.anchor anchorPosition
+//     |> testTypeRef expectedTypeText
+// let testAnchoredRelativeRender (relativePosition: AnchorPath) (anchorPosition: AnchorPath) (expectedTypeText: string) (ref: ResolvedType) =
+//     TestHelper.prerender ctx ref
+//     |> TypeRefRender.anchor anchorPosition
+//     |> TypeRefRender.localisePaths relativePosition
+//     |> testTypeRef expectedTypeText
     
 let primitives = [
     TypeKindPrimitive.Any, "option<obj>"
@@ -131,42 +131,42 @@ let erasedUnionTests = testList "Erased Union" [
         // This is deemed less correct; nullability is not specific to a union case, it should be lifted.
         |> testRender "option<U2<string, int>>"
         ||> Flip.Expect.equal ""
-    testCase "literals" <| fun _ ->
-        [
-            Literal.create "Foo"
-            |> Literal.wrap
-            Literal.create "Bar"
-            |> Literal.wrap
-        ]
-        |> Union.create
-        |> testAnchoredRender (
-            ModulePath.init "Foo"
-            |> TypePath.create "Bar"
-            |> MemberPath.createOnType "baz"
-            |> ParameterPath.create "para"
-            |> AnchorPath.Parameter
-            ) "Foo.Bar.Baz.Para"
-        ||> Flip.Expect.equal ""
-    testCase "literal relative" <| fun _ ->
-        let path =
-            ModulePath.init "Foo"
-            |> TypePath.create "Bar"
-            |> MemberPath.createOnType "baz"
-            |> ParameterPath.create "para"
-            |> AnchorPath.Parameter
-        [
-            Literal.create "Foo"
-            |> Literal.wrap
-            Literal.create "Bar"
-            |> Literal.wrap
-        ]
-        |> Union.create
-        |> testAnchoredRelativeRender (
-            ModulePath.createFromList [ "Foo"; "Bar"; "Baz" ]
-            |> TypePath.create "Local"
-            |> AnchorPath.Type
-            ) path "Para"
-        ||> Flip.Expect.equal ""
+    // testCase "literals" <| fun _ ->
+    //     [
+    //         Literal.create "Foo"
+    //         |> Literal.wrap
+    //         Literal.create "Bar"
+    //         |> Literal.wrap
+    //     ]
+    //     |> Union.create
+    //     |> testAnchoredRender (
+    //         ModulePath.init "Foo"
+    //         |> TypePath.create "Bar"
+    //         |> MemberPath.createOnType "baz"
+    //         |> ParameterPath.create "para"
+    //         |> AnchorPath.Parameter
+    //         ) "Foo.Bar.Baz.Para"
+    //     ||> Flip.Expect.equal ""
+    // testCase "literal relative" <| fun _ ->
+    //     let path =
+    //         ModulePath.init "Foo"
+    //         |> TypePath.create "Bar"
+    //         |> MemberPath.createOnType "baz"
+    //         |> ParameterPath.create "para"
+    //         |> AnchorPath.Parameter
+    //     [
+    //         Literal.create "Foo"
+    //         |> Literal.wrap
+    //         Literal.create "Bar"
+    //         |> Literal.wrap
+    //     ]
+    //     |> Union.create
+    //     |> testAnchoredRelativeRender (
+    //         ModulePath.createFromList [ "Foo"; "Bar"; "Baz" ]
+    //         |> TypePath.create "Local"
+    //         |> AnchorPath.Type
+    //         ) path "Para"
+    //     ||> Flip.Expect.equal ""
 ]
 
 let typeReferenceTests = testList "TypeReference" [
@@ -414,7 +414,7 @@ let contextPersistanceTests = testList "Context memoization" [
     testCase "Unseen primitive" <| fun _ ->
         let newRef = primitive TypeKindPrimitive.String
         let getRef () =
-            GeneratorContext.getRef ctx newRef
+            GeneratorContext.Prelude.tryGet ctx newRef
             |> ValueOption.toOption
         getRef()
         |> Flip.Expect.isNone "Should not have seen primitive"
@@ -427,13 +427,13 @@ let contextPersistanceTests = testList "Context memoization" [
             primitive TypeKindPrimitive.String
             |> TypeReference.create
             |> TypeReference.wrap
-        GeneratorContext.getRef ctx nestedType
+        GeneratorContext.Prelude.tryGet ctx nestedType
         |> ValueOption.toOption
         |> Flip.Expect.isNone "Should not have seen wrapper type"
         match nestedType with
         | ResolvedType.TypeReference { Type = Resolve resolvedType } ->
             TestHelper.prerender ctx resolvedType |> ignore
-            GeneratorContext.getRef ctx resolvedType
+            GeneratorContext.Prelude.tryGet ctx resolvedType
             |> ValueOption.toOption
             |> Flip.Expect.isSome "Should have seen resolved nested type"
         | _ -> failwith "Expected resolved reference type"

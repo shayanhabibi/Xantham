@@ -4,12 +4,9 @@ module Xantham.Generator.Generator.TypeRefRender
 open System.ComponentModel
 open Fabulous.AST
 open Fantomas.Core.SyntaxOak
-open Xantham.Generator.TypeRenders
+open Xantham.Generator.Types
 open Xantham.Generator.NamePath
-open Xantham.Decoder.ArenaInterner
 open Xantham.Decoder
-open Xantham
-open Xantham.Generator
 
 module private Implementation =
     let rec isFunctionRender (render: TypeRefRender) =
@@ -20,7 +17,7 @@ module private Implementation =
         match atom with
         | TypeRefAtom.Widget widgetBuilder ->
             widgetBuilder
-        | TypeRefAtom.AnchorPath typePath ->
+        | TypeRefAtom.ConcretePath typePath ->
             TypePath.flatten typePath
             |> List.map Name.Case.valueOrModified
             |> Ast.LongIdent

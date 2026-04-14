@@ -4,26 +4,24 @@ module Xantham.Generator.Generator.Render_TypeParameter
 open System.ComponentModel
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
-open Xantham.Generator.TypeRenders
+open Xantham.Generator.Types
+open Xantham.Generator.NamePath
 
 module TypeParameter =
-    let renderWithMetadata (ctx: GeneratorContext) (typar: TypeParameter) (metadata: RenderMetadata) =
+    let renderWithMetadata (ctx: GeneratorContext) scopeStore (typar: TypeParameter) (metadata: RenderMetadata) =
         {
-            TypeParameterRender.Name = typar.Name
+            Prelude.TypeParameterRender.Name = typar.Name
             Metadata = metadata
             Constraint =
                 typar.Constraint
-                |> Option.map (_.Value >> ctx.render)
+                |> Option.map (ctx.PreludeGetTypeRef ctx scopeStore)
                 |> Option.toValueOption
             Default =
                 typar.Default
-                |> Option.map (_.Value >> ctx.render)
+                |> Option.map (ctx.PreludeGetTypeRef ctx scopeStore)
                 |> Option.toValueOption
             Documentation = typar.Documentation
         }
-    let render (ctx: GeneratorContext) (typar: TypeParameter) =
-        renderWithMetadata ctx typar RenderMetadata.empty
+    let render (ctx: GeneratorContext) scopeStore (typar: TypeParameter) =
+        renderWithMetadata ctx scopeStore typar { Path = Path.create TransientTypePath.Anchored }
     
-    let inline renderWithPath (ctx: GeneratorContext) (typar: TypeParameter) (path: ^T) =
-        RenderMetadata.create path
-        |> renderWithMetadata ctx typar

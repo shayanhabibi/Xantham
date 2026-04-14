@@ -87,55 +87,57 @@ module UnionBuilder =
     /// otherwise we can generate our own.
     /// </summary>
     let erasedUnion = UnionBuilder(8)
-type Types =
-    /// <summary><c>Browser.Dom.Window</c></summary>
-    static member globalThis = Ast.LongIdent [ "Browser"; "Dom"; "Window" ]
-    /// <summary><c>bool</c></summary>
-    static member bool = Ast.Boolean()
-    /// <summary><c>string</c></summary>
-    static member string = Ast.String()
-    /// <summary><c>unit</c></summary>
-    static member unit = Ast.Unit()
-    /// <summary><c>int</c></summary>
-    static member int = Ast.Int()
-    /// <summary><c>float</c></summary>
-    static member float = Ast.Float()
-    /// <summary><c>bigint</c></summary>
-    static member bigint = Ast.Anon "bigint"
-    /// <summary><c>obj</c></summary>
-    static member obj = Ast.Obj()
-    /// <summary><c>char</c></summary>
-    static member char = Ast.Char()
-    /// <summary><c>obj | null</c></summary>
-    static member objNull = Ast.Obj() |> Ast.TypeOrNull
-    /// <summary><c>Array&lt;[Type]></c></summary>
-    static member array: WidgetBuilder<Type> -> WidgetBuilder<Type> = Ast.Array
-    static member arrayType = Ast.Anon "Array"
-    /// <summary><c>option&lt;[Type]></c></summary>
-    static member option: WidgetBuilder<Type> -> WidgetBuilder<Type> = Ast.OptionPrefix
-    /// <summary><c>U#&lt;T1, T2, ..., T#></c></summary>
-    static member union (types: WidgetBuilder<Type> seq) = erasedUnion { yield! Seq.toList types }
-    /// <summary><c>PropertyRecord</c></summary>
-    static member recordType = Ast.Anon "PropertyRecord"
-    /// <summary><c>PropertyRecord&lt;[PropertyType], [ResultType]></c></summary>
-    static member record (propertyType: WidgetBuilder<Type>) (resultType: WidgetBuilder<Type>) =
-        Ast.AppPrefix(Types.recordType, [ propertyType; resultType ])
-    /// <summary><c>keyof</c></summary>
-    /// <remarks>Backed by a string in JS. Provides static typing for F#</remarks>
-    static member keyofType = Ast.Anon "keyof"
-    /// <summary><c>keyof&lt;[value]></c></summary>
-    /// <remarks>Backed by a string in JS. Provides static typing for F#</remarks>
-    static member keyof (value: WidgetBuilder<Type>) = Ast.AppPrefix(Types.keyofType, [ value ])
-    /// <summary><c>typekeyof</c></summary>
-    /// <remarks>Backed by a string in JS. Provides static typing for F#</remarks>
-    static member typekeyofType = Ast.Anon "typekeyof"
-    /// <summary><c>typekeyof&lt;[object], [returnType]></c></summary>
-    /// <remarks>Backed by a string in JS. Provides static typing for F#</remarks>
-    static member typekeyof (returnType: WidgetBuilder<Type>) (object: WidgetBuilder<Type>) = Ast.AppPrefix(Types.typekeyofType, [ object; returnType ])
-    static member proptypelockType = Ast.Anon "proptypelock"
-    static member proptypelock (lockedType: WidgetBuilder<Type>) = Ast.AppPrefix(Types.proptypelockType, [ lockedType ])
-    static member proptypekeyType = Ast.Anon "proptypekey"
-    static member proptypekey (returnType: WidgetBuilder<Type>) (lockedType: WidgetBuilder<Type>) = Ast.AppPrefix(Types.proptypekeyType, [ lockedType; returnType ])
+[<AutoOpen>]
+module WidgetTypes =
+    type Types =
+        /// <summary><c>Browser.Dom.Window</c></summary>
+        static member globalThis = Ast.LongIdent [ "Browser"; "Dom"; "Window" ]
+        /// <summary><c>bool</c></summary>
+        static member bool = Ast.Boolean()
+        /// <summary><c>string</c></summary>
+        static member string = Ast.String()
+        /// <summary><c>unit</c></summary>
+        static member unit = Ast.Unit()
+        /// <summary><c>int</c></summary>
+        static member int = Ast.Int()
+        /// <summary><c>float</c></summary>
+        static member float = Ast.Float()
+        /// <summary><c>bigint</c></summary>
+        static member bigint = Ast.Anon "bigint"
+        /// <summary><c>obj</c></summary>
+        static member obj = Ast.Obj()
+        /// <summary><c>char</c></summary>
+        static member char = Ast.Char()
+        /// <summary><c>obj | null</c></summary>
+        static member objNull = Ast.Obj() |> Ast.TypeOrNull
+        /// <summary><c>Array&lt;[Type]></c></summary>
+        static member array: WidgetBuilder<Type> -> WidgetBuilder<Type> = Ast.Array
+        static member arrayType = Ast.Anon "Array"
+        /// <summary><c>option&lt;[Type]></c></summary>
+        static member option: WidgetBuilder<Type> -> WidgetBuilder<Type> = Ast.OptionPrefix
+        /// <summary><c>U#&lt;T1, T2, ..., T#></c></summary>
+        static member union (types: WidgetBuilder<Type> seq) = erasedUnion { yield! Seq.toList types }
+        /// <summary><c>PropertyRecord</c></summary>
+        static member recordType = Ast.Anon "PropertyRecord"
+        /// <summary><c>PropertyRecord&lt;[PropertyType], [ResultType]></c></summary>
+        static member record (propertyType: WidgetBuilder<Type>) (resultType: WidgetBuilder<Type>) =
+            Ast.AppPrefix(Types.recordType, [ propertyType; resultType ])
+        /// <summary><c>keyof</c></summary>
+        /// <remarks>Backed by a string in JS. Provides static typing for F#</remarks>
+        static member keyofType = Ast.Anon "keyof"
+        /// <summary><c>keyof&lt;[value]></c></summary>
+        /// <remarks>Backed by a string in JS. Provides static typing for F#</remarks>
+        static member keyof (value: WidgetBuilder<Type>) = Ast.AppPrefix(Types.keyofType, [ value ])
+        /// <summary><c>typekeyof</c></summary>
+        /// <remarks>Backed by a string in JS. Provides static typing for F#</remarks>
+        static member typekeyofType = Ast.Anon "typekeyof"
+        /// <summary><c>typekeyof&lt;[object], [returnType]></c></summary>
+        /// <remarks>Backed by a string in JS. Provides static typing for F#</remarks>
+        static member typekeyof (returnType: WidgetBuilder<Type>) (object: WidgetBuilder<Type>) = Ast.AppPrefix(Types.typekeyofType, [ object; returnType ])
+        static member proptypelockType = Ast.Anon "proptypelock"
+        static member proptypelock (lockedType: WidgetBuilder<Type>) = Ast.AppPrefix(Types.proptypelockType, [ lockedType ])
+        static member proptypekeyType = Ast.Anon "proptypekey"
+        static member proptypekey (returnType: WidgetBuilder<Type>) (lockedType: WidgetBuilder<Type>) = Ast.AppPrefix(Types.proptypekeyType, [ lockedType; returnType ])
 
 type Attributes =
     /// <summary>

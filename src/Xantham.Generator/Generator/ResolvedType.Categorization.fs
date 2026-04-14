@@ -7,12 +7,10 @@ open Xantham.Generator
 [<RequireQualifiedAccess>]
 type ResolvedTypeLiteralLike =
     | EnumCase of EnumCase
-    | TemplateLiteral of TemplateLiteral
     | Literal of TsLiteral
     member this.AsResolvedType =
         match this with
         | EnumCase enumCase -> ResolvedType.EnumCase enumCase
-        | TemplateLiteral templateLiteral -> ResolvedType.TemplateLiteral templateLiteral
         | Literal tsLiteral -> ResolvedType.Literal tsLiteral
 
 [<RequireQualifiedAccess>]
@@ -30,6 +28,7 @@ type ResolvedTypeOther =
     | Intersection of Intersection
     | Class of Class
     | GlobalThis
+    | TemplateLiteral of TemplateLiteral
     | TypeLiteral of TypeLiteral
     | Array of ResolvedType
     | TypeParameter of TypeParameter
@@ -48,6 +47,7 @@ type ResolvedTypeOther =
         | Tuple tuple -> ResolvedType.Tuple tuple
         | Interface ``interface`` -> ResolvedType.Interface ``interface``
         | TypeReference typeReference -> ResolvedType.TypeReference typeReference
+        | TemplateLiteral templateLiteral -> ResolvedType.TemplateLiteral templateLiteral
 
 [<RequireQualifiedAccess>]
 type ResolvedTypePrimitiveLike =
@@ -78,12 +78,12 @@ module ResolvedTypeCategories =
         | ResolvedType.TypeReference resolvedType -> OtherLike (ResolvedTypeOther.TypeReference resolvedType)
         | ResolvedType.IndexedAccess resolvedType -> OtherLike (ResolvedTypeOther.IndexedAccess resolvedType)
         | ResolvedType.Intersection resolvedType -> OtherLike (ResolvedTypeOther.Intersection resolvedType)
+        | ResolvedType.TemplateLiteral resolvedType -> OtherLike (ResolvedTypeOther.TemplateLiteral resolvedType)
         | ResolvedType.Predicate resolvedType -> PrimitiveLike (ResolvedTypePrimitiveLike.Predicate resolvedType)
         | ResolvedType.Primitive resolvedType -> PrimitiveLike (ResolvedTypePrimitiveLike.Primitive resolvedType)
         | ResolvedType.Enum resolvedType -> EnumLike (ResolvedTypeEnumLike.Enum resolvedType)
         | ResolvedType.Index resolvedType -> EnumLike (ResolvedTypeEnumLike.Index resolvedType)
         | ResolvedType.Literal resolvedType -> LiteralLike (ResolvedTypeLiteralLike.Literal resolvedType)
-        | ResolvedType.TemplateLiteral resolvedType -> LiteralLike (ResolvedTypeLiteralLike.TemplateLiteral resolvedType)
         | ResolvedType.EnumCase resolvedType -> LiteralLike (ResolvedTypeLiteralLike.EnumCase resolvedType)
         | ResolvedType.Conditional _
         | ResolvedType.Union _

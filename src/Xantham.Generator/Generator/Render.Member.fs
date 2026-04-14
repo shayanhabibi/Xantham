@@ -4,95 +4,92 @@ module Xantham.Generator.Generator.RenderMember
 open Xantham.Decoder
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
-open Xantham.Generator.TypeRenders
 open Xantham
+open Xantham.Generator.Types
+open Xantham.Generator.NamePath
 
 module CallSignature =
-    let renderWithMetadata (ctx: GeneratorContext) (callSignature: CallSignature) (metadata: RenderMetadata) =
-         let parameters =
-             callSignature.Parameters
-             |> List.map (Parameter.render ctx)
-         let returnType = ctx.render callSignature.Type.Value
-             
-         
-         {
-             Metadata = metadata
-             FunctionLikeSignature.Parameters = parameters |> List.toArray
-             ReturnType = returnType
-             Traits = TypedNameTraits.None
-             TypeParameters = [||]
-             Documentation = callSignature.Documentation
-         }
-    let render (ctx: GeneratorContext) (callSignature: CallSignature) =
-        renderWithMetadata ctx callSignature RenderMetadata.empty
-    let inline renderWithPath (ctx: GeneratorContext) (callSignature: CallSignature) (path: ^T) =
-        RenderMetadata.create path
-        |> renderWithMetadata ctx callSignature
+    let renderWithMetadata
+        (ctx: GeneratorContext)
+        (scopeStore: RenderScopeStore)
+        (callSignature: CallSignature)
+        (metadata: RenderMetadata) =
+        let parameters =
+            callSignature.Parameters
+            |> List.map (Parameter.render ctx scopeStore)
+        let returnType = ctx.PreludeGetTypeRef ctx scopeStore callSignature.Type
+        {
+            Prelude.FunctionLikeSignature.Metadata = metadata
+            Parameters = parameters
+            ReturnType = returnType
+            Traits = Set [ ]
+            TypeParameters = []
+            Documentation = callSignature.Documentation
+        }
         
-    let renderMemberWithMetadata (ctx: GeneratorContext) (callSignatures: CallSignature list) metadata =
+    let render (ctx: GeneratorContext) scopeStore (callSignature: CallSignature) =
+        renderWithMetadata ctx scopeStore callSignature
+            { Path = Path.create TransientMemberPath.Anchored }
+        
+    let renderMemberWithMetadata (ctx: GeneratorContext) scopeStore (callSignatures: CallSignature list) metadata =
         {
             Metadata = metadata
-            FunctionLikeRender.Name =
+            Prelude.FunctionLikeRender.Name =
                 Name.create "Invoke"
                 |> Case.addCamelMeasure
-            Signatures = [|
+            Signatures = [
                 for callSignature in callSignatures do
-                    yield render ctx callSignature
-            |]
-            Traits = TypedNameTraits.JSCallSignature
-            TypeParameters = [||]
+                    yield render ctx scopeStore callSignature
+            ]
+            Traits = Set [
+                RenderTraits.JSCallSignature
+            ]
+            TypeParameters = []
             Documentation = []
         }
         |> MemberRender.Method
     
-    let renderMember (ctx: GeneratorContext) (callSignatures: CallSignature list) =
-        renderMemberWithMetadata ctx callSignatures RenderMetadata.empty
+    let renderMember (ctx: GeneratorContext) scopeStore (callSignatures: CallSignature list) =
+        renderMemberWithMetadata ctx scopeStore callSignatures {
+            Path = Path.create TransientMemberPath.Anchored
+        }
         
-    let inline renderMemberWithPath (ctx: GeneratorContext) (callSignatures: CallSignature list) (path: ^T) =
-        RenderMetadata.create path
-        |> renderMemberWithMetadata ctx callSignatures
-
 module Method =
-    let renderWithMetadata (ctx: GeneratorContext) (method: Method) metadata =
+    let renderWithMetadata (ctx: GeneratorContext) scopeStore (method: Method) metadata =
         {
             Metadata = metadata
-            FunctionLikeRender.Name = method.Name
-            Signatures = [|{
-                 Metadata = RenderMetadata.empty
+            Prelude.FunctionLikeRender.Name = method.Name
+            Signatures = [{
+                 Metadata = metadata
                  Parameters =
                      method.Parameters
-                     |> List.map (Parameter.render ctx)
-                     |> List.toArray
-                 ReturnType = ctx.render method.Type.Value
-                 Traits = TypedNameTraits.None
-                 TypeParameters = [||]
+                     |> List.map (Parameter.render ctx scopeStore)
+                 ReturnType = ctx.PreludeGetTypeRef ctx scopeStore method.Type
+                 Traits = Set []
+                 TypeParameters = []
                  Documentation = []
-             }|]
-            Traits = 
-                 if method.IsStatic then
-                     TypedNameTraits.Static
-                 else TypedNameTraits.None
-                 ||| if method.IsOptional then TypedNameTraits.Optional
-                    else TypedNameTraits.None
-            TypeParameters = [||]
+             }]
+            Traits = Set [
+                if method.IsStatic then RenderTraits.Static
+                if method.IsOptional then RenderTraits.Optional
+            ]
+            TypeParameters = []
             Documentation = method.Documentation
         }
         |> MemberRender.Method
     
-    let render (ctx: GeneratorContext) (method: Method) =
-        renderWithMetadata ctx method RenderMetadata.empty
+    let render (ctx: GeneratorContext) scopeStore (method: Method) =
+        renderWithMetadata ctx scopeStore method {
+            Path = Path.create (TransientMemberPath.AnchoredAndMoored method.Name)
+        }
     
-    let inline renderWithPath (ctx: GeneratorContext) (method: Method) (path: ^T) =
-        RenderMetadata.create path
-        |> renderWithMetadata ctx method
-
 module GetAccessor =
-    let private getTraits (getter: GetAccessor) =
-        if getter.IsStatic then TypedNameTraits.Static
-        else TypedNameTraits.None
-        ||| TypedNameTraits.JSGetter
-        ||| TypedNameTraits.Readable
-    let renderWithMetadata (ctx: GeneratorContext) (getter: GetAccessor) metadata =
+    let private getTraits (getter: GetAccessor) = Set [
+        if getter.IsStatic then RenderTraits.Static
+        RenderTraits.Readable
+        RenderTraits.JSGetter
+    ]
+    let renderWithMetadata (ctx: GeneratorContext) scopeStore (getter: GetAccessor) metadata =
         match getter.Type.Value with
         | ResolvedType.TypeLiteral { Members = members } when members |> List.forall _.IsCallSignature ->
             let signatures =
@@ -100,209 +97,201 @@ module GetAccessor =
                 |> List.collect (function
                     | Member.CallSignature callSignatures -> callSignatures
                     | _ -> [])
-                |> List.map (CallSignature.render ctx)
-                |> Array.ofList
+                |> List.map (CallSignature.render ctx scopeStore)
             {
                 Metadata = metadata
-                FunctionLikeRender.Name = getter.Name
+                Prelude.FunctionLikeRender.Name = getter.Name
                 Signatures = signatures
                 Traits = getTraits getter
-                TypeParameters = [||]
+                TypeParameters = []
                 Documentation = []
             }
             |> MemberRender.Method
-        | resolvedType ->
+        | _ ->
             {
                 Metadata = metadata
-                TypedNameRender.Name = getter.Name
-                Type = ctx.render resolvedType
+                Prelude.TypedNameRender.Name = getter.Name
+                Type = ctx.PreludeGetTypeRef ctx scopeStore getter.Type
                 Traits = getTraits getter
-                TypeParameters = [||]
+                TypeParameters = []
                 Documentation = []
             }
             |> MemberRender.Property
-    let render (ctx: GeneratorContext) (getter: GetAccessor) =
-        renderWithMetadata ctx getter RenderMetadata.empty
-    let inline renderWithPath (ctx: GeneratorContext) (getter: GetAccessor) (path: ^T) =
-        RenderMetadata.create path
-        |> renderWithMetadata ctx getter
+    let render (ctx: GeneratorContext) scopeStore (getter: GetAccessor) =
+        renderWithMetadata ctx scopeStore getter { Path = Path.create (TransientMemberPath.AnchoredAndMoored getter.Name) }
+        
 module SetAccessor =
-    let private getTraits (setter: SetAccessor) =
-        if setter.IsStatic then TypedNameTraits.Static
-        else TypedNameTraits.None
-        ||| TypedNameTraits.JSSetter
-        ||| TypedNameTraits.Writable
+    let private getTraits (setter: SetAccessor) = Set [
+        if setter.IsStatic then RenderTraits.Static
+        RenderTraits.Writable
+        RenderTraits.JSSetter
+    ]
     
-    let renderWithMetadata (ctx: GeneratorContext) (setter: SetAccessor) metadata =
+    let renderWithMetadata (ctx: GeneratorContext) scopeStore (setter: SetAccessor) metadata =
         {
             Metadata = metadata
-            TypedNameRender.Name = setter.Name
-            Type = ctx.render setter.ArgumentType.Value 
+            Prelude.TypedNameRender.Name = setter.Name
+            Type = ctx.PreludeGetTypeRef ctx scopeStore setter.ArgumentType
             Traits = getTraits setter
-            TypeParameters = [||]
+            TypeParameters = []
             Documentation = setter.Documentation
         }
         |> MemberRender.Property
     
-    let render (ctx: GeneratorContext) (setter: SetAccessor) =
-        renderWithMetadata ctx setter RenderMetadata.empty
-    let inline renderWithPath (ctx: GeneratorContext) (setter: SetAccessor) (path: ^T) =
-        RenderMetadata.create path
-        |> renderWithMetadata ctx setter
+    let render (ctx: GeneratorContext) scopeStore (setter: SetAccessor) =
+        renderWithMetadata ctx scopeStore setter { Path = Path.create (TransientMemberPath.AnchoredAndMoored setter.Name) }
 
 module IndexSignature =
-    let renderWithMetadata (ctx: GeneratorContext) (indexSignature: IndexSignature) metadata =
+    let renderWithMetadata (ctx: GeneratorContext) scopeStore (indexSignature: IndexSignature) metadata =
+        let traits = Set [
+            RenderTraits.JSIndexer
+            RenderTraits.Readable
+            if not indexSignature.IsReadOnly then RenderTraits.Writable
+        ]
         {
             Metadata = metadata
-            FunctionLikeRender.Name =
+            Prelude.FunctionLikeRender.Name =
                 // force pascal case for this member
                 Name.create "Item"
                 |> Case.addCamelMeasure
-            Signatures = [|
+            Signatures = [
                 {
                     Metadata = metadata
-                    FunctionLikeSignature.Parameters =
+                    Prelude.FunctionLikeSignature.Parameters =
                         indexSignature.Parameters
-                        |> List.map (Parameter.render ctx)
-                        |> List.toArray
-                    ReturnType = ctx.render indexSignature.Type.Value 
-                    Traits = TypedNameTraits.JSIndexer
-                    TypeParameters = [||]
+                        |> List.map (Parameter.render ctx scopeStore)
+                    ReturnType = ctx.PreludeGetTypeRef ctx scopeStore indexSignature.Type
+                    Traits = traits
+                    TypeParameters = []
                     Documentation = []
                 }
-            |]
-            Traits =
-                if indexSignature.IsReadOnly then TypedNameTraits.Readable
-                else TypedNameTraits.None
-                ||| TypedNameTraits.JSIndexer
-            TypeParameters = [||]
+            ]
+            Traits = traits
+            TypeParameters = []
             Documentation = []
         }
         |> MemberRender.Method
     
-    let render (ctx: GeneratorContext) (indexSignature: IndexSignature) =
-        renderWithMetadata ctx indexSignature RenderMetadata.empty
+    let render (ctx: GeneratorContext) scopeStore (indexSignature: IndexSignature) =
+        renderWithMetadata ctx scopeStore indexSignature { Path = Path.create TransientMemberPath.Anchored }
     
-    let inline renderWithPath (ctx: GeneratorContext) (indexSignature: IndexSignature) (path: ^T) =
-        RenderMetadata.create path
-        |> renderWithMetadata ctx indexSignature
-
 module ConstructSignature =
-    let renderWithMetadata (ctx: GeneratorContext) (constructSignature: ConstructSignature list) metadata =
+    let renderWithMetadata (ctx: GeneratorContext) scopeStore (constructSignature: ConstructSignature list) metadata =
         {
             Metadata = metadata
-            FunctionLikeRender.Name =
+            Prelude.FunctionLikeRender.Name =
                 // force pascal case for this member
                 Name.create "Create"
                 |> Case.addCamelMeasure
-            Signatures = [|
+            Signatures = [
                 for constructSignature in constructSignature do
                     {
-                        Metadata = RenderMetadata.empty
-                        FunctionLikeSignature.Parameters =
+                        Metadata = metadata
+                        Prelude.FunctionLikeSignature.Parameters =
                             constructSignature.Parameters
-                            |> List.map (Parameter.render ctx)
-                            |> List.toArray
-                        ReturnType = ctx.render constructSignature.Type.Value
-                        Traits = TypedNameTraits.JSConstructor
-                        TypeParameters = [||]
+                            |> List.map (Parameter.render ctx scopeStore)
+                        ReturnType = ctx.PreludeGetTypeRef ctx scopeStore constructSignature.Type
+                        Traits = Set [ RenderTraits.JSConstructor ]
+                        TypeParameters = []
                         Documentation = []
                     }
-            |]
-            Traits = TypedNameTraits.JSConstructor
-            TypeParameters = [||]
+            ]
+            Traits = Set [ RenderTraits.JSConstructor ]
+            TypeParameters = []
             Documentation = []
         }
         |> MemberRender.Method
     
-    let render (ctx: GeneratorContext) (constructSignature: ConstructSignature list) =
-        renderWithMetadata ctx constructSignature RenderMetadata.empty
-    let inline renderWithPath (ctx: GeneratorContext) (constructSignature: ConstructSignature list) (path: ^T) =
-        RenderMetadata.create path
-        |> renderWithMetadata ctx constructSignature
+    let render (ctx: GeneratorContext) scopeStore (constructSignature: ConstructSignature list) =
+        renderWithMetadata ctx scopeStore constructSignature { Path = Path.create TransientMemberPath.Anchored }
         
 module Property =
-    let private getTraits (prop: Property) =
+    let private getTraits (prop: Property) = Set [
         match prop.Accessor with
-        | TsAccessor.ReadOnly -> TypedNameTraits.Readable
-        | TsAccessor.WriteOnly -> TypedNameTraits.Writable
+        | TsAccessor.ReadOnly -> RenderTraits.Readable
+        | TsAccessor.WriteOnly -> RenderTraits.Writable
         | TsAccessor.ReadWrite ->
-            TypedNameTraits.Readable
-            ||| TypedNameTraits.Writable
-        ||| if prop.IsOptional then TypedNameTraits.Optional
-            else TypedNameTraits.None
-        ||| if prop.IsStatic then TypedNameTraits.Static
-            else TypedNameTraits.None
-    let renderMethodLikeWithMetadata (ctx: GeneratorContext) (prop: Property) (callSignatures: CallSignature list) metadata =
+            RenderTraits.Readable
+            RenderTraits.Writable
+        if prop.IsOptional then RenderTraits.Optional
+        if prop.IsStatic then RenderTraits.Static
+    ]
+    let renderMethodLikeWithMetadata (ctx: GeneratorContext) scopeStore (prop: Property) (callSignatures: CallSignature list) metadata =
         {
             Metadata = metadata
-            FunctionLikeRender.Name = prop.Name
+            Prelude.FunctionLikeRender.Name = prop.Name
             Signatures =
                 callSignatures
-                |> List.map (CallSignature.render ctx)
-                |> Array.ofList
+                |> List.map (CallSignature.render ctx scopeStore)
             Traits = getTraits prop
-            TypeParameters = [||]
+            TypeParameters = []
             Documentation = prop.Documentation
         }
-    let renderMethodLike (ctx: GeneratorContext) (prop: Property) (callSignatures: CallSignature list) =
-        renderMethodLikeWithMetadata ctx prop callSignatures RenderMetadata.empty
-    let inline renderMethodLikeWithPath (ctx: GeneratorContext) (prop: Property) (callSignatures: CallSignature list) (path: ^T) =
-        RenderMetadata.create path
-        |> renderMethodLikeWithMetadata ctx prop callSignatures
+    let renderMethodLike (ctx: GeneratorContext) scopeStore (prop: Property) (callSignatures: CallSignature list) =
+        renderMethodLikeWithMetadata ctx scopeStore prop callSignatures { Path = TransientMemberPath.AnchoredAndMoored prop.Name |> Path.create }
 
-    let renderWithMetadata (ctx: GeneratorContext) (prop: Property) metadata =
+    let renderWithMetadata (ctx: GeneratorContext) scopeStore (prop: Property) metadata =
         match prop.Type.Value with
         | ResolvedType.TypeLiteral { Members = members } when members |> List.forall _.IsCallSignature ->
             members
             |> List.collect (function
                 | Member.CallSignature callSignatures -> callSignatures
                 | _ -> [])
-            |> renderMethodLike ctx prop
+            |> renderMethodLike ctx scopeStore prop
             |> MemberRender.Method
-        | resolvedType ->
+        | _ ->
             {
                 Metadata = metadata
-                TypedNameRender.Name = prop.Name
-                Type = ctx.render resolvedType
+                Prelude.TypedNameRender.Name = prop.Name
+                Type = ctx.PreludeGetTypeRef ctx scopeStore prop.Type
                 Traits = getTraits prop
-                TypeParameters = [||]
+                TypeParameters = []
                 Documentation = prop.Documentation
             }
             |> MemberRender.Property
     
-    let render (ctx: GeneratorContext) (prop: Property) =
-        renderWithMetadata ctx prop RenderMetadata.empty
-    let inline renderWithPath (ctx: GeneratorContext) (prop: Property) (path: ^T) =
-        RenderMetadata.create path
-        |> renderWithMetadata ctx prop
+    let render (ctx: GeneratorContext) scopeStore (prop: Property) =
+        renderWithMetadata ctx scopeStore prop { Path = TransientMemberPath.AnchoredAndMoored prop.Name |> Path.create }
 
 module Member =
-    let renderWithMetadata (ctx: GeneratorContext) (member': Member) metadata =
+    let renderWithMetadata (ctx: GeneratorContext) scopeStore (member': Member) metadata =
         match member' with
         | Member.Method methods ->
             methods
-            |> List.map (Method.renderWithMetadata ctx >> funApply metadata)
+            |> List.map (Method.renderWithMetadata ctx scopeStore >> funApply metadata)
         | Member.Property property ->
-            [ Property.renderWithMetadata ctx property metadata ]
+            [ Property.renderWithMetadata ctx scopeStore property metadata ]
         | Member.GetAccessor accessor ->
-            [ GetAccessor.renderWithMetadata ctx accessor metadata ]
+            [ GetAccessor.renderWithMetadata ctx scopeStore accessor metadata ]
         | Member.SetAccessor accessor ->
-            [ SetAccessor.renderWithMetadata ctx accessor metadata ]
+            [ SetAccessor.renderWithMetadata ctx scopeStore accessor metadata ]
         | Member.CallSignature callSignatures ->
-            [ CallSignature.renderMemberWithMetadata ctx callSignatures metadata ]
+            [ CallSignature.renderMemberWithMetadata ctx scopeStore callSignatures metadata ]
         | Member.IndexSignature indexSignature ->
-            [ IndexSignature.renderWithMetadata ctx indexSignature metadata ]
+            [ IndexSignature.renderWithMetadata ctx scopeStore indexSignature metadata ]
         | Member.ConstructSignature constructSignatures ->
-            [ ConstructSignature.renderWithMetadata ctx constructSignatures metadata ]
-    let render (ctx: GeneratorContext) (member': Member) =
-        renderWithMetadata ctx member' RenderMetadata.empty
-    let inline renderWithPath (ctx: GeneratorContext) (member': Member) (path: ^T) =
-        RenderMetadata.create path
-        |> renderWithMetadata ctx member'
-    let partitionRender ctx (members: Member list) =
+            [ ConstructSignature.renderWithMetadata ctx scopeStore constructSignatures metadata ]
+    let render (ctx: GeneratorContext) scopeStore (member': Member) =
+        match member' with
+        | Member.Method methods ->
+            methods
+            |> List.map (Method.render ctx scopeStore)
+        | Member.Property property ->
+            [ Property.render ctx scopeStore property ]
+        | Member.GetAccessor accessor ->
+            [ GetAccessor.render ctx scopeStore accessor ]
+        | Member.SetAccessor accessor ->
+            [ SetAccessor.render ctx scopeStore accessor ]
+        | Member.CallSignature callSignatures ->
+            [ CallSignature.renderMember ctx scopeStore callSignatures ]
+        | Member.IndexSignature indexSignature ->
+            [ IndexSignature.render ctx scopeStore indexSignature ]
+        | Member.ConstructSignature constructSignatures ->
+            [ ConstructSignature.render ctx scopeStore constructSignatures ]
+        
+    let partitionRender ctx scopeStore (members: Member list) =
         members
-        |> Seq.collect (render ctx)
+        |> Seq.collect (render ctx scopeStore)
         |> Seq.fold (fun (members, functions) m ->
             match m with
             | MemberRender.Property typedNameRender -> typedNameRender :: members, functions

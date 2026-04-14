@@ -366,8 +366,11 @@ type RenderTraits =
     | Readable
     | Writable
     | Literal
+    | JSGetter
+    | JSSetter
     | JSIndexer
     | JSConstructor
+    | JSCallSignature
     | EmitSelf
     | Inline
     | StringBuilder
@@ -425,14 +428,18 @@ type LiteralUnionRender<'Value, 'TypeName> = {
     Metadata: RenderMetadata
     Name: 'TypeName
     Cases: LiteralCaseRender<'Value, 'TypeName> list
+    Documentation: TsComment list
 }
 
 type TypeLikeRender<'RenderType, 'TypeName, 'MemberName, 'TyparName> = {
     Metadata: RenderMetadata
     Name: 'TypeName
     TypeParameters: TypeParameterRender<'RenderType, 'TyparName> list
+    Inheritance: 'RenderType list
     Members: TypedNameRender<'RenderType, 'MemberName, 'TyparName> list
     Functions: FunctionLikeRender<'RenderType, 'MemberName, 'TyparName> list
+    Constructors: TypedNameRender<'RenderType, 'MemberName, 'TyparName> list list
+    Documentation: TsComment list
 }
 
 type TypeAliasRender<'RenderType, 'TypeName, 'MemberName, 'TyparName> =
@@ -474,7 +481,7 @@ module Widget =
     
 module Transient =
     type TypeName = Name<Case.pascal> voption
-    type MemberName = Name<Case.camel> voption
+    type MemberName = Name<Case.camel>
     type TyparName = Name<Case.typar>
     type TypeParameterRender = TypeParameterRender<TypeRefRender, TyparName>
     type TypedNameRender = TypedNameRender<TypeRefRender, MemberName, TyparName>

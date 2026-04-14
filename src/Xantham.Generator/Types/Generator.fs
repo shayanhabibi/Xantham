@@ -26,17 +26,20 @@ type PreludeScopeStore = DictionaryImpl<
         Prelude.Concrete.RenderScope // concrete render scopes
         >
     >
-type AnchorScopeStore = DictionaryImpl<Choice<ResolvedType, ResolvedExport>, Anchored.RenderScope>
 
+type AnchorScopeStore = DictionaryImpl<Choice<ResolvedType, ResolvedExport>, Choice<Anchored.TypeRefRender, Anchored.RenderScope>>
+type PreludeGetTypeRefFunc = GeneratorContext -> RenderScopeStore -> LazyResolvedType -> TypeRefRender
 and GeneratorContext =
     {
+        PreludeGetTypeRef: PreludeGetTypeRefFunc
         PreludeRenders: PreludeScopeStore
         AnchorRenders: AnchorScopeStore
     }
     override this.ToString() = $"GeneratorContext(%d{this.PreludeRenders.Count})"
-    static member Create() = {
+    static member internal Create(preludeGetTypeRefFunc) = {
         PreludeRenders = DictionaryImpl()
         AnchorRenders = DictionaryImpl()
+        PreludeGetTypeRef = preludeGetTypeRefFunc
     }
 
 module GeneratorContext =
@@ -89,3 +92,35 @@ module GeneratorContext =
             |> Operation.addOrReplace key value
         let inline addOrReplace ctx key value =
             ((^T or SRTPHelper): (static member Add: GeneratorContext * ResolvedType * ^T -> unit) ctx, key, value)
+    module Anchored =
+        type SRTPHelper =
+            static member inline Add(ctx: GeneratorContext, key, value) =
+                ctx.AnchorRenders
+                |> Operation.addOrReplace key value
+            static member inline Add(ctx, key, value) =
+                ctx.AnchorRenders
+                |> Operation.addOrReplace (Choice1Of2 key) (Choice1Of2 value)
+            static member inline Add(ctx, key, value) =
+                ctx.AnchorRenders
+                |> Operation.addOrReplace (Choice1Of2 key) (Choice2Of2 value)
+            static member inline Add(ctx, key, value) =
+                ctx.AnchorRenders
+                |> Operation.addOrReplace (Choice2Of2 key) (Choice2Of2 value)
+            static member inline TryGet(ctx, key) =
+                ctx.AnchorRenders
+                |> Operation.tryGet key
+            static member inline TryGet(ctx, key) =
+                ctx.AnchorRenders
+                |> Operation.tryGet (Choice1Of2 key)
+            static member inline TryGet(ctx, key) =
+                ctx.AnchorRenders
+                |> Operation.tryGet (Choice2Of2 key)
+                
+        let inline tryGet ctx key =
+            ((^T or SRTPHelper): (static member TryGet: GeneratorContext * ^T -> Choice<Anchored.TypeRefRender, Anchored.RenderScope> voption) ctx, key)
+            
+        let inline addOrReplace ctx key value =
+            ((^T or SRTPHelper): (static member Add: GeneratorContext * ^T * ^U -> unit) ctx, key, value)
+        
+            
+            

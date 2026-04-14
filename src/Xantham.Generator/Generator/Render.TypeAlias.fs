@@ -6,52 +6,48 @@ open Xantham
 open Xantham.Decoder.ArenaInterner
 open Xantham.Decoder
 open Xantham.Generator
+open Xantham.Generator.Types
 open Xantham.Generator.Generator.ResolvedTypeCategorization
 open Xantham.Generator.NamePath
-open Xantham.Generator.TypeRenders
 
 module TypeAlias =
-    let render (ctx: GeneratorContext) (typ: TypeAlias) =
-        let innerType = typ.Type.Value
+    let render (ctx: GeneratorContext) scopeStore (typ: TypeAlias) =
+        let innerType = typ.Type
         let typeParameters =
             typ.TypeParameters
-            |> List.map (_.Value >> TypeParameter.render ctx)
-            |> List.toArray
+            |> List.map (_.Value >> TypeParameter.render ctx scopeStore)
         let documentation = typ.Documentation
         let name = typ.Name
         let path = Path.fromTypeAlias typ
-        let metadata = RenderMetadata.create path
+        let metadata = { Path = Path.create path }
         let makeLiteralsDefn metadata = function
             | literals when literals |> List.forall (function
                 | ResolvedTypeLiteralLike.Literal (TsLiteral.Int _)
-                | ResolvedTypeLiteralLike.EnumCase { Value = TsLiteral.Int _ }
+                | ResolvedTypeLiteralLike.EnumCase { Value = TsLiteral.Int _ } -> true
                 // We will filter this out anyway and count it as a primitive
-                | ResolvedTypeLiteralLike.TemplateLiteral _ -> true
                 | _ -> false) ->
                 {
                     Metadata = metadata
                     LiteralUnionRender.Name = Name.Pascal.create "Literals"
                     Cases =
                         literals
-                        |> List.filter (_.IsTemplateLiteral >> not)
                         |> List.map (function
                             | ResolvedTypeLiteralLike.Literal (TsLiteral.Int value) ->
                                 {
-                                    LiteralCaseRender.Metadata = RenderMetadata.empty
+                                    LiteralCaseRender.Metadata = { Path = Path.create TransientMemberPath.Anchored }
                                     Name = Name.Pascal.create (string value)
                                     Value = value
                                     Documentation = []
                                 }
                             | ResolvedTypeLiteralLike.EnumCase ({ Value = TsLiteral.Int value } as enumCase) ->
                                 {
-                                    LiteralCaseRender.Metadata = RenderMetadata.empty
+                                    LiteralCaseRender.Metadata = { Path = Path.create TransientMemberPath.Anchored }
                                     Name = enumCase.Name
                                     Value = value
                                     Documentation = enumCase.Documentation
                                 }
                             | _ -> failwith "Unreachable branch guaranteed by pattern guard"
                             )
-                        |> List.toArray
                     Documentation = documentation
                 }
                 |> TypeAliasRender.EnumUnion
@@ -61,7 +57,6 @@ module TypeAlias =
                     LiteralUnionRender.Name = Name.Pascal.create "Literals"
                     Cases =
                         literals
-                        |> List.filter (_.IsTemplateLiteral >> not)
                         |> List.map (function
                             | ResolvedTypeLiteralLike.Literal value ->
                                 let name =
@@ -73,25 +68,23 @@ module TypeAlias =
                                     | TsLiteral.BigInt value -> Name.Pascal.create (string value)
                                     | TsLiteral.Null -> Name.Pascal.create "null"
                                 {
-                                    LiteralCaseRender.Metadata = RenderMetadata.empty
+                                    LiteralCaseRender.Metadata = { Path = Path.create TransientMemberPath.Anchored }
                                     Name = name
                                     Value = value
                                     Documentation = []
                                 }
                             | ResolvedTypeLiteralLike.EnumCase enumCase ->
                                 {
-                                    LiteralCaseRender.Metadata = RenderMetadata.empty
+                                    LiteralCaseRender.Metadata = { Path = Path.create TransientMemberPath.Anchored }
                                     Name = enumCase.Name
                                     Value = enumCase.Value
                                     Documentation = enumCase.Documentation
                                 }
-                            | _ -> failwith "Unreachable branch guaranteed by filter above"
                             )
-                        |> List.toArray
                     Documentation = documentation
                 }
                 |> TypeAliasRender.StringUnion
-        match innerType with
+        match innerType.Value with
         | ResolvedType.Interface _
         | ResolvedType.Class _
         | ResolvedType.Primitive _
@@ -112,15 +105,15 @@ module TypeAlias =
                 Metadata = metadata
                 Name = name
                 TypeParameters = typeParameters
-                Type = ctx.render innerType
+                Type = ctx.PreludeGetTypeRef ctx scopeStore innerType
             }
             |> TypeAliasRender.Alias
             |> List.singleton
         | ResolvedType.Intersection _ 
         | ResolvedType.TypeLiteral _ ->
             let members, functions =
-                Member.collectAllRecursively innerType
-                |> Member.partitionRender ctx
+                Member.collectAllRecursively innerType.Value
+                |> Member.partitionRender ctx scopeStore
             // if members |> List.isEmpty && functions |> List.forall (_.Name >> Name.Case.valueOrSource >> (=) "Invoke") then
                 // ()
             // else
@@ -128,10 +121,10 @@ module TypeAlias =
                 TypeLikeRender.Metadata = metadata
                 Name = name
                 TypeParameters = typeParameters
-                Members = members |> List.toArray
-                Functions = functions |> List.toArray
-                Inheritance = [||]
-                Constructors = [||]
+                Members = members 
+                Functions = functions 
+                Inheritance = []
+                Constructors = []
                 Documentation = documentation
             }
             |> TypeAliasRender.TypeDefn
@@ -144,7 +137,7 @@ module TypeAlias =
                     Metadata = metadata
                     Name = name
                     TypeParameters = typeParameters
-                    Type = ctx.render innerType
+                    Type = ctx.PreludeGetTypeRef ctx scopeStore innerType
                 }
                 |> TypeAliasRender.Alias
             let pathForLiterals =
@@ -165,8 +158,8 @@ module TypeAlias =
                     |> TransientPath.create
                     |> TransientPath.anchor (AnchorPath.create path)
                 name, value
-            let literalsMetadata = RenderMetadata.create pathForLiterals
-            match ResolvedTypeCategories.create innerType with
+            let literalsMetadata = { Path = Path.create pathForLiterals }
+            match ResolvedTypeCategories.create innerType.Value with
             // no literals, and no 'others' that require a transient type
             | { LiteralLike = [] } & { Others = others } when others |> List.forall (function
                 | ResolvedTypeOther.Intersection _
@@ -200,15 +193,15 @@ module TypeAlias =
                     for members in otherMemberSets do
                         let name, path = makeObjectPath()
                         let members, functions =
-                            Member.partitionRender ctx members
+                            Member.partitionRender ctx scopeStore members
                         {
-                            TypeLikeRender.Metadata = RenderMetadata.create path
+                            TypeLikeRender.Metadata = { Path = Path.create path }
                             Name = Name.Pascal.create name
-                            TypeParameters = [||]
-                            Members = List.toArray members
-                            Functions = List.toArray functions
-                            Inheritance = [||]
-                            Constructors = [||]
+                            TypeParameters = []
+                            Members = members
+                            Functions = functions
+                            Inheritance = []
+                            Constructors = []
                             Documentation = []
                         }
                         |> TypeAliasRender.TypeDefn
@@ -218,14 +211,14 @@ module TypeAlias =
             {
                 LiteralUnionRender.Metadata = metadata
                 Name = name
-                Cases = [|
+                Cases = [
                     {
-                        LiteralCaseRender.Metadata = RenderMetadata.empty
+                        LiteralCaseRender.Metadata = { Path = Path.create TransientMemberPath.Anchored }
                         Name = name
                         Value = tsLiteral
                         Documentation = documentation
                     }
-                |]
+                ]
                 Documentation = documentation
             }
             |> TypeAliasRender.StringUnion
@@ -235,15 +228,15 @@ module TypeAlias =
             let members,functions =
                 Member.collectAllRecursively resolvedType
                 |> List.map Member.setReadOnly
-                |> Member.partitionRender ctx
+                |> Member.partitionRender ctx scopeStore
             {
                 TypeLikeRender.Metadata = metadata
                 Name = name
                 TypeParameters = typeParameters
-                Members = List.toArray members
-                Functions = List.toArray functions
-                Inheritance = [||]
-                Constructors = [||]
+                Members = members
+                Functions = functions
+                Inheritance = []
+                Constructors = []
                 Documentation = documentation
             }
             |> TypeAliasRender.TypeDefn
@@ -252,14 +245,14 @@ module TypeAlias =
             {
                 LiteralUnionRender.Metadata = metadata
                 Name = name
-                Cases = [|
+                Cases = [
                     {
-                        LiteralCaseRender.Metadata = RenderMetadata.empty
+                        LiteralCaseRender.Metadata = { Path = Path.create TransientMemberPath.Anchored }
                         Name = enumCase.Name
                         Value = enumCase.Value
                         Documentation = enumCase.Documentation
                     }
-                |]
+                ]
                 Documentation = documentation
             }
             |> TypeAliasRender.StringUnion
@@ -269,51 +262,63 @@ module TypeAlias =
                 TypeLikeRender.Metadata = metadata
                 Name = name
                 TypeParameters = typeParameters
-                Members = [|
+                Members = [
                     {
-                        TypedNameRender.Metadata = RenderMetadata.empty
+                        TypedNameRender.Metadata = { Path = Path.create TransientMemberPath.Anchored }
                         Name = Name.create "Value" |> Case.addCamelMeasure
-                        Type = Render.createRefOnly false Types.string
-                        Traits = TypedNameTraits.EmitSelf
-                        TypeParameters = [||]
+                        Type =
+                            RenderScopeStore.TypeRefRender.create
+                                scopeStore
+                                (ResolvedType.Primitive TypeKindPrimitive.String)
+                                false
+                                Types.string 
+                        Traits = Set [ RenderTraits.EmitSelf ]
+                        TypeParameters = []
                         Documentation = []
                     }
-                |]
-                Functions = [|
+                ]
+                Functions = [
                     {
-                        FunctionLikeRender.Metadata = RenderMetadata.empty
+                        FunctionLikeRender.Metadata = { Path = Path.create TransientMemberPath.Anchored }
                         Name = Name.create "Create" |> Case.addCamelMeasure
-                        Signatures = [|
+                        Signatures = [
                             {
-                                FunctionLikeSignature.Metadata = RenderMetadata.empty
+                                FunctionLikeSignature.Metadata = { Path = Path.create TransientMemberPath.Anchored }
                                 Parameters =
                                     templateLiteral.Types
-                                    |> List.mapi (fun i (Resolve typeRef) ->
+                                    |> List.mapi (fun i typeRef ->
                                         {
-                                            TypedNameRender.Metadata = RenderMetadata.empty
+                                            TypedNameRender.Metadata = { Path = Path.create TransientParameterPath.Anchored }
                                             Name = Name.Camel.create $"v{i}"
-                                            Type = ctx.render typeRef
-                                            Traits = TypedNameTraits.None
-                                            TypeParameters = [||]
+                                            Type = ctx.PreludeGetTypeRef ctx scopeStore typeRef
+                                            Traits = Set.empty
+                                            TypeParameters = []
                                             Documentation = []
                                         }
                                         )
-                                    |> List.toArray
                                 ReturnType =
                                     Ast.Anon(Name.Case.valueOrModified name)
-                                    |> Render.createRefOnly false
-                                Traits = TypedNameTraits.Inline ||| TypedNameTraits.StringBuilder
-                                TypeParameters = [||]
+                                    |> RenderScopeStore.TypeRefAtom.Unsafe.createWidget
+                                    |> RenderScopeStore.TypeRef.Unsafe.createAtom
+                                    |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+                                Traits = Set [
+                                    RenderTraits.Inline
+                                    RenderTraits.StringBuilder
+                                ]
+                                TypeParameters = []
                                 Documentation = []
                             }
-                        |]
-                        Traits = TypedNameTraits.Inline ||| TypedNameTraits.StringBuilder
-                        TypeParameters = [||]
+                        ]
+                        Traits = Set [
+                            RenderTraits.Inline
+                            RenderTraits.StringBuilder
+                        ]
+                        TypeParameters = []
                         Documentation = []
                     }
-                |]
-                Inheritance = [||]
-                Constructors = [||]
+                ]
+                Inheritance = []
+                Constructors = []
                 Documentation = documentation
             }
             |> TypeAliasRender.TypeDefn
