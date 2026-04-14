@@ -16,15 +16,15 @@
 
     <ItemGroup>
         <Compile Include="Utils.fs" />
-        <Compile Include="Types\Index.fs" />
-        <Compile Include="Types\TypeKey.AssociationSets.fs" />
+        <Compile Include="Types\Builders.Widgets.fs" />
         <Compile Include="Types\NamePath.fs" />
-        <Compile Include="Types\TypeRefRender.fs" />
-        <Compile Include="Types\BuildersAndPreludes.fs" />
+        <Compile Include="Types\RenderScope.Prelude.fs" />
+        <Compile Include="Types\RenderScope.Anchored.fs" />
         <Compile Include="Types\Generator.fs" />
-        <Compile Include="Generator\TypeRefRender.Render.fs" />
-        <Compile Include="Generator\TypeRefRender.Paths.fs" />
         <Compile Include="Generator\ResolvedType.Categorization.fs" />
+        <Compile Include="Generator\TypeRefRender.Paths.fs" />
+        <Compile Include="Generator\RenderScope.Prelude.fs" />
+        <Compile Include="Generator\TypeRefRender.Render.fs" />
         <Compile Include="Generator\TypeRefRender.Prerender.fs" />
         <Compile Include="Generator\Render.Primitive.fs" />
         <Compile Include="Generator\Render.TypeParameter.fs" />

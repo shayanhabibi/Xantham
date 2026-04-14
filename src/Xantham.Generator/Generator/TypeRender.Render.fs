@@ -6,7 +6,7 @@ open Xantham
 open Xantham.Decoder
 open Xantham.Generator
 open Xantham.Generator.NamePath
-open Xantham.Generator.TypeRefRender
+open Xantham.Generator.TypeRenders
 
 module LiteralCaseRender =
     let renderEnumCase (ctx: GeneratorContext) (enumCase: LiteralCaseRender<int>) =

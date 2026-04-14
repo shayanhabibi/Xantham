@@ -6,7 +6,7 @@ open Xantham.Decoder.ArenaInterner
 open Xantham.Decoder
 open Xantham.Generator
 open Xantham.Generator.NamePath
-open Xantham.Generator.TypeRefRender
+open Xantham.Generator.TypeRenders
 
 module Enum =
     let renderEnumWithMetadata (ctx: GeneratorContext) (enumType: EnumType) metadata =

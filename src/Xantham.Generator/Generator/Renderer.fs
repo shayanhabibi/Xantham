@@ -3,7 +3,7 @@
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
 open Xantham.Generator.NamePath
-open Xantham.Generator.TypeRefRender
+open Xantham.Generator.TypeRenders
 
 let private getRef = function
     | Render.Render (ref, _)

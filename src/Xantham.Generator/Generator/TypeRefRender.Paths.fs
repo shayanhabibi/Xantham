@@ -90,7 +90,10 @@ let fromEnum (enum: EnumType) =
     createModulePath qualifiedName source
     |> TypePath.create renderName
 
-let fromEnumCase (parentPath: TypePath) (enum: EnumCase) =
+let fromEnumCase (parentPath: TypePath option) (enum: EnumCase) =
+    let parentPath =
+        parentPath
+        |> Option.defaultWith(fun () -> fromEnum enum.Parent.Value)
     parentPath
     |> MemberPath.createOnType (enum.Name |> Name.Case.valueOrSource)
     
@@ -116,18 +119,7 @@ let fromResolvedExport (resolvedExport: ResolvedExport) =
     | ResolvedExport.TypeAlias typeAlias -> fromTypeAlias typeAlias |> AnchorPath.Type
     | ResolvedExport.Class ``class`` -> fromClass ``class`` |> AnchorPath.Type
     | ResolvedExport.Enum enumType -> fromEnum enumType |> AnchorPath.Type
+    | ResolvedExport.Module ``module`` -> fromModule ``module`` |> AnchorPath.Module
     | ResolvedExport.Function (func :: _) ->
         fromFunction func |> AnchorPath.Member
     | ResolvedExport.Function [] -> failwith "Resolved export contained no functions for the function case."
-    | ResolvedExport.Module ``module`` -> fromModule ``module`` |> AnchorPath.Module
-    
-let prepopulateTypeRefRendersForAliases (ctx: GeneratorContext) (exports: ResolvedExport list) =
-    exports
-    |> List.iter (function
-        | ResolvedExport.TypeAlias typeAlias ->
-            let resolvedType = typeAlias.Type.Value
-            let typePath = fromTypeAlias typeAlias
-            TypeRefRender.TypeRefRender.createAnchorPath false typePath
-            |> GeneratorContext.addTypeRef ctx resolvedType
-        | _ -> ()
-        )

@@ -7,7 +7,7 @@ open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
 open Xantham.Generator.Generator
 open Xantham.Generator.NamePath
-open Xantham.Generator.TypeRefRender
+open Xantham.Generator.TypeRenders
 open Xantham.Generator.Generator.TypeRefRender
 open Mocking.ArenaInterner.ResolvedType
 

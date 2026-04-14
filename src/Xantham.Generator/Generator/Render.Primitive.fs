@@ -2,7 +2,7 @@
 module Xantham.Generator.Generator.Render_Primitive
 
 open Xantham.Generator
-open Xantham.Generator.TypeRefRender
+open Xantham.Generator.TypeRenders
 open Xantham
 
 module Primitive =

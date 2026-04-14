@@ -6,7 +6,6 @@ open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
 open Xantham.Generator.Generator.Path
 open Xantham.Generator.Generator.ResolvedTypeCategorization
-open Xantham.Generator.TypeRefRender
 open Xantham.Generator.NamePath
 open Xantham.Generator.Generator
 open Xantham.Decoder

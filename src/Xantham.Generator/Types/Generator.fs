@@ -2,9 +2,11 @@
 
 open System.Collections.Generic
 open System.ComponentModel
+open Fabulous.AST
+open Fantomas.Core.SyntaxOak
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator.NamePath
-open Xantham.Generator.TypeRefRender
+open Xantham.Generator.Types
 open Xantham.Generator
 
 /// Wrapper that chooses the type of dictionary (concurrent/normal)
@@ -16,51 +18,26 @@ type DictionaryImpl<'Key, 'Value> =
     Dictionary<'Key, 'Value>
     #endif
 
-type Generators = {
-    TypeRefRender: GeneratorContext -> ResolvedType -> Render
-    ExportRender: GeneratorContext -> ResolvedExport -> Render list
-}
-
-and GeneratorHooks = {
-    /// if you want default handling for the resolved type, you can return None
-    TypeRefPrerender: (GeneratorContext -> ResolvedType -> TypeRefRender option) list
-    ExportRefPrerender: (GeneratorContext -> ResolvedExport -> TypeRefRender option) list
-    /// if you want default handling for the typeRefRender, you can return the original
-    TypeRefPostrender: (GeneratorContext -> TypeRefRender -> TypeRefRender) list
-    PathModifier: ( GeneratorContext -> AnchorPath -> AnchorPath ) list
-    /// If yyou want to keep the default render, just return the argument
-    TypeRenderModifier: ( GeneratorContext -> TypeRender -> TypeRender ) list
-}
+type PreludeScopeStore = DictionaryImpl<
+    ResolvedType, // Key
+    Choice< // 1 of 3 value types
+        Prelude.Widget.RenderScope,
+        Prelude.Transient.RenderScope, // transient render scopes
+        Prelude.Concrete.RenderScope // concrete render scopes
+        >
+    >
+type AnchorScopeStore = DictionaryImpl<Choice<ResolvedType, ResolvedExport>, Anchored.RenderScope>
 
 and GeneratorContext =
     {
-        TypeRefRenders: DictionaryImpl<ResolvedType, TypeRefRender>
-        ExportRefRenders: DictionaryImpl<ResolvedExport, TypeRefRender>
-        TypeRenders: DictionaryImpl<ResolvedType, Render>
-        /// <summary>
-        /// An export render may involve rendering multiple types, so
-        /// each export can potentially lift multiple renders.
-        /// </summary>
-        ExportRenders: DictionaryImpl<ResolvedExport, Render list>
-        Hooks: GeneratorHooks option
-        Generators: Generators
+        PreludeRenders: PreludeScopeStore
+        AnchorRenders: AnchorScopeStore
     }
-    static member Create(generators: Generators) = {
-        TypeRefRenders = DictionaryImpl<ResolvedType, TypeRefRender>()
-        ExportRefRenders = DictionaryImpl<ResolvedExport, TypeRefRender>()
-        TypeRenders = DictionaryImpl<ResolvedType, Render>()
-        ExportRenders = DictionaryImpl<ResolvedExport, Render list>()
-        Hooks = None
-        Generators = generators
+    override this.ToString() = $"GeneratorContext(%d{this.PreludeRenders.Count})"
+    static member Create() = {
+        PreludeRenders = DictionaryImpl()
+        AnchorRenders = DictionaryImpl()
     }
-    static member Create(generators: Generators, hooks: GeneratorHooks) =
-        { GeneratorContext.Create generators with Hooks = Some hooks }
-    
-    override this.ToString() = $"GeneratorContext(%d{this.TypeRefRenders.Count})"
-    
-    /// For usage in generator
-    member inline this.render (resolvedType: ResolvedType) =
-        this.Generators.TypeRefRender this resolvedType
 
 module GeneratorContext =
     /// <summary>
@@ -89,149 +66,26 @@ module GeneratorContext =
             #else
             Dictionary.addOrReplace key value dict
             #endif
-
-    let private makeTypeRefRenderHooks (context: GeneratorContext) (fn: ResolvedType -> TypeRefRender) =
-        let postFunc =
-            match context.Hooks with
-            | None | Some { TypeRefPostrender = [] } -> id
-            | Some { TypeRefPostrender = hooks } ->
-                fun typeRefRender ->
-                    hooks
-                    |> List.fold (fun typeRefRender fn -> fn context typeRefRender) typeRefRender
-        match context.Hooks with
-        | None | Some { TypeRefPrerender = [] } -> fn
-        | Some { TypeRefPrerender = hooks } ->
-            fun resolvedType ->
-                hooks
-                |> List.tryPick (fun hook -> hook context resolvedType)
-                |> Option.defaultValue (fn resolvedType)
-        >> postFunc
-    let private makeExportRefRenderHooks (context: GeneratorContext) (fn: ResolvedExport -> TypeRefRender) =
-        let postFunc =
-            match context.Hooks with
-            | None | Some { TypeRefPostrender = [] } -> id
-            | Some { TypeRefPostrender = hooks } ->
-                fun typeRefRender ->
-                    hooks
-                    |> List.fold (fun typeRefRender fn -> fn context typeRefRender) typeRefRender
-        match context.Hooks with
-        | None | Some { ExportRefPrerender = [] } -> fn
-        | Some { ExportRefPrerender = hooks } ->
-            fun resolvedExport ->
-                hooks
-                |> List.tryPick (fun hook -> hook context resolvedExport)
-                |> Option.defaultValue (fn resolvedExport)
-        >> postFunc
-    module Hooks =
-        let withHooks (hooks: GeneratorHooks) (context: GeneratorContext) =
-            { context with Hooks = Some hooks }
-        let empty = {
-            GeneratorHooks.ExportRefPrerender = []
-            TypeRefPrerender = []
-            TypeRefPostrender = []
-            PathModifier = []
-            TypeRenderModifier = []
-        }
-        let forHooks (hookFn: GeneratorHooks -> GeneratorHooks) (context: GeneratorContext) =
-            { context with Hooks = context.Hooks |> Option.defaultValue empty |> hookFn |> Some }
-        module Path =
-            /// <summary>
-            /// Allows you to modify paths that are generated. The hooks are executed
-            /// in order. Each subsequent hook will act on the output of the previous one.
-            /// </summary>
-            /// <param name="handler"></param>
-            /// <param name="context"></param>
-            let withHandler (handler: GeneratorContext -> AnchorPath -> AnchorPath) (context: GeneratorContext) =
-                forHooks (fun hooks -> {
-                    hooks with PathModifier = hooks.PathModifier @ [ handler ]
-                }) context
-        module TypeRef =
-            /// <summary>
-            /// Allows you to modify the typeRefRender that is generated for a ResolvedType.
-            /// The hooks are executed in order. You can choose to allow the default behaviour by
-            /// returning None. Hooks are executed until one of them returns <c>Some</c> value.
-            /// </summary>
-            /// <param name="handler"></param>
-            /// <param name="context"></param>
-            let forResolvedType (handler: GeneratorContext -> ResolvedType -> TypeRefRender option) (context: GeneratorContext) =
-                forHooks (fun hooks -> {
-                    hooks with TypeRefPrerender = hooks.TypeRefPrerender @ [ handler ]
-                }) context
-               
-            /// <summary>
-            /// Allows you to modify the typeRefRender that is generated for a ResolvedExport.
-            /// The hooks are executed in order. You can choose to allow the default behaviour by
-            /// returning None. Hooks are executed until one of them returns <c>Some</c> value.
-            /// </summary>
-            /// <param name="handler"></param>
-            /// <param name="context"></param>
-            let forExport (handler: GeneratorContext -> ResolvedExport -> TypeRefRender option) (context: GeneratorContext) =
-                forHooks (fun hooks -> {
-                    hooks with ExportRefPrerender = hooks.ExportRefPrerender @ [ handler ]
-                }) context
-            /// <summary>
-            /// Allows you to modify type ref renders after they have been generated; agnostic of whether
-            /// they were generated by a ResolvedType or ResolvedExport. The hooks are executed in order.
-            /// Each subsequent hook will act on the output of the previous one.
-            /// </summary>
-            /// <param name="handler"></param>
-            /// <param name="context"></param>
-            let withPosthandler (handler: GeneratorContext -> TypeRefRender -> TypeRefRender) (context: GeneratorContext) =
-                forHooks (fun hooks -> {
-                    hooks with TypeRefPostrender = hooks.TypeRefPostrender @ [ handler ]
-                }) context
+    module Prelude =
+        type SRTPHelper =
+            static member inline Add(ctx, key, value) =
+                ctx.PreludeRenders
+                |> Operation.addOrReplace key (Choice1Of3 value)
+            static member inline Add(ctx, key, value) =
+                ctx.PreludeRenders
+                |> Operation.addOrReplace key (Choice2Of3 value)
+            static member inline Add(ctx, key, value) =
+                ctx.PreludeRenders
+                |> Operation.addOrReplace key (Choice3Of3 value)
+            static member inline Add(ctx, key, value) =
+                ctx.PreludeRenders
+                |> Operation.addOrReplace key value
                 
-    let getTypeRefWith (context: GeneratorContext) (resolvedType: ResolvedType) (f: ResolvedType -> TypeRefRender) =
-        let pipeline = makeTypeRefRenderHooks context f
-        Operation.getOrAdd pipeline resolvedType context.TypeRefRenders
-    let getExportRefWith (context: GeneratorContext) (resolvedExport: ResolvedExport) (f: ResolvedExport -> TypeRefRender) =
-        let pipeline = makeExportRefRenderHooks context f
-        Operation.getOrAdd pipeline resolvedExport context.ExportRefRenders
-    let getTypeRef (context: GeneratorContext) (resolvedType: ResolvedType) =
-        Operation.tryGet resolvedType context.TypeRefRenders
-    let getExportRef (context: GeneratorContext) (resolvedExport: ResolvedExport) =
-        Operation.tryGet resolvedExport context.ExportRefRenders
-    let addTypeRef (context: GeneratorContext) (resolvedType: ResolvedType) (typeRefRender: TypeRefRender) =
-        Operation.addOrReplace resolvedType typeRefRender context.TypeRefRenders
-    let addExportRef (context: GeneratorContext) (resolvedExport: ResolvedExport) (typeRefRender: TypeRefRender) =
-        Operation.addOrReplace resolvedExport typeRefRender context.ExportRefRenders
-    [<EditorBrowsable(EditorBrowsableState.Never)>]
-    type SRTPHelper =
-        static member inline TryGetRef(context: GeneratorContext, resolvedType: ResolvedType) = getTypeRef context resolvedType
-        static member inline TryGetRef(context: GeneratorContext, resolvedExport: ResolvedExport) = getExportRef context resolvedExport
-        static member inline TryAddRef(context: GeneratorContext, resolvedType: ResolvedType, typeRefRender: TypeRefRender) = addTypeRef context resolvedType typeRefRender
-        static member inline TryAddRef(context: GeneratorContext, resolvedExport: ResolvedExport, typeRefRender: TypeRefRender) = addExportRef context resolvedExport typeRefRender
-        static member inline GetOrAddRef(context: GeneratorContext, resolvedType: ResolvedType, func: ResolvedType -> TypeRefRender) = getTypeRefWith context resolvedType func
-        static member inline GetOrAddRef(context: GeneratorContext, resolvedExport: ResolvedExport, func: ResolvedExport -> TypeRefRender) = getExportRefWith context resolvedExport func
-    /// <summary>
-    /// <para>SRTP Convenience function for <c>getTypeRefWith</c> and <c>getExportRefWith</c></para>
-    /// </summary>
-    /// <param name="context"></param>
-    /// <param name="resolvedTypeOrExport"></param>
-    /// <param name="func"></param>
-    let inline getOrAddRef (context: GeneratorContext) (resolvedTypeOrExport: ^T) (func: ^T -> TypeRefRender) =
-        ((^T or SRTPHelper) : (static member GetOrAddRef: GeneratorContext * ^T * (^T -> TypeRefRender) -> TypeRefRender) (context, resolvedTypeOrExport, func))
-    /// <summary>
-    /// <para>SRTP Convenience function for <c>getTypeRef</c> and <c>getExportRef</c></para>
-    /// </summary>
-    /// <param name="context"></param>
-    /// <param name="resolvedTypeOrExport"></param>
-    let inline getRef (context: GeneratorContext) (resolvedTypeOrExport: ^T) =
-        ((^T or SRTPHelper) : (
-            static member TryGetRef: GeneratorContext * ^T -> TypeRefRender voption
-        ) (context, resolvedTypeOrExport))
-    /// <summary>
-    /// <para>SRTP Convenience function for <c>addTypeRef</c> and <c>addExportRef</c></para>
-    /// </summary>
-    /// <param name="context"></param>
-    /// <param name="resolvedTypeOrExport"></param>
-    /// <param name="typeRefRender"></param>
-    let inline addRef (context: GeneratorContext) (resolvedTypeOrExport: ^T) (typeRefRender: TypeRefRender) =
-        ((^T or SRTPHelper) : (
-            static member TryAddRef: GeneratorContext * ^T * TypeRefRender -> unit
-        ) (context, resolvedTypeOrExport, typeRefRender))
-    let getTypeRender (context: GeneratorContext) (resolvedType: ResolvedType) =
-        Operation.tryGet resolvedType context.TypeRenders
-    let getExportRender (context: GeneratorContext) (resolvedExport: ResolvedExport) =
-        Operation.tryGet resolvedExport context.ExportRenders
-    
+        let tryGet ctx key =
+            ctx.PreludeRenders
+            |> Operation.tryGet key
+        let addOrReplaceChoice ctx key value =
+            ctx.PreludeRenders
+            |> Operation.addOrReplace key value
+        let inline addOrReplace ctx key value =
+            ((^T or SRTPHelper): (static member Add: GeneratorContext * ResolvedType * ^T -> unit) ctx, key, value)

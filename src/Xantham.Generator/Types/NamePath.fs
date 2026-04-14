@@ -1,6 +1,7 @@
 ﻿module Xantham.Generator.NamePath
 
 open System.Collections.Generic
+open System.ComponentModel
 open Xantham.Decoder
 open Xantham.Generator
 
@@ -342,6 +343,20 @@ module TypeParamPath =
         |> create name
 
 module AnchorPath =
+    let createModule (modulePath: ModulePath) = AnchorPath.Module modulePath
+    let createType (typePath: TypePath) = AnchorPath.Type typePath
+    let createMember (memberPath: MemberPath) = AnchorPath.Member memberPath
+    let createParameter (parameterPath: ParameterPath) = AnchorPath.Parameter parameterPath
+    let createTypeParameter (typeParameterPath: TypeParamPath) = AnchorPath.TypeParam typeParameterPath
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type SRTPHelper =
+        static member inline Create(modulePath: ModulePath) = createModule modulePath
+        static member inline Create(typePath: TypePath) = createType typePath
+        static member inline Create(memberPath: MemberPath) = createMember memberPath
+        static member inline Create(parameterPath: ParameterPath) = createParameter parameterPath
+        static member inline Create(typeParameterPath: TypeParamPath) = createTypeParameter typeParameterPath
+    let inline create (value: ^T) = ((^T or SRTPHelper): (static member Create: ^T -> AnchorPath) value)
+    
     let toTypePath = function
         | AnchorPath.Type typePath ->
             let parent = typePath.Parent
@@ -483,6 +498,17 @@ module TransientParameterPath =
         | _ -> failwith "Did not expect transient parameter path to have less than 3 elements"
 
 module TransientPath =
+    let createType (typePath: TransientTypePath) = TransientPath.Type typePath
+    let createMember (memberPath: TransientMemberPath) = TransientPath.Member memberPath
+    let createParameter (parameterPath: TransientParameterPath) = TransientPath.Parameter parameterPath
+    let createTypeParameter (typeParameterPath: TransientTypePath) = TransientPath.TypeParam typeParameterPath
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type SRTPHelper =
+        static member inline Create(typePath: TransientTypePath) = createType typePath
+        static member inline Create(memberPath: TransientMemberPath) = createMember memberPath
+        static member inline Create(parameterPath: TransientParameterPath) = createParameter parameterPath
+    let inline create (value: ^T) = ((^T or SRTPHelper): (static member Create: ^T -> TransientPath) value)
+    
     let toAnchored (transientPath: TransientPath) =
         match transientPath with
         | TransientPath.Type transientTypePath -> TransientTypePath.toAnchored transientTypePath
@@ -654,22 +680,6 @@ module TransientPath =
                 |> toTransientModulePath
                 
 
-    // let transientAnchor (transientAnchor: TransientPath) (transientVessel: TransientPath) =
-    //     let transientVessel = Helpers.removeCommonRoots transientAnchor transientVessel
-    //     let newAncestor = Helpers.toTransientModulePath transientVessel
-    //     let rec setAncestor (transientPath: TransientPath) =
-    //         match transientPath with
-    //         | TransientPath.Type transientTypePath ->
-    //             match transientTypePath with
-    //             | TransientTypePath.Anchored -> newAncestor
-    //             | TransientTypePath.Moored(parent, name) ->
-    //                 setAncestor 
-    //             | TransientTypePath.AnchoredAndMoored name -> failwith "todo"
-    //         | TransientPath.Member transientMemberPath -> failwith "todo"
-    //         | TransientPath.Parameter transientParameterPath -> failwith "todo"
-    //         | TransientPath.TypeParam transientTypePath -> failwith "todo"
-
-
 module Path =
     module private RelativeHelper =
         // Returns the index of the last common element in the two lists.
@@ -707,4 +717,16 @@ module Path =
         // add leaf name
         relativeRoot @ [ target.Name ]
 
+    let createAnchor (anchorPath: AnchorPath) = Path.Anchor anchorPath
+    let createTransient (transientPath: TransientPath) = Path.Transient transientPath
+    
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type SRTPHelper =
+        static member inline Create(anchorPath: AnchorPath) = createAnchor anchorPath
+        static member inline Create(transientPath: TransientPath) = createTransient transientPath
+        static member inline Create(path: Path) = path
         
+    let inline create (value: ^T) =
+        let ir = ((^T or SRTPHelper or AnchorPath.SRTPHelper or TransientPath.SRTPHelper): (static member Create: ^T -> ^U) value)
+        ((^U or SRTPHelper): (static member Create: ^U -> Path) ir)
+

@@ -8,7 +8,7 @@ open Xantham.Decoder
 open Xantham.Generator
 open Xantham.Generator.Generator.ResolvedTypeCategorization
 open Xantham.Generator.NamePath
-open Xantham.Generator.TypeRefRender
+open Xantham.Generator.TypeRenders
 
 module TypeAlias =
     let render (ctx: GeneratorContext) (typ: TypeAlias) =

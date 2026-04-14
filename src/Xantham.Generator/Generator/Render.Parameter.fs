@@ -4,7 +4,7 @@ module Xantham.Generator.Generator.Render_Parameter
 open System.ComponentModel
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
-open Xantham.Generator.TypeRefRender
+open Xantham.Generator.TypeRenders
 
 
 module Parameter =

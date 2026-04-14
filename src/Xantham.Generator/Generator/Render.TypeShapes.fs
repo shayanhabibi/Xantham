@@ -5,7 +5,7 @@ open Xantham.Decoder
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
 open Xantham.Generator.NamePath
-open Xantham.Generator.TypeRefRender
+open Xantham.Generator.TypeRenders
 
 module Interface =
     let renderWithMetadata (ctx: GeneratorContext) (shape: Interface) metadata =

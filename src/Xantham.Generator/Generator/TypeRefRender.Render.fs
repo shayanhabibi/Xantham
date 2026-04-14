@@ -4,7 +4,7 @@ module Xantham.Generator.Generator.TypeRefRender
 open System.ComponentModel
 open Fabulous.AST
 open Fantomas.Core.SyntaxOak
-open Xantham.Generator.TypeRefRender
+open Xantham.Generator.TypeRenders
 open Xantham.Generator.NamePath
 open Xantham.Decoder.ArenaInterner
 open Xantham.Decoder

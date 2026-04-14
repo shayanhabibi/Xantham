@@ -4,7 +4,7 @@ module Xantham.Generator.Generator.RenderMember
 open Xantham.Decoder
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
-open Xantham.Generator.TypeRefRender
+open Xantham.Generator.TypeRenders
 open Xantham
 
 module CallSignature =

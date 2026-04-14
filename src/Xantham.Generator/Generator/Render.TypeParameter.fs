@@ -4,7 +4,7 @@ module Xantham.Generator.Generator.Render_TypeParameter
 open System.ComponentModel
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
-open Xantham.Generator.TypeRefRender
+open Xantham.Generator.TypeRenders
 
 module TypeParameter =
     let renderWithMetadata (ctx: GeneratorContext) (typar: TypeParameter) (metadata: RenderMetadata) =
