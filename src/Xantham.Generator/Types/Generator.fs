@@ -34,12 +34,14 @@ and GeneratorContext =
         PreludeGetTypeRef: PreludeGetTypeRefFunc
         PreludeRenders: PreludeScopeStore
         AnchorRenders: AnchorScopeStore
+        InFlight: HashSet<ResolvedType>
     }
     override this.ToString() = $"GeneratorContext(%d{this.PreludeRenders.Count})"
     static member internal Create(preludeGetTypeRefFunc) = {
         PreludeRenders = DictionaryImpl()
         AnchorRenders = DictionaryImpl()
         PreludeGetTypeRef = preludeGetTypeRefFunc
+        InFlight = HashSet()
     }
 
 module GeneratorContext =
@@ -83,7 +85,14 @@ module GeneratorContext =
             static member inline Add(ctx, key, value) =
                 ctx.PreludeRenders
                 |> Operation.addOrReplace key value
-                
+        let canFlight ctx key =
+            #if CONCURRENT_DICT
+            lock ctx.InFlight (fun () ->
+            #endif
+            ctx.InFlight.Add key
+            #if CONCURRENT_DICT
+                )
+            #endif
         let tryGet ctx key =
             ctx.PreludeRenders
             |> Operation.tryGet key

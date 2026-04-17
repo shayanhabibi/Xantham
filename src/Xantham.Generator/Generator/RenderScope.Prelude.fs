@@ -21,22 +21,24 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         GeneratorContext.Prelude.addOrReplace ctx resolvedType renderScope
         renderScope
     let inline executeRender (renderScope: ^T when 'T:(member Render: Lazy<_>)) =
-        renderScope.Render.Value
-        |> ignore
+        // renderScope.Render.Value
+        // |> ignore
         renderScope
-    let cachedRenderValue =
-        lazy GeneratorContext.Prelude.tryGet ctx lazyResolvedType.Value
+    let valueIsCreated = lazyResolvedType.IsValueCreated
+    let cachedRenderValue = GeneratorContext.Prelude.tryGet ctx lazyResolvedType.Value
     // a significant portion of the branching logic will not initially register the
     // type ref before proceeding.
-    if lazyResolvedType.IsValueCreated && cachedRenderValue.Value.IsSome then
+    if valueIsCreated && cachedRenderValue.IsSome then
         let resolvedType = lazyResolvedType.Value
-        match cachedRenderValue.Value.Value with
+        match cachedRenderValue.Value with
         | Choice2Of3 renderScope ->
             scope
             |> Dictionary.tryAdd resolvedType renderScope.Root
             renderScope.TypeRef
         | Choice1Of3 { TypeRef = typeRef } 
         | Choice3Of3 { TypeRef = typeRef } -> typeRef
+    elif valueIsCreated && not(GeneratorContext.Prelude.canFlight ctx lazyResolvedType.Value) then
+        RenderScopeStore.TypeRefRender.create scope lazyResolvedType.Value true Types.obj
     else
     let resolvedType = lazyResolvedType.Value
     let inline lift value = RenderScopeStore.TypeRefRender.create scope resolvedType false value

@@ -11,13 +11,36 @@ let main argv =
     let tree = Decoder.Runtime.create file
     let interner = tree.GetArenaInterner()
     let generatorContext = GeneratorContext.Empty
-    Prerender.prerenderTypeRefs
-        generatorContext
-        (
-            interner.ExportMap
-            |> Seq.collect _.Value
-            |> Seq.toList
+    let graph = interner.Graph.Value
+    // for export in interner.ExportMap do
+    //     export.Value
+    //     |> List.filter _.IsTypeAlias
+    //     |> prerenderExport
+    for cycle in graph.Cycles do
+        if cycle.Key = cycle.Value then
+            cycle.Key
+            |> printfn "Bad key %A"
+        else
+        interner.ResolveType cycle.Key
+        |> TestHelper.prerender generatorContext
+        |> ignore
+    graph.Degrees
+    |> Seq.sortBy _.Value
+    |> Seq.iter (fun kv ->
+        kv.Key
+        |> interner.ResolveType 
+        |> TestHelper.prerender generatorContext
+        |> ignore
         )
+    
+    
+    // Prerender.prerenderTypeRefs
+    //     generatorContext
+    //     (
+    //         interner.ExportMap
+    //         |> Seq.collect _.Value
+    //         |> Seq.toList
+    //     )
     generatorContext.PreludeRenders
     |> Seq.take 5
     |> Seq.map _.Value

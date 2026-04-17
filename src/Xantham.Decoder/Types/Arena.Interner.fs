@@ -52,6 +52,8 @@ open System.Collections.Frozen
 open System.Collections.Generic
 open Xantham
 open Xantham.Decoder
+open Xantham.Decoder.Types
+open Xantham.Decoder.Types.Graph
 
 type QualifiedNamePartDiagnostic =
     | ContainsQuotationMarks = (1 <<< 0)
@@ -346,9 +348,18 @@ and [<ReferenceEquality>] SubstitutionType = {
 type ArenaInterner = {
     ResolveType: TypeKey -> ResolvedType
     ResolveExport: TypeKey -> Result<ResolvedExport, ResolvedType>
+    ResolvedTypes: Dictionary<TypeKey, ResolvedType>
+    ResolvedExports: Dictionary<TypeKey, ResolvedExport>
     ExportMap: Map<string, ResolvedExport list>
+    /// <summary>
+    /// WARNING: Evaluation of the graph can be expensive.<br/>
+    /// It is useful only when used in combination with the resolve type and resolve export
+    /// dictionaries to handle dependencies correctly.
+    /// </summary>
+    Graph: Lazy<Graph>
 } with
     override this.ToString() = $"ArenaInterner(%d{this.ExportMap.Count})"
+
 
 module private QualifiedNamePart =
     let create (value: string) =
@@ -723,6 +734,9 @@ module ArenaInterner =
                     |> Set.toList
                     |> List.choose (resolveExport >> Result.toOption)
                     )
+            Graph = lazy Graph.create false decodedResult
+            ResolvedTypes = resolved
+            ResolvedExports = resolvedExports
         }
 
 let inline (|Resolve|) (value: Lazy<'T>) = value.Value
