@@ -7,57 +7,52 @@ open Xantham.Generator
 open Xantham.Generator.NamePath
 open Xantham.Generator.Types
 open Xantham.Generator.Types.Prelude
+open FSharp.SignalsDotnet
 
 module Interface =
-    let renderWithMetadata (ctx: GeneratorContext) scopeStore (shape: Interface) metadata =
+    let render (ctx: GeneratorContext) scopeStore (shape: Interface): TypeLikeRender =
+        let path = Path.fromInterface shape
+        let metadata = RenderMetadata.create path
         let members, functions =
             shape.Members
-            |> Seq.collect (Member.render ctx scopeStore)
-            |> Seq.fold (fun (members, functions) m ->
-                match m with
-                | MemberRender.Property typedNameRender -> typedNameRender :: members, functions
-                | MemberRender.Method functionLikeRender -> members, functionLikeRender :: functions
-                ) ([], [])
+            |> Member.partitionRender ctx scopeStore
         {
             Metadata = metadata
             TypeLikeRender.Name = shape.Name
             TypeParameters =
                 shape.TypeParameters
-                |> List.map (_.Value >> TypeParameter.render ctx scopeStore)
+                |> List.map (_.Value >> TypeParameter.renderFromTypePath ctx scopeStore path)
             Members =
                 members
             Functions =
                 functions
             Inheritance =
                 shape.Heritage.Extends
-                |> List.map (
-                    ResolvedType.TypeReference
-                    >> Lazy.CreateFromValue
-                    >> ctx.PreludeGetTypeRef ctx scopeStore
+                |> List.map (fun ref ->
+                    Signal.compute (fun () ->
+                        ref
+                        |> ResolvedType.TypeReference
+                        |> GeneratorContext.Prelude.getRender ctx
+                        |> _.Value.TypeRef.Value
+                        )
                     )
             Constructors = []
             Documentation = shape.Documentation
         }
-    let render (ctx: GeneratorContext) scopeStore (shape: Interface) =
-        { Path = Path.fromInterface shape |> Path.create }
-        |> renderWithMetadata ctx scopeStore shape 
     
 module Class =
-    let renderWithMetadata (ctx: GeneratorContext) scopeStore (shape: Class) metadata =
+    let render (ctx: GeneratorContext) scopeStore (shape: Class) =
+        let path = Path.fromClass shape
+        let metadata = RenderMetadata.create path
         let members, functions =
             shape.Members
-            |> Seq.collect (Member.render ctx scopeStore)
-            |> Seq.fold (fun (members, functions) m ->
-                match m with
-                | MemberRender.Property typedNameRender -> typedNameRender :: members, functions
-                | MemberRender.Method functionLikeRender -> members, functionLikeRender :: functions
-                ) ([], [])
+            |> Member.partitionRender ctx scopeStore
         {
             Metadata = metadata
             TypeLikeRender.Name = shape.Name
             TypeParameters =
                 shape.TypeParameters
-                |> List.map (_.Value >> TypeParameter.render ctx scopeStore)
+                |> List.map (_.Value >> TypeParameter.renderFromTypePath ctx scopeStore path)
             Members = members
             Functions = functions
             Inheritance =
@@ -65,11 +60,13 @@ module Class =
                 |> Option.map List.singleton
                 |> Option.defaultValue []
                 |> List.append shape.Heritage.Extends
-                |> List.map (
-                    ResolvedType.TypeReference
-                    >> Lazy.CreateFromValue
-                    >> ctx.PreludeGetTypeRef ctx scopeStore
-                    )
+                |> List.map (fun ref ->
+                    Signal.compute (fun () ->
+                    ref
+                    |> ResolvedType.TypeReference
+                    |> GeneratorContext.Prelude.getRender ctx
+                    |> _.Value.TypeRef.Value
+                    ))
             Constructors =
                 shape.Constructors
                 |> List.map (
@@ -78,33 +75,21 @@ module Class =
                     )
             Documentation = []
         }
-    let render (ctx: GeneratorContext) scopeStore (shape: Class) =
-        { Path = Path.fromClass shape |> Path.create }
-        |> renderWithMetadata ctx scopeStore shape 
 
 module TypeLiteral =
-    let prerender (ctx: GeneratorContext) scopeStore (shape: TypeLiteral) =
+    let render (ctx: GeneratorContext) scopeStore (shape: TypeLiteral) =
+        let path = TransientTypePath.Anchored
+        let metadata = RenderMetadata.create path
         let members, functions =
             shape.Members
-            |> Seq.collect (Member.render ctx scopeStore)
-            |> Seq.fold (fun (members, functions) m ->
-                match m with
-                | MemberRender.Property typedNameRender -> typedNameRender :: members, functions
-                | MemberRender.Method functionLikeRender -> members, functionLikeRender :: functions
-                ) ([], [])
-        members, functions
-    let renderWithName (ctx: GeneratorContext) scopeStore (shape: TypeLiteral) =
-        let members, functions = prerender ctx scopeStore shape
-        fun name ->
-            {
-                Metadata = { Path = Path.create TransientMemberPath.Anchored }
-                TypeLikeRender.Name = name
-                TypeParameters = []
-                Members = members
-                Functions = functions
-                Inheritance = []
-                Constructors = []
-                Documentation = []
-            }
-    let renderWithNameString (ctx: GeneratorContext) scopeStore (shape: TypeLiteral) (name: string) =
-        renderWithName ctx scopeStore shape (Name.Pascal.create name)
+            |> Member.partitionRender ctx scopeStore
+        {
+            Metadata = metadata
+            TypeLikeRender.Name = Name.Pascal.create "Object"
+            TypeParameters = []
+            Members = members
+            Functions = functions
+            Inheritance = []
+            Constructors = []
+            Documentation = []
+        }

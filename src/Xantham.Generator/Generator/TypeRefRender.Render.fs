@@ -2,8 +2,11 @@
 module Xantham.Generator.Generator.TypeRefRender
 
 open System.ComponentModel
+open FSharp.SignalsDotnet
 open Fabulous.AST
 open Fantomas.Core.SyntaxOak
+open SignalsDotnet
+open Xantham.Generator
 open Xantham.Generator.Types
 open Xantham.Generator.NamePath
 open Xantham.Decoder
@@ -16,7 +19,7 @@ module private Implementation =
     let renderAtom (atom: TypeRefAtom) =
         match atom with
         | TypeRefAtom.Widget widgetBuilder ->
-            widgetBuilder
+            Ast.LongIdent widgetBuilder
         | TypeRefAtom.ConcretePath typePath ->
             TypePath.flatten typePath
             |> List.map Name.Case.valueOrModified
@@ -25,6 +28,7 @@ module private Implementation =
             TransientTypePath.toAnchored transientTypePath
             |> List.map Name.Case.valueOrModified
             |> Ast.LongIdent
+
     let rec renderMolecule (molecule: TypeRefMolecule) =
         match molecule with
         | TypeRefMolecule.Tuple typeRefRenders ->
@@ -84,3 +88,6 @@ module TypeRefMolecule =
 
 module TypeRefRender =
     let render value = Implementation.render value
+
+module TypeRefSignal =
+    let render: IReadOnlySignal<TypeRefRender> -> IReadOnlySignal<WidgetBuilder<Type>> = Signal.map Implementation.render

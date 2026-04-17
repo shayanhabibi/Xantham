@@ -1,6 +1,7 @@
 ﻿module Xantham.Generator.Tests.Tests.TypeRefRender
 
 open Expecto
+open FSharp.SignalsDotnet
 open Fabulous.AST
 open Xantham
 open Xantham.Decoder.ArenaInterner
@@ -12,6 +13,9 @@ open Xantham.Generator.Generator.TypeRefRender
 open Mocking.ArenaInterner.ResolvedType
 
 let ctx = GeneratorContext.Empty
+let tryGet (ctx: GeneratorContext) resolvedType =
+    ctx.PreludeRenders
+    |> DictionarySignal.tryGet resolvedType
 
 type TypeRefExpectation<'T> = 'T * string
     
@@ -26,7 +30,8 @@ let testTypeRef (expectedTypeText: string) (ref: TypeRefRender) =
     |> Gen.run
     |> _.Trim()
 let testRender (expectedTypeText: string) (ref: ResolvedType) =
-    TestHelper.prerender ctx ref
+    let render = TestHelper.prerender ctx ref
+    render.Value
     |> testTypeRef expectedTypeText
 // let testAnchoredRender (anchorPosition: AnchorPath) (expectedTypeText: string) (ref: ResolvedType) =
 //     TestHelper.prerender ctx ref
@@ -413,9 +418,7 @@ The intent behind a signature such as `int -> bool -> int -> string` is inherent
 let contextPersistanceTests = testList "Context memoization" [
     testCase "Unseen primitive" <| fun _ ->
         let newRef = primitive TypeKindPrimitive.String
-        let getRef () =
-            GeneratorContext.Prelude.tryGet ctx newRef
-            |> ValueOption.toOption
+        let getRef () = tryGet ctx newRef
         getRef()
         |> Flip.Expect.isNone "Should not have seen primitive"
         TestHelper.prerender ctx newRef
@@ -427,14 +430,12 @@ let contextPersistanceTests = testList "Context memoization" [
             primitive TypeKindPrimitive.String
             |> TypeReference.create
             |> TypeReference.wrap
-        GeneratorContext.Prelude.tryGet ctx nestedType
-        |> ValueOption.toOption
+        tryGet ctx nestedType
         |> Flip.Expect.isNone "Should not have seen wrapper type"
         match nestedType with
         | ResolvedType.TypeReference { Type = Resolve resolvedType } ->
             TestHelper.prerender ctx resolvedType |> ignore
-            GeneratorContext.Prelude.tryGet ctx resolvedType
-            |> ValueOption.toOption
+            tryGet ctx resolvedType
             |> Flip.Expect.isSome "Should have seen resolved nested type"
         | _ -> failwith "Expected resolved reference type"
     

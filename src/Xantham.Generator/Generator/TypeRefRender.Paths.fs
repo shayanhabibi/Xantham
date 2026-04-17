@@ -1,5 +1,6 @@
 ﻿module Xantham.Generator.Generator.Path
 
+open SignalsDotnet
 open Xantham.Generator
 open Xantham.Generator.NamePath
 open Xantham.Decoder.ArenaInterner
@@ -59,6 +60,14 @@ let fromVariable (variable: Variable) =
         createModulePath qualifiedName source
         |> MemberPath.createOnModule renderName
     path
+let fromVariableType (variable: Variable) =
+    let qualifiedName = getQualifiedName variable
+    let source = variable.Source
+    let renderName = Name.Case.valueOrSource variable.Name
+    let path =
+        createModulePath qualifiedName source
+        |> TypePath.create renderName
+    path
 
 let fromInterface (iface: Interface) =
     let qualifiedName = getQualifiedName iface
@@ -105,6 +114,14 @@ let fromFunction (function': Function) =
     createModulePath qualifiedName source
     |> MemberPath.createOnModule renderName
 
+let fromFunctionType (function': Function) =
+    let qualifiedName = getQualifiedName function'
+    let source = function'.Source
+    let renderName = Name.Case.valueOrSource function'.Name
+    createModulePath qualifiedName source
+    |> TypePath.create renderName
+    
+
 let fromModule (module': Module) =
     let qualifiedName = getQualifiedName module'
     let source = module'.Source
@@ -123,3 +140,7 @@ let fromResolvedExport (resolvedExport: ResolvedExport) =
     | ResolvedExport.Function (func :: _) ->
         fromFunction func |> AnchorPath.Member
     | ResolvedExport.Function [] -> failwith "Resolved export contained no functions for the function case."
+
+module Signal =
+    let fromResolvedExport (resolvedExport: ResolvedExport) =
+        Signal(fromResolvedExport resolvedExport)

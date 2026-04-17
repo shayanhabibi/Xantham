@@ -2,6 +2,7 @@
 
 open System.Collections.Generic
 open System.ComponentModel
+open SignalsDotnet
 open Xantham.Decoder
 open Xantham.Generator
 
@@ -194,6 +195,8 @@ type ModuleLikePath =
     | Anchored of ModulePath
     
 module ModulePath =
+    type Signal = Signal<ModulePath>
+    type Computed = IReadOnlySignal<ModulePath>
     let rec graft (parentPath: ModulePath) (childBranch: ModulePath) =
         match childBranch.Parent with
         | ValueSome parent ->
@@ -247,6 +250,8 @@ module ModulePath =
         |> List.rev
 
 module TypePath =
+    type Signal = Signal<TypePath>
+    type Computed = IReadOnlySignal<TypePath>
     let flatten { TypePath.Parent = parent; Name = name } =
         ModulePath.flatten parent @ [ name ]
     let inline traceToParentModule (typePath: TypePath) = typePath.Parent, [ typePath.Name ]
@@ -260,6 +265,8 @@ module TypePath =
         |> funApply parent
     
 module MemberPath =
+    type Signal = Signal<MemberPath>
+    type Computed = IReadOnlySignal<MemberPath>
     let findParentModule (memberPath: MemberPath) =
         match memberPath.Parent with
         | MemberPathParent.Type typePath -> typePath.Parent
@@ -289,6 +296,8 @@ module MemberPath =
         |> createWithName name
         
 module ParameterPath =
+    type Signal = Signal<ParameterPath>
+    type Computed = IReadOnlySignal<ParameterPath>
     /// Does not include the name of the parameter, or the returned module.
     let traceToParentModule (parameterPath: ParameterPath) =
         MemberPath.traceToParentModule parameterPath.Parent
@@ -309,6 +318,8 @@ module ParameterPath =
         |> funApply 0
 
 module TypeParamPath =
+    type Signal = Signal<TypeParamPath>
+    type Computed = IReadOnlySignal<TypeParamPath>
     let findParentModule (typeParamPath: TypeParamPath) =
         match typeParamPath.Parent with
         | TypeParamPathParent.Type typePath ->
@@ -343,6 +354,9 @@ module TypeParamPath =
         |> create name
 
 module AnchorPath =
+    type Signal = Signal<AnchorPath>
+    type Linked = ISignal<AnchorPath>
+    type Computed = IReadOnlySignal<AnchorPath>
     let createModule (modulePath: ModulePath) = AnchorPath.Module modulePath
     let createType (typePath: TypePath) = AnchorPath.Type typePath
     let createMember (memberPath: MemberPath) = AnchorPath.Member memberPath
@@ -408,6 +422,8 @@ module AnchorPath =
         
     
 module TransientModulePath =
+    type Signal = Signal<TransientModulePath>
+    type Computed = IReadOnlySignal<TransientModulePath>
     let createOnTransientModule name transientParent =
         TransientModulePath.Moored(transientParent, Name.Pascal.create name)
     let rec toAnchored (transientModulePath: TransientModulePath) =
@@ -422,6 +438,8 @@ module TransientModulePath =
         |> List.fold (fun acc name -> ModulePath.createWithName (Name.Pascal.fromName name) acc) modulePath
 
 module TransientTypePath =
+    type Signal = Signal<TransientTypePath>
+    type Computed = IReadOnlySignal<TransientTypePath>
     let createOnTransientModule name transientParent =
         TransientTypePath.Moored(transientParent, Name.Pascal.create name)
     
@@ -443,6 +461,8 @@ module TransientTypePath =
         |> TypePath.createWithName typeName
 
 module TransientMemberPath =
+    type Signal = Signal<TransientMemberPath>
+    type Computed = IReadOnlySignal<TransientMemberPath>
     let createOnTransientType name transientParent =
         TransientMemberPath.Moored(transientParent, Name.Camel.create name)
     let rec toAnchored (transientMemberPath: TransientMemberPath) =
@@ -468,6 +488,8 @@ module TransientMemberPath =
         | [] -> failwith "Did not expect empty transient member path"
 
 module TransientParameterPath =
+    type Signal = Signal<TransientParameterPath>
+    type Computed = IReadOnlySignal<TransientParameterPath>
     let createOnTransientMember name transientParent =
         TransientParameterPath.Moored(transientParent, Name.Camel.create name)
     let rec toAnchored (transientParameterPath: TransientParameterPath) =
@@ -498,6 +520,8 @@ module TransientParameterPath =
         | _ -> failwith "Did not expect transient parameter path to have less than 3 elements"
 
 module TransientPath =
+    type Signal = Signal<TransientPath>
+    type Computed = IReadOnlySignal<TransientPath>
     let createType (typePath: TransientTypePath) = TransientPath.Type typePath
     let createMember (memberPath: TransientMemberPath) = TransientPath.Member memberPath
     let createParameter (parameterPath: TransientParameterPath) = TransientPath.Parameter parameterPath
@@ -530,7 +554,7 @@ module TransientPath =
             TransientTypePath.anchor anchorPath transientTypePath
             |> AnchorPath.Type
     
-    module private Helpers =
+    module Helpers =
         type FlattenedTransientPath =
             | Type of TransientTypePath
             | Member of TransientMemberPath
@@ -603,7 +627,7 @@ module TransientPath =
                 | headModule :: tailModules ->
                     let headModule =
                         match headModule with
-                        | TransientModulePath.Moored(parent, name) ->
+                        | TransientModulePath.Moored(_, name) ->
                             TransientModulePath.AnchoredAndMoored(name)
                         | TransientModulePath.Anchored 
                         | TransientModulePath.AnchoredAndMoored _ -> headModule
@@ -681,7 +705,9 @@ module TransientPath =
                 
 
 module Path =
-    module private RelativeHelper =
+    type Signal = Signal<Path>
+    type Computed = IReadOnlySignal<Path>
+    module RelativeHelper =
         // Returns the index of the last common element in the two lists.
         let rec idxOfLastCommonElement (state: int) (target: string list) (from: string list) =
             match target, from with
@@ -729,4 +755,87 @@ module Path =
     let inline create (value: ^T) =
         let ir = ((^T or SRTPHelper or AnchorPath.SRTPHelper or TransientPath.SRTPHelper): (static member Create: ^T -> ^U) value)
         ((^U or SRTPHelper): (static member Create: ^U -> Path) ir)
+        
+module Signal =
+    let backupFn () =
+        ModulePath.createFromList [ "Xantham"; "Core"; "Error" ]
+        |> AnchorPath.create
+    let init(): AnchorPath.Signal = Signal<AnchorPath>(ModulePath.init "" |> AnchorPath.create)
+    let inline create anchorPath: AnchorPath.Signal = Signal(AnchorPath.create anchorPath)
+    let inline createTransient transientPath (anchorPath: AnchorPath.Computed): AnchorPath.Computed =
+        let transientPath = TransientPath.create transientPath
+        let compute () = TransientPath.anchor anchorPath.Value transientPath
+        Signal.Computed(compute, backupFn)
+    let inline set anchorPath (signal: AnchorPath.Signal) =
+        signal.Value <- AnchorPath.create anchorPath
+    
+    let createTransientMember (transientMemberPath: TransientMemberPath) (anchorSignal: AnchorPath.Computed) =
+        let signal = createTransient transientMemberPath anchorSignal
+        Signal.Computed(fun () ->
+            AnchorPath.traceToParentModule signal.Value
+            |> snd
+            |> List.tryLast
+            |> Option.map Name.Camel.fromName
+            |> Option.defaultValue (Name.Camel.create "member")), signal
+    let createTransientParameter (transientParameterPath: TransientParameterPath) (anchorSignal: AnchorPath.Computed) =
+        let signal = createTransient transientParameterPath anchorSignal
+        Signal.Computed(fun () ->
+            AnchorPath.traceToParentModule signal.Value
+            |> snd
+            |> List.tryLast
+            |> Option.map Name.Camel.fromName
+            |> Option.defaultValue (Name.Camel.create "parameter")
+            ), signal
+    let createTransientType (transientTypePath: TransientTypePath) (anchorSignal: AnchorPath.Computed) =
+        let signal = createTransient transientTypePath anchorSignal
+        Signal.Computed(fun () ->
+            AnchorPath.traceToParentModule signal.Value
+            |> snd
+            |> List.tryLast
+            |> Option.map Name.Pascal.fromName
+            |> Option.defaultValue (Name.Pascal.create "TransientType")), signal
+    let createTransientTypeParameter (transientTypePath: TransientTypePath) (anchorSignal: AnchorPath.Computed) =
+        let path = TransientPath.TypeParam transientTypePath
+        let compute () = TransientPath.anchor anchorSignal.Value path
+        let signal = Signal.Computed(compute, backupFn)
+        Signal.Computed(fun () ->
+            AnchorPath.traceToParentModule signal.Value
+            |> snd
+            |> List.tryLast
+            |> Option.map Name.Typar.fromName
+            |> Option.defaultValue (Name.Typar.create "T")
+            ), signal
 
+module TypeLikePath =
+    type SRTPHelper =
+        static member inline Create value = TypeLikePath.Anchored value
+        static member inline Create value = TypeLikePath.Transient value
+    let inline create value = ((^T or SRTPHelper): (static member Create: ^T -> TypeLikePath) value)
+
+module MemberLikePath =
+    type SRTPHelper =
+        static member inline Create value = MemberLikePath.Anchored value
+        static member inline Create value = MemberLikePath.Transient value
+    let inline create value = ((^T or SRTPHelper): (static member Create: ^T -> MemberLikePath) value)
+
+module ParameterLikePath =
+    type SRTPHelper =
+        static member inline Create value = ParameterLikePath.Anchored value
+        static member inline Create value = ParameterLikePath.Transient value
+        static member inline CreateParameter(name, parent) = ParameterPath.createWithName name parent 0 |> SRTPHelper.Create
+        static member inline CreateParameter(name, parent) = TransientParameterPath.createOnTransientMember name parent |> SRTPHelper.Create
+    let inline create value = ((^T or SRTPHelper): (static member Create: ^T -> ParameterLikePath) value)
+    let inline createWithName name memberLikePath = ((^T or SRTPHelper): (static member CreateParameter: ^Y * ^T -> ParameterLikePath) (name, memberLikePath))
+        
+
+module TypeParamLikePath =
+    type SRTPHelper =
+        static member inline Create value = TypeParamLikePath.Anchored value
+        static member inline Create value = TypeParamLikePath.Transient value
+    let inline create value = ((^T or SRTPHelper): (static member Create: ^T -> TypeParamLikePath) value)
+
+module ModuleLikePath =
+    type SRTPHelper =
+        static member inline Create value = ModuleLikePath.Anchored value
+        static member inline Create value = ModuleLikePath.Transient value
+    let inline create value = ((^T or SRTPHelper): (static member Create: ^T -> ModuleLikePath) value)

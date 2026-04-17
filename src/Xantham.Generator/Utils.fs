@@ -4,6 +4,8 @@ module Xantham.Generator.Utils
 open System.Collections.Concurrent
 open System.Collections.Frozen
 open System.Collections.Generic
+open System.ComponentModel
+open SignalsDotnet
 
 [<AutoOpen>]
 module DictionaryExtensions =
@@ -145,3 +147,7 @@ module StackExtensions =
         let inline pop (stack: Stack<'T>) = stack.Pop()
         
         let inline popAndForget (stack: Stack<'T>) = stack.Pop() |> ignore
+        let inline iter (fn: 'T -> unit) (stack: Stack<'T>) =
+            let mutable work = Unchecked.defaultof<'T>
+            while stack.TryPop(&work) do
+                fn work

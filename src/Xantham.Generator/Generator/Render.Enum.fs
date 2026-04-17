@@ -9,31 +9,17 @@ open Xantham.Generator.Types
 open Xantham.Generator.NamePath
 
 module Enum =
-    let renderEnumWithMetadata (ctx: GeneratorContext) (enumType: EnumType) metadata =
+    let renderEnumWithMetadata (ctx: GeneratorContext) (enumType: EnumType) metadata: TypeRender =
         {
             Metadata = metadata
             LiteralUnionRender.Name = enumType.Name
             Cases =
                 enumType.Members
                 |> List.map (_.Value >> fun case ->
+                    let path = Path.fromEnumCase None case |> AnchorPath.create
+                    let metadata = RenderMetadata.create path
                     {
-                        Metadata =
-                            {
-                                metadata with
-                                    Path =
-                                        match metadata.Path with
-                                        | Path.Anchor (AnchorPath.Type parentPath) ->
-                                            parentPath
-                                            |> MemberPath.createOnType (case.Name |> Name.Case.valueOrSource)
-                                            |> Path.create
-                                        | Path.Transient (TransientPath.Type parentPath) ->
-                                            parentPath
-                                            |> TransientMemberPath.createOnTransientType (case.Name |> Name.Case.valueOrSource)
-                                            |> Path.create
-                                        | _ ->
-                                            TransientMemberPath.AnchoredAndMoored (Case.unboxMeasure case.Name)
-                                            |> Path.create
-                            }
+                        Metadata = metadata
                         LiteralCaseRender.Name = case.Name
                         Value =
                             match case.Value with
@@ -47,36 +33,20 @@ module Enum =
         |> TypeRender.EnumUnion
         
     let renderEnum (ctx: GeneratorContext) (enumType: EnumType) =
-        {
-            Path = Path.fromEnum enumType |> Path.create
-        }
-        |> renderEnumWithMetadata ctx enumType
+        let path = Path.fromEnum enumType 
+        let metadata = RenderMetadata.create path
+        renderEnumWithMetadata ctx enumType metadata
         
-    let renderStringUnionWithMetadata (ctx: GeneratorContext) (enumType: EnumType) metadata =
+    let renderStringUnionWithMetadata (ctx: GeneratorContext) (enumType: EnumType) metadata: TypeRender =
         {
             Metadata = metadata
             LiteralUnionRender.Name = enumType.Name
             Cases =
                 enumType.Members
                 |> List.map (_.Value >> fun case ->
+                    let metadata = RenderMetadata.create (Path.fromEnumCase None case)
                     {
-                        Metadata =
-                            {
-                                metadata with
-                                    Path =
-                                        match metadata.Path with
-                                        | Path.Anchor (AnchorPath.Type parentPath) ->
-                                            parentPath
-                                            |> MemberPath.createOnType (case.Name |> Name.Case.valueOrSource)
-                                            |> Path.create
-                                        | Path.Transient (TransientPath.Type parentPath) ->
-                                            parentPath
-                                            |> TransientMemberPath.createOnTransientType (case.Name |> Name.Case.valueOrSource)
-                                            |> Path.create
-                                        | _ ->
-                                            TransientMemberPath.AnchoredAndMoored (Case.unboxMeasure case.Name)
-                                            |> Path.create
-                            }
+                        Metadata = metadata
                         LiteralCaseRender.Name = case.Name
                         Value = case.Value
                         Documentation = case.Documentation
@@ -86,7 +56,8 @@ module Enum =
         |> TypeRender.StringUnion
         
     let renderStringUnion (ctx: GeneratorContext) (enumType: EnumType) =
-        { Path = Path.fromEnum enumType |> Path.create }
+        let path = Path.fromEnum enumType 
+        RenderMetadata.create path
         |> renderStringUnionWithMetadata ctx enumType
         
     let renderWithMetadata (ctx: GeneratorContext) (enumType: EnumType) metadata =
@@ -95,5 +66,6 @@ module Enum =
         else renderStringUnionWithMetadata ctx enumType metadata
         
     let render (ctx: GeneratorContext) (enumType: EnumType) =
-        { Path = Path.fromEnum enumType |> Path.create }
+        let path = Path.fromEnum enumType 
+        RenderMetadata.create path
         |> renderWithMetadata ctx enumType

@@ -1,7 +1,7 @@
 ﻿[<AutoOpen>]
 module Xantham.Generator.Generator.Render_TypeAlias
 
-open Fabulous.AST
+open FSharp.SignalsDotnet
 open Xantham
 open Xantham.Decoder.ArenaInterner
 open Xantham.Decoder
@@ -19,7 +19,7 @@ module TypeAlias =
         let documentation = typ.Documentation
         let name = typ.Name
         let path = Path.fromTypeAlias typ
-        let metadata = { Path = Path.create path }
+        let metadata = RenderMetadata.create path
         let makeLiteralsDefn metadata = function
             | literals when literals |> List.forall (function
                 | ResolvedTypeLiteralLike.Literal (TsLiteral.Int _)
@@ -34,14 +34,14 @@ module TypeAlias =
                         |> List.map (function
                             | ResolvedTypeLiteralLike.Literal (TsLiteral.Int value) ->
                                 {
-                                    LiteralCaseRender.Metadata = { Path = Path.create TransientMemberPath.Anchored }
+                                    LiteralCaseRender.Metadata = RenderMetadata.create TransientMemberPath.Anchored
                                     Name = Name.Pascal.create (string value)
                                     Value = value
                                     Documentation = []
                                 }
                             | ResolvedTypeLiteralLike.EnumCase ({ Value = TsLiteral.Int value } as enumCase) ->
                                 {
-                                    LiteralCaseRender.Metadata = { Path = Path.create TransientMemberPath.Anchored }
+                                    LiteralCaseRender.Metadata = RenderMetadata.create TransientMemberPath.Anchored
                                     Name = enumCase.Name
                                     Value = value
                                     Documentation = enumCase.Documentation
@@ -68,14 +68,14 @@ module TypeAlias =
                                     | TsLiteral.BigInt value -> Name.Pascal.create (string value)
                                     | TsLiteral.Null -> Name.Pascal.create "null"
                                 {
-                                    LiteralCaseRender.Metadata = { Path = Path.create TransientMemberPath.Anchored }
+                                    LiteralCaseRender.Metadata = RenderMetadata.create TransientMemberPath.Anchored
                                     Name = name
                                     Value = value
                                     Documentation = []
                                 }
                             | ResolvedTypeLiteralLike.EnumCase enumCase ->
                                 {
-                                    LiteralCaseRender.Metadata = { Path = Path.create TransientMemberPath.Anchored }
+                                    LiteralCaseRender.Metadata = RenderMetadata.create TransientMemberPath.Anchored
                                     Name = enumCase.Name
                                     Value = enumCase.Value
                                     Documentation = enumCase.Documentation
@@ -105,7 +105,9 @@ module TypeAlias =
                 Metadata = metadata
                 Name = name
                 TypeParameters = typeParameters
-                Type = ctx.PreludeGetTypeRef ctx scopeStore innerType
+                Type =
+                    innerType.Value
+                    |> GeneratorContext.Prelude.getRenderWithScope ctx scopeStore (fun _ -> _.TypeRef.Value)
             }
             |> TypeAliasRender.Alias
             |> List.singleton
@@ -137,7 +139,9 @@ module TypeAlias =
                     Metadata = metadata
                     Name = name
                     TypeParameters = typeParameters
-                    Type = ctx.PreludeGetTypeRef ctx scopeStore innerType
+                    Type =
+                        innerType.Value
+                        |> GeneratorContext.Prelude.getRenderWithScope ctx scopeStore (fun _ -> _.TypeRef.Value)
                 }
                 |> TypeAliasRender.Alias
             let pathForLiterals =
@@ -158,7 +162,7 @@ module TypeAlias =
                     |> TransientPath.create
                     |> TransientPath.anchor (AnchorPath.create path)
                 name, value
-            let literalsMetadata = { Path = Path.create pathForLiterals }
+            let literalsMetadata = RenderMetadata.create pathForLiterals
             match ResolvedTypeCategories.create innerType.Value with
             // no literals, and no 'others' that require a transient type
             | { LiteralLike = [] } & { Others = others } when others |> List.forall (function
@@ -195,7 +199,7 @@ module TypeAlias =
                         let members, functions =
                             Member.partitionRender ctx scopeStore members
                         {
-                            TypeLikeRender.Metadata = { Path = Path.create path }
+                            TypeLikeRender.Metadata = RenderMetadata.create path
                             Name = Name.Pascal.create name
                             TypeParameters = []
                             Members = members
@@ -213,7 +217,7 @@ module TypeAlias =
                 Name = name
                 Cases = [
                     {
-                        LiteralCaseRender.Metadata = { Path = Path.create TransientMemberPath.Anchored }
+                        LiteralCaseRender.Metadata = RenderMetadata.create TransientMemberPath.Anchored
                         Name = name
                         Value = tsLiteral
                         Documentation = documentation
@@ -247,7 +251,7 @@ module TypeAlias =
                 Name = name
                 Cases = [
                     {
-                        LiteralCaseRender.Metadata = { Path = Path.create TransientMemberPath.Anchored }
+                        LiteralCaseRender.Metadata = RenderMetadata.create TransientMemberPath.Anchored
                         Name = enumCase.Name
                         Value = enumCase.Value
                         Documentation = enumCase.Documentation
@@ -264,14 +268,11 @@ module TypeAlias =
                 TypeParameters = typeParameters
                 Members = [
                     {
-                        TypedNameRender.Metadata = { Path = Path.create TransientMemberPath.Anchored }
+                        TypedNameRender.Metadata = RenderMetadata.create TransientMemberPath.Anchored
                         Name = Name.create "Value" |> Case.addCamelMeasure
                         Type =
-                            RenderScopeStore.TypeRefRender.create
-                                scopeStore
-                                (ResolvedType.Primitive TypeKindPrimitive.String)
-                                false
-                                Types.string 
+                            ResolvedType.Primitive TypeKindPrimitive.String
+                            |> GeneratorContext.Prelude.getRenderWithScope ctx scopeStore (fun _ -> _.TypeRef.Value)
                         Traits = Set [ RenderTraits.EmitSelf ]
                         TypeParameters = []
                         Documentation = []
@@ -279,28 +280,29 @@ module TypeAlias =
                 ]
                 Functions = [
                     {
-                        FunctionLikeRender.Metadata = { Path = Path.create TransientMemberPath.Anchored }
+                        FunctionLikeRender.Metadata = RenderMetadata.create TransientMemberPath.Anchored
                         Name = Name.create "Create" |> Case.addCamelMeasure
                         Signatures = [
                             {
-                                FunctionLikeSignature.Metadata = { Path = Path.create TransientMemberPath.Anchored }
+                                FunctionLikeSignature.Metadata = RenderMetadata.create TransientMemberPath.Anchored
                                 Parameters =
                                     templateLiteral.Types
                                     |> List.mapi (fun i typeRef ->
                                         {
-                                            TypedNameRender.Metadata = { Path = Path.create TransientParameterPath.Anchored }
+                                            TypedNameRender.Metadata = RenderMetadata.create TransientParameterPath.Anchored
                                             Name = Name.Camel.create $"v{i}"
-                                            Type = ctx.PreludeGetTypeRef ctx scopeStore typeRef
+                                            Type =
+                                                typeRef.Value
+                                                |> GeneratorContext.Prelude.getRenderWithScope ctx scopeStore (fun _ -> _.TypeRef.Value)
                                             Traits = Set.empty
                                             TypeParameters = []
                                             Documentation = []
                                         }
                                         )
                                 ReturnType =
-                                    Ast.Anon(Name.Case.valueOrModified name)
-                                    |> RenderScopeStore.TypeRefAtom.Unsafe.createWidget
-                                    |> RenderScopeStore.TypeRef.Unsafe.createAtom
-                                    |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+                                    Name.Case.valueOrModified name
+                                    |> TypeRefRender.create false
+                                    |> Signal.linkWithValue
                                 Traits = Set [
                                     RenderTraits.Inline
                                     RenderTraits.StringBuilder

@@ -16,6 +16,10 @@
 
     <ItemGroup>
         <Compile Include="Utils.fs" />
+        <Content Include="SignalPlan.md" />
+        <Compile Include="Types\Signal.fs" />
+        <Compile Include="Types\Library.fs" />
+        <Compile Include="Types\SignalHashSet.fs" />
         <Compile Include="Types\Builders.Widgets.fs" />
         <Compile Include="Types\NamePath.fs" />
         <Compile Include="Types\RenderScope.Prelude.fs" />
@@ -33,7 +37,6 @@
         <Compile Include="Generator\TypeRender.Render.fs" />
         <Compile Include="Generator\Render.Transient.fs" />
         <Compile Include="Generator\RenderScope.Prelude.fs" />
-        <Compile Include="Generator\TypeRefRender.Prerender.fs" />
         <Compile Include="Generator\RenderScope.Anchored.fs" />
         <Compile Include="Generator\Render.fs" />
     </ItemGroup>
@@ -45,6 +48,7 @@
     <ItemGroup>
       <PackageReference Include="Fabulous.AST" Version="2.0.0-pre06" />
       <PackageReference Include="FSharp.Logf" Version="1.2.2" />
+      <PackageReference Include="SignalsDotnet" Version="2.1.0" />
     </ItemGroup>
 
 </Project>

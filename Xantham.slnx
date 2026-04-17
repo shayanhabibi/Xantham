@@ -19,6 +19,7 @@
   </Folder>
   <Folder Name="/tests/">
     <File Path="tests/Signal.test.fsx" />
+    <File Path="tests/SignalDotNet.test.fsx" />
     <Project Path="tests/Xantham.Fable.Tests/Xantham.Fable.Tests.fsproj" />
     <Project Path="tests/Xantham.Generator.Tests/Xantham.Generator.Tests.fsproj" />
   </Folder>
