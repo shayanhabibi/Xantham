@@ -11,27 +11,7 @@ let main argv =
     let tree = Decoder.Runtime.create file
     let interner = tree.GetArenaInterner()
     let generatorContext = GeneratorContext.Empty
-    let graph = interner.Graph.Value
-    // for export in interner.ExportMap do
-    //     export.Value
-    //     |> List.filter _.IsTypeAlias
-    //     |> prerenderExport
-    for cycle in graph.Cycles do
-        if cycle.Key = cycle.Value then
-            cycle.Key
-            |> printfn "Bad key %A"
-        else
-        interner.ResolveType cycle.Key
-        |> TestHelper.prerender generatorContext
-        |> ignore
-    graph.Degrees
-    |> Seq.sortBy _.Value
-    |> Seq.iter (fun kv ->
-        kv.Key
-        |> interner.ResolveType 
-        |> TestHelper.prerender generatorContext
-        |> ignore
-        )
+    ArenaInterner.prerenderFromGraph generatorContext interner
     
     
     // Prerender.prerenderTypeRefs
@@ -43,13 +23,8 @@ let main argv =
     //     )
     generatorContext.PreludeRenders
     |> Seq.take 5
-    |> Seq.map _.Value
-    |> Seq.map (function
-        | Choice1Of3 { TypeRef = typeRef }
-        | Choice2Of3 { TypeRef = typeRef }
-        | Choice3Of3 { TypeRef = typeRef } -> typeRef
-        )
-    |> Seq.map TypeRefRender.TypeRefRender.render
+    |> Seq.map _.Value.TypeRef
+    |> Seq.map TypeRefRender.render
     |> fun x ->
         Ast.Oak() {
             Ast.AnonymousModule() {

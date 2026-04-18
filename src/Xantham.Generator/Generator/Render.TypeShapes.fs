@@ -32,7 +32,7 @@ module Interface =
                 shape.Heritage.Extends
                 |> List.map (
                     ResolvedType.TypeReference
-                    >> Lazy.CreateFromValue
+                    >> LazyContainer.CreateFromValue
                     >> ctx.PreludeGetTypeRef ctx scopeStore
                     )
             Constructors = []
@@ -67,7 +67,7 @@ module Class =
                 |> List.append shape.Heritage.Extends
                 |> List.map (
                     ResolvedType.TypeReference
-                    >> Lazy.CreateFromValue
+                    >> LazyContainer.CreateFromValue
                     >> ctx.PreludeGetTypeRef ctx scopeStore
                     )
             Constructors =

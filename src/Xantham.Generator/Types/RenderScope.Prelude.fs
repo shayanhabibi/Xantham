@@ -257,8 +257,8 @@ type RenderScope<'RootPathType, 'RenderType> = {
     Root: 'RootPathType
     TypeRef: TypeRefRender
     // we calculate the render lazily
-    Render: Lazy<'RenderType>
-    TransientChildren: RenderScopeStore
+    Render: 'RenderType
+    TransientChildren: RenderScopeStore voption
 }
 
 [<Struct>]
@@ -372,16 +372,8 @@ type MemberRender<'RenderType, 'MemberName, 'TyparName> =
     | Property of TypedNameRender<'RenderType, 'MemberName, 'TyparName>
     | Method of FunctionLikeRender<'RenderType, 'MemberName, 'TyparName>
 
-type Render<'RenderType, 'TypeName, 'MemberName, 'TyparName> =
-    | RefOnly of 'RenderType
-    | Render of 'RenderType * TypeRender<'RenderType, 'TypeName, 'MemberName, 'TyparName>
+type RenderKind<'RenderType, 'TypeName, 'MemberName, 'TyparName> = 'RenderType * Lazy<TypeRender<'RenderType, 'TypeName, 'MemberName, 'TyparName>>
 
-module Widget =
-    type RenderScope = {
-        Type: ResolvedType
-        TypeRef: TypeRefRender
-    }
-    
 module Transient =
     type TypeName = Name<Case.pascal> voption
     type MemberName = Name<Case.camel>
@@ -397,7 +389,7 @@ module Transient =
     type TypeAliasRenderRef = TypeAliasRenderRef<TypeRefRender, TypeName, TyparName>
     type TypeRender = TypeRender<TypeRefRender, TypeName, MemberName, TyparName>
     type MemberRender = MemberRender<TypeRefRender, MemberName, TyparName>
-    type Render = Render<TypeRefRender, TypeName, MemberName, TyparName>
+    type Render = RenderKind<TypeRefRender, TypeName, MemberName, TyparName>
     type RenderScope = RenderScope<TransientTypePath, Render>
     type RenderScopeFunc = ResolvedType -> RenderScope voption
 
@@ -416,12 +408,39 @@ module Concrete =
     type TypeAliasRenderRef = TypeAliasRenderRef<TypeRefRender, TypeName, TyparName>
     type TypeRender = TypeRender<TypeRefRender, TypeName, MemberName, TyparName>
     type MemberRender = MemberRender<TypeRefRender, MemberName, TyparName>
-    type Render = Render<TypeRefRender, TypeName, MemberName, TyparName>
-    type RenderScope = RenderScope<TypePath, Render>
-    type RenderScopeFunc = ResolvedType -> RenderScope voption
-    type ExportRenderScopeFunc = ResolvedExport -> RenderScope
+    type Render = RenderKind<TypeRefRender, TypeName, MemberName, TyparName>
 
-type PreludeExportRenderScopeFunc = Concrete.ExportRenderScopeFunc
-type PreludeTypeRenderScopeFunc = ResolvedType -> Choice<Concrete.RenderScope, Transient.RenderScope> voption
+type Render =
+    | RefOnly of TypeRefRender
+    | Concrete of Concrete.Render
+    | Transient of Transient.Render
 
-    
+type RenderScope = RenderScope<TypeLikePath voption, Render>
+
+module Render =
+    type SRTPHelper =
+        static member Create(typeRef: TypeRefRender, render) = Render.Concrete(typeRef, render)
+        static member Create(typeRef: TypeRefRender, render) = Render.Transient(typeRef, render)
+        static member Create(typeRef: TypeRefRender, renderer) = Render.Concrete(typeRef, lazy renderer())
+        static member Create(typeRef: TypeRefRender, renderer) = Render.Transient(typeRef, lazy renderer())
+        static member Create(typeRef: TypeRefRender, render) = Render.Concrete(typeRef, lazy render)
+        static member Create(typeRef: TypeRefRender, render) = Render.Transient(typeRef, lazy render)
+        static member Create(typeRef: TypeRefRender) = Render.RefOnly(typeRef)
+    let inline createRefOnly (typeRef: TypeRefRender) = SRTPHelper.Create(typeRef)
+    let inline createFromConcreteLazy (typeRef: TypeRefRender) (render: Lazy<Concrete.TypeRender>) = SRTPHelper.Create(typeRef, render)
+    let inline createFromTransientLazy (typeRef: TypeRefRender) (render: Lazy<Transient.TypeRender>) = SRTPHelper.Create(typeRef, render)
+    let inline createFromConcrete (typeRef: TypeRefRender) (render: Concrete.TypeRender) = SRTPHelper.Create(typeRef, render)
+    let inline createFromTransient (typeRef: TypeRefRender) (render: Transient.TypeRender) = SRTPHelper.Create(typeRef, render)
+    let inline create (typeRef: TypeRefRender) renderOrRenderer =
+        ((^T or SRTPHelper):(static member Create: TypeRefRender * ^T -> Render) typeRef, renderOrRenderer)
+
+module RenderScope =
+    let private dummyStore = RenderScopeStore.create()
+    let createRootless resolvedType (typeRef: TypeRefRender): RenderScope =
+        {
+            Type = resolvedType
+            Root = ValueNone
+            TypeRef = typeRef
+            Render = Render.RefOnly typeRef
+            TransientChildren = ValueNone
+        }

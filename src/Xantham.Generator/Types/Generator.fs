@@ -18,23 +18,17 @@ type DictionaryImpl<'Key, 'Value> =
     Dictionary<'Key, 'Value>
     #endif
 
-type PreludeScopeStore = DictionaryImpl<
-    ResolvedType, // Key
-    Choice< // 1 of 3 value types
-        Prelude.Widget.RenderScope,
-        Prelude.Transient.RenderScope, // transient render scopes
-        Prelude.Concrete.RenderScope // concrete render scopes
-        >
-    >
-
+type PreludeScopeStore = DictionaryImpl< ResolvedType, RenderScope >
 type AnchorScopeStore = DictionaryImpl<Choice<ResolvedType, ResolvedExport>, Choice<Anchored.TypeRefRender, Anchored.RenderScope>>
 type PreludeGetTypeRefFunc = GeneratorContext -> RenderScopeStore -> LazyResolvedType -> TypeRefRender
 and GeneratorContext =
     {
+        TypeAliasRemap: DictionaryImpl<ResolvedType, TypeRefRender>
         PreludeGetTypeRef: PreludeGetTypeRefFunc
         PreludeRenders: PreludeScopeStore
         AnchorRenders: AnchorScopeStore
         InFlight: HashSet<ResolvedType>
+        
     }
     override this.ToString() = $"GeneratorContext(%d{this.PreludeRenders.Count})"
     static member internal Create(preludeGetTypeRefFunc) = {
@@ -42,6 +36,7 @@ and GeneratorContext =
         AnchorRenders = DictionaryImpl()
         PreludeGetTypeRef = preludeGetTypeRefFunc
         InFlight = HashSet()
+        TypeAliasRemap = DictionaryImpl()
     }
 
 module GeneratorContext =
@@ -72,19 +67,9 @@ module GeneratorContext =
             Dictionary.addOrReplace key value dict
             #endif
     module Prelude =
-        type SRTPHelper =
-            static member inline Add(ctx, key, value) =
-                ctx.PreludeRenders
-                |> Operation.addOrReplace key (Choice1Of3 value)
-            static member inline Add(ctx, key, value) =
-                ctx.PreludeRenders
-                |> Operation.addOrReplace key (Choice2Of3 value)
-            static member inline Add(ctx, key, value) =
-                ctx.PreludeRenders
-                |> Operation.addOrReplace key (Choice3Of3 value)
-            static member inline Add(ctx, key, value) =
-                ctx.PreludeRenders
-                |> Operation.addOrReplace key value
+        let addTypeAliasRemap ctx key value =
+            ctx.TypeAliasRemap
+            |> Operation.addOrReplace key value
         let canFlight ctx key =
             #if CONCURRENT_DICT
             lock ctx.InFlight (fun () ->
@@ -99,8 +84,9 @@ module GeneratorContext =
         let addOrReplaceChoice ctx key value =
             ctx.PreludeRenders
             |> Operation.addOrReplace key value
-        let inline addOrReplace ctx key value =
-            ((^T or SRTPHelper): (static member Add: GeneratorContext * ResolvedType * ^T -> unit) ctx, key, value)
+        let addOrReplace ctx key value =
+            ctx.PreludeRenders
+            |> Operation.addOrReplace key value
     module Anchored =
         type SRTPHelper =
             static member inline Add(ctx: GeneratorContext, key, value) =

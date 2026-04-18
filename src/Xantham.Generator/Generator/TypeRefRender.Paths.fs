@@ -10,6 +10,8 @@ let inline private getQualifiedName (container: ^T when ^T:(member FullyQualifie
     |> QualifiedNamePart.parse
     |> QualifiedName.create
 
+let inline private sanitizeSource (source: string) =
+    source.Trim('@').Split([|'\\'; '/'|], System.StringSplitOptions.RemoveEmptyEntries) |> Array.toList
 let inline private createModulePath (qualifiedName: QualifiedName) (source: ArenaInterner.QualifiedNamePart option) =
     let hasNodeModuleFilePath =
         qualifiedName.FilePath
@@ -44,12 +46,14 @@ let inline private createModulePath (qualifiedName: QualifiedName) (source: Aren
             // proceed as normal
             |> List.fold (fun acc s -> ModulePath.create s acc) (ModulePath.init s)
         else
+            let s = sanitizeSource s
             path
-            |> List.fold (fun acc s -> ModulePath.create s acc) (ModulePath.init s)
+            |> List.fold (fun acc s -> ModulePath.create s acc) (ModulePath.createFromList s)
     // ==================================
     | Some (ArenaInterner.QualifiedNamePart.Abnormal(s, _) | ArenaInterner.QualifiedNamePart.Normal s), path ->
+        let s = sanitizeSource s
         path
-        |> List.fold (fun acc s -> ModulePath.create s acc) (ModulePath.init s)
+        |> List.fold (fun acc s -> ModulePath.create s acc) (ModulePath.createFromList s)
 
 let fromVariable (variable: Variable) =
     let qualifiedName = getQualifiedName variable

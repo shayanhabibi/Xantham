@@ -178,30 +178,28 @@ module Render =
                 |> TypeAliasRender.Function
 
         let anchor (ctx: GeneratorContext) (anchorPath: AnchorPath) (render: Transient.Render) =
-            match render with
-            | Transient.Render.RefOnly _ -> failwith "UNREACHABLE"
-            | Transient.Render.Render(ref, render) ->
-                match render with
-                | Transient.TypeRender.EnumUnion enumUnion ->
-                    anchorUnion ctx anchorPath enumUnion
-                    |> TypeRender.EnumUnion
-                | Transient.TypeRender.StringUnion enumUnion ->
-                    anchorUnion ctx anchorPath enumUnion
-                    |> TypeRender.StringUnion
-                | Transient.TypeRender.TypeDefn typeLikeRender ->
-                    anchorTypeDefn ctx anchorPath typeLikeRender
-                    |> TypeRender.TypeDefn
-                | Transient.TypeRender.TypeAlias typeAliasRender ->
-                    anchorTypeAlias ctx anchorPath typeAliasRender
-                    |> TypeRender.TypeAlias
-                | Transient.TypeRender.Function functionLikeRender ->
-                    anchorFunction ctx anchorPath functionLikeRender
-                    |> TypeRender.Function
-                | Transient.TypeRender.Variable typedNameRender ->
-                    anchorTypedNameRender ctx anchorPath typedNameRender
-                    |> TypeRender.Variable
-                |> fun typeRender ->
-                    Anchored.Render.Render( TypeRefRender.anchor anchorPath ref, typeRender )
+            let ref, render = render
+            match render.Value with
+            | Transient.TypeRender.EnumUnion enumUnion ->
+                anchorUnion ctx anchorPath enumUnion
+                |> TypeRender.EnumUnion
+            | Transient.TypeRender.StringUnion enumUnion ->
+                anchorUnion ctx anchorPath enumUnion
+                |> TypeRender.StringUnion
+            | Transient.TypeRender.TypeDefn typeLikeRender ->
+                anchorTypeDefn ctx anchorPath typeLikeRender
+                |> TypeRender.TypeDefn
+            | Transient.TypeRender.TypeAlias typeAliasRender ->
+                anchorTypeAlias ctx anchorPath typeAliasRender
+                |> TypeRender.TypeAlias
+            | Transient.TypeRender.Function functionLikeRender ->
+                anchorFunction ctx anchorPath functionLikeRender
+                |> TypeRender.Function
+            | Transient.TypeRender.Variable typedNameRender ->
+                anchorTypedNameRender ctx anchorPath typedNameRender
+                |> TypeRender.Variable
+            |> fun typeRender ->
+                Anchored.Render( TypeRefRender.anchor anchorPath ref, lazy typeRender )
     module Concrete =
         let inline anchorEnumCase (enumUnion: Concrete.LiteralCaseRender<'T>) =
             {
@@ -328,88 +326,74 @@ module Render =
                 |> TypeAliasRender.Function
 
         let anchor (ctx: GeneratorContext) (render: Concrete.Render) =
-            match render with
-            | Concrete.Render.RefOnly _ -> failwith "UNREACHABLE"
-            | Concrete.Render.Render(ref, render) ->
-                match render with
-                | Concrete.TypeRender.EnumUnion enumUnion ->
-                    anchorEnum enumUnion
-                    |> TypeRender.EnumUnion
-                | Concrete.TypeRender.StringUnion literalUnionRender ->
-                    anchorEnum literalUnionRender
-                    |> TypeRender.StringUnion
-                | Concrete.TypeRender.TypeDefn typeLikeRender ->
-                    anchorTypeDefn ctx typeLikeRender
-                    |> TypeRender.TypeDefn
-                | Concrete.TypeRender.TypeAlias typeAliasRender ->
-                    anchorTypeAlias ctx typeAliasRender
-                    |> TypeRender.TypeAlias
-                | Concrete.TypeRender.Function functionLikeRender ->
-                    let anchorPath =
-                        match functionLikeRender.Metadata.Path with
-                        | Path.Anchor anchorPath -> anchorPath
-                        | _ -> failwith "UNREACHABLE"
-                    anchorFunction ctx anchorPath functionLikeRender
-                    |> TypeRender.Function
-                | Concrete.TypeRender.Variable typedNameRender ->
-                    let anchorPath =
-                        match typedNameRender.Metadata.Path with
-                        | Path.Anchor anchorPath -> anchorPath
-                        | _ -> failwith "UNREACHABLE"
-                    anchorTypedNameRender ctx anchorPath typedNameRender
-                    |> TypeRender.Variable
-                |> fun typeRender ->
-                    let ref =
-                        ModulePath.init ""
-                        |> AnchorPath.create
-                        |> TypeRefRender.anchor
-                        |> funApply ref
-                    Anchored.Render.Render(ref, typeRender)
+            let ref, render = render
+            match render.Value with
+            | Concrete.TypeRender.EnumUnion enumUnion ->
+                anchorEnum enumUnion
+                |> TypeRender.EnumUnion
+            | Concrete.TypeRender.StringUnion literalUnionRender ->
+                anchorEnum literalUnionRender
+                |> TypeRender.StringUnion
+            | Concrete.TypeRender.TypeDefn typeLikeRender ->
+                anchorTypeDefn ctx typeLikeRender
+                |> TypeRender.TypeDefn
+            | Concrete.TypeRender.TypeAlias typeAliasRender ->
+                anchorTypeAlias ctx typeAliasRender
+                |> TypeRender.TypeAlias
+            | Concrete.TypeRender.Function functionLikeRender ->
+                let anchorPath =
+                    match functionLikeRender.Metadata.Path with
+                    | Path.Anchor anchorPath -> anchorPath
+                    | _ -> failwith "UNREACHABLE"
+                anchorFunction ctx anchorPath functionLikeRender
+                |> TypeRender.Function
+            | Concrete.TypeRender.Variable typedNameRender ->
+                let anchorPath =
+                    match typedNameRender.Metadata.Path with
+                    | Path.Anchor anchorPath -> anchorPath
+                    | _ -> failwith "UNREACHABLE"
+                anchorTypedNameRender ctx anchorPath typedNameRender
+                |> TypeRender.Variable
+            |> fun typeRender ->
+                let ref =
+                    ModulePath.init ""
+                    |> AnchorPath.create
+                    |> TypeRefRender.anchor
+                    |> funApply ref
+                Anchored.Render(ref, lazy typeRender)
 
 let inline addOrReplace ctx key value =
     GeneratorContext.Anchored.addOrReplace ctx key value
     
-let rec anchor (ctx: GeneratorContext) (resolvedExport: Concrete.RenderScope) =
-    let path = resolvedExport.Root
-    let anchorPath = AnchorPath.create path
-    let anchors = Dictionary<ResolvedType, TypePath * Render>()
-    let render = Render.Concrete.anchor ctx resolvedExport.Render.Value
-    {
-        RenderScope.Type = resolvedExport.Type
-        Root = path
-        TypeRef =
-            resolvedExport.TypeRef
-            |> TypeRefRender.anchor anchorPath
-        Render = render
-        Anchors = anchors
-    }
-    |> addOrReplace ctx resolvedExport.Type
-    resolvedExport.TransientChildren.Keys
-    |> Seq.iter (anchorResolvedType ctx anchors anchorPath)
-and anchorResolvedType ctx anchors anchorPath (resolvedType: ResolvedType) =
+let rec anchor (ctx: GeneratorContext) anchors anchorPath resolvedType =
     GeneratorContext.Prelude.tryGet ctx resolvedType
-    |> ValueOption.iter (function
-        | Choice1Of3 render -> anchorWidget ctx anchorPath render
-        | Choice2Of3 render -> anchorTransient ctx anchors anchorPath render
-        | Choice3Of3 render -> anchor ctx render
-        )
-and anchorWidget
-    (ctx: GeneratorContext)
-    (anchorPath: AnchorPath)
-    (widget: Widget.RenderScope) =
-    widget.TypeRef
-    |> TypeRefRender.anchor anchorPath
-    |> addOrReplace ctx widget.Type
-and anchorTransient
-    (ctx: GeneratorContext)
-    (anchors: Dictionary<ResolvedType, TypePath * Render>)
-    (anchorPath: AnchorPath)
-    (transientExport: Transient.RenderScope) =
-    let path =
-        transientExport.Root
-        |> TransientTypePath.anchor anchorPath
-    let render =
-        transientExport.Render.Value
-        |> Render.Transient.anchor ctx anchorPath
-    anchors
-    |> Dictionary.tryAdd transientExport.Type (path, render)
+    |> ValueOption.iter (fun resolvedExport ->
+    match resolvedExport with
+    | { Root = ValueSome (TypeLikePath.Anchored path); Render = Render.Concrete(renderTuple); TransientChildren = ValueSome transientChildren } ->
+        let anchorPath = AnchorPath.create path
+        let anchors = Dictionary<ResolvedType, TypePath * Render>()
+        let render = Render.Concrete.anchor ctx renderTuple
+        {
+            RenderScope.Type = resolvedExport.Type
+            Root = path
+            TypeRef =
+                resolvedExport.TypeRef
+                |> TypeRefRender.anchor anchorPath
+            Render = render
+            Anchors = anchors
+        }
+        |> addOrReplace ctx resolvedExport.Type
+        transientChildren.Keys
+        |> Seq.iter (anchor ctx anchors anchorPath)
+    | { Root = ValueSome (TypeLikePath.Transient path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren } ->
+        let path = TransientTypePath.anchor anchorPath path
+        let render = Render.Transient.anchor ctx anchorPath renderTuple
+        anchors
+        |> Dictionary.tryAdd resolvedExport.Type (path, render)
+    | { Root = ValueNone; Render = Render.RefOnly typeRef } ->
+        typeRef
+        |> TypeRefRender.anchor anchorPath
+        |> addOrReplace ctx resolvedExport.Type
+    | badScope ->
+        failwithf $"Bad scope: %A{badScope}"
+    )

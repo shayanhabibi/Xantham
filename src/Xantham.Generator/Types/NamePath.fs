@@ -530,7 +530,7 @@ module TransientPath =
             TransientTypePath.anchor anchorPath transientTypePath
             |> AnchorPath.Type
     
-    module private Helpers =
+    module Helpers =
         type FlattenedTransientPath =
             | Type of TransientTypePath
             | Member of TransientMemberPath
@@ -603,7 +603,7 @@ module TransientPath =
                 | headModule :: tailModules ->
                     let headModule =
                         match headModule with
-                        | TransientModulePath.Moored(parent, name) ->
+                        | TransientModulePath.Moored(_, name) ->
                             TransientModulePath.AnchoredAndMoored(name)
                         | TransientModulePath.Anchored 
                         | TransientModulePath.AnchoredAndMoored _ -> headModule
@@ -681,7 +681,7 @@ module TransientPath =
                 
 
 module Path =
-    module private RelativeHelper =
+    module RelativeHelper =
         // Returns the index of the last common element in the two lists.
         let rec idxOfLastCommonElement (state: int) (target: string list) (from: string list) =
             match target, from with
@@ -730,3 +730,35 @@ module Path =
         let ir = ((^T or SRTPHelper or AnchorPath.SRTPHelper or TransientPath.SRTPHelper): (static member Create: ^T -> ^U) value)
         ((^U or SRTPHelper): (static member Create: ^U -> Path) ir)
 
+module TypeLikePath =
+    type SRTPHelper =
+        static member inline Create value = TypeLikePath.Anchored value
+        static member inline Create value = TypeLikePath.Transient value
+    let inline create value = ((^T or SRTPHelper): (static member Create: ^T -> TypeLikePath) value)
+
+module MemberLikePath =
+    type SRTPHelper =
+        static member inline Create value = MemberLikePath.Anchored value
+        static member inline Create value = MemberLikePath.Transient value
+    let inline create value = ((^T or SRTPHelper): (static member Create: ^T -> MemberLikePath) value)
+
+module ParameterLikePath =
+    type SRTPHelper =
+        static member inline Create value = ParameterLikePath.Anchored value
+        static member inline Create value = ParameterLikePath.Transient value
+        static member inline CreateParameter(name, parent) = ParameterPath.createWithName name parent 0 |> SRTPHelper.Create
+        static member inline CreateParameter(name, parent) = TransientParameterPath.createOnTransientMember name parent |> SRTPHelper.Create
+    let inline create value = ((^T or SRTPHelper): (static member Create: ^T -> ParameterLikePath) value)
+    let inline createWithName name memberLikePath = ((^T or SRTPHelper): (static member CreateParameter: ^Y * ^T -> ParameterLikePath) (name, memberLikePath))
+
+module TypeParamLikePath =
+    type SRTPHelper =
+        static member inline Create value = TypeParamLikePath.Anchored value
+        static member inline Create value = TypeParamLikePath.Transient value
+    let inline create value = ((^T or SRTPHelper): (static member Create: ^T -> TypeParamLikePath) value)
+
+module ModuleLikePath =
+    type SRTPHelper =
+        static member inline Create value = ModuleLikePath.Anchored value
+        static member inline Create value = ModuleLikePath.Transient value
+    let inline create value = ((^T or SRTPHelper): (static member Create: ^T -> ModuleLikePath) value)
