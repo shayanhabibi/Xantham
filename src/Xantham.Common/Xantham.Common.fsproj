@@ -9,4 +9,9 @@
         <Compile Include="Common.Types.fs" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Thoth.Json" Version="10.4.1" />
+      <PackageReference Include="Thoth.Json.Net" Version="12.0.0" />
+    </ItemGroup>
+
 </Project>

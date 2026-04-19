@@ -12,6 +12,8 @@ let main argv =
     let interner = tree.GetArenaInterner()
     let generatorContext = GeneratorContext.Empty
     ArenaInterner.prerenderFromGraph generatorContext interner
+    ArenaInterner.processExports generatorContext interner
+    
     
     
     // Prerender.prerenderTypeRefs

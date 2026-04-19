@@ -312,9 +312,11 @@ module Internal =
                 destination
             else path.join(destination, "output.json")
         #if DEBUG
-        let json = Encode.Auto.toString(1, result)
+        // let json = Encode.Auto.toString(1, result)
+        let json = EncodedResult.encode result |> Encode.toString 1
         #else
-        let json = Encode.Auto.toString(result)
+        // let json = Encode.Auto.toString(result)
+        let json = EncodedResult.encode result |> Encode.toString
         #endif
         fs.writeFile(destination, json, None, callback = ignore)
 

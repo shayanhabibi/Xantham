@@ -365,35 +365,241 @@ module Render =
 let inline addOrReplace ctx key value =
     GeneratorContext.Anchored.addOrReplace ctx key value
     
+
 let rec anchor (ctx: GeneratorContext) anchors anchorPath resolvedType =
     GeneratorContext.Prelude.tryGet ctx resolvedType
-    |> ValueOption.iter (fun resolvedExport ->
-    match resolvedExport with
+    |> ValueOption.iter (anchorPreludeAnchorScope ctx (Some anchors) anchorPath)
+        
+and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderScope =
+    let anchors = defaultArg anchors (Dictionary<ResolvedType, TypePath * Render>())
+    match renderScope with
     | { Root = ValueSome (TypeLikePath.Anchored path); Render = Render.Concrete(renderTuple); TransientChildren = ValueSome transientChildren } ->
         let anchorPath = AnchorPath.create path
         let anchors = Dictionary<ResolvedType, TypePath * Render>()
         let render = Render.Concrete.anchor ctx renderTuple
         {
-            RenderScope.Type = resolvedExport.Type
+            RenderScope.Type = renderScope.Type
             Root = path
             TypeRef =
-                resolvedExport.TypeRef
+                renderScope.TypeRef
                 |> TypeRefRender.anchor anchorPath
             Render = render
             Anchors = anchors
         }
-        |> addOrReplace ctx resolvedExport.Type
+        |> addOrReplace ctx renderScope.Type
         transientChildren.Keys
         |> Seq.iter (anchor ctx anchors anchorPath)
     | { Root = ValueSome (TypeLikePath.Transient path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren } ->
         let path = TransientTypePath.anchor anchorPath path
         let render = Render.Transient.anchor ctx anchorPath renderTuple
         anchors
-        |> Dictionary.tryAdd resolvedExport.Type (path, render)
+        |> Dictionary.tryAdd renderScope.Type (path, render)
     | { Root = ValueNone; Render = Render.RefOnly typeRef } ->
         typeRef
         |> TypeRefRender.anchor anchorPath
-        |> addOrReplace ctx resolvedExport.Type
+        |> addOrReplace ctx renderScope.Type
     | badScope ->
         failwithf $"Bad scope: %A{badScope}"
-    )
+and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: RenderScopeStore) =
+    let anchors = Dictionary<ResolvedType, TypePath * Render>()
+    let anchorPath = Path.fromResolvedExport export
+    renderScopeStore
+    |> Seq.iter (fun (KeyValue(key, value)) ->
+        let renderScope =
+            GeneratorContext.Prelude.tryGet ctx key
+            |> ValueOption.orElseWith (fun () ->
+                prerender ctx renderScopeStore (LazyContainer.CreateTypeKeyDummy<ResolvedType> key)
+                |> ignore
+                GeneratorContext.Prelude.tryGet ctx key
+                )
+            |> ValueOption.defaultWith (fun () ->
+                failwith "Could not find render scope for key")
+        let path = TransientPath.anchor anchorPath (TransientPath.create value)
+        anchorPreludeAnchorScope ctx (Some anchors) path renderScope)
+    anchors
+
+let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport): unit =
+    let scope = RenderScopeStore.create()
+    match export with
+    | ResolvedExport.Class value ->
+        let path = Path.fromClass value
+        let ref = TypeRefRender.create false path
+        let anchors = anchorPreludeExportScope ctx export scope
+        let render =
+            Class.render ctx scope value
+            |> Render.Concrete.anchorTypeDefn ctx
+            |> TypeRender.TypeDefn
+        {
+            Type = ResolvedType.Class value
+            Root = path
+            TypeRef = ref
+            Render = Anchored.Render( ref, lazy render )
+            Anchors = anchors
+        }
+        |> GeneratorContext.Anchored.addOrReplace ctx export
+    | ResolvedExport.Variable value ->
+        let path =
+            Path.fromVariable value
+            |> AnchorPath.create
+        let typeRef =
+            value.Type
+            |> prerender ctx scope
+            |> TypeRefRender.anchor path
+        let anchors = anchorPreludeExportScope ctx export scope
+        let render =
+            {
+                Metadata = { Path = Path.create path }
+                TypedNameRender.Name = value.Name
+                Type = typeRef
+                Traits = Set []
+                TypeParameters = []
+                Documentation = value.Documentation
+            }
+            |> TypeRender.Variable
+        {
+            Type = value.Type.Value
+            Root = path |> AnchorPath.toTypePath
+            TypeRef = typeRef
+            Render = Anchored.Render( typeRef, lazy render )
+            Anchors = anchors
+        }
+        |> GeneratorContext.Anchored.addOrReplace ctx export
+    | ResolvedExport.Interface value ->
+        let path = Path.fromInterface value
+        let ref = TypeRefRender.create false path
+        let anchors = anchorPreludeExportScope ctx export scope
+        let render =
+            Interface.render ctx scope value
+            |> Render.Concrete.anchorTypeDefn ctx
+            |> TypeRender.TypeDefn
+        {
+            Type = ResolvedType.Interface value
+            Root = path
+            TypeRef = ref
+            Render = Anchored.Render( ref, lazy render )
+            Anchors = anchors
+        }
+        |> GeneratorContext.Anchored.addOrReplace ctx export
+    | ResolvedExport.TypeAlias value ->
+        let path = Path.fromTypeAlias value
+        let ref = TypeRefRender.create false path
+        let anchors = anchorPreludeExportScope ctx export scope
+        let render =
+            TypeAlias.render ctx scope value
+            |> Render.Concrete.anchorTypeAlias ctx
+            |> TypeRender.TypeAlias
+        {
+            Type = value.Type.Value
+            Root = path
+            TypeRef = ref
+            Render = Anchored.Render( ref, lazy render )
+            Anchors = anchors
+        }
+        |> GeneratorContext.Anchored.addOrReplace ctx export
+    | ResolvedExport.Enum value ->
+        let path = Path.fromEnum value
+        let ref = TypeRefRender.create false path
+        let anchors = anchorPreludeExportScope ctx export scope
+        let render =
+            match Enum.render ctx value with
+            | Concrete.TypeRender.EnumUnion enumUnion ->
+                enumUnion
+                |> Render.Concrete.anchorEnum
+                |> TypeRender.EnumUnion
+            | Concrete.TypeRender.StringUnion literalUnionRender ->
+                literalUnionRender
+                |> Render.Concrete.anchorEnum
+                |> TypeRender.StringUnion
+            | _ -> failwith "Unreachable branch"
+        {
+            Type = ResolvedType.Enum value
+            Root = path
+            TypeRef = ref
+            Render = Anchored.Render( ref, lazy render )
+            Anchors = anchors
+        }
+        |> GeneratorContext.Anchored.addOrReplace ctx export
+    | ResolvedExport.Function [] -> failwith "Empty function list"
+    | ResolvedExport.Function (headFunc :: rest) ->
+        let path = Path.fromFunction headFunc
+        let anchorPath = AnchorPath.create path
+        let ref =
+            headFunc.SignatureKey.Value
+            |> ResolvedType.TypeLiteral
+            |> LazyContainer.CreateTypeKeyDummy<ResolvedType>
+            |> prerender ctx scope
+            |> TypeRefRender.anchor anchorPath
+        let render =
+            {
+                FunctionLikeRender.Name = headFunc.Name
+                Metadata = { Path = Path.create path }
+                Signatures =
+                    (headFunc :: rest)
+                    |> List.map (fun func ->
+                        {
+                            FunctionLikeSignature.Metadata = { Path = Path.create path }
+                            Parameters =
+                                func.Parameters
+                                |> List.map (
+                                    Parameter.render ctx scope
+                                    >> Render.Concrete.anchorTypedNameRender ctx anchorPath
+                                    )
+                            ReturnType =
+                                func.Type
+                                |> prerender ctx scope
+                                |> TypeRefRender.anchor anchorPath
+                            Traits = Set [ RenderTraits.Static ]
+                            Documentation = func.Documentation
+                            TypeParameters =
+                                func.TypeParameters
+                                |> List.map (
+                                    _.Value
+                                    >> TypeParameter.render ctx scope
+                                    >> Render.Concrete.anchorTypeParameters ctx anchorPath
+                                    )
+                        }
+                        )
+                Traits = Set []
+                TypeParameters =
+                    headFunc.TypeParameters
+                    |> List.map (fun typeParameter ->
+                        let typeParameter = typeParameter.Value
+                        let path =
+                            path
+                            |> TypeParamPath.createOnMember typeParameter.Name
+                        {
+                            TypeParameterRender.Metadata = { Path = Path.create path }
+                            Name = typeParameter.Name
+                            Constraint =
+                                typeParameter.Constraint
+                                |> Option.toValueOption
+                                |> ValueOption.map (prerender ctx scope >> TypeRefRender.anchor anchorPath)
+                            Default = 
+                                typeParameter.Default
+                                |> Option.toValueOption
+                                |> ValueOption.map (prerender ctx scope >> TypeRefRender.anchor anchorPath)
+                            Documentation = typeParameter.Documentation
+                        }
+                        )
+                Documentation = headFunc.Documentation
+            }
+            |> TypeRender.Function
+        let anchors = anchorPreludeExportScope ctx export scope
+        {
+            Type = headFunc.SignatureKey.Value |> ResolvedType.TypeLiteral
+            Root = anchorPath |> AnchorPath.toTypePath
+            TypeRef = ref 
+            Render = Anchored.Render( ref, lazy render )
+            Anchors = anchors
+        }
+        |> GeneratorContext.Anchored.addOrReplace ctx export
+    | ResolvedExport.Module value ->
+        value.Exports
+        |> List.iter (registerAnchorFromExport ctx)
+
+let private registerExportsForAnchoring (ctx: GeneratorContext) = List.iter (registerAnchorFromExport ctx)
+
+module ArenaInterner =
+    let processExports (ctx: GeneratorContext) (interner: ArenaInterner) =
+        interner.ExportMap
+        |> Map.iter (fun _ -> registerExportsForAnchoring ctx)

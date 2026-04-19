@@ -48,8 +48,10 @@
 /// </remarks>
 module Xantham.Decoder.ArenaInterner
 
+open System.Collections.Concurrent
 open System.Collections.Frozen
 open System.Collections.Generic
+open FSharp.Control
 open Xantham
 open Xantham.Decoder
 open Xantham.Decoder.Types
@@ -102,8 +104,9 @@ and LazyContainer<'RawData, 'LazyResult> = {
     Data: 'RawData
     Result: Lazy<'LazyResult>
 } with
-    static member CreateLazyTypeKeyDummy<'LazyResult> (value: Lazy<'LazyResult>): LazyContainer<TypeKey, 'LazyResult> = { Data = TypeKindPrimitive.Never.TypeKey; Result = value }
-    static member CreateTypeKeyDummy<'LazyResult> (value: 'LazyResult): LazyContainer<TypeKey, 'LazyResult> = { Data = TypeKindPrimitive.Never.TypeKey; Result = Lazy.CreateFromValue value }
+    static member inline DummyTypeKey = TypeKindPrimitive.Unknown.TypeKey
+    static member CreateLazyTypeKeyDummy<'LazyResult> (value: Lazy<'LazyResult>): LazyContainer<TypeKey, 'LazyResult> = { Data = LazyContainer<_,_>.DummyTypeKey; Result = value }
+    static member CreateTypeKeyDummy<'LazyResult> (value: 'LazyResult): LazyContainer<TypeKey, 'LazyResult> = { Data = LazyContainer<_,_>.DummyTypeKey; Result = Lazy.CreateFromValue value }
     static member inline CreateFromValue<'RawData, 'LazyResult> (value: 'LazyResult): LazyContainer<'RawData, 'LazyResult> = { Data = Unchecked.defaultof<_>; Result = Lazy.CreateFromValue value }
     member inline this.Value with get() = this.Result.Value
     member inline this.IsValueCreated with get() = this.Result.IsValueCreated
@@ -392,8 +395,8 @@ module ArenaInterner =
         let typeMap = decodedResult.TypeMap
         let exportMap = decodedResult.ExportMap
         let typeExportMap = decodedResult.ExportTypeMap
-        let resolved = Dictionary<TypeKey, ResolvedType>()
-        let resolvedExports = Dictionary<TypeKey, ResolvedExport>()
+        let resolved = ConcurrentDictionary<TypeKey, ResolvedType>()
+        let resolvedExports = ConcurrentDictionary<TypeKey, ResolvedExport>()
         let libEsSet = decodedResult.LibEsExports.ToFrozenSet()
         let isLibEs = libEsSet.Contains
         
@@ -744,19 +747,28 @@ module ArenaInterner =
             Documentation = para.Documentation
         }
         
+        let exportMap =
+            exportMap
+            |> Seq.map (_.Deconstruct() >> (fun (key, value) -> key, seq value))
+            |> TaskSeq.ofSeq
+            |> TaskSeq.map (fun (key, value) ->
+                let exports =
+                    value
+                    |> TaskSeq.ofSeq
+                    |> TaskSeq.choose (resolveExport >> Result.toOption)
+                    |> TaskSeq.toList
+                key, exports
+                )
+            |> TaskSeq.toSeq
+            |> Map
+        
         {
             ResolveType = resolve
             ResolveExport = resolveExport
-            ExportMap =
-                exportMap
-                |> Map.map (fun _ value ->
-                    value
-                    |> Set.toList
-                    |> List.choose (resolveExport >> Result.toOption)
-                    )
+            ExportMap = exportMap
             Graph = lazy Graph.create false decodedResult
-            ResolvedTypes = resolved
-            ResolvedExports = resolvedExports
+            ResolvedTypes = Dictionary resolved
+            ResolvedExports = Dictionary resolvedExports
         }
 
 let inline (|Resolve|) (value: LazyContainer<_, 'T>) = value.Value

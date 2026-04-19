@@ -115,7 +115,8 @@ module Decoder =
     /// </summary>
     let readWithSettings (settings: Settings) =
         File.ReadAllText(settings.InputFile)
-        |> Decode.Auto.fromString<Schema.EncodedResult>
+        |> Decode.fromString Schema.EncodedResult.decode
+        // |> Decode.Auto.fromString<Schema.EncodedResult>
         |> Result.map (
             if settings.Compress then Utils.compress else id
             >> if settings.Sanitize then Utils.sanitize else id

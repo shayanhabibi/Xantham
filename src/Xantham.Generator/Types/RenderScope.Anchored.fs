@@ -46,6 +46,10 @@ module TypeRefAtom =
         | TypeRefAtom.Widget widgetBuilder -> widgetBuilder
 
 module TypeRefRender =
+    type SRTPHelper =
+        static member inline Create(nullable: bool, kind: TypePath) = { Kind = TypeRefKind.Atom(TypeRefAtom.Path kind); Nullable = nullable }
+        static member inline Create(nullable: bool, kind: WidgetBuilder<Type>) = { Kind = TypeRefKind.Atom(TypeRefAtom.Widget kind); Nullable = nullable }
+    let inline create nullable kind = ((^T or SRTPHelper):(static member Create: bool * ^T -> TypeRefRender) (nullable, kind))
     let rec anchor (anchorPath: AnchorPath) (typeRefRender: Prelude.TypeRefRender) =
         {
             Kind =
