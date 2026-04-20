@@ -8,6 +8,7 @@ open Xantham.Decoder.ArenaInterner
 open Xantham.Generator.NamePath
 open Xantham.Generator.Types
 open Xantham.Generator
+open Xantham.Generator.Types.Customisation
 
 /// Wrapper that chooses the type of dictionary (concurrent/normal)
 /// depending on the presence of the CONCURRENT_DICT constant on compilation
@@ -18,109 +19,90 @@ type DictionaryImpl<'Key, 'Value> =
     Dictionary<'Key, 'Value>
     #endif
 
-type PreludeScopeStore = DictionaryImpl<
-    ResolvedType, // Key
-    Choice< // 1 of 3 value types
-        Prelude.Widget.RenderScope,
-        Prelude.Transient.RenderScope, // transient render scopes
-        Prelude.Concrete.RenderScope // concrete render scopes
-        >
-    >
-
+type PreludeScopeStore = DictionaryImpl< ResolvedType, RenderScope >
 type AnchorScopeStore = DictionaryImpl<Choice<ResolvedType, ResolvedExport>, Choice<Anchored.TypeRefRender, Anchored.RenderScope>>
 type PreludeGetTypeRefFunc = GeneratorContext -> RenderScopeStore -> LazyResolvedType -> TypeRefRender
 and GeneratorContext =
     {
+        TypeAliasRemap: DictionaryImpl<ResolvedType, TypeRefRender>
         PreludeGetTypeRef: PreludeGetTypeRefFunc
         PreludeRenders: PreludeScopeStore
         AnchorRenders: AnchorScopeStore
+        InFlight: HashSet<ResolvedType>
+        Customisation: Customisation
+        
     }
     override this.ToString() = $"GeneratorContext(%d{this.PreludeRenders.Count})"
-    static member internal Create(preludeGetTypeRefFunc) = {
+    static member internal Create(preludeGetTypeRefFunc, ?customisation) = {
         PreludeRenders = DictionaryImpl()
         AnchorRenders = DictionaryImpl()
         PreludeGetTypeRef = preludeGetTypeRefFunc
+        InFlight = HashSet()
+        TypeAliasRemap = DictionaryImpl()
+        Customisation = defaultArg customisation Customisation.Default
     }
+    
 
 module GeneratorContext =
-    /// <summary>
-    /// Inlined implementations of the required functions with
-    /// branching compile time logic depending on the type of dictionary
-    /// we are working with due to the absence/presence of the CONCURRENT_DICT constant.
-    /// </summary>
     module private Operation =
-        let inline getOrAdd func key dict =
+        let inline getOrAdd func key (dict: DictionaryImpl<'Key, 'Value>) =
             #if CONCURRENT_DICT
-            ConcurrentDictionary.tryItemOrAdd func key dict
+            dict.GetOrAdd(key, System.Func<_,_>(func))
             #else
-            Dictionary.tryItem key dict
-            |> ValueOption.defaultWith (fun () ->
-                Dictionary.tryAddOrGet key (func key) dict)
+            match dict.TryGetValue(key) with
+            | true, value -> value
+            | _ ->
+                let value = func key
+                dict[key] <- value
+                value
             #endif
-        let inline tryGet key dict =
-            #if CONCURRENT_DICT
-            ConcurrentDictionary.tryItem key dict
-            #else
-            Dictionary.tryItem key dict
-            #endif
-        let inline addOrReplace key value dict =
-            #if CONCURRENT_DICT
-            ConcurrentDictionary.addOrReplace key value dict
-            #else
-            Dictionary.addOrReplace key value dict
-            #endif
+        let inline tryGet key (dict: DictionaryImpl<'Key, 'Value>) =
+            match dict.TryGetValue(key) with
+            | true, value -> ValueSome value
+            | _ -> ValueNone
+        let inline tryAdd key value (dict: DictionaryImpl<'Key, 'Value>) =
+            dict.TryAdd(key, value)
+        let inline addOrReplace key value (dict: DictionaryImpl<'Key, 'Value>) =
+            dict[key] <- value
+    
     module Prelude =
-        type SRTPHelper =
-            static member inline Add(ctx, key, value) =
-                ctx.PreludeRenders
-                |> Operation.addOrReplace key (Choice1Of3 value)
-            static member inline Add(ctx, key, value) =
-                ctx.PreludeRenders
-                |> Operation.addOrReplace key (Choice2Of3 value)
-            static member inline Add(ctx, key, value) =
-                ctx.PreludeRenders
-                |> Operation.addOrReplace key (Choice3Of3 value)
-            static member inline Add(ctx, key, value) =
-                ctx.PreludeRenders
-                |> Operation.addOrReplace key value
-                
+        let addTypeAliasRemap ctx key value =
+            ctx.TypeAliasRemap
+            |> Operation.addOrReplace key value
+        let canFlight ctx key =
+            #if CONCURRENT_DICT
+            lock ctx.InFlight (fun () ->
+            #endif
+            ctx.InFlight.Add key
+            #if CONCURRENT_DICT
+                )
+            #endif
         let tryGet ctx key =
             ctx.PreludeRenders
             |> Operation.tryGet key
-        let addOrReplaceChoice ctx key value =
+        let addOrReplace ctx key value =
             ctx.PreludeRenders
             |> Operation.addOrReplace key value
-        let inline addOrReplace ctx key value =
-            ((^T or SRTPHelper): (static member Add: GeneratorContext * ResolvedType * ^T -> unit) ctx, key, value)
     module Anchored =
-        type SRTPHelper =
-            static member inline Add(ctx: GeneratorContext, key, value) =
-                ctx.AnchorRenders
-                |> Operation.addOrReplace key value
-            static member inline Add(ctx, key, value) =
-                ctx.AnchorRenders
-                |> Operation.addOrReplace (Choice1Of2 key) (Choice1Of2 value)
-            static member inline Add(ctx, key, value) =
-                ctx.AnchorRenders
-                |> Operation.addOrReplace (Choice1Of2 key) (Choice2Of2 value)
-            static member inline Add(ctx, key, value) =
-                ctx.AnchorRenders
-                |> Operation.addOrReplace (Choice2Of2 key) (Choice2Of2 value)
-            static member inline TryGet(ctx, key) =
-                ctx.AnchorRenders
-                |> Operation.tryGet key
-            static member inline TryGet(ctx, key) =
-                ctx.AnchorRenders
-                |> Operation.tryGet (Choice1Of2 key)
-            static member inline TryGet(ctx, key) =
-                ctx.AnchorRenders
-                |> Operation.tryGet (Choice2Of2 key)
-                
-        let inline tryGet ctx key =
-            ((^T or SRTPHelper): (static member TryGet: GeneratorContext * ^T -> Choice<Anchored.TypeRefRender, Anchored.RenderScope> voption) ctx, key)
+        let tryGet (ctx: GeneratorContext) (key: Choice<ResolvedType, ResolvedExport>) =
+            ctx.AnchorRenders
+            |> Operation.tryGet key
+        
+        let tryGetResolvedType (ctx: GeneratorContext) (key: ResolvedType) =
+            tryGet ctx (Choice1Of2 key)
             
-        let inline addOrReplace ctx key value =
-            ((^T or SRTPHelper): (static member Add: GeneratorContext * ^T * ^U -> unit) ctx, key, value)
+        let tryGetResolvedExport (ctx: GeneratorContext) (key: ResolvedExport) =
+            tryGet ctx (Choice2Of2 key)
+
+        let addOrReplace (ctx: GeneratorContext) (key: Choice<ResolvedType, ResolvedExport>) (value: Choice<Anchored.TypeRefRender, Anchored.RenderScope>) =
+            ctx.AnchorRenders
+            |> Operation.addOrReplace key value
+            
+        let addResolvedType (ctx: GeneratorContext) (key: ResolvedType) (value: Choice<Anchored.TypeRefRender, Anchored.RenderScope>) =
+            addOrReplace ctx (Choice1Of2 key) value
+            
+        let addResolvedExport (ctx: GeneratorContext) (key: ResolvedExport) (value: Choice<Anchored.TypeRefRender, Anchored.RenderScope>) =
+            addOrReplace ctx (Choice2Of2 key) value
         
             
             

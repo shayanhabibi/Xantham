@@ -78,9 +78,14 @@ module Decoder =
         /// Defaults to <c>true</c>.
         /// </summary>
         Compress: bool
+        /// <summary>
+        /// Whether to sanitize the typemap by replacing cyclical keys with obj.
+        /// Defaults to <c>true</c>.
+        /// </summary>
+        Sanitize: bool
     }
     type Settings with
-        static member Create(inputFile: string, ?performHealthCheck: bool, ?compress: bool) =
+        static member Create(inputFile: string, ?performHealthCheck: bool, ?compress: bool, ?sanitize: bool) =
             let performHealthCheck =
                 defaultArg
                     performHealthCheck
@@ -90,10 +95,12 @@ module Decoder =
                     false
                     #endif
             let compress = defaultArg compress true
+            let sanitize = defaultArg sanitize true
             {
                 InputFile = inputFile
                 PerformHealthCheck = performHealthCheck
                 Compress = compress
+                Sanitize = sanitize
             }
     let private getExportSource = function
         | TsExportDeclaration.Variable { Source = source } 
@@ -108,9 +115,11 @@ module Decoder =
     /// </summary>
     let readWithSettings (settings: Settings) =
         File.ReadAllText(settings.InputFile)
-        |> Decode.Auto.fromString<Schema.EncodedResult>
+        |> Decode.fromString Schema.EncodedResult.decode
+        // |> Decode.Auto.fromString<Schema.EncodedResult>
         |> Result.map (
             if settings.Compress then Utils.compress else id
+            >> if settings.Sanitize then Utils.sanitize else id
             >> fun result ->
                 if settings.PerformHealthCheck then Diagnostics.healthCheck result |> Diagnostics.printHealthCheck
                 {

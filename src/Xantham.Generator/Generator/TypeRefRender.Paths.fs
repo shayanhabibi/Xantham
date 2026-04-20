@@ -1,15 +1,20 @@
 ﻿module Xantham.Generator.Generator.Path
 
+open System.ComponentModel
 open Xantham.Generator
 open Xantham.Generator.NamePath
 open Xantham.Decoder.ArenaInterner
 open Xantham.Decoder
+open Xantham.Generator.Types.Customisation
 
-let inline private getQualifiedName (container: ^T when ^T:(member FullyQualifiedName: ArenaInterner.QualifiedNamePart list)) =
+[<EditorBrowsable(EditorBrowsableState.Never)>]
+let inline getQualifiedName (container: ^T when ^T:(member FullyQualifiedName: ArenaInterner.QualifiedNamePart list)) =
     container.FullyQualifiedName
     |> QualifiedNamePart.parse
     |> QualifiedName.create
 
+let inline private sanitizeSource (source: string) =
+    source.Trim('@').Split([|'\\'; '/'|], System.StringSplitOptions.RemoveEmptyEntries) |> Array.toList
 let inline private createModulePath (qualifiedName: QualifiedName) (source: ArenaInterner.QualifiedNamePart option) =
     let hasNodeModuleFilePath =
         qualifiedName.FilePath
@@ -44,12 +49,14 @@ let inline private createModulePath (qualifiedName: QualifiedName) (source: Aren
             // proceed as normal
             |> List.fold (fun acc s -> ModulePath.create s acc) (ModulePath.init s)
         else
+            let s = sanitizeSource s
             path
-            |> List.fold (fun acc s -> ModulePath.create s acc) (ModulePath.init s)
+            |> List.fold (fun acc s -> ModulePath.create s acc) (ModulePath.createFromList s)
     // ==================================
     | Some (ArenaInterner.QualifiedNamePart.Abnormal(s, _) | ArenaInterner.QualifiedNamePart.Normal s), path ->
+        let s = sanitizeSource s
         path
-        |> List.fold (fun acc s -> ModulePath.create s acc) (ModulePath.init s)
+        |> List.fold (fun acc s -> ModulePath.create s acc) (ModulePath.createFromList s)
 
 let fromVariable (variable: Variable) =
     let qualifiedName = getQualifiedName variable
@@ -123,3 +130,19 @@ let fromResolvedExport (resolvedExport: ResolvedExport) =
     | ResolvedExport.Function (func :: _) ->
         fromFunction func |> AnchorPath.Member
     | ResolvedExport.Function [] -> failwith "Resolved export contained no functions for the function case."
+
+module Interceptors =
+    let inline shouldIgnoreRender (interceptor: Interceptors.IgnoreRendersForPaths) (value: ^T when ^T:(member Source: ArenaInterner.QualifiedNamePart option) and ^T:(member FullyQualifiedName: ArenaInterner.QualifiedNamePart list)) =
+        Option.exists interceptor.Source value.Source
+        ||
+        getQualifiedName value
+        |> interceptor.QualifiedName
+    let shouldIgnoreExport (interceptor: Interceptors.IgnoreRendersForPaths) (value: ResolvedExport) =
+        match value with
+        | ResolvedExport.Variable value -> shouldIgnoreRender interceptor value
+        | ResolvedExport.Interface value -> shouldIgnoreRender interceptor value
+        | ResolvedExport.TypeAlias value -> shouldIgnoreRender interceptor value
+        | ResolvedExport.Class value -> shouldIgnoreRender interceptor value
+        | ResolvedExport.Enum value -> shouldIgnoreRender interceptor value
+        | ResolvedExport.Function value -> shouldIgnoreRender interceptor value[0]
+        | ResolvedExport.Module value -> shouldIgnoreRender interceptor value

@@ -6,107 +6,9 @@ open Fabulous.AST
 open Fantomas.Core.SyntaxOak
 open Xantham
 open Xantham.Decoder.ArenaInterner
-open Xantham.Generator
 open Xantham.Generator.NamePath
 open Xantham.Decoder
 
-(*
-What is the recursive issue with rendering?
-The issue is that we may introspect a type and enter a cycle when we introspect
-further to determine what should be done.
-
-When we process a type to be referenced, we will produce either:
-1 a primitive widget render
-2 a path to a concrete type
-3 a transient path for a transient type that has to be rendered with whoever
-    is calling for the reference.
-4 a composition of the above.
-
-1 & 2 can be immediately processed without further inspecting the type.
-3 usually can only be elicited after inspecting a type to determine whether
-it needs to be rendered as a transient type at all. So long as we are not
-requesting further introspection, we can safely proceed with heuristics.
-
-Naturally, we cache these results against the resolved type that elicited the
-reference.
-
-When we finalise our renders, concrete paths that contain transient references will
-require those transient references to be anchored - and in doing so, will require
-those references to point to the renders that we will create.
-
-Therefore:
-> Transient anchoring will lift the renders to the caller
-> Type reference rendering can lift renders
-> Any final rendering of a type/reference can lift renders
-
-What if a transient type also contains a transient reference? What if that transient
-reference forms a cycle? We would endleslly try to lift the transient render and
-cause a stack overflow.
-
-> Any transient render is caused by an anchored path.
-> Concrete paths (distinct from anchored paths) are the root of any transient render graph.
-
-If we track all the types that are associated with a concrete paths render until it
-hits another concrete path or simple primitive, we can determine whether we need to
-recreate a transient type reference, or if we already have the reference in the concrete
-paths scope.
-
-That's actually a valid topology for the issue. Each concrete path forms a 'scope'.
-
-Transient Scope graph root (transient path):
-0. Transient Root 
-1. Transient paths - terminal node
-2. Primitive - terminal node
-3. Concrete path - terminal node
-4. Composite - branch
-> Associated renders: root render
-
-Concrete Scope graph:
-1. Concrete path - root / terminal node
-2. Primitive - terminal only
-3. Transient path - terminal only
-4. Composite - branch
-> Associated renders: root render
-
-Anchored Scope graph root (concrete):
-0. Concrete root
-1. Concrete path - terminal node
-2. Transient path - branch / cycles
-3. Primitive - terminal only
-4. Composite - branch
-> Associated renders: root render, and all transient renders
-
-As we build the anchored scope graph, we can only have one transient
-anchored per scope. So cyclic references, or cross references must be resolved
-with this in mind.
-
-Best to do this hierarchically, rather than in sequence.
-
-When building a transient scope graph, we must track:
-- local transient path.
-
-When building an anchored scope graph, we must track:
-- what types are already in scope
-- type set is atomic for all graph builders of the scope
-- what renders must be created for the scope
-
-When creating a render we must track:
-- What the path of render is (where to place it in namespace/module/file)
-- What associated renders there are (are there transient renders?)
-
-When rendering a reference, we need:
-- an anchored graph.
-
-So first - build transient scope graphs.
-Build concrete scope graphs.
-Build anchored scope graphs.
-Render anchored scope graphs.
-*)
-
-
-
-
-// force construction via our render stores so that we can be assured
 // of transient path tracking
 type TypeRefAtom =
     private
@@ -196,7 +98,7 @@ module RenderScopeStore =
         let inline createConcretePath (_scope: RenderScopeStore) (_resolvedType: ResolvedType) (path: TypePath) =
             Unsafe.createConcretePath path
         let inline createTransientPath (scope: RenderScopeStore) (resolvedType: ResolvedType) (path: TransientTypePath) =
-            Dictionary.tryAdd resolvedType path scope
+            scope.TryAdd(resolvedType, path) |> ignore
             Unsafe.createTransientPath path
         
         type SRTPHelper =
@@ -354,8 +256,8 @@ type RenderScope<'RootPathType, 'RenderType> = {
     Root: 'RootPathType
     TypeRef: TypeRefRender
     // we calculate the render lazily
-    Render: Lazy<'RenderType>
-    TransientChildren: RenderScopeStore
+    Render: 'RenderType
+    TransientChildren: RenderScopeStore voption
 }
 
 [<Struct>]
@@ -380,6 +282,8 @@ type RenderTraits =
 [<Struct>]
 type RenderMetadata = {
     Path: Path
+    Source: ArenaInterner.QualifiedNamePart voption
+    FullyQualifiedName: ArenaInterner.QualifiedNamePart list voption
 }
 
 type TypeParameterRender<'RenderType, 'TyparName> = {
@@ -469,16 +373,8 @@ type MemberRender<'RenderType, 'MemberName, 'TyparName> =
     | Property of TypedNameRender<'RenderType, 'MemberName, 'TyparName>
     | Method of FunctionLikeRender<'RenderType, 'MemberName, 'TyparName>
 
-type Render<'RenderType, 'TypeName, 'MemberName, 'TyparName> =
-    | RefOnly of 'RenderType
-    | Render of 'RenderType * TypeRender<'RenderType, 'TypeName, 'MemberName, 'TyparName>
+type RenderKind<'RenderType, 'TypeName, 'MemberName, 'TyparName> = 'RenderType * Lazy<TypeRender<'RenderType, 'TypeName, 'MemberName, 'TyparName>>
 
-module Widget =
-    type RenderScope = {
-        Type: ResolvedType
-        TypeRef: TypeRefRender
-    }
-    
 module Transient =
     type TypeName = Name<Case.pascal> voption
     type MemberName = Name<Case.camel>
@@ -494,7 +390,7 @@ module Transient =
     type TypeAliasRenderRef = TypeAliasRenderRef<TypeRefRender, TypeName, TyparName>
     type TypeRender = TypeRender<TypeRefRender, TypeName, MemberName, TyparName>
     type MemberRender = MemberRender<TypeRefRender, MemberName, TyparName>
-    type Render = Render<TypeRefRender, TypeName, MemberName, TyparName>
+    type Render = RenderKind<TypeRefRender, TypeName, MemberName, TyparName>
     type RenderScope = RenderScope<TransientTypePath, Render>
     type RenderScopeFunc = ResolvedType -> RenderScope voption
 
@@ -513,12 +409,39 @@ module Concrete =
     type TypeAliasRenderRef = TypeAliasRenderRef<TypeRefRender, TypeName, TyparName>
     type TypeRender = TypeRender<TypeRefRender, TypeName, MemberName, TyparName>
     type MemberRender = MemberRender<TypeRefRender, MemberName, TyparName>
-    type Render = Render<TypeRefRender, TypeName, MemberName, TyparName>
-    type RenderScope = RenderScope<TypePath, Render>
-    type RenderScopeFunc = ResolvedType -> RenderScope voption
-    type ExportRenderScopeFunc = ResolvedExport -> RenderScope
+    type Render = RenderKind<TypeRefRender, TypeName, MemberName, TyparName>
 
-type PreludeExportRenderScopeFunc = Concrete.ExportRenderScopeFunc
-type PreludeTypeRenderScopeFunc = ResolvedType -> Choice<Concrete.RenderScope, Transient.RenderScope> voption
+type Render =
+    | RefOnly of TypeRefRender
+    | Concrete of Concrete.Render
+    | Transient of Transient.Render
 
-    
+type RenderScope = RenderScope<TypeLikePath voption, Render>
+
+module Render =
+    type SRTPHelper =
+        static member Create(typeRef: TypeRefRender, render) = Render.Concrete(typeRef, render)
+        static member Create(typeRef: TypeRefRender, render) = Render.Transient(typeRef, render)
+        static member Create(typeRef: TypeRefRender, renderer) = Render.Concrete(typeRef, lazy renderer())
+        static member Create(typeRef: TypeRefRender, renderer) = Render.Transient(typeRef, lazy renderer())
+        static member Create(typeRef: TypeRefRender, render) = Render.Concrete(typeRef, lazy render)
+        static member Create(typeRef: TypeRefRender, render) = Render.Transient(typeRef, lazy render)
+        static member Create(typeRef: TypeRefRender) = Render.RefOnly(typeRef)
+    let inline createRefOnly (typeRef: TypeRefRender) = SRTPHelper.Create(typeRef)
+    let inline createFromConcreteLazy (typeRef: TypeRefRender) (render: Lazy<Concrete.TypeRender>) = SRTPHelper.Create(typeRef, render)
+    let inline createFromTransientLazy (typeRef: TypeRefRender) (render: Lazy<Transient.TypeRender>) = SRTPHelper.Create(typeRef, render)
+    let inline createFromConcrete (typeRef: TypeRefRender) (render: Concrete.TypeRender) = SRTPHelper.Create(typeRef, render)
+    let inline createFromTransient (typeRef: TypeRefRender) (render: Transient.TypeRender) = SRTPHelper.Create(typeRef, render)
+    let inline create (typeRef: TypeRefRender) renderOrRenderer =
+        ((^T or SRTPHelper):(static member Create: TypeRefRender * ^T -> Render) typeRef, renderOrRenderer)
+
+module RenderScope =
+    let private dummyStore = RenderScopeStore.create()
+    let createRootless resolvedType (typeRef: TypeRefRender): RenderScope =
+        {
+            Type = resolvedType
+            Root = ValueNone
+            TypeRef = typeRef
+            Render = Render.RefOnly typeRef
+            TransientChildren = ValueNone
+        }

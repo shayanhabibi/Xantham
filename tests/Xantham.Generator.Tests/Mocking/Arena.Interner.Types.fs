@@ -6,23 +6,23 @@ open Xantham.Decoder.ArenaInterner
 
 module ResolvedType =
     let globalThis = ResolvedType.GlobalThis
-    let primitive = ResolvedType.Primitive
+    let primitive: TypeKindPrimitive -> ResolvedType = ResolvedType.Primitive
     module Conditional =
         let create (trueType: ResolvedType) (falseType: ResolvedType) =
             {
-                Check = lazy primitive TypeKindPrimitive.Any
-                Extends = lazy primitive TypeKindPrimitive.Any
-                True = lazy trueType
-                False = lazy falseType
+                Check = LazyContainer.CreateLazyTypeKeyDummy<ResolvedType> <| lazy primitive TypeKindPrimitive.Any
+                Extends = LazyContainer.CreateLazyTypeKeyDummy<ResolvedType> <|lazy primitive TypeKindPrimitive.Any
+                True = LazyContainer.CreateLazyTypeKeyDummy<ResolvedType> <|lazy trueType
+                False = LazyContainer.CreateLazyTypeKeyDummy<ResolvedType> <|lazy falseType
             }
-        let extends typ conditional = { conditional with ConditionalType.Extends = lazy typ }
-        let check typ conditional = { conditional with ConditionalType.Check = lazy typ }
-        let trueType typ conditional = { conditional with ConditionalType.True = lazy typ }
-        let falseType typ conditional = { conditional with ConditionalType.False = lazy typ }
+        let extends typ conditional = { conditional with ConditionalType.Extends = LazyContainer.CreateLazyTypeKeyDummy<ResolvedType> <|lazy typ }
+        let check typ conditional = { conditional with ConditionalType.Check = LazyContainer.CreateLazyTypeKeyDummy<ResolvedType> <|lazy typ }
+        let trueType typ conditional = { conditional with ConditionalType.True = LazyContainer.CreateLazyTypeKeyDummy<ResolvedType> <|lazy typ }
+        let falseType typ conditional = { conditional with ConditionalType.False = LazyContainer.CreateLazyTypeKeyDummy<ResolvedType> <|lazy typ }
         let wrap = ResolvedType.Conditional
     module Tuple =
         let private makeTupleElementType typ = {
-            TupleElementType.Type = lazy typ
+            TupleElementType.Type = LazyContainer.CreateLazyTypeKeyDummy<ResolvedType> <|lazy typ
             IsOptional = false
             IsRest = false
         }
@@ -65,7 +65,7 @@ module ResolvedType =
     module Array =
         let create = ResolvedType.Array
     module Union =
-        let create types = ResolvedType.Union { Types = types |> List.map Lazy.CreateFromValue }
+        let create types = ResolvedType.Union { Types = types |> List.map LazyContainer.CreateFromValue }
     module Interface =
         let wrap = ResolvedType.Interface
         let create name =
@@ -132,7 +132,7 @@ module ResolvedType =
             Source = None
             FullyQualifiedName = [ QualifiedNamePart.Normal name ]
             Name = Name.Pascal.create name
-            TypeAlias.Type = Lazy.CreateFromValue innerType
+            TypeAlias.Type = LazyContainer.CreateFromValue innerType
             TypeParameters = []
             Documentation = []
         }
@@ -142,7 +142,7 @@ module ResolvedType =
         let addTypeParameter typeParameter typeAlias = { typeAlias with TypeAlias.TypeParameters = Lazy.CreateFromValue typeParameter :: typeAlias.TypeParameters }
         let addTypeParameters typeParameters typeAlias = { typeAlias with TypeAlias.TypeParameters = (typeParameters |> List.map Lazy.CreateFromValue) @ typeAlias.TypeParameters }
         let withTypeParameters typeParameters typeAlias = { typeAlias with TypeAlias.TypeParameters = typeParameters |> List.map Lazy.CreateFromValue }
-        let withType innerType typeAlias = { typeAlias with TypeAlias.Type = Lazy.CreateFromValue innerType }
+        let withType innerType typeAlias = { typeAlias with TypeAlias.Type = LazyContainer.CreateFromValue innerType }
     module TypeLiteral =
         let wrap = ResolvedType.TypeLiteral
         let empty = { TypeLiteral.Members = [] }
@@ -154,7 +154,7 @@ module ResolvedType =
         let wrap = Member.Property
         let create name typ = {
             Property.Name = Name.Camel.create name
-            Property.Type = Lazy.CreateFromValue typ
+            Property.Type = LazyContainer.CreateFromValue typ
             Documentation = []
             IsOptional = false
             IsStatic = false
@@ -167,35 +167,35 @@ module ResolvedType =
         let readOnly prop = { prop with Property.Accessor = TsAccessor.ReadOnly }
         let writeOnly prop = { prop with Property.Accessor = TsAccessor.WriteOnly }
         let readWrite prop = { prop with Property.Accessor = TsAccessor.ReadWrite }
-        let withType typ prop = { prop with Property.Type = Lazy.CreateFromValue typ }
+        let withType typ prop = { prop with Property.Type = LazyContainer.CreateFromValue typ }
     module Parameter =
         let create name typ = {
             Parameter.Name = Name.Camel.create name
             IsOptional = false
             IsSpread = false
-            Parameter.Type = Lazy.CreateFromValue typ
+            Parameter.Type = LazyContainer.CreateFromValue typ
             Documentation = []
         }
         let optional param = { param with Parameter.IsOptional = true }
         let spread param = { param with Parameter.IsSpread = true }
-        let withType typ param = { param with Parameter.Type = Lazy.CreateFromValue typ }
+        let withType typ param = { param with Parameter.Type = LazyContainer.CreateFromValue typ }
     module CallSignature =
         let wrap = Member.CallSignature
         let create returnType = {
             Documentation = []
             Parameters = []
-            CallSignature.Type = Lazy.CreateFromValue returnType
+            CallSignature.Type = LazyContainer.CreateFromValue returnType
         }
         let withParameters parameters callSignature = { callSignature with CallSignature.Parameters = parameters }
-        let withReturnType returnType callSignature = { callSignature with CallSignature.Type = Lazy.CreateFromValue returnType }
+        let withReturnType returnType callSignature = { callSignature with CallSignature.Type = LazyContainer.CreateFromValue returnType }
     module TypeReference =
         let wrap = ResolvedType.TypeReference
         let create typ = {
-            TypeReference.Type = Lazy.CreateFromValue typ
+            TypeReference.Type = LazyContainer.CreateFromValue typ
             TypeArguments = []
             ResolvedType = None
         }
-        let withTypeArguments typeArguments typ = { typ with TypeReference.TypeArguments = typeArguments |> List.map Lazy.CreateFromValue }
-        let withResolvedType resolvedType typ = { typ with TypeReference.ResolvedType = Lazy.CreateFromValue resolvedType |> Some }
-        let withType innerType typ = { typ with TypeReference.Type = Lazy.CreateFromValue innerType }
+        let withTypeArguments typeArguments typ = { typ with TypeReference.TypeArguments = typeArguments |> List.map LazyContainer.CreateFromValue }
+        let withResolvedType resolvedType typ = { typ with TypeReference.ResolvedType = LazyContainer.CreateFromValue resolvedType |> Some }
+        let withType innerType typ = { typ with TypeReference.Type = LazyContainer.CreateFromValue innerType }
     

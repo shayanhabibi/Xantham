@@ -15,7 +15,6 @@
     <Project Path="src/Xantham.Fable.Core/Xantham.Fable.Core.fsproj" />
     <Project Path="src/Xantham.Fable/Xantham.Fable.fsproj" />
     <Project Path="src/Xantham.Generator/Xantham.Generator.fsproj" />
-    <Project Path="src/Xantham.SimpleGenerator/Xantham.SimpleGenerator.fsproj" />
   </Folder>
   <Folder Name="/tests/">
     <File Path="tests/Signal.test.fsx" />

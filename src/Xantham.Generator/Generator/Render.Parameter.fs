@@ -24,4 +24,6 @@ module Parameter =
         
     let render ctx scopeStore param =
         renderWithMetadata ctx scopeStore param 
-            { Path = Path.create (TransientParameterPath.AnchoredAndMoored param.Name) }
+            { Path = Path.create (TransientParameterPath.AnchoredAndMoored param.Name)
+              Source = ValueNone
+              FullyQualifiedName = ValueNone }

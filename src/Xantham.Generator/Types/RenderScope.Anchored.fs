@@ -46,6 +46,10 @@ module TypeRefAtom =
         | TypeRefAtom.Widget widgetBuilder -> widgetBuilder
 
 module TypeRefRender =
+    type SRTPHelper =
+        static member inline Create(nullable: bool, kind: TypePath) = { Kind = TypeRefKind.Atom(TypeRefAtom.Path kind); Nullable = nullable }
+        static member inline Create(nullable: bool, kind: WidgetBuilder<Type>) = { Kind = TypeRefKind.Atom(TypeRefAtom.Widget kind); Nullable = nullable }
+    let inline create nullable kind = ((^T or SRTPHelper):(static member Create: bool * ^T -> TypeRefRender) (nullable, kind))
     let rec anchor (anchorPath: AnchorPath) (typeRefRender: Prelude.TypeRefRender) =
         {
             Kind =
@@ -118,6 +122,10 @@ module TypeRefRender =
                     )
                 |> TypeRefKind.Molecule
                 |> wrap
+    let inline setNullable nullable typeRefRender = { typeRefRender with TypeRefRender.Nullable = nullable }
+    let inline orNullable nullable typeRefRender = { typeRefRender with TypeRefRender.Nullable = nullable || typeRefRender.Nullable }
+    let nullable typeRefRender = setNullable true typeRefRender
+    let nonNullable typeRefRender = setNullable false typeRefRender
 
 
 type TypeName = Name<Case.pascal>
@@ -134,7 +142,7 @@ type TypeAliasRender = TypeAliasRender<TypeRefRender, TypeName, MemberName, Typa
 type TypeAliasRenderRef = TypeAliasRenderRef<TypeRefRender, TypeName, TyparName>
 type TypeRender = TypeRender<TypeRefRender, TypeName, MemberName, TyparName>
 type MemberRender = MemberRender<TypeRefRender, MemberName, TyparName>
-type Render = Render<TypeRefRender, TypeName, MemberName, TyparName>
+type Render = RenderKind<TypeRefRender, TypeName, MemberName, TyparName>
 
 type RenderScope = {
     Type: ResolvedType
@@ -144,10 +152,7 @@ type RenderScope = {
     Anchors: Dictionary<ResolvedType, TypePath * Render>
 }
 
-type TransientScopeStore = Dictionary<ResolvedType, Transient.RenderScope>
-type ConcreteScopeStore = Dictionary<ResolvedType, Concrete.RenderScope>
 type AnchorScopeStore = Dictionary<ResolvedType, RenderScope>
 
 // to create an anchored render scope, you need a concrete root, and the transient scope store.
 // You then expand the store recursively, using the concrete path as the anchor.
-type RenderScopeFunc = ResolvedType -> Concrete.RenderScope -> TransientScopeStore -> RenderScope

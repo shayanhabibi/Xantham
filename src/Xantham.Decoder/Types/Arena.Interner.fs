@@ -48,10 +48,14 @@
 /// </remarks>
 module Xantham.Decoder.ArenaInterner
 
+open System.Collections.Concurrent
 open System.Collections.Frozen
 open System.Collections.Generic
+open FSharp.Control
 open Xantham
 open Xantham.Decoder
+open Xantham.Decoder.Types
+open Xantham.Decoder.Types.Graph
 
 type QualifiedNamePartDiagnostic =
     | ContainsQuotationMarks = (1 <<< 0)
@@ -96,8 +100,19 @@ and [<RequireQualifiedAccess>] ResolvedExport =
     | Function of Function list
     | Module of Module
 
-and LazyResolvedType = Lazy<ResolvedType>
-and LazyResolvedExport = Lazy<ResolvedExport>
+and LazyContainer<'RawData, 'LazyResult> = {
+    Data: 'RawData
+    Result: Lazy<'LazyResult>
+} with
+    static member inline DummyTypeKey = TypeKindPrimitive.Unknown.TypeKey
+    static member CreateLazyTypeKeyDummy<'LazyResult> (value: Lazy<'LazyResult>): LazyContainer<TypeKey, 'LazyResult> = { Data = LazyContainer<_,_>.DummyTypeKey; Result = value }
+    static member CreateTypeKeyDummy<'LazyResult> (value: 'LazyResult): LazyContainer<TypeKey, 'LazyResult> = { Data = LazyContainer<_,_>.DummyTypeKey; Result = Lazy.CreateFromValue value }
+    static member inline CreateFromValue<'RawData, 'LazyResult> (value: 'LazyResult): LazyContainer<'RawData, 'LazyResult> = { Data = Unchecked.defaultof<_>; Result = Lazy.CreateFromValue value }
+    member inline this.Value with get() = this.Result.Value
+    member inline this.IsValueCreated with get() = this.Result.IsValueCreated
+    member inline this.Raw with get() = this.Data
+and LazyResolvedType = LazyContainer<TypeKey, ResolvedType>
+and LazyResolvedExport = LazyContainer<TypeKey, ResolvedExport>
 
 and [<ReferenceEquality>] Module = {
     IsLibEs: bool
@@ -290,7 +305,7 @@ and [<RequireQualifiedAccess>] Member =
     | ConstructSignature of ConstructSignature list
 
 and [<ReferenceEquality>] TypeReference = {
-    Type: Lazy<ResolvedType>
+    Type: LazyResolvedType
     TypeArguments: LazyResolvedType list
     ResolvedType: LazyResolvedType option
 }
@@ -346,9 +361,18 @@ and [<ReferenceEquality>] SubstitutionType = {
 type ArenaInterner = {
     ResolveType: TypeKey -> ResolvedType
     ResolveExport: TypeKey -> Result<ResolvedExport, ResolvedType>
+    ResolvedTypes: Dictionary<TypeKey, ResolvedType>
+    ResolvedExports: Dictionary<TypeKey, ResolvedExport>
     ExportMap: Map<string, ResolvedExport list>
+    /// <summary>
+    /// WARNING: Evaluation of the graph can be expensive.<br/>
+    /// It is useful only when used in combination with the resolve type and resolve export
+    /// dictionaries to handle dependencies correctly.
+    /// </summary>
+    Graph: Lazy<Graph>
 } with
     override this.ToString() = $"ArenaInterner(%d{this.ExportMap.Count})"
+
 
 module private QualifiedNamePart =
     let create (value: string) =
@@ -371,8 +395,8 @@ module ArenaInterner =
         let typeMap = decodedResult.TypeMap
         let exportMap = decodedResult.ExportMap
         let typeExportMap = decodedResult.ExportTypeMap
-        let resolved = Dictionary<TypeKey, ResolvedType>()
-        let resolvedExports = Dictionary<TypeKey, ResolvedExport>()
+        let resolved = ConcurrentDictionary<TypeKey, ResolvedType>()
+        let resolvedExports = ConcurrentDictionary<TypeKey, ResolvedExport>()
         let libEsSet = decodedResult.LibEsExports.ToFrozenSet()
         let isLibEs = libEsSet.Contains
         
@@ -400,7 +424,11 @@ module ArenaInterner =
                 resolve typeKey
                 |> Error
         and buildFromExport (isLibEs: bool) (export: TsExportDeclaration): ResolvedExport =
-            let inline lazyResolve typ = lazy (resolve typ)
+            let inline lazyResolve typ =
+                {
+                    Data = typ
+                    Result = lazy (resolve typ)
+                }
             match export with
             | TsExportDeclaration.Variable tsVariable -> ResolvedExport.Variable {
                     IsLibEs = isLibEs
@@ -507,8 +535,14 @@ module ArenaInterner =
                     })
                 |> ResolvedExport.Function
         and buildFrom (isLibEs: bool) (typ: TsType): ResolvedType =
-            let inline lazyResolve typ = lazy (resolve typ)
-            let inline lazyResolveOption typ = typ |> Option.map lazyResolve
+            let inline lazyResolve typ =
+                {
+                    Data = typ
+                    Result = lazy (resolve typ)
+                }
+                // lazy (resolve typ)
+            let inline lazyResolveOption typ =
+                typ |> Option.map lazyResolve
             match typ with
             | TsType.GlobalThis -> ResolvedType.GlobalThis
             | TsType.Conditional tsConditionalType -> ResolvedType.Conditional {
@@ -645,9 +679,9 @@ module ArenaInterner =
             | _ -> failwith "Inlining a type parameter returned a non type parameter."
         and buildFromTypeReference (typ: TsTypeReference) =
             {
-                TypeReference.Type = lazy resolve typ.Type
-                TypeArguments = typ.TypeArguments |> List.map (fun arg -> lazy resolve arg)
-                ResolvedType = typ.ResolvedType |> Option.map (fun arg -> lazy resolve arg)
+                TypeReference.Type = { Data = typ.Type; Result = lazy resolve typ.Type }
+                TypeArguments = typ.TypeArguments |> List.map (fun arg -> { Data = arg; Result = lazy (resolve arg) } )
+                ResolvedType = typ.ResolvedType |> Option.map (fun arg -> { Data = arg; Result = lazy (resolve arg) } )
             }
         and buildFromMember = function
             | TsMember.Method tsMethod ->
@@ -655,7 +689,7 @@ module ArenaInterner =
                 |> List.map (fun method -> {
                     Method.Name = Name.Camel.create method.Name
                     Parameters = method.Parameters |> List.map buildFromParameter
-                    Type = lazy resolve method.Type
+                    Type = { Data = method.Type; Result = lazy resolve method.Type }
                     Documentation = method.Documentation
                     IsOptional = method.IsOptional
                     IsStatic = method.IsStatic
@@ -663,7 +697,7 @@ module ArenaInterner =
                 |> Member.Method
             | TsMember.Property tsProperty -> Member.Property {
                 Property.Name = Name.Camel.create tsProperty.Name
-                Type = lazy resolve tsProperty.Type
+                Type = { Data = tsProperty.Type; Result = lazy resolve tsProperty.Type }
                 Documentation = tsProperty.Documentation
                 IsOptional = tsProperty.IsOptional
                 IsStatic = tsProperty.IsStatic
@@ -672,13 +706,13 @@ module ArenaInterner =
                 }
             | TsMember.GetAccessor tsGetAccessor -> Member.GetAccessor {
                     GetAccessor.Name = Name.Camel.create tsGetAccessor.Name
-                    Type = lazy resolve tsGetAccessor.Type
+                    Type = { Data = tsGetAccessor.Type; Result = lazy resolve tsGetAccessor.Type }
                     IsStatic = tsGetAccessor.IsStatic
                     IsPrivate = tsGetAccessor.IsPrivate
                 }
             | TsMember.SetAccessor tsSetAccessor -> Member.SetAccessor {
                 SetAccessor.Name = Name.Camel.create tsSetAccessor.Name
-                ArgumentType = lazy resolve tsSetAccessor.ArgumentType
+                ArgumentType = { Data = tsSetAccessor.ArgumentType; Result = lazy resolve tsSetAccessor.ArgumentType }
                 IsStatic = tsSetAccessor.IsStatic
                 IsPrivate = tsSetAccessor.IsPrivate
                 Documentation = tsSetAccessor.Documentation
@@ -688,19 +722,19 @@ module ArenaInterner =
                 |> List.map (fun value -> {
                     CallSignature.Documentation = value.Documentation
                     Parameters = value.Parameters |> List.map buildFromParameter
-                    Type = lazy resolve value.Type
+                    Type = { Data = value.Type; Result = lazy resolve value.Type }
                 })
                 |> Member.CallSignature
             | TsMember.IndexSignature tsIndexSignature ->
                 Member.IndexSignature {
                     IndexSignature.Parameters = tsIndexSignature.Parameters |> List.map buildFromParameter
-                    Type = lazy resolve tsIndexSignature.Type
+                    Type = { Data = tsIndexSignature.Type; Result = lazy resolve tsIndexSignature.Type }
                     IsReadOnly = tsIndexSignature.IsReadOnly
                 }
             | TsMember.ConstructSignature tsOverloadableConstruct ->
                 tsOverloadableConstruct.ToList()
                 |> List.map (fun value -> {
-                    ConstructSignature.Type = lazy resolve value.Type
+                    ConstructSignature.Type = { Data = value.Type; Result = lazy resolve value.Type }
                     Parameters = value.Parameters |> List.map buildFromParameter
                 })
                 |> Member.ConstructSignature
@@ -709,20 +743,32 @@ module ArenaInterner =
             Parameter.Name = Name.Camel.create para.Name
             IsOptional = para.IsOptional
             IsSpread = para.IsSpread
-            Type = lazy resolve para.Type
+            Type = { Data = para.Type; Result = lazy resolve para.Type }
             Documentation = para.Documentation
         }
+        
+        let exportMap =
+            exportMap
+            |> Seq.map (_.Deconstruct() >> (fun (key, value) -> key, seq value))
+            |> TaskSeq.ofSeq
+            |> TaskSeq.map (fun (key, value) ->
+                let exports =
+                    value
+                    |> TaskSeq.ofSeq
+                    |> TaskSeq.choose (resolveExport >> Result.toOption)
+                    |> TaskSeq.toList
+                key, exports
+                )
+            |> TaskSeq.toSeq
+            |> Map
         
         {
             ResolveType = resolve
             ResolveExport = resolveExport
-            ExportMap =
-                exportMap
-                |> Map.map (fun _ value ->
-                    value
-                    |> Set.toList
-                    |> List.choose (resolveExport >> Result.toOption)
-                    )
+            ExportMap = exportMap
+            Graph = lazy Graph.create false decodedResult
+            ResolvedTypes = Dictionary resolved
+            ResolvedExports = Dictionary resolvedExports
         }
 
-let inline (|Resolve|) (value: Lazy<'T>) = value.Value
+let inline (|Resolve|) (value: LazyContainer<_, 'T>) = value.Value

@@ -9,6 +9,7 @@
     <ItemGroup>
         <PackageReference Include="EasyBuild.FileSystemProvider" Version="1.1.0" />
         <PackageReference Include="Fabulous.AST" Version="2.0.0-pre06" />
+        <PackageReference Include="FSharp.Control.TaskSeq" Version="1.1.1" />
         <PackageReference Include="FsToolkit.ErrorHandling" Version="5.1.0" />
         <PackageReference Include="Thoth.Json.Net" Version="12.0.0" />
     </ItemGroup>
@@ -19,6 +20,7 @@
         <Compile Include="Types\Name.fs" />
         <Compile Include="Types\Frozen.Extensions.fs" />
         <Compile Include="Types\CodedTypeKey.fs" />
+        <Compile Include="Types\Graph.fs" />
         <Compile Include="Types\Arena.Interner.fs" />
       <Compile Include="Utils.fs" />
       <Compile Include="Core.fs" />

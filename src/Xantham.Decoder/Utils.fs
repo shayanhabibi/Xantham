@@ -531,3 +531,91 @@ let compress (result: Schema.EncodedResult) =
         cycle <- cycle + 1
     printfn $"Compressed typemap from %i{initialCount} to %i{types.Count} types over %i{cycle} cycles."
     { result with Types = types; ExportedDeclarations = exports }
+
+module private Sanitize =
+    let santizeTypes (result: Schema.EncodedResult) =
+        printfn "Sanitizing types..."
+        let mutable count = 0
+        let inline fixKey key input =
+            if input = key then
+                count <- count + 1
+                TypeKindPrimitive.NonPrimitive.TypeKey
+            else
+                input
+        let sanitizedTypes =
+            result.Types
+            |> Map.map (fun key typ ->
+            let inline fixKey input = fixKey key input
+            match typ with
+            | TsType.TypeReference value when value.Type = key || List.contains key value.TypeArguments || Option.contains key value.ResolvedType ->
+                TsType.TypeReference {
+                    Type = fixKey value.Type
+                    TypeArguments = value.TypeArguments |> List.map fixKey
+                    ResolvedType = value.ResolvedType |> Option.map fixKey
+                }
+            | TsType.Conditional tsConditionalType when List.contains key [
+                    tsConditionalType.Extends
+                    tsConditionalType.Check
+                    tsConditionalType.False
+                    tsConditionalType.True
+                ] ->
+                TsType.Conditional {
+                    Extends = fixKey tsConditionalType.Extends
+                    Check = fixKey tsConditionalType.Check
+                    True = fixKey tsConditionalType.True
+                    False = fixKey tsConditionalType.False
+                }
+            | TsType.Union tsUnion when tsUnion.Types |> List.contains key ->
+                TsType.Union (TsTypeUnion (tsUnion.Types |> List.map fixKey))
+            | TsType.Intersection tsTypeIntersection when tsTypeIntersection.Types |> List.contains key ->
+                TsType.Intersection (TsTypeIntersection (tsTypeIntersection.Types |> List.map fixKey))
+            | TsType.IndexedAccess tsIndexAccessType when tsIndexAccessType.Index = key || tsIndexAccessType.Object = key ->
+                TsType.IndexedAccess {
+                    Index = fixKey tsIndexAccessType.Index
+                    Object = fixKey tsIndexAccessType.Object
+                }
+            | TsType.TypeParameter tsTypeParameter when Option.contains key tsTypeParameter.Constraint || Option.contains key tsTypeParameter.Default ->
+                TsType.TypeParameter {
+                    tsTypeParameter with
+                        Constraint = tsTypeParameter.Constraint |> Option.map fixKey
+                        Default = tsTypeParameter.Default |> Option.map fixKey
+                }
+            | TsType.Tuple tsTuple when tsTuple.Types |> List.exists (function
+                | TsTupleElement.FixedLabeled (_, { Type = innerKey })
+                | TsTupleElement.Variadic innerKey
+                | TsTupleElement.Fixed { Type = innerKey } -> innerKey = key
+                ) ->
+                TsType.Tuple {
+                    tsTuple with
+                        Types =
+                            tsTuple.Types
+                            |> List.map (function
+                                | TsTupleElement.FixedLabeled (name, value) ->
+                                    TsTupleElement.FixedLabeled (name, { value with Type = fixKey value.Type })
+                                | TsTupleElement.Variadic innerKey -> Variadic (fixKey innerKey)
+                                | Fixed tsTupleElementType -> Fixed { tsTupleElementType with Type = fixKey tsTupleElementType.Type }
+                                )
+                }
+            | TsType.Index tsIndex when tsIndex.Type = key -> TsType.Index { Type = fixKey tsIndex.Type }
+            | TsType.TemplateLiteral tsTemplateLiteralType when tsTemplateLiteralType.Types |> List.contains key ->
+                { tsTemplateLiteralType with Types = tsTemplateLiteralType.Types |> List.map fixKey }
+                |> TsType.TemplateLiteral
+            | TsType.Optional tsTypeReference when tsTypeReference.Type = key || List.contains key tsTypeReference.TypeArguments || Option.contains key tsTypeReference.ResolvedType ->
+                TsType.Optional {
+                    Type = fixKey tsTypeReference.Type
+                    TypeArguments = tsTypeReference.TypeArguments |> List.map fixKey
+                    ResolvedType = tsTypeReference.ResolvedType |> Option.map fixKey
+                }
+            | TsType.Substitution tsSubstitutionType when tsSubstitutionType.Constraint = key || tsSubstitutionType.Constraint = key ->
+                TsType.Substitution {
+                    Base = fixKey tsSubstitutionType.Base
+                    Constraint = fixKey tsSubstitutionType.Constraint
+                }
+            | value -> value
+            )
+        if count > 0 then
+            printfn $"Sanitized %i{count} types."
+        { result with Types = sanitizedTypes }
+
+let sanitize (result: Schema.EncodedResult) =
+    Sanitize.santizeTypes result
