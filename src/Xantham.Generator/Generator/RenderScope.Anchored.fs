@@ -24,7 +24,8 @@ module Render =
         | Path.Anchor anchorPath -> anchorPath
     let anchorMetadata (ctx: GeneratorContext) (anchorPath: AnchorPath) (metadata: RenderMetadata) =
         if metadata.Path.IsAnchor then metadata else
-        { Path = anchorMetadataPath ctx anchorPath metadata.Path |> Path.create }
+        { Path = anchorMetadataPath ctx anchorPath metadata.Path |> Path.create
+          Source = ValueNone; FullyQualifiedName = ValueNone }
     module Transient =
         let inline anchorUnionCase (ctx: GeneratorContext) (parentPath: AnchorPath) (enumUnion: Transient.LiteralCaseRender<'T>) =
             let anchoredPath =
@@ -39,7 +40,11 @@ module Render =
                         | AnchorPath.Member memberPath -> Name.Pascal.fromCase memberPath.Name
                         | _ -> failwith "Unreachable branch"
                         )
-                Metadata = { Path = Path.create anchoredPath }
+                Metadata = {
+                    Path = Path.create anchoredPath
+                    Source = enumUnion.Metadata.Source
+                    FullyQualifiedName = enumUnion.Metadata.FullyQualifiedName
+                }
                 Value = enumUnion.Value
                 Documentation = enumUnion.Documentation
             }
@@ -48,7 +53,11 @@ module Render =
                 enumUnion.Metadata.Path
                 |> anchorMetadataPath ctx parentPath
             {
-                Metadata = { Path = Path.create anchoredPath }
+                Metadata = {
+                    Path = Path.create anchoredPath
+                    Source = enumUnion.Metadata.Source
+                    FullyQualifiedName = enumUnion.Metadata.FullyQualifiedName
+                }
                 LiteralUnionRender.Name =
                     enumUnion.Name
                     |> ValueOption.defaultWith (fun () ->
@@ -67,7 +76,11 @@ module Render =
                 typeParameter.Metadata.Path
                 |> anchorMetadataPath ctx anchorPath
             {
-                Metadata = { Path = Path.create anchorPath }
+                Metadata = {
+                    Path = Path.create anchorPath
+                    Source = typeParameter.Metadata.Source
+                    FullyQualifiedName = typeParameter.Metadata.FullyQualifiedName
+                }
                 TypeParameterRender.Name =
                     typeParameter.Name
                 Constraint =
@@ -83,7 +96,11 @@ module Render =
                 typedName.Metadata.Path
                 |> anchorMetadataPath ctx anchorPath
             {
-                Metadata = { Path = Path.create anchorPath }
+                Metadata = {
+                    Path = Path.create anchorPath
+                    Source = typedName.Metadata.Source
+                    FullyQualifiedName = typedName.Metadata.FullyQualifiedName
+                }
                 TypedNameRender.Name = typedName.Name
                 Type = typedName.Type |> TypeRefRender.anchor anchorPath
                 Traits = typedName.Traits
@@ -92,7 +109,11 @@ module Render =
             }
         let anchorFunctionSignature (ctx: GeneratorContext) (anchorPath: AnchorPath) (functionSignature: Transient.FunctionLikeSignature) =
             {
-                FunctionLikeSignature.Metadata = { Path = Path.create anchorPath }
+                FunctionLikeSignature.Metadata = {
+                    Path = Path.create anchorPath
+                    Source = functionSignature.Metadata.Source
+                    FullyQualifiedName = functionSignature.Metadata.FullyQualifiedName
+                }
                 Parameters =
                     functionSignature.Parameters
                     |> List.map (anchorTypedNameRender ctx anchorPath)
@@ -108,7 +129,11 @@ module Render =
                 functionLike.Metadata.Path
                 |> anchorMetadataPath ctx anchorPath
             {
-                Metadata = { Path = Path.create anchorPath }
+                Metadata = {
+                    Path = Path.create anchorPath
+                    Source = functionLike.Metadata.Source
+                    FullyQualifiedName = functionLike.Metadata.FullyQualifiedName
+                }
                 FunctionLikeRender.Name = functionLike.Name
                 Signatures = functionLike.Signatures |> List.map (anchorFunctionSignature ctx anchorPath)
                 Traits = functionLike.Traits
@@ -120,7 +145,11 @@ module Render =
                 typeDefn.Metadata.Path
                 |> anchorMetadataPath ctx anchorPath
             {
-                TypeLikeRender.Metadata = { Path = Path.create anchorPath }
+                TypeLikeRender.Metadata = {
+                    Path = Path.create anchorPath
+                    Source = typeDefn.Metadata.Source
+                    FullyQualifiedName = typeDefn.Metadata.FullyQualifiedName
+                }
                 Name =
                     typeDefn.Name
                     |> ValueOption.defaultWith (fun () ->
@@ -153,7 +182,11 @@ module Render =
                     alias.Metadata.Path
                     |> anchorMetadataPath ctx anchorPath
                 {
-                    TypeAliasRenderRef.Metadata = { Path = Path.create anchorPath }
+                    TypeAliasRenderRef.Metadata = {
+                        Path = Path.create anchorPath
+                        Source = alias.Metadata.Source
+                        FullyQualifiedName = alias.Metadata.FullyQualifiedName
+                    }
                     Name = alias.Name |> ValueOption.defaultWith (fun () ->
                         match anchorPath with
                         | AnchorPath.Type typePath -> typePath.Name
@@ -221,7 +254,11 @@ module Render =
                 typeParameter.Metadata.Path
                 |> anchorMetadataPath ctx anchorPath
             {
-                Metadata = { Path = Path.create anchorPath }
+                Metadata = {
+                    Path = Path.create anchorPath
+                    Source = typeParameter.Metadata.Source
+                    FullyQualifiedName = typeParameter.Metadata.FullyQualifiedName
+                }
                 TypeParameterRender.Name =
                     typeParameter.Name
                 Constraint =
@@ -237,7 +274,11 @@ module Render =
                 typedName.Metadata.Path
                 |> anchorMetadataPath ctx anchorPath
             {
-                Metadata = { Path = Path.create anchorPath }
+                Metadata = {
+                    Path = Path.create anchorPath
+                    Source = typedName.Metadata.Source
+                    FullyQualifiedName = typedName.Metadata.FullyQualifiedName
+                }
                 TypedNameRender.Name = typedName.Name
                 Type = typedName.Type |> TypeRefRender.anchor anchorPath
                 Traits = typedName.Traits
@@ -246,7 +287,11 @@ module Render =
             }
         let anchorFunctionSignature (ctx: GeneratorContext) (anchorPath: AnchorPath) (functionSignature: Concrete.FunctionLikeSignature) =
             {
-                FunctionLikeSignature.Metadata = { Path = Path.create anchorPath }
+                FunctionLikeSignature.Metadata = {
+                    Path = Path.create anchorPath
+                    Source = functionSignature.Metadata.Source
+                    FullyQualifiedName = functionSignature.Metadata.FullyQualifiedName
+                }
                 Parameters =
                     functionSignature.Parameters
                     |> List.map (anchorTypedNameRender ctx anchorPath)
@@ -262,7 +307,11 @@ module Render =
                 functionLike.Metadata.Path
                 |> anchorMetadataPath ctx anchorPath
             {
-                Metadata = { Path = Path.create anchorPath }
+                Metadata = {
+                    Path = Path.create anchorPath
+                    Source = functionLike.Metadata.Source
+                    FullyQualifiedName = functionLike.Metadata.FullyQualifiedName
+                }
                 FunctionLikeRender.Name = functionLike.Name
                 Signatures = functionLike.Signatures |> List.map (anchorFunctionSignature ctx anchorPath)
                 Traits = functionLike.Traits
@@ -275,7 +324,11 @@ module Render =
                 | Path.Anchor anchorPath -> anchorPath
                 | _ -> failwith "UNREACHABLE"
             {
-                TypeLikeRender.Metadata = { Path = Path.create anchorPath }
+                TypeLikeRender.Metadata = {
+                    Path = Path.create anchorPath
+                    Source = typeDefn.Metadata.Source
+                    FullyQualifiedName = typeDefn.Metadata.FullyQualifiedName
+                }
                 Name = typeDefn.Name
                 TypeParameters =
                     typeDefn.TypeParameters
@@ -302,7 +355,11 @@ module Render =
                     | Path.Anchor anchorPath -> anchorPath
                     | _ -> failwith "UNREACHABLE"
                 {
-                    TypeAliasRenderRef.Metadata = { Path = Path.create anchorPath }
+                    TypeAliasRenderRef.Metadata = {
+                        Path = Path.create anchorPath
+                        Source = alias.Metadata.Source
+                        FullyQualifiedName = alias.Metadata.FullyQualifiedName
+                    }
                     Name = alias.Name 
                     TypeParameters = alias.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
                     Documentation = alias.Documentation
@@ -390,12 +447,16 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
         |> Choice2Of2
         |> GeneratorContext.Anchored.addResolvedType ctx renderScope.Type
         transientChildren.Keys
+        |> Seq.filter (anchors.ContainsKey >> not)
         |> Seq.iter (anchor ctx anchors anchorPath)
     | { Root = ValueSome (TypeLikePath.Transient path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren } ->
         let path = TransientTypePath.anchor anchorPath path
         let render = Render.Transient.anchor ctx anchorPath renderTuple
         anchors
         |> Dictionary.tryAdd renderScope.Type (path, render)
+        transientChildren.Keys
+        |> Seq.filter (anchors.ContainsKey >> not)
+        |> Seq.iter (anchor ctx anchors (AnchorPath.create path))
     | { Root = ValueNone; Render = Render.RefOnly typeRef } ->
         typeRef
         |> TypeRefRender.anchor anchorPath
@@ -458,7 +519,11 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
         let anchors = anchorPreludeExportScope ctx export scope
         let render =
             {
-                Metadata = { Path = Path.create path }
+                Metadata = {
+                    Path = Path.create path
+                    Source = value.Source |> Option.toValueOption
+                    FullyQualifiedName = ValueSome value.FullyQualifiedName
+                }
                 TypedNameRender.Name = value.Name
                 Type = typeRef
                 Traits = Set []
@@ -558,12 +623,20 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
         let render =
             {
                 FunctionLikeRender.Name = headFunc.Name
-                Metadata = { Path = Path.create path }
+                Metadata = {
+                    Path = Path.create path
+                    Source = headFunc.Source |> Option.toValueOption
+                    FullyQualifiedName = ValueSome headFunc.FullyQualifiedName
+                }
                 Signatures =
                     (headFunc :: rest)
                     |> List.map (fun func ->
                         {
-                            FunctionLikeSignature.Metadata = { Path = Path.create path }
+                            FunctionLikeSignature.Metadata = {
+                                Path = Path.create path
+                                Source = func.Source |> Option.toValueOption
+                                FullyQualifiedName = ValueSome func.FullyQualifiedName
+                            }
                             Parameters =
                                 func.Parameters
                                 |> List.map (
@@ -594,7 +667,11 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                             path
                             |> TypeParamPath.createOnMember typeParameter.Name
                         {
-                            TypeParameterRender.Metadata = { Path = Path.create path }
+                            TypeParameterRender.Metadata = {
+                                Path = Path.create path
+                                Source = ValueNone
+                                FullyQualifiedName = ValueNone
+                            }
                             Name = typeParameter.Name
                             Constraint =
                                 typeParameter.Constraint

@@ -1,58 +1,24 @@
 ﻿namespace Xantham.Generator
+(*
+-----------------------------------------------------------------------------------------------------------------------
+                                                    BUILDERS 
+-----------------------------------------------------------------------------------------------------------------------
+This file contains a builder for unions that represent erased unions in Fable - it counts the lengths of the unions
+it builds to ensure that we have all erased unions defined in the base set, otherwise we can generate our own.
+A builder for attributes is also provided, which is used to collect attributes without nonsense.
+
+-----------------------------------------------------------------------------------------------------------------------
+                                                    WIDGETS 
+-----------------------------------------------------------------------------------------------------------------------
+The file also contains pre-defined types and attributes that are used in the Fable bindings.
+
+*)
 
 open System.Collections.Generic
 open Fabulous.AST
 open Fantomas.Core.SyntaxOak
 open Xantham
 open Xantham.Decoder
-
-(*
-== MEMBERS ==
-Member types are simple to render
-== TYPE PARAMETERS ==
-Type parameters with constraints can be turned into concrete type parameters
-such as
-'a when 'a :> IComparable
-can be made into
-type A<'A when 'A:>IComparable> = 'A
-and now references to the type parameter can be constrained simple as 'A when A<'A>
-== LITERALS ==
-Combination of literals should be rendered into unions
-They should be reduced to enums if they are all digits
-A singular literal should be rendered as the underlying type for the moment
-== ENUMS ==
-Enums should be rendered as unions or enums.
-Subsets of enums should be rendered as separate enums.
-Converters should be added which can produce the optional subset value or the original set.
-Supersets of enums should be rendered as enums with subsets inlined.
-Converters should be added which can produce the optional subset value.
-
-Subsets of unions should be rendered as unions.
-Converters should also be added
-== IndexAccess ==
-An index access which has a generic index or object type should be rendered
-as a PropertyAccess.
-== Index ==
-An index type should be rendered as a propertyaccess/indexof
-== Interface ==
-Should be rendered as interfaces with the 'I' prefix, and as pojos. All references
-to the interface should use the 'I' prefix. The pojos will have all the members inlined.
-== Class ==
-Should be rendered as classes with a private unit constructor, and all constructors should
-be overloads/augments instead.
-== Conditional ==
-Should render an erased union of the true and false branch.
-References to their members should be resolved as the intersection of their members.
-== Tuples ==
-If they are fixed tuples with no variadic elements, then they should be rendered as a tuple.
-If they have variadic elements, then they should be rendered as an array of an erased union.
-== TypeLiteral ==
-Render interface and pojo
-== Module ==
-Render as a module/namespace
-== Variable ==
-Render as a let binding
-*)
 
 /// <summary>
 /// A builder for <c>WidgetBuilder&lt;Type&gt;</c>s that represent erased unions in Fable.
@@ -313,5 +279,3 @@ module AttributesBuilder =
     /// </code>
     /// </example>
     let attributes = AttributesBuilder()
-// How do we need all the final types to be represented?
-// paths, masterkey

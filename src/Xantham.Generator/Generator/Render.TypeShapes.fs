@@ -39,7 +39,9 @@ module Interface =
             Documentation = shape.Documentation
         }
     let render (ctx: GeneratorContext) scopeStore (shape: Interface) =
-        { Path = Path.fromInterface shape |> Path.create }
+        { Path = Path.fromInterface shape |> Path.create
+          Source = shape.Source |> Option.toValueOption
+          FullyQualifiedName = ValueSome shape.FullyQualifiedName }
         |> renderWithMetadata ctx scopeStore shape 
     
 module Class =
@@ -79,7 +81,11 @@ module Class =
             Documentation = []
         }
     let render (ctx: GeneratorContext) scopeStore (shape: Class) =
-        { Path = Path.fromClass shape |> Path.create }
+        {
+            Path = Path.fromClass shape |> Path.create
+            Source = shape.Source |> Option.toValueOption
+            FullyQualifiedName = ValueSome shape.FullyQualifiedName 
+        }
         |> renderWithMetadata ctx scopeStore shape 
 
 module TypeLiteral =
@@ -97,7 +103,11 @@ module TypeLiteral =
         let members, functions = prerender ctx scopeStore shape
         fun name ->
             {
-                Metadata = { Path = Path.create TransientMemberPath.Anchored }
+                Metadata = {
+                    Path = Path.create TransientMemberPath.Anchored
+                    Source = ValueNone
+                    FullyQualifiedName = ValueNone
+                }
                 TypeLikeRender.Name = name
                 TypeParameters = []
                 Members = members

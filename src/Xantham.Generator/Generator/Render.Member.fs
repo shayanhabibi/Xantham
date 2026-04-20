@@ -29,7 +29,9 @@ module CallSignature =
         
     let render (ctx: GeneratorContext) scopeStore (callSignature: CallSignature) =
         renderWithMetadata ctx scopeStore callSignature
-            { Path = Path.create TransientMemberPath.Anchored }
+            { Path = Path.create TransientMemberPath.Anchored
+              Source = ValueNone
+              FullyQualifiedName = ValueNone }
         
     let renderMemberWithMetadata (ctx: GeneratorContext) scopeStore (callSignatures: CallSignature list) metadata =
         {
@@ -52,6 +54,8 @@ module CallSignature =
     let renderMember (ctx: GeneratorContext) scopeStore (callSignatures: CallSignature list) =
         renderMemberWithMetadata ctx scopeStore callSignatures {
             Path = Path.create TransientMemberPath.Anchored
+            Source = ValueNone
+            FullyQualifiedName = ValueNone
         }
         
 module Method =
@@ -81,6 +85,8 @@ module Method =
     let render (ctx: GeneratorContext) scopeStore (method: Method) =
         renderWithMetadata ctx scopeStore method {
             Path = Path.create (TransientMemberPath.AnchoredAndMoored method.Name)
+            Source = ValueNone
+            FullyQualifiedName = ValueNone
         }
     
 module GetAccessor =
@@ -118,7 +124,11 @@ module GetAccessor =
             }
             |> MemberRender.Property
     let render (ctx: GeneratorContext) scopeStore (getter: GetAccessor) =
-        renderWithMetadata ctx scopeStore getter { Path = Path.create (TransientMemberPath.AnchoredAndMoored getter.Name) }
+        renderWithMetadata ctx scopeStore getter {
+            Path = Path.create (TransientMemberPath.AnchoredAndMoored getter.Name)
+            Source = ValueNone
+            FullyQualifiedName = ValueNone
+        }
         
 module SetAccessor =
     let private getTraits (setter: SetAccessor) = Set [
@@ -139,7 +149,11 @@ module SetAccessor =
         |> MemberRender.Property
     
     let render (ctx: GeneratorContext) scopeStore (setter: SetAccessor) =
-        renderWithMetadata ctx scopeStore setter { Path = Path.create (TransientMemberPath.AnchoredAndMoored setter.Name) }
+        renderWithMetadata ctx scopeStore setter {
+            Path = Path.create (TransientMemberPath.AnchoredAndMoored setter.Name)
+            Source = ValueNone
+            FullyQualifiedName = ValueNone
+        }
 
 module IndexSignature =
     let renderWithMetadata (ctx: GeneratorContext) scopeStore (indexSignature: IndexSignature) metadata =
@@ -173,7 +187,11 @@ module IndexSignature =
         |> MemberRender.Method
     
     let render (ctx: GeneratorContext) scopeStore (indexSignature: IndexSignature) =
-        renderWithMetadata ctx scopeStore indexSignature { Path = Path.create TransientMemberPath.Anchored }
+        renderWithMetadata ctx scopeStore indexSignature {
+            Path = Path.create TransientMemberPath.Anchored
+            Source = ValueNone
+            FullyQualifiedName = ValueNone
+        }
     
 module ConstructSignature =
     let renderWithMetadata (ctx: GeneratorContext) scopeStore (constructSignature: ConstructSignature list) metadata =
@@ -203,7 +221,11 @@ module ConstructSignature =
         |> MemberRender.Method
     
     let render (ctx: GeneratorContext) scopeStore (constructSignature: ConstructSignature list) =
-        renderWithMetadata ctx scopeStore constructSignature { Path = Path.create TransientMemberPath.Anchored }
+        renderWithMetadata ctx scopeStore constructSignature {
+            Path = Path.create TransientMemberPath.Anchored
+            Source = ValueNone
+            FullyQualifiedName = ValueNone
+        }
         
 module Property =
     let private getTraits (prop: Property) = Set [
@@ -228,7 +250,11 @@ module Property =
             Documentation = prop.Documentation
         }
     let renderMethodLike (ctx: GeneratorContext) scopeStore (prop: Property) (callSignatures: CallSignature list) =
-        renderMethodLikeWithMetadata ctx scopeStore prop callSignatures { Path = TransientMemberPath.AnchoredAndMoored prop.Name |> Path.create }
+        renderMethodLikeWithMetadata ctx scopeStore prop callSignatures {
+            Path = TransientMemberPath.AnchoredAndMoored prop.Name |> Path.create
+            Source = ValueNone
+            FullyQualifiedName = ValueNone
+        }
 
     let renderWithMetadata (ctx: GeneratorContext) scopeStore (prop: Property) metadata =
         match prop.Type.Value with
@@ -251,7 +277,11 @@ module Property =
             |> MemberRender.Property
     
     let render (ctx: GeneratorContext) scopeStore (prop: Property) =
-        renderWithMetadata ctx scopeStore prop { Path = TransientMemberPath.AnchoredAndMoored prop.Name |> Path.create }
+        renderWithMetadata ctx scopeStore prop {
+            Path = TransientMemberPath.AnchoredAndMoored prop.Name |> Path.create
+            Source = ValueNone
+            FullyQualifiedName = ValueNone
+        }
 
 module Member =
     let renderWithMetadata (ctx: GeneratorContext) scopeStore (member': Member) metadata =

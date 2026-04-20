@@ -5,6 +5,7 @@ open System.ComponentModel
 open Fabulous.AST
 open Fantomas.Core.SyntaxOak
 open Xantham.Generator.Types
+open Xantham.Generator
 open Xantham.Generator.NamePath
 open Xantham.Decoder
 
@@ -38,9 +39,7 @@ module private Implementation =
                 | [] -> Ast.Unit()
                 | [ widget ] -> widget
                 | types ->
-                    let length = List.length types
-                    let prefix = Ast.Anon $"U{length}"
-                    Ast.AppPrefix(prefix, types)
+                    erasedUnion { yield! types }
         // if we have no parameters, then we render a unit function
         | TypeRefMolecule.Function([], returnType) ->
             let returnType = render returnType
@@ -106,9 +105,7 @@ module private Implementation =
                     | [] -> Ast.Unit()
                     | [ widget ] -> widget
                     | types ->
-                        let length = List.length types
-                        let prefix = Ast.Anon $"U{length}"
-                        Ast.AppPrefix(prefix, types)
+                        erasedUnion { yield! types }
                 
         and render (typeRefRender: Anchored.TypeRefRender): WidgetBuilder<Type> =
             match typeRefRender.Kind with
@@ -119,10 +116,6 @@ module private Implementation =
             |> if typeRefRender.Nullable then
                 Ast.OptionPrefix 
                 else id
-            
-                
-                
-
 
 [<EditorBrowsable(EditorBrowsableState.Never)>]
 module TestHelpers =

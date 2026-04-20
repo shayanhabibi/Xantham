@@ -52,6 +52,10 @@ let main argv =
                     | Choice1Of2 x -> x
                     | Choice2Of2 x -> x
             }
+            Ast.AnonymousModule() {
+                for i in erasedUnion.UnionLengths |> Seq.sort do
+                    SpecialRender.renderErasedUnion i
+            }
         }
         |> Gen.mkOak
         |> Gen.run

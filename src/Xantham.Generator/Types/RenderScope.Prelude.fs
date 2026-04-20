@@ -6,7 +6,6 @@ open Fabulous.AST
 open Fantomas.Core.SyntaxOak
 open Xantham
 open Xantham.Decoder.ArenaInterner
-open Xantham.Generator
 open Xantham.Generator.NamePath
 open Xantham.Decoder
 
@@ -283,6 +282,8 @@ type RenderTraits =
 [<Struct>]
 type RenderMetadata = {
     Path: Path
+    Source: ArenaInterner.QualifiedNamePart voption
+    FullyQualifiedName: ArenaInterner.QualifiedNamePart list voption
 }
 
 type TypeParameterRender<'RenderType, 'TyparName> = {

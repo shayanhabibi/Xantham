@@ -34,7 +34,6 @@
         <Compile Include="Generator\Render.TypeAlias.fs" />
         <Compile Include="Generator\TypeRender.Render.fs" />
         <Compile Include="Generator\RenderScope.Prelude.fs" />
-        <Compile Include="Generator\TypeRefRender.Prerender.fs" />
         <Compile Include="Generator\RenderScope.Anchored.fs" />
         <Compile Include="Generator\Render.fs" />
     </ItemGroup>

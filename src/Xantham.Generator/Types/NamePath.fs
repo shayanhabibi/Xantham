@@ -1,5 +1,9 @@
 ﻿module Xantham.Generator.NamePath
 
+(*
+This file contains the logic for type safe name generation via domain specific unions.
+*)
+
 open System.Collections.Generic
 open System.ComponentModel
 open Xantham.Decoder

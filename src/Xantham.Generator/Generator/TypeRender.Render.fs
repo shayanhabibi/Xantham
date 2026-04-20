@@ -560,4 +560,121 @@ module TypeLikeRender =
     // renders as an anonymous record
     let renderAnonymousRecord (ctx: GeneratorContext) (typeLike: TypeLikeRender) = ()
     
+module SpecialRender =
+    /// <summary>
+    /// Renders a type definition for a SRTP bound <c>typekeyof</c> accessor.
+    /// Given a member name like <c>ofValue</c>, the following type definition will be rendered:
+    /// <code lang="fsharp">
+    /// [&lt;Erase&gt;]
+    /// type OfValueAccessor =
+    ///     static member inline create&lt;^T, ^ReturnType when ^T:(member ofValue: ^ReturnType)&gt;(?object: ^T): typekeyof&lt;^T, ^ReturnType> = unbox "ofValue"
+    ///     static member inline access&lt;^T, ^ReturnType when ^T:(member ofValue: ^ReturnType)&gt;(object: ^T): ^ReturnType = object.ofValue
+    /// </code>
+    /// </summary>
+    /// <remarks>
+    /// <para>Now we can observe usage. If we were to create an untyped ofValue <c>typekeyof</c> by using
+    /// the unit method call, then the result type will be <c>typekeyof&lt;obj, obj></c></para>
+    /// <para>Subsequent usage would instantly resolve the type to the object it is used on, but this would
+    /// invalidate it for usage on other types with the same property.</para>
+    /// <code lang="fsharp">
+    /// type TestObject = {
+    ///     ofValue: int
+    /// }
+    /// type TestObject2 = {
+    ///     ofValue: string
+    /// }
+    /// let testObject = { TestObject.ofValue = 1 }
+    /// let testObject2 = { TestObject2.ofValue = "1" }
+    ///
+    /// let ofValueAccessor = OfValueAccessor.create()
+    /// <br/>
+    /// // the line below will resolve ofValueAccessor to typekeyof&lt;TestObject, int>
+    /// TypeKeyOf.access ofValueAccessor testObject
+    /// 
+    /// // The line before can no longer be used on testObject2, as it is of a different type
+    /// // TypeKeyOf.access ofValueAccessor testObject2
+    /// </code>
+    /// <para>We can also alternatively use the SRTP static method to access the value directly, without restricting the
+    /// method to a single object type.</para>
+    /// <code lang="fsharp">
+    /// // Both are valid and are resolved by the compiler correctly
+    /// OfValueAccessor.access testObject // int
+    /// OfValueAccessor.access testObject2 // string
+    /// </code>
+    /// </remarks>
+    /// <param name="srtpMember"></param>
+    let renderTypeKeyOfSRTP (srtpMember: Name) =
+        let typeDefnName =
+            srtpMember
+            |> Name.map (sprintf "%sAccessor")
+            |> Name.Pascal.fromName
+        Ast.TypeDefn(Name.Case.valueOrModified typeDefnName) {
+            Ast.Member(
+                "create",
+                [ Ast.ParenPat(Ast.ParameterPat("?object", Ast.LongIdent "^T")) ],
+                $"unbox \"{Name.valueOrSource srtpMember}\"",
+                Types.typekeyof (Ast.LongIdent "^ReturnType") (Ast.LongIdent "^T")
+            )   .toStatic()
+                .toInlined()
+                .typeParams(Ast.PostfixList $"^T, ^ReturnType when ^T:(member %s{Name.valueOrModified srtpMember}: ^ReturnType)")
+            
+            Ast.Member(
+                "access",
+                [ Ast.ParenPat(Ast.ParameterPat("object", Ast.LongIdent "^T")) ],
+                $"object.{Name.valueOrModified srtpMember}",
+                Ast.LongIdent "^ReturnType"
+            )   .toStatic()
+                .toInlined()
+                .typeParams(Ast.PostfixList $"^T, ^ReturnType when ^T:(member %s{Name.valueOrModified srtpMember}: ^ReturnType)")
+        }
+        |> _.attribute(Attributes.erase)
     
+    module private ErasedUnionHelpers =
+        [<Literal>]
+        let private lowerBoundTypeParam = 'A'
+        [<Literal>]
+        let private upperBoundTypeParam = 'Z'
+        [<Literal>]
+        let private typeParameterCharRange = upperBoundTypeParam - lowerBoundTypeParam
+        let inline typeParam (caseIdx: int) =
+            let range = byte typeParameterCharRange + 1uy
+            let repl = (caseIdx / int range) + 1
+            byte caseIdx % range + byte lowerBoundTypeParam
+            |> char
+            |> Array.replicate repl
+            |> Array.insertAt 0 '''
+            |> System.String
+        let inline caseName (caseIdx: int) = $"Case%i{caseIdx + 1}"
+
+        let renderStaticErase (caseIdx: int) =
+            Ast.Member("op_ErasedCast", [ $"x: {typeParam caseIdx}" ], $"{caseName caseIdx} x")
+            |> _.toStatic()
+            |> _.attribute(Attributes.emit "$0")
+        let renderStaticImplicit (caseIdx: int) =
+            Ast.Member("op_Implicit", [ $"x: {typeParam caseIdx}" ], $"{caseName caseIdx} x")
+            |> _.toStatic()
+            |> _.attribute(Attributes.emit "$0")
+            
+    let renderErasedUnion (caseCount: int) =
+        let typeParameters =
+            [0..caseCount - 1]
+            |> List.map (ErasedUnionHelpers.typeParam >> Ast.TyparDecl)
+            |> Ast.PostfixList
+        let name = $"U{caseCount}"
+        let documentation = Documentation.render [
+            TsComment.Summary [
+                $"Erased union type to represent 1 of {caseCount} possible values."
+                "<a href=\"https://fable.io/docs/javascript/features.html#erased-unions\">Read more</a>"
+            ]
+        ]
+        (Ast.Union(name) {
+            for i in 0..caseCount - 1 do
+                Ast.UnionCase(ErasedUnionHelpers.caseName i, Ast.LongIdent (ErasedUnionHelpers.typeParam i))
+        }).members() {
+            for i in 0..caseCount - 1 do
+                ErasedUnionHelpers.renderStaticErase i
+        }
+        |> _.xmlDocs(documentation.Value)
+        |> _.typeParams(typeParameters)
+        |> _.attribute(Attributes.erase)
+        
