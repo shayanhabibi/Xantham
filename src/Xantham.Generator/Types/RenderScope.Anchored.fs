@@ -122,6 +122,10 @@ module TypeRefRender =
                     )
                 |> TypeRefKind.Molecule
                 |> wrap
+    let inline setNullable nullable typeRefRender = { typeRefRender with TypeRefRender.Nullable = nullable }
+    let inline orNullable nullable typeRefRender = { typeRefRender with TypeRefRender.Nullable = nullable || typeRefRender.Nullable }
+    let nullable typeRefRender = setNullable true typeRefRender
+    let nonNullable typeRefRender = setNullable false typeRefRender
 
 
 type TypeName = Name<Case.pascal>

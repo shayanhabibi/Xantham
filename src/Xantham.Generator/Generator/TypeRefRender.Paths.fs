@@ -1,11 +1,14 @@
 ﻿module Xantham.Generator.Generator.Path
 
+open System.ComponentModel
 open Xantham.Generator
 open Xantham.Generator.NamePath
 open Xantham.Decoder.ArenaInterner
 open Xantham.Decoder
+open Xantham.Generator.Types.Customisation
 
-let inline private getQualifiedName (container: ^T when ^T:(member FullyQualifiedName: ArenaInterner.QualifiedNamePart list)) =
+[<EditorBrowsable(EditorBrowsableState.Never)>]
+let inline getQualifiedName (container: ^T when ^T:(member FullyQualifiedName: ArenaInterner.QualifiedNamePart list)) =
     container.FullyQualifiedName
     |> QualifiedNamePart.parse
     |> QualifiedName.create
@@ -127,3 +130,19 @@ let fromResolvedExport (resolvedExport: ResolvedExport) =
     | ResolvedExport.Function (func :: _) ->
         fromFunction func |> AnchorPath.Member
     | ResolvedExport.Function [] -> failwith "Resolved export contained no functions for the function case."
+
+module Interceptors =
+    let inline shouldIgnoreRender (interceptor: Interceptors.IgnoreRendersForPaths) (value: ^T when ^T:(member Source: ArenaInterner.QualifiedNamePart option) and ^T:(member FullyQualifiedName: ArenaInterner.QualifiedNamePart list)) =
+        Option.exists interceptor.Source value.Source
+        ||
+        getQualifiedName value
+        |> interceptor.QualifiedName
+    let shouldIgnoreExport (interceptor: Interceptors.IgnoreRendersForPaths) (value: ResolvedExport) =
+        match value with
+        | ResolvedExport.Variable value -> shouldIgnoreRender interceptor value
+        | ResolvedExport.Interface value -> shouldIgnoreRender interceptor value
+        | ResolvedExport.TypeAlias value -> shouldIgnoreRender interceptor value
+        | ResolvedExport.Class value -> shouldIgnoreRender interceptor value
+        | ResolvedExport.Enum value -> shouldIgnoreRender interceptor value
+        | ResolvedExport.Function value -> shouldIgnoreRender interceptor value[0]
+        | ResolvedExport.Module value -> shouldIgnoreRender interceptor value

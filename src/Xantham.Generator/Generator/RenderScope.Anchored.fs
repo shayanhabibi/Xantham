@@ -6,6 +6,7 @@ open Xantham
 open Xantham.Decoder
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
+open Xantham.Generator.Generator.Path
 open Xantham.Generator.Types
 open Xantham.Generator.NamePath
 open Xantham.Generator.Generator.ResolvedTypeCategorization
@@ -399,7 +400,7 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
         |> TypeRefRender.anchor anchorPath
         |> addOrReplace ctx renderScope.Type
     | badScope ->
-        failwithf $"Bad scope: %A{badScope}"
+        printfn $"Bad scope: %A{badScope}"
 and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: RenderScopeStore) =
     let anchors = Dictionary<ResolvedType, TypePath * Render>()
     let anchorPath = Path.fromResolvedExport export
@@ -424,6 +425,9 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
     | ResolvedExport.Class value ->
         let path = Path.fromClass value
         let ref = TypeRefRender.create false path
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors.IgnoreRendersForPaths value then
+            ref |> GeneratorContext.Anchored.addOrReplace ctx export
+        else
         let anchors = anchorPreludeExportScope ctx export scope
         let render =
             Class.render ctx scope value
@@ -445,6 +449,9 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
             value.Type
             |> prerender ctx scope
             |> TypeRefRender.anchor path
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors.IgnoreRendersForPaths value then
+            typeRef |> GeneratorContext.Anchored.addOrReplace ctx export
+        else
         let anchors = anchorPreludeExportScope ctx export scope
         let render =
             {
@@ -467,6 +474,9 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
     | ResolvedExport.Interface value ->
         let path = Path.fromInterface value
         let ref = TypeRefRender.create false path
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors.IgnoreRendersForPaths value then
+            ref |> GeneratorContext.Anchored.addOrReplace ctx export
+        else
         let anchors = anchorPreludeExportScope ctx export scope
         let render =
             Interface.render ctx scope value
@@ -483,6 +493,9 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
     | ResolvedExport.TypeAlias value ->
         let path = Path.fromTypeAlias value
         let ref = TypeRefRender.create false path
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors.IgnoreRendersForPaths value then
+            ref |> GeneratorContext.Anchored.addOrReplace ctx export
+        else
         let anchors = anchorPreludeExportScope ctx export scope
         let render =
             TypeAlias.render ctx scope value
@@ -499,6 +512,9 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
     | ResolvedExport.Enum value ->
         let path = Path.fromEnum value
         let ref = TypeRefRender.create false path
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors.IgnoreRendersForPaths value then
+            ref |> GeneratorContext.Anchored.addOrReplace ctx export
+        else
         let anchors = anchorPreludeExportScope ctx export scope
         let render =
             match Enum.render ctx value with
@@ -529,6 +545,9 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
             |> LazyContainer.CreateTypeKeyDummy<ResolvedType>
             |> prerender ctx scope
             |> TypeRefRender.anchor anchorPath
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors.IgnoreRendersForPaths headFunc then
+            ref |> GeneratorContext.Anchored.addOrReplace ctx export
+        else
         let render =
             {
                 FunctionLikeRender.Name = headFunc.Name

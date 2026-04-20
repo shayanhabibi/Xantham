@@ -14,6 +14,7 @@ open Xantham.Decoder.ArenaInterner
 open Fabulous.AST
 open Fantomas.Core.SyntaxOak
 open Xantham.Generator.NamePath
+open Xantham.Generator.Types.Customisation
 
 let private createConcreteTypeRef (path: TypePath) =
     RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
@@ -412,6 +413,7 @@ module TestHelper =
     
 type GeneratorContext with
     static member Empty = GeneratorContext.Create prerender
+    static member EmptyWithCustomisation customisation = GeneratorContext.Create(prerender, Customisation.Create(customisation))
     
 module ArenaInterner =
     let prerenderTypeAliases (ctx: GeneratorContext) (arena: ArenaInterner) =

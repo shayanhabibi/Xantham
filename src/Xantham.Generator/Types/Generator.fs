@@ -8,6 +8,7 @@ open Xantham.Decoder.ArenaInterner
 open Xantham.Generator.NamePath
 open Xantham.Generator.Types
 open Xantham.Generator
+open Xantham.Generator.Types.Customisation
 
 /// Wrapper that chooses the type of dictionary (concurrent/normal)
 /// depending on the presence of the CONCURRENT_DICT constant on compilation
@@ -28,16 +29,19 @@ and GeneratorContext =
         PreludeRenders: PreludeScopeStore
         AnchorRenders: AnchorScopeStore
         InFlight: HashSet<ResolvedType>
+        Customisation: Customisation
         
     }
     override this.ToString() = $"GeneratorContext(%d{this.PreludeRenders.Count})"
-    static member internal Create(preludeGetTypeRefFunc) = {
+    static member internal Create(preludeGetTypeRefFunc, ?customisation) = {
         PreludeRenders = DictionaryImpl()
         AnchorRenders = DictionaryImpl()
         PreludeGetTypeRef = preludeGetTypeRefFunc
         InFlight = HashSet()
         TypeAliasRemap = DictionaryImpl()
+        Customisation = defaultArg customisation Customisation.Default
     }
+    
 
 module GeneratorContext =
     /// <summary>
@@ -101,6 +105,9 @@ module GeneratorContext =
             static member inline Add(ctx, key, value) =
                 ctx.AnchorRenders
                 |> Operation.addOrReplace (Choice2Of2 key) (Choice2Of2 value)
+            static member inline Add(ctx, key, value) =
+                ctx.AnchorRenders
+                |> Operation.addOrReplace (Choice2Of2 key) (Choice1Of2 value)
             static member inline TryGet(ctx, key) =
                 ctx.AnchorRenders
                 |> Operation.tryGet key

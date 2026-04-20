@@ -279,6 +279,9 @@ type AttributesBuilder() =
     [<CustomOperation "paramArray">]
     member inline _.ParamArray(state, value: bool) =
         if value then Attributes.paramArray :: state else state
+    [<CustomOperation "emitConstructor">]
+    member inline _.Constructor(state) =
+        Attributes.emitConstructor :: state
         
     member inline _.Run(state: WidgetBuilder<AttributeNode> list) =
         state

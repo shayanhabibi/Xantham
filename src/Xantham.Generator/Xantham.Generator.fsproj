@@ -20,6 +20,7 @@
         <Compile Include="Types\NamePath.fs" />
         <Compile Include="Types\RenderScope.Prelude.fs" />
         <Compile Include="Types\RenderScope.Anchored.fs" />
+        <Compile Include="Types\Interceptors.fs" />
         <Compile Include="Types\Generator.fs" />
         <Compile Include="Generator\ResolvedType.Categorization.fs" />
         <Compile Include="Generator\TypeRefRender.Paths.fs" />
