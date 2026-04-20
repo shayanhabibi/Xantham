@@ -5,7 +5,6 @@ open Xantham.Generator
 open Xantham.Generator.NamePath
 open Xantham.Decoder.ArenaInterner
 open Xantham.Decoder
-open Xantham.Generator.Types.Customisation
 
 [<EditorBrowsable(EditorBrowsableState.Never)>]
 let inline getQualifiedName (container: ^T when ^T:(member FullyQualifiedName: ArenaInterner.QualifiedNamePart list)) =
@@ -132,12 +131,12 @@ let fromResolvedExport (resolvedExport: ResolvedExport) =
     | ResolvedExport.Function [] -> failwith "Resolved export contained no functions for the function case."
 
 module Interceptors =
-    let inline shouldIgnoreRender (interceptor: Interceptors.IgnoreRendersForPaths) (value: ^T when ^T:(member Source: ArenaInterner.QualifiedNamePart option) and ^T:(member FullyQualifiedName: ArenaInterner.QualifiedNamePart list)) =
-        Option.exists interceptor.Source value.Source
+    let inline shouldIgnoreRender (interceptor: Interceptors) (value: ^T when ^T:(member Source: ArenaInterner.QualifiedNamePart option) and ^T:(member FullyQualifiedName: ArenaInterner.QualifiedNamePart list)) =
+        Option.exists interceptor.IgnorePathRender.Source value.Source
         ||
         getQualifiedName value
-        |> interceptor.QualifiedName
-    let shouldIgnoreExport (interceptor: Interceptors.IgnoreRendersForPaths) (value: ResolvedExport) =
+        |> interceptor.IgnorePathRender.QualifiedName
+    let shouldIgnoreExport (interceptor: Interceptors) (value: ResolvedExport) =
         match value with
         | ResolvedExport.Variable value -> shouldIgnoreRender interceptor value
         | ResolvedExport.Interface value -> shouldIgnoreRender interceptor value
@@ -146,3 +145,46 @@ module Interceptors =
         | ResolvedExport.Enum value -> shouldIgnoreRender interceptor value
         | ResolvedExport.Function value -> shouldIgnoreRender interceptor value[0]
         | ResolvedExport.Module value -> shouldIgnoreRender interceptor value
+    let pipeInterface (ctx: GeneratorContext) (iface: Interface) =
+        (Choice1Of4 iface, fromInterface iface)
+        ||> ctx.Customisation.Interceptors.Paths.TypePaths ctx
+    let pipeClass (ctx: GeneratorContext) (cls: Class) =
+        (Choice3Of4 cls, fromClass cls)
+        ||> ctx.Customisation.Interceptors.Paths.TypePaths ctx
+    let pipeEnum (ctx: GeneratorContext) (enum: EnumType) =
+        (Choice2Of4 enum, fromEnum enum)
+        ||> ctx.Customisation.Interceptors.Paths.TypePaths ctx
+    let pipeTypeAlias (ctx: GeneratorContext) (typeAlias: TypeAlias) =
+        (Choice4Of4 typeAlias, fromTypeAlias typeAlias)
+        ||> ctx.Customisation.Interceptors.Paths.TypePaths ctx
+    let pipeVariable (ctx: GeneratorContext) (variable: Variable) =
+        (Choice1Of2 variable, fromVariable variable)
+        ||> ctx.Customisation.Interceptors.Paths.MemberPaths ctx
+    let pipeFunction (ctx: GeneratorContext) (function': Function) =
+        (Choice2Of2 function', fromFunction function')
+        ||> ctx.Customisation.Interceptors.Paths.MemberPaths ctx
+    let pipeExport (ctx: GeneratorContext) (export: ResolvedExport) =
+        match export with
+        | ResolvedExport.Variable variable ->
+            pipeVariable ctx variable
+            |> AnchorPath.create
+        | ResolvedExport.Interface ``interface`` ->
+            pipeInterface ctx ``interface``
+            |> AnchorPath.create
+        | ResolvedExport.TypeAlias typeAlias ->
+            pipeTypeAlias ctx typeAlias
+            |> AnchorPath.create
+        | ResolvedExport.Class ``class`` ->
+            pipeClass ctx ``class``
+            |> AnchorPath.create
+        | ResolvedExport.Enum enumType ->
+            pipeEnum ctx enumType
+            |> AnchorPath.create
+        | ResolvedExport.Function functions ->
+            pipeFunction ctx functions[0]
+            |> AnchorPath.create
+        | ResolvedExport.Module ``module`` ->
+            ``module``
+            |> fromModule
+            |> AnchorPath.create
+    

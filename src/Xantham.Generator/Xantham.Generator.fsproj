@@ -20,7 +20,6 @@
         <Compile Include="Types\NamePath.fs" />
         <Compile Include="Types\RenderScope.Prelude.fs" />
         <Compile Include="Types\RenderScope.Anchored.fs" />
-        <Compile Include="Types\Interceptors.fs" />
         <Compile Include="Types\Generator.fs" />
         <Compile Include="Generator\ResolvedType.Categorization.fs" />
         <Compile Include="Generator\TypeRefRender.Paths.fs" />
@@ -35,6 +34,7 @@
         <Compile Include="Generator\TypeRender.Render.fs" />
         <Compile Include="Generator\RenderScope.Prelude.fs" />
         <Compile Include="Generator\RenderScope.Anchored.fs" />
+        <Compile Include="Generator\Render.Collection.fs" />
         <Compile Include="Generator\Render.fs" />
     </ItemGroup>
 

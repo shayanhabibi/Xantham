@@ -5,10 +5,10 @@ open System.ComponentModel
 open Fabulous.AST
 open Fantomas.Core.SyntaxOak
 open Xantham.Decoder.ArenaInterner
+open Xantham.Decoder
 open Xantham.Generator.NamePath
 open Xantham.Generator.Types
 open Xantham.Generator
-open Xantham.Generator.Types.Customisation
 
 /// Wrapper that chooses the type of dictionary (concurrent/normal)
 /// depending on the presence of the CONCURRENT_DICT constant on compilation
@@ -22,6 +22,41 @@ type DictionaryImpl<'Key, 'Value> =
 type PreludeScopeStore = DictionaryImpl< ResolvedType, RenderScope >
 type AnchorScopeStore = DictionaryImpl<Choice<ResolvedType, ResolvedExport>, Choice<Anchored.TypeRefRender, Anchored.RenderScope>>
 type PreludeGetTypeRefFunc = GeneratorContext -> RenderScopeStore -> LazyResolvedType -> TypeRefRender
+and InterceptorIgnorePathRender = {
+    Source: ArenaInterner.QualifiedNamePart -> bool
+    QualifiedName: QualifiedName -> bool
+} with
+    static member Default = {
+        Source = fun _ -> false
+        QualifiedName = fun _ -> false
+    }
+and InterceptorPaths = {
+    TypePaths: GeneratorContext -> Choice<Interface, EnumType, Class, TypeAlias> -> TypePath -> TypePath
+    MemberPaths: GeneratorContext -> Choice<Variable, Function> -> MemberPath -> MemberPath
+} with
+    static member Default = {
+        TypePaths = fun _ _ -> id
+        MemberPaths = fun _ _ -> id
+    }
+and Interceptors = {
+    IgnorePathRender: InterceptorIgnorePathRender
+    Paths: InterceptorPaths
+    ResolvedTypePrelude: GeneratorContext -> ResolvedType -> RenderScope -> RenderScope
+    AnchoredRender: GeneratorContext -> Choice<ResolvedType, ResolvedExport> -> Choice<Anchored.TypeRefRender, Anchored.RenderScope> -> Choice<Anchored.TypeRefRender, Anchored.RenderScope>
+} with
+    static member Default = {
+        IgnorePathRender = InterceptorIgnorePathRender.Default
+        Paths = InterceptorPaths.Default
+        ResolvedTypePrelude = fun _ _ -> id
+        AnchoredRender = fun _ _ -> id
+    }
+and Customisation = {
+    Interceptors: Interceptors
+} with
+    static member Default = {
+        Interceptors = Interceptors.Default
+    }
+    static member Create fn: Customisation = fn Customisation.Default
 and GeneratorContext =
     {
         TypeAliasRemap: DictionaryImpl<ResolvedType, TypeRefRender>
@@ -95,6 +130,7 @@ module GeneratorContext =
             tryGet ctx (Choice2Of2 key)
 
         let addOrReplace (ctx: GeneratorContext) (key: Choice<ResolvedType, ResolvedExport>) (value: Choice<Anchored.TypeRefRender, Anchored.RenderScope>) =
+            let value = ctx.Customisation.Interceptors.AnchoredRender ctx key value
             ctx.AnchorRenders
             |> Operation.addOrReplace key value
             

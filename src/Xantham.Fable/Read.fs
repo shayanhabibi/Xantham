@@ -360,6 +360,15 @@ let read (reader: TypeScriptReader) =
     let typeResults, exportResults =
         Internal.runReader reader
         |> Internal.assembleResults
+    let typeIdentities =
+        typeResults.NonDuplicates
+        |> Array.map _.Identity
+        |> Array.append (
+            exportResults.NonDuplicates
+            |> Array.map _.Identity
+            )
+        |> Array.append exportTagIdentities
+        |> Array.distinct
     {
         ExportedDeclarations =
             exportResults.NonDuplicates
@@ -415,9 +424,16 @@ let read (reader: TypeScriptReader) =
             |> Array.distinct
             |> Array.toList
         LibEsExports =
-            exportTagIdentities
+            typeIdentities
             |> Array.filter reader.libCache.Contains
-            |> Array.map (fun key -> reader.exportCache[key].RefKey)
+            |> Array.choose (fun key ->
+                match reader.exportCache.TryGetValue(key) with
+                | true, export -> Some export.RefKey
+                | _ ->
+                match reader.signalCache.TryGetValue(key) with
+                | true, signal -> Some signal.Key
+                | _ -> None
+                )
             |> Array.toList
     }
     |> Internal.trimTypeReferenceArrayTupleDuplicates

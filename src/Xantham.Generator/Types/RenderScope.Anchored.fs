@@ -146,7 +146,7 @@ type Render = RenderKind<TypeRefRender, TypeName, MemberName, TyparName>
 
 type RenderScope = {
     Type: ResolvedType
-    Root: TypePath
+    Root: Choice<TypePath, MemberPath>
     TypeRef: TypeRefRender
     Render: Render
     Anchors: Dictionary<ResolvedType, TypePath * Render>

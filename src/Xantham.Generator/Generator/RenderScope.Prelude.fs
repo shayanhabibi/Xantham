@@ -14,7 +14,6 @@ open Xantham.Decoder.ArenaInterner
 open Fabulous.AST
 open Fantomas.Core.SyntaxOak
 open Xantham.Generator.NamePath
-open Xantham.Generator.Types.Customisation
 
 let private createConcreteTypeRef (path: TypePath) =
     RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
@@ -30,6 +29,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 |> TypeRefRender.orNullable nullable
             | ref -> ref
     let inline addOrReplaceScope ctx resolvedType renderScope =
+        let renderScope = ctx.Customisation.Interceptors.ResolvedTypePrelude ctx resolvedType renderScope
         GeneratorContext.Prelude.addOrReplace ctx resolvedType renderScope
         Registered (remap renderScope.TypeRef)
     let valueIsCreated = lazyResolvedType.IsValueCreated
@@ -89,7 +89,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         
     | ResolvedType.Interface ``interface`` ->
         let scope = RenderScopeStore.create()
-        let path = Path.fromInterface ``interface``
+        let path = Path.Interceptors.pipeInterface ctx ``interface``
         let ref = path |> createConcreteTypeRef
         {
             RenderScope.Type = resolvedType
@@ -106,7 +106,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         // |> executeRender
     | ResolvedType.Class ``class`` ->
         let scope = RenderScopeStore.create()
-        let path = Path.fromClass ``class``
+        let path = Path.Interceptors.pipeClass ctx ``class``
         let ref = path |> createConcreteTypeRef
         {
             RenderScope.Type = resolvedType
@@ -279,7 +279,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Enum enumType ->
-        let path = Path.fromEnum enumType
+        let path = Path.Interceptors.pipeEnum ctx enumType
         let ref = path |> createConcreteTypeRef
         let scope = RenderScopeStore.create()
         { RenderScope.Type = resolvedType

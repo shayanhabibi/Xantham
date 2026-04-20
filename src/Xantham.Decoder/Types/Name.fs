@@ -25,10 +25,19 @@ type Name =
 /// Provide static typing over the casing of a name
 [<MeasureAnnotatedAbbreviation>] type Name<[<Measure>] 'u> = Name
 
+/// <summary>
+/// This provides unsafe means of removing/adding measures to a <c>Name</c>.
+/// Use with caution, as they are not associated with any transformations of the underlying strings.
+/// </summary>
 module Case =
+    /// Measure to signify Pascal casing.
     type [<Measure>] pascal
+    /// Measure to signify camel casing.
     type [<Measure>] camel
+    /// Measure to signify the name is modified to represent the module interface.
+    /// This is used to distinguish between the module interface and the module itself.
     type [<Measure>] modulename
+    /// Measure to signify a type parameter (prefixed with a single quote).
     type [<Measure>] typar
 
     let inline addMeasure<[<Measure>] 'u> (name: Name): Name<'u> = unbox name
@@ -39,7 +48,9 @@ module Case =
     let inline addModuleMeasure (name: Name) = addMeasure<modulename> name
     let inline addTyparMeasure (name: Name) = addMeasure<typar> name
     
-
+/// <summary>
+/// Struct union for runtime safe access to typed name casings.
+/// </summary>
 [<Struct; RequireQualifiedAccess>]
 type CasedName =
     | Pascal of Name<Case.pascal>

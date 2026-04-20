@@ -5,6 +5,7 @@ open System.Collections.Frozen
 open System.Collections.Generic
 open Xantham
 open Xantham.Decoder
+open Xantham.Decoder.Types.Graph
 
 module Map =
     let inline choose (fn: 'Key -> 'Item -> 'Outcome option) (map: Map<'Key, 'Item>) = Map.fold (fun acc key item -> match fn key item with Some value -> Map.add key value acc | None -> acc) (Map []) map
@@ -123,6 +124,7 @@ type XanthamTree(settings: Settings) =
             | TsType.Interface _ -> CodeKey.ExportCodeKey.Interface  key |> CodeKey.CodeKey.Export
             | TsType.Class _ -> CodeKey.ExportCodeKey.Class  key |> CodeKey.CodeKey.Export
             | TsType.Enum _ -> CodeKey.ExportCodeKey.Enum  key |> CodeKey.CodeKey.Export
+    member this.GetDependencyGraph() = Graph.create false decodedResult
     member this.GetArenaInterner() = arenaInterner.Value
     /// <summary>
     /// Default constructor for a XanthamTree.
