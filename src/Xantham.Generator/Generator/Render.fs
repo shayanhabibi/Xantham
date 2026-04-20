@@ -25,20 +25,11 @@ let main argv =
     ArenaInterner.prerenderFromGraph generatorContext interner
     ArenaInterner.processExports generatorContext interner
     
-    
-    
-    // Prerender.prerenderTypeRefs
-    //     generatorContext
-    //     (
-    //         interner.ExportMap
-    //         |> Seq.collect _.Value
-    //         |> Seq.toList
-    //     )
     generatorContext.AnchorRenders
     |> Seq.take 100
     |> Seq.choose (_.Value >> function
         | Choice1Of2 x ->
-            Ast.Value("_", "jsNative", TypeRefRender.render x)
+            Ast.Value("_", "jsNative", TypeRefRender.Anchored.render x)
             |> Choice1Of2
             |> Some
         | Choice2Of2 x ->
@@ -51,10 +42,7 @@ let main argv =
                 TypeLikeRender.renderClass generatorContext typeLikeRender
                 |> Choice2Of2
                 |> Some
-            | TypeAlias _
-            | StringUnion _
-            | Function _
-            | Variable _ -> None
+            | _ -> None
             )
     |> fun x ->
         Ast.Oak() {

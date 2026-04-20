@@ -136,6 +136,8 @@ module TypeRefMolecule =
 
 module TypeRefRender =
     type SRTPHelper =
-        static member Render value = Implementation.render value
+        static member Render (value: TypeRefRender) = Implementation.render value
         static member Render (value: Anchored.TypeRefRender) = Implementation.Anchored.render value
     let inline render value = ((^T or SRTPHelper):(static member Render: ^T -> WidgetBuilder<Type>) value)
+    module Anchored =
+        let render value = Implementation.Anchored.render value

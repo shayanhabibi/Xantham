@@ -99,7 +99,7 @@ module RenderScopeStore =
         let inline createConcretePath (_scope: RenderScopeStore) (_resolvedType: ResolvedType) (path: TypePath) =
             Unsafe.createConcretePath path
         let inline createTransientPath (scope: RenderScopeStore) (resolvedType: ResolvedType) (path: TransientTypePath) =
-            Dictionary.tryAdd resolvedType path scope
+            scope.TryAdd(resolvedType, path) |> ignore
             Unsafe.createTransientPath path
         
         type SRTPHelper =

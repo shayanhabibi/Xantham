@@ -173,9 +173,8 @@ module LiteralUnionRender =
         })
         |> Documentation.renderForUnion unionType
         
-    let renderWithPath (anchorPath: AnchorPath) (typeRef: TypeRefRender) =
-        TypeRefRender.localise anchorPath typeRef
-        |> TypeRefRender.render
+    let renderWithPath (anchorPath: AnchorPath) (typeRef: Anchored.TypeRefRender) =
+        TypeRefRender.Anchored.render typeRef
 
 module TypedNameRender =
     /// <summary>

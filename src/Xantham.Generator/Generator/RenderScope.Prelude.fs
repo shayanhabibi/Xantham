@@ -413,7 +413,7 @@ module TestHelper =
     
 type GeneratorContext with
     static member Empty = GeneratorContext.Create prerender
-    static member EmptyWithCustomisation customisation = GeneratorContext.Create(prerender, Customisation.Create(customisation))
+    static member EmptyWithCustomisation customisation = GeneratorContext.Create(prerender, Customisation.Create customisation)
     
 module ArenaInterner =
     let prerenderTypeAliases (ctx: GeneratorContext) (arena: ArenaInterner) =
@@ -447,21 +447,16 @@ module ArenaInterner =
                 yield cycle.Value
             while degrees.Count > 0 do
                 let (KeyValue(key, _)) = degrees |> Seq.sortBy _.Value |> Seq.head
-                match
-                    dependencies
-                    |> Dictionary.tryItem key
-                with
-                | ValueSome deps ->
+                match dependencies.TryGetValue key with
+                | true, deps ->
                     for dep in deps do
-                        degrees
-                        |> ConcurrentDictionary.tryItem dep
-                        |> ValueOption.iter (fun value ->
-                            degrees[dep] <- value - 1
-                            )
+                        match degrees.TryGetValue dep with
+                        | true, value -> degrees[dep] <- value - 1
+                        | _ -> ()
                     yield key
                     dependencies.Remove(key) |> ignore
                     degrees.Remove(key) |> ignore
-                | ValueNone ->
+                | _ ->
                     yield key
                     degrees.Remove(key) |> ignore
         }
@@ -498,17 +493,13 @@ module ArenaInterner =
             |> prerender ctx renderScope
             |> ignore
             if renderScope.Count <> 0 then
-                renderScopes
-                |> ConcurrentDictionary.tryItem renderType
-                |> ValueOption.map (fun scope ->
+                match renderScopes.TryGetValue renderType with
+                | true, scope ->
                     for kv in renderScope do
-                        scope
-                        |> Dictionary.tryAdd kv.Key kv.Value
-                    )
-                |> ValueOption.defaultWith(fun () ->
-                    renderScopes
-                    |> ConcurrentDictionary.tryAdd renderType renderScope
-                    ))
+                        scope.TryAdd(kv.Key, kv.Value) |> ignore
+                | _ ->
+                    renderScopes.TryAdd(renderType, renderScope) |> ignore
+            )
         |> _.Wait()
         for kv in renderScopes do
             GeneratorContext.Prelude.tryGet ctx kv.Key
