@@ -156,21 +156,37 @@ module ExportStore =
     
 type TypeScriptReader with
     member this.routeTypeTo (tag: XanthamTag) (signal: TypeSignal) =
-        tag.TypeSignal
+        tag
+        |> XanthamTag.withDebugOneShot "RouteTypeSignal" (fun tag ->
+            Signal.effect (fun () ->
+                XanthamTag.debugCommentAndForget $"TypeSignal changed to match {signal.Value}" tag
+                ) [ signal.Invalidated ]
+            |> ignore
+            ) 
+        |> _.TypeSignal
         |> Signal.fulfillWith(fun () -> signal.Value)
         signal
     /// The tags source is filled by the given source signal
     member this.routeSourceTo (tag: XanthamTag) (source: Signal<ModuleName>) =
-        GuardedData.Source.getOrSetWith (fun () -> source) tag
+        tag
+        |> XanthamTag.withDebugOneShot "RouteSource" (fun tag ->
+            Signal.effect (fun () ->
+                XanthamTag.debugCommentAndForget $"Source changed to match {source.Value}" tag
+                ) [ source.Invalidated ]
+            |> ignore
+            )
+        |> GuardedData.Source.getOrSetWith (fun () -> source) 
         |> Signal.fulfillWith(fun () -> source.Value)
 
 let setTypeKeyForTag (tag: XanthamTag) (typ: TypeKey) =
+    XanthamTag.debugLocationAndCommentAndForget "Prelude.setTypeKeyForTag" $"TypeKey changed to {typ}" tag
     (GuardedData.TypeSignal.getOrSetDefault tag).Set typ
 
 /// Sets the source if it doesn't have a connected signal
 let trySetSourceForTag (tag: XanthamTag) (source: ModuleName) =
     GuardedData.Source.getOrSetWith (fun () -> Signal.source source) tag
 let setSourceForTag (tag: XanthamTag) (source: ModuleName) =
+    XanthamTag.debugLocationAndCommentAndForget "Prelude.setSourceForTag" $"Source changed to {source}" tag
     GuardedData.Source.getOrSetWith (fun () -> Signal.source source) tag
     |> _.Set(source)
 
@@ -334,10 +350,13 @@ let tryGetOrRegisterStore (ctx: TypeScriptReader) (tag: XanthamTag) : TypeStore 
 
 let stackPushAndThen (ctx: TypeScriptReader) (f: XanthamTag -> 'a) (tag: TagState<XanthamTag>): 'a =
     match tag with
-    | TagState.Visited tag -> f tag
+    | TagState.Visited tag ->
+        XanthamTag.debugLocationAndComment "Prelude.stackPushAndThen" "Already visited" tag
+        |> f 
     | TagState.Unvisited tag ->
         ctx.stack.Push tag
-        f tag
+        XanthamTag.debugLocationAndComment "Prelude.stackPushAndThen" "Pushed to stack" tag
+        |> f 
 
 let pushToStackIfNodeUnseen (ctx: TypeScriptReader) (node: Ts.Node) =
     ctx.CreateXanthamTag node |> fst |> stackPushAndThen ctx ignore

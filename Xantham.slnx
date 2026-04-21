@@ -21,4 +21,7 @@
     <Project Path="tests/Xantham.Fable.Tests/Xantham.Fable.Tests.fsproj" />
     <Project Path="tests/Xantham.Generator.Tests/Xantham.Generator.Tests.fsproj" />
   </Folder>
+  <Folder Name="/tests/spec-tests/" >
+    <File Path="tests/Xantham.Generator.Tests/Tests/Name.fs" />
+  </Folder>
 </Solution>

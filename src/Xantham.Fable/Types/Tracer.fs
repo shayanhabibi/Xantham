@@ -81,8 +81,21 @@ type GuardTracer =
     inherit Tracer<IdentityKey>
 
 let TRACER_GUARD = SymbolTypeKey.create<GuardTracer> "XanGuard"
+let mutable DebugIdCounter = 0
+let getDebugId() =
+    DebugIdCounter <- DebugIdCounter + 1
+    DebugIdCounter
 
 type Tracer<'T> with
+    member inline this.DebugId with get() = this["DebugId"] :?> int option |> Option.defaultValue -1
+    member inline this.Debug
+        with inline get() = this["Debug"] :?> bool option |> Option.defaultValue false
+        and inline set(value: bool) =
+            if value && not this.Debug then
+                this["DebugId"] <- getDebugId()
+            this["Debug"] <- value
+            
+        
     member inline this.TYPE_Valid = TRACER_PROXY.Invoke(this).IsSome && TRACER_PROXY.UnsafeInvoke(this) = typeof<'T>.Name
     member inline this.TYPE_Invalid = this.TYPE_Valid |> not
     member inline this.Imprint =
@@ -101,6 +114,26 @@ module Tracer =
         (unbox<SymbolTypeKey<Tracer<'T>>> TRACER_TAG).Invoke(target)
     let inline unsafeGet<'T> (target: obj) =
         (unbox<SymbolTypeKey<Tracer<'T>>> TRACER_TAG).UnsafeInvoke(target)
+    let inline withDebug<'T> (fn: Tracer<'T> -> unit) (target: Tracer<'T>)=
+        #if DEBUG
+        if target.Debug then fn target
+        #endif
+        target
+    let inline withTracerDebug<'T, 'a> (fn: 'a -> Tracer<'T> -> unit) (target: 'a): 'a =
+        #if DEBUG
+        get<'T> target
+        |> ValueOption.iter (withDebug (fn target) >> ignore)
+        #endif
+        target
+    let inline setDebug<'T> (target: Tracer<'T>) =
+        target.Debug <- true
+        target
+    let inline setDebugTracer<'T> (target: obj) =
+        match get<'T> target with
+        | ValueSome tracer ->
+            tracer.Debug <- true
+            true
+        | ValueNone -> false
     let inline set<'T> (value: 'T) (target: obj) =
         target.Item(unbox<string> TRACER_TAG) <- {| Value = value |}
     let inline unsafeCreate<'T> (value: 'T) (target: obj) =

@@ -11,32 +11,40 @@ open Xantham.Fable.Types.Tracer
 // Module-level helpers (shared across all declaration sub-readers)
 // ---------------------------------------------------------------------------
 
-let inline private getTypeSignalFromNode (ctx: TypeScriptReader) (node: Ts.TypeNode) =
-    ctx.CreateXanthamTag node |> fst |> stackPushAndThen ctx _.TypeSignal
+let inline private getTypeSignalFromNode (ctx: TypeScriptReader) (parent: XanthamTag) (node: Ts.TypeNode)  =
+    ctx.CreateXanthamTag node |> fst
+    |> fun tagState ->
+        XanthamTag.chainDebug parent tagState.Value
+        |> XanthamTag.debugLocationAndForget "MemberDeclaration.getTypeSignalFromNode"
+        tagState
+    |> stackPushAndThen ctx _.TypeSignal
 
 /// Returns Void TypeSignal when the type annotation is absent.
-let inline private getReturnTypeSignal (ctx: TypeScriptReader) (typeNode: Ts.TypeNode option) =
+let inline private getReturnTypeSignal (ctx: TypeScriptReader) (parent: XanthamTag) (typeNode: Ts.TypeNode option) =
     typeNode
-    |> Option.map (getTypeSignalFromNode ctx)
+    |> Option.map (getTypeSignalFromNode ctx parent)
     |> Option.defaultValue (TypeSignal.ofKey TypeKindPrimitive.Void.TypeKey)
 
 /// Resolves an optional TypeNode to a TypeSignal, falling back to checker.getTypeAtLocation when None.
-let private getSignalFromTypeNodeOption (ctx: TypeScriptReader) (typ: Ts.TypeNode option) (node: Ts.Node) =
+let private getSignalFromTypeNodeOption (ctx: TypeScriptReader) (typ: Ts.TypeNode option) (node: Ts.Node) (parentTag: XanthamTag) =
     typ
-    |> Option.map (getTypeSignalFromNode ctx)
+    |> Option.map (getTypeSignalFromNode ctx parentTag)
     |> Option.defaultWith (fun () ->
         match
             ctx.checker.getTypeAtLocation node
             |> ctx.CreateXanthamTag
         with
         | _, TagState.Visited guard when ctx.signalCache.ContainsKey(guard.Value) ->
+            XanthamTag.chainDebug parentTag (unbox guard) |> ignore
             TypeSignal.ofKey ctx.signalCache[guard.Value].Key
-        | tagState, _ -> stackPushAndThen ctx _.TypeSignal tagState
+        | tagState, _ ->
+            XanthamTag.chainDebug parentTag (unbox tagState.Value) |> ignore
+            stackPushAndThen ctx _.TypeSignal tagState
         )
 /// Returns TypeSignal voption for constraint/default slots on type parameters.
-let inline getTypeSignalFromOption (ctx: TypeScriptReader) (typ: Ts.TypeNode option) =
+let inline getTypeSignalFromOption (ctx: TypeScriptReader) (parent: XanthamTag) (typ: Ts.TypeNode option) =
     typ
-    |> Option.map (getTypeSignalFromNode ctx)
+    |> Option.map (getTypeSignalFromNode ctx parent)
     |> Option.toValueOption
 
 let inline getFullyQualifiedName (ctx: TypeScriptReader) (tag: XanthamTag) =
@@ -65,8 +73,10 @@ let inline getFullyQualifiedName (ctx: TypeScriptReader) (tag: XanthamTag) =
 
 /// Maps parameter declarations to reactive builder slots.
 let private getParameterSlots (ctx: TypeScriptReader) (parameters: ResizeArray<Ts.ParameterDeclaration>) =
-    parameters.AsArray
-    |> Array.map (Member.resolveToParameterBuilder ctx)
+    let parameterValues =
+        parameters.AsArray
+        |> Array.map (Member.resolveToParameterBuilder ctx)
+    parameterValues
 
 /// Maps type parameter declarations to reactive builder slots.
 let private getTypeParamSlots (ctx: TypeScriptReader) (typeParams: ResizeArray<Ts.TypeParameterDeclaration> option) =
@@ -92,7 +102,7 @@ module Property =
             SPropertyBuilder.Documentation = JSDocTags.resolveDocsForTag ctx xanTag
             Name = NameHelpers.getName node.name
             Type =
-                getSignalFromTypeNodeOption ctx node.``type`` node
+                getSignalFromTypeNodeOption ctx node.``type`` node xanTag 
                 |> ctx.routeTypeTo xanTag
             IsStatic = node.modifiers |> optionArrayHasModifier _.IsStatic
             IsOptional = node.questionToken.IsSome
@@ -108,7 +118,7 @@ module Property =
         let builder = {
             Name = NameHelpers.getName node.name
             Type =
-                getSignalFromTypeNodeOption ctx node.``type`` (unbox<Ts.Node> node)
+                getSignalFromTypeNodeOption ctx node.``type`` (unbox<Ts.Node> node) xanTag
                 |> ctx.routeTypeTo xanTag
             IsStatic = node.modifiers |> unbox |> optionArrayHasModifier _.IsStatic
             IsOptional = node.questionToken.IsSome
@@ -123,22 +133,32 @@ module Property =
 
 module Method =
     let readSignature (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.MethodSignature) =
+        XanthamTag.debugLocationAndForget "Method.readSignature" xanTag
         let builder = {
             SMethodBuilder.Name = NameHelpers.getName node.name
             Parameters = getParameterSlots ctx node.parameters
-            Type = getReturnTypeSignal ctx node.``type``
+            Type = getReturnTypeSignal ctx xanTag node.``type``
             IsOptional = node.questionToken.IsSome
             IsStatic = false
             Documentation = JSDocTags.resolveDocsForTag ctx xanTag
         }
+        if NameHelpers.getName node.name = "copyTexImage2D" then
+            node.parameters.AsArray
+            |> Array.iter (
+                ctx.CreateXanthamTag
+                >> fst >> _.Value
+                >> XanthamTag.setDebugForReason "Child of copyTexImage2D"
+                >> ignore
+                )
         xanTag.MemberBuilder <-  builder |> SMemberBuilder.Method
 
     let readDeclaration (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.MethodDeclaration) =
+        XanthamTag.debugLocationAndForget "Method.readDeclaration" xanTag
         xanTag.MemberBuilder <-
             {
                 SMethodBuilder.Name = NameHelpers.getName node.name
                 Parameters = getParameterSlots ctx node.parameters
-                Type = getReturnTypeSignal ctx node.``type``
+                Type = getReturnTypeSignal ctx xanTag node.``type``
                 IsOptional = false
                 IsStatic = node.modifiers |> unbox |> optionArrayHasModifier _.IsStatic
                 Documentation = JSDocTags.resolveDocsForTag ctx xanTag
@@ -147,35 +167,39 @@ module Method =
 
 module IndexSignature =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.IndexSignatureDeclaration) =
+        XanthamTag.debugLocationAndForget "IndexSignature.read" xanTag
         xanTag.MemberBuilder <-
             {
                 SIndexSignatureBuilder.Parameters = getParameterSlots ctx node.parameters
-                Type = getTypeSignalFromNode ctx node.``type``
+                Type = getTypeSignalFromNode ctx xanTag node.``type``
                 IsReadOnly = node.modifiers |> unbox |> optionArrayHasModifier _.IsReadOnly
             }
             |> SMemberBuilder.IndexSignature
 
 module CallSignature =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.CallSignatureDeclaration) =
+        XanthamTag.debugLocationAndForget "CallSignature.read" xanTag
         xanTag.MemberBuilder <-
             {
                 SCallSignatureBuilder.Parameters = getParameterSlots ctx node.parameters
-                Type = getReturnTypeSignal ctx node.``type``
+                Type = getReturnTypeSignal ctx xanTag node.``type``
                 Documentation = JSDocTags.resolveDocsForTag ctx xanTag
             }
             |> SMemberBuilder.CallSignature
 
 module ConstructSignature =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.ConstructSignatureDeclaration) =
+        XanthamTag.debugLocationAndForget "ConstructSignature.read" xanTag
         xanTag.MemberBuilder <-
             {
-                SConstructSignatureBuilder.Type = getReturnTypeSignal ctx node.``type``
+                SConstructSignatureBuilder.Type = getReturnTypeSignal ctx xanTag node.``type``
                 Parameters = getParameterSlots ctx node.parameters
             }
             |> SMemberBuilder.ConstructSignature
 
 module Constructor =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.ConstructorDeclaration) =
+        XanthamTag.debugLocationAndForget "Constructor.read" xanTag
         xanTag.ConstructorBuilder <-
             {
                 SConstructorBuilder.Parameters = getParameterSlots ctx node.parameters
@@ -184,11 +208,12 @@ module Constructor =
 
 module GetAccessor =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.GetAccessorDeclaration) =
+        XanthamTag.debugLocationAndForget "GetAccessor.read" xanTag
         xanTag.MemberBuilder <-
         {
             SGetAccessorBuilder.Name = NameHelpers.getName node.name
             Type =
-                getReturnTypeSignal ctx node.``type``
+                getReturnTypeSignal ctx xanTag node.``type``
                 |> ctx.routeTypeTo xanTag
             IsStatic = node.modifiers |> unbox |> optionArrayHasModifier _.IsStatic
             IsPrivate = node.modifiers |> unbox |> optionArrayHasModifier _.IsPrivate
@@ -197,12 +222,13 @@ module GetAccessor =
 
 module SetAccessor =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.SetAccessorDeclaration) =
+        XanthamTag.debugLocationAndForget "SetAccessor.read" xanTag
         // Argument type comes from the first parameter; fall back to checker on the node itself.
         let argType =
             node.parameters.AsArray
             |> Array.tryHead
             |> Option.bind _.``type``
-            |> fun t -> getSignalFromTypeNodeOption ctx t (unbox<Ts.Node> node)
+            |> fun t -> getSignalFromTypeNodeOption ctx t (unbox<Ts.Node> node) xanTag
         xanTag.MemberBuilder <-
         {
             SSetAccessorBuilder.Name = NameHelpers.getName node.name
@@ -217,18 +243,20 @@ module SetAccessor =
 
 module Parameter =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.ParameterDeclaration) =
+        XanthamTag.debugLocationAndForget "Parameter.read" xanTag
         xanTag.ParameterBuilder <-
         {
             SParameterBuilder.Name = NameHelpers.getName node.name
             IsOptional = node.questionToken.IsSome
             IsSpread = node.dotDotDotToken.IsSome
             Type =
-                getSignalFromTypeNodeOption ctx node.``type`` (unbox<Ts.Node> node)
+                getSignalFromTypeNodeOption ctx node.``type`` (unbox<Ts.Node> node) xanTag
                 |> ctx.routeTypeTo xanTag
             Documentation = JSDocTags.resolveDocsForTag ctx xanTag
         }
         
 let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: MemberDeclaration) =
+    XanthamTag.debugLocationAndForget "MemberDeclaration.dispatch" xanTag
     match node with
     | MemberDeclaration.PropertySignature propertySignature ->
         Property.readSignature ctx xanTag propertySignature

@@ -54,6 +54,7 @@
         <TypeScriptCompile Include="TypeFiles\function-ref.d.ts" />
         <TypeScriptCompile Include="TypeFiles\ref-enum.d.ts" />
         <TypeScriptCompile Include="TypeFiles\import-package.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\aliases.d.ts" />
     </ItemGroup>
 
     <ItemGroup>
