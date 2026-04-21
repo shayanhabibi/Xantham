@@ -142,14 +142,6 @@ module Method =
             IsStatic = false
             Documentation = JSDocTags.resolveDocsForTag ctx xanTag
         }
-        if NameHelpers.getName node.name = "copyTexImage2D" then
-            node.parameters.AsArray
-            |> Array.iter (
-                ctx.CreateXanthamTag
-                >> fst >> _.Value
-                >> XanthamTag.setDebugForReason "Child of copyTexImage2D"
-                >> ignore
-                )
         xanTag.MemberBuilder <-  builder |> SMemberBuilder.Method
 
     let readDeclaration (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.MethodDeclaration) =

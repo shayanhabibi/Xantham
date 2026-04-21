@@ -243,7 +243,8 @@ type Signal<'a> private (compute: unit -> 'a, upstream: IEvent<unit> option) =
             let v = thunk()
             collector <- prev
             this.Set v
-            subs <- deps |> List.map (fun dep -> Observable.subscribe (fun () -> run()) dep)
+            subs <- deps |> List.map (Observable.subscribe (fun () -> run()))
+
         run()
 
 type PendingSignal<'A> = Signal<'A voption>

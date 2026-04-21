@@ -31,10 +31,18 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
                 t
             | TagState.Visited t ->
                 XanthamTag.chainDebug xanTag t
-        xanTag.TypeSignal
-        |> Signal.fulfillWith (fun () -> innerTag.TypeSignal.Value)
-        xanTag.Builder
-        |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
+        Signal.effect (fun () ->
+            xanTag.TypeSignal <- innerTag.TypeSignal.Value
+            innerTag.Builder.Value
+            |> ValueOption.iter (fun x ->
+                xanTag.Builder <- x)
+            ) [ xanTag.TypeSignal.Invalidated; innerTag.TypeSignal.Invalidated; xanTag.Builder.Invalidated; innerTag.Builder.Invalidated ]
+        |> ignore
+        // xanTag.TypeSignal
+        // |> Signal.fulfillWith (fun () ->
+        //     innerTag.TypeSignal.Value)
+        // xanTag.Builder
+        // |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
     /// Build parameter slots from a list of ParameterDeclarations.
     let inline getParamSlots (parameters: ResizeArray<Ts.ParameterDeclaration>) =
         parameters.AsArray
