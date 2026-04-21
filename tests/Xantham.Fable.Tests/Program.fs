@@ -111,6 +111,20 @@ let findModule name (result: EncodedResult) =
         | _ -> None)
 
 // -----------------------------------------------------------------------
+// Fixture: aliases.d.ts
+// export type GInt = number
+//
+// -----------------------------------------------------------------------
+let aliasTests =
+    testList "aliases.d.ts" [
+        let result = createTestReader "aliases" |> runReader
+        testCase "GInt is a TypeAlias" <| fun _ ->
+            let alias = result |> findAlias "GInt"
+            "Alias has underlying type of number"
+            |> Expect.equal alias.Type TypeKindPrimitive.Number.TypeKey
+    ]
+
+// -----------------------------------------------------------------------
 // Fixture: basic.d.ts
 //   export type BaseObject    = { name: string }
 //   export interface BaseInterface { name: string; age: number }
@@ -1816,6 +1830,7 @@ let tests =
         deepTransitiveSourceTests
         middleOfChainDirectSourceTests
         leafDirectSourceTests
+        aliasTests
     ]
 
 Mocha.runTests tests |> ignore

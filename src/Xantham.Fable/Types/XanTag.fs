@@ -6,6 +6,7 @@ open System.ComponentModel
 open System.Runtime.CompilerServices
 open Fable.Core.DynamicExtensions
 open Fable.Core.JsInterop
+open Glutinum.Chalk
 open TypeScript
 open Fable.Core
 open Xantham
@@ -272,7 +273,112 @@ type XanTagHelpers =
 /// </remarks>
 [<RequireQualifiedAccess>]
 module XanthamTag =
-
+    /// <summary>
+    /// For tags where <c>Debug</c> is true, calls <paramref name="fn"/> with the tag.
+    /// </summary>
+    /// <remarks>
+    /// Only available in DEBUG builds. Noop otherwise.
+    /// See <see cref="M:XanthamTag.setDebug"/> for flipping the <c>Debug</c> flag.
+    /// </remarks>
+    /// <param name="fn"></param>
+    /// <param name="tag"></param>
+    let inline withDebug (fn: XanthamTag -> unit) (tag: XanthamTag) =
+        #if DEBUG
+        if tag.Debug then fn tag
+        #endif
+        tag
+    /// <summary>
+    /// Sets the <c>Debug</c> flag to true on <paramref name="tag"/>.
+    /// </summary>
+    /// <param name="tag"></param>
+    let inline setDebug (tag: XanthamTag) =
+        #if DEBUG
+        tag.Debug <- true
+        #endif
+        tag
+    let inline setDebugForReason (reason: string) (tag: XanthamTag) =
+        #if DEBUG
+        if not tag.Debug then
+            tag.Debug <- true
+            chalk.white.Invoke "[TRACKING] " + $"Tracking {tag.IdentityKey}" + "\n           Tracking Reason: " + chalk.italic.Invoke reason + "\n           Tracking Id: " + chalk.yellow.Invoke $"""[{tag.DebugId}]"""
+            |> Log.debug
+        #endif
+        tag
+    let inline setDebugForReasonOr (onFail: string) (reason: string) (tag: XanthamTag) =
+        #if DEBUG
+        if not tag.Debug then
+            tag.Debug <- true
+            chalk.white.Invoke "[TRACKING] " + $"Tracking {tag.IdentityKey}" + "\n           Tracking Reason: " + chalk.italic.Invoke reason + "\n           Tracking Id: " + chalk.yellow.Invoke $"""[{tag.DebugId}]"""
+            |> Log.debug
+        else
+            chalk.gray.Invoke "[TRACKING] " + $"Tried tracking {tag.IdentityKey}" + "\n           Tracking Reason: " + chalk.italic.Invoke onFail + "\n           Known tracking id: " + chalk.gray.Invoke $"""[{tag.DebugId}]"""
+            |> Log.debug
+        #endif
+        tag
+            
+    /// <summary>
+    /// For tags where <c>Debug</c> is true, calls <paramref name="fn"/> with the tag once for the
+    /// given key.
+    /// </summary>
+    /// <remarks>
+    /// Only available in DEBUG builds. Noop otherwise.
+    /// See <see cref="M:XanthamTag.setDebug"/> for flipping the <c>Debug</c> flag.
+    /// </remarks>
+    /// <param name="key"></param>
+    /// <param name="fn"></param>
+    /// <param name="tag"></param>
+    let inline withDebugOneShot (key: string) (fn: XanthamTag -> unit) (tag: XanthamTag) =
+        #if DEBUG
+        withDebug (fun tag ->
+            if !!(tag["DebugOneShots"]) then
+                if !!(tag["DebugOneShots"][key]) then ()
+                else
+                fn tag
+                tag["DebugOneShots"][key] <- true
+            else
+                tag["DebugOneShots"] <- createObj [ key ==> true ]
+                fn tag
+            ) tag
+        #else
+        tag
+        #endif
+    let inline chainDebug (parent: XanthamTag) (child: XanthamTag) =
+        #if DEBUG
+        withDebug (fun _ ->
+            let debugIdParent = chalk.yellow.Invoke $"[{parent.DebugId}]"
+            setDebugForReasonOr $"Parent {debugIdParent} attempted to chain" $"Parent {debugIdParent} chained debug" child |> ignore) parent
+        |> ignore
+        #endif
+        child
+    let inline debugLocation (location: string) (tag: XanthamTag) =
+        withDebug (fun tag ->
+            let debugString = "[DEBUG]"
+            let debugId = chalk.yellow.Invoke $"[{tag.DebugId}]"
+            $"{chalk.white.Invoke debugString} %s{chalk.yellow.Invoke location}: %A{debugId}"
+            |> Log.debug
+            ) tag
+    let inline debugComment (comment: string) (tag: XanthamTag) =
+        withDebug (fun tag ->
+            let debugString = "[DEBUG]"
+            let debugId = chalk.yellow.Invoke $"[{tag.DebugId}]"
+            $"{chalk.white.Invoke debugString} %A{debugId}: %s{comment}"
+            |> Log.debug
+            ) tag
+    let inline debugLocationAndComment (location: string) (comment: string) (tag: XanthamTag) =
+        withDebug (fun tag ->
+            let debugString = "[DEBUG]"
+            let debugId = chalk.yellow.Invoke $"[{tag.DebugId}]"
+            $"{chalk.white.Invoke debugString} %s{chalk.yellow.Invoke location}: %A{debugId} %s{comment}"
+            |> Log.debug
+            ) tag
+        
+    let inline debugLocationAndForget (location: string) (tag: XanthamTag) =
+        debugLocation location tag |> ignore
+    let inline debugCommentAndForget (comment: string) (tag: XanthamTag) =
+        debugComment comment tag |> ignore
+    let inline debugLocationAndCommentAndForget (location: string) (comment: string) (tag: XanthamTag) =
+        debugLocationAndComment location comment tag |> ignore
+    
     /// <summary>
     /// Retrieves the stored <typeparamref name="'Data"/> entry from <paramref name="tag"/>.
     /// </summary>

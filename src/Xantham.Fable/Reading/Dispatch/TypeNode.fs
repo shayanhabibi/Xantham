@@ -15,6 +15,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
     let inline setAstSignal builder =
         xanTag.Builder <- builder
     let inline setKeyword (prim: TypeKindPrimitive) =
+        XanthamTag.debugLocationAndCommentAndForget "TypeNode.dispatch | Keyword" (sprintf "Primitive type: %A" prim) xanTag
         prim |> SType.Primitive |> setAstSignal
         prim.TypeKey |> setTypeKeyForTag xanTag
     let inline setTypeKeyFromNode (node: Ts.TypeNode) =
@@ -24,10 +25,15 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         let resolved = ctx.checker.getTypeFromTypeNode node
         let innerTag =
             match ctx.CreateXanthamTag resolved |> fst with
-            | TagState.Unvisited t -> pushToStack ctx t; t
-            | TagState.Visited t -> t
+            | TagState.Unvisited t ->
+                XanthamTag.chainDebug xanTag t
+                |> pushToStack ctx
+                t
+            | TagState.Visited t ->
+                XanthamTag.chainDebug xanTag t
         xanTag.TypeSignal
-        |> Signal.fulfillWith (fun () -> innerTag.TypeSignal.Value)
+        |> Signal.fulfillWith (fun () ->
+            innerTag.TypeSignal.Value)
         xanTag.Builder
         |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
     /// Build parameter slots from a list of ParameterDeclarations.
@@ -47,8 +53,11 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
     | TypeNode.ObjectKeyword _    -> setKeyword TypeKindPrimitive.NonPrimitive
     | TypeNode.SymbolKeyword _    -> setKeyword TypeKindPrimitive.ESSymbol
     | TypeNode.BigIntKeyword _    -> setKeyword TypeKindPrimitive.BigInt
-    | TypeNode.IntrinsicKeyword _ -> (* represents intrinsic type manipulations like Uppercase etc *) ()
+    | TypeNode.IntrinsicKeyword _ ->
+         XanthamTag.debugLocationAndCommentAndForget "TypeNode.dispatch | IntrinsicKeyword" "Represents intrinsic type manipulations like Uppercase etc" xanTag
+        (* represents intrinsic type manipulations like Uppercase etc *) 
     | TypeNode.UnionType unionTypeNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | UnionType" xanTag
         let types = unionTypeNode.types.AsArray
         if
             types.Length = 2
@@ -76,6 +85,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
             | TagState.Unvisited innerTag -> pushToStack ctx innerTag
             | TagState.Visited _ -> ()
     | TypeNode.IntersectionType intersectionTypeNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | IntersectionType" xanTag
         {
             STypeIntersectionBuilder.Types =
                 intersectionTypeNode.types.AsArray
@@ -91,6 +101,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         | TagState.Unvisited innerTag -> pushToStack ctx innerTag
         | TagState.Visited _ -> ()
     | TypeNode.ArrayType arrayTypeNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | ArrayType" xanTag
         let arrayElementTag =
             match ctx.CreateXanthamTag arrayTypeNode.elementType with
             | TagState.Unvisited tag, _ ->
@@ -109,6 +120,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
             )
         setTypeKeyFromNode arrayTypeNode
     | TypeNode.TupleType tupleTypeNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | TupleType" xanTag
         let fixedLength, minLength =
             tupleTypeNode.elements.AsArray
             |> Array.map (unbox<Ts.TypeNode> >> function
@@ -138,6 +150,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         |> setAstSignal
         setTypeKeyFromNode tupleTypeNode
     | TypeNode.NamedTupleMember namedTupleMemberNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | NamedTupleMember" xanTag
         let typeSignal = getTypeSignalFromNode namedTupleMemberNode.``type``
         
         STupleElementBuilder.FixedLabeled (
@@ -151,11 +164,13 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         |> xanTag.Set
         
     | TypeNode.RestType restTupleTypeNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | RestType" xanTag
         restTupleTypeNode.``type``
         |> getTypeSignalFromNode
         |> STupleElementBuilder.Variadic
         |> xanTag.Set
     | TypeNode.OptionalType optionalTypeNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | OptionalType" xanTag
         {
             Type = optionalTypeNode.``type`` |> getTypeSignalFromNode
             IsRest = false
@@ -170,6 +185,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         }
         |> setAstSignal
     | TypeNode.ParenthesizedType typeNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | ParenthesizedType" xanTag
         let typeSignal =
             typeNode.``type``
             |> getTypeSignalFromNode
@@ -186,12 +202,16 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         // Generic TypeReferences keep their own TypeReference builder (captures type arguments).
         let hasTypeArgs = typeReferenceNode.typeArguments |> Option.map (fun a -> a.Count > 0) |> Option.defaultValue false
         if hasTypeArgs then
+            XanthamTag.debugLocationAndForget "TypeNode.dispatch | TypeReference - hasTypeArgs" xanTag
             TypeReference.fromNode ctx xanTag typeReferenceNode
         else
+            XanthamTag.debugLocationAndForget "TypeNode.dispatch | TypeReference - not hasTypeArgs" xanTag
             routeViaChecker typeReferenceNode
     | TypeNode.TypeParameterDeclaration typeParameterDeclaration ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | TypeParameterDeclaration" xanTag
         TypeDeclaration.TypeParameter.read ctx xanTag typeParameterDeclaration
     | TypeNode.InferType inferTypeNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | InferType" xanTag
         // Emit the scoped type variable as a TypeParameter so it has an identity in the cache.
         let state = ctx.CreateXanthamTag (unbox<Ts.Node> inferTypeNode.typeParameter) |> fst
         let t = state.Value
@@ -201,6 +221,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         xanTag.Builder
         |> Signal.fulfillWith (fun () -> t.Builder.Value)
     | TypeNode.TypePredicate typePredicateNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | TypePredicate" xanTag
         let paramName =
             if (unbox<Ts.Node> typePredicateNode.parameterName).kind = Ts.SyntaxKind.Identifier
             then (unbox<Ts.Identifier> typePredicateNode.parameterName).text
@@ -222,12 +243,15 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         ctx.signalCache[xanTag.IdentityKey].Key
         |> setTypeKeyForTag xanTag
     | TypeNode.TypeQuery typeQueryNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | TypeQuery" xanTag
         // typeof X — resolve to the static type of X
         routeViaChecker typeQueryNode
     | TypeNode.TypeOperator typeOperatorNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | TypeOperator" xanTag
         // keyof T → union of property keys; unique symbol → UniqueESSymbol; readonly → inner type
         routeViaChecker typeOperatorNode
     | TypeNode.IndexedAccessType indexedAccessTypeNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | IndexedAccessType" xanTag
         let resolved = ctx.checker.getTypeFromTypeNode indexedAccessTypeNode
         if resolved.flags.HasFlag Ts.TypeFlags.IndexedAccess then
             // Generic/unresolvable — emit raw IndexedAccess builder using the syntactic nodes
@@ -249,9 +273,11 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
             xanTag.Builder
             |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
     | TypeNode.MappedType mappedTypeNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | MappedType" xanTag
         // { [K in keyof T]: T[K] } — route via checker to ObjectFlags.Mapped at the type layer
         routeViaChecker mappedTypeNode
     | TypeNode.ConditionalType conditionalTypeNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | ConditionalType" xanTag
         {
             SConditionalTypeBuilder.Check = conditionalTypeNode.checkType |> getTypeSignalFromNode
             Extends = conditionalTypeNode.extendsType |> getTypeSignalFromNode
@@ -262,6 +288,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         |> setAstSignal
         setTypeKeyFromNode conditionalTypeNode
     | TypeNode.TemplateLiteralType templateLiteralTypeNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | TemplateLiteralType" xanTag
         let innerTag =
             match ctx.checker.getTypeAtLocation templateLiteralTypeNode |> ctx.CreateXanthamTag |> fst with
             | TagState.Unvisited tag -> pushToStack ctx tag; tag
@@ -270,11 +297,15 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         |> Signal.fulfillWith (fun () -> innerTag.TypeSignal.Value)
         xanTag.Builder
         |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
-    | TypeNode.TemplateLiteralTypeSpan _ -> () // only reached as child of TemplateLiteralType; handled above
+    | TypeNode.TemplateLiteralTypeSpan _ ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | TemplateLiteralTypeSpan" xanTag
+        // only reached as child of TemplateLiteralType; handled above
     | TypeNode.ImportType importTypeNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | ImportType" xanTag
         // import("module").TypeName — resolve via checker
         routeViaChecker importTypeNode
     | TypeNode.FunctionType funcTypeNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | FunctionType" xanTag
         // (x: T) => R — emit as a CallSignature (type params not captured; schema has no slot)
         {
             Members = [|
@@ -292,6 +323,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         |> setAstSignal
         setTypeKeyFromNode funcTypeNode
     | TypeNode.ConstructorType ctorTypeNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | ConstructorType" xanTag
         // new (x: T) => R — emit as a ConstructSignature
         {
             Members = [|
@@ -308,6 +340,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         |> setAstSignal
         setTypeKeyFromNode ctorTypeNode
     | TypeNode.TypeLiteral typeLiteralNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | TypeLiteral" xanTag
         {
             STypeLiteralBuilder.Members =
                 typeLiteralNode.members.AsArray
@@ -317,6 +350,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         |> setAstSignal
         setTypeKeyFromNode typeLiteralNode
     | TypeNode.LiteralType literalToken ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | LiteralType" xanTag
         LiteralTokenNode.dispatch
             ctx
             xanTag
@@ -324,6 +358,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
     // this type node doesn't really resolve to anything
     // without context
     | TypeNode.ThisType thisTypeNode ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | ThisType" xanTag
         // get type checker resolved value
         match
             ctx.checker.getTypeFromTypeNode thisTypeNode
@@ -343,6 +378,9 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
             xanTag.Builder
             |> Signal.fulfillWith(fun () -> builder.Value)
         
-    | TypeNode.SatisfiesExpression _ -> ()
-    | TypeNode.AsExpression _ -> ()
-    | TypeNode.TypeAssertion _ -> ()
+    | TypeNode.SatisfiesExpression _ ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | SatisfiesExpression" xanTag
+    | TypeNode.AsExpression _ ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | AsExpression" xanTag
+    | TypeNode.TypeAssertion _ ->
+        XanthamTag.debugLocationAndForget "TypeNode.dispatch | TypeAssertion" xanTag

@@ -74,6 +74,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
     /// ties the current xantham tag to the signals of the given type
     /// </summary>
     let inline routeToType (typ: Ts.Type) =
+        XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | routeToType" xanTag
         let underlyingType =
             match ctx.CreateXanthamTag typ |> fst with
             | TagState.Unvisited tag -> pushToStack ctx tag; tag
@@ -85,6 +86,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
         xanTag.Builder
         |> Signal.fulfillWith (fun () -> underlyingBuilderSignal.Value)
     let setPrimitive = fun prim ->
+        XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | setPrimitive" xanTag
         SType.Primitive prim
         |> setAstSignal
         prim.TypeKey
@@ -103,9 +105,14 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
     | TypeFlagPrimary.Null _ -> setPrimitive TypeKindPrimitive.Null
     | TypeFlagPrimary.Never _ -> setPrimitive TypeKindPrimitive.Never
     | TypeFlagPrimary.NonPrimitive _ -> setPrimitive TypeKindPrimitive.NonPrimitive
-    | TypeFlagPrimary.Literal typeFlagLiteral -> TypeFlagLiteral.dispatch ctx xanTag typeFlagLiteral
-    | TypeFlagPrimary.Object typeFlagObject -> TypeFlagObject.dispatch ctx xanTag typeFlagObject
+    | TypeFlagPrimary.Literal typeFlagLiteral ->
+        XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | Literal" xanTag
+        TypeFlagLiteral.dispatch ctx xanTag typeFlagLiteral
+    | TypeFlagPrimary.Object typeFlagObject ->
+        XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | Object" xanTag
+        TypeFlagObject.dispatch ctx xanTag typeFlagObject
     | TypeFlagPrimary.Intersection intersectionType ->
+        XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | Intersection" xanTag
         {
             STypeIntersectionBuilder.Types =
                 intersectionType.types.AsArray
@@ -116,12 +123,14 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
         intersectionType.TypeKey
         |> setTypeKeyForTag xanTag
     | TypeFlagPrimary.Index indexType ->
+        XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | Index" xanTag
         { SIndexBuilder.Type = unbox<Ts.Type> indexType.``type`` |> getTypeSignal }
         |> SType.Index
         |> setAstSignal
         indexType.TypeKey
         |> setTypeKeyForTag xanTag
     | TypeFlagPrimary.IndexedAccess indexedAccessType ->
+        XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | IndexedAccess" xanTag
         // If the checker has simplified the type (e.g. T[K] where K's constraint resolves),
         // forward to the simplified form. Otherwise emit a raw IndexedAccess builder.
         match indexedAccessType.simplifiedForReading with
@@ -137,6 +146,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
             indexedAccessType.TypeKey
             |> setTypeKeyForTag xanTag
     | TypeFlagPrimary.Conditional conditionalType ->
+        XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | Conditional" xanTag
         let inline getTypeSignalFromNode (node: Ts.TypeNode) =
             ctx.CreateXanthamTag node |> fst |> stackPushAndThen ctx _.TypeSignal
         {
@@ -156,8 +166,11 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
         |> SType.Conditional
         |> setAstSignal
         conditionalType.TypeKey |> setTypeKeyForTag xanTag
-    | TypeFlagPrimary.Substitution subType -> routeToType subType.baseType
+    | TypeFlagPrimary.Substitution subType ->
+        XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | Substitution" xanTag
+        routeToType subType.baseType
     | TypeFlagPrimary.TemplateLiteral templateLiteralType ->
+        XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | TemplateLiteral" xanTag
         {
             STemplateLiteralTypeBuilder.Texts = templateLiteralType.texts.AsArray
             Types = templateLiteralType.types.AsArray |> Array.map getTypeSignal
@@ -167,9 +180,11 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
         templateLiteralType.TypeKey
         |> setTypeKeyForTag xanTag
     | TypeFlagPrimary.StringMapping stringMappingType ->
+        XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | StringMappingType" xanTag
         // TODO - for now we're just returning the type of the string mapping directly
         routeToType stringMappingType.``type``
     | TypeFlagPrimary.Union unionType ->
+        XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | Union" xanTag
         let types = unionType.types.AsArray
         if types |> Array.forall (TypeFlagPrimary.Create >> function
             | TypeFlagPrimary.Literal (TypeFlagLiteral.Boolean _)
@@ -184,6 +199,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
         unionType.TypeKey
         |> setTypeKeyForTag xanTag
     | TypeFlagPrimary.TypeParameter typ ->
+        XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | TypeParameter" xanTag
         {
             STypeParameterBuilder.Name =
                 typ.getSymbol()
