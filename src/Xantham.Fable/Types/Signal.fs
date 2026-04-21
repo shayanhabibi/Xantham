@@ -1,5 +1,7 @@
 module Xantham.Fable.Types.Signal
 
+open System.Collections.Generic
+
 // ---------------------------------------------------------------------------
 // Tracking scope — module-level mutable, single active scope at a time.
 // F# doesn't support `let private mutable` at module level; the binding is
@@ -224,9 +226,7 @@ type Signal<'a> private (compute: unit -> 'a, upstream: IEvent<unit> option) =
     /// </para>
     /// <para>
     /// The thunk is run immediately to seed the value, then re-run whenever any
-    /// tracked dependency fires. Before each re-run, the previous subscriptions are
-    /// disposed so that shifting dependency sets (conditional branches in the thunk)
-    /// are handled correctly.
+    /// tracked dependency fires.
     /// </para>
     /// <para>
     /// Equality-checked on each <c>Set</c>: the thunk re-running does not fire
@@ -234,16 +234,17 @@ type Signal<'a> private (compute: unit -> 'a, upstream: IEvent<unit> option) =
     /// </para>
     /// </remarks>
     member this.FulfillWith(thunk: unit -> 'a) : unit =
-        let mutable subs: System.IDisposable list = []
+        let subs: Dictionary<IEvent<unit>, System.IDisposable> = Dictionary()
         let rec run () =
-            subs |> List.iter _.Dispose()
-            let mutable deps: IEvent<unit> list = []
             let prev = collector
-            collector <- Some (fun ev -> deps <- ev :: deps)
+            collector <- Some (fun ev ->
+                if subs.ContainsKey(ev) then ()
+                else
+                subs[ev] <- Observable.subscribe (fun () -> run()) ev
+                )
             let v = thunk()
             collector <- prev
             this.Set v
-            subs <- deps |> List.map (Observable.subscribe (fun () -> run()))
 
         run()
 
