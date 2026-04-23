@@ -796,3 +796,129 @@ module ModuleLikePath =
         static member inline Create value = ModuleLikePath.Anchored value
         static member inline Create value = ModuleLikePath.Transient value
     let inline create value = ((^T or SRTPHelper): (static member Create: ^T -> ModuleLikePath) value)
+
+/// <summary>
+/// Builder for constructing paths with easily identifiable syntax (originally made for spec testing, but
+/// may be a useful abstraction for consumers who need to create paths for injected types or other purposes).
+/// <br/><br/>
+/// All concrete paths are preceded by a single <c>_</c>, while transient paths are preceded and followed by <c>_</c>.
+/// <br/>
+/// Therefor making a concrete path would be:
+/// <code>
+/// _module "Root"; _module "Module"; _type "Type"
+/// </code>
+/// And a transient path would be:
+/// <code>
+/// _module_ "Root"; _type_ "Type"
+/// </code>
+/// If you do not pass a string to the transient builder, it will be anchored.
+/// <code>
+/// _type_ // TransientTypePath.Anchored
+/// _type_ "Type" // TransientTypePath.AnchoredAndMoored "Type"
+/// _module_ "Module"; _type_ "Type" // TransientTypePath.Moored(TransientModulePath.AnchoredAndMoored "Module", "Type")
+/// </code>
+/// </summary>
+type PathBuilder() =
+    member inline _.Yield(a: unit) = ()
+    member inline _.Yield(n: ModulePath) = n
+    member inline _.Yield(n: TypePath) = n
+    member inline _.Yield(n: MemberPath) = n
+    member inline _.Yield(n: ParameterPath) = n
+    member inline _.Yield(n: TypeParamPath) = n
+    member inline _.Yield(n: TransientTypePath) = n
+    member inline _.Yield(n: TransientModulePath) = n
+    member inline _.Yield(n: TransientMemberPath) = n
+    member inline _.Yield(n: TransientParameterPath) = n
+    member inline _.Yield(n: AnchorPath) = n
+    member inline _.Yield(n: TransientPath) = n
+    member inline _.Yield(n: Path) = n
+    member inline _.Yield(n: string) = n
+    member inline _.Combine(a, b: unit) = a
+    member inline _.Zero() = ()
+    member inline this.Combine(a: ModulePath, b: string) = ModulePath.create b a
+    member inline this.Combine(a: string, b: string) = ModulePath.init a |> ModulePath.create b
+    member inline this.Combine(a: TypePath, b: string) = MemberPath.createOnType b a
+    member inline this.Combine(a: MemberPath, b: string) = ParameterPath.create b a
+    member inline this.Combine(a: TypePath, b: Name<Case.typar>) = TypeParamPath.createOnType b a
+    member inline this.Combine(a: MemberPath, b: Name<Case.typar>) = TypeParamPath.createOnMember b a
+    member inline this.Combine(a: ParameterPath, b: Name<Case.typar>) = TypeParamPath.createOnParameter b a
+    member inline this.Combine(a: TransientModulePath, b: string) = TransientModulePath.createOnTransientModule b a
+    member inline this.Combine(a: TransientTypePath, b: string) = TransientMemberPath.createOnTransientType b a
+    member inline this.Combine(a: TransientMemberPath, b: string) = TransientParameterPath.createOnTransientMember b a
+    member inline this.Delay([<InlineIfLambda>] a) = a()
+    member inline this.For(a: ModulePath, b: unit -> string) = this.Combine(a, b())
+    [<CustomOperation "_module_">]
+    member inline _.MakeTransientModule(a: unit, b: string) = TransientModulePath.AnchoredAndMoored(Name.Pascal.create b)
+    [<CustomOperation "_module_">]
+    member inline _.MakeTransientModule(a: TransientModulePath, b: string) = TransientModulePath.Moored(a, Name.Pascal.create b)
+    [<CustomOperation "_module_">]
+    member inline _.MakeTransientModule(a: string, b: string) =
+        TransientModulePath.AnchoredAndMoored(Name.Pascal.create a)
+        |> TransientModulePath.createOnTransientModule b
+    [<CustomOperation "_module_">]
+    member inline _.MakeTransientModule(a: unit) = TransientModulePath.Anchored
+    [<CustomOperation "_type_">]
+    member inline _.MakeTransientType(a: unit) = TransientTypePath.Anchored
+    [<CustomOperation "_type_">]
+    member inline _.MakeTransientType(a: TransientModulePath, b: string) = TransientTypePath.Moored(a, Name.Pascal.create b)
+    [<CustomOperation "_type_">]
+    member inline _.MakeTransientType(a: unit, b: string) = TransientTypePath.AnchoredAndMoored(Name.Pascal.create b)
+    [<CustomOperation "_member_">]
+    member inline _.MakeTransientMember(a: unit) = TransientMemberPath.Anchored
+    [<CustomOperation "_member_">]
+    member inline _.MakeTransientMember(a: TransientTypePath, b: string) = TransientMemberPath.Moored(a, Name.Camel.create b)
+    [<CustomOperation "_member_">]
+    member inline _.MakeTransientMember(a: unit, b: string) = TransientMemberPath.AnchoredAndMoored(Name.Camel.create b)
+    [<CustomOperation "_parameter_">]
+    member inline _.MakeTransientParameter(a: unit) = TransientParameterPath.Anchored
+    [<CustomOperation "_parameter_">]
+    member inline _.MakeTransientParameter(a: TransientMemberPath, b: string) = TransientParameterPath.Moored(a, Name.Camel.create b)
+    [<CustomOperation "_parameter_">]
+    member inline _.MakeTransientParameter(a: unit, b: string) = TransientParameterPath.AnchoredAndMoored(Name.Camel.create b)
+    [<CustomOperation "_module">]
+    member inline _.MakeModule(a: unit, b: string) = ModulePath.init b
+    [<CustomOperation "_module">]
+    member inline _.MakeModule(a: ModulePath, b: string) = ModulePath.create b a
+    [<CustomOperation "_type">]
+    member inline _.MakeType(a: ModulePath, b: string) = TypePath.create b a
+    [<CustomOperation "_member">]
+    member inline _.MakeMember(a: TypePath, b: string) = MemberPath.createOnType b a
+    [<CustomOperation "_member">]
+    member inline _.MakeMember(a: ModulePath, b: string) = MemberPath.createOnModule b a
+    [<CustomOperation "_parameter">]
+    member inline _.MakeParameter(a: MemberPath, b: string) = ParameterPath.create b a
+    [<CustomOperation "_typar">]
+    member inline this.MakeTypeParam(a: TypePath, b: string) = this.Combine(a, Name.Typar.create b)
+    [<CustomOperation "_typar">]
+    member inline this.MakeTypeParam(a: MemberPath, b: string) = this.Combine(a, Name.Typar.create b)
+    [<CustomOperation "_typar">]
+    member inline this.MakeTypeParam(a: ParameterPath, b: string) = this.Combine(a, Name.Typar.create b)
+    [<CustomOperation "asAnchorPath">]
+    member inline _.AsAnchorPath(a) = AnchorPath.create a
+    [<CustomOperation "asTransientPath">]
+    member inline _.AsTransientPath(a) = TransientPath.create a
+    [<CustomOperation "asPath">]
+    member inline _.AsPath(a) = Path.create a
+    member inline _.Run(a) = a
+/// <summary>
+/// Builder for constructing paths with easily identifiable syntax (originally made for spec testing, but
+/// may be a useful abstraction for consumers who need to create paths for injected types or other purposes).
+/// <br/><br/>
+/// All concrete paths are preceded by a single <c>_</c>, while transient paths are preceded and followed by <c>_</c>.
+/// <br/>
+/// Therefor making a concrete path would be:
+/// <code>
+/// _module "Root"; _module "Module"; _type "Type"
+/// </code>
+/// And a transient path would be:
+/// <code>
+/// _module_ "Root"; _type_ "Type"
+/// </code>
+/// If you do not pass a string to the transient builder, it will be anchored.
+/// <code>
+/// _type_ // TransientTypePath.Anchored
+/// _type_ "Type" // TransientTypePath.AnchoredAndMoored "Type"
+/// _module_ "Module"; _type_ "Type" // TransientTypePath.Moored(TransientModulePath.AnchoredAndMoored "Module", "Type")
+/// </code>
+/// </summary>
+let pathCe = PathBuilder()
