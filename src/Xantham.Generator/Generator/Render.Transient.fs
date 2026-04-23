@@ -11,17 +11,19 @@ open Xantham.Generator.Types
 open Xantham.Generator.NamePath
 
 module Union =
-    let private renderUnionLiteralCase (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (literal: ResolvedTypeLiteralLike) =
+    let private renderUnionLiteralCase (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (transientPathCtx: TransientTypePath voption) (literal: ResolvedTypeLiteralLike) =
         match literal with
         | ResolvedTypeLiteralLike.EnumCase enumCase ->
-            let path =
+            let name =
                 Case.unboxMeasure enumCase.Name
-                |> TransientMemberPath.AnchoredAndMoored
-                |> Path.create
+            let path =
+                transientPathCtx
+                |> ValueOption.map (TransientMemberPath.createOnTransientTypeWithName name)
+                |> ValueOption.defaultValue (TransientMemberPath.AnchoredAndMoored name)
             {
                 LiteralCaseRender.Metadata = {
-                    Path = path
-                    Original = path
+                    Path = Path.create path
+                    Original = TransientMemberPath.AnchoredAndMoored name |> Path.create
                     Source = enumCase.Source |> Option.toValueOption
                     FullyQualifiedName = ValueSome enumCase.FullyQualifiedName
                 }
@@ -51,27 +53,33 @@ module Union =
                 Value = tsLiteral
                 Documentation = []
             }
-    let private renderUnionLiterals (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (literals: ResolvedTypeLiteralLike list) =
+    let private renderUnionLiterals (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (transientPathCtx: TransientModulePath voption) (literals: ResolvedTypeLiteralLike list) =
+        let path =
+            transientPathCtx
+            |> ValueOption.map TransientTypePath.graft
+            |> ValueOption.defaultValue TransientTypePath.Anchored
         {
-            Metadata = { Path = Path.create TransientTypePath.Anchored
+            Metadata = { Path = Path.create path
                          Original = Path.create TransientTypePath.Anchored
                          Source = ValueNone; FullyQualifiedName = ValueNone }
             Prelude.Transient.LiteralUnionRender.Name = ValueNone
             Cases =
                 literals
-                |> List.map (renderUnionLiteralCase ctx scopeStore)
+                |> List.map (renderUnionLiteralCase ctx scopeStore (ValueSome path))
             Documentation = []
         }
-    let private renderEnumLiteralCase (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (literal: ResolvedTypeLiteralLike) =
+    let private renderEnumLiteralCase (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (transientPathCtx: TransientTypePath voption) (literal: ResolvedTypeLiteralLike) =
         match literal with
         | ResolvedTypeLiteralLike.EnumCase ({ Value = TsLiteral.Int value } as enumCase) ->
-            let path =
+            let name = 
                 Case.unboxMeasure enumCase.Name
-                |> TransientMemberPath.AnchoredAndMoored
-                |> Path.create
+            let path =
+                transientPathCtx
+                |> ValueOption.map (TransientMemberPath.createOnTransientTypeWithName name)
+                |> ValueOption.defaultValue (TransientMemberPath.AnchoredAndMoored name)
             {
-                Metadata = { Path = path
-                             Original = path
+                Metadata = { Path = Path.create path
+                             Original = TransientMemberPath.AnchoredAndMoored name |> Path.create
                              Source = enumCase.Source |> Option.toValueOption
                              FullyQualifiedName = ValueSome enumCase.FullyQualifiedName }
                 Name = enumCase.Name |> ValueSome
@@ -90,19 +98,22 @@ module Union =
         | ResolvedTypeLiteralLike.EnumCase _ 
         | ResolvedTypeLiteralLike.Literal _ -> failwith "Cannot render enum literal case for non int literal. This should be guarded against"
 
-    let private renderEnumLiterals (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (literals: ResolvedTypeLiteralLike list) =
-        let path = TransientTypePath.Anchored |> Path.create
+    let private renderEnumLiterals (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (transientPathCtx: TransientModulePath voption) (literals: ResolvedTypeLiteralLike list) =
+        let path =
+            transientPathCtx
+            |> ValueOption.map TransientTypePath.graft
+            |> ValueOption.defaultValue TransientTypePath.Anchored
         {
-            Metadata = { Path = path; Original = path
+            Metadata = { Path = Path.create path; Original = Path.create TransientTypePath.Anchored
                          Source = ValueNone; FullyQualifiedName = ValueNone }
             Name = ValueNone
             Cases =
                 literals
-                |> List.map (renderEnumLiteralCase ctx scopeStore)
+                |> List.map (renderEnumLiteralCase ctx scopeStore (ValueSome path))
             Documentation = []
         }
     
-    let renderLiterals (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (literals: ResolvedTypeLiteralLike list) =
+    let renderLiterals (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (transientPathCtx: TransientModulePath voption) (literals: ResolvedTypeLiteralLike list) =
         if
             literals
             |> List.forall (function
@@ -111,25 +122,35 @@ module Union =
                 | _ -> false
                 )
         then
-            renderEnumLiterals ctx scopeStore literals
+            renderEnumLiterals ctx scopeStore transientPathCtx literals
             |> Transient.TypeRender.EnumUnion
         else
-            renderUnionLiterals ctx scopeStore literals
+            renderUnionLiterals ctx scopeStore transientPathCtx literals
             |> Transient.TypeRender.StringUnion
 module TemplateLiteral =
-    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (templateLiteral: TemplateLiteral) =
+    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (transientPathCtx: TransientModulePath voption) (templateLiteral: TemplateLiteral) =
             let path =
-                Name.Pascal.create "TemplateLiteral"
-                |> TransientTypePath.AnchoredAndMoored
-                |> Path.create
+                transientPathCtx
+                |> ValueOption.map TransientTypePath.graft
+                |> ValueOption.defaultValue (
+                        Name.Pascal.create "TemplateLiteral"
+                        |> TransientTypePath.AnchoredAndMoored
+                    )
+            
             {
                 TypeLikeRender.Metadata = {
-                    Path = path
-                    Original = path
+                    Path = Path.create path
+                    Original =
+                        TransientTypePath.Anchored
+                        |> Path.create
                     Source = ValueNone
                     FullyQualifiedName = ValueNone
                 }
-                Name = Name.Pascal.create "TemplateLiteral" |> ValueSome
+                Name =
+                    match path with
+                    | TransientTypePath.AnchoredAndMoored name
+                    | TransientTypePath.Moored(_, name) -> ValueSome name
+                    | _ -> ValueNone
                 TypeParameters = []
                 Members = [
                     {
@@ -200,11 +221,19 @@ module TemplateLiteral =
             }
             |> TypeDefn
 module Members =
-    let renderFromMembersAndFunctions (ctx: GeneratorContext) (scopeStore: RenderScopeStore) members functions =
+    let renderFromMembersAndFunctions (ctx: GeneratorContext) (scopeStore: RenderScopeStore) transientPathCtx members functions =
+        let path =
+            transientPathCtx
+            |> ValueOption.map TransientTypePath.graft
+            |> ValueOption.defaultValue TransientTypePath.Anchored
         {
-            Transient.TypeLikeRender.Metadata = { Path = Path.create TransientTypePath.Anchored; Original = Path.create TransientTypePath.Anchored
+            Transient.TypeLikeRender.Metadata = { Path = Path.create path; Original = Path.create TransientTypePath.Anchored
                                                   Source = ValueNone; FullyQualifiedName = ValueNone }
-            Name = ValueNone
+            Name =
+                match path with
+                | TransientTypePath.Anchored -> ValueNone
+                | TransientTypePath.Moored(_, name) 
+                | TransientTypePath.AnchoredAndMoored name -> ValueSome name
             TypeParameters = []
             Inheritance = []
             Members = members
@@ -213,24 +242,29 @@ module Members =
             Documentation = []
         }
         |> Transient.TypeRender.TypeDefn
-    let inline render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (members: Member list) =
-        Member.partitionRender ctx scopeStore members
-        ||> renderFromMembersAndFunctions ctx scopeStore
+    let inline render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) transientPathCtx (members: Member list) =
+        let typePathCtx = transientPathCtx |> ValueOption.map TransientTypePath.graft
+        Member.partitionRender ctx scopeStore typePathCtx members
+        ||> renderFromMembersAndFunctions ctx scopeStore transientPathCtx
 
 module Intersection =
-    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (intersection: Intersection) =
+    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) transientPathCtx (intersection: Intersection) =
         Member.collectAllRecursively (ResolvedType.Intersection intersection)
-        |> Members.render ctx scopeStore
+        |> Members.render ctx scopeStore transientPathCtx
 
 module TypeLiteral =
-    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (typeLiteral: TypeLiteral) =
+    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) transientPathCtx (typeLiteral: TypeLiteral) =
         typeLiteral.Members
-        |> Members.render ctx scopeStore
+        |> Members.render ctx scopeStore transientPathCtx
 
 module Literal =
-    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (literal: TsLiteral) =
+    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) transientPathCtx (literal: TsLiteral) =
+        let path =
+            transientPathCtx
+            |> ValueOption.map TransientTypePath.graft
+            |> ValueOption.defaultValue TransientTypePath.Anchored
         {
-            Metadata = { Path = Path.create TransientTypePath.Anchored; Original = Path.create TransientTypePath.Anchored
+            Metadata = { Path = Path.create path; Original = Path.create TransientTypePath.Anchored
                          Source = ValueNone; FullyQualifiedName = ValueNone }
             LiteralUnionRender.Name = ValueNone
             Cases = [
@@ -256,9 +290,13 @@ module Literal =
         |> Transient.TypeRender.StringUnion
 
 module EnumCase =
-    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (enumCase: EnumCase) =
+    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) transientPathCtx (enumCase: EnumCase) =
+        let path =
+            transientPathCtx
+            |> ValueOption.map TransientTypePath.graft
+            |> ValueOption.defaultValue TransientTypePath.Anchored
         {
-            Metadata = { Path = Path.create TransientTypePath.Anchored
+            Metadata = { Path = Path.create path
                          Original = Path.create TransientTypePath.Anchored
                          Source = enumCase.Source |> Option.toValueOption
                          FullyQualifiedName = ValueSome enumCase.FullyQualifiedName }

@@ -24,7 +24,8 @@ let pathTests = testList "Anchor" [
     
     pathCe { _module "Root"; _type "Type"; _member "op"; _parameter "para" } ==> "Root.Type.Op.Para"
     
-    pathCe { _module "Root"; _type "Type" } ==> "Root.Type.Type" // if a transient type is being opened by a concrete type, then we still nest it.
+    // type alias body: type Type = { ... }  →  the body IS the type, not a child of it
+    pathCe { _module "Root"; _type "Type" } ==> "Root.Type"
     
             ] <| fun (a,b) ->
                 a
@@ -63,18 +64,21 @@ let pathTests = testList "Anchor" [
                 c
                 |> Flip.Expect.isTrue ""
             testTheory "Chained TransientTypeAnchorMoored" [
-                
-    pathCe { _module "Root"; _type "Foo"; asAnchorPath }
-    --> pathCe { _type_ } --> pathCe { _type_ } ==> "Root.Foo.Foo.Foo" <== _.IsType
-    
+    // Named (AnchoredAndMoored) chains correctly extend the module path at each step
     pathCe { _module "Root"; _type "Bar"; asAnchorPath }
     --> pathCe { _type_ "Foo" } --> pathCe { _type_ "Bar" } ==> "Root.Bar.Foo.Bar" <== _.IsType
-    
+
+    // Unnamed (Anchored) transient on a type anchor collapses to the anchor itself — chaining is idempotent
+    pathCe { _module "Root"; _type "Foo"; asAnchorPath }
+    --> pathCe { _type_ } --> pathCe { _type_ } ==> "Root.Foo" <== _.IsType
+
+    // Mixed: unnamed step collapses, subsequent named step is relative to the (collapsed) anchor
     pathCe { _module "A"; _type "B"; asAnchorPath }
-    --> pathCe { _type_ } --> pathCe { _type_ "C" } ==> "A.B.B.C" <== _.IsType
-    
+    --> pathCe { _type_ } --> pathCe { _type_ "D" } ==> "A.B.D" <== _.IsType
+
+    // Mixed: named step first, then unnamed collapses to it
     pathCe { _module "A"; _type "B"; asAnchorPath }
-    --> pathCe { _type_ "C" } --> pathCe { _type_ } ==> "A.B.C.C" <== _.IsType
+    --> pathCe { _type_ "C" } --> pathCe { _type_ } ==> "A.B.C" <== _.IsType
     
             ] <| fun (a, b, c) ->
                 a
@@ -153,7 +157,7 @@ let relativePathTests = testList "Relative Path" [
     
     testTheory "Transient Type" [
         pathCe { _module "Root"; _type "Type"; asAnchorPath }
-        --> pathCe { _type_ } // Root.Type.Type
+        --> pathCe { _type_ } // Root.Type
         =-= pathCe { _module "Root"; _type "Type" }
         ==> "Type"
         

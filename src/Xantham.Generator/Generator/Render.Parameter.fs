@@ -24,8 +24,11 @@ module Parameter =
             Documentation = param.Documentation
         }
         
-    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (param: Parameter): TypedNameRender<TypeRefRender,Name<Case.camel>,'a> =
-        let path = Path.create (TransientParameterPath.AnchoredAndMoored param.Name)
+    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (transientContextPath: TransientMemberPath voption) (param: Parameter): TypedNameRender<TypeRefRender,Name<Case.camel>,'a> =
+        let path =
+            transientContextPath
+            |> ValueOption.map (TransientParameterPath.createOnTransientMemberWithName param.Name >> Path.create)
+            |> ValueOption.defaultValue (Path.create (TransientParameterPath.AnchoredAndMoored param.Name))
         renderWithMetadata ctx scopeStore param 
             { Path = path
               Original = path

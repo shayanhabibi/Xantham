@@ -2,6 +2,7 @@
 module Xantham.Generator.Generator.Render_TypeParameter
 
 open System.ComponentModel
+open Xantham.Decoder
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
 open Xantham.Generator.Types
@@ -22,10 +23,18 @@ module TypeParameter =
                 |> Option.toValueOption
             Documentation = typar.Documentation
         }
-    let render (ctx: GeneratorContext) scopeStore (typar: TypeParameter) =
+    let render (ctx: GeneratorContext) scopeStore (transientPathCtx: TransientModulePath voption) (typar: TypeParameter) =
+        let transientPath =
+            transientPathCtx
+            |> ValueOption.map TransientTypeParameterPath.graft
+            |> ValueOption.defaultWith (fun () ->
+                TransientTypePath.AnchoredAndMoored(Name.Pascal.fromCase typar.Name)
+                |> TransientPath.create
+                )
+            |> Path.create
         renderWithMetadata ctx scopeStore typar {
-            Path = Path.create TransientTypePath.Anchored
-            Original = Path.create TransientTypePath.Anchored
+            Path = transientPath
+            Original = transientPath
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }

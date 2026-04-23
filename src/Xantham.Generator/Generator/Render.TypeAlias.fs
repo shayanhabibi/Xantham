@@ -14,11 +14,11 @@ open Xantham.Generator.NamePath
 module TypeAlias =
     let render (ctx: GeneratorContext) scopeStore (typ: TypeAlias) =
         let innerType = typ.Type
+        let name = typ.Name
         let typeParameters =
             typ.TypeParameters
-            |> List.map (_.Value >> TypeParameter.render ctx scopeStore)
+            |> List.map (_.Value >> TypeParameter.render ctx scopeStore (TransientModulePath.AnchoredAndMoored name |> ValueSome))
         let documentation = typ.Documentation
-        let name = typ.Name
         let path = Path.fromTypeAlias typ
         let metadata = { Path = Path.create path
                          Original = Path.create path
@@ -48,11 +48,12 @@ module TypeAlias =
                 Type = ctx.PreludeGetTypeRef ctx scopeStore innerType
             }
             |> TypeAliasRender.Alias
-        | ResolvedType.Intersection _ 
+        | ResolvedType.Intersection _
         | ResolvedType.TypeLiteral _ ->
+            let transientTypePathCtx = TransientTypePath.AnchoredAndMoored name |> ValueSome
             let members, functions =
                 Member.collectAllRecursively innerType.Value
-                |> Member.partitionRender ctx scopeStore
+                |> Member.partitionRender ctx scopeStore transientTypePathCtx
             // if members |> List.isEmpty && functions |> List.forall (_.Name >> Name.Case.valueOrSource >> (=) "Invoke") then
                 // ()
             // else
@@ -80,7 +81,8 @@ module TypeAlias =
             match ResolvedTypeCategories.create innerType.Value with
             // no literals, and no 'others' that require a transient type
             | { LiteralLike = literals; Others = []; Nullable = nullable; Primitives = []; EnumLike = [] } ->
-                match Union.renderLiterals ctx scopeStore literals with
+                let transientModulePathCtx = TransientModulePath.AnchoredAndMoored name |> ValueSome
+                match Union.renderLiterals ctx scopeStore transientModulePathCtx literals with
                 | TypeRender.EnumUnion enumRender ->
                     {
                         LiteralUnionRender.Metadata = metadata
@@ -133,10 +135,11 @@ module TypeAlias =
             |> TypeAliasRender.StringUnion
             
         | ResolvedType.ReadOnly resolvedType ->
+            let transientTypePathCtx = TransientTypePath.AnchoredAndMoored name |> ValueSome
             let members,functions =
                 Member.collectAllRecursively resolvedType
                 |> List.map Member.setReadOnly
-                |> Member.partitionRender ctx scopeStore
+                |> Member.partitionRender ctx scopeStore transientTypePathCtx
             {
                 TypeLikeRender.Metadata = metadata
                 Name = name

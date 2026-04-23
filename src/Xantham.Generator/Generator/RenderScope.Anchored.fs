@@ -487,13 +487,17 @@ and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: R
         let renderScope =
             GeneratorContext.Prelude.tryGet ctx key
             |> ValueOption.orElseWith (fun () ->
-                prerender ctx renderScopeStore (LazyContainer.CreateTypeKeyDummy<ResolvedType> key)
+                prerenderExternal ctx renderScopeStore (LazyContainer.CreateTypeKeyDummy<ResolvedType> key)
                 |> ignore
                 GeneratorContext.Prelude.tryGet ctx key
                 )
             |> ValueOption.defaultWith (fun () ->
                 failwith "Could not find render scope for key")
-        let path = TransientPath.anchor anchorPath (TransientPath.create value)
+        let transientPath =
+            match renderScope.Root with
+            | ValueSome (TypeLikePath.Transient path) -> path
+            | _ -> failwith "Expected transient path"
+        let path = TransientPath.anchor anchorPath (TransientPath.create transientPath)
         anchorPreludeAnchorScope ctx (Some anchors) path renderScope)
     anchors
 
@@ -525,7 +529,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
         let anchorPath = AnchorPath.create path
         let typeRef =
             value.Type
-            |> prerender ctx scope
+            |> prerenderExternal ctx scope
             |> TypeRefRender.anchor anchorPath
         if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
             typeRef |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
@@ -630,7 +634,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
             headFunc.SignatureKey.Value
             |> ResolvedType.TypeLiteral
             |> LazyContainer.CreateTypeKeyDummy<ResolvedType>
-            |> prerender ctx scope
+            |> prerenderExternal ctx scope
             |> TypeRefRender.anchor anchorPath
         if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors headFunc then
             ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
@@ -657,12 +661,12 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                             Parameters =
                                 func.Parameters
                                 |> List.map (
-                                    Parameter.render ctx scope
+                                    Parameter.render ctx scope ValueNone
                                     >> Render.Concrete.anchorTypedNameRender ctx anchorPath
                                     )
                             ReturnType =
                                 func.Type
-                                |> prerender ctx scope
+                                |> prerenderExternal ctx scope
                                 |> TypeRefRender.anchor anchorPath
                             Traits = Set [ RenderTraits.Static ]
                             Documentation = func.Documentation
@@ -670,7 +674,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                                 func.TypeParameters
                                 |> List.map (
                                     _.Value
-                                    >> TypeParameter.render ctx scope
+                                    >> TypeParameter.render ctx scope ValueNone
                                     >> Render.Concrete.anchorTypeParameters ctx anchorPath
                                     )
                         }
@@ -694,11 +698,11 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                             Constraint =
                                 typeParameter.Constraint
                                 |> Option.toValueOption
-                                |> ValueOption.map (prerender ctx scope >> TypeRefRender.anchor anchorPath)
+                                |> ValueOption.map (prerenderExternal ctx scope >> TypeRefRender.anchor anchorPath)
                             Default = 
                                 typeParameter.Default
                                 |> Option.toValueOption
-                                |> ValueOption.map (prerender ctx scope >> TypeRefRender.anchor anchorPath)
+                                |> ValueOption.map (prerenderExternal ctx scope >> TypeRefRender.anchor anchorPath)
                             Documentation = typeParameter.Documentation
                         }
                         )

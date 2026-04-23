@@ -9,7 +9,14 @@ open Xantham.Generator.Types
 open Xantham.Generator.NamePath
 
 module Enum =
-    let renderEnumWithMetadata (ctx: GeneratorContext) (enumType: EnumType) metadata =
+    let renderEnum (ctx: GeneratorContext) (enumType: EnumType) =
+        let path = Path.fromEnum enumType |> Path.create
+        let metadata = {
+            Path = path
+            Original = path
+            Source = enumType.Source |> Option.toValueOption
+            FullyQualifiedName = ValueSome enumType.FullyQualifiedName
+        }
         {
             Metadata = metadata
             LiteralUnionRender.Name = enumType.Name
@@ -46,17 +53,14 @@ module Enum =
         }
         |> TypeRender.EnumUnion
         
-    let renderEnum (ctx: GeneratorContext) (enumType: EnumType) =
+    let renderStringUnion (ctx: GeneratorContext) (enumType: EnumType) =
         let path = Path.fromEnum enumType |> Path.create
-        {
-            Path = path
+        let metadata =
+          { Path = path
             Original = path
             Source = enumType.Source |> Option.toValueOption
-            FullyQualifiedName = ValueSome enumType.FullyQualifiedName
-        }
-        |> renderEnumWithMetadata ctx enumType
+            FullyQualifiedName = ValueSome enumType.FullyQualifiedName }
         
-    let renderStringUnionWithMetadata (ctx: GeneratorContext) (enumType: EnumType) metadata =
         {
             Metadata = metadata
             LiteralUnionRender.Name = enumType.Name
@@ -89,23 +93,7 @@ module Enum =
         }
         |> TypeRender.StringUnion
         
-    let renderStringUnion (ctx: GeneratorContext) (enumType: EnumType) =
-        let path = Path.fromEnum enumType |> Path.create
-        { Path = path
-          Original = path
-          Source = enumType.Source |> Option.toValueOption
-          FullyQualifiedName = ValueSome enumType.FullyQualifiedName }
-        |> renderStringUnionWithMetadata ctx enumType
-        
-    let renderWithMetadata (ctx: GeneratorContext) (enumType: EnumType) metadata =
-        if enumType.Members |> List.forall _.Value.Value.IsInt
-        then renderEnumWithMetadata ctx enumType metadata
-        else renderStringUnionWithMetadata ctx enumType metadata
-        
     let render (ctx: GeneratorContext) (enumType: EnumType) =
-        let path = Path.fromEnum enumType |> Path.create
-        { Path = path
-          Original = path
-          Source = enumType.Source |> Option.toValueOption
-          FullyQualifiedName = ValueSome enumType.FullyQualifiedName }
-        |> renderWithMetadata ctx enumType
+        if enumType.Members |> List.forall _.Value.Value.IsInt
+        then renderEnum ctx enumType 
+        else renderStringUnion ctx enumType 

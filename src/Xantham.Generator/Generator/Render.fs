@@ -26,15 +26,17 @@ let main argv =
                      | _ -> id
                  Customisation.Interceptors.IgnorePathRender.Source = function
                      | QualifiedNamePart.Normal(text)
-                     | QualifiedNamePart.Abnormal(text,_) -> text.Contains("babel", StringComparison.OrdinalIgnoreCase) }
+                     | QualifiedNamePart.Abnormal(text,_) ->
+                         text.Contains("babel", StringComparison.OrdinalIgnoreCase)
+                         || text.Contains("typescript", StringComparison.OrdinalIgnoreCase)
+         }
              )
     ArenaInterner.prerenderFromGraph generatorContext interner
     ArenaInterner.processExports generatorContext interner
     let renders =
         RootModule.collectModules generatorContext
-        |> _.Modules["Typescript"]
-        |> renderModule generatorContext
-        // |> renderRoot generatorContext
+        // |> renderModule generatorContext
+        |> renderRoot generatorContext
     // generatorContext.AnchorRenders
     // |> Seq.take 100
     // |> Seq.choose (_.Value >> function

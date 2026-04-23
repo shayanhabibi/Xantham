@@ -22,7 +22,11 @@ let private createConcreteTypeRef (path: TypePath) =
 
 [<Struct>]
 type private Registered = Registered of TypeRefRender
-let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolvedType: LazyResolvedType): TypeRefRender =
+let rec prerender
+    (ctx: GeneratorContext)
+    (scope: RenderScopeStore)
+    (transientPathCtx: TransientModulePath voption)
+    (lazyResolvedType: LazyResolvedType): TypeRefRender =
     let remap = function
             | { Nullable = nullable } when ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Value) ->
                 ctx.TypeAliasRemap[lazyResolvedType.Value]
@@ -40,10 +44,20 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         let resolvedType = lazyResolvedType.Value
         match cachedRenderValue.Value with
         | { Root = ValueSome (TypeLikePath.Transient path); TypeRef = ref } ->
+            let rebasedPath =
+                match path, transientPathCtx with
+                | _, ValueNone
+                | _, ValueSome TransientModulePath.Anchored ->
+                    path
+                | TransientTypePath.Anchored, ValueSome ctx ->
+                    TransientTypePath.graft ctx
+                | TransientTypePath.Moored(parent, name), ValueSome ctx ->
+                    TransientTypePath.Moored(TransientModulePath.graft ctx parent, name)
+                | TransientTypePath.AnchoredAndMoored name, ValueSome ctx ->
+                    TransientTypePath.Moored(ctx, name)
             scope
-            |> Dictionary.tryAdd resolvedType path
+            |> Dictionary.tryAdd resolvedType rebasedPath
             remap ref
-            
         | { TypeRef = ref } ->
             remap ref
     // a first visit to a type will either see the 'resolved type' as having been
@@ -82,7 +96,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             conditionalType.True
             conditionalType.False
         ]
-        |> List.map (prerender ctx scope)
+        |> List.map (prerender ctx scope transientPathCtx)
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
@@ -153,7 +167,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> List.map (
                 _.AsResolvedType
                 >> LazyContainer.CreateFromValue
-                >> prerender ctx scope
+                >> prerender ctx scope transientPathCtx
                 )
             |> RenderScopeStore.TypeRefRender.create scope resolvedType nullable
             |> RenderScope.createRootless resolvedType
@@ -162,7 +176,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         | { Others = []; LiteralLike = [ResolvedTypeCategories.AsResolvedType t]; EnumLike = []; Primitives = []; Nullable = nullable } 
         | { Others = []; LiteralLike = []; EnumLike = [ResolvedTypeCategories.AsResolvedType t]; Primitives = []; Nullable = nullable } 
         | { Others = []; LiteralLike = []; EnumLike = []; Primitives = [ResolvedTypeCategories.AsResolvedType t]; Nullable = nullable } ->
-            prerender ctx scope (LazyContainer.CreateFromValue t)
+            prerender ctx scope transientPathCtx (LazyContainer.CreateFromValue t)
             |> TypeRefRender.orNullable nullable
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
@@ -180,7 +194,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 Root = TypeLikePath.create path |> ValueSome
                 TypeRef = ref
                 Render =
-                    lazy Union.renderLiterals ctx scope literals
+                    lazy Union.renderLiterals ctx scope transientPathCtx literals
                     |> Render.create ref
                 TransientChildren = ValueSome <| Dictionary()
             }
@@ -196,7 +210,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 for primitive in primitives do primitive.AsResolvedType
                 for enum in enumLike do enum.AsResolvedType
             }
-            |> Seq.map (LazyContainer.CreateFromValue >> prerender ctx scope)
+            |> Seq.map (LazyContainer.CreateFromValue >> prerender ctx scope transientPathCtx)
             |> Seq.toList
             |> RenderScopeStore.TypeRefRender.create scope resolvedType nullable
             |> RenderScope.createRootless resolvedType
@@ -210,7 +224,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             Root = TypeLikePath.create path |> ValueSome
             TypeRef = ref
             Render =
-                lazy Intersection.render ctx scope intersection
+                lazy Intersection.render ctx scope transientPathCtx intersection
                 |> Render.create ref
             TransientChildren = ValueSome scope
         }
@@ -224,7 +238,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             Root = path |> TypeLikePath.create |> ValueSome
             TypeRef = ref
             Render =
-                lazy Literal.render ctx scope tsLiteral
+                lazy Literal.render ctx scope transientPathCtx tsLiteral
                 |> Render.create ref
             TransientChildren = ValueSome scope
         }
@@ -235,7 +249,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 indexAccessType.Object
                 indexAccessType.Index
             ]
-            |> List.map (prerender ctx scope)
+            |> List.map (prerender ctx scope transientPathCtx)
         let prefix = lift Types.proptypekeyType
         (prefix, suffixes)
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
@@ -246,7 +260,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             lift Types.keyofType,
             index.Type
             |> List.singleton
-            |> List.map (prerender ctx scope)
+            |> List.map (prerender ctx scope transientPathCtx)
         )
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
@@ -254,16 +268,16 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
     | ResolvedType.TypeReference { ResolvedType = Some innerResolvedType } 
     | ResolvedType.TypeReference { Type = innerResolvedType; TypeArguments = [] } ->
         innerResolvedType
-        |> prerender ctx scope
+        |> prerender ctx scope transientPathCtx
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeReference { TypeArguments = typeArguments; Type = innerResolvedType } ->
         let prefix =
             innerResolvedType
-            |> prerender ctx scope
+            |> prerender ctx scope transientPathCtx
         let postfixArguments =
             typeArguments
-            |> List.map (prerender ctx scope)
+            |> List.map (prerender ctx scope transientPathCtx)
         (prefix, postfixArguments)
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
@@ -272,7 +286,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         (
             lift Types.arrayType,
             LazyContainer.CreateFromValue innerResolvedType
-            |> prerender ctx scope
+            |> prerender ctx scope transientPathCtx
             |> List.singleton
         )
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
@@ -298,7 +312,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
           Root = TypeLikePath.create path |> ValueSome
           TypeRef = ref
           Render =
-              lazy EnumCase.render ctx scope enumCase
+              lazy EnumCase.render ctx scope transientPathCtx enumCase
               |> Render.create ref
           TransientChildren = ValueSome scope }
         |> addOrReplaceScope ctx resolvedType
@@ -312,14 +326,14 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
     | ResolvedType.ReadOnly innerResolvedType ->
         innerResolvedType
         |> LazyContainer.CreateFromValue
-        |> prerender ctx scope
+        |> prerender ctx scope transientPathCtx
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Tuple tuple ->
         tuple.Types
         |> List.mapi (fun idx ->
             _.Type
-            >> prerender ctx scope
+            >> prerender ctx scope transientPathCtx
             >> TypeRefRender.orNullable tuple.Types[idx].IsOptional
             )
         |> List.toArray
@@ -353,9 +367,9 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 singleSig.Parameters
                 |> List.mapi (fun idx ->
                     _.Type
-                    >> prerender ctx scope
+                    >> prerender ctx scope transientPathCtx
                     >> TypeRefRender.orNullable singleSig.Parameters[idx].IsOptional)
-            let returnValue = prerender ctx scope singleSig.Type
+            let returnValue = prerender ctx scope transientPathCtx singleSig.Type
             (parameters, returnValue)
             |> RenderScopeStore.TypeRefRender.create scope resolvedType false
             |> RenderScope.createRootless resolvedType
@@ -369,7 +383,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 Root = path |> TypeLikePath.create |> ValueSome
                 TypeRef = ref
                 Render =
-                    lazy TypeLiteral.render ctx scope typeLiteral
+                    lazy TypeLiteral.render ctx scope transientPathCtx typeLiteral
                     |> Render.create ref
                 TransientChildren = ValueSome scope
             }
@@ -384,7 +398,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             Root = path |> TypeLikePath.create |> ValueSome
             TypeRef = ref
             Render =
-                lazy TemplateLiteral.render ctx scope templateLiteral
+                lazy TemplateLiteral.render ctx scope transientPathCtx templateLiteral
                 |> Render.create ref
             TransientChildren = ValueSome scope
         }
@@ -392,12 +406,12 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
     | ResolvedType.Optional typeReference ->
         ResolvedType.TypeReference typeReference
         |> LazyContainer.CreateFromValue
-        |> prerender ctx scope
+        |> prerender ctx scope transientPathCtx
         |> TypeRefRender.nullable
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Substitution substitutionType ->
-        substitutionType.Base |> prerender ctx scope
+        substitutionType.Base |> prerender ctx scope transientPathCtx
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     |> function
@@ -406,14 +420,17 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> TypeRefRender.orNullable nullable
         | Registered ref -> ref
 
+let prerenderExternal (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolvedType: LazyResolvedType) =
+    prerender ctx scope ValueNone lazyResolvedType
+
 module TestHelper =
     let prerender ctx resolvedType =
         let scope = RenderScopeStore.create()
-        prerender ctx scope (LazyContainer.CreateFromValue resolvedType)
-    
+        prerenderExternal ctx scope (LazyContainer.CreateFromValue resolvedType)
+
 type GeneratorContext with
-    static member Empty = GeneratorContext.Create prerender
-    static member EmptyWithCustomisation customisation = GeneratorContext.Create(prerender, Customisation.Create customisation)
+    static member Empty = GeneratorContext.Create prerenderExternal
+    static member EmptyWithCustomisation customisation = GeneratorContext.Create(prerenderExternal, Customisation.Create customisation)
     
 module ArenaInterner =
     let prerenderTypeAliases (ctx: GeneratorContext) (arena: ArenaInterner) =
@@ -490,7 +507,7 @@ module ArenaInterner =
                 Data = key
                 Result = lazy renderType
             }
-            |> prerender ctx renderScope
+            |> prerenderExternal ctx renderScope
             |> ignore
             if renderScope.Count <> 0 then
                 match renderScopes.TryGetValue renderType with
