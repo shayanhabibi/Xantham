@@ -185,7 +185,7 @@ type Exprs =
     /// </summary>
     static member unit = Ast.UnitExpr()
 
-type AttributesBuilder() =
+type AttributesBuilderBase() =
     member inline _.Zero() = []
     member inline _.Delay(f: unit -> WidgetBuilder<AttributeNode> list) = f()
     member inline _.Yield(_: unit) = []
@@ -211,16 +211,16 @@ type AttributesBuilder() =
     /// </summary>
     [<CustomOperation("compiledName")>]
     member inline _.CompiledName(state, value: Name<_>) =
-        AttributesBuilder.MakeAttributeIfModified value Attributes.compiledName state
+        AttributesBuilderBase.MakeAttributeIfModified value Attributes.compiledName state
     [<CustomOperation("compiledNameOrErase")>]
     member inline _.CompiledNameOrErase(state, value: Name<_>) =
-        AttributesBuilder.MakeAttributeIfModifiedElse value Attributes.compiledName Attributes.erase :: state
+        AttributesBuilderBase.MakeAttributeIfModifiedElse value Attributes.compiledName Attributes.erase :: state
     [<CustomOperation("emitProperty")>]
     member inline _.EmitProperty(state, value: Name<_>) =
-        AttributesBuilder.MakeAttributeIfModified value Attributes.emitProperty state
+        AttributesBuilderBase.MakeAttributeIfModified value Attributes.emitProperty state
     [<CustomOperation("emitPropertyOrErase")>]
     member inline _.EmitPropertyErase(state, value: Name<_>) =
-        AttributesBuilder.MakeAttributeIfModifiedElse value Attributes.emitProperty Attributes.erase :: state
+        AttributesBuilderBase.MakeAttributeIfModifiedElse value Attributes.emitProperty Attributes.erase :: state
     [<CustomOperation "compiledName">]
     member inline _.CompiledName(state, value: string) =
         Attributes.compiledName value :: state
@@ -249,8 +249,21 @@ type AttributesBuilder() =
     member inline _.Constructor(state) =
         Attributes.emitConstructor :: state
         
+type AttributesBuilder() =
+    inherit AttributesBuilderBase()
     member inline _.Run(state: WidgetBuilder<AttributeNode> list) =
         state
+type AttributeModifierSRTPType<
+    ^WidgetModifier, ^WidgetType when
+        ^WidgetModifier:(static member attributes: ^WidgetType * WidgetBuilder<AttributeNode> list -> ^WidgetType)
+    > = ^WidgetModifier
+type AttributesModifierBuilder<^WidgetModifier, ^WidgetType when AttributeModifierSRTPType<^WidgetModifier, ^WidgetType> >() = 
+    inherit AttributesBuilderBase()
+    member inline _.Run(state: WidgetBuilder<AttributeNode> list) =
+        match state with
+        | [] -> id
+        | state -> fun widget -> 'WidgetModifier.attributes(widget, state)
+        
 
 [<AutoOpen>]
 module AttributesBuilder =
@@ -279,3 +292,8 @@ module AttributesBuilder =
     /// </code>
     /// </example>
     let attributes = AttributesBuilder()
+    let inline attributesInjector<^Modifier, ^Widget when AttributeModifierSRTPType<^Modifier, ^Widget>> =
+        AttributesModifierBuilder<^Modifier, ^Widget>()
+    let typeDefnAttributes = attributesInjector<TypeDefnModifiers, WidgetBuilder<TypeDefn>>
+    let memberDefnAttributes = attributesInjector<MemberDefnModifiers, WidgetBuilder<MemberDefn>>
+    

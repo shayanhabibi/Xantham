@@ -31,7 +31,7 @@ let main argv =
     ArenaInterner.prerenderFromGraph generatorContext interner
     ArenaInterner.processExports generatorContext interner
     let renders =
-        collectModules generatorContext
+        RootModule.collectModules generatorContext
         |> _.Modules["Typescript"]
         |> renderModule generatorContext
         // |> renderRoot generatorContext

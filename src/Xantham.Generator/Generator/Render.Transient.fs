@@ -13,10 +13,15 @@ open Xantham.Generator.NamePath
 module Union =
     let private renderUnionLiteralCase (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (literal: ResolvedTypeLiteralLike) =
         match literal with
-        | ResolvedTypeLiteralLike.EnumCase enumCase -> 
+        | ResolvedTypeLiteralLike.EnumCase enumCase ->
+            let path =
+                Case.unboxMeasure enumCase.Name
+                |> TransientMemberPath.AnchoredAndMoored
+                |> Path.create
             {
                 LiteralCaseRender.Metadata = {
-                    Path = Path.create (TransientMemberPath.AnchoredAndMoored (Case.unboxMeasure enumCase.Name))
+                    Path = path
+                    Original = path
                     Source = enumCase.Source |> Option.toValueOption
                     FullyQualifiedName = ValueSome enumCase.FullyQualifiedName
                 }
@@ -24,10 +29,12 @@ module Union =
                 Value = enumCase.Value
                 Documentation = enumCase.Documentation
             }
-        | ResolvedTypeLiteralLike.Literal tsLiteral -> 
+        | ResolvedTypeLiteralLike.Literal tsLiteral ->
+            let path = TransientMemberPath.Anchored |> Path.create
             {
                 LiteralCaseRender.Metadata = {
-                    Path = Path.create TransientMemberPath.Anchored
+                    Path = path
+                    Original = path
                     Source = ValueNone
                     FullyQualifiedName = ValueNone
                 }
@@ -47,6 +54,7 @@ module Union =
     let private renderUnionLiterals (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (literals: ResolvedTypeLiteralLike list) =
         {
             Metadata = { Path = Path.create TransientTypePath.Anchored
+                         Original = Path.create TransientTypePath.Anchored
                          Source = ValueNone; FullyQualifiedName = ValueNone }
             Prelude.Transient.LiteralUnionRender.Name = ValueNone
             Cases =
@@ -57,8 +65,13 @@ module Union =
     let private renderEnumLiteralCase (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (literal: ResolvedTypeLiteralLike) =
         match literal with
         | ResolvedTypeLiteralLike.EnumCase ({ Value = TsLiteral.Int value } as enumCase) ->
+            let path =
+                Case.unboxMeasure enumCase.Name
+                |> TransientMemberPath.AnchoredAndMoored
+                |> Path.create
             {
-                Metadata = { Path = Path.create (TransientMemberPath.AnchoredAndMoored (Case.unboxMeasure enumCase.Name))
+                Metadata = { Path = path
+                             Original = path
                              Source = enumCase.Source |> Option.toValueOption
                              FullyQualifiedName = ValueSome enumCase.FullyQualifiedName }
                 Name = enumCase.Name |> ValueSome
@@ -66,8 +79,9 @@ module Union =
                 Documentation = enumCase.Documentation
             }
         | ResolvedTypeLiteralLike.Literal (TsLiteral.Int value) ->
+            let path = TransientMemberPath.Anchored |> Path.create
             {
-                Metadata = { Path = Path.create TransientMemberPath.Anchored
+                Metadata = { Path = path; Original = path
                              Source = ValueNone; FullyQualifiedName = ValueNone }
                 Name = string value |> Name.Pascal.create |> ValueSome
                 Value = value
@@ -77,8 +91,9 @@ module Union =
         | ResolvedTypeLiteralLike.Literal _ -> failwith "Cannot render enum literal case for non int literal. This should be guarded against"
 
     let private renderEnumLiterals (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (literals: ResolvedTypeLiteralLike list) =
+        let path = TransientTypePath.Anchored |> Path.create
         {
-            Metadata = { Path = Path.create TransientTypePath.Anchored
+            Metadata = { Path = path; Original = path
                          Source = ValueNone; FullyQualifiedName = ValueNone }
             Name = ValueNone
             Cases =
@@ -103,9 +118,14 @@ module Union =
             |> Transient.TypeRender.StringUnion
 module TemplateLiteral =
     let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (templateLiteral: TemplateLiteral) =
+            let path =
+                Name.Pascal.create "TemplateLiteral"
+                |> TransientTypePath.AnchoredAndMoored
+                |> Path.create
             {
                 TypeLikeRender.Metadata = {
-                    Path = Path.create (TransientTypePath.AnchoredAndMoored (Name.Pascal.create "TemplateLiteral"))
+                    Path = path
+                    Original = path
                     Source = ValueNone
                     FullyQualifiedName = ValueNone
                 }
@@ -115,6 +135,7 @@ module TemplateLiteral =
                     {
                         TypedNameRender.Metadata = {
                             Path = Path.create TransientMemberPath.Anchored
+                            Original = Path.create TransientMemberPath.Anchored
                             Source = ValueNone
                             FullyQualifiedName = ValueNone
                         }
@@ -132,18 +153,18 @@ module TemplateLiteral =
                 ]
                 Functions = [
                     {
-                        FunctionLikeRender.Metadata = { Path = Path.create TransientMemberPath.Anchored
+                        FunctionLikeRender.Metadata = { Path = Path.create TransientMemberPath.Anchored; Original = Path.create TransientMemberPath.Anchored
                                                         Source = ValueNone; FullyQualifiedName = ValueNone }
                         Name = Name.create "Create" |> Case.addCamelMeasure
                         Signatures = [
                             {
-                                FunctionLikeSignature.Metadata = { Path = Path.create TransientMemberPath.Anchored
+                                FunctionLikeSignature.Metadata = { Path = Path.create TransientMemberPath.Anchored; Original = Path.create TransientMemberPath.Anchored
                                                                    Source = ValueNone; FullyQualifiedName = ValueNone }
                                 Parameters =
                                     templateLiteral.Types
                                     |> List.mapi (fun i typeRef ->
                                         {
-                                            TypedNameRender.Metadata = { Path = Path.create TransientParameterPath.Anchored
+                                            TypedNameRender.Metadata = { Path = Path.create TransientParameterPath.Anchored; Original = Path.create TransientParameterPath.Anchored
                                                                          Source = ValueNone; FullyQualifiedName = ValueNone }
                                             Name = Name.Camel.create $"v{i}"
                                             Type = ctx.PreludeGetTypeRef ctx scopeStore typeRef
@@ -181,7 +202,7 @@ module TemplateLiteral =
 module Members =
     let renderFromMembersAndFunctions (ctx: GeneratorContext) (scopeStore: RenderScopeStore) members functions =
         {
-            Transient.TypeLikeRender.Metadata = { Path = Path.create TransientTypePath.Anchored
+            Transient.TypeLikeRender.Metadata = { Path = Path.create TransientTypePath.Anchored; Original = Path.create TransientTypePath.Anchored
                                                   Source = ValueNone; FullyQualifiedName = ValueNone }
             Name = ValueNone
             TypeParameters = []
@@ -209,12 +230,12 @@ module TypeLiteral =
 module Literal =
     let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (literal: TsLiteral) =
         {
-            Metadata = { Path = Path.create TransientTypePath.Anchored
+            Metadata = { Path = Path.create TransientTypePath.Anchored; Original = Path.create TransientTypePath.Anchored
                          Source = ValueNone; FullyQualifiedName = ValueNone }
             LiteralUnionRender.Name = ValueNone
             Cases = [
                 {
-                    Metadata = { Path = Path.create TransientMemberPath.Anchored
+                    Metadata = { Path = Path.create TransientMemberPath.Anchored; Original = Path.create TransientMemberPath.Anchored
                                  Source = ValueNone; FullyQualifiedName = ValueNone }
                     Name =
                         match literal with
@@ -238,12 +259,14 @@ module EnumCase =
     let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (enumCase: EnumCase) =
         {
             Metadata = { Path = Path.create TransientTypePath.Anchored
+                         Original = Path.create TransientTypePath.Anchored
                          Source = enumCase.Source |> Option.toValueOption
                          FullyQualifiedName = ValueSome enumCase.FullyQualifiedName }
             Name = ValueSome enumCase.Name
             Cases = [
+                let path = (Case.unboxMeasure enumCase.Name) |> TransientMemberPath.AnchoredAndMoored |> Path.create
                 {
-                    Metadata = { Path = Path.create (TransientMemberPath.AnchoredAndMoored (Case.unboxMeasure enumCase.Name))
+                    Metadata = { Path = path; Original = path
                                  Source = enumCase.Source |> Option.toValueOption
                                  FullyQualifiedName = ValueSome enumCase.FullyQualifiedName }
                     Name = ValueSome enumCase.Name

@@ -64,26 +64,41 @@ module Documentation =
         match text with
         | [] -> [ makeImmediateTag tag ]
         | _ -> wrapInTag tag text
-    let inline private wrapInTagWithAttributes tag attributes (text: string voption) =
+    let inline private wrapInTagWithAttributes tag attributes (text: string list voption) =
         match text with
         | ValueNone -> [ makeImmediateTagWithAttributes tag attributes ]
         | ValueSome text ->
             [
                 makeOpeningTagWithAttributes tag attributes
-                text
+                yield! text
                 makeClosingTag tag
             ]
+    let private normalizeDocString (docString: string) =
+        (docString.Split("\n"), [])
+        ||> Array.foldBack (fun line -> function
+            | [] -> [ line ]
+            | lines -> line + "<br/>" :: lines
+            )
     let render (documentation: TsComment list) =
         documentation
         |> List.sortBy sortTsComment
         |> List.collect (function
-            | TsComment.Summary summary -> wrapInTag "summary" summary
-            | TsComment.Remarks remarks -> wrapInTag "remarks" [ remarks ]
-            | TsComment.Example example -> wrapInTag "example" [ example ]
+            | TsComment.Summary summary ->
+                summary
+                |> List.collect normalizeDocString
+                |> wrapInTag "summary"
+            | TsComment.Remarks remarks ->
+                normalizeDocString remarks
+                |> wrapInTag "remarks"
+            | TsComment.Example example ->
+                normalizeDocString example
+                |> wrapInTag "example" 
             | TsComment.Param(name, content) ->
-                wrapInTagWithAttributes "param" [ "name", name ] (Option.toValueOption content)
+                wrapInTagWithAttributes "param" [ "name", name ] (Option.toValueOption content |> ValueOption.map normalizeDocString)
             | TsComment.Deprecated (Some (Null | "") | None) -> [ makeImmediateTag "deprecated" ]
-            | TsComment.Deprecated (Some value) -> wrapInTag "deprecated" [ value ]
+            | TsComment.Deprecated (Some value) ->
+                normalizeDocString value
+                |> wrapInTag "deprecated" 
             | _ -> []
             )
         |> function
@@ -92,7 +107,6 @@ module Documentation =
                 docs
                 |> Ast.XmlDocs
                 |> ValueSome
-    open Fantomas.Core.SyntaxOak
     let inline makeRendererHelper<
         ^WidgetBuilder, ^ModifierType, ^Container when
             ^Container:(member Documentation: TsComment list)
@@ -188,13 +202,13 @@ module TypedNameRender =
     let private renderAsPatternImpl withOptional (ctx: GeneratorContext) (typedName: TypedNameRender) =
         let isOptional = typedName.Traits.Contains(RenderTraits.Optional) || typedName.Type.Nullable
         let typeWidget =
-            if withOptional then
+            if withOptional && typedName.Traits.Contains(RenderTraits.Optional) then
                 TypeRefRender.nonNullable typedName.Type 
             else typedName.Type |> TypeRefRender.setNullable isOptional
             |> TypeRefRender.render
         let name =
             Name.Case.valueOrModified typedName.Name
-            |> if withOptional && isOptional then
+            |> if withOptional && typedName.Traits.Contains(RenderTraits.Optional) then
                    sprintf "?%s"
                else id
         Ast.ParameterPat( name, typeWidget )
@@ -559,6 +573,25 @@ module TypeLikeRender =
     let renderRecord (ctx: GeneratorContext) (typeLike: TypeLikeRender) = ()
     // renders as an anonymous record
     let renderAnonymousRecord (ctx: GeneratorContext) (typeLike: TypeLikeRender) = ()
+
+module TypeAliasRender =
+    let renderTypeAlias (ctx: GeneratorContext) (typeAliasRef: TypeAliasRenderRef) =
+        let renderName = Name.Case.valueOrModified typeAliasRef.Name
+        let typeParameters =
+            if List.isEmpty typeAliasRef.TypeParameters then
+                ValueNone
+            else
+                typeAliasRef.TypeParameters
+                |> List.map (TypeParameterRender.renderTypeParameter ctx)
+                |> Ast.PostfixList
+                |> ValueSome
+        let typeRefRender =
+            typeAliasRef.Type
+            |> TypeRefRender.render
+        Ast.Abbrev(renderName, typeRefRender)
+        |> if typeParameters.IsSome then _.typeParams(typeParameters.Value) else id
+        |> Documentation.renderForTypeDefn typeAliasRef
+        
     
 module SpecialRender =
     /// <summary>

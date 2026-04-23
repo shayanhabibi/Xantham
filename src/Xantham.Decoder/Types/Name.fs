@@ -108,10 +108,14 @@ module Name =
     /// <param name="name"></param>
     let map (f: string -> string) (name: Name) =
         match name with
-        | Modified(original, modified) -> Modified(original, f modified)
-        | Source original when f original <> original ->
-            Modified(original, f original)
-        | _ -> name
+        | Modified(original, modified) -> 
+            let next = f modified
+            if next = original then Source original
+            else Modified(original, next)
+        | Source original ->
+            let next = f original
+            if next = original then Source original
+            else Modified(original, next)
     /// <summary>
     /// Map a function over the original source name.
     /// </summary>
@@ -140,10 +144,34 @@ module Name =
         | Modified(original, _) ->
             Source(original)
     module private Internal =
+        let isUpperSnakeCase (s: string) =
+            s.Length > 0 &&
+            s |> Seq.forall (fun c -> System.Char.IsUpper(c) || c = '_' || System.Char.IsDigit(c)) &&
+            s |> Seq.exists System.Char.IsUpper
+
         let pascalCaseRegex = Regex(@"(?:^|[-_])(.)", RegexOptions.Compiled)
-        let toPascalCase (s: string) = pascalCaseRegex.Replace(s, _.Groups.[1].Value.ToUpperInvariant())
+        let toPascalCase (s: string) =
+            if isUpperSnakeCase s then s
+            else
+                pascalCaseRegex.Replace(s, fun m -> m.Groups.[1].Value.ToUpperInvariant())
+
+        let toCamelCase (s: string) =
+            if isUpperSnakeCase s then s
+            else
+                let p = toPascalCase s
+                if p.Length > 0 then
+                    // Find first letter and lowercase it, keeping leading non-letters
+                    let mutable i = 0
+                    while i < p.Length && not (System.Char.IsLetter(p.[i])) do
+                        i <- i + 1
+                    if i < p.Length then
+                        p.Substring(0, i) + p.Substring(i, 1).ToLowerInvariant() + p.Substring(i + 1)
+                    else
+                        p.ToLowerInvariant()
+                else p
+
         let stripBackticks (s: string) =
-            if s.StartsWith("``") && s.EndsWith("``") then s.Trim('`') else s
+            if s.StartsWith("``") && s.EndsWith("``") then s.Substring(2, s.Length - 4) else s
         let normalizeString = Normalization.normalize
     /// Normalizes the name by adding backticks if needed
     let normalize (name: Name) = name |> map Normalization.normalize
@@ -161,7 +189,7 @@ module Name =
     let private _camelCase (fn: (string -> string) -> Name -> Name) name =
         name |> fn (
             Internal.stripBackticks
-            >> fun s -> s.Substring(0, 1).ToLowerInvariant() + s.Substring(1)
+            >> Internal.toCamelCase
             >> Internal.normalizeString
             )
         
@@ -244,7 +272,7 @@ module Name =
     /// <para>Backticks are removed prior to applying casing. Normalization is reapplied
     /// after casing is applied.</para>
     /// </remarks>
-    let normalizeForTypeParameter = pascalCase >> map (sprintf "'%s")
+    let normalizeForTypeParameter = map (Internal.stripBackticks >> sprintf "'%s")
     /// <summary>
     /// Pascal cases the source name, and prefixes with a single quote.
     /// </summary>
@@ -253,7 +281,7 @@ module Name =
     /// after casing is applied.</para>
     /// <para>The function is applied to the source string, even if the name is modified</para>
     /// </remarks>
-    let sourceNormalizeForTypeParameter = sourcePascalCase >> mapSource (sprintf "'%s")
+    let sourceNormalizeForTypeParameter = mapSource (Internal.stripBackticks >> sprintf "'%s")
     /// <summary>
     /// Pascal cases the name, and prefixes with <c>I</c>.
     /// </summary>
@@ -261,7 +289,15 @@ module Name =
     /// <para>Backticks are removed prior to applying casing. Normalization is reapplied
     /// after casing is applied.</para>
     /// </remarks>
-    let mapToModuleName = pascalCase >> map (sprintf "I%s")
+    let mapToModuleName (name: Name) =
+        let p = pascalCase name
+        match name with
+        | Modified(original = s) | Source s when s.StartsWith "``" -> p
+        | _ -> 
+            p 
+            |> map (fun s -> s.TrimStart('_')) 
+            |> capitalize
+            |> map (sprintf "I%s")
     /// <summary>
     /// Pascal cases the source name, and then prefixes with <c>I</c>.
     /// </summary>
@@ -270,7 +306,15 @@ module Name =
     /// after casing is applied.</para>
     /// <para>The function is applied to the source string, even if the name is modified</para>
     /// </remarks>
-    let sourceMapToModuleName = sourcePascalCase >> mapSource (sprintf "I%s")
+    let sourceMapToModuleName (name: Name) =
+        let p = sourcePascalCase name
+        match name with
+        | Modified(original = s) | Source s when s.StartsWith "``" -> p
+        | _ -> 
+            p 
+            |> map (fun s -> s.TrimStart('_')) 
+            |> capitalize
+            |> map (sprintf "I%s")
  
     /// <summary>
     /// Provides some equivalency functions for working with Names that have measures.

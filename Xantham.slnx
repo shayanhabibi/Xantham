@@ -1,9 +1,24 @@
 <Solution>
   <Folder Name="/ai/">
     <File Path="CLAUDE.md" />
+    <File Path="AGENTS.md" />
+  </Folder>
+  <Folder Name="/ai/rules/">
+    <File Path=".claude/rules/fable.core.md" />
+    <File Path=".claude/rules/fable.md" />
+    <File Path=".claude/rules/decoder.md" />
+    <File Path=".claude/rules/common.types.md" />
+    <File Path=".claude/rules/generator.md" />
+  </Folder>
+  <Folder Name="/ai/skills/spec-tests/">
+    <File Path=".claude/skills/spec-tests/SKILL.md" />
   </Folder>
   <Folder Name="/docs/">
     <File Path="docs/README.md" />
+  </Folder>
+  <Folder Name="/misc/sln build/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
   </Folder>
   <Folder Name="/misc/">
     <File Path="package.json" />
@@ -21,7 +36,7 @@
     <Project Path="tests/Xantham.Fable.Tests/Xantham.Fable.Tests.fsproj" />
     <Project Path="tests/Xantham.Generator.Tests/Xantham.Generator.Tests.fsproj" />
   </Folder>
-  <Folder Name="/tests/spec-tests/" >
+  <Folder Name="/tests/spec-tests/">
     <File Path="tests/Xantham.Generator.Tests/Tests/Name.fs" />
   </Folder>
 </Solution>

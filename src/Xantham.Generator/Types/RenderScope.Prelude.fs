@@ -282,6 +282,7 @@ type RenderTraits =
 [<Struct>]
 type RenderMetadata = {
     Path: Path
+    Original: Path
     Source: ArenaInterner.QualifiedNamePart voption
     FullyQualifiedName: ArenaInterner.QualifiedNamePart list voption
 }

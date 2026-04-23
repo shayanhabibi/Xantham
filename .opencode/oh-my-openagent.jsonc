@@ -1,0 +1,24 @@
+﻿{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json",
+  "agents": {
+    "sisyphus": {
+      "model": "ollama/qwen3-coder:30b"
+    },
+    "librarian": {
+      "model": "ollama/qwen3-coder:30b"
+    },
+    "explore": {
+      "model": "ollama/qwen3-coder:30b"
+    },
+    "oracle": {
+      "model": "ollama/qwen3-coder:30b"
+    },
+    "prometheus": {
+      "prompt_append": "Leverage deep & quick agents heavily, always in parallel where our 32k context window allows."
+    }
+  },
+  "experimental": {
+    "task_system": true,
+    "truncate_all_tool_outputs": true
+  }
+}

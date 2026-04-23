@@ -249,10 +249,12 @@ module ModulePath =
             )
         flattenModule modulePath
         |> List.rev
+    let flattenCaseless = flatten >> List.map Case.withoutMeasure
 
 module TypePath =
     let flatten { TypePath.Parent = parent; Name = name } =
         ModulePath.flatten parent @ [ name ]
+    let flattenCaseless = flatten >> List.map Case.withoutMeasure
     let inline traceToParentModule (typePath: TypePath) = typePath.Parent, [ typePath.Name ]
     let createWithName name parent = {
         TypePath.Parent = parent
@@ -409,6 +411,15 @@ module AnchorPath =
         traceToParentModule
         >> fun (modulePath, pathTrace) ->
             ModulePath.flatten modulePath @ (pathTrace |> List.map Name.Pascal.fromName)
+    let flattenCaseless =
+        traceToParentModule
+        >> fun (modulePath, pathTrace) ->
+            ModulePath.flattenCaseless modulePath @ pathTrace
+    let last =
+        traceToParentModule
+        >> function
+            | modulePath, [] -> Case.withoutMeasure modulePath.Name
+            | _, pathTrace -> pathTrace |> List.last
         
     
 module TransientModulePath =
@@ -417,8 +428,8 @@ module TransientModulePath =
     let rec toAnchored (transientModulePath: TransientModulePath) =
         match transientModulePath with
         | TransientModulePath.Anchored -> []
-        | TransientModulePath.Moored(parent, name) -> toAnchored parent @ [ name ]
-        | TransientModulePath.AnchoredAndMoored name -> [ name ]
+        | TransientModulePath.Moored(parent, name) -> toAnchored parent @ [ Case.withoutMeasure name ]
+        | TransientModulePath.AnchoredAndMoored name -> [ Case.withoutMeasure name ]
     let anchor (anchorPath: AnchorPath) (transient: TransientModulePath) =
         let anchorTrace = toAnchored transient
         let modulePath, pathTrace = AnchorPath.traceToParentModule anchorPath
@@ -433,18 +444,23 @@ module TransientTypePath =
         match transientTypePath with
         | TransientTypePath.Anchored -> []
         | TransientTypePath.Moored(parent, name) ->
-            TransientModulePath.toAnchored parent @ [ name ]
-        | TransientTypePath.AnchoredAndMoored name -> [ name ]
+            TransientModulePath.toAnchored parent @ [ Case.withoutMeasure name ]
+        | TransientTypePath.AnchoredAndMoored name -> [ Case.withoutMeasure name ]
     
     let anchor (anchorPath: AnchorPath) (transient: TransientTypePath) =
         let anchorTrace = toAnchored transient
         let modulePath, pathTrace = AnchorPath.traceToParentModule anchorPath
-        let combinedTrace = List.map Name.Pascal.fromName pathTrace @ anchorTrace
+        let combinedTrace = pathTrace @ anchorTrace
         let typeName = combinedTrace |> List.last
-        let traceWithoutTypeName = combinedTrace |> List.removeAt (List.length combinedTrace - 1)
+        let traceWithoutTypeName =
+            // if the anchor path is a type, and we are anchoring a type against it,
+            // we would collide with the anchor path without generating a nested type.
+            if anchorPath.IsType && transient.IsAnchored
+            then combinedTrace
+            else combinedTrace |> List.removeAt (List.length combinedTrace - 1)
         traceWithoutTypeName
-        |> List.fold (fun acc name -> ModulePath.createWithName name acc) modulePath
-        |> TypePath.createWithName typeName
+        |> List.fold (fun acc name -> ModulePath.createWithName (Name.Pascal.fromName name) acc) modulePath
+        |> TypePath.createWithName (Name.Pascal.fromName typeName)
 
 module TransientMemberPath =
     let createOnTransientType name transientParent =
@@ -453,21 +469,24 @@ module TransientMemberPath =
         match transientMemberPath with
         | TransientMemberPath.Anchored -> []
         | TransientMemberPath.Moored(parent, name) ->
-            TransientTypePath.toAnchored parent @ [ Name.Pascal.fromCase name ]
-        | TransientMemberPath.AnchoredAndMoored name -> [ Name.Pascal.fromCase name ]
+            TransientTypePath.toAnchored parent @ [ Case.withoutMeasure name ]
+        | TransientMemberPath.AnchoredAndMoored name -> [ Case.withoutMeasure name ]
     let anchor (anchorPath: AnchorPath) (transient: TransientMemberPath) =
-        let anchorTrace = toAnchored transient
         let modulePath, pathTrace = AnchorPath.traceToParentModule anchorPath
-        let trace = List.map Name.Pascal.fromName pathTrace @ anchorTrace |> List.rev
+        let anchorTrace =
+            if transient.IsAnchored
+            then pathTrace |> List.last |> List.singleton
+            else toAnchored transient
+        let trace = pathTrace @ anchorTrace |> List.rev
         match trace with
         | memberName :: typeName :: moduleTrace ->
             moduleTrace |> List.rev
-            |> List.fold (fun acc name -> ModulePath.createWithName name acc) modulePath
-            |> TypePath.createWithName typeName
-            |> MemberPath.createOnTypeWithName (Name.Camel.fromCase memberName)
+            |> List.fold (fun acc name -> ModulePath.createWithName (Name.Pascal.fromName name) acc) modulePath
+            |> TypePath.createWithName (Name.Pascal.fromName typeName)
+            |> MemberPath.createOnTypeWithName (Name.Camel.fromName memberName)
         | memberName :: moduleTrace ->
             moduleTrace |> List.rev
-            |> List.fold (fun acc name -> ModulePath.createWithName name acc) modulePath
+            |> List.fold (fun acc name -> ModulePath.createWithName (Name.Pascal.fromName name) acc) modulePath
             |> MemberPath.createOnModuleWithName (Name.Camel.fromCase memberName)
         | [] -> failwith "Did not expect empty transient member path"
 
@@ -478,24 +497,24 @@ module TransientParameterPath =
         match transientParameterPath with
         | TransientParameterPath.Anchored -> []
         | TransientParameterPath.Moored(parent, name) ->
-            TransientMemberPath.toAnchored parent @ [ Name.Pascal.fromCase name ]
-        | TransientParameterPath.AnchoredAndMoored name -> [ Name.Pascal.fromCase name ]
+            TransientMemberPath.toAnchored parent @ [ Case.withoutMeasure name ]
+        | TransientParameterPath.AnchoredAndMoored name -> [ Case.withoutMeasure name ]
     let anchor (anchorPath: AnchorPath) (transient: TransientParameterPath) =
         let anchorTrace = toAnchored transient
         let modulePath, pathTrace = AnchorPath.traceToParentModule anchorPath
-        let trace = List.map Name.Pascal.fromName pathTrace @ anchorTrace |> List.rev
+        let trace = pathTrace @ anchorTrace |> List.rev
         match trace with
         | [] -> failwith "Did not expect empty transient parameter path"
         | parameterName :: memberName :: typeName :: moduleTrace ->
             moduleTrace |> List.rev
-            |> List.fold (fun acc name -> ModulePath.createWithName name acc) modulePath
-            |> TypePath.createWithName typeName
+            |> List.fold (fun acc name -> ModulePath.createWithName (Name.Pascal.fromName name) acc) modulePath
+            |> TypePath.createWithName (Name.Pascal.fromName typeName)
             |> MemberPath.createOnTypeWithName (Name.Camel.fromCase memberName)
             |> ParameterPath.createWithName (Name.Camel.fromCase parameterName)
             |> funApply 0
         | parameterName :: memberName :: moduleTrace ->
             moduleTrace |> List.rev
-            |> List.fold (fun acc name -> ModulePath.createWithName name acc) modulePath
+            |> List.fold (fun acc name -> ModulePath.createWithName (Name.Pascal.fromName name) acc) modulePath
             |> MemberPath.createOnModuleWithName (Name.Camel.fromCase memberName)
             |> ParameterPath.createWithName (Name.Camel.fromCase parameterName)
             |> funApply 0
@@ -638,6 +657,13 @@ module TransientPath =
                         TransientParameterPath.Moored(memberPath, name)
                         |> TransientPath.Parameter
                     | _ -> r)
+        let last (transientPath: TransientPath) =
+            match transientPath with
+            | TransientPath.Type (TransientTypePath.Moored(_, name) | TransientTypePath.AnchoredAndMoored name) -> name |> Case.withoutMeasure |> ValueSome
+            | TransientPath.TypeParam (TransientTypePath.Moored(_, name) | TransientTypePath.AnchoredAndMoored name) -> name |> Case.withoutMeasure |> ValueSome
+            | TransientPath.Member (TransientMemberPath.Moored(_, name) | TransientMemberPath.AnchoredAndMoored name ) -> name |> Case.withoutMeasure |> ValueSome
+            | TransientPath.Parameter (TransientParameterPath.Moored(_, name) | TransientParameterPath.AnchoredAndMoored name) -> name |> Case.withoutMeasure |> ValueSome
+            | _ -> ValueNone
 
         let removeCommonRoots (target: TransientPath) (transient: TransientPath) =
             let rec getCommonIdxOfTransientPathsImpl idx (l: FlattenedTransientPath list) (r: FlattenedTransientPath list) =
@@ -682,7 +708,7 @@ module TransientPath =
             | TransientPath.TypeParam transientTypePath ->
                 TransientPath.Type transientTypePath
                 |> toTransientModulePath
-                
+    let last = Helpers.last
 
 module Path =
     module RelativeHelper =
@@ -720,6 +746,10 @@ module Path =
             |> List.map Name.Pascal.create
         // add leaf name
         relativeRoot @ [ target.Name ]
+    let last (path: Path) =
+        match path with
+        | Path.Anchor anchored -> AnchorPath.last anchored |> ValueSome
+        | Path.Transient transient -> TransientPath.last transient
 
     let createAnchor (anchorPath: AnchorPath) = Path.Anchor anchorPath
     let createTransient (transientPath: TransientPath) = Path.Transient transientPath

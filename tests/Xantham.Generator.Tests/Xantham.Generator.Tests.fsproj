@@ -12,6 +12,7 @@
         <Compile Include="Tests\TypeRefRender.fs" />
         <Compile Include="Tests\Paths.fs" />
         <Compile Include="Tests\Name.fs" />
+        <Compile Include="Tests\NamePath.fs" />
         <Compile Include="Main.fs"/>
     </ItemGroup>
 

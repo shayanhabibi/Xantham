@@ -47,8 +47,10 @@ module Enum =
         |> TypeRender.EnumUnion
         
     let renderEnum (ctx: GeneratorContext) (enumType: EnumType) =
+        let path = Path.fromEnum enumType |> Path.create
         {
-            Path = Path.fromEnum enumType |> Path.create
+            Path = path
+            Original = path
             Source = enumType.Source |> Option.toValueOption
             FullyQualifiedName = ValueSome enumType.FullyQualifiedName
         }
@@ -88,7 +90,9 @@ module Enum =
         |> TypeRender.StringUnion
         
     let renderStringUnion (ctx: GeneratorContext) (enumType: EnumType) =
-        { Path = Path.fromEnum enumType |> Path.create
+        let path = Path.fromEnum enumType |> Path.create
+        { Path = path
+          Original = path
           Source = enumType.Source |> Option.toValueOption
           FullyQualifiedName = ValueSome enumType.FullyQualifiedName }
         |> renderStringUnionWithMetadata ctx enumType
@@ -99,7 +103,9 @@ module Enum =
         else renderStringUnionWithMetadata ctx enumType metadata
         
     let render (ctx: GeneratorContext) (enumType: EnumType) =
-        { Path = Path.fromEnum enumType |> Path.create
+        let path = Path.fromEnum enumType |> Path.create
+        { Path = path
+          Original = path
           Source = enumType.Source |> Option.toValueOption
           FullyQualifiedName = ValueSome enumType.FullyQualifiedName }
         |> renderWithMetadata ctx enumType

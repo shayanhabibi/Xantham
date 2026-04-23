@@ -25,6 +25,7 @@ module Render =
     let anchorMetadata (ctx: GeneratorContext) (anchorPath: AnchorPath) (metadata: RenderMetadata) =
         if metadata.Path.IsAnchor then metadata else
         { Path = anchorMetadataPath ctx anchorPath metadata.Path |> Path.create
+          Original = metadata.Original
           Source = ValueNone; FullyQualifiedName = ValueNone }
     module Transient =
         let inline anchorUnionCase (ctx: GeneratorContext) (parentPath: AnchorPath) (enumUnion: Transient.LiteralCaseRender<'T>) =
@@ -42,6 +43,7 @@ module Render =
                         )
                 Metadata = {
                     Path = Path.create anchoredPath
+                    Original = enumUnion.Metadata.Original
                     Source = enumUnion.Metadata.Source
                     FullyQualifiedName = enumUnion.Metadata.FullyQualifiedName
                 }
@@ -55,6 +57,7 @@ module Render =
             {
                 Metadata = {
                     Path = Path.create anchoredPath
+                    Original = enumUnion.Metadata.Original
                     Source = enumUnion.Metadata.Source
                     FullyQualifiedName = enumUnion.Metadata.FullyQualifiedName
                 }
@@ -78,6 +81,7 @@ module Render =
             {
                 Metadata = {
                     Path = Path.create anchorPath
+                    Original = typeParameter.Metadata.Original
                     Source = typeParameter.Metadata.Source
                     FullyQualifiedName = typeParameter.Metadata.FullyQualifiedName
                 }
@@ -98,6 +102,7 @@ module Render =
             {
                 Metadata = {
                     Path = Path.create anchorPath
+                    Original = typedName.Metadata.Original
                     Source = typedName.Metadata.Source
                     FullyQualifiedName = typedName.Metadata.FullyQualifiedName
                 }
@@ -111,6 +116,7 @@ module Render =
             {
                 FunctionLikeSignature.Metadata = {
                     Path = Path.create anchorPath
+                    Original = functionSignature.Metadata.Original
                     Source = functionSignature.Metadata.Source
                     FullyQualifiedName = functionSignature.Metadata.FullyQualifiedName
                 }
@@ -131,6 +137,7 @@ module Render =
             {
                 Metadata = {
                     Path = Path.create anchorPath
+                    Original = functionLike.Metadata.Original
                     Source = functionLike.Metadata.Source
                     FullyQualifiedName = functionLike.Metadata.FullyQualifiedName
                 }
@@ -147,6 +154,7 @@ module Render =
             {
                 TypeLikeRender.Metadata = {
                     Path = Path.create anchorPath
+                    Original = typeDefn.Metadata.Original
                     Source = typeDefn.Metadata.Source
                     FullyQualifiedName = typeDefn.Metadata.FullyQualifiedName
                 }
@@ -184,6 +192,7 @@ module Render =
                 {
                     TypeAliasRenderRef.Metadata = {
                         Path = Path.create anchorPath
+                        Original = alias.Metadata.Original
                         Source = alias.Metadata.Source
                         FullyQualifiedName = alias.Metadata.FullyQualifiedName
                     }
@@ -256,6 +265,7 @@ module Render =
             {
                 Metadata = {
                     Path = Path.create anchorPath
+                    Original = typeParameter.Metadata.Original
                     Source = typeParameter.Metadata.Source
                     FullyQualifiedName = typeParameter.Metadata.FullyQualifiedName
                 }
@@ -276,6 +286,7 @@ module Render =
             {
                 Metadata = {
                     Path = Path.create anchorPath
+                    Original = typedName.Metadata.Original
                     Source = typedName.Metadata.Source
                     FullyQualifiedName = typedName.Metadata.FullyQualifiedName
                 }
@@ -289,6 +300,7 @@ module Render =
             {
                 FunctionLikeSignature.Metadata = {
                     Path = Path.create anchorPath
+                    Original = functionSignature.Metadata.Original
                     Source = functionSignature.Metadata.Source
                     FullyQualifiedName = functionSignature.Metadata.FullyQualifiedName
                 }
@@ -309,6 +321,7 @@ module Render =
             {
                 Metadata = {
                     Path = Path.create anchorPath
+                    Original = functionLike.Metadata.Original
                     Source = functionLike.Metadata.Source
                     FullyQualifiedName = functionLike.Metadata.FullyQualifiedName
                 }
@@ -326,6 +339,7 @@ module Render =
             {
                 TypeLikeRender.Metadata = {
                     Path = Path.create anchorPath
+                    Original = typeDefn.Metadata.Original
                     Source = typeDefn.Metadata.Source
                     FullyQualifiedName = typeDefn.Metadata.FullyQualifiedName
                 }
@@ -357,6 +371,7 @@ module Render =
                 {
                     TypeAliasRenderRef.Metadata = {
                         Path = Path.create anchorPath
+                        Original = alias.Metadata.Original
                         Source = alias.Metadata.Source
                         FullyQualifiedName = alias.Metadata.FullyQualifiedName
                     }
@@ -520,6 +535,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
             {
                 Metadata = {
                     Path = Path.create path
+                    Original = Path.create path
                     Source = value.Source |> Option.toValueOption
                     FullyQualifiedName = ValueSome value.FullyQualifiedName
                 }
@@ -624,6 +640,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                 FunctionLikeRender.Name = headFunc.Name
                 Metadata = {
                     Path = Path.create path
+                    Original = Path.create path
                     Source = headFunc.Source |> Option.toValueOption
                     FullyQualifiedName = ValueSome headFunc.FullyQualifiedName
                 }
@@ -633,6 +650,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                         {
                             FunctionLikeSignature.Metadata = {
                                 Path = Path.create path
+                                Original = Path.create path
                                 Source = func.Source |> Option.toValueOption
                                 FullyQualifiedName = ValueSome func.FullyQualifiedName
                             }
@@ -668,6 +686,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                         {
                             TypeParameterRender.Metadata = {
                                 Path = Path.create path
+                                Original = Path.create path
                                 Source = ValueNone
                                 FullyQualifiedName = ValueNone
                             }

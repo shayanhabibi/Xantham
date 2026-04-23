@@ -1,8 +1,10 @@
 ﻿[<AutoOpen>]
 module Xantham.Generator.Generator.RenderMember
 
+open Microsoft.FSharp.Core.CompilerServices
 open Xantham.Decoder
 open Xantham.Decoder.ArenaInterner
+open Xantham.Decoder.Case
 open Xantham.Generator
 open Xantham
 open Xantham.Generator.Types
@@ -27,9 +29,11 @@ module CallSignature =
             Documentation = callSignature.Documentation
         }
         
-    let render (ctx: GeneratorContext) scopeStore (callSignature: CallSignature) =
+    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (callSignature: CallSignature): FunctionLikeSignature<TypeRefRender,Name<camel>,'a> =
+        let path = Path.create TransientMemberPath.Anchored
         renderWithMetadata ctx scopeStore callSignature
-            { Path = Path.create TransientMemberPath.Anchored
+            { Path = path
+              Original = path
               Source = ValueNone
               FullyQualifiedName = ValueNone }
         
@@ -51,9 +55,12 @@ module CallSignature =
         }
         |> MemberRender.Method
     
-    let renderMember (ctx: GeneratorContext) scopeStore (callSignatures: CallSignature list) =
+    let renderMember (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (callSignatures: CallSignature list)
+        : MemberRender<TypeRefRender,Name<camel>,'a> =
+        let path = Path.create TransientMemberPath.Anchored
         renderMemberWithMetadata ctx scopeStore callSignatures {
-            Path = Path.create TransientMemberPath.Anchored
+            Path = path
+            Original = path
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }
@@ -82,9 +89,11 @@ module Method =
         }
         |> MemberRender.Method
     
-    let render (ctx: GeneratorContext) scopeStore (method: Method) =
+    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (method: Method): MemberRender<TypeRefRender,Name<camel>,'a> =
+        let path = Path.create (TransientMemberPath.AnchoredAndMoored method.Name)
         renderWithMetadata ctx scopeStore method {
-            Path = Path.create (TransientMemberPath.AnchoredAndMoored method.Name)
+            Path = path
+            Original = path
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }
@@ -123,9 +132,12 @@ module GetAccessor =
                 Documentation = []
             }
             |> MemberRender.Property
-    let render (ctx: GeneratorContext) scopeStore (getter: GetAccessor) =
+    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (getter: GetAccessor)
+        : MemberRender<TypeRefRender,Name<camel>,'a> =
+        let path = Path.create (TransientMemberPath.AnchoredAndMoored getter.Name)
         renderWithMetadata ctx scopeStore getter {
-            Path = Path.create (TransientMemberPath.AnchoredAndMoored getter.Name)
+            Path = path
+            Original = path
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }
@@ -148,9 +160,12 @@ module SetAccessor =
         }
         |> MemberRender.Property
     
-    let render (ctx: GeneratorContext) scopeStore (setter: SetAccessor) =
+    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (setter: SetAccessor)
+        : MemberRender<TypeRefRender,Name<camel>,'a> =
+        let path = Path.create (TransientMemberPath.AnchoredAndMoored setter.Name)
         renderWithMetadata ctx scopeStore setter {
-            Path = Path.create (TransientMemberPath.AnchoredAndMoored setter.Name)
+            Path = path
+            Original = path
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }
@@ -186,9 +201,12 @@ module IndexSignature =
         }
         |> MemberRender.Method
     
-    let render (ctx: GeneratorContext) scopeStore (indexSignature: IndexSignature) =
+    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (indexSignature: IndexSignature)
+        : MemberRender<TypeRefRender,Name<camel>,'a> =
+        let path = Path.create TransientMemberPath.Anchored
         renderWithMetadata ctx scopeStore indexSignature {
-            Path = Path.create TransientMemberPath.Anchored
+            Path = path
+            Original = path
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }
@@ -221,8 +239,10 @@ module ConstructSignature =
         |> MemberRender.Method
     
     let render (ctx: GeneratorContext) scopeStore (constructSignature: ConstructSignature list) =
+        let path = Path.create TransientMemberPath.Anchored
         renderWithMetadata ctx scopeStore constructSignature {
-            Path = Path.create TransientMemberPath.Anchored
+            Path = path
+            Original = path
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }
@@ -250,8 +270,10 @@ module Property =
             Documentation = prop.Documentation
         }
     let renderMethodLike (ctx: GeneratorContext) scopeStore (prop: Property) (callSignatures: CallSignature list) =
+        let path = Path.create (TransientMemberPath.AnchoredAndMoored prop.Name)
         renderMethodLikeWithMetadata ctx scopeStore prop callSignatures {
-            Path = TransientMemberPath.AnchoredAndMoored prop.Name |> Path.create
+            Path = path
+            Original = path
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }
@@ -277,8 +299,10 @@ module Property =
             |> MemberRender.Property
     
     let render (ctx: GeneratorContext) scopeStore (prop: Property) =
+        let path = Path.create (TransientMemberPath.AnchoredAndMoored prop.Name)
         renderWithMetadata ctx scopeStore prop {
-            Path = TransientMemberPath.AnchoredAndMoored prop.Name |> Path.create
+            Path = path
+            Original = path
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }

@@ -2,6 +2,8 @@
 module Xantham.Generator.Generator.Render_Parameter
 
 open System.ComponentModel
+open Microsoft.FSharp.Core.CompilerServices
+open Xantham.Decoder
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
 open Xantham.Generator.Types
@@ -22,8 +24,10 @@ module Parameter =
             Documentation = param.Documentation
         }
         
-    let render ctx scopeStore param =
+    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (param: Parameter): TypedNameRender<TypeRefRender,Name<Case.camel>,'a> =
+        let path = Path.create (TransientParameterPath.AnchoredAndMoored param.Name)
         renderWithMetadata ctx scopeStore param 
-            { Path = Path.create (TransientParameterPath.AnchoredAndMoored param.Name)
+            { Path = path
+              Original = path
               Source = ValueNone
               FullyQualifiedName = ValueNone }

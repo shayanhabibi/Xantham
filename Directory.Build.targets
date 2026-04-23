@@ -1,0 +1,6 @@
+﻿<Project>
+    <PropertyGroup Condition="'$(IsExcludedFromRootBuild)' == 'true'">
+        <BuildDependsOn>BeforeBuild;AfterBuild</BuildDependsOn>
+        <CompileDependsOn />
+    </PropertyGroup>
+</Project>

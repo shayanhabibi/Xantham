@@ -39,7 +39,9 @@ module Interface =
             Documentation = shape.Documentation
         }
     let render (ctx: GeneratorContext) scopeStore (shape: Interface) =
-        { Path = Path.fromInterface shape |> Path.create
+        let path = Path.fromInterface shape |> Path.create
+        { Path = path
+          Original = path
           Source = shape.Source |> Option.toValueOption
           FullyQualifiedName = ValueSome shape.FullyQualifiedName }
         |> renderWithMetadata ctx scopeStore shape 
@@ -81,8 +83,10 @@ module Class =
             Documentation = []
         }
     let render (ctx: GeneratorContext) scopeStore (shape: Class) =
+        let path = Path.fromClass shape |> Path.create
         {
-            Path = Path.fromClass shape |> Path.create
+            Path = path
+            Original = path
             Source = shape.Source |> Option.toValueOption
             FullyQualifiedName = ValueSome shape.FullyQualifiedName 
         }
@@ -102,9 +106,11 @@ module TypeLiteral =
     let renderWithName (ctx: GeneratorContext) scopeStore (shape: TypeLiteral) =
         let members, functions = prerender ctx scopeStore shape
         fun name ->
+            let path = Path.create (TransientMemberPath.AnchoredAndMoored (Case.unboxMeasure name))
             {
                 Metadata = {
-                    Path = Path.create TransientMemberPath.Anchored
+                    Path = path
+                    Original = path
                     Source = ValueNone
                     FullyQualifiedName = ValueNone
                 }

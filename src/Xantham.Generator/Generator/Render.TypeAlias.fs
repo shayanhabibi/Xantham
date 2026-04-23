@@ -21,6 +21,7 @@ module TypeAlias =
         let name = typ.Name
         let path = Path.fromTypeAlias typ
         let metadata = { Path = Path.create path
+                         Original = Path.create path
                          Source = typ.Source |> Option.toValueOption
                          FullyQualifiedName = ValueSome typ.FullyQualifiedName }
         match innerType.Value with
@@ -120,7 +121,7 @@ module TypeAlias =
                 Name = name
                 Cases = [
                     {
-                        LiteralCaseRender.Metadata = { Path = Path.create TransientMemberPath.Anchored
+                        LiteralCaseRender.Metadata = { Path = Path.create TransientMemberPath.Anchored; Original = Path.create TransientMemberPath.Anchored
                                                        Source = ValueNone; FullyQualifiedName = ValueNone }
                         Name = name
                         Value = tsLiteral
@@ -155,6 +156,7 @@ module TypeAlias =
                     {
                         LiteralCaseRender.Metadata = {
                             Path = Path.create TransientMemberPath.Anchored
+                            Original = Path.create TransientMemberPath.Anchored
                             Source = enumCase.Source |> Option.toValueOption
                             FullyQualifiedName = ValueSome enumCase.FullyQualifiedName
                         }
@@ -173,7 +175,7 @@ module TypeAlias =
                 TypeParameters = typeParameters
                 Members = [
                     {
-                        TypedNameRender.Metadata = { Path = Path.create TransientMemberPath.Anchored
+                        TypedNameRender.Metadata = { Path = Path.create TransientMemberPath.Anchored; Original = Path.create TransientMemberPath.Anchored
                                                      Source = ValueNone; FullyQualifiedName = ValueNone }
                         Name = Name.create "Value" |> Case.addCamelMeasure
                         Type =
@@ -189,18 +191,18 @@ module TypeAlias =
                 ]
                 Functions = [
                     {
-                        FunctionLikeRender.Metadata = { Path = Path.create TransientMemberPath.Anchored
+                        FunctionLikeRender.Metadata = { Path = Path.create TransientMemberPath.Anchored; Original = Path.create TransientMemberPath.Anchored
                                                         Source = ValueNone; FullyQualifiedName = ValueNone }
                         Name = Name.create "Create" |> Case.addCamelMeasure
                         Signatures = [
                             {
-                                FunctionLikeSignature.Metadata = { Path = Path.create TransientMemberPath.Anchored
+                                FunctionLikeSignature.Metadata = { Path = Path.create TransientMemberPath.Anchored; Original = Path.create TransientMemberPath.Anchored
                                                                    Source = ValueNone; FullyQualifiedName = ValueNone }
                                 Parameters =
                                     templateLiteral.Types
                                     |> List.mapi (fun i typeRef ->
                                         {
-                                            TypedNameRender.Metadata = { Path = Path.create TransientParameterPath.Anchored
+                                            TypedNameRender.Metadata = { Path = Path.create TransientParameterPath.Anchored; Original = Path.create TransientParameterPath.Anchored
                                                                          Source = ValueNone; FullyQualifiedName = ValueNone }
                                             Name = Name.Camel.create $"v{i}"
                                             Type = ctx.PreludeGetTypeRef ctx scopeStore typeRef

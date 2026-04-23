@@ -25,6 +25,7 @@ module TypeParameter =
     let render (ctx: GeneratorContext) scopeStore (typar: TypeParameter) =
         renderWithMetadata ctx scopeStore typar {
             Path = Path.create TransientTypePath.Anchored
+            Original = Path.create TransientTypePath.Anchored
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }
