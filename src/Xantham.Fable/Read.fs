@@ -316,7 +316,7 @@ module Internal =
         let json = EncodedResult.encode result |> Encode.toString 1
         #else
         // let json = Encode.Auto.toString(result)
-        let json = EncodedResult.encode result |> Encode.toString
+        let json = EncodedResult.encode result |> Encode.toString 1
         #endif
         fs.writeFile(destination, json, None, callback = ignore)
 
