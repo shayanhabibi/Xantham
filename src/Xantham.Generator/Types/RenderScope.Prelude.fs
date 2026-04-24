@@ -77,14 +77,30 @@ module TypeRefRender =
     let nullable (typeRefRender: TypeRefRender) = setNullable true typeRefRender
     let nonNullable (typeRefRender: TypeRefRender) = setNullable false typeRefRender
 
-type RenderScopeStore = Dictionary<ResolvedType, TransientTypePath>
+type RenderScopeStore = {
+    PathContext: TransientPath
+    TypeStore: Dictionary<ResolvedType, TransientTypePath>
+}
 
 /// <summary>
 /// The strategy here is to force references being created with a contract that would
 /// recognise and register any transient type paths that are defined.
 /// </summary>
 module RenderScopeStore =
-    let create () = Dictionary<ResolvedType, TransientTypePath>()
+    let create () = {
+            PathContext = TransientPath.create TransientTypePath.Anchored
+            TypeStore = Dictionary<ResolvedType, TransientTypePath>()
+        }
+    let mapPathContext (fn: TransientPath -> TransientPath) (scope: RenderScopeStore) = { scope with PathContext = fn scope.PathContext }
+    let appendStringToPathContext scope (str: string) =
+        mapPathContext (
+            TransientPath.toTransientModulePath
+            >> TransientTypePath.createOnTransientModule str
+            >> TransientPath.create
+            ) scope
+    let appendNameToPathContext scope (name: Name<_>) =
+        Name.Case.valueOrSource name
+        |> appendStringToPathContext scope
     module TypeRefAtom =
         module Unsafe =
             let createWidget (widget: WidgetBuilder<Type>) =
@@ -98,8 +114,22 @@ module RenderScopeStore =
             Unsafe.createWidget widget
         let inline createConcretePath (_scope: RenderScopeStore) (_resolvedType: ResolvedType) (path: TypePath) =
             Unsafe.createConcretePath path
-        let inline createTransientPath (scope: RenderScopeStore) (resolvedType: ResolvedType) (path: TransientTypePath) =
-            scope.TryAdd(resolvedType, path) |> ignore
+        let createTransientPath (scope: RenderScopeStore) (resolvedType: ResolvedType) (path: TransientTypePath) =
+            match path with
+            | TransientTypePath.Anchored ->
+                TransientPath.toTransientModulePath scope.PathContext
+                |> TransientTypePath.graft
+            | TransientTypePath.Moored(parent, name) ->
+                parent
+                |> TransientModulePath.graft (TransientPath.toTransientModulePath scope.PathContext)
+                |> TransientTypePath.createOnTransientModuleWithName name
+            | TransientTypePath.AnchoredAndMoored name ->
+                TransientPath.toTransientModulePath scope.PathContext
+                |> TransientTypePath.createOnTransientModuleWithName name
+            |> fun path ->
+                scope.TypeStore.TryAdd(resolvedType, path)
+                |> ignore
+            // scope.TryAdd(resolvedType, path) |> ignore
             Unsafe.createTransientPath path
         
         type SRTPHelper =
@@ -109,6 +139,9 @@ module RenderScopeStore =
             static member inline Create(scope, resolvedType, _, widget) = createWidget scope resolvedType widget
             static member inline Create(scope, resolvedType, _, path) = createConcretePath scope resolvedType path
             static member inline Create(scope, resolvedType, _, path) = createTransientPath scope resolvedType path
+        
+    let tryAdd (resolvedType: ResolvedType) (transientTypePath: TransientTypePath) (scope: RenderScopeStore) =
+        TypeRefAtom.createTransientPath scope resolvedType transientTypePath |> ignore
             
     module TypeRefMolecule =
         module Unsafe =

@@ -476,9 +476,10 @@ module TransientTypePath =
     let graft (parent: TransientModulePath) =
         match parent with
         | TransientModulePath.Anchored -> TransientTypePath.Anchored
-        | TransientModulePath.Moored(_, name) 
-        | TransientModulePath.AnchoredAndMoored name ->
+        | TransientModulePath.Moored(parent, name) ->
             TransientTypePath.Moored(parent, name)
+        | TransientModulePath.AnchoredAndMoored name ->
+            TransientTypePath.AnchoredAndMoored(name)
 
     let createOnTransientModuleWithName name transientParent =
         TransientTypePath.Moored(transientParent, name)

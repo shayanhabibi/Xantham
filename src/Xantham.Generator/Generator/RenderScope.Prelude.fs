@@ -41,7 +41,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         match cachedRenderValue.Value with
         | { Root = ValueSome (TypeLikePath.Transient path); TypeRef = ref } ->
             scope
-            |> Dictionary.tryAdd resolvedType path
+            |> RenderScopeStore.tryAdd resolvedType path
             remap ref
             
         | { TypeRef = ref } ->
@@ -182,7 +182,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 Render =
                     lazy Union.renderLiterals ctx scope literals
                     |> Render.create ref
-                TransientChildren = ValueSome <| Dictionary()
+                TransientChildren = ValueSome <| RenderScopeStore.create()
             }
             |> addOrReplaceScope ctx resolvedType
         | { Others = others; LiteralLike = literals; EnumLike = enumLike; Primitives = primitives; Nullable = nullable } ->
@@ -376,7 +376,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TemplateLiteral templateLiteral ->
         let path = TransientTypePath.Anchored
-        scope |> Dictionary.tryAdd resolvedType path
+        scope |> RenderScopeStore.tryAdd resolvedType path
         let scope = RenderScopeStore.create()
         let ref = RenderScopeStore.TypeRefRender.create scope resolvedType false path
         {
@@ -421,7 +421,7 @@ module ArenaInterner =
         |> Map.iter (fun _ -> List.iter (function
             | ResolvedExport.TypeAlias value ->
                 let resolvedType = value.Type.Value
-                let path = Path.fromTypeAlias value
+                let path = Path.Interceptors.pipeTypeAlias ctx value
                 RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
                 |> RenderScopeStore.TypeRef.Unsafe.createAtom
                 |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
@@ -492,11 +492,11 @@ module ArenaInterner =
             }
             |> prerender ctx renderScope
             |> ignore
-            if renderScope.Count <> 0 then
+            if renderScope.TypeStore.Count <> 0 then
                 match renderScopes.TryGetValue renderType with
                 | true, scope ->
-                    for kv in renderScope do
-                        scope.TryAdd(kv.Key, kv.Value) |> ignore
+                    for kv in renderScope.TypeStore do
+                        scope.TypeStore.TryAdd(kv.Key, kv.Value) |> ignore
                 | _ ->
                     renderScopes.TryAdd(renderType, renderScope) |> ignore
             )
@@ -506,9 +506,9 @@ module ArenaInterner =
             |> ValueOption.iter (fun renderScope ->
                 renderScope.TransientChildren
                 |> ValueOption.iter (fun scope ->
-                    for kv in kv.Value do
+                    for kv in kv.Value.TypeStore do
                         scope
-                        |> Dictionary.tryAdd kv.Key kv.Value
+                        |> RenderScopeStore.tryAdd kv.Key kv.Value
                     )
                 )
         renderScopes.Clear()

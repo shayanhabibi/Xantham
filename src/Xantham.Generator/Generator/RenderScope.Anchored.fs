@@ -461,7 +461,7 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
         }
         |> Choice2Of2
         |> GeneratorContext.Anchored.addResolvedType ctx renderScope.Type
-        transientChildren.Keys
+        transientChildren.TypeStore.Keys
         |> Seq.filter (anchors.ContainsKey >> not)
         |> Seq.iter (anchor ctx anchors anchorPath)
     | { Root = ValueSome (TypeLikePath.Transient path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren } ->
@@ -469,7 +469,7 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
         let render = Render.Transient.anchor ctx anchorPath renderTuple
         anchors
         |> Dictionary.tryAdd renderScope.Type (path, render)
-        transientChildren.Keys
+        transientChildren.TypeStore.Keys
         |> Seq.filter (anchors.ContainsKey >> not)
         |> Seq.iter (anchor ctx anchors (AnchorPath.create path))
     | { Root = ValueNone; Render = Render.RefOnly typeRef } ->
@@ -482,7 +482,7 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
 and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: RenderScopeStore) =
     let anchors = Dictionary<ResolvedType, TypePath * Render>()
     let anchorPath = Interceptors.pipeExport ctx export
-    renderScopeStore
+    renderScopeStore.TypeStore
     |> Seq.iter (fun (KeyValue(key, value)) ->
         let renderScope =
             GeneratorContext.Prelude.tryGet ctx key
@@ -506,7 +506,6 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
         if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
             ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
         else
-        let anchors = anchorPreludeExportScope ctx export scope
         let render =
             Class.render ctx scope value
             |> Render.Concrete.anchorTypeDefn ctx
@@ -516,7 +515,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
             Root = Choice1Of2 path
             TypeRef = ref
             Render = Anchored.Render( ref, lazy render )
-            Anchors = anchors
+            Anchors = anchorPreludeExportScope ctx export scope
         }
         |> Choice2Of2
         |> GeneratorContext.Anchored.addResolvedExport ctx export
@@ -530,7 +529,6 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
         if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
             typeRef |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
         else
-        let anchors = anchorPreludeExportScope ctx export scope
         let render =
             {
                 Metadata = {
@@ -551,7 +549,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
             Root = Choice2Of2 path 
             TypeRef = typeRef
             Render = Anchored.Render( typeRef, lazy render )
-            Anchors = anchors
+            Anchors = anchorPreludeExportScope ctx export scope
         }
         |> Choice2Of2
         |> GeneratorContext.Anchored.addResolvedExport ctx export
@@ -561,7 +559,6 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
         if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
             ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
         else
-        let anchors = anchorPreludeExportScope ctx export scope
         let render =
             Interface.render ctx scope value
             |> Render.Concrete.anchorTypeDefn ctx
@@ -571,7 +568,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
             Root = Choice1Of2 path
             TypeRef = ref
             Render = Anchored.Render( ref, lazy render )
-            Anchors = anchors
+            Anchors = anchorPreludeExportScope ctx export scope
         }
         |> Choice2Of2
         |> GeneratorContext.Anchored.addResolvedExport ctx export
@@ -581,7 +578,6 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
         if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
             ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
         else
-        let anchors = anchorPreludeExportScope ctx export scope
         let render =
             TypeAlias.render ctx scope value
             |> Render.Concrete.anchorTypeAlias ctx
@@ -591,7 +587,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
             Root = Choice1Of2 path
             TypeRef = ref
             Render = Anchored.Render( ref, lazy render )
-            Anchors = anchors
+            Anchors = anchorPreludeExportScope ctx export scope
         }
         |> Choice2Of2
         |> GeneratorContext.Anchored.addResolvedExport ctx export
@@ -601,7 +597,6 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
         if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
             ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
         else
-        let anchors = anchorPreludeExportScope ctx export scope
         let render =
             match Enum.render ctx value with
             | Concrete.TypeRender.EnumUnion enumUnion ->
@@ -618,7 +613,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
             Root = Choice1Of2 path
             TypeRef = ref
             Render = Anchored.Render( ref, lazy render )
-            Anchors = anchors
+            Anchors = anchorPreludeExportScope ctx export scope
         }
         |> Choice2Of2
         |> GeneratorContext.Anchored.addResolvedExport ctx export
@@ -705,13 +700,12 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                 Documentation = headFunc.Documentation
             }
             |> TypeRender.Function
-        let anchors = anchorPreludeExportScope ctx export scope
         {
             Type = headFunc.SignatureKey.Value |> ResolvedType.TypeLiteral
             Root = Choice2Of2 path
             TypeRef = ref 
             Render = Anchored.Render( ref, lazy render )
-            Anchors = anchors
+            Anchors = anchorPreludeExportScope ctx export scope
         }
         |> Choice2Of2
         |> GeneratorContext.Anchored.addResolvedExport ctx export

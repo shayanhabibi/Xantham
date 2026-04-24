@@ -86,6 +86,38 @@ let tryRenderMetadataImport (metadata: RenderMetadata) =
             |> ValueSome
         | _ -> ValueNone
 
+let combine (primary: Anchored.TypeRender) (secondary: Anchored.TypeRender) =
+    // primary
+    match primary, secondary with
+    | _ when primary = secondary -> primary
+    | Anchored.TypeRender.Variable _, _ -> primary
+    | Anchored.TypeRender.EnumUnion e1, Anchored.TypeRender.EnumUnion e2 ->
+        { e1 with Cases = e1.Cases @ e2.Cases |> List.distinct }
+        |> Anchored.TypeRender.EnumUnion
+    | Anchored.TypeRender.StringUnion e1, Anchored.TypeRender.StringUnion e2 ->
+        { e1 with Cases = e1.Cases @ e2.Cases |> List.distinct }
+        |> Anchored.TypeRender.StringUnion
+    | Anchored.TypeRender.Function fn1, Anchored.TypeRender.Function fn2 ->
+        { fn1 with Signatures = fn1.Signatures @ fn2.Signatures |> List.distinct }
+        |> Anchored.TypeRender.Function
+    | Anchored.TypeRender.TypeDefn t1, Anchored.TypeRender.TypeDefn t2 when t1.Inheritance = t2.Inheritance ->
+        { t1 with
+              Constructors = t1.Constructors @ t2.Constructors |> List.distinct
+              Members = t1.Members @ t2.Members |> List.distinct
+              Functions = t1.Functions @ t2.Functions |> List.distinct }
+        |> Anchored.TypeRender.TypeDefn
+    | Anchored.TypeRender.TypeAlias t1, Anchored.TypeRender.TypeAlias t2 ->
+        match t1, t2 with
+        | TypeAliasRender.TypeDefn t1, TypeAliasRender.TypeDefn t2 when t1.Inheritance = t2.Inheritance ->
+            { t1 with
+                  Constructors = t1.Constructors @ t2.Constructors |> List.distinct
+                  Members = t1.Members @ t2.Members |> List.distinct
+                  Functions = t1.Functions @ t2.Functions |> List.distinct }
+            |> Anchored.TypeRender.TypeDefn
+        | _ -> primary
+    | _ -> primary
+            
+
 module RootModuleCollector =
     let collectModules (ctx: GeneratorContext): RootModuleCollector =
         let collectedRenders =
@@ -228,13 +260,29 @@ module RootModule =
                         | TypeAlias (TypeAliasRender.Function { Name = name }) -> Name.Case.valueOrModified name
                         | _ | _ -> failwith "unreachable guaranteed by guard in partition"
                     if module'.Types.TryAdd(name, typeRender) |> not then
-                        printfn "Duplicate type name: %A" name
+                        module'.Types[name] <- combine module'.Types[name] typeRender
                 | Choice2Of3 ({ Name = name } as typedNameRender) ->
-                    if module'.Members.TryAdd(Name.Case.valueOrModified name, Choice1Of2 typedNameRender) |> not then
-                        printfn "Duplicate member name: %A" name
+                    let name = Name.Case.valueOrModified name
+                    if module'.Members.TryAdd(name, Choice1Of2 typedNameRender) |> not then
+                        match module'.Members[name] with
+                        | Choice1Of2 t ->
+                            (Anchored.TypeRender.Variable t, Anchored.TypeRender.Variable typedNameRender)
+                            ||> combine
+                            |> function
+                                | Anchored.TypeRender.Variable t -> module'.Members[name] <- Choice1Of2 t
+                                | _ -> failwith "unreachable guaranteed by guard in partition"
+                        | _ -> ()
                 | Choice3Of3 ({ Name = name } as functionLikeRender) ->
-                    if module'.Members.TryAdd(Name.Case.valueOrModified name, Choice2Of2 functionLikeRender) |> not then
-                        printfn "Duplicate member name: %A" name
+                    let name = Name.Case.valueOrModified name
+                    if module'.Members.TryAdd(name, Choice2Of2 functionLikeRender) |> not then
+                        match module'.Members[name] with
+                        | Choice2Of2 t ->
+                            (Anchored.TypeRender.Function t, Anchored.TypeRender.Function functionLikeRender)
+                            ||> combine
+                            |> function
+                                | Anchored.TypeRender.Function t -> module'.Members[name] <- Choice2Of2 t
+                                | _ -> failwith "unreachable guaranteed by guard in partition"
+                        | _ -> ()
             | head :: tail ->
                 match module'.Modules.TryGetValue head with
                 | true, module' -> collect module' render tail

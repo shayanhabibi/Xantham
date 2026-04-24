@@ -2,6 +2,7 @@
 module Xantham.Generator.Generator.Render_TypeParameter
 
 open System.ComponentModel
+open Xantham.Decoder
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
 open Xantham.Generator.Types
@@ -15,6 +16,9 @@ module TypeParameter =
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }
+        let scopeStore =
+            typar.Name
+            |> RenderScopeStore.appendNameToPathContext scopeStore
         {
             Prelude.TypeParameterRender.Name = typar.Name
             Metadata = metadata

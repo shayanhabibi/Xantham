@@ -42,6 +42,7 @@ module CallSignature =
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }
+        let scopeStore = RenderScopeStore.appendStringToPathContext scopeStore "Invoke"
         {
             Metadata = metadata
             Prelude.FunctionLikeRender.Name =
@@ -68,6 +69,9 @@ module Method =
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }
+        let scopeStore =
+            method.Name
+            |> RenderScopeStore.appendNameToPathContext scopeStore
         {
             Metadata = metadata
             Prelude.FunctionLikeRender.Name = method.Name
@@ -104,6 +108,9 @@ module GetAccessor =
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }
+        let scopeStore =
+            getter.Name
+            |> RenderScopeStore.appendNameToPathContext scopeStore
         match getter.Type.Value with
         | ResolvedType.TypeLiteral { Members = members } when members |> List.forall _.IsCallSignature ->
             let signatures =
@@ -147,6 +154,9 @@ module SetAccessor =
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }
+        let scopeStore =
+            setter.Name
+            |> RenderScopeStore.appendNameToPathContext scopeStore
         {
             Metadata = metadata
             Prelude.TypedNameRender.Name = setter.Name
@@ -171,6 +181,7 @@ module IndexSignature =
             RenderTraits.Readable
             if not indexSignature.IsReadOnly then RenderTraits.Writable
         ]
+        let scopeStore = RenderScopeStore.appendStringToPathContext scopeStore "Item"
         {
             Metadata = metadata
             Prelude.FunctionLikeRender.Name =
@@ -204,6 +215,7 @@ module ConstructSignature =
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }
+        let scopeStore = RenderScopeStore.appendStringToPathContext scopeStore "Create"
         {
             Metadata = metadata
             Prelude.FunctionLikeRender.Name =
@@ -248,6 +260,8 @@ module Property =
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }
+        let scopeStore =
+            prop.Name |> RenderScopeStore.appendNameToPathContext scopeStore
         {
             Metadata = metadata
             Prelude.FunctionLikeRender.Name = prop.Name
@@ -267,6 +281,8 @@ module Property =
             Source = ValueNone
             FullyQualifiedName = ValueNone
         }
+        let scopeStore =
+            prop.Name |> RenderScopeStore.appendNameToPathContext scopeStore
         match prop.Type.Value with
         | ResolvedType.TypeLiteral { Members = members } when members |> List.forall _.IsCallSignature ->
             members

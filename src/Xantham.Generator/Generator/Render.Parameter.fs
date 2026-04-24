@@ -18,6 +18,9 @@ module Parameter =
               Original = path
               Source = ValueNone
               FullyQualifiedName = ValueNone }
+        let scopeStore =
+            param.Name
+            |> RenderScopeStore.appendNameToPathContext scopeStore
         {
             Metadata = metadata
             Prelude.TypedNameRender.Name = param.Name

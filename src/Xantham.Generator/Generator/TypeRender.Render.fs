@@ -10,6 +10,8 @@ open Xantham.Generator.Types
 open Xantham.Generator.Types.Anchored
 open Fantomas.Core.SyntaxOak
 
+let private unitPat = Ast.ParameterPat("_", Ast.Unit())
+
 module Attributes =
     let inline renderAttributes<^Modifier, ^T
         when (^T or ^Modifier):(static member attributes: ^T * WidgetBuilder<AttributeNode> list -> ^T)
@@ -162,7 +164,7 @@ module LiteralCaseRender =
                 Attributes.compiledValue (int value)
                 |> Some
             | TsLiteral.Null ->
-                Attributes.compiledName null
+                Attributes.compiledNameNull
                 |> Some
 
         Ast.UnionCase(Name.Case.valueOrModified unionCase.Name)
@@ -383,6 +385,9 @@ module FunctionLikeSignature =
         let parameters =
             functionLike.Parameters
             |> List.map (TypedNameRender.renderAsNamedTypeWithOptionName ctx)
+            |> function
+                | [] -> [ Ast.Unit() ]
+                | paras -> paras
             |> Ast.Tuple
         let returnType = functionLike.ReturnType |> TypeRefRender.render
         Ast.AbstractMember(renderName, [ parameters ], returnType)
@@ -394,6 +399,9 @@ module FunctionLikeSignature =
         let parameters =
             functionLike.Parameters
             |> List.map (TypedNameRender.renderAsPatternWithOptionName ctx)
+            |> function
+                | [] -> [ unitPat ]
+                | paras -> paras
             |> Ast.TuplePat
             |> Ast.ParenPat
         let returnType = functionLike.ReturnType |> TypeRefRender.render
@@ -406,6 +414,9 @@ module FunctionLikeSignature =
         let parameters =
             functionLike.Parameters
             |> List.map (TypedNameRender.renderAsPattern ctx >> Ast.ParenPat)
+            |> function
+                | [] -> [ Ast.UnitPat() ]
+                | paras -> paras
         Ast.Function(renderName, parameters, Exprs.jsUndefined, functionLike.ReturnType |> TypeRefRender.render)
         |> Documentation.renderForBinding functionLike
     
@@ -413,6 +424,9 @@ module FunctionLikeSignature =
         let parameters =
             functionLike.Parameters
             |> List.map (TypedNameRender.renderTypeOnly ctx)
+            |> function
+                | [] -> [ Ast.Unit() ]
+                | paras -> paras
         let returnType = functionLike.ReturnType |> TypeRefRender.render
         Ast.Funs(parameters, returnType)
     
@@ -420,6 +434,9 @@ module FunctionLikeSignature =
         let parameters =
             functionLike.Parameters
             |> List.map (TypedNameRender.renderAsNamedTypeWithOptionName ctx)
+            |> function
+                | [] -> [ Ast.Unit() ]
+                | paras -> paras
             |> Ast.Tuple
         let returnType = functionLike.ReturnType |> TypeRefRender.render
         let renderName = Name.Case.valueOrModified name
@@ -466,6 +483,9 @@ module TypeLikeRender =
             let parameters =
                 parameters
                 |> List.map (TypedNameRender.renderAsNamedTypeWithOptionName ctx)
+                |> function
+                    | [] -> [ Ast.Unit() ]
+                    | paras -> paras
                 |> Ast.Tuple
             let signature = Ast.Funs(parameters, returnType)
             Ast.AbstractMember("Create", signature).attributes(attributes {
@@ -479,6 +499,9 @@ module TypeLikeRender =
             let parameters =
                 parameters
                 |> List.map (TypedNameRender.renderAsPatternWithOptionName ctx)
+                |> function
+                    | [] -> [ Ast.UnitPat() ]
+                    | paras -> paras
                 |> Ast.TuplePat
                 |> Ast.ParenPat
             Ast.Member("Create", parameters, Exprs.jsUndefined, returnType).attributes(attributes {

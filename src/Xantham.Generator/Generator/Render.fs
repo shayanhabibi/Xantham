@@ -46,13 +46,14 @@ let main argv =
                      | _ -> s
                      
          })
-    ArenaInterner.prerenderFromGraph generatorContext interner
+    ArenaInterner.prerenderTypeAliases generatorContext interner
+    // ArenaInterner.prerenderFromGraph generatorContext interner
     ArenaInterner.processExports generatorContext interner
     let renders =
         RootModule.collectModules generatorContext
-        |> _.Modules["Typescript"]
-        |> renderModule generatorContext
-        // |> renderRoot generatorContext
+        // |> _.Modules["Typescript"]
+        // |> renderModule generatorContext
+        |> renderRoot generatorContext
     // generatorContext.AnchorRenders
     // |> Seq.take 100
     // |> Seq.choose (_.Value >> function

@@ -113,6 +113,7 @@ type Attributes =
     /// <summary><c>CompiledName("[value]")</c></summary>
     /// <param name="value"></param>
     static member compiledName(value: string) = Ast.Attribute("CompiledName", Ast.ParenExpr(Ast.String value))
+    static member compiledNameNull = Ast.Attribute("CompiledName", Ast.ParenExpr(Ast.NullExpr()))
     /// <summary><c>CompiledValue([value])</c></summary>
     /// <param name="value"></param>
     static member compiledValue(value: int) = Ast.Attribute("CompiledValue", Ast.ParenExpr(Ast.Int value))

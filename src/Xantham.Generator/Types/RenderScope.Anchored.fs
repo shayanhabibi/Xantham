@@ -8,9 +8,23 @@ open Xantham.Decoder
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator.NamePath
 
+[<CustomEquality; NoComparison>]
 type TypeRefAtom =
     | Widget of WidgetBuilder<Type> 
-    | Path of TypePath 
+    | Path of TypePath
+    override this.Equals(other) =
+        match other, this with
+        | :? TypeRefAtom as (TypeRefAtom.Widget otherWidget), TypeRefAtom.Widget thisWidget ->
+            otherWidget.Compile() = thisWidget.Compile()
+        | :? TypeRefAtom as (TypeRefAtom.Path otherPath), TypeRefAtom.Path thisPath ->
+            otherPath = thisPath
+        | _ -> false
+    override this.GetHashCode() =
+        match this with
+        | TypeRefAtom.Widget widget ->
+            widget.Compile().GetHashCode()
+        | TypeRefAtom.Path path ->
+            path.GetHashCode()
 
 type TypeRefMolecule =
     | Tuple of TypeRefRender list
