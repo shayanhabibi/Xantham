@@ -19,11 +19,10 @@ module TypeAlias =
             |> List.map (_.Value >> TypeParameter.render ctx scopeStore)
         let documentation = typ.Documentation
         let name = typ.Name
-        let path = Path.fromTypeAlias typ
-        let metadata = { Path = Path.create path
-                         Original = Path.create path
-                         Source = typ.Source |> Option.toValueOption
-                         FullyQualifiedName = ValueSome typ.FullyQualifiedName }
+        let path = Path.Interceptors.pipeTypeAlias ctx typ
+        let metadata =
+            (Path.create path, typ)
+            ||> RenderMetadata.createWithPathFromExport
         match innerType.Value with
         | ResolvedType.Interface _
         | ResolvedType.Class _

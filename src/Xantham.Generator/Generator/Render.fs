@@ -3,8 +3,11 @@
 open System
 open Xantham
 open Xantham.Generator
+open Xantham.Generator.Generator
+open Xantham.Generator.NamePath
 open Fabulous.AST
 open Xantham.Decoder.ArenaInterner
+open Xantham.Decoder
 
 open Xantham.Generator.Types
 
@@ -26,8 +29,23 @@ let main argv =
                      | _ -> id
                  Customisation.Interceptors.IgnorePathRender.Source = function
                      | QualifiedNamePart.Normal(text)
-                     | QualifiedNamePart.Abnormal(text,_) -> text.Contains("babel", StringComparison.OrdinalIgnoreCase) }
-             )
+                     | QualifiedNamePart.Abnormal(text,_) -> text.Contains("babel", StringComparison.OrdinalIgnoreCase)
+                 Customisation.Interceptors.Paths.TypePaths = fun ctx typ s ->
+                     match typ with
+                     | Choice1Of4 { IsLibEs = true }
+                     | Choice2Of4 { IsLibEs = true }
+                     | Choice3Of4 { IsLibEs = true }
+                     | Choice4Of4 { IsLibEs = true } ->
+                         TypePath.pruneParent (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") s
+                     | _ -> s
+                 Customisation.Interceptors.Paths.MemberPaths = fun ctx typ s ->
+                     match typ with
+                     | Choice1Of2 { IsLibEs = true }
+                     | Choice2Of2 { IsLibEs = true } ->
+                         MemberPath.pruneParent (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") s
+                     | _ -> s
+                     
+         })
     ArenaInterner.prerenderFromGraph generatorContext interner
     ArenaInterner.processExports generatorContext interner
     let renders =

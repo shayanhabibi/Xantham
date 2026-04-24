@@ -8,7 +8,13 @@ open Xantham.Generator.Types
 open Xantham.Generator.NamePath
 
 module TypeParameter =
-    let renderWithMetadata (ctx: GeneratorContext) scopeStore (typar: TypeParameter) (metadata: RenderMetadata) =
+    let render (ctx: GeneratorContext) scopeStore (typar: TypeParameter)  =
+        let metadata = {
+            Path = Path.create TransientTypePath.Anchored
+            Original = Path.create TransientTypePath.Anchored
+            Source = ValueNone
+            FullyQualifiedName = ValueNone
+        }
         {
             Prelude.TypeParameterRender.Name = typar.Name
             Metadata = metadata
@@ -21,12 +27,5 @@ module TypeParameter =
                 |> Option.map (ctx.PreludeGetTypeRef ctx scopeStore)
                 |> Option.toValueOption
             Documentation = typar.Documentation
-        }
-    let render (ctx: GeneratorContext) scopeStore (typar: TypeParameter) =
-        renderWithMetadata ctx scopeStore typar {
-            Path = Path.create TransientTypePath.Anchored
-            Original = Path.create TransientTypePath.Anchored
-            Source = ValueNone
-            FullyQualifiedName = ValueNone
         }
     

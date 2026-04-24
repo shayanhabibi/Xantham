@@ -230,13 +230,17 @@ module TypeLiteral =
 module Literal =
     let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (literal: TsLiteral) =
         {
-            Metadata = { Path = Path.create TransientTypePath.Anchored; Original = Path.create TransientTypePath.Anchored
-                         Source = ValueNone; FullyQualifiedName = ValueNone }
+            Metadata =
+                TransientTypePath.Anchored
+                |> Path.create
+                |> RenderMetadata.createWithPath
             LiteralUnionRender.Name = ValueNone
             Cases = [
                 {
-                    Metadata = { Path = Path.create TransientMemberPath.Anchored; Original = Path.create TransientMemberPath.Anchored
-                                 Source = ValueNone; FullyQualifiedName = ValueNone }
+                    Metadata = 
+                        TransientMemberPath.Anchored
+                        |> Path.create
+                        |> RenderMetadata.createWithPath
                     Name =
                         match literal with
                         | TsLiteral.String value -> value
@@ -258,10 +262,12 @@ module Literal =
 module EnumCase =
     let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (enumCase: EnumCase) =
         {
-            Metadata = { Path = Path.create TransientTypePath.Anchored
-                         Original = Path.create TransientTypePath.Anchored
-                         Source = enumCase.Source |> Option.toValueOption
-                         FullyQualifiedName = ValueSome enumCase.FullyQualifiedName }
+            Metadata =
+                TransientTypePath.Anchored
+                |> Path.create
+                |> RenderMetadata.createWithPath
+                |> RenderMetadata.withFullyQualifiedName enumCase.FullyQualifiedName
+                |> RenderMetadata.withSourceOption enumCase.Source
             Name = ValueSome enumCase.Name
             Cases = [
                 let path = (Case.unboxMeasure enumCase.Name) |> TransientMemberPath.AnchoredAndMoored |> Path.create

@@ -66,6 +66,10 @@ type QualifiedNamePartDiagnostic =
 type QualifiedNamePart =
     | Abnormal of part: string * diagnostic: QualifiedNamePartDiagnostic
     | Normal of part: string
+    member this.Value =
+        match this with
+        | Abnormal(part, _)
+        | Normal(part) -> part
 
 type [<RequireQualifiedAccess>] ResolvedType =
     | GlobalThis

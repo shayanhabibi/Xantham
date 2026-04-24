@@ -11,7 +11,13 @@ open Xantham.Generator.NamePath
 
 
 module Parameter =
-    let renderWithMetadata (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (param: Parameter) (metadata: RenderMetadata) =
+    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (param: Parameter)  =
+        let path = Path.create (TransientParameterPath.AnchoredAndMoored param.Name)
+        let metadata =
+            { Path = path
+              Original = path
+              Source = ValueNone
+              FullyQualifiedName = ValueNone }
         {
             Metadata = metadata
             Prelude.TypedNameRender.Name = param.Name
@@ -23,11 +29,3 @@ module Parameter =
             TypeParameters = []
             Documentation = param.Documentation
         }
-        
-    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (param: Parameter): TypedNameRender<TypeRefRender,Name<Case.camel>,'a> =
-        let path = Path.create (TransientParameterPath.AnchoredAndMoored param.Name)
-        renderWithMetadata ctx scopeStore param 
-            { Path = path
-              Original = path
-              Source = ValueNone
-              FullyQualifiedName = ValueNone }

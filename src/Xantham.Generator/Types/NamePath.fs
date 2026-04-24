@@ -229,24 +229,42 @@ module ModulePath =
             parent
     let createFromList (parts: string list) =
         match parts with
-        | [] -> invalidArg "parts" "Cannot create module path from empty list"
+        | [] -> init ""
         | head :: tail ->
             tail
             |> List.fold (fun acc part -> create part acc) (init head)
     let parent (path: ModulePath) = path.Parent
     let depth (path: ModulePath) = path.Depth
     let name (path: ModulePath) = path.Name
-    let pruneParent (modulePath: ModulePath) =
-        if modulePath.Parent.IsSome then
-            initWithName modulePath.Name
-        else modulePath
+    let pruneParent (predicate: ModulePath -> bool) (modulePath: ModulePath) =
+        let rec prune = function
+            | { ModulePath.Parent = ValueSome parent; Name = name } when predicate parent ->
+                true, initWithName name
+            | { ModulePath.Parent = ValueSome parent; Name = name } as current ->
+                match prune parent with
+                | true, parentPath -> true, createWithName name parentPath
+                | false, _ -> false, current
+            | { ModulePath.Parent = ValueNone } as current ->
+                false, current
+        prune modulePath
+        |> snd
+    let rec mutateChain (map: ModulePath -> ModulePath) (modulePath: ModulePath) =
+        let modulePath = map modulePath
+        { modulePath with Parent = modulePath.Parent |> ValueOption.map (mutateChain map) }
+    let pruneTopParent (modulePath: ModulePath) = pruneParent _.Parent.IsNone modulePath
     let flatten (modulePath: ModulePath) =
         let rec flattenModule (modulePath: ModulePath) =
-            modulePath.Name :: (
+            if modulePath.Name |> Name.Case.valueOrSource |> (=) ""
+            then
                 modulePath.Parent
                 |> ValueOption.map flattenModule
                 |> ValueOption.defaultValue []
-            )
+            else
+                modulePath.Name :: (
+                    modulePath.Parent
+                    |> ValueOption.map flattenModule
+                    |> ValueOption.defaultValue []
+                )
         flattenModule modulePath
         |> List.rev
     let flattenCaseless = flatten >> List.map Case.withoutMeasure
@@ -264,7 +282,11 @@ module TypePath =
         Name.Pascal.create name
         |> createWithName
         |> funApply parent
-    
+    let pruneParent (predicate: ModulePath -> bool) (typePath: TypePath) =
+        if predicate typePath.Parent then
+            ModulePath.init ""
+        else ModulePath.pruneParent predicate typePath.Parent
+        |> createWithName typePath.Name
 module MemberPath =
     let findParentModule (memberPath: MemberPath) =
         match memberPath.Parent with
@@ -293,7 +315,17 @@ module MemberPath =
     let inline createOnModuleWithName name parent =
         MemberPathParent.Module parent
         |> createWithName name
-        
+    let pruneParent (predicate: ModulePath -> bool) (memberPath: MemberPath) =
+        let parent =
+            match memberPath.Parent with
+            | MemberPathParent.Type typePath ->
+                TypePath.pruneParent predicate typePath
+                |> MemberPathParent.Type
+            | MemberPathParent.Module modulePath ->
+                ModulePath.pruneParent predicate modulePath
+                |> MemberPathParent.Module
+        { memberPath with Parent = parent }
+
 module ParameterPath =
     /// Does not include the name of the parameter, or the returned module.
     let traceToParentModule (parameterPath: ParameterPath) =

@@ -4,12 +4,15 @@ module Xantham.Generator.Generator.Render_TypeShapes
 open Xantham.Decoder
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
+open Xantham.Generator.Generator.Path
 open Xantham.Generator.NamePath
 open Xantham.Generator.Types
 open Xantham.Generator.Types.Prelude
 
 module Interface =
-    let renderWithMetadata (ctx: GeneratorContext) scopeStore (shape: Interface) metadata =
+    let render (ctx: GeneratorContext) scopeStore (shape: Interface) =
+        let path = Interceptors.pipeInterface ctx shape |> Path.create
+        let metadata = RenderMetadata.createWithPathFromExport path shape
         let members, functions =
             shape.Members
             |> Seq.collect (Member.render ctx scopeStore)
@@ -38,16 +41,11 @@ module Interface =
             Constructors = []
             Documentation = shape.Documentation
         }
-    let render (ctx: GeneratorContext) scopeStore (shape: Interface) =
-        let path = Path.fromInterface shape |> Path.create
-        { Path = path
-          Original = path
-          Source = shape.Source |> Option.toValueOption
-          FullyQualifiedName = ValueSome shape.FullyQualifiedName }
-        |> renderWithMetadata ctx scopeStore shape 
     
 module Class =
-    let renderWithMetadata (ctx: GeneratorContext) scopeStore (shape: Class) metadata =
+    let render (ctx: GeneratorContext) scopeStore (shape: Class) =
+        let path = Interceptors.pipeClass ctx shape |> Path.create
+        let metadata = RenderMetadata.createWithPathFromExport path shape
         let members, functions =
             shape.Members
             |> Seq.collect (Member.render ctx scopeStore)
@@ -82,15 +80,6 @@ module Class =
                     )
             Documentation = []
         }
-    let render (ctx: GeneratorContext) scopeStore (shape: Class) =
-        let path = Path.fromClass shape |> Path.create
-        {
-            Path = path
-            Original = path
-            Source = shape.Source |> Option.toValueOption
-            FullyQualifiedName = ValueSome shape.FullyQualifiedName 
-        }
-        |> renderWithMetadata ctx scopeStore shape 
 
 module TypeLiteral =
     let prerender (ctx: GeneratorContext) scopeStore (shape: TypeLiteral) =
@@ -103,24 +92,3 @@ module TypeLiteral =
                 | MemberRender.Method functionLikeRender -> members, functionLikeRender :: functions
                 ) ([], [])
         members, functions
-    let renderWithName (ctx: GeneratorContext) scopeStore (shape: TypeLiteral) =
-        let members, functions = prerender ctx scopeStore shape
-        fun name ->
-            let path = Path.create (TransientMemberPath.AnchoredAndMoored (Case.unboxMeasure name))
-            {
-                Metadata = {
-                    Path = path
-                    Original = path
-                    Source = ValueNone
-                    FullyQualifiedName = ValueNone
-                }
-                TypeLikeRender.Name = name
-                TypeParameters = []
-                Members = members
-                Functions = functions
-                Inheritance = []
-                Constructors = []
-                Documentation = []
-            }
-    let renderWithNameString (ctx: GeneratorContext) scopeStore (shape: TypeLiteral) (name: string) =
-        renderWithName ctx scopeStore shape (Name.Pascal.create name)

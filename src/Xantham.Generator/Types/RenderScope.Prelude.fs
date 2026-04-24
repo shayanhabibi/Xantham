@@ -1,6 +1,7 @@
 ﻿[<AutoOpen>]
 module Xantham.Generator.Types.Prelude
 
+open System
 open System.Collections.Generic
 open Fabulous.AST
 open Fantomas.Core.SyntaxOak
@@ -446,3 +447,41 @@ module RenderScope =
             Render = Render.RefOnly typeRef
             TransientChildren = ValueNone
         }
+
+module RenderMetadata =
+    let withSourceOption (source: ArenaInterner.QualifiedNamePart option) metadata =
+        { metadata with RenderMetadata.Source = ValueOption.ofOption source }
+    let withSource (source: ArenaInterner.QualifiedNamePart) metadata =
+        { metadata with RenderMetadata.Source = ValueSome source }
+    let withSourceString (source: string) (metadata: RenderMetadata) =
+        withSource (ArenaInterner.QualifiedNamePart.Normal source) metadata
+    let withFullyQualifiedName (fullyQualifiedName: ArenaInterner.QualifiedNamePart list) metadata =
+        { metadata with RenderMetadata.FullyQualifiedName = ValueSome fullyQualifiedName }
+    let withFullyQualifiedNameStrings (fullyQualifiedName: string list) (metadata: RenderMetadata) =
+        withFullyQualifiedName (fullyQualifiedName |> List.map ArenaInterner.QualifiedNamePart.Normal) metadata
+    let create (path: Path) (original: Path) (source: ArenaInterner.QualifiedNamePart voption) (fullyQualifiedName: ArenaInterner.QualifiedNamePart list voption) =
+        {
+            Path = path
+            Original = original
+            Source = source
+            FullyQualifiedName = fullyQualifiedName
+        }
+    let createWithPath (path: Path) =
+        create path path ValueNone ValueNone
+    let createWithOriginalPath (original: Path) (path: Path) =
+        create path original ValueNone ValueNone
+    let createWithTransientPath = Path.createTransient >> createWithPath
+    let createWithAnchorPath = Path.createAnchor >> createWithPath
+    let createWithOriginalTransientPath original = Path.createTransient >> createWithOriginalPath (Path.createTransient original)
+    let createWithOriginalAnchorPath original = Path.createAnchor >> createWithOriginalPath (Path.createAnchor original)
+    let inline createWithPathFromExport<^T
+        when ^T: (member FullyQualifiedName: ArenaInterner.QualifiedNamePart list)
+        and ^T: (member Source: ArenaInterner.QualifiedNamePart option)
+        and ^T: (member IsLibEs: bool)
+        > (path: Path) (export: ^T) =
+        if export.IsLibEs && export.Source |> Option.exists (_.Value >> _.Equals("typescript", StringComparison.OrdinalIgnoreCase)) then
+            createWithPath path
+            |> withFullyQualifiedName export.FullyQualifiedName
+        else
+            create path path (ValueOption.ofOption export.Source) (ValueSome export.FullyQualifiedName)
+            

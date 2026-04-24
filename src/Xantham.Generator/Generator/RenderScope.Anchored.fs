@@ -481,7 +481,7 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
         printfn $"Bad scope: %A{badScope}"
 and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: RenderScopeStore) =
     let anchors = Dictionary<ResolvedType, TypePath * Render>()
-    let anchorPath = Path.fromResolvedExport export
+    let anchorPath = Interceptors.pipeExport ctx export
     renderScopeStore
     |> Seq.iter (fun (KeyValue(key, value)) ->
         let renderScope =
