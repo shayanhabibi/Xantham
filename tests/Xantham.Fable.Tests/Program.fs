@@ -934,7 +934,7 @@ let utilityTests =
                 | TsMember.Property { IsOptional = true } -> true
                 | _ -> false
                 )
-        testList "[Known Errors - See Issue #30] Generic utility types preserves semantic information" [
+        testList "Generic utility types preserves semantic information" [
             let genericUtility = result |> findAlias "GenericUtility"
             let genericUtilityType =
                 result
@@ -942,16 +942,30 @@ let utilityTests =
                 |> function
                     | TsType.TypeReference typeRef -> typeRef
                     | _ -> failwith "Expected TypeReference"
-            // Type checker actually still resolves the type down to a type literal
-            // with an index signature on any object.
-            ptestCase "Utility type is unresolved type reference" <| fun _ ->
-                "" |> Expect.isTrue genericUtilityType.ResolvedType.IsNone
-            // Semantic/syntactic information is lost.
-            // We again receive a type literal with an index signature on any object.
-            // likely because we use type checker immediately on type references?
-            ptestCase "Utility type preserves semantic information" <| fun _ ->
-                let typ = findType genericUtilityType.Type result
-                "Expect to keep semantic info of: GenericUtility<T extends keyof IUtilityInterface> = Pick<PartialInterface, T>" |> Expect.equal (typ.ToString()) ""
+            testCase "Utility type preserves semantic information of type" <| fun _ ->
+                let typ = findExportByKey genericUtilityType.Type result
+                "Expect to keep semantic info of: GenericUtility<T extends keyof IUtilityInterface> = Pick<PartialInterface, T>" |> Expect.isTrue (
+                    match typ with
+                    | TsExportDeclaration.TypeAlias { Name = "Pick" } -> true
+                    | _ -> false
+                    )
+            testCase "Utility type arguments preserve semantic information" <| fun _ ->
+                "" |> Expect.hasLength genericUtilityType.TypeArguments 2
+                #nowarn 25
+                let [ taOne; taTwo ] = genericUtilityType.TypeArguments
+                #warnon 25
+                "First type argument should be a type alias"
+                |> Expect.isTrue (
+                    result
+                    |> findExportByKey taOne
+                    |> _.IsTypeAlias
+                    )
+                "Second type argument should be a type parameter"
+                |> Expect.isTrue (
+                    result
+                    |> findType taTwo
+                    |> _.IsTypeParameter
+                    )
         ]
     ]
 
