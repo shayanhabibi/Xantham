@@ -145,7 +145,7 @@ module TemplateLiteral =
                                 scopeStore
                                 (ResolvedType.Primitive TypeKindPrimitive.String)
                                 false
-                                Types.string 
+                                Intrinsic.string 
                         Traits = Set [ RenderTraits.EmitSelf ]
                         TypeParameters = []
                         Documentation = []

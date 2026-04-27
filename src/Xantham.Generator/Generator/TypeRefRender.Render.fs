@@ -16,6 +16,8 @@ module private Implementation =
         | _ -> false
     let renderAtom (atom: TypeRefAtom) =
         match atom with
+        | TypeRefAtom.Intrinsic s ->
+            Ast.LongIdent s
         | TypeRefAtom.Widget widgetBuilder ->
             widgetBuilder
         | TypeRefAtom.ConcretePath typePath ->
@@ -116,6 +118,8 @@ module private Implementation =
             |> if typeRefRender.Nullable then
                 Ast.OptionPrefix 
                 else id
+        let localisedRender (anchorPath: AnchorPath) (typeRefRender: Anchored.TypeRefRender) =
+            Anchored.TypeRefRender.localise anchorPath typeRefRender
 
 [<EditorBrowsable(EditorBrowsableState.Never)>]
 module TestHelpers =
@@ -134,3 +138,4 @@ module TypeRefRender =
     let inline render value = ((^T or SRTPHelper):(static member Render: ^T -> WidgetBuilder<Type>) value)
     module Anchored =
         let render value = Implementation.Anchored.render value
+        let localiseRender (anchorPath: AnchorPath) (typeRefRender: Anchored.TypeRefRender) = Implementation.Anchored.localisedRender anchorPath typeRefRender

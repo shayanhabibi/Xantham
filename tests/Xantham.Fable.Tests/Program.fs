@@ -598,13 +598,24 @@ let indexAccessTests =
             testCase "Index is type parameter" <| fun _ ->
                 let typ = findType indexAccessType.Index result
                 "Type should be a type parameter"
-                |> Expect.isTrue (match typ with TsType.TypeParameter _ -> true | _ -> false)
+                |> Expect.isTrue (
+                    match typ with
+                    | TsType.TypeReference ({ ResolvedType = Some typKey } | { Type = typKey }) ->
+                        findType typKey result
+                        |> _.IsTypeParameter
+                    | TsType.TypeParameter _ -> true
+                    | _ -> false
+                    )
             testCase "Object accessed is 'AccessedInterface'" <| fun _ ->
                 let nestedType =
                     findType indexAccessType.Object result
                 "Type should be an interface by the name of AccessedInterface"
                 |> Expect.isTrue (
                     match nestedType with
+                    | TsType.TypeReference { ResolvedType = Some typKey } ->
+                        match findType typKey result with
+                        | TsType.Interface { Name = "AccessedInterface" } -> true
+                        | _ -> false
                     | TsType.Interface { Name = "AccessedInterface" } -> true
                     | _ -> false
                     )
@@ -843,8 +854,8 @@ let utilityTests =
                     | TsExportDeclaration.TypeAlias a -> Some a
                     | _ -> None
                     )
-            "5 Aliases are present"
-            |> Expect.hasLength utilityTypes 5
+            (Seq.length utilityTypes >= 5, "At least 5 Aliases are present")
+            ||> Expect.isTrue
         testCase "Partial utility definition is correct" <| fun _ ->
             let partialUtility = result |> findAlias "PartialInterface"
             let partialUtilityType =

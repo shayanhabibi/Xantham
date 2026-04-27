@@ -13,7 +13,8 @@ open Xantham.Decoder
 // of transient path tracking
 type TypeRefAtom =
     private
-    | Widget_ of WidgetBuilder<Type> 
+    | Widget_ of WidgetBuilder<Type>
+    | Intrinsic_ of string
     | ConcretePath_ of TypePath 
     | TransientPath_ of TransientTypePath 
 
@@ -37,11 +38,12 @@ and TypeRefRender = {
 }
 
 module TypeRefAtom =
-    let (|Widget|ConcretePath|TransientPath|) (atom: TypeRefAtom) =
+    let (|Widget|ConcretePath|TransientPath|Intrinsic|) (atom: TypeRefAtom) =
         match atom with
         | Widget_(widgetBuilder) -> Widget(widgetBuilder)
         | ConcretePath_(typePath) -> ConcretePath(typePath)
         | TransientPath_(transientTypePath) -> TransientPath(transientTypePath)
+        | Intrinsic_ s -> Intrinsic(s)
 
 module TypeRefMolecule =
     let (|Tuple|Union|Function|Prefix|) (molecule: TypeRefMolecule) =
@@ -109,11 +111,15 @@ module RenderScopeStore =
                 TypeRefAtom.ConcretePath_(path)
             let createTransientPath  (path: TransientTypePath) =
                 TypeRefAtom.TransientPath_(path)
+            let createIntrinsic (intrinsic: string) =
+                TypeRefAtom.Intrinsic_(intrinsic)
             
         let inline createWidget (_scope: RenderScopeStore) (_resolvedType: ResolvedType) (widget: WidgetBuilder<Type>) =
             Unsafe.createWidget widget
         let inline createConcretePath (_scope: RenderScopeStore) (_resolvedType: ResolvedType) (path: TypePath) =
             Unsafe.createConcretePath path
+        let inline createIntrinsic (_scope: RenderScopeStore) (_resolvedType: ResolvedType) (intrinsic: string) =
+            Unsafe.createIntrinsic intrinsic
         let createTransientPath (scope: RenderScopeStore) (resolvedType: ResolvedType) (path: TransientTypePath) =
             match path with
             | TransientTypePath.Anchored ->
@@ -139,6 +145,8 @@ module RenderScopeStore =
             static member inline Create(scope, resolvedType, _, widget) = createWidget scope resolvedType widget
             static member inline Create(scope, resolvedType, _, path) = createConcretePath scope resolvedType path
             static member inline Create(scope, resolvedType, _, path) = createTransientPath scope resolvedType path
+            static member inline Create(scope, resolvedType, intrinsic) = createIntrinsic scope resolvedType intrinsic
+            static member inline Create(scope, resolvedType, _, intrinsic) = createIntrinsic scope resolvedType intrinsic
         
     let tryAdd (resolvedType: ResolvedType) (transientTypePath: TransientTypePath) (scope: RenderScopeStore) =
         TypeRefAtom.createTransientPath scope resolvedType transientTypePath |> ignore

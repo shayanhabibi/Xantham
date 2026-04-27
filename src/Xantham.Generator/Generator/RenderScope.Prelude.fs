@@ -54,7 +54,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
     elif valueIsCreated && not(GeneratorContext.Prelude.canFlight ctx lazyResolvedType.Value) then
         printfn $"Stack overflow would be caused by rendering the type ref for {lazyResolvedType.Raw}"
         let (Registered ref) =
-            RenderScopeStore.TypeRefRender.create scope lazyResolvedType.Value true Types.obj
+            RenderScopeStore.TypeRefRender.create scope lazyResolvedType.Value true Intrinsic.obj
             |> RenderScope.createRootless lazyResolvedType.Value
             |> addOrReplaceScope ctx lazyResolvedType.Value
         ref
@@ -65,7 +65,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
     let inline liftWithNullable nullable value = if nullable then liftNullable value else lift value
     match resolvedType with
     | ResolvedType.GlobalThis ->
-        lift Types.globalThis
+        lift Intrinsic.globalThis
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Conditional conditionalType ->
@@ -74,7 +74,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             conditionalType.False
         ] |> List.contains lazyResolvedType
         then
-            liftNullable Types.obj
+            liftNullable Intrinsic.obj
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
         else
@@ -122,30 +122,30 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> addOrReplaceScope ctx resolvedType
         // |> executeRender
     | ResolvedType.Predicate _ ->
-        lift Types.bool
+        lift Intrinsic.bool
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Primitive typeKindPrimitive ->
         match typeKindPrimitive with
         | TypeKindPrimitive.Unknown 
-        | TypeKindPrimitive.Any -> liftNullable Types.obj
+        | TypeKindPrimitive.Any -> liftNullable Intrinsic.obj
         | TypeKindPrimitive.NonPrimitive 
-        | TypeKindPrimitive.ESSymbol -> lift Types.obj
+        | TypeKindPrimitive.ESSymbol -> lift Intrinsic.obj
         | TypeKindPrimitive.Never 
         | TypeKindPrimitive.Void 
         | TypeKindPrimitive.Undefined 
-        | TypeKindPrimitive.Null -> lift Types.unit
-        | TypeKindPrimitive.String -> lift Types.string
-        | TypeKindPrimitive.Integer -> lift Types.int
-        | TypeKindPrimitive.Number -> lift Types.float
-        | TypeKindPrimitive.Boolean -> lift Types.bool
-        | TypeKindPrimitive.BigInt -> lift Types.bigint
+        | TypeKindPrimitive.Null -> lift Intrinsic.unit
+        | TypeKindPrimitive.String -> lift Intrinsic.string
+        | TypeKindPrimitive.Integer -> lift Intrinsic.int
+        | TypeKindPrimitive.Number -> lift Intrinsic.float
+        | TypeKindPrimitive.Boolean -> lift Intrinsic.bool
+        | TypeKindPrimitive.BigInt -> lift Intrinsic.bigint
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Union _ ->
         match ResolvedTypeCategories.create resolvedType with
         | { Others = []; LiteralLike = []; EnumLike = []; Primitives = []; Nullable = nullable } ->
-            liftWithNullable nullable Types.obj
+            liftWithNullable nullable Intrinsic.obj
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
         | { Others = []; EnumLike = []; Primitives = primitives; LiteralLike = []; Nullable = nullable } ->
@@ -236,14 +236,14 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 indexAccessType.Index
             ]
             |> List.map (prerender ctx scope)
-        let prefix = lift Types.proptypekeyType
+        let prefix = lift Intrinsic.proptypekey
         (prefix, suffixes)
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Index index ->
         (
-            lift Types.keyofType,
+            lift Intrinsic.keyof,
             index.Type
             |> List.singleton
             |> List.map (prerender ctx scope)
@@ -270,7 +270,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Array innerResolvedType ->
         (
-            lift Types.arrayType,
+            lift Intrinsic.array,
             LazyContainer.CreateFromValue innerResolvedType
             |> prerender ctx scope
             |> List.singleton
@@ -345,7 +345,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> not
         match callSignature, rest with
         | [], [] ->
-            liftNullable Types.obj
+            liftNullable Intrinsic.obj
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
         | [ [ singleSig ] ], [] when shouldInlineCallSignature singleSig ->

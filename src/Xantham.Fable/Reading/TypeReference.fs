@@ -72,9 +72,11 @@ let private resolveTypeBase (ctx: TypeScriptReader) (xanTag: XanthamTag) (typ: T
         // target's own TS TypeKey directly.  That key matches the signalCache entry registered
         // for the generic declaration (interface/class), which is the semantically correct
         // referent for TypeReference.Type.
+        XanthamTag.debugLocationAndForget "TypeReference.resolveTypeBase | Shared symbol" xanTag
         if cachedKey = typ.TypeKey then TypeSignal.ofKey typ.target.TypeKey
         else TypeSignal.ofKey cachedKey
     else
+        XanthamTag.debugLocationAndForget "TypeReference.resolveTypeBase | non shared symbol" xanTag
         match tagState with
         | TagState.Visited tag -> tag.TypeSignal
         | TagState.Unvisited tag ->
@@ -134,7 +136,12 @@ let fromType (ctx: TypeScriptReader) (xanTag: XanthamTag) (typ: Ts.TypeReference
         STypeReferenceBuilder.Type = resolveTypeBase ctx xanTag typ
         TypeArguments =
             ctx.checker.getTypeArguments(typ).AsArray
-            |> Array.map (ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx _.TypeSignal)
+            |> Array.map (
+                ctx.CreateXanthamTag
+                >> fst
+                >> TagState.apply (fun _ -> XanthamTag.chainDebug xanTag >> ignore)
+                >> stackPushAndThen ctx _.TypeSignal
+                )
         ResolvedType = ValueNone
     }
     |> SType.TypeReference

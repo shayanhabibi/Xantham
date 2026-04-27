@@ -344,10 +344,11 @@ module XanthamTag =
         #endif
     let inline chainDebug (parent: XanthamTag) (child: XanthamTag) =
         #if DEBUG
-        withDebug (fun _ ->
-            let debugIdParent = chalk.yellow.Invoke $"[{parent.DebugId}]"
-            setDebugForReasonOr $"Parent {debugIdParent} attempted to chain" $"Parent {debugIdParent} chained debug" child |> ignore) parent
-        |> ignore
+        if parent <> child then
+            withDebug (fun _ ->
+                let debugIdParent = chalk.yellow.Invoke $"[{parent.DebugId}]"
+                setDebugForReasonOr $"Parent {debugIdParent} attempted to chain" $"Parent {debugIdParent} chained debug" child |> ignore) parent
+            |> ignore
         #endif
         child
     let inline debugLocation (location: string) (tag: XanthamTag) =

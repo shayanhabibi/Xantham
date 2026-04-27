@@ -55,6 +55,21 @@ module UnionBuilder =
     let erasedUnion = UnionBuilder(8)
 [<AutoOpen>]
 module WidgetTypes =
+    module Intrinsic =
+        let globalThis = "Browser.Dom.Window"
+        let bool = "bool"
+        let string = "string"
+        let unit = "unit"
+        let int = "int"
+        let float = "float"
+        let bigint = "bigint"
+        let obj = "obj"
+        let char = "char"
+        let objNull = "objnull"
+        let array = "array"
+        let option = "option"
+        let proptypekey = "proptypekey"
+        let keyof = "keyof"
     type Types =
         /// <summary><c>Browser.Dom.Window</c></summary>
         static member globalThis = Ast.LongIdent [ "Browser"; "Dom"; "Window" ]

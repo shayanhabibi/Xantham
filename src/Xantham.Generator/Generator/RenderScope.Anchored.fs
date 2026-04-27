@@ -89,10 +89,10 @@ module Render =
                     typeParameter.Name
                 Constraint =
                     typeParameter.Constraint
-                    |> ValueOption.map (TypeRefRender.anchor anchorPath)
+                    |> ValueOption.map (TypeRefRender.anchorAndLocalise anchorPath)
                 Default =
                     typeParameter.Default
-                    |> ValueOption.map (TypeRefRender.anchor anchorPath)
+                    |> ValueOption.map (TypeRefRender.anchorAndLocalise anchorPath)
                 Documentation = typeParameter.Documentation
             }
         let anchorTypedNameRender (ctx: GeneratorContext) (anchorPath: AnchorPath) (typedName: Transient.TypedNameRender) =
@@ -107,7 +107,7 @@ module Render =
                     FullyQualifiedName = typedName.Metadata.FullyQualifiedName
                 }
                 TypedNameRender.Name = typedName.Name
-                Type = typedName.Type |> TypeRefRender.anchor anchorPath
+                Type = typedName.Type |> TypeRefRender.anchorAndLocalise anchorPath 
                 Traits = typedName.Traits
                 TypeParameters = typedName.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
                 Documentation = typedName.Documentation
@@ -125,7 +125,7 @@ module Render =
                     |> List.map (anchorTypedNameRender ctx anchorPath)
                 ReturnType =
                     functionSignature.ReturnType
-                    |> TypeRefRender.anchor anchorPath
+                    |> TypeRefRender.anchorAndLocalise anchorPath
                 Traits = functionSignature.Traits
                 Documentation = functionSignature.Documentation
                 TypeParameters = functionSignature.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
@@ -171,7 +171,7 @@ module Render =
                     |> List.map (anchorTypeParameters ctx anchorPath)
                 Inheritance =
                     typeDefn.Inheritance
-                    |> List.map (TypeRefRender.anchor anchorPath)
+                    |> List.map (TypeRefRender.anchorAndLocalise anchorPath)
                 Members =
                     typeDefn.Members
                     |> List.map (anchorTypedNameRender ctx anchorPath)
@@ -204,7 +204,7 @@ module Render =
                         )
                     TypeParameters = alias.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
                     Documentation = alias.Documentation
-                    Type = alias.Type |> TypeRefRender.anchor anchorPath
+                    Type = alias.Type |> TypeRefRender.anchorAndLocalise anchorPath
                 }
                 |> TypeAliasRender.Alias
             | Transient.TypeAliasRender.TypeDefn typeLikeRender ->
@@ -242,7 +242,7 @@ module Render =
                 anchorTypedNameRender ctx anchorPath typedNameRender
                 |> TypeRender.Variable
             |> fun typeRender ->
-                Anchored.Render( TypeRefRender.anchor anchorPath ref, lazy typeRender )
+                Anchored.Render( TypeRefRender.anchorAndLocalise anchorPath ref, lazy typeRender )
     module Concrete =
         let inline anchorEnumCase (enumUnion: Concrete.LiteralCaseRender<'T>) =
             {
@@ -273,10 +273,10 @@ module Render =
                     typeParameter.Name
                 Constraint =
                     typeParameter.Constraint
-                    |> ValueOption.map (TypeRefRender.anchor anchorPath)
+                    |> ValueOption.map (TypeRefRender.anchorAndLocalise anchorPath)
                 Default =
                     typeParameter.Default
-                    |> ValueOption.map (TypeRefRender.anchor anchorPath)
+                    |> ValueOption.map (TypeRefRender.anchorAndLocalise anchorPath)
                 Documentation = typeParameter.Documentation
             }
         let anchorTypedNameRender (ctx: GeneratorContext) (anchorPath: AnchorPath) (typedName: Concrete.TypedNameRender) =
@@ -291,7 +291,7 @@ module Render =
                     FullyQualifiedName = typedName.Metadata.FullyQualifiedName
                 }
                 TypedNameRender.Name = typedName.Name
-                Type = typedName.Type |> TypeRefRender.anchor anchorPath
+                Type = typedName.Type |> TypeRefRender.anchorAndLocalise anchorPath
                 Traits = typedName.Traits
                 TypeParameters = typedName.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
                 Documentation = typedName.Documentation
@@ -309,7 +309,7 @@ module Render =
                     |> List.map (anchorTypedNameRender ctx anchorPath)
                 ReturnType =
                     functionSignature.ReturnType
-                    |> TypeRefRender.anchor anchorPath
+                    |> TypeRefRender.anchorAndLocalise anchorPath
                 Traits = functionSignature.Traits
                 Documentation = functionSignature.Documentation
                 TypeParameters = functionSignature.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
@@ -349,7 +349,7 @@ module Render =
                     |> List.map (anchorTypeParameters ctx anchorPath)
                 Inheritance =
                     typeDefn.Inheritance
-                    |> List.map (TypeRefRender.anchor anchorPath)
+                    |> List.map (TypeRefRender.anchorAndLocalise anchorPath)
                 Members =
                     typeDefn.Members
                     |> List.map (anchorTypedNameRender ctx anchorPath)
@@ -378,7 +378,7 @@ module Render =
                     Name = alias.Name 
                     TypeParameters = alias.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
                     Documentation = alias.Documentation
-                    Type = alias.Type |> TypeRefRender.anchor anchorPath
+                    Type = alias.Type |> TypeRefRender.anchorAndLocalise anchorPath
                 }
                 |> TypeAliasRender.Alias
             | Concrete.TypeAliasRender.TypeDefn typeLikeRender ->
@@ -431,7 +431,7 @@ module Render =
                 let ref =
                     ModulePath.init ""
                     |> AnchorPath.create
-                    |> TypeRefRender.anchor
+                    |> TypeRefRender.anchorAndLocalise
                     |> funApply ref
                 Anchored.Render(ref, lazy typeRender)
 
@@ -525,7 +525,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
         let typeRef =
             value.Type
             |> prerender ctx scope
-            |> TypeRefRender.anchor anchorPath
+            |> TypeRefRender.anchorAndLocalise anchorPath
         if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
             typeRef |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
         else
@@ -658,7 +658,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                             ReturnType =
                                 func.Type
                                 |> prerender ctx scope
-                                |> TypeRefRender.anchor anchorPath
+                                |> TypeRefRender.anchorAndLocalise anchorPath
                             Traits = Set [ RenderTraits.Static ]
                             Documentation = func.Documentation
                             TypeParameters =
@@ -689,11 +689,11 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                             Constraint =
                                 typeParameter.Constraint
                                 |> Option.toValueOption
-                                |> ValueOption.map (prerender ctx scope >> TypeRefRender.anchor anchorPath)
+                                |> ValueOption.map (prerender ctx scope >> TypeRefRender.anchorAndLocalise anchorPath)
                             Default = 
                                 typeParameter.Default
                                 |> Option.toValueOption
-                                |> ValueOption.map (prerender ctx scope >> TypeRefRender.anchor anchorPath)
+                                |> ValueOption.map (prerender ctx scope >> TypeRefRender.anchorAndLocalise anchorPath)
                             Documentation = typeParameter.Documentation
                         }
                         )

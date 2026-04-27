@@ -288,13 +288,16 @@ let tryGetOrRegisterExportedStore (ctx: TypeScriptReader) (tag: XanthamTag) : Ex
     let key = tag.IdentityKey
     match ctx.exportCache.TryGetValue key with
     | true, store ->
-        GuardedData.ExportBuilder.getOrSetDefault tag
+        XanthamTag.debugLocationAndComment "Prelude.tryGetOrRegisterExportedStore" $"Already cached {store.RefKey}" tag
+        |> GuardedData.ExportBuilder.getOrSetDefault 
         |> Signal.fulfillWith (fun () -> store.Builder.Value)
         GuardedData.TypeSignal.getOrSetDefault tag
         |> _.Set(store.RefKey)
         None
     | false, _ ->
-        let store = ExportStore.create ctx tag
+        let store =
+            XanthamTag.debugLocationAndComment "Prelude.tryGetOrRegisterExportedStore" "Creating store" tag
+            |> ExportStore.create ctx 
         ctx.exportCache.Add(key, store)
         Some store
 

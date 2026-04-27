@@ -10,7 +10,8 @@ open Xantham.Generator.NamePath
 
 [<CustomEquality; NoComparison>]
 type TypeRefAtom =
-    | Widget of WidgetBuilder<Type> 
+    | Widget of WidgetBuilder<Type>
+    | Intrinsic of string
     | Path of TypePath
     override this.Equals(other) =
         match other, this with
@@ -18,6 +19,8 @@ type TypeRefAtom =
             otherWidget.Compile() = thisWidget.Compile()
         | :? TypeRefAtom as (TypeRefAtom.Path otherPath), TypeRefAtom.Path thisPath ->
             otherPath = thisPath
+        | :? TypeRefAtom as (TypeRefAtom.Intrinsic otherIntrinsic), TypeRefAtom.Intrinsic thisIntrinsic ->
+            otherIntrinsic = thisIntrinsic
         | _ -> false
     override this.GetHashCode() =
         match this with
@@ -25,6 +28,7 @@ type TypeRefAtom =
             widget.Compile().GetHashCode()
         | TypeRefAtom.Path path ->
             path.GetHashCode()
+        | Intrinsic s -> s.GetHashCode()
 
 type TypeRefMolecule =
     | Tuple of TypeRefRender list
@@ -51,6 +55,8 @@ module TypeRefAtom =
             TypeRefAtom.Path path
         | Prelude.TypeRefAtom.Widget widgetBuilder ->
             TypeRefAtom.Widget widgetBuilder
+        | Prelude.TypeRefAtom.Intrinsic intrinsic ->
+            TypeRefAtom.Intrinsic intrinsic
     let localise anchorPath (atom: TypeRefAtom) =
         match atom with
         | TypeRefAtom.Path path ->
@@ -58,6 +64,7 @@ module TypeRefAtom =
             |> List.map Name.Case.valueOrModified
             |> Ast.LongIdent
         | TypeRefAtom.Widget widgetBuilder -> widgetBuilder
+        | Intrinsic s -> Ast.LongIdent s
 
 module TypeRefRender =
     type SRTPHelper =
@@ -136,6 +143,9 @@ module TypeRefRender =
                     )
                 |> TypeRefKind.Molecule
                 |> wrap
+    let anchorAndLocalise anchorPath (typeRefRender: Prelude.TypeRefRender) =
+        anchor anchorPath typeRefRender
+        |> localise anchorPath
     let inline setNullable nullable typeRefRender = { typeRefRender with TypeRefRender.Nullable = nullable }
     let inline orNullable nullable typeRefRender = { typeRefRender with TypeRefRender.Nullable = nullable || typeRefRender.Nullable }
     let nullable typeRefRender = setNullable true typeRefRender

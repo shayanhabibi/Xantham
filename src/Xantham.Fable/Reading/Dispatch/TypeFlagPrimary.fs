@@ -5,6 +5,7 @@ open Xantham
 open Xantham.Fable
 open Xantham.Fable.Types
 open Xantham.Fable.Types.Signal
+open Xantham.Fable.Types.Tracer
 
 /// Checks whether a flat array of enum-literal types represents a complete enum
 /// (every member of the parent enum is present). If so, wires xanTag's signals to
@@ -73,17 +74,17 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
     /// <summary>
     /// ties the current xantham tag to the signals of the given type
     /// </summary>
-    let inline routeToType (typ: Ts.Type) =
-        XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | routeToType" xanTag
+    let inline routeToType tag (typ: Ts.Type) =
+        XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | routeToType" tag
         let underlyingType =
             match ctx.CreateXanthamTag typ |> fst with
             | TagState.Unvisited tag -> pushToStack ctx tag; tag
             | TagState.Visited tag -> tag
         let underlyingTypeSignal = underlyingType.TypeSignal
         let underlyingBuilderSignal = underlyingType.Builder
-        xanTag.TypeSignal
+        tag.TypeSignal
         |> Signal.fulfillWith (fun () -> underlyingTypeSignal.Value)
-        xanTag.Builder
+        tag.Builder
         |> Signal.fulfillWith (fun () -> underlyingBuilderSignal.Value)
     let setPrimitive = fun prim ->
         XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | setPrimitive" xanTag
@@ -91,6 +92,27 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
         |> setAstSignal
         prim.TypeKey
         |> setTypeKeyForTag xanTag
+        
+    match xanTag.Guard.Value with
+    | IdentityKey.Id _
+    | IdentityKey.Symbol _
+    | IdentityKey.DeclarationPosition _ -> ()
+    | IdentityKey.AliasSymbol symbol ->
+        symbol.declarations
+        |> Option.iter (
+            _.AsArray
+            >> Array.iter (
+                ctx.CreateXanthamTag
+                >> fst
+                >> TagState.applyUnvisited (fun declXanTag ->
+                    match declXanTag.Value with
+                    | XanTagKind.TypeDeclaration (TypeDeclaration.TypeAlias _) ->
+                        XanthamTag.chainDebug xanTag declXanTag
+                        |> pushToStack ctx 
+                    | _ -> ())
+                >> ignore
+                )
+            )
     match tag with
     | TypeFlagPrimary.Any _ -> setPrimitive TypeKindPrimitive.Any
     | TypeFlagPrimary.Unknown _ -> setPrimitive TypeKindPrimitive.Unknown
@@ -135,7 +157,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
         // forward to the simplified form. Otherwise emit a raw IndexedAccess builder.
         match indexedAccessType.simplifiedForReading with
         | Some simplified when not (simplified.flags.HasFlag Ts.TypeFlags.IndexedAccess) ->
-            routeToType simplified
+            routeToType xanTag simplified
         | _ ->
             {
                 SIndexAccessTypeBuilder.Object = getTypeSignal indexedAccessType.objectType
@@ -168,7 +190,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
         conditionalType.TypeKey |> setTypeKeyForTag xanTag
     | TypeFlagPrimary.Substitution subType ->
         XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | Substitution" xanTag
-        routeToType subType.baseType
+        routeToType xanTag subType.baseType
     | TypeFlagPrimary.TemplateLiteral templateLiteralType ->
         XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | TemplateLiteral" xanTag
         {
@@ -182,9 +204,11 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
     | TypeFlagPrimary.StringMapping stringMappingType ->
         XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | StringMappingType" xanTag
         // TODO - for now we're just returning the type of the string mapping directly
-        routeToType stringMappingType.``type``
+        routeToType xanTag stringMappingType.``type``
     | TypeFlagPrimary.Union unionType ->
-        XanthamTag.debugLocationAndForget "TypeFlagPrimary.dispatch | Union" xanTag
+        xanTag
+        |> XanthamTag.debugLocation "TypeFlagPrimary.dispatch | Union" 
+        |> ignore
         let types = unionType.types.AsArray
         if types |> Array.forall (TypeFlagPrimary.Create >> function
             | TypeFlagPrimary.Literal (TypeFlagLiteral.Boolean _)

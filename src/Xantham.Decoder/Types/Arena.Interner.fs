@@ -754,16 +754,13 @@ module ArenaInterner =
         let exportMap =
             exportMap
             |> Seq.map (_.Deconstruct() >> (fun (key, value) -> key, seq value))
-            |> TaskSeq.ofSeq
-            |> TaskSeq.map (fun (key, value) ->
+            |> Seq.map (fun (key, value) ->
                 let exports =
                     value
-                    |> TaskSeq.ofSeq
-                    |> TaskSeq.choose (resolveExport >> Result.toOption)
-                    |> TaskSeq.toList
+                    |> Seq.choose (resolveExport >> Result.toOption)
+                    |> Seq.toList
                 key, exports
                 )
-            |> TaskSeq.toSeq
             |> Map
         
         {

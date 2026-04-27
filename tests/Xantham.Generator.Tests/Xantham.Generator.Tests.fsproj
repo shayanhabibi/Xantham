@@ -10,6 +10,7 @@
         <Compile Include="Sample.fs"/>
         <Compile Include="Mocking\Arena.Interner.Types.fs" />
         <Compile Include="Tests\TypeRefRender.fs" />
+        <Compile Include="Tests\TypeRefRenderExtra.fs" />
         <Compile Include="Tests\Paths.fs" />
         <Compile Include="Tests\Name.fs" />
         <Compile Include="Tests\NamePath.fs" />
