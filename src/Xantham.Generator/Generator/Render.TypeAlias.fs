@@ -39,12 +39,25 @@ module TypeAlias =
         | ResolvedType.Conditional _
         | ResolvedType.Enum _
         | ResolvedType.Array _ ->
+            let oldRef = ctx.PreludeGetTypeRef ctx scopeStore innerType
+            let innerRef =
+                match ctx.PreludeRenders.TryGetValue(innerType.Value) with
+                | true, value -> ValueSome value
+                | false, _ -> ValueNone
+                |> ValueOption.map (fun newRef ->
+                    match ctx.TypeAliasRemap.TryGetValue(innerType.Value) with
+                    | true, value ->
+                        TypeRefRender.replace value newRef.TypeRef oldRef
+                    | _ -> newRef.TypeRef
+                    )
+                |> ValueOption.defaultValue oldRef
+                
             {
                 TypeAliasRenderRef.Documentation = documentation
                 Metadata = metadata
                 Name = name
                 TypeParameters = typeParameters
-                Type = ctx.PreludeGetTypeRef ctx scopeStore innerType
+                Type = innerRef
             }
             |> TypeAliasRender.Alias
         | ResolvedType.Intersection _ 

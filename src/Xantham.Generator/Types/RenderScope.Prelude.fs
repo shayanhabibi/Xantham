@@ -11,12 +11,30 @@ open Xantham.Generator.NamePath
 open Xantham.Decoder
 
 // of transient path tracking
+[<CustomEquality; NoComparison>]
 type TypeRefAtom =
     private
     | Widget_ of WidgetBuilder<Type>
     | Intrinsic_ of string
     | ConcretePath_ of TypePath 
-    | TransientPath_ of TransientTypePath 
+    | TransientPath_ of TransientTypePath
+    override this.GetHashCode() =
+        match this with
+        | Widget_ w -> w.Compile().GetHashCode()
+        | Intrinsic_ s -> s.GetHashCode()
+        | ConcretePath_ p -> p.GetHashCode()
+        | TransientPath_ p -> p.GetHashCode()
+    override this.Equals(other) =
+        match this, other with
+        | Widget_ w1, (:? TypeRefAtom as (Widget_ w2)) ->
+            w1.Compile() = w2.Compile()
+        | Intrinsic_ s1, (:? TypeRefAtom as (Intrinsic_ s2)) ->
+            s1 = s2
+        | ConcretePath_ p1, (:? TypeRefAtom as (ConcretePath_ p2)) ->
+            p1 = p2
+        | TransientPath_ p1, (:? TypeRefAtom as (TransientPath_ p2)) ->
+            p1 = p2
+        | _ -> false
 
 type TypeRefMolecule =
     private
@@ -74,6 +92,40 @@ module TypeRefRender =
                     Nullable = false } ]
             | render -> [ render ]
             )
+    let rec replace (old: TypeRefRender) (new': TypeRefRender) (render: TypeRefRender) =
+        if render = old then replace old new' new'
+        elif render.Kind.IsMolecule_ then
+            let kind =
+                match render.Kind with
+                | TypeRefKind.Molecule_ molecule ->
+                    match molecule with
+                    | TypeRefMolecule.Tuple_ typeRefs ->
+                        typeRefs
+                        |> List.map (replace old new')
+                        |> TypeRefMolecule.Tuple_
+                        |> TypeRefKind.Molecule_
+                    | TypeRefMolecule.Union_ typeRefs ->
+                        typeRefs
+                        |> List.map (replace old new')
+                        |> TypeRefMolecule.Union_
+                        |> TypeRefKind.Molecule_
+                    | TypeRefMolecule.Function_ (parameters, returnType) ->
+                        TypeRefMolecule.Function_ (
+                            parameters
+                            |> List.map (replace old new'),
+                            replace old new' returnType
+                            )
+                        |> TypeRefKind.Molecule_
+                    | TypeRefMolecule.Prefix_ (prefix, args) ->
+                        TypeRefMolecule.Prefix_ (
+                            replace old new' prefix,
+                            args
+                            |> List.map (replace old new')
+                            )
+                        |> TypeRefKind.Molecule_
+                | atom -> atom
+            { render with Kind = kind }
+        else render
     let orNullable (value: bool) (typeRefRender: TypeRefRender) = { typeRefRender with Nullable = value || typeRefRender.Nullable }
     let setNullable (value: bool) (typeRefRender: TypeRefRender) = { typeRefRender with Nullable = value }
     let nullable (typeRefRender: TypeRefRender) = setNullable true typeRefRender
