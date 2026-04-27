@@ -19,6 +19,9 @@ let private resolveBase (ctx: TypeScriptReader) (_xanTag: XanthamTag) (node: Ts.
     let getTypeSymbol (tracer: TagState<XanthamTag> * TagState<GuardTracer>) =
         let tagState, guardState = tracer
         let guard = guardState.Value
+        tagState.Value
+        |> XanthamTag.chainDebug _xanTag
+        |> ignore
         // Check signalCache regardless of guard's Visited/Unvisited state — same shared-symbol
         // issue as resolveTypeBase: a pre-existing guard (Unvisited) may still have its
         // IdentityKey already registered in the cache.
@@ -30,25 +33,74 @@ let private resolveBase (ctx: TypeScriptReader) (_xanTag: XanthamTag) (node: Ts.
             | TagState.Unvisited tag ->
                 pushToStack ctx tag
                 tag.TypeSignal
-    match getSymbol node.typeName with
-    | Some symbol when GuardTracer.has symbol && ctx.signalCache.ContainsKey(GuardTracer.unsafeGet symbol |> _.Value) ->
+    let pushAliases (symbol: Ts.Symbol) =
+        if symbol.flags.HasFlag Ts.SymbolFlags.TypeAlias then
+            symbol.declarations
+            |> Option.iter (
+                _.AsArray
+                >> Array.iter (function
+                    | Patterns.Node.TypeAliasDeclaration node ->
+                        ctx.CreateXanthamTag node
+                        |> fst
+                        |> stackPushAndThen ctx (XanthamTag.chainDebug _xanTag)
+                        |> ignore
+                    | _ -> ()
+                    )
+                )
+    let maybeTypeNameSymbol = getSymbol node.typeName
+    match maybeTypeNameSymbol with
+    | Some symbol when not(symbol.flags.HasFlag(Ts.SymbolFlags.TypeAlias)) && GuardTracer.has symbol && ctx.signalCache.ContainsKey(GuardTracer.unsafeGet symbol |> _.Value) ->
+        XanthamTag.debugLocationAndCommentAndForget
+            "TypeReference.resolveBase"
+            $"Shared symbol (name: {symbol.name}) with flags: {symbol.flags.ToStringArray()}"
+            _xanTag
         let store =
             ctx.signalCache[
                 GuardTracer.unsafeGet symbol
                 |> _.Value
             ]
         TypeSignal.ofKey store.Key
+    | Some symbol when symbol.flags.HasFlag Ts.SymbolFlags.TypeAlias ->
+        XanthamTag.debugLocationAndCommentAndForget
+            "TypeReference.resolveBase"
+            "Type alias"
+            _xanTag
+        symbol.valueDeclaration
+        |> Option.orElse (
+            symbol.declarations
+            |> Option.bind (_.AsArray >> Array.tryHead)
+            )
+        |> Option.map (
+            ctx.CreateXanthamTag
+            >> fst
+            >> stackPushAndThen ctx _.TypeSignal
+            )
+        |> Option.defaultValue (TypeSignal.pending())
     | Some symbol when symbol.flags.HasFlag Ts.SymbolFlags.TypeParameter ->
+        pushAliases symbol
+        XanthamTag.debugLocationAndCommentAndForget
+            "TypeReference.resolveBase"
+            "Type parameter"
+            _xanTag
         unbox<Ts.TypeNode> node.typeName
         |> ctx.checker.getTypeFromTypeNode
         |> ctx.CreateXanthamTag
         |> getTypeSymbol
-    | Some _ ->
+    | Some symbol ->
+        XanthamTag.debugLocationAndCommentAndForget
+            "TypeReference.resolveBase"
+            $"Found symbol: {symbol.name}"
+            _xanTag
+        pushAliases symbol
         unbox<Ts.Node> node.typeName
         |> ctx.checker.getTypeAtLocation
         |> ctx.CreateXanthamTag
         |> getTypeSymbol
     | None ->
+        XanthamTag.debugLocationAndCommentAndForget
+            "TypeReference.resolveBase"
+            "No symbol found"
+            _xanTag
         ctx.checker.getTypeFromTypeNode node
         |> ctx.CreateXanthamTag
         |> getTypeSymbol
@@ -94,14 +146,42 @@ let private resolveTypeArgumentsFromType (ctx: TypeScriptReader) (_xanTag: Xanth
         else [||]
     else [||]
 
+let private resolveTypeArgumentsFromNode (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.TypeReferenceNode) =
+    node.typeArguments
+    |> Option.map _.AsArray
+    |> Option.defaultValue [||]
+    |> Array.map (
+        ctx.CreateXanthamTag
+        >> fst
+        >> stackPushAndThen ctx (
+            XanthamTag.chainDebug xanTag
+            >> _.TypeSignal
+            )
+        )
+
 let fromNode (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.TypeReferenceNode) =
+    XanthamTag.withDebug (fun _ ->
+        Log.info <| node.getText()
+        ) xanTag
+    |> ignore
     // Resolve the instantiated type once; shared by TypeArguments and ResolvedType
     // to avoid redundant checker calls.
     let resolvedType = ctx.checker.getTypeFromTypeNode node
     let resolvedTypeTag = ctx.CreateXanthamTag resolvedType
+    resolvedTypeTag
+    |> fst |> _.Value
+    |> XanthamTag.chainDebug xanTag
+    |> ignore
     {
         STypeReferenceBuilder.Type = resolveBase ctx xanTag node
-        TypeArguments = resolveTypeArgumentsFromType ctx xanTag resolvedType
+        TypeArguments =
+            // if the resolved type is not a type reference, then the
+            // type arguments are already resolved and will be ephemereal.
+            // We don't want to lose the information when we're not
+            // not looking at the resolved type.
+            match resolveTypeArgumentsFromType ctx xanTag resolvedType with
+            | [||] -> resolveTypeArgumentsFromNode ctx xanTag node
+            | args -> args
         ResolvedType =
             // Only emit a ResolvedType when the instantiated type is a distinct identity
             // from the tag itself (avoids self-referential noise).
