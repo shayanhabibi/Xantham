@@ -8,6 +8,13 @@
         "fable"
       ],
       "rollForward": false
+    },
+    "fsdocs-tool": {
+      "version": "22.0.0",
+      "commands": [
+        "fsdocs"
+      ],
+      "rollForward": false
     }
   }
 }

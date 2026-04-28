@@ -16,4 +16,15 @@ rampant.
     <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Xantham.Fable.Tests'">
         <IsExcludedFromRootBuild>true</IsExcludedFromRootBuild>
     </PropertyGroup>
+    
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <FsDocsAllowExecutableProject>true</FsDocsAllowExecutableProject>
+        <RepositoryUrl>https://github.com/shayanhabibi/Xantham</RepositoryUrl>
+        <FsDocsLicenseLink>https://github.com/shayanhabibi/Xantham/blob/master/LICENSE.md</FsDocsLicenseLink>
+        <FsDocsReleaseNotesLink>https://github.com/shayanhabibi/Xantham/blob/master/RELEASE_NOTES.md</FsDocsReleaseNotesLink>
+        <PackageProjectUrl>https://shayanhabibi.github.io/Xantham</PackageProjectUrl>
+        <FsDocsLogoSource>content/assets/favicon-32x32.png</FsDocsLogoSource>
+        <FsDocsFaviconSource>content/assets/favicon.ico</FsDocsFaviconSource>
+    </PropertyGroup>
 </Project>

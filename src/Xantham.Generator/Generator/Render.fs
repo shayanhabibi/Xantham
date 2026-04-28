@@ -29,7 +29,9 @@ let main argv =
                      | _ -> id
                  Customisation.Interceptors.IgnorePathRender.Source = function
                      | QualifiedNamePart.Normal(text)
-                     | QualifiedNamePart.Abnormal(text,_) -> text.Contains("babel", StringComparison.OrdinalIgnoreCase)
+                     | QualifiedNamePart.Abnormal(text,_) ->
+                         text.Contains("babel", StringComparison.OrdinalIgnoreCase)
+                         || text.Contains("typescript", StringComparison.OrdinalIgnoreCase)
                  Customisation.Interceptors.Paths.TypePaths = fun ctx typ s ->
                      match typ with
                      | Choice1Of4 { IsLibEs = true }

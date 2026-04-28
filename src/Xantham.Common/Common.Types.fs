@@ -3,6 +3,9 @@
 open Thoth.Json
 open Fable.Core
 [<Erase>]
+/// <summary>
+/// A unique identifier for a type.
+/// </summary>
 type TypeKey = TypeKey of int
 module TypeKey =
     let inline createWith (i: int) = TypeKey i
@@ -10,6 +13,9 @@ module TypeKey =
     let decode: Decoder<TypeKey> = Decode.int >> unbox
 #else
 open Thoth.Json.Net
+/// <summary>
+/// A unique identifier for a type.
+/// </summary>
 type TypeKey = System.Int32
 module TypeKey =
     let inline createWith (i: int) = i
@@ -20,11 +26,13 @@ module TypeKey =
 /// <summary>
 /// Indicates a type can be a member of a <c>TsOverloadableConstruct</c> collection.
 /// </summary>
+/// <category>Auxiliary</category>
 type IOverloadable = interface end
 
 /// <summary>
 /// Represents a non-empty collection of overloads of a type.
 /// </summary>
+/// <category>Container</category>
 type TsOverloadableConstruct<'T when 'T:>IOverloadable and 'T : equality and 'T : comparison> =
     | NoOverloads of 'T
     | Overloaded of 'T Set
@@ -66,6 +74,10 @@ type TsOverloadableConstruct<'T when 'T:>IOverloadable and 'T : equality and 'T 
     member this.Values = this.ToArray()
 
 
+/// <summary>
+/// DU of TS comment tag types.
+/// </summary>
+/// <category>Auxiliary</category>
 [<RequireQualifiedAccess>]
 type TsComment =
     | Summary of string list
@@ -78,7 +90,10 @@ type TsComment =
     | TypeParam of typeName: string * content: string option
     | Throws of string
 
-        
+/// <summary>
+/// DU of TS literal types.
+/// </summary>
+/// <category>Type Representation</category>
 [<RequireQualifiedAccess>]
 type TsLiteral =
     | String of value: string
@@ -98,6 +113,7 @@ type TsLiteral =
 /// // GlueEnumCase for "Red" with value 0
 /// </code>
 /// </example>
+/// <category>Type Representation</category>
 type TsEnumCase = {
     Parent: TypeKey
     Source: string option
@@ -116,6 +132,7 @@ type TsEnumCase = {
 /// export enum Direction { Up, Down }
 /// </code>
 /// </example>
+/// <category>Type Representation</category>
 type TsEnumType = {
     Source: string option
     FullyQualifiedName: string list
@@ -133,6 +150,7 @@ type TsEnumType = {
 /// export const answer: number = 42;
 /// </code>
 /// </example>
+/// <category>Declaration Representation</category>
 type TsVariable = {
     Source: string option
     FullyQualifiedName: string list
@@ -150,6 +168,7 @@ type TsVariable = {
 /// function f(x: number, y?: string, ...rest: boolean[]) {}
 /// </code>
 /// </example>
+/// <category>Declaration Representation</category>
 type TsParameter = {
     Name: string
     IsOptional: bool
@@ -167,6 +186,7 @@ type TsParameter = {
 /// </code>
 /// </example>
 /// </summary>
+/// <category>Type Representation</category>
 type TsTypeParameter = {
     Name: string
     Constraint: TypeKey option
@@ -178,6 +198,7 @@ type TsTypeParameter = {
 /// A tuple to be used by types which inline <c>TsTypeParameter</c>s rather than referencing by TypeKey.
 /// The tuple is used to preserve information for the container type that inlines them.
 /// </summary>
+/// <category>Auxiliary</category>
 type InlinedTsTypeParameter = TypeKey * TsTypeParameter
 
 /// <summary>
@@ -189,6 +210,7 @@ type InlinedTsTypeParameter = TypeKey * TsTypeParameter
 /// class C { static bar(): void {} }
 /// </code></example>
 /// </summary>
+/// <category>Declaration Representation</category>
 type TsMethod = {
     Name: string
     Parameters: TsParameter list
@@ -205,6 +227,7 @@ type TsMethod = {
 /// interface FnLike { (x: number, y: number): number }
 /// </code></example>
 /// </summary>
+/// <category>Declaration Representation</category>
 type TsCallSignature = {
     Documentation: TsComment list
     Parameters: TsParameter list
@@ -218,6 +241,7 @@ type TsCallSignature = {
 /// interface CtorLike { new (x: number): Date }
 /// </code></example>
 /// </summary>
+/// <category>Declaration Representation</category>
 type TsConstructSignature = {
     Type: TypeKey
     Parameters: TsParameter list

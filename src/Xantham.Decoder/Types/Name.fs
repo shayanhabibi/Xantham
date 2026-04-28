@@ -7,56 +7,85 @@ open Fantomas.FCS.Syntax.PrettyNaming
 /// Utility type for working with names or manipulating the
 /// names of types and members while preserving the original source.
 /// </summary>
+/// <category index="3">Names and Casing</category>
 [<Struct>]
 type Name =
     | Modified of original: string * modified: string
     | Source of original: string
+    /// <summary>The original source string regardless of whether the name has been modified.</summary>
     member this.ValueOrSource =
         match this with
         | Modified(original = source) | Source(source) -> source
+    /// <summary>The modified string if the name has been modified; otherwise the original source string.</summary>
     member this.ValueOrModified =
         match this with
         | Modified(modified = modified) | Source(modified) -> modified
+    /// <summary>Create an unmodified <c>Source</c> name from the given string. No normalization is applied.</summary>
     static member Create(value: string) = Source value
+    /// <summary>Create a <c>Modified</c> name from explicit original and modified strings.</summary>
     static member Create(original: string, modified: string) = Modified(original, modified)
+    /// <summary>Create a <c>Modified</c> name from explicit original and modified strings.</summary>
     static member CreateModified(original: string, modified: string) = Modified(original, modified)
 
 
-/// Provide static typing over the casing of a name
+/// <summary>Provide static typing over the casing of a name</summary>
+/// <category index="3">Names and Casing</category>
 [<MeasureAnnotatedAbbreviation>] type Name<[<Measure>] 'u> = Name
 
 /// <summary>
 /// This provides unsafe means of removing/adding measures to a <c>Name</c>.
 /// Use with caution, as they are not associated with any transformations of the underlying strings.
 /// </summary>
+/// <category index="3">Names and Casing</category>
 module Case =
-    /// Measure to signify Pascal casing.
+    /// <summary>Measure to signify Pascal casing.</summary>
+    /// <category index="3">Names and Casing</category>
     type [<Measure>] pascal
-    /// Measure to signify camel casing.
+    /// <summary>Measure to signify camel casing.</summary>
+    /// <category index="3">Names and Casing</category>
     type [<Measure>] camel
+    /// <summary>
     /// Measure to signify the name is modified to represent the module interface.
     /// This is used to distinguish between the module interface and the module itself.
+    /// </summary>
+    /// <category index="3">Names and Casing</category>
     type [<Measure>] modulename
-    /// Measure to signify a type parameter (prefixed with a single quote).
+    /// <summary>Measure to signify a type parameter (prefixed with a single quote).</summary>
+    /// <category index="3">Names and Casing</category>
     type [<Measure>] typar
 
+    /// <summary>Tag a <c>Name</c> with the given casing measure. Performs no string transformation.</summary>
     let inline addMeasure<[<Measure>] 'u> (name: Name): Name<'u> = unbox name
+    /// <summary>Strip the casing measure from a <c>Name&lt;_&gt;</c>.</summary>
     let inline withoutMeasure (name: Name<'u>): Name = unbox name
+    /// <summary>Re-tag a <c>Name&lt;_&gt;</c> with a different casing measure. Performs no string transformation.</summary>
     let inline unboxMeasure (name: Name<'u>): Name<'t> = unbox name
+    /// <summary>Tag a <c>Name</c> with the <c>pascal</c> casing measure.</summary>
     let inline addPascalMeasure (name: Name) = addMeasure<pascal> name
+    /// <summary>Tag a <c>Name</c> with the <c>camel</c> casing measure.</summary>
     let inline addCamelMeasure (name: Name) = addMeasure<camel> name
+    /// <summary>Tag a <c>Name</c> with the <c>modulename</c> casing measure.</summary>
     let inline addModuleMeasure (name: Name) = addMeasure<modulename> name
+    /// <summary>Tag a <c>Name</c> with the <c>typar</c> casing measure.</summary>
     let inline addTyparMeasure (name: Name) = addMeasure<typar> name
     
 /// <summary>
-/// Struct union for runtime safe access to typed name casings.
+/// A <c>Name</c> tagged with one of the supported casing measures (Pascal, camel,
+/// module, or typar). Useful as an envelope when the casing flavour is decided
+/// dynamically rather than known statically.
 /// </summary>
+/// <category index="3">Names and Casing</category>
 [<Struct; RequireQualifiedAccess>]
 type CasedName =
+    /// A name carrying the Pascal-case measure (e.g. type, module, or class names).
     | Pascal of Name<Case.pascal>
+    /// A name carrying the camelCase measure (e.g. member or value names).
     | Camel of Name<Case.camel>
+    /// A name carrying the module-name measure.
     | Module of Name<Case.modulename>
+    /// A name carrying the type-parameter (typar) measure.
     | Typar of Name<Case.typar>
+    /// <summary>The underlying untyped <c>Name</c>, dropping the casing measure.</summary>
     member inline this.Value =
         match this with
         | Pascal name -> unbox<Name> name
@@ -64,8 +93,12 @@ type CasedName =
         | Module name -> unbox name
         | Typar name -> unbox name
 
+/// <summary></summary>
+/// <category index="3">Names and Casing</category>
 module Name =
     module Normalization =
+        /// <summary></summary>
+        /// <category index="3">Names and Casing</category>
         type Setting =
             | Backticks
             | SafeCustom of (string -> string)
@@ -328,21 +361,33 @@ module Name =
         let inline isSource (name: Name<'u>) = Case.withoutMeasure name |> _.IsSource
     /// Provides means for working with Pascal case measure annotated names directly.
     module Pascal =
+        /// <summary>Convert a <c>Name</c> to PascalCase and tag it with the <c>pascal</c> measure.</summary>
         let fromName = sourcePascalCase >> Case.addPascalMeasure
+        /// <summary>Normalize a string into a <c>Name&lt;pascal&gt;</c>.</summary>
         let create = create >> fromName
+        /// <summary>Re-cast any cased name to a <c>Name&lt;pascal&gt;</c>, applying PascalCase normalization.</summary>
         let inline fromCase name = Case.withoutMeasure name |> fromName
     /// Provides means for working with Camel case measure annotated names directly.
     module Camel =
+        /// <summary>Convert a <c>Name</c> to camelCase and tag it with the <c>camel</c> measure.</summary>
         let fromName = sourceCamelCase >> Case.addCamelMeasure
+        /// <summary>Normalize a string into a <c>Name&lt;camel&gt;</c>.</summary>
         let create = create >> fromName
+        /// <summary>Re-cast any cased name to a <c>Name&lt;camel&gt;</c>, applying camelCase normalization.</summary>
         let inline fromCase name = Case.withoutMeasure name |> fromName
     /// Provides means for working with Module measure annotated names directly.
     module Module =
+        /// <summary>Map a <c>Name</c> into a module-name shape and tag it with the <c>modulename</c> measure.</summary>
         let fromName = sourceMapToModuleName >> Case.addModuleMeasure
+        /// <summary>Normalize a string into a <c>Name&lt;modulename&gt;</c>.</summary>
         let create = create >> fromName
+        /// <summary>Re-cast any cased name to a <c>Name&lt;modulename&gt;</c>, applying module-name normalization.</summary>
         let inline fromCase name = Case.withoutMeasure name |> fromName
     /// Provides means for working with Typar measure annotated names directly.
     module Typar =
+        /// <summary>Normalize a <c>Name</c> for use as a TypeScript-style type parameter and tag it with the <c>typar</c> measure.</summary>
         let fromName = sourceNormalizeForTypeParameter >> Case.addTyparMeasure
+        /// <summary>Normalize a string into a <c>Name&lt;typar&gt;</c>.</summary>
         let create = create >> fromName
+        /// <summary>Re-cast any cased name to a <c>Name&lt;typar&gt;</c>, applying typar normalization.</summary>
         let inline fromCase name = Case.withoutMeasure name |> fromName

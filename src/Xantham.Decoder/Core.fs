@@ -63,6 +63,7 @@ module Decoder =
     /// <summary>
     /// Settings for the Decoder.
     /// </summary>
+    /// <category index="6">Runtime</category>
     type Settings = {
         /// <summary>
         /// The path to the <c>.json</c> file to decode.

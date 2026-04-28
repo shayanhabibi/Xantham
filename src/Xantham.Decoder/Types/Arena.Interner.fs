@@ -57,11 +57,23 @@ open Xantham.Decoder
 open Xantham.Decoder.Types
 open Xantham.Decoder.Types.Graph
 
+/// <summary>
+/// Bit flags describing structural anomalies in a single segment of a fully
+/// qualified TypeScript name (e.g. embedded quotation marks, slashes, or periods).
+/// </summary>
+/// <category index="4">Resolved Type Graph</category>
+[<System.Flags>]
 type QualifiedNamePartDiagnostic =
     | ContainsQuotationMarks = (1 <<< 0)
     | ContainsSlash = (1 <<< 1)
     | ContainsPeriod = (1 <<< 2)
 
+/// <summary>
+/// A single segment of a fully qualified TypeScript name. Tagged either as
+/// <c>Normal</c> (no anomalies) or <c>Abnormal</c> together with diagnostic flags
+/// indicating which anomalies the segment contains.
+/// </summary>
+/// <category index="4">Resolved Type Graph</category>
 [<Struct>]
 type QualifiedNamePart =
     | Abnormal of part: string * diagnostic: QualifiedNamePartDiagnostic
@@ -71,6 +83,12 @@ type QualifiedNamePart =
         | Abnormal(part, _)
         | Normal(part) -> part
 
+/// <summary>
+/// The resolved (lazy-graph) form of a structural TypeScript type. Each case
+/// directly references its dependencies (rather than carrying <c>TypeKey</c>s),
+/// with cycles broken by the surrounding <see cref="T:LazyResolvedType"/> wrappers.
+/// </summary>
+/// <category index="4">Resolved Type Graph</category>
 type [<RequireQualifiedAccess>] ResolvedType =
     | GlobalThis
     | Conditional of ConditionalType
@@ -95,6 +113,11 @@ type [<RequireQualifiedAccess>] ResolvedType =
     | Optional of TypeReference
     | Substitution of SubstitutionType
 
+/// <summary>
+/// The resolved (lazy-graph) form of a top-level TypeScript export declaration.
+/// Holds direct references into the resolved type graph rather than <c>TypeKey</c>s.
+/// </summary>
+/// <category index="4">Resolved Type Graph</category>
 and [<RequireQualifiedAccess>] ResolvedExport =
     | Variable of Variable
     | Interface of Interface
@@ -104,14 +127,23 @@ and [<RequireQualifiedAccess>] ResolvedExport =
     | Function of Function list
     | Module of Module
 
+/// <summary>
+/// Pairing of raw input data (<typeparamref name="'RawData"/>, typically a <c>TypeKey</c>)
+/// with a lazily computed resolved value (<typeparamref name="'LazyResult"/>).
+/// Used to defer resolution of cyclic dependencies in the type graph.
+/// </summary>
+/// <category index="4">Resolved Type Graph</category>
 and LazyContainer<'RawData, 'LazyResult> = {
+    /// The raw input value (typically a <c>TypeKey</c>) that produced the lazy result.
     Data: 'RawData
+    /// The lazy resolution of the raw data into a richer object graph value.
     Result: Lazy<'LazyResult>
 } with
     static member inline DummyTypeKey = TypeKindPrimitive.Unknown.TypeKey
     static member CreateLazyTypeKeyDummy<'LazyResult> (value: Lazy<'LazyResult>): LazyContainer<TypeKey, 'LazyResult> = { Data = LazyContainer<_,_>.DummyTypeKey; Result = value }
     static member CreateTypeKeyDummy<'LazyResult> (value: 'LazyResult): LazyContainer<TypeKey, 'LazyResult> = { Data = LazyContainer<_,_>.DummyTypeKey; Result = Lazy.CreateFromValue value }
     static member inline CreateFromValue<'RawData, 'LazyResult> (value: 'LazyResult): LazyContainer<'RawData, 'LazyResult> = { Data = Unchecked.defaultof<_>; Result = Lazy.CreateFromValue value }
+    /// <summary>Force and return the lazy result.</summary>
     member inline this.Value with get() = this.Result.Value
     member inline this.IsValueCreated with get() = this.Result.IsValueCreated
     member inline this.Raw with get() = this.Data
@@ -362,11 +394,24 @@ and [<ReferenceEquality>] SubstitutionType = {
     Constraint: LazyResolvedType
 }
 
+/// <summary>
+/// Lazily-resolved object graph view of a <c>DecodedResult</c>. Following a
+/// reference forces a <c>Lazy&lt;ResolvedType&gt;</c>, materialising a node on
+/// demand. Cycles are broken by lazy boundaries (construction never forces
+/// outgoing lazies). Exports are shelled eagerly; nested types are deferred.
+/// </summary>
+/// <category index="4">Resolved Type Graph</category>
 type ArenaInterner = {
+    /// Resolve a <c>TypeKey</c> to a structural <see cref="T:ResolvedType"/>.
     ResolveType: TypeKey -> ResolvedType
+    /// Resolve a <c>TypeKey</c> to a <see cref="T:ResolvedExport"/> if it identifies an
+    /// exported declaration; otherwise return the structural type as <c>Error</c>.
     ResolveExport: TypeKey -> Result<ResolvedExport, ResolvedType>
+    /// Cache of all resolved structural types keyed by their <c>TypeKey</c>.
     ResolvedTypes: Dictionary<TypeKey, ResolvedType>
+    /// Cache of all resolved export declarations keyed by their <c>TypeKey</c>.
     ResolvedExports: Dictionary<TypeKey, ResolvedExport>
+    /// Map from source module path to the list of resolved exports declared in that module.
     ExportMap: Map<string, ResolvedExport list>
     /// <summary>
     /// WARNING: Evaluation of the graph can be expensive.<br/>
@@ -394,7 +439,16 @@ module private QualifiedNamePart =
             | diagnostic when diagnostic = enum 0 -> QualifiedNamePart.Normal value
             | diagnostic -> QualifiedNamePart.Abnormal(value, diagnostic)
 
+/// <summary>
+/// Functions for constructing and walking an <see cref="T:ArenaInterner"/>.
+/// </summary>
 module ArenaInterner =
+    /// <summary>
+    /// Build an <see cref="T:ArenaInterner"/> from a <c>DecodedResult</c>.
+    /// Exports are shelled into their resolved form eagerly; structural types
+    /// referenced from those exports are resolved lazily on first access.
+    /// </summary>
+    /// <param name="decodedResult">The decoded type/export maps to lift into the lazy graph.</param>
     let create (decodedResult: DecodedResult) =
         let typeMap = decodedResult.TypeMap
         let exportMap = decodedResult.ExportMap
@@ -772,4 +826,8 @@ module ArenaInterner =
             ResolvedExports = Dictionary resolvedExports
         }
 
+/// <summary>
+/// Active pattern for ergonomic forcing of a <see cref="T:LazyContainer`2"/>:
+/// matching <c>Resolve t</c> binds <c>t</c> to the materialised lazy result.
+/// </summary>
 let inline (|Resolve|) (value: LazyContainer<_, 'T>) = value.Value

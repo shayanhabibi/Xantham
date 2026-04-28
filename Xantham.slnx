@@ -10,11 +10,49 @@
     <File Path=".claude/rules/common.types.md" />
     <File Path=".claude/rules/generator.md" />
   </Folder>
+  <Folder Name="/ai/skills/" />
   <Folder Name="/ai/skills/spec-tests/">
     <File Path=".claude/skills/spec-tests/SKILL.md" />
   </Folder>
+<!--          DOCUMENTATION         -->
   <Folder Name="/docs/">
-    <File Path="docs/README.md" />
+    <File Path="docs/index.md" />
+    <File Path="docs/_head.html" />
+  </Folder>
+  <Folder Name="/docs/Overview/">
+    <File Path="docs/Overview/overview.md" />
+  </Folder>
+  <Folder Name="/docs/Documentation/" />
+  <Folder Name="/docs/content/">
+    <File Path="docs/content/fsdocs-theme.css" />
+  </Folder>
+  <Folder Name="/docs/Xantham.Fable/">
+    <File Path="docs/Xantham.Fable/Architecture.md" />
+    <File Path="docs/Xantham.Fable/GuardedProperties.md" />
+    <File Path="docs/Xantham.Fable/QuickStart.md" />
+    <File Path="docs/Xantham.Fable/README.md" />
+    <File Path="docs/Xantham.Fable/SignalArchitecture.md" />
+  </Folder>
+  <Folder Name="/docs/Xantham.Decoder/">
+    <File Path="docs/Xantham.Decoder/arena-interner.md" />
+    <File Path="docs/Xantham.Decoder/code-keys.md" />
+    <File Path="docs/Xantham.Decoder/decoder.fsx" />
+    <File Path="docs/Xantham.Decoder/graph.md" />
+    <File Path="docs/Xantham.Decoder/index.md" />
+    <File Path="docs/Xantham.Decoder/names.fsx" />
+    <File Path="docs/Xantham.Decoder/runtime.fsx" />
+  </Folder>
+  <Folder Name="/docs/Xantham.Generator/">
+    <File Path="docs/Xantham.Generator/generator-context.md" />
+    <File Path="docs/Xantham.Generator/index.md" />
+    <File Path="docs/Xantham.Generator/paths.md" />
+    <File Path="docs/Xantham.Generator/pipeline.fsx" />
+    <File Path="docs/Xantham.Generator/typeref-render.md" />
+  </Folder>
+  <Folder Name="/docs/content/assets/">
+    <File Path="docs/content/assets/favicon-16x16.png" />
+    <File Path="docs/content/assets/favicon-32x32.png" />
+    <File Path="docs/content/assets/favicon.ico" />
   </Folder>
   <Folder Name="/misc/sln build/">
     <File Path="Directory.Build.props" />

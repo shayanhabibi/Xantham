@@ -10,9 +10,19 @@ open FSharp.Control
 open Xantham
 open Xantham.Decoder
 
+/// <summary>
+/// A dependency graph of types extracted from a <c>DecodedResult</c>.
+/// Provides reverse-lookup, cycle detection, and degree tracking for
+/// downstream ordering or topological analysis.
+/// </summary>
+/// <category index="5">Dependency Graph</category>
 type Graph = {
+    /// For each <c>TypeKey</c>, the set of keys that depend on it (i.e. its dependents).
     Dependents: FrozenDictionary<TypeKey, FrozenSet<TypeKey>>
+    /// Cycles in the graph as <c>(typeKey, cycleParticipant)</c> pairs:
+    /// each entry indicates a key that participates in a dependency cycle with another key.
     Cycles: FrozenDictionary<TypeKey, TypeKey>
+    /// In-degree per <c>TypeKey</c> — the count of outgoing dependencies from each node.
     Degrees: FrozenDictionary<TypeKey, int>
 }
 
@@ -78,6 +88,14 @@ module Graph =
             if (snd typeParameter).Default.IsSome then (snd typeParameter).Default.Value
         ]
 
+    /// <summary>
+    /// Build a <see cref="T:Graph"/> from a <c>DecodedResult</c>.
+    /// </summary>
+    /// <param name="includeCheckExtendsConditional">
+    /// When <c>true</c>, conditional types contribute their <c>Check</c>/<c>Extends</c> branches
+    /// as edges; when <c>false</c>, only the <c>True</c>/<c>False</c> branches are followed.
+    /// </param>
+    /// <param name="decodedResult">The decoded type/export maps to walk.</param>
     let create includeCheckExtendsConditional (decodedResult: DecodedResult) =
         let dependents = ConcurrentDictionary<TypeKey, ConcurrentBag<TypeKey>>()
         let degrees = ConcurrentDictionary<TypeKey, int>()

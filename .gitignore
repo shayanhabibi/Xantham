@@ -1,5 +1,12 @@
+
 bin/
 obj/
+
+# FSharp.Formatting
+tmp/
+output/
+.fsdocs/
+
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
