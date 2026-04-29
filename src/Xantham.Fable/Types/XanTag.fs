@@ -291,28 +291,40 @@ module XanthamTag =
     /// Sets the <c>Debug</c> flag to true on <paramref name="tag"/>.
     /// </summary>
     /// <param name="tag"></param>
-    let inline setDebug (tag: XanthamTag) =
+    /// <param name="condition"></param>
+    let inline setDebug ([<InlineIfLambda>] condition: XanthamTag -> bool) (tag: XanthamTag) =
+        #if FAIL_ON_DEBUG_TRACKING
+        failwith "Debug tracking activated"
+        #endif
         #if DEBUG
-        tag.Debug <- true
+        if condition tag then
+            tag.Debug <- true
         #endif
         tag
-    let inline setDebugForReason (reason: string) (tag: XanthamTag) =
+    let inline setDebugForReason (reason: string) ([<InlineIfLambda>] condition: XanthamTag -> bool) (tag: XanthamTag) =
+        #if FAIL_ON_DEBUG_TRACKING
+        failwith "Debug tracking activated"
+        #endif
         #if DEBUG
-        if not tag.Debug then
+        if not tag.Debug && condition tag then
             tag.Debug <- true
             chalk.white.Invoke "[TRACKING] " + $"Tracking {tag.IdentityKey}" + "\n           Tracking Reason: " + chalk.italic.Invoke reason + "\n           Tracking Id: " + chalk.yellow.Invoke $"""[{tag.DebugId}]"""
             |> Log.debug
         #endif
         tag
-    let inline setDebugForReasonOr (onFail: string) (reason: string) (tag: XanthamTag) =
+    let inline setDebugForReasonOr (onFail: string) (reason: string) ([<InlineIfLambda>] condition: XanthamTag -> bool) (tag: XanthamTag) =
+        #if FAIL_ON_DEBUG_TRACKING
+        failwith "Debug tracking activated"
+        #endif
         #if DEBUG
-        if not tag.Debug then
-            tag.Debug <- true
-            chalk.white.Invoke "[TRACKING] " + $"Tracking {tag.IdentityKey}" + "\n           Tracking Reason: " + chalk.italic.Invoke reason + "\n           Tracking Id: " + chalk.yellow.Invoke $"""[{tag.DebugId}]"""
-            |> Log.debug
-        else
-            chalk.gray.Invoke "[TRACKING] " + $"Tried tracking {tag.IdentityKey}" + "\n           Tracking Reason: " + chalk.italic.Invoke onFail + "\n           Known tracking id: " + chalk.gray.Invoke $"""[{tag.DebugId}]"""
-            |> Log.debug
+        if condition tag then
+            if not tag.Debug then
+                tag.Debug <- true
+                chalk.white.Invoke "[TRACKING] " + $"Tracking {tag.IdentityKey}" + "\n           Tracking Reason: " + chalk.italic.Invoke reason + "\n           Tracking Id: " + chalk.yellow.Invoke $"""[{tag.DebugId}]"""
+                |> Log.debug
+            else
+                chalk.gray.Invoke "[TRACKING] " + $"Tried tracking {tag.IdentityKey}" + "\n           Tracking Reason: " + chalk.italic.Invoke onFail + "\n           Known tracking id: " + chalk.gray.Invoke $"""[{tag.DebugId}]"""
+                |> Log.debug
         #endif
         tag
             
@@ -347,7 +359,7 @@ module XanthamTag =
         if parent <> child then
             withDebug (fun _ ->
                 let debugIdParent = chalk.yellow.Invoke $"[{parent.DebugId}]"
-                setDebugForReasonOr $"Parent {debugIdParent} attempted to chain" $"Parent {debugIdParent} chained debug" child |> ignore) parent
+                setDebugForReasonOr $"Parent {debugIdParent} attempted to chain" $"Parent {debugIdParent} chained debug" (fun _ -> true) child |> ignore) parent
             |> ignore
         #endif
         child

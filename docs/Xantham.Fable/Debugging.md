@@ -45,10 +45,12 @@ short identifier rendered in yellow brackets in every trace line, e.g.
 ### Turning tracing on
 
 ```fsharp
-XanthamTag.setDebug              : XanthamTag -> XanthamTag
-XanthamTag.setDebugForReason     : reason:string -> XanthamTag -> XanthamTag
-XanthamTag.setDebugForReasonOr   : onFail:string -> reason:string -> XanthamTag -> XanthamTag
+XanthamTag.setDebug              : condition:(XanthamTag -> bool) -> XanthamTag -> XanthamTag
+XanthamTag.setDebugForReason     : reason:string -> condition:(XanthamTag -> bool) -> XanthamTag -> XanthamTag
+XanthamTag.setDebugForReasonOr   : onFail:string -> reason:string -> condition:(XanthamTag -> bool) -> XanthamTag -> XanthamTag
 ```
+
+When the condition lambda returns true:
 
 * `setDebug` flips the flag silently.
 * `setDebugForReason` flips the flag *and* emits a one-line `[TRACKING]`
@@ -66,8 +68,15 @@ node
 |> XanthamTag.Create checker
 |> fst
 |> TagState.value
-|> XanthamTag.setDebugForReason "User reported missing TsType for Promise<T>"
+|> XanthamTag.setDebugForReason "User reported missing TsType for Promise<T>" (fun _ -> true)
 ```
+
+> The public API forces predicate usage so that CI can automatically detect
+> if a commit included usage of `setDebug-` variants using a preprocessor
+> condition which fails when the function is called (regardless of the condition).
+> 
+> This simply requires building and usage of the library with the `FAIL_ON_DEBUG_TRACKING` 
+> property set.
 
 ### Conditional execution
 
@@ -159,8 +168,11 @@ relevant `Reading/*.fs` handler:
 // in Reading/TypeReference.fs
 let xanTag, guard = XanthamTag.Create(typ, ctx.Checker)
 let xanTag = xanTag |> TagState.value
-if (xanTag.IdentityKey.ToString()).Contains "Promise" then
-    XanthamTag.setDebugForReason "Repro for #42: Promise<T> missing" xanTag |> ignore
+XanthamTag.setDebugForReason
+  "Repro for #42: Promise<T> missing"
+  _.IdentityKey.ToString().Contains("Promise")
+  xanTag
+|> ignore
 ```
 
 Remove the conditional once the bug is fixed &mdash; the helper itself is a
@@ -179,7 +191,7 @@ let dispatch (ctx: TypeScriptReader) (tag: XanthamTag) (node: MyNode) =
     ...
 ```
 
-### 3. Use one-shot for hot paths
+### 3. Use one-shots for hot paths or effects
 
 Cache lookups and the `runReader` stack-pop loop visit the same tag many
 times. Use `withDebugOneShot` with a stable key to log the *first* visit
@@ -195,6 +207,22 @@ tag
             t)
 ```
 
+You can also subscribe to changes in signals via effects:
+
+```fsharp
+tag
+|> XanthamTag.withDebugOneShot
+    "first-pass:register"
+    (fun _ ->
+        Signal.effect (fun () ->
+            GuardedData.TypeSignal.getOrDefault tag
+            |> _.Value
+            |> sprintf "Type signal set: %A"
+            |> XanthamTag.debugLocationAndForget
+            |> funApply tag)
+        |> ignore)
+```
+
 ### 4. Cross-reference with the standard log markers
 
 The reader emits the build-wide markers `[CIRCREF]` (circular ref) and
@@ -208,6 +236,8 @@ above it usually point at the offending push.
 ad-hoc seed predicates before committing; leave `chainDebug` and the
 `debugLocation*` calls in place &mdash; they are zero-cost when no tag is
 seeded.
+
+
 
 ## Build configuration
 
