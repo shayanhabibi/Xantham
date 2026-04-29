@@ -71,13 +71,23 @@ src/
 The fundamental unit of data association in Xantham.Fable:
 
 ```fsharp
-// A tag represents an AST node with associated metadata
-type XanthamTag = {
-    Value: XanTagKind        // Type of node being processed
-    IdentityKey: IdentityKey // Unique identifier
-    // ... other metadata
-}
+// XanthamTag is a Tracer<XanTagKind> with an identity Guard, attached
+// directly to the underlying TS object via well-known JS symbol keys.
+type XanthamTag =
+    inherit GuardedTracer<XanTagKind, GuardTracer>
+
+// Created via three SRTP overloads dispatching on Ts.Node / Ts.Type / Ts.Symbol:
+let tagState, guardState = XanthamTag.Create(node, checker)
+let tag         : XanthamTag = TagState.value tagState
+let identityKey : IdentityKey = tag.IdentityKey   // tag.Guard.Value
+let xanTagKind  : XanTagKind  = tag.Value         // discriminated kind
 ```
+
+`tag.Value` is the `XanTagKind` discriminator (TypeDeclaration, MemberDeclaration,
+TypeNode, JSDocTag, ...). `tag.IdentityKey` reads through to the guard's
+identity (`Symbol`, `AliasSymbol`, `DeclarationPosition`, or `Id TypeKey`).
+The tag also exposes a typed property bag and a separate keyed bag stored on
+its guard &mdash; see [Guarded Properties](GuardedProperties.html).
 
 #### 2. Signal-based Architecture
 Xantham.Fable uses a sophisticated signal system for reactive data flow:
@@ -140,13 +150,17 @@ let read (reader: TypeScriptReader) : EncodedResult =
 `Types/Signal.fs` - The reactive system at the heart of data flow:
 
 ```fsharp
-// Reactive signal with dependency tracking
-type Signal<'T> = {
-    Value: 'T                // Current value
-    Invalidated: IEvent<unit> // Dependency changes
-    // ... methods for set, compute, etc.
-}
+// Unified reactive signal — covers source and computed signals behind one surface.
+type Signal<'a> =
+    member Value       : 'a              // re-computes if dirty; registers as dep in auto-scope
+    member Invalidated : IEvent<unit>    // fires once per dirty transition
+    member Set         : 'a -> unit      // source signals only; equality-checked
+    member FulfillWith : (unit -> 'a) -> unit   // retrofit a thunk onto a pending source
 ```
+
+See [Signal Architecture](SignalArchitecture.html) for the full surface
+(`Signal.source`, `Signal.auto`, `Signal.computed`, `Signal.pending`,
+`Signal.map`, `Signal.effect`, ...).
 
 ### 4. Tag Dispatching
 `Reading/Dispatcher.fs` - Routes processing to appropriate handlers:
@@ -203,10 +217,20 @@ let processNode (ctx: TypeScriptReader) (tag: XanthamTag) =
 
 ### 3. Debugging Tips
 
-- Use the `debugLocationAndForget` helper for logging
-- Check `XanthamTag.debugLocationAndCommentAndForget` for detailed debugging
-- Monitor the stack for processing flow
-- Use signal `.Value` access to track dependency tracking
+Xantham.Fable has a per-tag opt-in tracing system &mdash; see
+[Debugging](Debugging.html) for the full surface. The short version:
+
+- Seed a single tag with `XanthamTag.setDebugForReason "why"` near the
+  handler you suspect.
+- Propagate to children with `XanthamTag.chainDebug parent child`.
+- Sprinkle `XanthamTag.debugLocationAndForget "Module.function" tag`
+  inside handlers; in release builds these elide to no-ops.
+- Use `XanthamTag.withDebugOneShot key fn tag` for hot paths
+  (cache lookups, the stack-pop loop) so a re-entered tag does not
+  flood the log.
+- Stack overflows usually mean a `Signal.fulfillWith` thunk is reading
+  the same signal it is filling &mdash; see the self-reference hazard
+  notes in [Signal Architecture](SignalArchitecture.html).
 
 ## Testing
 

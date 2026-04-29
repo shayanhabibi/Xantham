@@ -124,22 +124,35 @@ flowchart LR
 The fundamental unit of data association in the AST processing:
 
 ```fsharp
-type XanthamTag = {
-    Value: XanTagKind                       // Tag type and data
-    IdentityKey: IdentityKey                // Unique identifier
-    // Additional metadata for tracking
-}
+// XanthamTag is a guarded tracer attached to the underlying TS object via
+// the well-known TRACER_TAG / TRACER_GUARD JS symbol keys. It carries the
+// XanTagKind classification, an identity Guard, and two property bags
+// (a tag-bag stored on the tag and a keyed-bag stored on the guard).
+type XanthamTag =
+    inherit GuardedTracer<XanTagKind, GuardTracer>
+    member Value       : XanTagKind   // discriminated kind
+    member Guard       : GuardTracer  // identity guard
+    member IdentityKey : IdentityKey  // = this.Guard.Value
+    member Debug       : bool with get, set
+    member DebugId     : int
 
-type XanTagKind = 
+type XanTagKind =
     | Ignore
-    | MemberDeclaration of MemberDeclaration
-    | TypeDeclaration of TypeDeclaration
-    | TypeNode of TypeNode
-    | JSDocTag of JSDocTags
-    | Type of TypeFlagPrimary
-    | ModulesAndExports of ModulesAndExports
-    | LiteralTokenNode of LiteralTokenNode
+    | MemberDeclaration  of MemberDeclaration
+    | TypeDeclaration    of TypeDeclaration
+    | TypeNode           of TypeNode
+    | JSDocTag           of JSDocTags
+    | Type               of TypeFlagPrimary
+    | ModulesAndExports  of ModulesAndExports
+    | LiteralTokenNode   of LiteralTokenNode
 ```
+
+Tags are obtained through the SRTP factory `XanthamTag.Create(node, checker)`,
+which dispatches over `Ts.Node`, `Ts.Type`, and `Ts.Symbol`. The factory
+returns a pair of `TagState` values describing whether the tag container and
+its guard already existed on the underlying object &mdash; this is how
+cycle-detection and idempotent re-entry are implemented (see also
+[Debugging](Debugging.html) for the role of `Debug` and `DebugId`).
 
 <div class="mermaid">
 flowchart TD

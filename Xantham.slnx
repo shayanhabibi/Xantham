@@ -28,6 +28,7 @@
   </Folder>
   <Folder Name="/docs/Xantham.Fable/">
     <File Path="docs/Xantham.Fable/Architecture.md" />
+    <File Path="docs/Xantham.Fable/Debugging.md" />
     <File Path="docs/Xantham.Fable/GuardedProperties.md" />
     <File Path="docs/Xantham.Fable/QuickStart.md" />
     <File Path="docs/Xantham.Fable/README.md" />
