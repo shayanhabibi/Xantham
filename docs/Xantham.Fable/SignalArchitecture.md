@@ -16,6 +16,36 @@ Xantham.Fable uses a sophisticated signal-based reactive system that provides au
 
 The core `Signal<'a>` type is defined in `Types/Signal.fs` and provides:
 
+<div class="mermaid">
+flowchart TD
+    subgraph Signal_System
+        signal[Signal<'a>] --> source[Source Signal]
+        signal --> computed[Computed Signal]
+        signal --> auto[Auto Signal]
+    end
+    subgraph Signal_Operations
+        source --> set[Set Value]
+        source --> get[Get Value]
+        computed --> deps[Dependency Tracking]
+        computed --> recalc[Recompute]
+        auto --> track[Automatic Tracking]
+        auto --> invalidation[Invalidation]
+        get --> cache[Value Caching]
+    end
+    subgraph Dependency_Management
+        deps --> collector[Dependency Collector]
+        collector --> deps2[Dependency Discovery]
+        deps2 --> invalidation
+        invalidation --> propagation[Propagation]
+    end
+    subgraph Reactive_Flow
+        input[Input Data] --> source
+        source --> cache
+        cache --> computed
+        computed --> output[Output Data]
+    end
+</div>
+
 ### Key Features
 
 1. **Dual Nature**:

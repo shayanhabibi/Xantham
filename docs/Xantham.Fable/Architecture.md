@@ -13,17 +13,13 @@ The architecture of Xantham.Fable is designed to transform TypeScript `.d.ts` fi
 
 Xantham.Fable operates as a TypeScript AST crawler and converter that processes complex TypeScript definitions into a common schema format. The architecture can be visualized as:
 
-```text
-Input .d.ts files 
-    ↓
-TypeScript Compiler API (ts-morph)
-    ↓
-Stack-based AST traversal
-    ↓
-Reactive signal processing with guarded properties
-    ↓
-Common Schema JSON Output
-```
+<div class="mermaid">
+flowchart LR
+    input[Input .d.ts files] --> tsc[TypeScript Compiler API]
+    tsc --> stack[Stack-based AST traversal]
+    stack --> signals[Reactive signal processing]
+    signals --> output[Common Schema JSON Output]
+</div>
 
 ## Core Architecture Layers
 
@@ -47,6 +43,40 @@ Common Schema JSON Output
 - **Common Schema**: Standard representation for downstream consumers
 - **Serialization**: Efficient JSON generation with Thoth.Json
 
+<div class="mermaid">
+flowchart TB
+    subgraph Input
+        input1[File Processing]
+        input2[Module Resolution]
+        input3[Compiler Setup]
+    end
+    subgraph AST_Processing
+        ast1[Stack-based Traversal]
+        ast2[Type System]
+        ast3[Signal Management]
+    end
+    subgraph Data_Flow
+        data1[Guarded Properties]
+        data2[Signal Architecture]
+        data3[Caching]
+    end
+    subgraph Output
+        out1[Schema Encoding]
+        out2[Common Schema]
+        out3[Serialization]
+    end
+    input1 --> ast1
+    input2 --> ast1
+    input3 --> ast1
+    ast1 --> data1
+    ast2 --> data2
+    ast3 --> data3
+    data1 --> out1
+    data2 --> out2
+    data3 --> out3
+    out1 --> out3
+</div>
+
 ## Detailed Architecture Components
 
 ### TypeScript Reader and Program Management
@@ -67,6 +97,27 @@ type TypeScriptReader = {
     LibCache: HashSet<IdentityKey>         // Library type cache
 }
 ```
+
+<div class="mermaid">
+flowchart LR
+    subgraph TypeScript_Reader
+        stack[XanthamTag Stack] --> program[TypeScript Program]
+        program --> checker[TypeChecker]
+        checker --> modulemap[ModuleMap]
+        modulemap --> caches[Caches]
+        caches --> signalcache[SignalCache]
+        caches --> exportcache[ExportCache]
+        caches --> membercache[MemberCache]
+        caches --> libcache[LibCache]
+    end
+    subgraph Processing_Loop
+        program --> tags[Tag Creation]
+        tags --> dispatch[Dispatcher]
+        dispatch --> processors[Node Processors]
+        processors --> results[Processing Results]
+        results --> caches
+    end
+</div>
 
 ### XanthamTag System
 
@@ -90,39 +141,132 @@ type XanTagKind =
     | LiteralTokenNode of LiteralTokenNode
 ```
 
+<div class="mermaid">
+flowchart TD
+    subgraph XanthamTag_System
+        tag[XanthamTag]
+        tag --> value[Value: XanTagKind]
+        tag --> identity[IdentityKey]
+        value --> kind1[MemberDeclaration]
+        value --> kind2[TypeDeclaration]
+        value --> kind3[TypeNode]
+        value --> kind4[JSDocTag]
+        value --> kind5[Type]
+        value --> kind6[ModulesAndExports]
+        value --> kind7[LiteralTokenNode]
+    end
+    subgraph Data_Association
+        tag --> data[Associated Data]
+        data --> member[Member Data]
+        data --> type[Type Data]
+        data --> node[Node Data]
+        data --> doc[JSDoc Data]
+        data --> typeflag[Type Flag Data]
+        data --> module[Module Data]
+        data --> literal[Literal Data]
+    end
+</div>
+
 ### Stack-based Processing Architecture
 
 A critical component that prevents JavaScript stack overflows:
 
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                    Stack Management                         │
-├─────────────────┬─────────────────┬─────────────────────────┤
-│   XanthamTag    │   Processing    │       Work Queue        │
-│   Stack         │   State         │       (LIFO Queue)      │
-├─────────────────┼─────────────────┼─────────────────────────┤
-│   ┌───────────┐ │   ┌───────────┐ │   ┌───────────────────┐ │
-│   │  Member   │ │   │  Type     │ │   │  TypeDeclaration  │ │
-│   │Declaration│ │   │  Node     │ │   │  Process          │ │
-│   └───────────┘ │   └───────────┘ │   └───────────────────┘ │
-│   ┌───────────┐ │   ┌───────────┐ │   ┌───────────────────┐ │
-│   │  Type     │ │   │  Type     │ │   │  Module           │ │
-│   │Declaration│ │   │  Node     │ │   │  Processing       │ │
-│   └───────────┘ │   └───────────┘ │   └───────────────────┘ │
-│                 │                 │                         │
-│                 │                 │                         │
-└─────────────────┴─────────────────┴─────────────────────────┘
-         ↑                    ↑                     ↑
- Current Stack State       Processing Loop       Work Items
-```
+<div class="mermaid">
+flowchart TD
+    subgraph Stack_Processing
+        stack[Processing Stack] --> tag1[XanthamTag]
+        stack --> tag2[XanthamTag]  
+        stack --> tag3[XanthamTag]
+        tag1 --> process1[Processing]
+        tag2 --> process2[Processing]
+        tag3 --> process3[Processing]
+    end
+    subgraph Processing_Control
+        dispatch[Dispatcher] --> processor1[Handler]
+        processor1 --> results[Results]
+        results --> cache[Caches]
+        cache --> stack2[Update Stack]
+        stack2 --> process1
+    end
+    subgraph Dependency_Management
+        dependencies[Dependencies] --> signals[Signal System]
+        signals --> processing_loop[Processing Loop]
+        processing_loop --> stack3[Stack Updates]
+        stack3 --> stack
+    end
+</div>
+
+### Signal Architecture Integration
+
+Core reactive data flow system:
+
+<div class="mermaid">
+flowchart LR
+    subgraph Signal_System
+        source[Source Signals] --> computed[Computed Signals]
+        computed --> invalidation[Invalidation Events]
+    end
+    subgraph Dependency_Tracking
+        collector[Dependency Collector] --> computed
+        invalidation --> recalc[Recalculation]
+        recalc --> cache2[Signal Cache]
+        cache2 --> computed
+    end
+    subgraph Data_Flow
+        source --> processing[Processing]
+        processing --> results[Results]
+        results --> signals
+    end
+</div>
+
+### Guarded Properties Pattern
+
+Type-safe data access with separation of concerns:
+
+<div class="mermaid">
+flowchart LR
+    subgraph Guarded_Properties
+        tag[XanthamTag] --> slots[Guarded Properties]
+        slots --> slot1[Summary Content]
+        slots --> slot2[Documentation]
+        slots --> slot3[Parameter Builder]
+        slots --> slot4[Type Signal]
+        slots --> slot5[Member Builder]
+    end
+    subgraph Access_Patterns
+        get[Get Access] --> slot1
+        get --> slot2
+        get --> slot3
+        get --> slot4
+        get --> slot5
+        set[Set Access] --> slot1
+        set --> slot2  
+        set --> slot3
+        set --> slot4
+        set --> slot5
+        clear[Clear Operations] --> slot1
+        clear --> slot2
+        clear --> slot3
+        clear --> slot4
+        clear --> slot5
+    end
+    subgraph Data_Flow
+        tag --> process[Processing]
+        process --> get
+        get --> results[Results]
+        results --> cache[Signal Cache]
+        cache --> set
+        set --> tag
+    end
+</div>
 
 ### Signal Architecture Integration
 
 Core reactive data flow system:
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│                     Signal System                           │
+┌───────────────────────────────────────────────────────────────┐
+│                     Signal System                             │
 ├─────────────────┬─────────────────┬───────────────────────────┤
 │   Signals       │   Dependencies  │   Computation             │
 ├─────────────────┼─────────────────┼───────────────────────────┤
@@ -141,8 +285,8 @@ Core reactive data flow system:
 Type-safe data access with separation of concerns:
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│                  Guarded Properties                         │
+┌───────────────────────────────────────────────────────────────┐
+│                  Guarded Properties                           │
 ├─────────────────┬─────────────────┬───────────────────────────┤
 │   Named         │  Module-level   │   Keyed vs Non-Keyped     │
 │   Accessors     │  Slot System    │   Storage                 │

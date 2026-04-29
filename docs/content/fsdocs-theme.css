@@ -1,106 +1,874 @@
-﻿:root {
-    --monospace-font: "JetBrains Mono", Menlo, Consolas, monospace;
-    /*--system-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;*/
-    /*--heading-font-family: var(--system-font);*/
+﻿/*!* ==========================================================================*/
+/*   Partas Design System — fsdocs theme override*/
+/*   Drop this file into docs/content/fsdocs-theme.css in your project.*/
+/*   It layers on top of fsdocs-default.css; do not edit the default file.*/
+/*   ========================================================================== *!*/
 
-    /*--spacing-50: 4px;*/
-    /*--spacing-100: 8px;*/
-    /*--spacing-200: 12px;*/
-    /*--spacing-300: 16px;*/
-    /*--spacing-400: 24px;*/
-    /*--spacing-500: 32px;*/
-    /*--spacing-600: 48px;*/
-    /*--spacing-700: 64px;*/
-    /*--spacing-800: 96px;*/
-    /*--spacing-900: 128px;*/
-    /*--spacing-950: 192px;*/
+/*@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap');*/
 
-    /*--font-50: 12px;*/
-    /*--font-100: 14px;*/
-    /*--font-200: 16px;*/
-    /*--font-300: 18px;*/
-    /*--font-400: 20px;*/
-    /*--font-500: 24px;*/
-    /*--font-600: 30px;*/
-    /*--font-700: 36px;*/
-    /*--font-800: 48px;*/
-    /*--font-900: 60px;*/
-    /*--font-950: 72px;*/
+/*!* --------------------------------------------------------------------------*/
+/*   Root token overrides*/
+/*   light-dark(light-value, dark-value) — follows the user's color-scheme*/
+/*   -------------------------------------------------------------------------- *!*/
+/*:root {*/
+/*    !* --- Typography --- *!*/
+/*    --system-font:          'DM Sans', 'Helvetica Neue', Arial, sans-serif;*/
+/*    --heading-font-family:  'Nunito', 'Trebuchet MS', sans-serif;*/
+/*    --monospace-font:       'JetBrains Mono', 'Fira Code', monospace;*/
 
-    /*--line-height: 1.5;*/
-    /*--heading-line-height: 1.25;*/
-    /*--radius: 6px;*/
+/*    !* --- Shape --- *!*/
+/*    --radius: 8px;*/
 
-    /*--container-sm: 768px;*/
-    /*--container-md: 960px;*/
-    /*--container-lg: 1024px;*/
-    /*--container-xl: 1200px;*/
-    /*--container-xxl: 1400px;*/
-    /*--container-xxxl: 1800px;*/
-    /*--main-menu-width: 260px;*/
-    /*--page-menu-width: var(--main-menu-width);*/
-    /*--header-height: 60px;*/
-    /*--body-grid-template-columns: var(--main-menu-width) minmax(0, 1fr);*/
-    /*--body-grid-template-columns-xl: var(--main-menu-width) minmax(0, 1fr) var(--page-menu-width);*/
-    /*--main-menu-grid-row: 2;*/
-    /*--main-menu-grid-column: 1;*/
-    /*--main-grid-row: 2;*/
-    /*--main-grid-column: 2;*/
-    /*--dialog-width: 500px;*/
-    /*--api-docs-first-column-min-width: 320px;*/
-    /*--api-docs-second-column-min-width: 240px;*/
+/*    !* --- Brand palette shortcuts (not light-dark, just aliases) --- *!*/
+/*    --partas-navy:          #1A3A96;*/
+/*    --partas-navy-deep:     #0D1B4B;*/
+/*    --partas-navy-mid:      #0F1E4F;*/
+/*    --partas-navy-light:    #2A4DB5;*/
+/*    --partas-cyan:          #00B5EC;*/
+/*    --partas-cyan-light:    #4CCFF5;*/
+/*    --partas-cyan-dim:      #007BAF;*/
+/*    --partas-blue:          #0083C8;*/
+/*    --partas-muted:         #6B7BAD;*/
+/*    --partas-off-white:     #F4F6FB;*/
+/*    --partas-gray-light:    #E2E7F4;*/
+/*    --partas-gray-dark:     #3D4E7A;*/
 
-    /*color-scheme: light dark;*/
+/*    !* --- Core theme colours --- *!*/
+/*    --primary:              light-dark(var(--partas-blue), var(--partas-cyan));*/
 
-    /*!* theme colors — light-dark(light-value, dark-value) *!*/
-    /*--primary: light-dark(hsl(199, 95%, 74%), #81cfe0);*/
-    --background: light-dark(hsl(0, 0%, 100%), hsl(240, 6%, 10%));
-    --text-color: light-dark(hsl(240, 5%, 26%), hsl(240, 5%, 85%));
-    /*--text-hover: light-dark(#282828, #FFF);*/
-    --heading-color: light-dark(hsl(240, 6%, 10%), hsl(0, 0%, 100%));
-    --code-background: light-dark(hsl(0, 0%, 98%), hsl(240, 4%, 16%));
-    --code-color: light-dark(hsl(201, 90%, 27%), hsl(199, 95%, 74%));
-    /*--header-background: light-dark(#f9fbfc, #0c1318);*/
-    /*--header-border: light-dark(#e8ecf1, #3a3a42);*/
-    /*--header-link-color: var(--text-color);*/
-    /*--mobile-menu-background: var(--header-background);*/
-    /*--menu-color: var(--text-color);*/
-    --menu-item-hover-background: light-dark(hsl(204, 94%, 95%), hsl(202, 80%, 14%));
-    /*--menu-item-hover-color: var(--menu-color);*/
-    /*--doc-tip-background: light-dark(#F7F7F7, #2e293a);*/
-    /*--link-color: light-dark(#4871f7, #c5eff7);*/
-    /*--link-hover: #91aafa;*/
-    /*--search-background: light-dark(rgb(229, 231, 235), #020202);*/
-    /*--nav-category: light-dark(rgb(156, 163, 175), rgb(207, 211, 215));*/
-    /*--scrollbar-track-background: #424242;*/
-    /*--scrollbar-track-border: #4A4A4A;*/
-    /*--scrollbar-thumb-background: #686868;*/
-    /*--shadow-color: hsla(0, 0%, 0%, .1);*/
-    /*--main-shadow-color: hsla(0, 0%, 0%, .025);*/
-    --aside-background: var(--background);
-    /*--blockquote-bacground-color: (hsl(214, 100%, 97%);*/
-    /*--blockquote-color: var(--text-color);*/
-    --on-this-page-color: var(--menu-color);
-    --page-menu-background-color: var(--header-background);
-    --page-menu-background-border-color: var(--header-background);
-    /*--page-menu-background-hover-border-color: var(--text-color);*/
-    /*--nav-item-border-color: var(--header-border);*/
-    /*--nav-item-active-border-color: var(--text-color);*/
-    /*--dialog-background-color: var(--header-background);*/
-    /*--dialog-empty-color: var(--nav-category);*/
-    /*--dialog-icon-color: var(--text-color);*/
-    /*--dialog-link-color: var(--link-color);*/
-    /*--dialog-link-hover-color: var(--header-background);*/
-    /*--dialog-link-hover-background-color: var(--link-hover);*/
-    --code-fence-border-color: hsla(0, 0%, 0%, .1);
+/*    --background:           light-dark(var(--partas-off-white), var(--partas-navy-deep));*/
+/*    --text-color:           light-dark(var(--partas-navy-deep), #FFFFFF);*/
+/*    --text-hover:           light-dark(var(--partas-navy), #FFFFFF);*/
+/*    --heading-color:        light-dark(var(--partas-navy-deep), #FFFFFF);*/
 
-    /*--header-brand-text-transform: none;*/
+/*    !* --- Header (navy in both modes — brand signature) --- *!*/
+/*    --header-background:    light-dark(var(--partas-navy), var(--partas-navy-deep));*/
+/*    --header-border:        light-dark(rgba(107,123,173,0.3), rgba(107,123,173,0.2));*/
+/*    --header-link-color:    #FFFFFF;*/
+/*    --mobile-menu-background: light-dark(var(--partas-navy), var(--partas-navy-deep));*/
+
+/*    !* --- Sidebar / aside --- *!*/
+/*    --aside-background:     light-dark(var(--partas-off-white), var(--partas-navy-mid));*/
+/*    --menu-color:           light-dark(var(--partas-navy-deep), var(--partas-gray-light));*/
+/*    --menu-item-hover-background: light-dark(rgba(26,58,150,0.07), rgba(0,181,236,0.1));*/
+/*    --menu-item-hover-color: light-dark(var(--partas-navy), var(--partas-cyan));*/
+/*    --nav-item-border-color: light-dark(rgba(107,123,173,0.2), rgba(107,123,173,0.18));*/
+/*    --nav-item-active-border-color: light-dark(var(--partas-navy), var(--partas-cyan));*/
+/*    --nav-category:         var(--partas-muted);*/
+
+/*    !* --- Right-hand page menu --- *!*/
+/*    --page-menu-background-color:        light-dark(var(--partas-off-white), var(--partas-navy-mid));*/
+/*    --page-menu-background-border-color: light-dark(rgba(107,123,173,0.2), rgba(107,123,173,0.18));*/
+/*    --page-menu-background-hover-border-color: light-dark(var(--partas-navy), var(--partas-cyan));*/
+/*    --on-this-page-color:   var(--partas-muted);*/
+
+/*    !* --- Links --- *!*/
+/*    --link-color:           light-dark(var(--partas-blue), var(--partas-cyan));*/
+/*    --link-hover:           light-dark(var(--partas-cyan), var(--partas-cyan-light));*/
+
+/*    !* --- Code blocks --- *!*/
+/*    --code-background:      light-dark(#FFFFFF, #0A1430);*/
+/*    --code-color:           light-dark(var(--partas-navy-deep), var(--partas-gray-light));*/
+/*    --code-fence-border-color: light-dark(var(--partas-gray-light), rgba(107,123,173,0.2));*/
+
+/*    !* --- Blockquote --- *!*/
+/*    --blockquote-bacground-color: light-dark(#EEF1FA, #111D3E);*/
+/*    --blockquote-color:     light-dark(var(--partas-navy-deep), var(--partas-gray-light));*/
+
+/*    !* --- Tooltips --- *!*/
+/*    --doc-tip-background:   light-dark(var(--partas-off-white), #111D3E);*/
+
+/*    !* --- Search dialog --- *!*/
+/*    --dialog-background-color:          light-dark(#FFFFFF, #111D3E);*/
+/*    --dialog-empty-color:               var(--partas-muted);*/
+/*    --dialog-icon-color:                light-dark(var(--partas-navy-deep), var(--partas-gray-light));*/
+/*    --dialog-link-color:                light-dark(var(--partas-blue), var(--partas-cyan));*/
+/*    --dialog-link-hover-color:          #FFFFFF;*/
+/*    --dialog-link-hover-background-color: light-dark(var(--partas-navy), var(--partas-cyan-dim));*/
+
+/*    !* --- Shadows --- *!*/
+/*    --shadow-color:         hsla(220, 60%, 12%, 0.14);*/
+/*    --main-shadow-color:    hsla(220, 60%, 12%, 0.04);*/
+
+/*    !* --- Scrollbar --- *!*/
+/*    --scrollbar-track-background: light-dark(var(--partas-gray-light), #162050);*/
+/*    --scrollbar-track-border:     light-dark(#C8D0E8, #243170);*/
+/*    --scrollbar-thumb-background: light-dark(var(--partas-muted), var(--partas-blue));*/
+
+/*    !* --- Code syntax colours (both modes) ---*/
+/*       Dark mode leans on Partas palette; light mode is readable on white.      *!*/
+
+/*    !* strings *!*/
+/*    --code-strings-color:       light-dark(#0093A1, #86b4b9);*/
+/*    !* printf *!*/
+/*    --code-printf-color:        light-dark(#8B3DC8, #C69DEC);*/
+/*    !* identifiers *!*/
+/*    --code-identifiers-color:   light-dark(#7B3FB8, #d1b3f5);*/
+/*    !* module *!*/
+/*    --code-module-color:        light-dark(#007BAF, var(--partas-cyan));*/
+/*    !* reference type *!*/
+/*    --code-reference-color:     light-dark(#0083C8, #40fddd);*/
+/*    !* value type *!*/
+/*    --code-value-color:         light-dark(#1B6600, #ffb4e9);*/
+/*    !* keywords *!*/
+/*    --code-keywords-color:      light-dark(#0F54D6, var(--partas-cyan-light));*/
+/*    !* operators *!*/
+/*    --code-operators-color:     light-dark(#0F54D6, #b4c6ee);*/
+/*    !* comment *!*/
+/*    --code-comment-color:       light-dark(#6B7BAD, #4B5EA0);*/
+/*    !* numbers *!*/
+/*    --code-numbers-color:       light-dark(#007BAF, var(--partas-cyan));*/
+/*    !* line numbers *!*/
+/*    --code-linenumbers-color:   var(--partas-muted);*/
+/*    !* function *!*/
+/*    --code-function-color:      light-dark(#6B2FBA, #C69DEC);*/
+/*    --code-function2-color:     light-dark(#6B2FBA, #cbda9d);*/
+/*    !* property *!*/
+/*    --code-property-color:      light-dark(#0083C8, #6acfe7);*/
+/*    !* interface *!*/
+/*    --code-interface-color:     light-dark(#0083C8, #43AEC6);*/
+/*    !* disposable *!*/
+/*    --code-disposable-color:    light-dark(#43AEC6, #6dd6f1);*/
+/*    !* punctuation *!*/
+/*    --code-punctuation-color:   light-dark(#0083C8, #43AEC6);*/
+/*    !* escaped chars *!*/
+/*    --code-escaped-color:       #EE9E7D;*/
+/*    !* preprocessor *!*/
+/*    --code-preprocessor-color:  #C380B2;*/
+/*    !* inactive *!*/
+/*    --code-inactive-color:      var(--partas-muted);*/
+/*    !* fsi output *!*/
+/*    --code-fsioutput-color:     var(--partas-muted);*/
+/*}*/
+
+/*!* --------------------------------------------------------------------------*/
+/*   Header — navy brand strip, always dark regardless of color-scheme*/
+/*   -------------------------------------------------------------------------- *!*/
+/*header {*/
+/*    border-bottom: 1px solid rgba(107, 123, 173, 0.3);*/
+/*    !* Subtle gradient so it reads as distinctly Partas *!*/
+/*    background: linear-gradient(*/
+/*            135deg,*/
+/*            light-dark(#1A3A96, #0D1B4B) 0%,*/
+/*            light-dark(#163088, #091540) 100%*/
+/*    );*/
+/*}*/
+
+/*header .start > a {*/
+/*    gap: 4px;*/
+/*}*/
+
+/*header .start strong {*/
+/*    font-family: var(--heading-font-family);*/
+/*    font-weight: 700;*/
+/*    letter-spacing: -0.01em;*/
+/*    color: #FFFFFF;*/
+/*}*/
+
+/*!* Logo mark sizing *!*/
+/*header .start img {*/
+/*    height: 28px;*/
+/*    width: auto;*/
+/*}*/
+
+/*!* GitHub icon and header actions *!*/
+/*header .end a,*/
+/*header .end iconify-icon {*/
+/*    color: rgba(255,255,255,0.8);*/
+/*    transition: color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);*/
+/*}*/
+
+/*header .end a:hover,*/
+/*header .end iconify-icon:hover {*/
+/*    color: var(--partas-cyan);*/
+/*}*/
+
+/*!* --------------------------------------------------------------------------*/
+/*   Sidebar*/
+/*   -------------------------------------------------------------------------- *!*/
+/*#fsdocs-main-menu {*/
+/*    border-right: 1px solid var(--header-border);*/
+/*}*/
+
+/*!* Category headers — muted + spaced *!*/
+/*.menu .nav-header {*/
+/*    font-family: var(--heading-font-family);*/
+/*    font-size: 11px;*/
+/*    font-weight: 700;*/
+/*    letter-spacing: 0.08em;*/
+/*    text-transform: uppercase;*/
+/*    color: var(--partas-muted);*/
+/*    padding-left: 0;*/
+/*}*/
+
+/*!* Active nav item — cyan accent left border *!*/
+/*.nav-item.active {*/
+/*    border-color: var(--partas-cyan);*/
+/*}*/
+
+/*.nav-item.active a {*/
+/*    color: light-dark(var(--partas-navy), var(--partas-cyan));*/
+/*}*/
+
+/*!* --------------------------------------------------------------------------*/
+/*   Content headings*/
+/*   -------------------------------------------------------------------------- *!*/
+/*h1, h2, h3, h4, h5, h6 {*/
+/*    font-family: var(--heading-font-family);*/
+/*    letter-spacing: -0.02em;*/
+/*    color: var(--heading-color);*/
+/*}*/
+
+/*!* Heading anchor links *!*/
+/*h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {*/
+/*    text-decoration: none;*/
+/*}*/
+
+/*!* --------------------------------------------------------------------------*/
+/*   Blockquote — left border uses primary cyan/blue*/
+/*   -------------------------------------------------------------------------- *!*/
+/*blockquote {*/
+/*    border-left-color: var(--primary);*/
+/*    border-radius: 0 var(--radius) var(--radius) 0;*/
+/*}*/
+
+/*!* --------------------------------------------------------------------------*/
+/*   Code blocks — JetBrains Mono + subtle border*/
+/*   -------------------------------------------------------------------------- *!*/
+/*code, table.pre, pre {*/
+/*    font-family: var(--monospace-font);*/
+/*}*/
+
+/*!* Inline code pill *!*/
+/*p > code, li > code {*/
+/*    background: light-dark(rgba(26,58,150,0.07), rgba(0,181,236,0.1));*/
+/*    color: light-dark(var(--partas-navy), var(--partas-cyan-light));*/
+/*    border-radius: 5px;*/
+/*    padding: 2px 7px;*/
+/*    font-size: 0.88em;*/
+/*}*/
+
+/*!* --------------------------------------------------------------------------*/
+/*   Tables*/
+/*   -------------------------------------------------------------------------- *!*/
+/*#content table:not(.pre):not(.fssnip) {*/
+/*    border-collapse: collapse;*/
+/*    width: 100%;*/
+/*    margin: 16px 0;*/
+/*    font-size: 15px;*/
+/*}*/
+
+/*#content table:not(.pre):not(.fssnip) th {*/
+/*    font-family: var(--heading-font-family);*/
+/*    font-weight: 700;*/
+/*    font-size: 12px;*/
+/*    letter-spacing: 0.05em;*/
+/*    text-transform: uppercase;*/
+/*    color: var(--partas-muted);*/
+/*    padding: 10px 12px;*/
+/*    border-bottom: 2px solid var(--header-border);*/
+/*    text-align: left;*/
+/*}*/
+
+/*#content table:not(.pre):not(.fssnip) td {*/
+/*    padding: 10px 12px;*/
+/*    border-bottom: 1px solid var(--header-border);*/
+/*    vertical-align: top;*/
+/*    line-height: 1.6;*/
+/*}*/
+
+/*#content table:not(.pre):not(.fssnip) tr:last-child td {*/
+/*    border-bottom: none;*/
+/*}*/
+
+/*!* --------------------------------------------------------------------------*/
+/*   Search dialog*/
+/*   -------------------------------------------------------------------------- *!*/
+/*dialog {*/
+/*    border-radius: 12px;*/
+/*    box-shadow: 0 8px 40px rgba(13, 27, 75, 0.35);*/
+/*}*/
+
+/*dialog input[type=search] {*/
+/*    font-family: var(--system-font);*/
+/*    border-radius: var(--radius);*/
+/*    background: light-dark(var(--partas-off-white), #0A1430);*/
+/*    color: var(--text-color);*/
+/*    outline: 2px solid var(--primary);*/
+/*}*/
+
+/*!* --------------------------------------------------------------------------*/
+/*   Copy button*/
+/*   -------------------------------------------------------------------------- *!*/
+/*.copy-code-button {*/
+/*    font-family: var(--system-font);*/
+/*    border-radius: 6px;*/
+/*    font-size: 11px;*/
+/*    font-weight: 600;*/
+/*    letter-spacing: 0.03em;*/
+/*    background: light-dark(var(--partas-navy), rgba(0,131,200,0.3));*/
+/*    color: #FFFFFF;*/
+/*    border-color: light-dark(rgba(255,255,255,0.15), rgba(0,181,236,0.3));*/
+/*}*/
+
+/*.copy-code-button:hover {*/
+/*    background: light-dark(var(--partas-navy-light), rgba(0,181,236,0.4));*/
+/*}*/
+
+/*!* --------------------------------------------------------------------------*/
+/*   API doc member list refinements*/
+/*   -------------------------------------------------------------------------- *!*/
+/*.fsdocs-member-usage {*/
+/*    font-family: var(--monospace-font);*/
+/*}*/
+
+/*.fsdocs-source-link:hover {*/
+/*    color: var(--partas-cyan);*/
+/*}*/
+
+/*!* --------------------------------------------------------------------------*/
+/*   Tooltips*/
+/*   -------------------------------------------------------------------------- *!*/
+/*div.fsdocs-tip {*/
+/*    border-radius: var(--radius);*/
+/*    box-shadow: 0 4px 24px rgba(13, 27, 75, 0.22);*/
+/*    border-color: light-dark(rgba(107,123,173,0.3), rgba(107,123,173,0.2));*/
+/*}*/
+
+/*!* --------------------------------------------------------------------------*/
+/*   Page-menu (on this page) right sidebar*/
+/*   -------------------------------------------------------------------------- *!*/
+/*#fsdocs-page-menu #on-this-page {*/
+/*    font-family: var(--heading-font-family);*/
+/*    font-size: 11px;*/
+/*    font-weight: 700;*/
+/*    letter-spacing: 0.08em;*/
+/*    text-transform: uppercase;*/
+/*    color: var(--partas-muted);*/
+/*}*/
+
+/*#fsdocs-page-menu ul li.active,*/
+/*#fsdocs-page-menu ul li:hover {*/
+/*    border-color: var(--primary);*/
+/*}*/
+
+/*#fsdocs-page-menu ul li a {*/
+/*    font-size: 13px;*/
+/*}*/
+
+/*!* --------------------------------------------------------------------------*/
+/*   Smooth focus rings*/
+/*   -------------------------------------------------------------------------- *!*/
+/*:focus-visible {*/
+/*    outline: 2px solid var(--partas-cyan);*/
+/*    outline-offset: 2px;*/
+/*    border-radius: 4px;*/
+/*}*/
+/* ==========================================================================
+   Partas Design System — fsdocs theme override
+   Drop into docs/content/fsdocs-theme.css
+   Layers on top of fsdocs-default.css — do not edit the default file.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* --------------------------------------------------------------------------
+   Root token overrides
+   -------------------------------------------------------------------------- */
+:root {
+    --system-font:         'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+    --heading-font-family: 'Nunito', 'Trebuchet MS', sans-serif;
+    --monospace-font:      'JetBrains Mono', 'Fira Code', monospace;
+    --radius: 8px;
+
+    /* Brand palette */
+    --partas-navy:          #1A3A96;
+    --partas-navy-deep:     #0D1B4B;
+    --partas-navy-mid:      #0F1E4F;
+    --partas-navy-light:    #2A4DB5;
+    --partas-cyan:          #00B5EC;
+    --partas-cyan-light:    #4CCFF5;
+    --partas-cyan-dim:      #007BAF;
+    --partas-blue:          #0083C8;
+    --partas-salmon:        #EE9E7D;
+    --partas-mauve:         #C380B2;
+    --partas-violet:        #A769AC;
+    --partas-muted:         #6B7BAD;
+    --partas-off-white:     #F4F6FB;
+    --partas-gray-light:    #E2E7F4;
+    --partas-gray-dark:     #3D4E7A;
+
+    /* Signature gradients */
+    --partas-gradient-warm: linear-gradient(135deg, #EE9E7D 0%, #C380B2 60%, #A769AC 100%);
+    --partas-gradient-cool: linear-gradient(135deg, #00B5EC 0%, #0083C8 100%);
+    --partas-gradient-full: linear-gradient(90deg, #EE9E7D 0%, #C380B2 40%, #00B5EC 80%, #0083C8 100%);
+
+    /* Theme semantic tokens */
+    --primary:              light-dark(var(--partas-blue), var(--partas-cyan));
+    --background:           light-dark(var(--partas-off-white), var(--partas-navy-deep));
+    --text-color:           light-dark(var(--partas-navy-deep), #FFFFFF);
+    --text-hover:           light-dark(var(--partas-navy), #FFFFFF);
+    --heading-color:        light-dark(var(--partas-navy-deep), #FFFFFF);
+    --header-background:    light-dark(var(--partas-navy), var(--partas-navy-deep));
+    --header-border:        light-dark(rgba(107,123,173,.3), rgba(107,123,173,.2));
+    --header-link-color:    #FFFFFF;
+    --mobile-menu-background: light-dark(var(--partas-navy), var(--partas-navy-deep));
+    --aside-background:     light-dark(var(--partas-off-white), var(--partas-navy-mid));
+    --menu-color:           light-dark(var(--partas-navy-deep), var(--partas-gray-light));
+    --menu-item-hover-background: light-dark(rgba(26,58,150,.07), rgba(0,181,236,.08));
+    --menu-item-hover-color: light-dark(var(--partas-navy), var(--partas-cyan));
+    --nav-item-border-color: light-dark(rgba(107,123,173,.2), rgba(107,123,173,.18));
+    --nav-item-active-border-color: light-dark(var(--partas-navy), var(--partas-cyan));
+    --nav-category:         var(--partas-muted);
+    --link-color:           light-dark(var(--partas-navy), var(--partas-cyan));
+    --link-hover:           light-dark(var(--partas-navy-light), var(--partas-cyan-light));
+    --code-background:      light-dark(#FFFFFF, #080f28);
+    --code-color:           light-dark(var(--partas-navy-deep), var(--partas-gray-light));
+    --code-fence-border-color: light-dark(var(--partas-gray-light), rgba(107,123,173,.18));
+    --blockquote-bacground-color: light-dark(#EEF1FA, rgba(0,181,236,.05));
+    --blockquote-color:     light-dark(var(--partas-navy-deep), var(--partas-gray-light));
+    --doc-tip-background:   light-dark(var(--partas-off-white), #0d1a3a);
+    --on-this-page-color:   var(--partas-muted);
+    --page-menu-background-color:        light-dark(var(--partas-off-white), var(--partas-navy-mid));
+    --page-menu-background-border-color: light-dark(rgba(107,123,173,.2), rgba(107,123,173,.18));
+    --page-menu-background-hover-border-color: light-dark(var(--partas-navy), var(--partas-cyan));
+    --dialog-background-color:  light-dark(#FFFFFF, #0d1a3a);
+    --dialog-empty-color:       var(--partas-muted);
+    --dialog-icon-color:        light-dark(var(--partas-navy-deep), var(--partas-gray-light));
+    --dialog-link-color:        light-dark(var(--partas-blue), var(--partas-cyan));
+    --dialog-link-hover-color:          #FFFFFF;
+    --dialog-link-hover-background-color: light-dark(var(--partas-navy), var(--partas-cyan-dim));
+    --shadow-color:             hsla(220, 60%, 12%, .15);
+    --main-shadow-color:        hsla(220, 60%, 12%, .04);
+    --scrollbar-track-background: light-dark(var(--partas-gray-light), #0d1635);
+    --scrollbar-track-border:     light-dark(#C8D0E8, #1a2a5e);
+    --scrollbar-thumb-background: light-dark(var(--partas-muted), var(--partas-blue));
+
+    /* Code syntax */
+    --code-keywords-color:    light-dark(#0F54D6, #4CCFF5);
+    --code-strings-color:     light-dark(#0093A1, #86b4b9);
+    --code-comment-color:     light-dark(#8090BB, #3d5490);
+    --code-identifiers-color: light-dark(#7B3FB8, #d1b3f5);
+    --code-module-color:      light-dark(#007BAF, #00B5EC);
+    --code-reference-color:   light-dark(#0083C8, #40fddd);
+    --code-numbers-color:     light-dark(#007BAF, #00B5EC);
+    --code-function-color:    light-dark(#6B2FBA, #C69DEC);
+    --code-function2-color:   light-dark(#6B2FBA, #cbda9d);
+    --code-property-color:    light-dark(#0083C8, #6acfe7);
+    --code-interface-color:   light-dark(#0083C8, #43AEC6);
+    --code-typearg-color:     light-dark(#0083C8, #43AEC6);
+    --code-disposable-color:  light-dark(#43AEC6, #6dd6f1);
+    --code-punctuation-color: light-dark(#0083C8, #43AEC6);
+    --code-punctuation2-color: var(--code-color);
+    --code-operators-color:   light-dark(#0F54D6, #b4c6ee);
+    --code-escaped-color:     #EE9E7D;
+    --code-preprocessor-color:#C380B2;
+    --code-value-color:       light-dark(#1B6600, #ffb4e9);
+    --code-mutable-color:     light-dark(#1B6600, #ffb4e9);
+    --code-inactive-color:    var(--partas-muted);
+    --code-linenumbers-color: light-dark(#aab4d4, #3d5490);
+    --code-printf-color:      light-dark(#8B3DC8, #C69DEC);
+    --code-fsioutput-color:   var(--partas-muted);
+    --code-activepattern-color: #4ec9b0;
+    --code-unioncase-color:   #4ec9b0;
+    --code-enumeration-color: #8C6C41;
+    --code-tooltip-color:     var(--partas-muted);
+    --header-brand-text-transform: none;
+    
+    --header-gradient-stop1: light-dark(#1A3A96, #0D1b4b);
+    --header-gradient-stop2: light-dark(#163088, #091540);
+    
+    --sidebar-gradient-stop1: light-dark(#edf0fa, #101f52);
+    --sidebar-gradient-stop2: light-dark(var(--partas-off-white), var(--partas-navy-mid));
 }
 
-code {
-    font-variant-ligatures: normal;
+/* --------------------------------------------------------------------------
+   Header — navy brand strip with signature gradient accent at bottom
+   -------------------------------------------------------------------------- */
+header {
+    background: linear-gradient(135deg, var(--header-gradient-stop1) 0%, var(--header-gradient-stop2) 100%);
+    border-bottom: none;
+    /* Warm→cool gradient stripe along the bottom edge */
+    box-shadow:
+            0 3px 0 0 transparent,
+            inset 0 -3px 0 0 transparent;
+    position: relative;
 }
 
+header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--partas-gradient-full);
+    pointer-events: none;
+}
+
+header .start > a {
+    gap: 6px;
+    text-decoration: none;
+    color: #FFFFFF;
+}
+
+header .start img {
+    height: 26px;
+    width: auto;
+    filter: brightness(1.1);
+}
+
+header .start strong {
+    font-family: var(--heading-font-family);
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.02em;
+    color: #FFFFFF;
+}
+
+header .end a,
+header .end iconify-icon {
+    color: rgba(255,255,255,.75);
+    transition: color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+header .end a:hover,
+header .end iconify-icon:hover {
+    color: var(--partas-cyan);
+}
+
+/* Mobile menu toggle */
+#menu-toggle {
+    border-color: rgba(255,255,255,.2) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar
+   -------------------------------------------------------------------------- */
 #fsdocs-main-menu {
-    border-right-color: var(--background);
+    border-right: 1px solid var(--header-border);
+    /* Faint gradient bleed from top, referencing the header brand color */
+    background: linear-gradient(180deg, var(--sidebar-gradient-stop1) 0%, var(--sidebar-gradient-stop2) 80px);
+}
+
+/* Category nav-headers — all-caps label with muted color */
+.menu .nav-header {
+    font-family: var(--heading-font-family);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--partas-muted);
+    padding-left: 2px;
+}
+
+/* Active nav item — highlight background + left glow */
+.nav-item {
+    transition: border-color 150ms;
+}
+
+.nav-item.active {
+    border-color: var(--partas-cyan);
+    background: light-dark(rgba(0,131,200,.07), rgba(0,181,236,.08));
+}
+
+.nav-item.active a {
+    color: light-dark(var(--partas-navy), var(--partas-cyan));
+    font-weight: 600;
+}
+
+.nav-item a {
+    transition: background-color 150ms, color 150ms;
+    border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+/* --------------------------------------------------------------------------
+   Headings — display font with decorative accents
+   -------------------------------------------------------------------------- */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--heading-font-family);
+    letter-spacing: -0.02em;
+    color: var(--heading-color);
+}
+
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* H1 — warm gradient underline bar */
+h1 {
+    padding-bottom: 20px;
+    position: relative;
+}
+
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: 8px; left: 0;
+    width: 64px; height: 4px;
+    background: var(--partas-gradient-warm);
+    border-radius: 99px;
+}
+
+/* H2 — small cyan left tick */
+h2 {
+    padding-left: 14px;
+    position: relative;
+}
+
+h2::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 4px; height: 60%;
+    min-height: 18px;
+    background: var(--partas-gradient-cool);
+    border-radius: 99px;
+}
+
+/* H3 — smaller cyan dot */
+h3 {
+    padding-left: 12px;
+    position: relative;
+}
+
+h3::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 3px; height: 50%;
+    min-height: 12px;
+    background: light-dark(rgba(0,131,200,.5), rgba(0,181,236,.45));
+    border-radius: 99px;
+}
+
+/* --------------------------------------------------------------------------
+   Links — animated gradient underline
+   -------------------------------------------------------------------------- */
+#content a:not(.nav-link):not(.copy-code-button):not(.fsdocs-source-link) {
+    color: var(--link-color);
+    text-decoration: none;
+    background-image: linear-gradient(90deg, var(--partas-cyan), var(--partas-blue));
+    background-size: 0% 1.5px;
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    transition: background-size 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    color 200ms;
+    padding-bottom: 1px;
+}
+
+#content a:not(.nav-link):not(.copy-code-button):not(.fsdocs-source-link):hover {
+    color: var(--link-hover);
+    background-size: 100% 1.5px;
+}
+
+/* --------------------------------------------------------------------------
+   Blockquotes — warm gradient left border
+   -------------------------------------------------------------------------- */
+blockquote {
+    border-left: none;
+    padding-left: 18px;
+    background-color: var(--blockquote-bacground-color);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    position: relative;
+    margin-left: 0;
+}
+
+blockquote::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--partas-gradient-warm);
+    border-radius: 99px 0 0 99px;
+}
+
+blockquote > p { margin: 0; }
+
+/* Code */
+#content > pre.fssnip.highlighted::before {
+    left: -0.5px; top: -2px; right: -0.5px; bottom: 0;
+    position: absolute;
+    content: '';
+    border-radius: var(--radius);
+    background: var(--partas-gradient-cool);
+    z-index: -1;
+}
+#content > pre.fssnip.highlighted {
+    border-top: 1px transparent;
+}
+
+/* Inline code pill */
+a > code, p > code, li > code, td > code {
+    background: light-dark(rgba(26,58,150,.07), rgba(0,181,236,.1));
+    color: light-dark(var(--partas-navy), var(--partas-cyan-light));
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-size: .875em;
+}
+
+/* Copy button */
+.copy-code-button {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 5px;
+    background: light-dark(rgba(26,58,150,.85), rgba(0,131,200,.3));
+    color: #FFFFFF;
+    border-color: light-dark(rgba(255,255,255,.2), rgba(0,181,236,.25));
+    transition: background 200ms, opacity 200ms;
+}
+
+.copy-code-button:hover {
+    background: light-dark(var(--partas-navy), rgba(0,181,236,.45));
+}
+
+/* --------------------------------------------------------------------------
+   Tables (content) — clean with brand header
+   -------------------------------------------------------------------------- */
+#content table:not(.pre):not(.fssnip) {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 20px 0;
+    font-size: 15px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--header-border);
+}
+
+#content table:not(.pre):not(.fssnip) th {
+    font-family: var(--heading-font-family);
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: light-dark(#FFFFFF, var(--partas-gray-light));
+    background: light-dark(var(--partas-navy), #0a1635);
+    padding: 10px 14px;
+    text-align: left;
+}
+
+#content table:not(.pre):not(.fssnip) td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--header-border);
+    vertical-align: top;
+    line-height: 1.6;
+}
+
+#content table:not(.pre):not(.fssnip) tbody tr:last-child td {
+    border-bottom: none;
+}
+
+#content table:not(.pre):not(.fssnip) tbody tr:hover td {
+    background: light-dark(rgba(26,58,150,.02), rgba(0,181,236,.04));
+}
+
+/* --------------------------------------------------------------------------
+   API doc member list
+   -------------------------------------------------------------------------- */
+.fsdocs-member-usage {
+    font-family: var(--monospace-font);
+    font-size: 13px;
+}
+
+.fsdocs-source-link:hover {
+    color: var(--partas-cyan);
+}
+
+/* API table row hover */
+.table tbody tr:hover td {
+    background: light-dark(rgba(26,58,150,.03), rgba(0,181,236,.04));
+}
+
+/* Member section expand triangle — cyan */
+.fsdocs-member-xmldoc summary {
+    color: var(--text-color);
+}
+
+.fsdocs-member-xmldoc details[open] summary {
+    color: var(--primary);
+}
+
+/* --------------------------------------------------------------------------
+   Tooltips
+   -------------------------------------------------------------------------- */
+div.fsdocs-tip {
+    border-radius: var(--radius);
+    box-shadow: 0 8px 32px rgba(13,27,75,.28);
+    border-color: light-dark(rgba(107,123,173,.3), rgba(107,123,173,.2));
+    background-color: var(--doc-tip-background);
+    /* Top micro-stripe */
+    border-top: 2px solid var(--partas-cyan);
+}
+
+/* --------------------------------------------------------------------------
+   On this page (right sidebar)
+   -------------------------------------------------------------------------- */
+#fsdocs-page-menu #on-this-page {
+    font-family: var(--heading-font-family);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--partas-muted);
+    margin-bottom: 10px;
+}
+
+#fsdocs-page-menu ul li {
+    transition: border-color 150ms;
+}
+
+#fsdocs-page-menu ul li.active,
+#fsdocs-page-menu ul li:hover {
+    border-color: var(--primary);
+}
+
+#fsdocs-page-menu ul li.active a {
+    color: var(--primary);
+}
+
+#fsdocs-page-menu ul li a {
+    font-size: 13px;
+    transition: color 150ms;
+}
+
+/* --------------------------------------------------------------------------
+   Search dialog
+   -------------------------------------------------------------------------- */
+dialog {
+    border-radius: 12px;
+    box-shadow: 0 12px 48px rgba(13,27,75,.35);
+    /* Gradient top accent */
+    border-top: 3px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+    overflow: hidden;
+}
+
+dialog::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--partas-gradient-full);
+    z-index: 1;
+}
+
+dialog input[type=search] {
+    font-family: var(--system-font);
+    background: light-dark(var(--partas-off-white), #0a1430);
+    color: var(--text-color);
+    outline: 2px solid var(--primary);
+    border-radius: var(--radius);
+}
+
+/* --------------------------------------------------------------------------
+   Focus rings
+   -------------------------------------------------------------------------- */
+:focus-visible {
+    outline: 2px solid var(--partas-cyan);
+    outline-offset: 2px;
+    border-radius: 4px;
 }

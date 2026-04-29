@@ -42,6 +42,51 @@ type PendingSymbolSlot<'T> =
     inherit SymbolSlotWithDefault<PendingSignal<'T>>
 ```
 
+<div class="mermaid">
+flowchart TD
+    subgraph Guarded_Properties_System
+        tag[XanthamTag] --> slots[Guarded Properties]
+        slots --> slot1[SummaryContent]
+        slots --> slot2[Documentation] 
+        slots --> slot3[ParameterBuilder]
+        slots --> slot4[TypeSignal]
+        slots --> slot5[MemberBuilder]
+        slots --> slot6[ExportBuilder]
+    end
+    subgraph Access_Patterns
+        get[Get Access] --> slot1
+        get --> slot2
+        get --> slot3
+        get --> slot4
+        get --> slot5
+        get --> slot6
+        set[Set Access] --> slot1
+        set --> slot2  
+        set --> slot3
+        set --> slot4
+        set --> slot5
+        set --> slot6
+        clear[Clear Operations] --> slot1
+        clear --> slot2
+        clear --> slot3
+        clear --> slot4
+        clear --> slot5
+        clear --> slot6
+    end
+    subgraph Internal_System
+        symbol[Symbol Key] --> slots
+        tags[Tag Storage] --> slots
+        cache[Cache System] --> slots
+        pending[Pending Signals] --> slots
+    end
+    tag --> internal[Internal Processing]
+    internal --> get
+    get --> results[Results]
+    results --> cache
+    cache --> set
+    set --> tag
+</div>
+
 ## Implementation Details
 
 ### Helpers Module
