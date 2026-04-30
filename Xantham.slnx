@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/ci/">
+    <File Path=".github/workflows/docs.yml" />
+  </Folder>
   <Folder Name="/ai/">
     <File Path="CLAUDE.md" />
     <File Path="AGENTS.md" />
@@ -55,6 +58,8 @@
     <File Path="docs/content/assets/favicon-32x32.png" />
     <File Path="docs/content/assets/favicon.ico" />
   </Folder>
+<!--    ===================    -->
+<!--    MISCELLANEOUS    -->
   <Folder Name="/misc/sln build/">
     <File Path="Directory.Build.props" />
     <File Path="Directory.Build.targets" />
@@ -63,6 +68,7 @@
     <File Path="package.json" />
     <File Path="README.md" />
   </Folder>
+<!--    ===================    -->
   <Folder Name="/src/">
     <Project Path="src/Xantham.Common/Xantham.Common.fsproj" />
     <Project Path="src/Xantham.Decoder/Xantham.Decoder.fsproj" />
