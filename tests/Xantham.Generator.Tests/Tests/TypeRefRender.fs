@@ -412,7 +412,7 @@ The intent behind a signature such as `int -> bool -> int -> string` is inherent
 
 let contextPersistanceTests = testList "Context memoization" [
     testCase "Unseen primitive" <| fun _ ->
-        let newRef = primitive TypeKindPrimitive.String
+        let newRef = Conditional.create (primitive TypeKindPrimitive.String) (primitive TypeKindPrimitive.Integer) |> Conditional.wrap
         let getRef () =
             GeneratorContext.Prelude.tryGet ctx newRef
             |> ValueOption.toOption

@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/ci/">
     <File Path=".github/workflows/docs.yml" />
+    <Project Path="Build.fsproj" />
   </Folder>
   <Folder Name="/ai/">
     <File Path="CLAUDE.md" />
