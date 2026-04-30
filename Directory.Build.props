@@ -21,6 +21,7 @@ rampant.
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <FsDocsAllowExecutableProject>true</FsDocsAllowExecutableProject>
         <RepositoryUrl>https://github.com/shayanhabibi/Xantham</RepositoryUrl>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <FsDocsLicenseLink>https://github.com/shayanhabibi/Xantham/blob/master/LICENSE.md</FsDocsLicenseLink>
         <FsDocsReleaseNotesLink>https://github.com/shayanhabibi/Xantham/blob/master/RELEASE_NOTES.md</FsDocsReleaseNotesLink>
         <PackageProjectUrl>https://shayanhabibi.github.io/Xantham</PackageProjectUrl>
