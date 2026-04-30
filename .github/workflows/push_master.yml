@@ -1,0 +1,19 @@
+﻿name: CI
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch: 
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout source code
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+      - name: Restore FAKE
+        run: dotnet restore Build.fsproj
+      - name: Run FAKE
+        run: dotnet run -- tests
