@@ -168,6 +168,8 @@ module ExportStore =
                 ctx.checker.getTypeAtLocation node
                 |> _.TypeKey
         XanthamTag.debugLocationAndCommentAndForget "Prelude.ExportStore.create" $"ExportStore created with key {key}" tag
+        GuardedData.TypeSignal.getOrSetDefault tag
+        |> _.Set(key)
         {
             RefKey = key
             Builder = GuardedData.ExportBuilder.getOrSetDefault tag
