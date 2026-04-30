@@ -1,6 +1,7 @@
 ---
 title: Quick Start
 category: Xantham.Fable
+categoryindex: 1
 index: 1
 ---
 

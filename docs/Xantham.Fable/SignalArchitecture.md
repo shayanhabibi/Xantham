@@ -1,6 +1,7 @@
 ---
 title: Signals
 category: Xantham.Fable
+categoryindex: 1
 index: 4
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: ArenaInterner
 category: Xantham.Decoder
-categoryindex: 2
+categoryindex: 1
 index: 6
 ---
 

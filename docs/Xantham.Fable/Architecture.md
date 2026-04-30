@@ -1,7 +1,7 @@
 ---
 title: Architecture
 category: Xantham.Fable
-categoryindex: 2
+categoryindex: 1
 index: 2
 ---
 

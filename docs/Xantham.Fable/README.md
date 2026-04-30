@@ -1,6 +1,7 @@
 ---
 title: Introduction
 category: Xantham.Fable
+categoryindex: 1
 index: 0
 ---
 

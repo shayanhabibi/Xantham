@@ -42,6 +42,8 @@ let main argsv =
             Ops.clean ==> Ops.fableClean
             Ops.test
             Ops.fableTest
+            Ops.setupTest
+            Ops.setupFableTest
             Ops.format
         ]
         Ops.tests <== [

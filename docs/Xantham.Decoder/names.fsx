@@ -2,7 +2,7 @@
 ---
 title: Names and Casing
 category: Xantham.Decoder
-categoryindex: 2
+categoryindex: 1
 index: 3
 ---
 
