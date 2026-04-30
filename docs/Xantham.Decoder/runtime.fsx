@@ -18,7 +18,7 @@ The simplest case takes a path to a Xantham JSON file:
 *)
 
 (*** condition: prepare ***)
-#I "../../src/Xantham.Decoder/bin/Debug/net10.0"
+#I "../../src/Xantham.Decoder/bin/Release/net10.0"
 #r "Xantham.Decoder.dll"
 open Xantham.Decoder
 (** *)

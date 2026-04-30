@@ -23,7 +23,7 @@ attributes (`[<CompiledName "...">]`), error messages, or round-tripping.
 *)
 
 (*** condition: prepare ***)
-#I "../../src/Xantham.Decoder/bin/Debug/net10.0"
+#I "../../src/Xantham.Decoder/bin/Release/net10.0"
 #r "Xantham.Decoder.dll"
 open Xantham.Decoder
 (** *)

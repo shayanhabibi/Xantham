@@ -22,7 +22,7 @@ written by `Xantham.Fable` and decodes it into a navigable graph:
 *)
 
 (*** hide ***)
-#I "../../src/Xantham.Generator/bin/Debug/net10.0"
+#I "../../src/Xantham.Generator/bin/Release/net10.0"
 #r "Xantham.Generator.dll"
 #r "Xantham.Decoder.dll"
 #r "Fabulous.AST.dll"
