@@ -188,14 +188,14 @@ module TypeAlias =
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             Type =
-                // avoid trouble from generated keys such as with intersection types
-                // TODO - is it better to just prevent intersection types seeding their tags with their semantic type keys, and using their generated keys instead?
-                innerTypeSignal
-                |> ctx.routeTypeTo xanTag
-                |> Signal.map (fun typ ->
-                    if typ <> TypeKindPrimitive.Unknown.TypeKey then
-                        ctx.signalCache[identityKey].Key
-                    else typ)
+                match node.``type`` with
+                | Patterns.Node.IntersectionTypeNode _ ->
+                    innerTypeSignal
+                    |> Signal.map (fun typ ->
+                        if typ <> TypeKindPrimitive.Unknown.TypeKey then
+                            ctx.signalCache[identityKey].Key
+                        else typ)
+                | _ -> innerTypeSignal
             TypeParameters = getTypeParamSlots ctx node.typeParameters
             Documentation = JSDocTags.resolveDocsForTag ctx xanTag
         }
