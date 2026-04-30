@@ -93,6 +93,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         }
         |> SType.Intersection
         |> setAstSignal
+        setTypeKeyFromNode intersectionTypeNode
         // Same pattern as UnionType: TypeStore.Key is generated but TypeSignal is the semantic
         // intersection's natural TypeKey. Push the semantic type to ensure it's registered.
         let semanticIntersection = ctx.checker.getTypeFromTypeNode intersectionTypeNode
