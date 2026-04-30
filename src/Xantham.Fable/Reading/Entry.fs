@@ -65,10 +65,15 @@ let getDeclarations (ctx: TypeScriptReader) (sourceFile: Ts.SourceFile) =
         |> Option.map (
             ctx.checker.getExportsOfModule // get export declaration symbols
             >> _.AsArray
-            >> Array.choose (fun (sym: Ts.Symbol) ->
-                sym.declarations // get lead declaration symbols
-                |> Option.bind (fun decls -> decls |> Seq.tryHead)
-                |> Option.map (fun decl ->
+            >> Array.collect (fun (sym: Ts.Symbol) ->
+                // Walk every declaration of the export symbol, not just the head. Value+type
+                // namespace merging (e.g. `declare const Node` + `type Node = ...`) yields one
+                // merged symbol with multiple sibling declarations of different kinds; taking
+                // only `Seq.tryHead` silently dropped the type-side sibling.
+                sym.declarations
+                |> Option.map _.AsArray
+                |> Option.defaultValue [||]
+                |> Array.map (fun decl ->
                     ctx.CreateXanthamTag(decl) |> fst |> TagState.value |> fun tag ->
                         tag // route symbol source in case of barrel exports
                         |> GuardedData.Source.Keyed.getOrSetWith (fun _ -> Signal.source ctx.moduleMap[sourceFile])

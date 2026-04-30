@@ -104,12 +104,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
             >> Array.iter (
                 ctx.CreateXanthamTag
                 >> fst
-                >> TagState.applyUnvisited (fun declXanTag ->
-                    match declXanTag.Value with
-                    | XanTagKind.TypeDeclaration (TypeDeclaration.TypeAlias _) ->
-                        XanthamTag.chainDebug xanTag declXanTag
-                        |> pushToStack ctx 
-                    | _ -> ())
+                >> TagState.applyUnvisited (XanthamTag.chainDebug xanTag >> pushToStack ctx)
                 >> ignore
                 )
             )

@@ -179,15 +179,23 @@ module Interface =
 
 module TypeAlias =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.TypeAliasDeclaration) (source: ModuleName) =
-        let innerTypeSignal, innerBuilderSignal =
+        let innerTypeSignal, innerBuilderSignal, identityKey =
             ctx.CreateXanthamTag node.``type``
             |> fst
-            |> stackPushAndThen ctx (fun tag -> tag.TypeSignal, tag.Builder)
+            |> stackPushAndThen ctx (XanthamTag.chainDebug xanTag >> fun tag -> tag.TypeSignal, tag.Builder, tag.IdentityKey)
         let builder = {
             SAliasBuilder.Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
-            Type = innerTypeSignal |> ctx.routeTypeTo xanTag
+            Type =
+                // avoid trouble from generated keys such as with intersection types
+                // TODO - is it better to just prevent intersection types seeding their tags with their semantic type keys, and using their generated keys instead?
+                innerTypeSignal
+                |> ctx.routeTypeTo xanTag
+                |> Signal.map (fun typ ->
+                    if typ <> TypeKindPrimitive.Unknown.TypeKey then
+                        ctx.signalCache[identityKey].Key
+                    else typ)
             TypeParameters = getTypeParamSlots ctx node.typeParameters
             Documentation = JSDocTags.resolveDocsForTag ctx xanTag
         }
