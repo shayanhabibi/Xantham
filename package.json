@@ -10,7 +10,7 @@
         "watch-test": "dotnet fable --cwd tests/Xantham.Fable.Tests --noCache --watch --runWatch mocha Program.fs.js",
         "prestart": "dotnet fable --cwd src/Xantham.Fable",
         "start": "node src/Xantham.Fable/Program.fs.js",
-        "run": "dotnet fable --cwd src/Xantham.Fable --noCache --run node Program.fs.js",
+        "run": "dotnet fable --cwd src/Xantham.Fable -c DEBUG --noCache --run node Program.fs.js",
         "watch": "dotnet fable --cwd src/Xantham.Fable --noCache --watch --run node --watch Program.fs.js",
         "test:signal": "dotnet fable --cwd tests/ --noCache Signal.test.fsx && node tests/Signal.test.fs.js"
     },

@@ -402,14 +402,19 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
         ctx.moduleMap[node]
     match node with
     | TypeDeclaration.TypeParameter typeParameterDeclaration ->
+        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | TypeParameter" xanTag
         TypeParameter.read ctx xanTag typeParameterDeclaration
     | TypeDeclaration.Interface interfaceDeclaration ->
+        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Interface" xanTag
         Interface.read ctx xanTag interfaceDeclaration source
     | TypeDeclaration.TypeAlias typeAliasDeclaration ->
+        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | TypeAlias" xanTag
         TypeAlias.read ctx xanTag typeAliasDeclaration source
     | TypeDeclaration.Class classDeclaration ->
+        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Class" xanTag
         Class.read ctx xanTag classDeclaration source
     | TypeDeclaration.HeritageClause heritageClause ->
+        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | HeritageClause" xanTag
         // Wire this tag to the first type in the clause so Interface.read's Heritage
         // computed signal can read a TypeReference builder from it.
         match heritageClause.types.AsArray |> Array.tryHead with
@@ -426,6 +431,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
             xanTag.Builder
             |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
     | TypeDeclaration.ExpressionWithTypeArguments exprWithTypeArgs ->
+        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | ExpressionWithTypeArguments" xanTag
         // Route via checker; consumers look up TypeSignal/Builder on this tag.
         let resolvedType = ctx.checker.getTypeAtLocation exprWithTypeArgs
         let innerTag = ctx.CreateXanthamTag resolvedType |> fst |> stackPushAndThen ctx id
@@ -434,10 +440,13 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
         xanTag.Builder
         |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
     | TypeDeclaration.Enum enumDeclaration ->
+        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Enum" xanTag
         Enum.readDeclaration ctx xanTag enumDeclaration source
     | TypeDeclaration.EnumMember enumMember ->
+        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | EnumMember" xanTag
         Enum.readMember ctx xanTag enumMember
     | TypeDeclaration.VariableStatement variableStatement ->
+        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | VariableStatement" xanTag
         // Push each inner VariableDeclaration and wire this tag's signals to the first one.
         let tags =
             variableStatement.declarationList.declarations.AsArray
@@ -454,12 +463,16 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
             xanTag.TypeSignal |> Signal.fulfillWith (fun () -> firstTag.TypeSignal.Value)
             xanTag.ExportBuilder |> Signal.fulfillWith(fun () -> firstTag.ExportBuilder.Value)
     | TypeDeclaration.VariableDeclaration variableDeclaration ->
+        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | VariableDeclaration" xanTag
         Variable.readDeclaration ctx xanTag variableDeclaration source
     | TypeDeclaration.FunctionDeclaration functionDeclaration ->
+        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | FunctionDeclaration" xanTag
         FunctionDecl.read ctx xanTag functionDeclaration source
     | TypeDeclaration.Module moduleDeclaration ->
+        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Module" xanTag
         Module.read ctx xanTag moduleDeclaration source
     | TypeDeclaration.Namespace namespaceDeclaration ->
+        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Namespace" xanTag
         Module.read ctx xanTag namespaceDeclaration source
     | TypeDeclaration.ModuleBlock _ ->
         () // Processed inline during Module/Namespace dispatch; no standalone signal needed

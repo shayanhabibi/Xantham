@@ -93,7 +93,7 @@ module TypeStore =
             let withGeneratedKey (tag: XanthamTag) =
                 withTypeKeyMap (fun _ ->
                     let typeKey = TypeKey.create()
-                    XanthamTag.debugLocationAndCommentAndForget "Prelude.withGeneratedKey" $"Generated key {typeKey}" tag
+                    XanthamTag.debugLocationAndCommentAndForget "Prelude.TypeStore.Create.withGeneratedKey" $"Generated key {typeKey}" tag
                     typeKey
                     ) tag
                 
@@ -101,11 +101,25 @@ module TypeStore =
                 if tag.Value.IsMemberDeclaration then failwith "Attempted to create TypeStore for member declaration"
                 if usesGeneratedKey tag then
                     withGeneratedKey tag
-                else tag |> withTypeKeyMap (function
-                    | Choice1Of2 typ -> typ.TypeKey
-                    | Choice2Of2 node ->
-                        ctx.checker.getTypeAtLocation node
-                        |> _.TypeKey)
+                else
+                let typeKey =
+                    tag
+                    |> withTypeKeyMap (function
+                        | Choice1Of2 typ -> typ.TypeKey
+                        | Choice2Of2 node ->
+                            ctx.checker.getTypeAtLocation node
+                            |> _.TypeKey)
+                tag
+                |> XanthamTag.debugLocationAndComment "Prelude.TypeStore.Create.create" $"TypeStore created with key {typeKey.Key}"
+                |> XanthamTag.withDebugOneShot "typestore:created" (fun tag ->
+                    Signal.effect (fun () ->
+                        XanthamTag.debugCommentAndForget $"TypeBuilder changed to {typeKey.Builder.Value}" tag
+                        ) [ typeKey.Builder.Invalidated ]
+                    |> ignore
+                    )
+                |> ignore
+                typeKey
+                
 
 module MemberStore =
     module Parameter =

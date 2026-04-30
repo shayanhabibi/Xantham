@@ -308,7 +308,18 @@ module XanthamTag =
         #if DEBUG
         if not tag.Debug && condition tag then
             tag.Debug <- true
-            chalk.white.Invoke "[TRACKING] " + $"Tracking {tag.IdentityKey}" + "\n           Tracking Reason: " + chalk.italic.Invoke reason + "\n           Tracking Id: " + chalk.yellow.Invoke $"""[{tag.DebugId}]"""
+            let underlyingStr =
+                match tag.ToUnderlyingValue() with
+                | Choice1Of2 typ ->
+                    typ.flags.ToStringArray()
+                    |> sprintf "Type with flags: %A"
+                | Choice2Of2 decl ->
+                    decl.kind.Name
+                    |> sprintf "Node of kind: %s"
+            chalk.white.Invoke "[TRACKING] " + $"Tracking {tag.IdentityKey}"
+            + "\n           Tracking Reason: " + chalk.italic.Invoke reason
+            + "\n           Tracking Kind: " + chalk.italic.Invoke underlyingStr
+            + "\n           Tracking Id: " + chalk.yellow.Invoke $"""[{tag.DebugId}]"""
             |> Log.debug
         #endif
         tag
@@ -318,12 +329,26 @@ module XanthamTag =
         #endif
         #if DEBUG
         if condition tag then
+            let underlyingStr =
+                match tag.ToUnderlyingValue() with
+                | Choice1Of2 typ ->
+                    typ.flags.ToStringArray()
+                    |> sprintf "Type with flags: %A"
+                | Choice2Of2 decl ->
+                    decl.kind.Name
+                    |> sprintf "Node of kind: %s"
             if not tag.Debug then
                 tag.Debug <- true
-                chalk.white.Invoke "[TRACKING] " + $"Tracking {tag.IdentityKey}" + "\n           Tracking Reason: " + chalk.italic.Invoke reason + "\n           Tracking Id: " + chalk.yellow.Invoke $"""[{tag.DebugId}]"""
+                chalk.white.Invoke "[TRACKING] " + $"Tracking {tag.IdentityKey}"
+                + "\n           Tracking Reason: " + chalk.italic.Invoke reason
+                + "\n           Tracking Kind: " + chalk.italic.Invoke underlyingStr
+                + "\n           Tracking Id: " + chalk.yellow.Invoke $"""[{tag.DebugId}]"""
                 |> Log.debug
             else
-                chalk.gray.Invoke "[TRACKING] " + $"Tried tracking {tag.IdentityKey}" + "\n           Tracking Reason: " + chalk.italic.Invoke onFail + "\n           Known tracking id: " + chalk.gray.Invoke $"""[{tag.DebugId}]"""
+                chalk.gray.Invoke "[TRACKING] " + $"Tried tracking {tag.IdentityKey}"
+                + "\n           Tracking Reason: " + chalk.italic.Invoke onFail
+                + "\n           Tracking Kind: " + chalk.italic.Invoke underlyingStr
+                + "\n           Known tracking id: " + chalk.gray.Invoke $"""[{tag.DebugId}]"""
                 |> Log.debug
         #endif
         tag

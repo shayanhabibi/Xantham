@@ -17,7 +17,7 @@ the underlying `TsType` / `TsExportDeclaration`.
 
 ## The three layers
 
-```
+```text
 CodeKey
  ├── Export of ExportCodeKey  ── Variable | Interface | TypeAlias | Class | Enum | Module | Function
  └── Type   of TypeCodeKey    ── GlobalThis | Conditional | Primitive | Union | …

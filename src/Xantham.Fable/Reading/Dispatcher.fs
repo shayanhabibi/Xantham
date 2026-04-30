@@ -13,6 +13,7 @@ let dispatch (ctx: TypeScriptReader) (tag: XanthamTag) =
         XanthamTag.debugLocationAndCommentAndForget "Dispatcher.dispatch | MemberDeclaration" "Already dispatched" tag
     // Dispatch
     | XanTagKind.MemberDeclaration memberDeclaration ->
+        XanthamTag.debugLocationAndCommentAndForget "Dispatcher.dispatch | MemberDeclaration" "dispatch" tag
         MemberDeclaration.dispatch ctx tag memberDeclaration
     // ====== Type-Level Dispatch ========
     // Already dispatched - noop
