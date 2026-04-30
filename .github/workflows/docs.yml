@@ -2,6 +2,7 @@
 
 # Trigger this Action when new code is pushed to the main branch
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
