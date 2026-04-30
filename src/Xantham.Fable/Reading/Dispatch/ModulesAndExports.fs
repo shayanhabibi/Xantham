@@ -105,6 +105,8 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
                 |> Signal.fulfillWith (fun () -> decl.TypeSignal.Value)
                 xanTag.Builder
                 |> Signal.fulfillWith (fun () -> decl.Builder.Value)
+                xanTag.ExportBuilder
+                |> Signal.fulfillWith (fun () -> decl.ExportBuilder.Value)
         | None -> Log.error "failed to get symbol"
     | ModulesAndExports.NamedExports namedExports -> ()
     | ModulesAndExports.NamespaceExport namespaceExportDeclaration -> ()
