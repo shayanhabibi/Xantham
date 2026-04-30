@@ -3,7 +3,18 @@ on:
   push:
     branches:
       - master
+    paths:
+      - '**.fs'
+      - 'src/**/**.fsproj'
+      - '!ci/**.fs'
   workflow_dispatch: 
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
 
 jobs:
   tests:
