@@ -179,23 +179,15 @@ module Interface =
 
 module TypeAlias =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.TypeAliasDeclaration) (source: ModuleName) =
-        let innerTypeSignal, innerBuilderSignal, identityKey =
+        let innerTypeSignal, innerBuilderSignal =
             ctx.CreateXanthamTag node.``type``
             |> fst
-            |> stackPushAndThen ctx (XanthamTag.chainDebug xanTag >> fun tag -> tag.TypeSignal, tag.Builder, tag.IdentityKey)
+            |> stackPushAndThen ctx (fun tag -> tag.TypeSignal, tag.Builder)
         let builder = {
             SAliasBuilder.Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
-            Type =
-                match node.``type`` with
-                | Patterns.Node.IntersectionTypeNode _ ->
-                    innerTypeSignal
-                    |> Signal.map (fun typ ->
-                        if typ <> TypeKindPrimitive.Unknown.TypeKey then
-                            ctx.signalCache[identityKey].Key
-                        else typ)
-                | _ -> innerTypeSignal
+            Type = innerTypeSignal |> ctx.routeTypeTo xanTag
             TypeParameters = getTypeParamSlots ctx node.typeParameters
             Documentation = JSDocTags.resolveDocsForTag ctx xanTag
         }
