@@ -27,6 +27,7 @@
   <Folder Name="/docs/Overview/">
     <File Path="docs/Overview/litmus-tests.md" />
     <File Path="docs/Overview/overview.md" />
+    <File Path="docs/Overview/usage.md" />
   </Folder>
   <Folder Name="/docs/Documentation/" />
   <Folder Name="/docs/content/">

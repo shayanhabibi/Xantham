@@ -74,11 +74,16 @@ module CliApiManagement =
         | setupTest
         | fableTest
         | test
+        | fableTestSignal
         | postFableTest
         | postTest
+        | runAllTests
         | tests
         | restore
         | format
+        | fableTestWatch
+        | fableBuild
+        | watch
         static member inline op_Implicit (op: Ops): string = op.ToString()
 #onwarn 3391
     
@@ -88,7 +93,10 @@ Usage:
     xantham [options]
     xantham build [options]
     xantham format [options]
+    xantham watch (fable | docs) [options] [npm]
+    xantham test (dotnet | fable | signal) [options] [npm]
     xantham tests [options] [npm]
+    xantham run <TARGET> [options] [npm]
 Npm Options [npm]:
     --ci                    When performing installation of dependencies, use the `ci` command.
     --release               Build with Fable `-c Release`
@@ -133,8 +141,13 @@ module FakeInitializationAndUtilities =
         |> CreateProcess.withWorkingDirectory dir
         |> CreateProcess.ensureExitCode
     
-    let private dotnet args dir =
+    let dotnet args dir =
         createProcess "dotnet" args dir |> Proc.run |> ignore
+    
+    let fable args dir = dotnet ("fable" :: args) dir
+    
+    let mocha args dir =
+        createProcess Npm.defaultNpmParams.NpmFilePath ("exec" :: "--" :: "mocha" :: args) dir |> Proc.run |> ignore
     
     let private gitCi args dir =
         createProcess gitCiCommand args dir |> Proc.run |> ignore
@@ -145,52 +158,6 @@ module FakeInitializationAndUtilities =
         let install = setDir >> Npm.install
         let test = setDir >> Npm.runTest "test"
         let runScript command = setDir root |> Npm.run command
-    module Xantham =
-        open Fake.IO
-        open Fake.IO.Globbing.Operators
-        open Fake.DotNet
-        let clean () = !!"**/**/bin" -- "bin" |> Shell.cleanDirs
-        let restore () =
-            dotnet [ "restore"; Solutions.Xantham; "--verbosity"; "q" ] root
-            dotnet [ "tool"; "restore"; "--verbosity"; "q" ] root
-        let format () =
-            sourceFiles
-            |> Seq.map (sprintf "\"%s\"")
-            |> String.concat " "
-            |> DotNet.exec id "fantomas"
-            |> function
-                | { ExitCode = 0 } -> ()
-                | result -> Trace.log $"Errors while formatting all files: %A{result.Messages}"
-        let build () =
-            // Building the generator will also build the dependencies
-            Projects.FsProj.Generator
-            |> DotNet.build (fun p -> {
-                p with
-                    Configuration = DotNet.BuildConfiguration.Release
-                    DotNet.BuildOptions.MSBuildParams.DisableInternalBinLog = true
-                    DotNet.BuildOptions.MSBuildParams.Verbosity = Some MSBuildVerbosity.Quiet
-            })
-        let test () =
-            // DotNet.test
-            //     (fun p -> { p with DotNet.TestOptions.MSBuildParams.DisableInternalBinLog = true })
-            //     Tests.FsProj.Generator
-            dotnet [ "run" ] Tests.Directory.Generator.``.``
-        module Fable =
-            let build () = dotnet [ "fable"; "-e"; ".js" ] Projects.Directory.Fable.``.``
-            let test () = Npm.test root
-            let watchTest () = Npm.runScript "watch-test"
-            let watch () = Npm.runScript "watch"
-            let testSignal () = Npm.runScript "test:signal"
-            let run () = Npm.runScript "run"
-            let clean () =
-                let func = [ "fable"; "clean"; "-e"; ".js"; "--yes" ]
-                [|
-                    Projects.Directory.Fable.``.``
-                    Projects.Directory.FableCore.``.``
-                    Tests.Directory.Tests.``.``
-                    Projects.Directory.Common.``.``
-                |]
-                |> Array.Parallel.iter (dotnet func)
     module Git =
         open Fake.Tools.Git
         let inline private run command = CommandHelper.directRunGitCommandAndFail root command

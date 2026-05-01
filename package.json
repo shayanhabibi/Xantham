@@ -8,6 +8,11 @@
     "bin": "./index.js",
     "main": "index.js",
     "license": "Apache-2.0",
+    "publishConfig": { },
+    "files": [
+        "src/Xantham.Fable/output/",
+        "index.js"
+    ],
     "engines": {
         "node": ">=16"
     },
