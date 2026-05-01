@@ -1,6 +1,6 @@
 # Xantham
 
-![NPM Version](https://img.shields.io/npm/v/xantham?label=npm%20xantham)
+[![NPM Version](https://img.shields.io/npm/v/xantham?label=npm%20xantham)](https://www.npmjs.com/package/xantham)
 
 > A schema-driven TypeScript → F# bindings generator.
 
