@@ -14,6 +14,7 @@ litmus test is to verify that we can complete the first two stages correctly,
 without stack overflows or missing references/types.
 
 The following litmus test type hierarchies have been completed:
+
 - `@types/three`
 - `solid-js`
 - `typescript`
