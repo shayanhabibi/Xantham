@@ -81,9 +81,17 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
             // natural TypeKey in their type fields. Ensure the semantic union type-level entry
             // exists in signalCache so the generator can resolve it.
             let semanticUnion = ctx.checker.getTypeFromTypeNode unionTypeNode
-            match ctx.CreateXanthamTag semanticUnion |> fst with
-            | TagState.Unvisited innerTag -> pushToStack ctx innerTag
-            | TagState.Visited _ -> ()
+            // match ctx.CreateXanthamTag semanticUnion |> fst with
+            // | TagState.Unvisited innerTag -> pushToStack ctx innerTag
+            // | TagState.Visited _ -> ()
+            
+            // Force push regardless of visitation state, dispatcher will noop if visitation state
+            // is reflected in the type store. Bug didn't show up for this, but we're applying
+            // the same fix that was done for intersections proactively.
+            ctx.CreateXanthamTag semanticUnion
+            |> fst
+            |> TagState.apply (fun _ -> pushToStack ctx)
+            |> ignore
     | TypeNode.IntersectionType intersectionTypeNode ->
         XanthamTag.debugLocationAndForget "TypeNode.dispatch | IntersectionType" xanTag
         {
@@ -97,9 +105,12 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         // Same pattern as UnionType: TypeStore.Key is generated but TypeSignal is the semantic
         // intersection's natural TypeKey. Push the semantic type to ensure it's registered.
         let semanticIntersection = ctx.checker.getTypeFromTypeNode intersectionTypeNode
-        match ctx.CreateXanthamTag semanticIntersection |> fst with
-        | TagState.Unvisited innerTag -> pushToStack ctx innerTag
-        | TagState.Visited _ -> ()
+        // Force push regardless of visitation state, dispatcher will noop if visitation state
+        // is reflected in the type store.
+        ctx.CreateXanthamTag semanticIntersection
+        |> fst
+        |> TagState.apply (fun _ -> pushToStack ctx)
+        |> ignore
     | TypeNode.ArrayType arrayTypeNode ->
         XanthamTag.debugLocationAndForget "TypeNode.dispatch | ArrayType" xanTag
         let arrayElementTag =
