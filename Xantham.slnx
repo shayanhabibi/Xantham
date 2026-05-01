@@ -25,6 +25,7 @@
     <File Path="docs/_head.html" />
   </Folder>
   <Folder Name="/docs/Overview/">
+    <File Path="docs/Overview/litmus-tests.md" />
     <File Path="docs/Overview/overview.md" />
   </Folder>
   <Folder Name="/docs/Documentation/" />
