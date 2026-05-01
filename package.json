@@ -1,5 +1,11 @@
 {
     "type": "module",
+    "name": "xantham",
+    "author": "shayanhabibi",
+    "repository": "https://github.com/shayanhabibi/xantham",
+    "description": "CLI for generating Xantham IR json.",
+    "version": "0.0.1",
+    "bin": "./index.js",
     "main": "index.js",
     "license": "Apache-2.0",
     "engines": {
@@ -8,15 +14,16 @@
     "scripts": {
         "pretest": "dotnet fable -c Debug --cwd tests/Xantham.Fable.Tests -o dist/tests",
         "test": "mocha tests/Xantham.Fable.Tests/dist/tests",
-        "watch-test": "dotnet fable --cwd tests/Xantham.Fable.Tests --noCache --watch --runWatch mocha Program.fs.js",
-        "prestart": "dotnet fable --cwd src/Xantham.Fable",
-        "start": "node src/Xantham.Fable/Program.fs.js",
-        "run": "dotnet fable --cwd src/Xantham.Fable -c DEBUG --noCache --run node Program.fs.js",
-        "watch": "dotnet fable --cwd src/Xantham.Fable --noCache --watch --run node --watch Program.fs.js",
-        "test:signal": "dotnet fable --cwd tests/ --noCache Signal.test.fsx && node tests/Signal.test.fs.js"
+        "watch-test": "dotnet fable --cwd tests/Xantham.Fable.Tests -e .fs.js --noCache --watch --runWatch mocha Program.fs.js",
+        "prestart": "dotnet fable --cwd src/Xantham.Fable -o output -e .fs.js",
+        "start": "node src/Xantham.Fable/output/Program.fs.js",
+        "run": "dotnet fable --cwd src/Xantham.Fable -e .fs.js -c DEBUG --noCache -o output --run node output/Program.fs.js",
+        "watch": "dotnet fable --cwd src/Xantham.Fable --noCache -e .fs.js -o output --watch --run node --watch output/Program.fs.js",
+        "test:signal": "dotnet fable --cwd tests/ --noCache Signal.test.fsx && node tests/Signal.test.fs.js",
+        "prebuild": "dotnet fable --cwd src/Xantham.Fable -c Release --noCache -o output -e .fs.js",
+        "build": ""
     },
     "devDependencies": {
-        "mocha": "^11.7.5",
         "@iconify-icons/lucide": "^1.2.135",
         "@iconify-icons/simple-icons": "^1.2.74",
         "@iconify/react": "^4.1.1",
@@ -30,6 +37,7 @@
         "fable-css-modules": "^1.8.0",
         "gh-pages": "^6.1.1",
         "lz-string": "^1.5.0",
+        "mocha": "^11.7.5",
         "monaco-editor": "^0.46.0",
         "nodemon": "^3.1.0",
         "react": "^18.2.0",
@@ -38,10 +46,10 @@
         "solid-js": "^1.9.10",
         "ts-morph": "^27.0.2",
         "vite": "^5.2.9",
+        "@ts-morph/bootstrap": "^0.28.1",
         "vitest": "^1.5.0"
     },
     "dependencies": {
-        "@ts-morph/bootstrap": "^0.28.1",
         "chalk": "^5.3.0",
         "typescript": "^5.9.3"
     }

@@ -19,4 +19,7 @@
       <PackageReference Include="Fake.Tools.Git" Version="6.1.4" />
       <PackageReference Include="Partas.GitNet" Version="3.0.0" />
     </ItemGroup>
+    <ItemGroup>
+      <Content Include="index.js" />
+    </ItemGroup>
 </Project>

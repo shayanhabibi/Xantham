@@ -307,7 +307,11 @@ module Internal =
                     (result: EncodedResult)  =
         let destination =
             if destination = null then
+                #if !RELEASE
                 path.join(__SOURCE_DIRECTORY__, "output.json")
+                #else
+                "./output.json"
+                #endif
             elif destination.EndsWith(".json") then
                 destination
             else path.join(destination, "output.json")
@@ -316,9 +320,11 @@ module Internal =
         let json = EncodedResult.encode result |> Encode.toString 1
         #else
         // let json = Encode.Auto.toString(result)
-        let json = EncodedResult.encode result |> Encode.toString 1
+        let json = EncodedResult.encode result |> Encode.toString 0
         #endif
-        fs.writeFile(destination, json, None, callback = ignore)
+        fs.writeFile(destination, json, None, callback = (function
+            | Some error -> failwith $"%A{error}"
+            | None -> ()))
 
     let initialise (reader: TypeScriptReader) =
         tagPrimitives reader

@@ -89,10 +89,9 @@ Usage:
     xantham build [options]
     xantham format [options]
     xantham tests [options] [npm]
-    xantham test [options]
-    xantham fableTests [options] [npm]
 Npm Options [npm]:
     --ci                    When performing installation of dependencies, use the `ci` command.
+    --release               Build with Fable `-c Release`
 Options [options]:
     -h, --help              Show this help message.
     -q, --quick             Skip setup steps, such as installing dependencies (for local environments).

@@ -9,7 +9,7 @@ open Node.Api
 open Xantham.Fable.Types
 open Fable.Core.JsInterop
 
-#if !FABLE_TEST
+#if !RELEASE && !FABLE_TEST
 // let dtsFile = path.join(__SOURCE_DIRECTORY__, "../../node_modules/solid-js/types/index.d.ts")
 let dtsFile file = path.join(__SOURCE_DIRECTORY__, $"../../node_modules/{file}")
 let reader =
@@ -28,7 +28,7 @@ let private readFile (file: string) (destination: string) =
             TypeScriptReader.create file
             |> readAndWrite (
                 if isNull destination then
-                    __SOURCE_DIRECTORY__ + "/output.json"
+                    "output.json"
                 else
                     destination
                 )
@@ -58,6 +58,13 @@ let main argv =
     match argv with
     | args when args |> List.contains "--help" || args = [] -> printHelp()
     | input :: ("--output" | "-o") :: [ output ] ->
+        let pathIsFile = path.extname output <> ""
+        let dirPath =
+            if pathIsFile
+            then path.join(output, "..")
+            else output
+        if fs.existsSync(!^dirPath) |> not then
+            fs.mkdirSync(dirPath)
         readFile input output
     | [ input ] ->
         readFile input null
