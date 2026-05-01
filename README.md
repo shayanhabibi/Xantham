@@ -1,5 +1,7 @@
 # Xantham
 
+![NPM Version](https://img.shields.io/npm/v/xantham?label=npm%20xantham)
+
 > A schema-driven TypeScript → F# bindings generator.
 
 Xantham is a hard fork of [Glutinum](https://github.com/glutinum-org/cli) that tackles the TypeScript-to-.NET bindings problem differently. Instead of a single end-to-end pipeline it separates concerns into **extract**, **encode/decode**, and **generate** phases across Fable and .NET boundaries. The common JSON schema is the only hand-off point; generators consume `Xantham.Decoder` and never touch the extraction layer.
