@@ -8,3 +8,12 @@
 
 export type StringOrNumber = string | number;
 export type ThreeWay = string | number | null;
+
+export const RGBA1_Format = 1;
+export const RGBA2_Format = 2;
+export const RGBA3_Format = 3;
+
+export type RGBAFormat =
+    | typeof RGBA1_Format
+    | typeof RGBA2_Format
+    | typeof RGBA3_Format;

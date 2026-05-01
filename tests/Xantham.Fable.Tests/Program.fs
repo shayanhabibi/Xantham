@@ -661,6 +661,58 @@ let unionTests =
             match result |> findType threeWay.Type with
             | TsType.Union u -> "" |> Expect.hasLength u.Types 3
             | _ -> failwith "Expected Union"
+        
+        testList "Union of const typeof's" [
+            testCase "Union 'RGBAFormat' is present with 3 members" <| fun _ ->
+                let format = findAlias "RGBAFormat" result
+                match findType format.Type result with
+                | TsType.Union x -> "" |> Expect.hasLength x.Types 3
+                | _ -> failwith "Expected Union"
+            
+            testCase "All 3 variables present" <| fun _ ->
+                Expect.hasLength [
+                    findVariable "RGBA1_Format" result
+                    findVariable "RGBA2_Format" result
+                    findVariable "RGBA3_Format" result
+                ] 3 ""
+            
+            testCase "Type of each variable is a literal" <| fun _ ->
+                let vars = [
+                    findVariable "RGBA1_Format" result
+                    findVariable "RGBA2_Format" result
+                    findVariable "RGBA3_Format" result
+                ]
+                vars
+                |> List.forall (fun v ->
+                    match findType v.Type result with
+                    | TsType.Literal _ -> true
+                    | _ -> false
+                    )
+                |> Expect.isTrue
+                |> funApply ""
+                vars
+                |> List.choose (fun v ->
+                    match findType v.Type result with
+                    | TsType.Literal (TsLiteral.Int i) -> Some i
+                    | _ -> None)
+                |> Expect.containsAll
+                |> funApply [ 1; 2; 3 ]
+                |> funApply ""
+            testCase "Type of each variable equals union" <| fun _ ->
+                [
+                    findVariable "RGBA1_Format" result
+                    findVariable "RGBA2_Format" result
+                    findVariable "RGBA3_Format" result
+                ]
+                |> List.map _.Type
+                |> Expect.containsAll (match (findType (findAlias "RGBAFormat" result).Type result) with TsType.Union u -> u.Types | _ -> [])
+                |> funApply ""
+                
+                
+            
+                
+                
+        ]
     ]
 
 // -----------------------------------------------------------------------
