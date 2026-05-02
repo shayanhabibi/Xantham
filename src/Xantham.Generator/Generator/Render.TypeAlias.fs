@@ -23,6 +23,17 @@ module TypeAlias =
         let metadata =
             (Path.create path, typ)
             ||> RenderMetadata.createWithPathFromExport
+        let resolveInnerRef () =
+            let oldRef = ctx.PreludeGetTypeRef ctx scopeStore innerType
+            match ctx.PreludeRenders.TryGetValue(innerType.Value) with
+            | true, newRef ->
+                match ctx.TypeAliasRemap.TryGetValue(innerType.Value) with
+                | true, value ->
+                    let stripped = { oldRef with Nullable = false }
+                    TypeRefRender.replace value newRef.TypeRef stripped
+                    |> TypeRefRender.orNullable oldRef.Nullable
+                | _ -> newRef.TypeRef
+            | false, _ -> oldRef
         let rec matchImpl = function
             | ResolvedType.TypeQuery { Type = Resolve typ } ->
                 matchImpl typ
@@ -41,25 +52,12 @@ module TypeAlias =
             | ResolvedType.Conditional _
             | ResolvedType.Enum _
             | ResolvedType.Array _ ->
-                let oldRef = ctx.PreludeGetTypeRef ctx scopeStore innerType
-                let innerRef =
-                    match ctx.PreludeRenders.TryGetValue(innerType.Value) with
-                    | true, value -> ValueSome value
-                    | false, _ -> ValueNone
-                    |> ValueOption.map (fun newRef ->
-                        match ctx.TypeAliasRemap.TryGetValue(innerType.Value) with
-                        | true, value ->
-                            TypeRefRender.replace value newRef.TypeRef oldRef
-                        | _ -> newRef.TypeRef
-                        )
-                    |> ValueOption.defaultValue oldRef
-                    
                 {
                     TypeAliasRenderRef.Documentation = documentation
                     Metadata = metadata
                     Name = name
                     TypeParameters = typeParameters
-                    Type = innerRef
+                    Type = resolveInnerRef ()
                 }
                 |> TypeAliasRender.Alias
             | ResolvedType.Intersection _ 
@@ -88,7 +86,7 @@ module TypeAlias =
                         Metadata = metadata
                         Name = name
                         TypeParameters = typeParameters
-                        Type = ctx.PreludeGetTypeRef ctx scopeStore innerType
+                        Type = resolveInnerRef ()
                     }
                     |> TypeAliasRender.Alias
                 match ResolvedTypeCategories.create innerType.Value with
