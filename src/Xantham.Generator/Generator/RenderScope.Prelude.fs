@@ -12,7 +12,6 @@ open Xantham
 open Xantham.Decoder
 open Xantham.Decoder.ArenaInterner
 open Fabulous.AST
-open Fantomas.Core.SyntaxOak
 open Xantham.Generator.NamePath
 
 let private createConcreteTypeRef (path: TypePath) =
@@ -394,6 +393,10 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> LazyContainer.CreateFromValue
         |> prerender ctx scope
         |> TypeRefRender.nullable
+        |> RenderScope.createRootless resolvedType
+        |> addOrReplaceScope ctx resolvedType
+    | ResolvedType.TypeQuery typeQuery ->
+        prerender ctx scope typeQuery.Type
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Substitution substitutionType ->

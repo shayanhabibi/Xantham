@@ -54,7 +54,6 @@ open System.Collections.Generic
 open FSharp.Control
 open Xantham
 open Xantham.Decoder
-open Xantham.Decoder.Types
 open Xantham.Decoder.Types.Graph
 
 /// <summary>
@@ -112,6 +111,7 @@ type [<RequireQualifiedAccess>] ResolvedType =
     | TemplateLiteral of TemplateLiteral
     | Optional of TypeReference
     | Substitution of SubstitutionType
+    | TypeQuery of TypeQuery
 
 /// <summary>
 /// The resolved (lazy-graph) form of a top-level TypeScript export declaration.
@@ -158,6 +158,11 @@ and [<ReferenceEquality>] Module = {
     IsNamespace: bool
     IsRecursive: bool
     Exports: ResolvedExport list
+}
+
+and [<ReferenceEquality>] TypeQuery = {
+    FullyQualifiedName: QualifiedNamePart list
+    Type: LazyResolvedType
 }
 
 and [<ReferenceEquality>] Index = {
@@ -729,6 +734,10 @@ module ArenaInterner =
             | TsType.Substitution tsSubstitutionType -> ResolvedType.Substitution {
                     Base = lazyResolve tsSubstitutionType.Base
                     Constraint = lazyResolve tsSubstitutionType.Constraint
+                }
+            | TsType.TypeQuery tsTypeQuery -> ResolvedType.TypeQuery {
+                    FullyQualifiedName = tsTypeQuery.FullyQualifiedName |> List.map QualifiedNamePart.create
+                    Type = lazyResolve tsTypeQuery.Type
                 }
         and buildFromTypeParameter (key: TypeKey, _) =
             lazy

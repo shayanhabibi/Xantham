@@ -128,6 +128,7 @@ let rec getKeys typ =
     | TsType.TemplateLiteral tsTemplateLiteralType -> tsTemplateLiteralType.Types |> List.toArray
     | TsType.Optional tsTypeReference -> getKeys (TsType.TypeReference tsTypeReference)
     | TsType.Substitution tsSubstitutionType -> [| tsSubstitutionType.Base; tsSubstitutionType.Constraint |]
+    | TsType.TypeQuery tsTypeQuery -> [| tsTypeQuery.Type |]
 
 /// <summary>
 /// Recursively collects all keys from a <c>TsExportDeclaration</c>.
@@ -332,6 +333,8 @@ let private compressWithMap (types: Map<TypeKey, TsType>) (compressions: Diction
                 Base = swap tsSubstitutionType.Base
                 Constraint = swap tsSubstitutionType.Constraint
             }
+        | TsType.TypeQuery tsTypeQuery ->
+            TsType.TypeQuery { tsTypeQuery with Type = swap tsTypeQuery.Type }
 
     types
     |> Map.toArray

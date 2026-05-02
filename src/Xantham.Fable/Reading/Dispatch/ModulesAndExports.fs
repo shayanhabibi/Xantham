@@ -9,10 +9,10 @@ open Xantham.Fable.Types.Signal
 
 let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExports) =
     match tag with
-    | ModulesAndExports.ImportDeclaration mportDeclaration -> ()
-    | ModulesAndExports.ImportClause mportClause -> ()
-    | ModulesAndExports.NamespaceImport namespaceImport -> ()
-    | ModulesAndExports.NamedImports namedImports -> ()
+    | ModulesAndExports.ImportDeclaration _ -> ()
+    | ModulesAndExports.ImportClause _ -> ()
+    | ModulesAndExports.NamespaceImport _ -> ()
+    | ModulesAndExports.NamedImports _ -> ()
     | ModulesAndExports.ImportSpecifier mportSpecifier ->
         match
             ctx.checker.getSymbolAtLocation(mportSpecifier.name)
@@ -69,9 +69,9 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
                 xanTag.ExportBuilder
                 |> Signal.fulfillWith (fun () -> decl.ExportBuilder.Value)
         | None -> Log.error "failed to get symbol"
-    | ModulesAndExports.AssertClause assertClause -> ()
-    | ModulesAndExports.ExportAssignment exportAssignment -> ()
-    | ModulesAndExports.ExportDeclaration exportDeclaration -> ()
+    | ModulesAndExports.AssertClause _ -> ()
+    | ModulesAndExports.ExportAssignment _ -> ()
+    | ModulesAndExports.ExportDeclaration _ -> ()
     | ModulesAndExports.ExportSpecifier exportSpecifier ->
         let source =
             xanTag
@@ -108,5 +108,5 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
                 xanTag.ExportBuilder
                 |> Signal.fulfillWith (fun () -> decl.ExportBuilder.Value)
         | None -> Log.error "failed to get symbol"
-    | ModulesAndExports.NamedExports namedExports -> ()
-    | ModulesAndExports.NamespaceExport namespaceExportDeclaration -> ()
+    | ModulesAndExports.NamedExports _ -> ()
+    | ModulesAndExports.NamespaceExport _ -> ()

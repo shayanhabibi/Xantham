@@ -76,6 +76,8 @@ module TypeStore =
         // semantic type produced by the checker.
         | XanTagKind.TypeNode (TypeNode.UnionType _)
         | XanTagKind.TypeNode (TypeNode.IntersectionType _) -> true
+        // TypeNode.TypeQuery: acts as a wrapper that captures the name used in the resolution
+        | XanTagKind.TypeNode (TypeNode.TypeQuery _) -> true
         // TypeNode.TypePredicate: getTypeFromTypeNode on a TypePredicate node returns the
         // boolean type, so all predicates would share the boolean TypeKey. Generated key
         // gives each predicate node its own unique TypeStore entry.

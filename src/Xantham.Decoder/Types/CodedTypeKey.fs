@@ -51,6 +51,8 @@ type TypeCodeKey =
     | Optional of optional: TypeKey
     /// A substitution type used in conditional/distributive type checking.
     | Substitution of substitution: TypeKey
+    ///<summary>A type query (<c>typeof T</c>).</summary>
+    | TypeQuery of typeQuery: TypeKey
 
 /// <summary>
 /// A <c>TypeKey</c> tagged with the <c>TsExportDeclaration</c> case it identifies.

@@ -160,6 +160,8 @@ type XanthamTree(settings: Settings) =
             | TsType.Interface _ -> CodeKey.ExportCodeKey.Interface  key |> CodeKey.CodeKey.Export
             | TsType.Class _ -> CodeKey.ExportCodeKey.Class  key |> CodeKey.CodeKey.Export
             | TsType.Enum _ -> CodeKey.ExportCodeKey.Enum  key |> CodeKey.CodeKey.Export
+            | TsType.TypeQuery _ -> CodeKey.TypeCodeKey.TypeQuery key |> CodeKey.CodeKey.Type
+
     /// <summary>
     /// Build a dependency graph over the decoded type/export maps.
     /// Conditional <c>Check</c>/<c>Extends</c> branches are excluded from the edges.

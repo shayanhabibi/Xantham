@@ -8,10 +8,12 @@ open Xantham.Generator
 type ResolvedTypeLiteralLike =
     | EnumCase of EnumCase
     | Literal of TsLiteral
+    | TypeQuery of TypeQuery
     member this.AsResolvedType =
         match this with
         | EnumCase enumCase -> ResolvedType.EnumCase enumCase
         | Literal tsLiteral -> ResolvedType.Literal tsLiteral
+        | TypeQuery typeQuery -> ResolvedType.TypeQuery typeQuery
 
 [<RequireQualifiedAccess>]
 type ResolvedTypeEnumLike =
@@ -67,29 +69,34 @@ type ResolvedTypeCategories = {
 }
 
 module ResolvedTypeCategories =
-    let (|PrimitiveLike|LiteralLike|EnumLike|OtherLike|) = function
-        | ResolvedType.Array resolvedType -> OtherLike (ResolvedTypeOther.Array resolvedType)
-        | ResolvedType.Class resolvedType -> OtherLike (ResolvedTypeOther.Class resolvedType)
-        | ResolvedType.Interface resolvedType -> OtherLike (ResolvedTypeOther.Interface resolvedType)
-        | ResolvedType.GlobalThis -> OtherLike ResolvedTypeOther.GlobalThis
-        | ResolvedType.TypeLiteral resolvedType -> OtherLike (ResolvedTypeOther.TypeLiteral resolvedType)
-        | ResolvedType.TypeParameter resolvedType -> OtherLike (ResolvedTypeOther.TypeParameter resolvedType)
-        | ResolvedType.Tuple resolvedType -> OtherLike (ResolvedTypeOther.Tuple resolvedType)
-        | ResolvedType.TypeReference resolvedType -> OtherLike (ResolvedTypeOther.TypeReference resolvedType)
-        | ResolvedType.IndexedAccess resolvedType -> OtherLike (ResolvedTypeOther.IndexedAccess resolvedType)
-        | ResolvedType.Intersection resolvedType -> OtherLike (ResolvedTypeOther.Intersection resolvedType)
-        | ResolvedType.TemplateLiteral resolvedType -> OtherLike (ResolvedTypeOther.TemplateLiteral resolvedType)
-        | ResolvedType.Predicate resolvedType -> PrimitiveLike (ResolvedTypePrimitiveLike.Predicate resolvedType)
-        | ResolvedType.Primitive resolvedType -> PrimitiveLike (ResolvedTypePrimitiveLike.Primitive resolvedType)
-        | ResolvedType.Enum resolvedType -> EnumLike (ResolvedTypeEnumLike.Enum resolvedType)
-        | ResolvedType.Index resolvedType -> EnumLike (ResolvedTypeEnumLike.Index resolvedType)
-        | ResolvedType.Literal resolvedType -> LiteralLike (ResolvedTypeLiteralLike.Literal resolvedType)
-        | ResolvedType.EnumCase resolvedType -> LiteralLike (ResolvedTypeLiteralLike.EnumCase resolvedType)
-        | ResolvedType.Conditional _
-        | ResolvedType.Union _
-        | ResolvedType.ReadOnly _
-        | ResolvedType.Optional _
-        | ResolvedType.Substitution _ -> invalidOp "These operations are only available for expanded resolved types in the ResolvedTypeCategories module"
+    let (|PrimitiveLike|LiteralLike|EnumLike|OtherLike|) =
+        let rec impl = function
+            | ResolvedType.Array resolvedType -> OtherLike (ResolvedTypeOther.Array resolvedType)
+            | ResolvedType.Class resolvedType -> OtherLike (ResolvedTypeOther.Class resolvedType)
+            | ResolvedType.Interface resolvedType -> OtherLike (ResolvedTypeOther.Interface resolvedType)
+            | ResolvedType.GlobalThis -> OtherLike ResolvedTypeOther.GlobalThis
+            | ResolvedType.TypeLiteral resolvedType -> OtherLike (ResolvedTypeOther.TypeLiteral resolvedType)
+            | ResolvedType.TypeParameter resolvedType -> OtherLike (ResolvedTypeOther.TypeParameter resolvedType)
+            | ResolvedType.Tuple resolvedType -> OtherLike (ResolvedTypeOther.Tuple resolvedType)
+            | ResolvedType.TypeReference resolvedType -> OtherLike (ResolvedTypeOther.TypeReference resolvedType)
+            | ResolvedType.IndexedAccess resolvedType -> OtherLike (ResolvedTypeOther.IndexedAccess resolvedType)
+            | ResolvedType.Intersection resolvedType -> OtherLike (ResolvedTypeOther.Intersection resolvedType)
+            | ResolvedType.TemplateLiteral resolvedType -> OtherLike (ResolvedTypeOther.TemplateLiteral resolvedType)
+            | ResolvedType.Predicate resolvedType -> PrimitiveLike (ResolvedTypePrimitiveLike.Predicate resolvedType)
+            | ResolvedType.Primitive resolvedType -> PrimitiveLike (ResolvedTypePrimitiveLike.Primitive resolvedType)
+            | ResolvedType.Enum resolvedType -> EnumLike (ResolvedTypeEnumLike.Enum resolvedType)
+            | ResolvedType.Index resolvedType -> EnumLike (ResolvedTypeEnumLike.Index resolvedType)
+            | ResolvedType.Literal resolvedType -> LiteralLike (ResolvedTypeLiteralLike.Literal resolvedType)
+            | ResolvedType.EnumCase resolvedType -> LiteralLike (ResolvedTypeLiteralLike.EnumCase resolvedType)
+            | ResolvedType.TypeQuery ({ Type = Resolve (ResolvedType.Literal _) } as resolvedType) -> LiteralLike (ResolvedTypeLiteralLike.TypeQuery resolvedType)
+            | ResolvedType.TypeQuery { Type = Resolve typ } -> impl typ
+            | ResolvedType.Conditional _
+            | ResolvedType.Union _
+            | ResolvedType.ReadOnly _
+            | ResolvedType.Optional _
+            | ResolvedType.Substitution _ -> invalidOp "These operations are only available for expanded resolved types in the ResolvedTypeCategories module"
+
+        impl
     let inline (|AsResolvedType|) (value: ^T when ^T:(member AsResolvedType: ResolvedType)) = value.AsResolvedType
 
     let empty = {

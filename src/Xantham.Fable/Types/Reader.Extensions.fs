@@ -2,9 +2,7 @@
 module Xantham.Fable.Types.AutoOpenReaderExtensions
 
 open TypeScript
-open Xantham
 open Xantham.Fable
-open Xantham.Fable.Types.Signal
 
 type TypeScriptReader with
     member this.CreateXanthamTag(node: Ts.Node) =

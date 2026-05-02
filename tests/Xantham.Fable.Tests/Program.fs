@@ -1,12 +1,10 @@
 module Main
 
-open System.Collections.Generic
 open Xantham
 open Xantham.Fable
 open Xantham.Fable.Types
 open Node.Api
 open Fable.Mocha
-open Fable.Core.Testing
 open Xantham.Schema
 
 // -----------------------------------------------------------------------
@@ -53,7 +51,7 @@ let tryFindInterface name (result: EncodedResult) =
 /// Find the first interface in the result whose Name matches; throws on miss.
 let findInterface name result =
     tryFindInterface name result
-    |> Option.defaultWith (fun () -> failwithf "Interface '%s' not found in result" name)
+    |> Option.defaultWith (fun () -> failwithf $"Interface '%s{name}' not found in result")
 
 /// Find the first enum whose Name matches; throws on miss.
 let findEnum name (result: EncodedResult) =
@@ -322,7 +320,7 @@ let memberTests =
 
         testCase "'greet' parameter is named 'message'" <| fun _ ->
             let m = findInterface "WithMethods" result |> _.Members |> findMethod "greet"
-            let p = m.ValueOrHead.Parameters.[0]
+            let p = m.ValueOrHead.Parameters[0]
             "greet param should be named message" |> Expect.equal p.Name "message"
 
         testCase "'add' method has 2 parameters" <| fun _ ->
@@ -493,7 +491,7 @@ let genericsTests =
 
         testCase "'Box' type parameter is named 'T'" <| fun _ ->
             let iface = result |> findInterface "Box"
-            let (_, tp) = iface.TypeParameters.[0]
+            let _, tp = iface.TypeParameters[0]
             "Box type param should be T" |> Expect.equal tp.Name "T"
 
         testCase "'Box' has a member named 'value'" <| fun _ ->
@@ -551,13 +549,13 @@ let functionTests =
 
         testCase "'collect' parameter 'items' is a spread (rest) param" <| fun _ ->
             let fd = fd |> findFunction "collect"
-            let p = fd.ValueOrHead.Parameters.[0]
+            let p = fd.ValueOrHead.Parameters[0]
             "items should be spread" |> Expect.isTrue p.IsSpread
 
         testCase "'collect' spread parameter 'items' is not optional" <| fun _ ->
             // Rest parameters cannot be optional in TypeScript
             let fd = fd |> findFunction "collect"
-            let p = fd.ValueOrHead.Parameters.[0]
+            let p = fd.ValueOrHead.Parameters[0]
             "items should not be optional" |> Expect.isFalse p.IsOptional
 
         testCase "'ping' has 0 parameters" <| fun _ ->
@@ -661,6 +659,54 @@ let unionTests =
             match result |> findType threeWay.Type with
             | TsType.Union u -> "" |> Expect.hasLength u.Types 3
             | _ -> failwith "Expected Union"
+        
+        testList "Union of const typeof's" [
+            testCase "Union 'RGBAFormat' is present with 3 members" <| fun _ ->
+                let format = findAlias "RGBAFormat" result
+                match findType format.Type result with
+                | TsType.Union x -> "" |> Expect.hasLength x.Types 3
+                | _ -> failwith "Expected Union"
+            
+            testCase "All 3 variables present" <| fun _ ->
+                Expect.hasLength [
+                    findVariable "RGBA1_Format" result
+                    findVariable "RGBA2_Format" result
+                    findVariable "RGBA3_Format" result
+                ] 3 ""
+            
+            testCase "Type of each variable is a literal" <| fun _ ->
+                let vars = [
+                    findVariable "RGBA1_Format" result
+                    findVariable "RGBA2_Format" result
+                    findVariable "RGBA3_Format" result
+                ]
+                vars
+                |> List.forall (fun v ->
+                    match findType v.Type result with
+                    | TsType.Literal _ -> true
+                    | _ -> false
+                    )
+                |> Expect.isTrue
+                |> funApply ""
+                vars
+                |> List.choose (fun v ->
+                    match findType v.Type result with
+                    | TsType.Literal (TsLiteral.Int i) -> Some i
+                    | _ -> None)
+                |> Expect.containsAll
+                |> funApply [ 1; 2; 3 ]
+                |> funApply ""
+            testCase "Type of union types is TypeQuery" <| fun _ ->
+                let format = findAlias "RGBAFormat" result
+                match findType format.Type result with
+                | TsType.Union x ->
+                    for typ in x.Types do
+                        "All types in union should be TypeQuery"
+                        |> Expect.isTrue (findType typ result).IsTypeQuery
+                | _ -> failwith "Expected Union"
+                
+                
+        ]
     ]
 
 // -----------------------------------------------------------------------
@@ -778,10 +824,10 @@ let classTests =
             "" |> Expect.hasLength cls.Constructors 1
 
         testCase "'Animal' constructor has 2 parameters" <| fun _ ->
-            "" |> Expect.hasLength cls.Constructors.[0].Parameters 2
+            "" |> Expect.hasLength cls.Constructors[0].Parameters 2
 
         testCase "'Animal' constructor parameter names are 'name' and 'age'" <| fun _ ->
-            let names = cls.Constructors.[0].Parameters |> List.map _.Name
+            let names = cls.Constructors[0].Parameters |> List.map _.Name
             "" |> Expect.containsAll names [ "name"; "age" ]
 
         testCase "'Animal' has a 'speak' method member" <| fun _ ->
@@ -1228,7 +1274,7 @@ let templateLiteralTests =
 
         testCase "'EventName' interpolated type is string primitive" <| fun _ ->
             match result |> findType eventAlias.Type with
-            | TsType.TemplateLiteral t -> "" |> Expect.equal t.Types.[0] TypeKindPrimitive.String.TypeKey
+            | TsType.TemplateLiteral t -> "" |> Expect.equal t.Types[0] TypeKindPrimitive.String.TypeKey
             | _ -> failwith "Expected TemplateLiteral"
 
         testCase "'KeyValuePair' has 2 interpolated Type entries" <| fun _ ->
@@ -1242,7 +1288,7 @@ let templateLiteralTests =
             match result |> findType kv.Type with
             | TsType.TemplateLiteral t ->
                 // texts = [""; ":"; ""] — index 1 is the separator between the two interpolations
-                "" |> Expect.equal t.Texts.[1] ":"
+                "" |> Expect.equal t.Texts[1] ":"
             | _ -> failwith "Expected TemplateLiteral"
     ]
 
@@ -1363,11 +1409,11 @@ let functionRefTests =
 
         testCase "'getPerson' parameter is named 'name'" <| fun _ ->
             let fn = result |> findFunction "getPerson"
-            "" |> Expect.equal fn.ValueOrHead.Parameters.[0].Name "name"
+            "" |> Expect.equal fn.ValueOrHead.Parameters[0].Name "name"
 
         testCase "'getPerson' parameter 'name' is type string" <| fun _ ->
             let fn = result |> findFunction "getPerson"
-            "" |> Expect.equal fn.ValueOrHead.Parameters.[0].Type TypeKindPrimitive.String.TypeKey
+            "" |> Expect.equal fn.ValueOrHead.Parameters[0].Type TypeKindPrimitive.String.TypeKey
 
         testCase "'Api' interface is present" <| fun _ ->
             "'Api' should be in result"
@@ -1383,42 +1429,57 @@ let functionRefTests =
                 | TsMember.Property p when p.Name = "person" -> true
                 | _ -> false)
 
-        testCase "'Api.person' type resolves to TypeLiteral (typeof getPerson)" <| fun _ ->
+        testCase "'Api.person' type resolves to TypeQuery - TypeLiteral (typeof getPerson)" <| fun _ ->
             let prop = api.Members |> findProperty "person"
             let typ = result |> findType prop.Type
+            "'Api.person' should be a TypeQuery"
+            |> Expect.isTrue (match typ with TsType.TypeQuery _ -> true | _ -> false)
+            let typ =
+                match typ with
+                | TsType.TypeQuery t -> findType t.Type result
+                | _ -> failwith "Expected TypeQuery"
             "typeof getPerson should be a TypeLiteral (anonymous function type)"
             |> Expect.isTrue (match typ with TsType.TypeLiteral _ -> true | _ -> false)
 
         testCase "'Api.person' TypeLiteral has exactly 1 CallSignature" <| fun _ ->
             let prop = api.Members |> findProperty "person"
             match result |> findType prop.Type with
-            | TsType.TypeLiteral { Members = members } ->
-                let callSigs = members |> List.filter (function TsMember.CallSignature _ -> true | _ -> false)
-                "" |> Expect.hasLength callSigs 1
-            | _ -> failwith "Expected TypeLiteral"
+            | TsType.TypeQuery { Type = typ } ->
+                match result |> findType typ with
+                | TsType.TypeLiteral { Members = members } ->
+                    let callSigs = members |> List.filter (function TsMember.CallSignature _ -> true | _ -> false)
+                    "" |> Expect.hasLength callSigs 1
+                | _ -> failwith "Expected TypeLiteral"
+            | _ -> failwith "Expected TypeQuery"
 
         testCase "'Api.person' call signature has 1 parameter named 'name'" <| fun _ ->
             let prop = api.Members |> findProperty "person"
             match result |> findType prop.Type with
-            | TsType.TypeLiteral { Members = members } ->
-                match members |> List.pick (function TsMember.CallSignature c -> Some c | _ -> None) with
-                | TsOverloadableConstruct.NoOverloads cs ->
-                    "" |> Expect.hasLength cs.Parameters 1
-                    "" |> Expect.equal cs.Parameters.[0].Name "name"
-                | _ -> failwith "Expected NoOverloads call signature"
-            | _ -> failwith "Expected TypeLiteral"
+            | TsType.TypeQuery { Type = typ } ->
+                match result |> findType typ with
+                | TsType.TypeLiteral { Members = members } ->
+                    match members |> List.pick (function TsMember.CallSignature c -> Some c | _ -> None) with
+                    | TsOverloadableConstruct.NoOverloads cs ->
+                        "" |> Expect.hasLength cs.Parameters 1
+                        "" |> Expect.equal cs.Parameters[0].Name "name"
+                    | _ -> failwith "Expected NoOverloads call signature"
+                | _ -> failwith "Expected TypeLiteral"
+            | _ -> failwith "Expected TypeQuery"
 
         testCase "'Api.person' call signature return type is NonPrimitive (object)" <| fun _ ->
             let prop = api.Members |> findProperty "person"
             match result |> findType prop.Type with
-            | TsType.TypeLiteral { Members = members } ->
-                match members |> List.pick (function TsMember.CallSignature c -> Some c | _ -> None) with
-                | TsOverloadableConstruct.NoOverloads cs ->
-                    let returnType = result |> findType cs.Type
-                    "Return type of getPerson is 'object' → NonPrimitive"
-                    |> Expect.equal returnType (TsType.Primitive TypeKindPrimitive.NonPrimitive)
-                | _ -> failwith "Expected NoOverloads"
-            | _ -> failwith "Expected TypeLiteral"
+            | TsType.TypeQuery { Type = typ } ->
+                match result |> findType typ with
+                | TsType.TypeLiteral { Members = members } ->
+                    match members |> List.pick (function TsMember.CallSignature c -> Some c | _ -> None) with
+                    | TsOverloadableConstruct.NoOverloads cs ->
+                        let returnType = result |> findType cs.Type
+                        "Return type of getPerson is 'object' → NonPrimitive"
+                        |> Expect.equal returnType (TsType.Primitive TypeKindPrimitive.NonPrimitive)
+                    | _ -> failwith "Expected NoOverloads"
+                | _ -> failwith "Expected TypeLiteral"
+            | _ -> failwith "Expected TypeQuery"
     ]
 
 let multiFileTests =

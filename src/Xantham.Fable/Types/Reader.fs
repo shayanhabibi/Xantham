@@ -5,7 +5,6 @@ open System.Collections.Generic
 open Fable.Core.JsInterop
 open TypeScript
 open Xantham.Fable
-open Xantham
 open Xantham.Fable.Types
 open Xantham.Fable.Types.Tracer
 

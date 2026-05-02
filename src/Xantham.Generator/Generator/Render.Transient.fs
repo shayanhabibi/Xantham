@@ -51,6 +51,32 @@ module Union =
                 Value = tsLiteral
                 Documentation = []
             }
+        | ResolvedTypeLiteralLike.TypeQuery typeQuery ->
+            let value =
+                match typeQuery.Type.Value with
+                | ResolvedType.Literal tsLiteral -> tsLiteral
+                | _ -> failwith "Cannot render union literal case for non literal type"
+            let name =
+                typeQuery.FullyQualifiedName
+                |> List.last
+                |> (_.Value >> Name.Pascal.create)
+            let path =
+                name
+                |> Case.unboxMeasure
+                |> TransientMemberPath.AnchoredAndMoored
+                |> Path.create
+            {
+                Metadata = {
+                    Path = path
+                    Original = path
+                    Source = ValueNone
+                    FullyQualifiedName = ValueSome typeQuery.FullyQualifiedName
+                }
+                Name = ValueSome name
+                Value = value
+                Documentation = []
+            }
+
     let private renderUnionLiterals (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (literals: ResolvedTypeLiteralLike list) =
         {
             Metadata = { Path = Path.create TransientTypePath.Anchored
@@ -87,6 +113,26 @@ module Union =
                 Value = value
                 Documentation = []
             }
+        | ResolvedTypeLiteralLike.TypeQuery { FullyQualifiedName = fqn; Type = Resolve (ResolvedType.Literal (TsLiteral.Int value))  } ->
+            let name =
+                fqn
+                |> List.last
+                |> _.Value
+                |> Name.Pascal.create
+            let path =
+                name
+                |> Case.unboxMeasure
+                |> TransientMemberPath.AnchoredAndMoored
+                |> Path.create
+            {
+                Metadata =
+                    RenderMetadata.createWithPath path
+                    |> RenderMetadata.withFullyQualifiedName fqn
+                Name = ValueSome name
+                Value = value
+                Documentation = []
+            }
+        | ResolvedTypeLiteralLike.TypeQuery _
         | ResolvedTypeLiteralLike.EnumCase _ 
         | ResolvedTypeLiteralLike.Literal _ -> failwith "Cannot render enum literal case for non int literal. This should be guarded against"
 
@@ -107,6 +153,7 @@ module Union =
             literals
             |> List.forall (function
                 | ResolvedTypeLiteralLike.EnumCase { Value = TsLiteral.Int _ }
+                | ResolvedTypeLiteralLike.TypeQuery { Type = Resolve (ResolvedType.Literal (TsLiteral.Int _)) }
                 | ResolvedTypeLiteralLike.Literal (TsLiteral.Int _) -> true
                 | _ -> false
                 )
