@@ -2,10 +2,10 @@
 #if FABLE_COMPILER
 open Thoth.Json
 open Fable.Core
-[<Erase>]
 /// <summary>
 /// A unique identifier for a type.
 /// </summary>
+[<Erase>]
 type TypeKey = TypeKey of int
 module TypeKey =
     let inline createWith (i: int) = TypeKey i
@@ -631,6 +631,20 @@ type TsTypePredicate = {
     Type: TypeKey
     IsAssertion: bool
 }
+
+/// <summary>
+/// Represents a type query like `typeof Foo` or `typeof Foo.bar`.
+/// The type query is resolved to the type of the referenced entity.
+/// </summary>
+/// <remarks>
+/// The name is provided so that enum like type query unions can have
+/// names inferred from the query appropriately.<br/>
+/// This is the cheapest schema representation.
+/// </remarks>
+type TsTypeQuery = {
+    FullyQualifiedName: string list
+    Type: TypeKey
+}
 /// <summary>
 /// Represents a <c>namespace</c> or <c>module</c> declaration and the collected types within it.
 /// 
@@ -641,7 +655,7 @@ type TsTypePredicate = {
 /// declare namespace MyLib { const version: string }
 /// </code>
 /// </example>
-type TsModule = {
+and TsModule = {
     Source: string option
     FullyQualifiedName: string list
     Name: string
@@ -672,6 +686,7 @@ and [<RequireQualifiedAccess>] TsType =
     | TemplateLiteral of TsTemplateLiteralType
     | Optional of TsTypeReference
     | Substitution of TsSubstitutionType
+    | TypeQuery of TsTypeQuery
 
     /// Discriminated union of all high-level TypeScript type shapes the reader can produce.
     /// Each case mirrors a concrete TS type or declaration form (see individual types above).
@@ -742,6 +757,7 @@ and [<RequireQualifiedAccess>] TsAstNode =
     | Intersection of TsTypeIntersection
     | Optional of TsTypeReference
     | Module of TsModule
+    | TypeQuery of TsTypeQuery
     member this.IsExport =
         match this with
         | Class _
@@ -768,6 +784,7 @@ and [<RequireQualifiedAccess>] TsAstNode =
         | Conditional _
         | Union _
         | Intersection _
+        | TypeQuery _
         | Optional _ -> false
     member this.IsType =
         match this with
@@ -795,6 +812,7 @@ and [<RequireQualifiedAccess>] TsAstNode =
         | Conditional _
         | Union _
         | Intersection _
+        | TypeQuery _
         | Optional _ -> true
     member this.ToType() =
         match this with
@@ -823,6 +841,7 @@ and [<RequireQualifiedAccess>] TsAstNode =
         | Union v -> TsType.Union v |> ValueSome
         | Intersection v -> TsType.Intersection v |> ValueSome
         | Optional v -> TsType.Optional v |> ValueSome
+        | TypeQuery v -> TsType.TypeQuery v |> ValueSome
     member this.ToExportDeclaration() =
         match this with
         | Class v -> TsExportDeclaration.Class v |> ValueSome
@@ -849,9 +868,14 @@ and [<RequireQualifiedAccess>] TsAstNode =
         | Conditional _
         | Union _
         | Intersection _
+        | TypeQuery _
         | Optional _ -> ValueNone
     member this.ToTypeExportDeclaration() =
         this.ToType(), this.ToExportDeclaration()
+        
+[<AutoOpen>]
+module private Utils =
+    let inline mock<'T> = Unchecked.defaultof<'T>
 
 module TsOverloadableConstruct =
     let encode (encoder: Encoder<'T>) (value: TsOverloadableConstruct<'T>) =
@@ -874,57 +898,57 @@ module TsComment =
         Encode.object [
             match value with
             | TsComment.Summary l ->
-                "Summary",
+                nameof TsComment.Summary,
                 l |> List.map Encode.string |> Encode.list
             | TsComment.Returns s ->
-                "Returns",
+                nameof TsComment.Returns,
                 Encode.string s
             | TsComment.Param(name, content) ->
-                "Param", Encode.string name
+                nameof TsComment.Param, Encode.string name
                 "Content", content |> Encode.option Encode.string
             | TsComment.Deprecated stringOption ->
-                "Deprecated", stringOption |> Encode.option Encode.string
+                nameof TsComment.Deprecated, stringOption |> Encode.option Encode.string
             | TsComment.Remarks s ->
-                "Remarks", Encode.string s
+                nameof TsComment.Remarks, Encode.string s
             | TsComment.DefaultValue s ->
-                "DefaultValue", Encode.string s
+                nameof TsComment.DefaultValue, Encode.string s
             | TsComment.Example s ->
-                "Example", Encode.string s
+                nameof TsComment.Example, Encode.string s
             | TsComment.TypeParam(typeName, content) ->
-                "TypeParam", Encode.string typeName
+                nameof TsComment.TypeParam, Encode.string typeName
                 "Content", content |> Encode.option Encode.string
             | TsComment.Throws s ->
-                "Throws", Encode.string s
+                nameof TsComment.Throws, Encode.string s
         ]
     let decode: Decoder<TsComment> = Decode.oneOf [
         Decode.object <| fun get ->
-            get.Required.Field "Summary" (Decode.list Decode.string)
+            get.Required.Field (nameof TsComment.Summary) (Decode.list Decode.string)
             |> TsComment.Summary
         Decode.object <| fun get ->
-            get.Required.Field "Returns" Decode.string
+            get.Required.Field (nameof TsComment.Returns) Decode.string
             |> TsComment.Returns
         Decode.object <| fun get ->
-            let param = get.Required.Field "Param" Decode.string
+            let param = get.Required.Field (nameof TsComment.Param) Decode.string
             let content = get.Required.Field "Content" (Decode.option Decode.string)
             TsComment.Param(param, content)
         Decode.object <| fun get ->
-            get.Required.Field "Deprecated" (Decode.option Decode.string)
+            get.Required.Field (nameof TsComment.Deprecated) (Decode.option Decode.string)
             |> TsComment.Deprecated 
         Decode.object <| fun get ->
-            get.Required.Field "Remarks" Decode.string
+            get.Required.Field (nameof TsComment.Remarks) Decode.string
             |> TsComment.Remarks
         Decode.object <| fun get ->
-            get.Required.Field "DefaultValue" Decode.string
+            get.Required.Field (nameof TsComment.DefaultValue) Decode.string
             |> TsComment.DefaultValue
         Decode.object <| fun get ->
-            get.Required.Field "Example" Decode.string
+            get.Required.Field (nameof TsComment.Example) Decode.string
             |> TsComment.Example
         Decode.object <| fun get ->
-            let typeName = get.Required.Field "TypeParam" Decode.string
+            let typeName = get.Required.Field (nameof TsComment.TypeParam) Decode.string
             let content = get.Required.Field "Content" (Decode.option Decode.string)
             TsComment.TypeParam(typeName, content)
         Decode.object <| fun get ->
-            get.Required.Field "Throws" Decode.string
+            get.Required.Field (nameof TsComment.Throws) Decode.string
             |> TsComment.Throws
     ]
 module TsLiteral =
@@ -1508,6 +1532,18 @@ module TsTypePredicate =
             IsAssertion = get.Required.Field "IsAssertion" Decode.bool
         }
 
+module TsTypeQuery =
+    let encode (value: TsTypeQuery) =
+        Encode.object [
+            nameof value.FullyQualifiedName, value.FullyQualifiedName |> List.map Encode.string |> Encode.list
+            nameof value.Type, TypeKey.encode value.Type
+        ]
+    let decode: Decoder<TsTypeQuery> =
+        Decode.object <| fun get -> {
+            FullyQualifiedName = get.Required.Field (nameof mock<TsTypeQuery>.FullyQualifiedName) (Decode.list Decode.string)
+            Type = get.Required.Field (nameof mock<TsTypeQuery>.Type) TypeKey.decode
+        }
+
 module TypeKindPrimitive =
     let encode (value: TypeKindPrimitive) =
         match value with
@@ -1567,6 +1603,7 @@ module TsType =
             | TsType.TemplateLiteral tl -> "TemplateLiteral", TsTemplateLiteralType.encode tl
             | TsType.Optional tr -> "Optional", TsTypeReference.encode tr
             | TsType.Substitution s -> "Substitution", TsSubstitutionType.encode s
+            | TsType.TypeQuery tsTypeQuery -> nameof TsType.TypeQuery, TsTypeQuery.encode tsTypeQuery
         ]
     let rec decode: Decoder<TsType> =
         fun path value ->
@@ -1593,6 +1630,7 @@ module TsType =
                 Decode.object (fun get -> get.Required.Field "TemplateLiteral" TsTemplateLiteralType.decode |> TsType.TemplateLiteral)
                 Decode.object (fun get -> get.Required.Field "Optional" TsTypeReference.decode |> TsType.Optional)
                 Decode.object (fun get -> get.Required.Field "Substitution" TsSubstitutionType.decode |> TsType.Substitution)
+                Decode.object (fun get -> get.Required.Field (nameof TsType.TypeQuery) TsTypeQuery.decode |> TsType.TypeQuery)
             ] path value
 
 module TsModule =

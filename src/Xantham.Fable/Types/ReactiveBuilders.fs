@@ -544,6 +544,17 @@ type SPredicateBuilder = {
           Type = this.Type.Value
           IsAssertion = this.IsAssertion }
 
+/// <summary>
+/// Signal-based equivalent of <c>TsTypeQuery</c>, builds to <see cref="T:Xantham.TsTypeQuery"/>.
+/// </summary>
+type STypeQueryBuilder = {
+    FullyQualifiedName: string array
+    Type: TypeSignal
+} with
+    member this.Build() : TsTypeQuery =
+        { FullyQualifiedName = Array.toList this.FullyQualifiedName
+          Type = this.Type.Value }
+
 /// Signal-based equivalent of <c>TsModuleBuilder</c>, builds to <see cref="T:Xantham.TsModule"/>.
 type SModuleBuilder = {
     Source: Signal<ModuleName>
@@ -588,6 +599,7 @@ and [<RequireQualifiedAccess>] SType =
     | Intersection of STypeIntersectionBuilder
     | Optional of STypeReferenceBuilder
     | TemplateLiteral of STemplateLiteralTypeBuilder
+    | TypeQuery of STypeQueryBuilder
     member this.Build() : TsType =
         match this with
         | GlobalThis -> TsType.GlobalThis
@@ -611,6 +623,7 @@ and [<RequireQualifiedAccess>] SType =
         | Intersection sTypeIntersectionBuilder -> sTypeIntersectionBuilder.Build() |> TsType.Intersection
         | Optional sTypeReferenceBuilder -> sTypeReferenceBuilder.Build() |> TsType.Optional
         | TemplateLiteral sTemplateLiteralTypeBuilder -> sTemplateLiteralTypeBuilder.Build() |> TsType.TemplateLiteral
+        | TypeQuery sTypeQueryBuilder -> sTypeQueryBuilder.Build() |> TsType.TypeQuery
 
 and [<RequireQualifiedAccess>] STsExportDeclaration =
     | Interface of SInterfaceBuilder

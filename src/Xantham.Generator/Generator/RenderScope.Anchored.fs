@@ -2,21 +2,17 @@
 module Xantham.Generator.Generator.RenderScope_Anchored
 
 open System.Collections.Generic
-open Xantham
 open Xantham.Decoder
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
 open Xantham.Generator.Generator.Path
 open Xantham.Generator.Types
 open Xantham.Generator.NamePath
-open Xantham.Generator.Generator.ResolvedTypeCategorization
 open Xantham.Generator.Generator
-open Fabulous.AST
-open Fantomas.Core.SyntaxOak
 open Anchored
 
 module Render =
-    let anchorMetadataPath (ctx: GeneratorContext) (anchorPath: AnchorPath) (path: Path) =
+    let anchorMetadataPath (_ctx: GeneratorContext) (anchorPath: AnchorPath) (path: Path) =
         match path with
         | Path.Transient transientPath ->
             transientPath

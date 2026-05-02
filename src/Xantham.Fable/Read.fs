@@ -1,16 +1,10 @@
 ﻿[<AutoOpen>]
 module Xantham.Fable.Main
 
-open System.Collections.Generic
-open System.Text.RegularExpressions
 open Fable.Core.DynamicExtensions
-open Fable.Core.JsInterop
-open Fable.Core
 open Node
 open Thoth.Json
-open TypeScript
 open Xantham
-open System.Collections
 open Xantham.Fable.Reading
 open Xantham.Fable.Reading.Entry
 open Xantham.Fable.Types
@@ -85,6 +79,8 @@ module Internal =
             | TsType.TypeReference { ResolvedType = Some key }
             | TsType.TypeReference { Type = key } when key = typKey -> Log.healthCheckError typKey tsType tsType
             | _ -> ()
+        | TsType.TypeQuery ({ Type = key } as typeQuery) ->
+            if typKey = key then Log.healthCheckError typKey typeQuery typeQuery
 
     let private unknownKey = TypeKindPrimitive.Unknown.TypeKey
     

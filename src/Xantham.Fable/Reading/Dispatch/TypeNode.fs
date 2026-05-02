@@ -75,7 +75,9 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
             { STypeUnionBuilder.Types = Array.map getTypeSignalFromNode types }
             |> SType.Union
             |> setAstSignal
-            setTypeKeyFromNode unionTypeNode
+            ctx.signalCache[xanTag.IdentityKey].Key
+            |> setTypeKeyForTag xanTag
+            // setTypeKeyFromNode unionTypeNode
             // TypeStore.Key is generated (see Prelude.usesGeneratedKey) but TypeSignal is set to
             // the semantic union's natural TypeKey via setTypeKeyFromNode. Parents embed that
             // natural TypeKey in their type fields. Ensure the semantic union type-level entry
@@ -256,7 +258,32 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
     | TypeNode.TypeQuery typeQueryNode ->
         XanthamTag.debugLocationAndForget "TypeNode.dispatch | TypeQuery" xanTag
         // typeof X — resolve to the static type of X
-        routeViaChecker typeQueryNode
+        let rec foldEntityName (acc: ResizeArray<string>) (entityName: Ts.EntityName) =
+            match entityName with
+            | Patterns.Node.EntityNamePatterns.Identifier identifier -> acc.Add(identifier.text)
+            | Patterns.Node.EntityNamePatterns.QualifiedName qualifiedName ->
+                foldEntityName acc qualifiedName.left
+                acc.Add(qualifiedName.right.text)
+        let entityName =
+            let result = ResizeArray<string>()
+            foldEntityName result typeQueryNode.exprName
+            result.AsArray
+        let resolvedType = ctx.checker.getTypeFromTypeNode typeQueryNode
+        let innerTag =
+            ctx.CreateXanthamTag resolvedType |> fst
+            |> TagState.apply (function
+                | true -> XanthamTag.chainDebug xanTag >> pushToStack ctx
+                | false -> XanthamTag.chainDebug xanTag >> ignore)
+            |> _.Value
+        {
+            STypeQueryBuilder.FullyQualifiedName = entityName
+            Type = innerTag.TypeSignal
+        }
+        |> SType.TypeQuery
+        |> setAstSignal
+        // Type query uses a generated type signal
+        ctx.signalCache[xanTag.IdentityKey].Key
+        |> setTypeKeyForTag xanTag
     | TypeNode.TypeOperator typeOperatorNode ->
         XanthamTag.debugLocationAndForget "TypeNode.dispatch | TypeOperator" xanTag
         // keyof T → union of property keys; unique symbol → UniqueESSymbol; readonly → inner type

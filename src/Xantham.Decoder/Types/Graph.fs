@@ -227,6 +227,12 @@ module Graph =
                             TypeKey = kv.Key
                             Dependencies = Set [ tsSubstitutionType.Base; tsSubstitutionType.Constraint ]
                         }
+                    | TsType.TypeQuery tsTypeQuery ->
+                        {
+                            TypeKey = kv.Key
+                            Dependencies = Set [ tsTypeQuery.Type ]
+                        }
+
                 matcher kv.Value
         }
         |> TaskSeq.iter (fun node ->
