@@ -93,7 +93,8 @@ module TypeRefRender =
             | render -> [ render ]
             )
     let rec replace (old: TypeRefRender) (new': TypeRefRender) (render: TypeRefRender) =
-        if render = old then replace old new' new'
+        if old = new' then render
+        elif render = old then replace old new' new'
         elif render.Kind.IsMolecule_ then
             let kind =
                 match render.Kind with
