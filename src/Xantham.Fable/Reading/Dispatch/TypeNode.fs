@@ -393,6 +393,10 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
             ctx
             xanTag
             (LiteralTokenNodes.Create (unbox<Ts.Node> literalToken.literal))
+        // It would be incorrect for the literaltokennode dispatcher to set the type signal,
+        // as the type key is held by the type node, not the literal token node.
+        // This was the cause of the bug where the type key was being incorrectly set for literal tokens to `5`.
+        setTypeKeyFromNode literalToken
     // this type node doesn't really resolve to anything
     // without context
     | TypeNode.ThisType thisTypeNode ->

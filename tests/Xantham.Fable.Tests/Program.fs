@@ -1869,6 +1869,18 @@ let leafDirectSourceTests =
             |> Expect.equal alias.Source (Some "my-app")
     ]
 
+// Fixture: packages/three/constants.d.ts - loaded as entry directly.
+// Literal token nodes resolve to literal types
+let literalTokenNodeTest =
+    testList "three/constants.d.ts" [
+        let result = createTestReader "packages/three/constants" |> runReader
+        testCase "Contains variable byteType; a literal type" <| fun _ ->
+            let var = result |> findVariable "ByteType"
+            let varType = result |> findType var.Type
+            "Type of byteType should be a literal type"
+            |> Expect.isTrue varType.IsLiteral
+    ]
+
 // -----------------------------------------------------------------------
 // Suite
 // -----------------------------------------------------------------------
@@ -1917,6 +1929,7 @@ let tests =
         middleOfChainDirectSourceTests
         leafDirectSourceTests
         aliasTests
+        literalTokenNodeTest
     ]
 
 Mocha.runTests tests |> ignore
