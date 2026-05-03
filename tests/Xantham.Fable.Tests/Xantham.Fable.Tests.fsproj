@@ -56,6 +56,8 @@
         <TypeScriptCompile Include="TypeFiles\ref-enum.d.ts" />
         <TypeScriptCompile Include="TypeFiles\import-package.d.ts" />
         <TypeScriptCompile Include="TypeFiles\aliases.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\nested-generics.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\type-args.d.ts" />
     </ItemGroup>
 
     <ItemGroup>
