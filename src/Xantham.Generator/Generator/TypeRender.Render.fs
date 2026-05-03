@@ -370,14 +370,29 @@ module TypeParameterRender =
         let name = Name.Case.valueOrModified typeParameter.Name
         match renderConstraints ctx typeParameter with
         | ValueSome constrain ->
-            Ast.TyparDecl(name, constrain)
+            Ast.TyparDecl(name),
+            ValueSome(Ast.SubtypeOf(name, constrain))
         | ValueNone ->
-            Ast.TyparDecl(name)
+            Ast.TyparDecl(name),
+            ValueNone
+        
+    let renderTypeParametersIntoPostfixList (ctx: GeneratorContext) (typeParameters: TypeParameterRender list) =
+        typeParameters
+        |> List.fold (fun (decls, constraints) -> renderTypeParameter ctx >> function
+            | decl, ValueSome typarConstraint -> decl :: decls, typarConstraint :: constraints
+            | decl, ValueNone -> decl :: decls, constraints
+            ) ([], [])
+        |> Ast.PostfixList
         
     // rendering as typar
     let renderType (ctx: GeneratorContext) (typeParameter: TypeParameterRender) =
         Name.Case.valueOrModified typeParameter.Name
         |> Ast.LongIdent
+    
+    let renderTypeWithConstraint (ctx: GeneratorContext) (typeParameter: TypeParameterRender) =
+        renderType ctx typeParameter,
+        snd <| renderTypeParameter ctx typeParameter
+        
 
 module FunctionLikeSignature =
     let renderAbstractWithName (ctx: GeneratorContext) (name: Name<_>) (functionLike: FunctionLikeSignature) =
@@ -536,8 +551,7 @@ module TypeLikeRender =
                 ValueNone
             else
             typeLike.TypeParameters
-            |> List.map (TypeParameterRender.renderTypeParameter ctx)
-            |> Ast.PostfixList
+            |> TypeParameterRender.renderTypeParametersIntoPostfixList ctx
             |> ValueSome
         let members =
             typeLike.Members
@@ -569,8 +583,7 @@ module TypeLikeRender =
                 ValueNone
             else
                 typeLike.TypeParameters
-                |> List.map (TypeParameterRender.renderTypeParameter ctx)
-                |> Ast.PostfixList
+                |> TypeParameterRender.renderTypeParametersIntoPostfixList ctx
                 |> ValueSome
         let members =
             typeLike.Members
@@ -605,8 +618,7 @@ module TypeAliasRender =
                 ValueNone
             else
                 typeAliasRef.TypeParameters
-                |> List.map (TypeParameterRender.renderTypeParameter ctx)
-                |> Ast.PostfixList
+                |> TypeParameterRender.renderTypeParametersIntoPostfixList ctx
                 |> ValueSome
         let typeRefRender =
             typeAliasRef.Type
