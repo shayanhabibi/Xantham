@@ -349,52 +349,58 @@ module Member =
                 )
             |> Member.Method
         | m -> m
-
-    let rec collectAllRecursively (typ: ResolvedType) =
-        let readOnly = collectAllRecursively >> List.map setReadOnly
-        let optional = collectAllRecursively >> List.map setOptional
-        match typ with
-        | ResolvedType.Substitution { Base = Resolve resolved }
-        | ResolvedType.TypeParameter { Default = Some (Resolve resolved) }
-        | ResolvedType.TypeParameter { Constraint = Some (Resolve resolved) }
-        | ResolvedType.TypeReference { ResolvedType = Some (Resolve resolved) }
-        | ResolvedType.TypeReference { Type = Resolve resolved } ->
-            collectAllRecursively resolved
-        | ResolvedType.TypeLiteral { Members = members } -> members
-        | ResolvedType.Intersection { Types = types } ->
-            types
-            |> List.collect (_.Value >> collectAllRecursively)
-        | ResolvedType.Interface iface ->
-            iface.Heritage.Extends
-            |> List.collect (ResolvedType.TypeReference >> collectAllRecursively)
-            |> List.append iface.Members
-        | ResolvedType.Class classType ->
-            classType.Heritage.Implements
-            |> Option.toList
-            |> List.append classType.Heritage.Extends
-            |> List.collect (ResolvedType.TypeReference >> collectAllRecursively)
-            |> List.append classType.Members
-        | ResolvedType.Conditional conditionalValues ->
-            [
-                conditionalValues.True
-                conditionalValues.False
-            ]
-            |> List.collect (_.Value >> collectAllRecursively)
-            |> List.distinct
-        | ResolvedType.Optional optionalType ->
-            optional (ResolvedType.TypeReference optionalType)
-        | ResolvedType.ReadOnly resolvedType ->
-            readOnly resolvedType
-        | ResolvedType.Union _ 
-        | ResolvedType.GlobalThis 
-        | ResolvedType.Primitive _
-        | ResolvedType.Literal _
-        | ResolvedType.IndexedAccess _
-        | ResolvedType.Index _
-        | ResolvedType.Array _
-        | ResolvedType.Enum _
-        | ResolvedType.EnumCase _
-        | ResolvedType.Tuple _
-        | ResolvedType.TypeParameter _
-        | ResolvedType.Predicate _
-        | ResolvedType.TemplateLiteral _ -> []
+    
+    // todo - optimise stack overflow protection.
+    let collectAllRecursively (typ: ResolvedType) =
+        let collected = System.Collections.Generic.HashSet<ResolvedType>()
+        let rec collectAllRecursively (typ: ResolvedType) =
+            if collected.Add(typ) |> not then [] else
+            let readOnly = collectAllRecursively >> List.map setReadOnly
+            let optional = collectAllRecursively >> List.map setOptional
+            match typ with
+            | ResolvedType.Substitution { Base = Resolve resolved }
+            | ResolvedType.TypeQuery { Type = Resolve resolved } 
+            | ResolvedType.TypeParameter { Default = Some (Resolve resolved) }
+            | ResolvedType.TypeParameter { Constraint = Some (Resolve resolved) }
+            | ResolvedType.TypeReference { ResolvedType = Some (Resolve resolved) }
+            | ResolvedType.TypeReference { Type = Resolve resolved } ->
+                collectAllRecursively resolved
+            | ResolvedType.TypeLiteral { Members = members } -> members
+            | ResolvedType.Intersection { Types = types } ->
+                types
+                |> List.collect (_.Value >> collectAllRecursively)
+            | ResolvedType.Interface iface ->
+                iface.Heritage.Extends
+                |> List.collect (ResolvedType.TypeReference >> collectAllRecursively)
+                |> List.append iface.Members
+            | ResolvedType.Class classType ->
+                classType.Heritage.Implements
+                |> Option.toList
+                |> List.append classType.Heritage.Extends
+                |> List.collect (ResolvedType.TypeReference >> collectAllRecursively)
+                |> List.append classType.Members
+            | ResolvedType.Conditional conditionalValues ->
+                [
+                    conditionalValues.True
+                    conditionalValues.False
+                ]
+                |> List.collect (_.Value >> collectAllRecursively)
+                |> List.distinct
+            | ResolvedType.Optional optionalType ->
+                optional (ResolvedType.TypeReference optionalType)
+            | ResolvedType.ReadOnly resolvedType ->
+                readOnly resolvedType
+            | ResolvedType.Union _ 
+            | ResolvedType.GlobalThis 
+            | ResolvedType.Primitive _
+            | ResolvedType.Literal _
+            | ResolvedType.IndexedAccess _
+            | ResolvedType.Index _
+            | ResolvedType.Array _
+            | ResolvedType.Enum _
+            | ResolvedType.EnumCase _
+            | ResolvedType.Tuple _
+            | ResolvedType.TypeParameter _
+            | ResolvedType.Predicate _
+            | ResolvedType.TemplateLiteral _ -> []
+        collectAllRecursively typ
