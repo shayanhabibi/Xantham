@@ -176,10 +176,13 @@ let private buildMembersFromType (ctx: TypeScriptReader) (objType: Ts.ObjectType
 // ---------------------------------------------------------------------------
 
 let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) =
+    let debugLocation typeFlagObjectType =
+        XanthamTag.debugLocationAndForget $"TypeFlagObject.dispatch | %s{typeFlagObjectType}" xanTag
     let inline setAstSignal (astValue: SType) =
         xanTag.Builder <- astValue
     match tag with
     | TypeFlagObject.Anonymous anonType ->
+        nameof TypeFlagObject.Anonymous |> debugLocation
         {
             STypeLiteralBuilder.Members = buildMembersFromType ctx anonType
         }
@@ -189,6 +192,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) 
         |> setTypeKeyForTag xanTag
 
     | TypeFlagObject.Interface interfaceType ->
+        nameof TypeFlagObject.Interface |> debugLocation
         // Route to the InterfaceDeclaration node; the node-level dispatch fills the builders.
         interfaceType.symbol
         |> Option.ofObj
@@ -197,6 +201,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) 
         |> setTypeKeyForTag xanTag
 
     | TypeFlagObject.Class classType ->
+        nameof TypeFlagObject.Class |> debugLocation
         // Route to the ClassDeclaration node.
         classType.symbol
         |> Option.ofObj
@@ -204,6 +209,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) 
         classType.TypeKey |> setTypeKeyForTag xanTag
 
     | TypeFlagObject.Mapped mappedType ->
+        nameof TypeFlagObject.Mapped |> debugLocation
         // Try enumerating concrete properties first; fall back to a string-index for generic cases.
         let props = ctx.checker.getPropertiesOfType(mappedType).AsArray
         let members =
@@ -241,6 +247,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) 
         |> setTypeKeyForTag xanTag
 
     | TypeFlagObject.Instantiated objType ->
+        nameof TypeFlagObject.Instantiated |> debugLocation
         // A generic type applied to concrete arguments — same shape as Reference.
         // If the target equals itself (uninstantiated), forward to the declaration instead.
         let typeRef = unbox<Ts.TypeReference> objType
@@ -251,6 +258,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) 
         objType.TypeKey
         |> setTypeKeyForTag xanTag
     | TypeFlagObject.Reference typeReference ->
+        nameof TypeFlagObject.Reference |> debugLocation
         // If the target equals the reference itself (uninstantiated generic like bare `Array`),
         // forward to the symbol declaration to avoid a self-referential TypeReference entry.
         if typeReference.target.TypeKey = typeReference.TypeKey then
@@ -260,6 +268,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) 
         typeReference.TypeKey
         |> setTypeKeyForTag xanTag
     | TypeFlagObject.Tuple tupleType ->
+        nameof TypeFlagObject.Tuple |> debugLocation
         let elementTypes = ctx.checker.getTypeArguments(unbox<Ts.TypeReference> tupleType).AsArray
         let elementFlags = tupleType.elementFlags.AsArray
         let labeledDecls =
@@ -302,4 +311,5 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) 
         tupleType.TypeKey |> setTypeKeyForTag xanTag
 
     | TypeFlagObject.EvolvingArray _ ->
+        nameof TypeFlagObject.EvolvingArray |> debugLocation
         () // Internal checker type; never present in .d.ts files

@@ -248,27 +248,39 @@ module Parameter =
         }
         
 let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: MemberDeclaration) =
-    XanthamTag.debugLocationAndForget "MemberDeclaration.dispatch" xanTag
+    let debugLocation memberType =
+       XanthamTag.debugLocationAndForget $"MemberDeclaration.dispatch | %s{memberType}" xanTag
     match node with
     | MemberDeclaration.PropertySignature propertySignature ->
+        nameof MemberDeclaration.PropertySignature |> debugLocation
         Property.readSignature ctx xanTag propertySignature
     | MemberDeclaration.MethodSignature methodSignature ->
+        nameof MemberDeclaration.MethodSignature |> debugLocation
         Method.readSignature ctx xanTag methodSignature
     | MemberDeclaration.IndexSignature indexSignatureDeclaration ->
+        nameof MemberDeclaration.IndexSignature |> debugLocation
         IndexSignature.read ctx xanTag indexSignatureDeclaration
     | MemberDeclaration.CallSignature callSignatureDeclaration ->
+        nameof MemberDeclaration.CallSignature |> debugLocation
         CallSignature.read ctx xanTag callSignatureDeclaration
     | MemberDeclaration.ConstructSignature constructSignatureDeclaration ->
+        nameof MemberDeclaration.ConstructSignature |> debugLocation
         ConstructSignature.read ctx xanTag constructSignatureDeclaration
     | MemberDeclaration.Property propertyDeclaration ->
+        nameof MemberDeclaration.Property |> debugLocation
         Property.readDeclaration ctx xanTag propertyDeclaration
     | MemberDeclaration.Method methodDeclaration ->
+        nameof MemberDeclaration.Method |> debugLocation
         Method.readDeclaration ctx xanTag methodDeclaration
     | MemberDeclaration.Constructor constructorDeclaration ->
+        nameof MemberDeclaration.Constructor |> debugLocation
         Constructor.read ctx xanTag constructorDeclaration
     | MemberDeclaration.GetAccessor accessorDeclaration ->
+        nameof MemberDeclaration.GetAccessor |> debugLocation
         GetAccessor.read ctx xanTag accessorDeclaration
     | MemberDeclaration.SetAccessor accessorDeclaration ->
+        nameof MemberDeclaration.SetAccessor |> debugLocation
         SetAccessor.read ctx xanTag accessorDeclaration
     | MemberDeclaration.Parameter parameterDeclaration ->
+        nameof MemberDeclaration.Parameter |> debugLocation
         Parameter.read ctx xanTag parameterDeclaration
