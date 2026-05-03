@@ -77,6 +77,7 @@ module ResolvedType =
               TypeParameters = []
               Documentation = []
               Heritage = { Extends = [] } }
+        let withTypeParameters typeParameters iface = { iface with Interface.TypeParameters = typeParameters |> List.map Lazy.CreateFromValue }
         let withPath modules iface =
             { iface with Interface.FullyQualifiedName = (List.map QualifiedNamePart.Normal modules) @ iface.FullyQualifiedName }
         let withSource source iface = { iface with Interface.Source = Some (QualifiedNamePart.Normal source) }
@@ -123,8 +124,8 @@ module ResolvedType =
             Default = None
             Constraint = None
             Documentation = [] }
-        let withDefault defaultType typar = { typar with TypeParameter.Default = Some defaultType }
-        let withConstraint constraintType typar = { typar with TypeParameter.Constraint = Some constraintType }
+        let withDefault defaultType typar = { typar with TypeParameter.Default = LazyContainer.CreateTypeKeyDummy<ResolvedType> defaultType |> Some }
+        let withConstraint constraintType typar = { typar with TypeParameter.Constraint = LazyContainer.CreateTypeKeyDummy<ResolvedType> constraintType |> Some }
     
     module TypeAlias =
         let create innerType name = {

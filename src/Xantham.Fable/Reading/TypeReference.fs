@@ -179,9 +179,11 @@ let fromNode (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.TypeReferenc
             // type arguments are already resolved and will be ephemereal.
             // We don't want to lose the information when we're not
             // not looking at the resolved type.
-            match resolveTypeArgumentsFromType ctx xanTag resolvedType with
-            | [||] -> resolveTypeArgumentsFromNode ctx xanTag node
-            | args -> args
+            let typeArguments = resolveTypeArgumentsFromType ctx xanTag resolvedType
+            let typeNodeArguments = resolveTypeArgumentsFromNode ctx xanTag node
+            if typeArguments.Length > typeNodeArguments.Length then
+                typeArguments
+            else typeNodeArguments
         ResolvedType =
             // Only emit a ResolvedType when the instantiated type is a distinct identity
             // from the tag itself (avoids self-referential noise).
