@@ -309,13 +309,14 @@ let renderModuleInterface (ctx: GeneratorContext) (root: Module) =
         for KeyValue(_, render) in root.Members do
             match render with
             | Choice1Of2 typedName ->
-                TypedNameRender.renderMember ctx typedName
+                // TODO (post-Anchored.TypeRender augmentation): replace ValueNone with the cached scope's RenderMode.
+                TypedNameRender.renderMember ctx ValueNone typedName
                 |> memberDefnAttributes {
                     tryRenderMetadataImport typedName.Metadata
                 }
             | Choice2Of2 functionLike ->
                 yield!
-                    FunctionLikeRender.renderMember ctx functionLike
+                    FunctionLikeRender.renderMember ctx ValueNone functionLike
                     |> List.map (memberDefnAttributes {
                         tryRenderMetadataImport functionLike.Metadata
                     })
@@ -325,20 +326,22 @@ let rec renderModule (ctx: GeneratorContext) (root: Module) =
     let nextModules =
         root.Modules.Values
         |> Seq.map (renderModule ctx)
+    // TODO (post-Anchored.TypeRender augmentation): the cached Module entries should carry
+    // the originating RenderScope's mode so we can pass it instead of ValueNone here.
     Ast.Module(root.Name) {
         for KeyValue(_, render) in root.Types do
             match render with
             | TypeDefn typeLikeRender ->
-                TypeLikeRender.renderInterface ctx typeLikeRender
+                TypeLikeRender.renderInterface ctx ValueNone typeLikeRender
                 |> typeDefnAttributes {
                     tryRenderMetadataImport typeLikeRender.Metadata
                 }
             | TypeAlias typeAliasRender ->
                 match typeAliasRender with
                 | TypeAliasRender.Alias typeAliasRenderRef ->
-                    TypeAliasRender.renderTypeAlias ctx typeAliasRenderRef
+                    TypeAliasRender.renderTypeAlias ctx ValueNone typeAliasRenderRef
                 | TypeAliasRender.TypeDefn typeLikeRender ->
-                    TypeLikeRender.renderInterface ctx typeLikeRender
+                    TypeLikeRender.renderInterface ctx ValueNone typeLikeRender
                     |> _.attributes(attributes {
                         tryRenderMetadataImport typeLikeRender.Metadata
                     })
@@ -347,7 +350,7 @@ let rec renderModule (ctx: GeneratorContext) (root: Module) =
                 | TypeAliasRender.EnumUnion literalUnionRender ->
                     LiteralUnionRender.renderEnum ctx literalUnionRender
                 | TypeAliasRender.Function functionLikeRender ->
-                    FunctionLikeRender.renderDelegate ctx functionLikeRender
+                    FunctionLikeRender.renderDelegate ctx ValueNone functionLikeRender
             | StringUnion literalUnionRender ->
                 LiteralUnionRender.renderUnion ctx literalUnionRender
             | EnumUnion literalUnionRender ->
@@ -367,19 +370,19 @@ let renderRoot (ctx: GeneratorContext) (root: RootModule) =
         for KeyValue(_, render) in root.Types do
             match render with
             | TypeDefn typeLikeRender ->
-                TypeLikeRender.renderInterface ctx typeLikeRender
+                TypeLikeRender.renderInterface ctx ValueNone typeLikeRender
             | TypeAlias typeAliasRender ->
                 match typeAliasRender with
                 | TypeAliasRender.Alias typeAliasRenderRef ->
-                    TypeAliasRender.renderTypeAlias ctx typeAliasRenderRef
+                    TypeAliasRender.renderTypeAlias ctx ValueNone typeAliasRenderRef
                 | TypeAliasRender.TypeDefn typeLikeRender ->
-                    TypeLikeRender.renderInterface ctx typeLikeRender
+                    TypeLikeRender.renderInterface ctx ValueNone typeLikeRender
                 | TypeAliasRender.StringUnion literalUnionRender ->
                     LiteralUnionRender.renderUnion ctx literalUnionRender
                 | TypeAliasRender.EnumUnion literalUnionRender ->
                     LiteralUnionRender.renderEnum ctx literalUnionRender
                 | TypeAliasRender.Function functionLikeRender ->
-                    FunctionLikeRender.renderBinding ctx functionLikeRender
+                    FunctionLikeRender.renderBinding ctx ValueNone functionLikeRender
             | StringUnion literalUnionRender ->
                 LiteralUnionRender.renderUnion ctx literalUnionRender
             | EnumUnion literalUnionRender ->

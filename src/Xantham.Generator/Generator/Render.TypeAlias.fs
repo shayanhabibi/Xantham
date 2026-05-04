@@ -19,7 +19,8 @@ module TypeAlias =
             |> List.map (_.Value >> TypeParameter.render ctx scopeStore)
         let documentation = typ.Documentation
         let name = typ.Name
-        let path = Path.Interceptors.pipeTypeAlias ctx typ
+        let rawPath = Path.fromTypeAlias typ
+        let path = Path.tryResolveTypePath ctx ValueNone PathPosition.TopLevelType rawPath |> ValueOption.defaultValue rawPath
         let metadata =
             (Path.create path, typ)
             ||> RenderMetadata.createWithPathFromExport

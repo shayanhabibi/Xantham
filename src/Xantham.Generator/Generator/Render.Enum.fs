@@ -10,7 +10,8 @@ open Xantham.Generator.NamePath
 
 module Enum =
     let renderEnum (ctx: GeneratorContext) (enumType: EnumType) =
-        let path = Path.Interceptors.pipeEnum ctx enumType |> Path.create
+        let rawPath = Path.fromEnum enumType
+        let path = Path.tryResolveTypePath ctx (ValueSome (ResolvedType.Enum enumType)) PathPosition.TopLevelType rawPath |> ValueOption.defaultValue rawPath |> Path.create
         let metadata = RenderMetadata.createWithPathFromExport path enumType
         {
             Metadata = metadata
@@ -50,7 +51,8 @@ module Enum =
         
         
     let renderStringUnion (ctx: GeneratorContext) (enumType: EnumType) =
-        let path = Path.Interceptors.pipeEnum ctx enumType |> Path.create
+        let rawPath = Path.fromEnum enumType
+        let path = Path.tryResolveTypePath ctx (ValueSome (ResolvedType.Enum enumType)) PathPosition.TopLevelType rawPath |> ValueOption.defaultValue rawPath |> Path.create
         let metadata = RenderMetadata.createWithPathFromExport path enumType
         {
             Metadata = metadata

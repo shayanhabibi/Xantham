@@ -48,21 +48,60 @@ type GeneratorContext = {
 
 ## Construction
 
+The `Customisation` record dispatches through hook slots at seven pipeline
+stages. Each slot holds a list of handlers that are invoked left-to-right
+(latest-registered runs first). Handlers are registered using chainable
+`add*` methods:
+
 ```fsharp
 let ctx =
     GeneratorContext.EmptyWithCustomisation (fun c ->
-        { c with
-            Customisation.Interceptors.IgnorePathRender.Source = …
-            Customisation.Interceptors.Paths.TypePaths        = …
-            Customisation.Interceptors.ResolvedTypePrelude    = …
-        })
+        c
+        |> Customisation.addRenderScopeBuild myRenderScopeBuildHook
+        |> Customisation.addPathResolutionType myTypePathHook
+        |> Customisation.addPathResolutionMember myMemberPathHook)
 ```
 
-The `EmptyWithCustomisation` helper wires up a default
-`PreludeGetTypeRef` and lets the caller mutate the customisation record
-through a function. `GeneratorContext.Create(preludeFn, ?customisation)`
-is the lower-level form that takes the prelude function explicitly — used
-by tests that want to inject their own resolution strategy.
+The `EmptyWithCustomisation` helper wires up a default `PreludeGetTypeRef`,
+accepts a function that composes hooks into `Customisation.Default`,
+and returns the context. `GeneratorContext.Create(preludeFn, ?customisation)`
+is the lower-level form that takes the prelude function and optional
+customisation explicitly — used by tests that want to inject their own
+resolution strategy.
+
+## Hook slots and types
+
+```fsharp
+type HookSlot<'T> = {
+    Handlers : Hook<'T> list
+    HasAny   : bool
+}
+
+type SkippableHookSlot<'T> = {
+    Handlers : SkippableHook<'T> list
+    HasAny   : bool
+}
+
+type Hook<'T> = GeneratorContext -> RenderContext -> 'T -> HookResult<'T>
+
+type SkippableHook<'T> = GeneratorContext -> RenderContext -> 'T -> SkippableHookResult<'T>
+
+type HookResult<'T> = | Pass | Replace of 'T
+
+type SkippableHookResult<'T> = | Pass | Replace of 'T | Skip
+```
+
+A `HookSlot` is a non-empty list wrapper carrying:
+- `Handlers` — accumulated hooks in registration order (latest-registered first).
+- `HasAny` — fast path; true iff the list is non-empty (avoids a check every call site).
+
+`HookSlot.run slot ctx rctx value` invokes all handlers left-to-right:
+- `Pass` → move to the next handler.
+- `Replace v'` → update the value and move to the next handler.
+- On the final handler, return the accumulated value.
+
+`SkippableHookSlot.run` additionally respects `Skip`:
+- `Skip` → immediately return `Skip` without invoking downstream handlers.
 
 ## Operations
 
@@ -83,87 +122,99 @@ GeneratorContext.Anchored.addResolvedType  ctx t value
 GeneratorContext.Anchored.addResolvedExport ctx e value
 ```
 
-The `Anchored.addOrReplace` path runs the
-`Customisation.Interceptors.AnchoredRender` interceptor on every write —
-this is the last opportunity to rewrite a render before it lands in the
-emit-time store.
+The `Anchored.addOrReplace` path dispatches through `AnchoredRef` /
+`AnchoredScope` hook slots on every write — this is the last opportunity
+to rewrite a render before it lands in the emit-time store. Return `Skip`
+to prevent the entry from being stored.
 
-## Customisation surface
+## Customisation record
 
 ```fsharp
-type InterceptorIgnorePathRender = {
-    Source        : ArenaInterner.QualifiedNamePart -> bool
-    QualifiedName : QualifiedName -> bool
+type Customisation = {
+    PathResolutionType    : SkippableHookSlot<TypePath>
+    PathResolutionMember  : SkippableHookSlot<MemberPath>
+    TypeRefBuild          : HookSlot<TypeRefRender>
+    TypeRefEmit           : HookSlot<WidgetBuilder<Type>>
+    RenderScopeBuild      : SkippableHookSlot<RenderScope>
+    TypeDefBuildClass     : SkippableHookSlot<Concrete.TypeLikeRender>
+    TypeDefBuildAlias     : SkippableHookSlot<Concrete.TypeAliasRender>
+    TypeDefBuildEnum      : SkippableHookSlot<Concrete.LiteralUnionRender<int>>
+    TypeDefBuildStringUnion : SkippableHookSlot<Concrete.LiteralUnionRender<TsLiteral>>
+    TypeDefEmit           : HookSlot<WidgetBuilder<TypeDefn>>
+    AnchoredRef           : SkippableHookSlot<Anchored.TypeRefRender>
+    AnchoredScope         : SkippableHookSlot<Anchored.RenderScope>
 }
-
-type InterceptorPaths = {
-    TypePaths    : GeneratorContext -> Choice<Interface, EnumType, Class, TypeAlias> -> TypePath -> TypePath
-    MemberPaths  : GeneratorContext -> Choice<Variable, Function> -> MemberPath -> MemberPath
-}
-
-type Interceptors = {
-    IgnorePathRender    : InterceptorIgnorePathRender
-    Paths               : InterceptorPaths
-    ResolvedTypePrelude : GeneratorContext -> ResolvedType -> RenderScope -> RenderScope
-    AnchoredRender      : GeneratorContext -> Choice<ResolvedType, ResolvedExport>
-                           -> Choice<Anchored.TypeRefRender, Anchored.RenderScope>
-                           -> Choice<Anchored.TypeRefRender, Anchored.RenderScope>
-}
-
-type Customisation = { Interceptors: Interceptors }
 ```
 
-* **`IgnorePathRender.Source`** — return `true` to drop a qualified-name
-  source segment before it becomes part of a path. Use this to filter out
-  `babel`, `typescript`, or other infrastructure markers.
-* **`IgnorePathRender.QualifiedName`** — same idea, but applied to the
-  fully parsed `QualifiedName`.
-* **`Paths.TypePaths` / `Paths.MemberPaths`** — rewrite an absolute path
-  before it is stored. Typically used with `TypePath.pruneParent` to remove
-  injected prefixes.
-* **`ResolvedTypePrelude`** — last-mile mutation of a prelude
-  `RenderScope`. The reference generator uses it to force every lib-ES type
-  into `Render.RefOnly`, so that standard-library types are *referenced*
-  but never *defined* in the output.
-* **`AnchoredRender`** — same idea at the anchor level.
+Each field is a hook slot. Register handlers using:
 
-`Customisation.Default` provides identity functions for every hook;
-`Customisation.Create fn` is the recommended entry point because it
-preserves any hooks the runtime adds in the future.
+```fsharp
+Customisation.addPathResolutionType hook customisation         // prepends hook
+Customisation.addPathResolutionTypeTracked hook customisation  // returns (customisation, HandlerToken)
+Customisation.addRenderScopeBuild hook customisation           // and so on for each slot
+```
+
+All `add*` methods are chainable and return the updated `Customisation`.
+`add*Tracked` variants additionally return a `HandlerToken` that can be
+passed to `Customisation.remove token customisation` to deregister a handler
+later.
+
+### Registration order and composition
+
+Handlers register via `add*` which prepends to the slot's handler list.
+When `HookSlot.run` or `SkippableHookSlot.run` is invoked:
+
+1. Iterate handlers left-to-right (latest-registered runs first).
+2. Apply the handler to the current value.
+3. If the handler returns `Replace v'`, continue with `v'`.
+4. If a `SkippableHook` returns `Skip`, stop immediately and return `Skip`.
+5. Return the final value.
+
+This means later-registered handlers see the mutations of earlier-registered
+ones and can shape behavior without coordination.
+
+`Customisation.Default` provides empty slot lists for every hook;
+`GeneratorContext.EmptyWithCustomisation (fun c -> …)` is the recommended
+entry point.
 
 ## Worked example
 
 ```fsharp
+let renderScopeBuildHook: SkippableHook<RenderScope> =
+    fun ctx rctx scope ->
+        match rctx.Owner with
+        | ValueSome (RenderOwner.Type (ResolvedType.Interface { IsLibEs = true }))
+        | ValueSome (RenderOwner.Type (ResolvedType.Class { IsLibEs = true }))
+        | ValueSome (RenderOwner.Type (ResolvedType.Enum { IsLibEs = true })) ->
+            SkippableHookResult.Replace { scope with Render = ValueSome (Render.RefOnly scope.TypeRef) }
+        | _ -> SkippableHookResult.Pass
+
+let pruneTypescriptTypeHook: SkippableHook<TypePath> =
+    fun ctx rctx path ->
+        match rctx.Owner with
+        | ValueSome (RenderOwner.Type (ResolvedType.Interface { IsLibEs = true }))
+        | ValueSome (RenderOwner.Type (ResolvedType.Class { IsLibEs = true }))
+        | ValueSome (RenderOwner.Type (ResolvedType.Enum { IsLibEs = true })) ->
+            SkippableHookResult.Replace
+                (TypePath.pruneParent
+                    (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") path)
+        | _ -> SkippableHookResult.Pass
+
 let ctx =
     GeneratorContext.EmptyWithCustomisation (fun c ->
-        { c with
-            Customisation.Interceptors.IgnorePathRender.Source = function
-                | QualifiedNamePart.Normal text
-                | QualifiedNamePart.Abnormal(text, _) ->
-                    text.Contains("typescript", StringComparison.OrdinalIgnoreCase)
-
-            Customisation.Interceptors.ResolvedTypePrelude = fun _ -> function
-                | ResolvedType.Interface { IsLibEs = true }
-                | ResolvedType.Class     { IsLibEs = true }
-                | ResolvedType.Enum      { IsLibEs = true } ->
-                    fun scope -> { scope with Render = Render.RefOnly scope.TypeRef }
-                | _ -> id
-
-            Customisation.Interceptors.Paths.TypePaths = fun _ typ p ->
-                match typ with
-                | Choice1Of4 { IsLibEs = true }
-                | Choice2Of4 { IsLibEs = true }
-                | Choice3Of4 { IsLibEs = true }
-                | Choice4Of4 { IsLibEs = true } ->
-                    TypePath.pruneParent
-                        (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") p
-                | _ -> p })
+        c
+        |> Customisation.addRenderScopeBuild renderScopeBuildHook
+        |> Customisation.addPathResolutionType pruneTypescriptTypeHook)
 ```
 
-This is the exact configuration in `Generator/Render.fs`. It says:
+This is the core configuration in `Generator/Render.fs`. It says:
 
-1. Drop the `typescript` source qualifier when computing module paths.
-2. For every lib-ES type, do not emit a definition — emit only the
-   reference.
-3. For every lib-ES path, strip the synthetic `Typescript` parent module so
+1. For every lib-ES type, render only the reference (mark `Render = RefOnly`
+   in the scope) — do not emit a definition.
+2. For every lib-ES path, strip the synthetic `Typescript` parent module so
    the result reads like `MyTypes.Foo` rather than `Typescript.MyTypes.Foo`.
+
+Both hooks dispatch on `rctx.Owner` to distinguish lib-ES types from
+user-defined ones. No special interceptor for the path source is needed here;
+the `Path` module's `fromX` builders already filter sources during path
+construction.
