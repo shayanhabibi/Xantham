@@ -2277,7 +2277,17 @@ let intrinsicTests = testList "intrinsic.d.ts" [
         Expect.hasLength inputTypeRef.TypeArguments 1 "inputExamples type has one type argument"
     }
 ]
-    
+
+// fixture: cloudflare-export
+let cloudFlareExportTests = testList "cloudflare-export.d.ts" [
+    let result = createTestReader "cloudflare-export" |> runReader
+    test "connect exists" {
+        findFunction "connect" result
+        |> _.Values
+        |> Expect.isNotEmpty
+        |> funApply "connect exists"
+    }
+]
 
 // -----------------------------------------------------------------------
 // Suite
@@ -2332,6 +2342,7 @@ let tests =
         nestedGenericsTests
         typeArgsTests
         intrinsicTests
+        cloudFlareExportTests
     ]
 
 Mocha.runTests tests |> ignore
