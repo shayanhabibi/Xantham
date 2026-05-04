@@ -10,6 +10,8 @@ open Xantham.Generator.NamePath
 open Xantham.Generator.Types
 open Xantham.Generator
 
+exception EncoderInvariantViolation of string
+
 /// Wrapper that chooses the type of dictionary (concurrent/normal)
 /// depending on the presence of the CONCURRENT_DICT constant on compilation
 type DictionaryImpl<'Key, 'Value> =

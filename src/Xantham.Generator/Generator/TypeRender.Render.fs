@@ -524,8 +524,9 @@ module TypeLikeRender =
             })
             |> Documentation.renderForMember typeLike
             )
-    let renderInheritance (ctx: GeneratorContext) (typeRefRender: TypeRefRender) =
+    let renderInheritance (ctx: GeneratorContext) (inScopeTyparNames: Set<string>) (typeRefRender: TypeRefRender) =
         typeRefRender
+        |> TypeRefRender.substituteForHeritage inScopeTyparNames
         |> TypeRefRender.nonNullable
         |> TypeRefRender.render
         |> Ast.Inherit
@@ -560,6 +561,10 @@ module TypeLikeRender =
             typeLike.Functions
             |> List.collect (FunctionLikeRender.renderAbstract ctx)
         let memberCollection = members @ functions
+        let inScopeTypars =
+            typeLike.TypeParameters
+            |> List.map (fun tp -> "'" + Name.Case.valueOrModified tp.Name)
+            |> Set.ofList
         let builder =
             if List.isEmpty memberCollection
             then Ast.InterfaceEnd(renderName)
@@ -568,7 +573,7 @@ module TypeLikeRender =
             yield! renderAbstractConstructors ctx typeLike
             yield!
                 typeLike.Inheritance
-                |> List.map (renderInheritance ctx)
+                |> List.map (renderInheritance ctx inScopeTypars)
             yield! memberCollection
         }
         |> Documentation.renderForTypeDefn typeLike

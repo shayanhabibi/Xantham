@@ -1,8 +1,11 @@
 ﻿module Xantham.Generator.Tests.Tests.Inheritance
 
 open Expecto
+open Fabulous.AST
 open Mocking.ArenaInterner.ResolvedType
 open Xantham
+open Xantham.Generator
+open Xantham.Generator.Types
 
 
 let private testRender = TypeRefRender.testRender
@@ -10,9 +13,9 @@ let private testRender = TypeRefRender.testRender
 let interfaceTypeParameters =
     [
         let defaultForT = primitive TypeKindPrimitive.String
+        TypeParameter.create "U"
         TypeParameter.create "T"
         |> TypeParameter.withDefault defaultForT
-        TypeParameter.create "U"
     ]
 
 let testInterface =
@@ -33,10 +36,10 @@ let inheritanceTests =
     testList "Inheritance" [
         testCase "interface with typars" <| fun _ ->
             testInterface
-            |> testRender "Global.TestInterface<string, _>"
+            |> testRender "Global.TestInterface<_, string>"
             ||> Flip.Expect.equal ""
         testCase "typeref with typars, interface with typars" <| fun _ ->
             testTypeReference
-            |> testRender "TestInterface<'T, 'U>"
+            |> testRender "TestInterface<'T, string>"
             ||> Flip.Expect.equal ""
     ]

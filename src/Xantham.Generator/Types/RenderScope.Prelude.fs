@@ -132,6 +132,46 @@ module TypeRefRender =
     let nullable (typeRefRender: TypeRefRender) = setNullable true typeRefRender
     let nonNullable (typeRefRender: TypeRefRender) = setNullable false typeRefRender
 
+    let substituteForHeritage (inScopeTyparNames: Set<string>) (render: TypeRefRender) : TypeRefRender =
+        let rec walk (render: TypeRefRender) : TypeRefRender =
+            match render.Kind with
+            | TypeRefKind.Atom_ atom ->
+                let newAtom =
+                    match atom with
+                    | TypeRefAtom.Intrinsic_ "_" ->
+                        TypeRefAtom.Intrinsic_ "obj"
+                    | TypeRefAtom.Intrinsic_ s when s.StartsWith("'") ->
+                        if Set.contains s inScopeTyparNames then
+                            atom
+                        else
+                            printfn "Warning: orphan type parameter '%s' in heritage clause, substituting with 'obj'" s
+                            TypeRefAtom.Intrinsic_ "obj"
+                    | _ -> atom
+                { render with Kind = TypeRefKind.Atom_ newAtom }
+            | TypeRefKind.Molecule_ molecule ->
+                let newMolecule =
+                    match molecule with
+                    | TypeRefMolecule.Tuple_ typeRefs ->
+                        typeRefs
+                        |> List.map walk
+                        |> TypeRefMolecule.Tuple_
+                    | TypeRefMolecule.Union_ typeRefs ->
+                        typeRefs
+                        |> List.map walk
+                        |> TypeRefMolecule.Union_
+                    | TypeRefMolecule.Function_ (parameters, returnType) ->
+                        TypeRefMolecule.Function_ (
+                            parameters |> List.map walk,
+                            walk returnType
+                        )
+                    | TypeRefMolecule.Prefix_ (prefix, args) ->
+                        TypeRefMolecule.Prefix_ (
+                            walk prefix,
+                            args |> List.map walk
+                        )
+                { render with Kind = TypeRefKind.Molecule_ newMolecule }
+        walk render
+
 type RenderScopeStore = {
     PathContext: TransientPath
     TypeStore: Dictionary<ResolvedType, TransientTypePath>

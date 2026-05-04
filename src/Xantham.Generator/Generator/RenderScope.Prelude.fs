@@ -263,6 +263,17 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         let postfixArguments =
             typeArguments
             |> List.map (prerender ctx scope)
+        // Assert encoder invariant: args count must match declared type parameters
+        let innerResolvedTypeValue = innerResolvedType.Value
+        let declaredParamCount =
+            match innerResolvedTypeValue with
+            | ResolvedType.Interface i -> i.TypeParameters.Length
+            | ResolvedType.Class c -> c.TypeParameters.Length
+            | _ -> typeArguments.Length
+        if postfixArguments.Length <> declaredParamCount then
+            raise (EncoderInvariantViolation (
+                $"TypeReference application has {postfixArguments.Length} arguments but {innerResolvedTypeValue} declares {declaredParamCount} type parameters"
+            ))
         (prefix, postfixArguments)
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
