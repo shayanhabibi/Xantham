@@ -386,6 +386,7 @@ let renderRoot (ctx: GeneratorContext) (root: RootModule) =
                 LiteralUnionRender.renderEnum ctx literalUnionRender
             | _ -> ()
         for module' in root.Modules.Values do
-            renderModuleInterface ctx module'
+            if module'.Members.Count > 0 then
+                renderModuleInterface ctx module'
         yield! nextModules
     }
