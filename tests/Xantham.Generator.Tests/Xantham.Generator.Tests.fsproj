@@ -18,6 +18,7 @@
         <Compile Include="Tests\TypeRefRender.EncoderInvariant.fs" />
         <Compile Include="Tests\TypeRefRender.SubstituteForHeritage.fs" />
         <Compile Include="Tests\RenderCollection.fs" />
+        <Compile Include="Tests\RenderScopeAnchored.fs" />
         <Compile Include="Main.fs"/>
     </ItemGroup>
 

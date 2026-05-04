@@ -666,6 +666,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                                     )
                         }
                         )
+                    |> List.distinct
                 Traits = Set []
                 TypeParameters =
                     headFunc.TypeParameters
