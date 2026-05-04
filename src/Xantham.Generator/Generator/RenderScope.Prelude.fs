@@ -264,14 +264,30 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             | ResolvedType.Class c -> c.TypeParameters.Length
             | _ -> typeArguments.Length
         // Encoder/TS may produce a TypeReference whose argument count doesn't
-        // match the inner type's declared type parameter count — e.g. a class
-        // `extends Body<X>` where the resolved Body declaration has no type
-        // params (arises with declaration merging when the encoder can't
-        // disambiguate). Degrading to the inner type without args is the
-        // correct fallback for F# generation, which would otherwise crash.
-        if typeArguments.Length <> declaredParamCount then
-            printfn "Warning: TypeReference application has %d arguments but %A declares %d type parameters; rendering without arguments"
-                typeArguments.Length innerResolvedTypeValue declaredParamCount
+        // match the inner type's declared type parameter count — happens with
+        // declaration merging where the encoder can't disambiguate which
+        // declaration's arity to honour (e.g. lib.dom Body has 0 type params
+        // but a downstream class `extends Body<X>` was authored against a
+        // merged extension). Align the args to the declaration's arity so the
+        // emitted F# is well-formed: truncate excess args, pad missing args
+        // with `obj`. Both directions log a warning so the upstream encoder
+        // discrepancy stays visible.
+        let alignedArguments =
+            if typeArguments.Length = declaredParamCount then
+                typeArguments
+            elif typeArguments.Length > declaredParamCount then
+                printfn "Warning: TypeReference application has %d arguments but %A declares %d type parameters; truncating to declared arity"
+                    typeArguments.Length innerResolvedTypeValue declaredParamCount
+                typeArguments |> List.truncate declaredParamCount
+            else
+                printfn "Warning: TypeReference application has %d arguments but %A declares %d type parameters; padding with obj to declared arity"
+                    typeArguments.Length innerResolvedTypeValue declaredParamCount
+                let padCount = declaredParamCount - typeArguments.Length
+                let objArg =
+                    LazyContainer.CreateFromValue
+                        (ResolvedType.Primitive TypeKindPrimitive.NonPrimitive)
+                typeArguments @ List.replicate padCount objArg
+        if List.isEmpty alignedArguments then
             innerResolvedType
             |> prerender ctx scope
             |> RenderScope.createRootless resolvedType
@@ -281,7 +297,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             innerResolvedType
             |> prerender ctx scope
         let postfixArguments =
-            typeArguments
+            alignedArguments
             |> List.map (prerender ctx scope)
         (prefix, postfixArguments)
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
