@@ -13,7 +13,8 @@ open Fable.Core.JsInterop
 // let dtsFile = path.join(__SOURCE_DIRECTORY__, "../../node_modules/solid-js/types/index.d.ts")
 let dtsFile file = path.join(__SOURCE_DIRECTORY__, $"../../node_modules/{file}")
 let reader =
-    dtsFile "solid-js/types/index.d.ts"
+    dtsFile "agents/dist/index.d.ts"
+    // dtsFile "solid-js/types/index.d.ts"
     // dtsFile "typescript/lib/lib.dom.d.ts"
     // path.join(__SOURCE_DIRECTORY__, "../../tests/Xantham.Fable.Tests/TypeFiles/multiple-extends.d.ts")
     |> TypeScriptReader.create 

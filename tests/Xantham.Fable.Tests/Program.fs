@@ -2240,6 +2240,43 @@ let typeArgsTests = testList "type-args.d.ts" [
         ]
     ]
 ]
+
+let intrinsicTests = testList "intrinsic.d.ts" [
+    let result = createTestReader "intrinsic" |> runReader
+    test "Tool exists" {
+        let tool = result |> findAlias "Tool"
+        ""
+        |> Expect.equal tool.Name "Tool"
+    }
+    test "Tool alias type exists" {
+        let tool = result |> findAlias "Tool"
+        let x = findType tool.Type result
+        Expect.isTrue x.IsTypeLiteral "Tool type is a type literal"
+    }
+    test "Tool type literal contains inputExamples property" {
+        let tool = result |> findAlias "Tool"
+        let typeLiteral =
+            match findType tool.Type result with
+            | TsType.TypeLiteral lit -> lit
+            | _ -> failwith "Expected TypeLiteral"
+        typeLiteral.Members
+        |> Expect.exists
+        |> funApply (function
+            | TsMember.Property prop when prop.Name = "inputExamples" -> true
+            | _ -> false
+            )
+        |> funApply "inputExamples property exists"
+        
+        let inputExamples =
+            typeLiteral.Members
+            |> List.find (_.IfIsProperty >> ValueOption.exists _.Name.Equals("inputExamples"))
+            |> _.IfIsProperty.Value
+        let inputType = findType inputExamples.Type result
+        Expect.isTrue inputType.IsTypeReference $"inputExamples type is a type reference, not {inputType}"
+        let inputTypeRef = match inputType with TsType.TypeReference ref -> ref | _ -> failwith "Expected TypeReference"
+        Expect.hasLength inputTypeRef.TypeArguments 1 "inputExamples type has one type argument"
+    }
+]
     
 
 // -----------------------------------------------------------------------
@@ -2294,6 +2331,7 @@ let tests =
         literalTokenNodeTest
         nestedGenericsTests
         typeArgsTests
+        intrinsicTests
     ]
 
 Mocha.runTests tests |> ignore

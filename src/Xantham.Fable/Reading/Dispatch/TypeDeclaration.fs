@@ -182,7 +182,7 @@ module TypeAlias =
         let innerTypeSignal, innerBuilderSignal =
             ctx.CreateXanthamTag node.``type``
             |> fst
-            |> stackPushAndThen ctx (fun tag -> tag.TypeSignal, tag.Builder)
+            |> stackPushAndThen ctx (XanthamTag.chainDebug xanTag >> fun tag -> tag.TypeSignal, tag.Builder)
         let builder = {
             SAliasBuilder.Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
