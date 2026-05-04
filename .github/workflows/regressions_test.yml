@@ -24,7 +24,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
       - name: Restore Tools
-        run: dotnet tool restore
+        run: dotnet restore ./Xantham.slnx
       - name: Restore Sln
         run: dotnet restore
       - name: Run regression tests
