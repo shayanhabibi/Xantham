@@ -1,0 +1,32 @@
+﻿name: regressions_test
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '**.fs'
+      - 'src/**/**.fsproj'
+      - '!ci/**.fs'
+  workflow_dispatch: 
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+jobs:
+  encoder-decoder-regressions:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout source code
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+      - name: Restore Tools
+        run: dotnet tool restore
+      - name: Restore Sln
+        run: dotnet restore
+      - name: Run regression tests
+        run: dotnet run --project tests/Xantham.Decoder.Tests/Xantham.Decoder.Tests.fsproj
+        
