@@ -26,7 +26,7 @@ jobs:
       - name: Restore Tools
         run: dotnet tool restore
       - name: Restore Sln
-        run: dotnet restore
+        run: dotnet restore ./Xantham.slnx
       - name: Run regression tests
         run: dotnet run --project tests/Xantham.Decoder.Tests/Xantham.Decoder.Tests.fsproj
         
