@@ -55,6 +55,12 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
     | TypeNode.BigIntKeyword _    -> setKeyword TypeKindPrimitive.BigInt
     | TypeNode.IntrinsicKeyword _ ->
          XanthamTag.debugLocationAndCommentAndForget "TypeNode.dispatch | IntrinsicKeyword" "Represents intrinsic type manipulations like Uppercase etc" xanTag
+         // Type references, aliases, and other declarations that somehow
+         // require a dedicated type build for the intrinsic type will fail
+         // on this dangling reference. Set a generic value. Most resolved shapes should not
+         // even point to this.
+         setAstSignal (SType.Primitive TypeKindPrimitive.Any)
+         setTypeKeyForTag xanTag TypeKindPrimitive.Any.TypeKey
         (* represents intrinsic type manipulations like Uppercase etc *) 
     | TypeNode.UnionType unionTypeNode ->
         XanthamTag.debugLocationAndForget "TypeNode.dispatch | UnionType" xanTag

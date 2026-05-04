@@ -60,6 +60,7 @@
         <TypeScriptCompile Include="TypeFiles\nested-generics.d.ts" />
         <TypeScriptCompile Include="TypeFiles\type-args.d.ts" />
         <TypeScriptCompile Include="TypeFiles\plan-a-test.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\intrinsic.d.ts" />
     </ItemGroup>
 
     <ItemGroup>
