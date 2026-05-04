@@ -2,6 +2,6 @@
     "type": "module",
     "name": "xantham",
     "dependencies": {
-        "@cloudflare/workers-types": "*"
+        "@cloudflare/workers-types": "^4.20260504.1"
     }
 }

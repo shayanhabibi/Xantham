@@ -2,6 +2,7 @@ module Fixture
 
 open EasyBuild.FileSystemProvider
 open Expecto
+open Fake.Core
 open Fake.JavaScript
 open Xantham.Decoder
 
@@ -51,8 +52,7 @@ module Virtual =
                         dist/
                             index.d.ts
                     workers-types/
-                        dist/
-                            index.d.ts
+                        index.d.ts
             output.json"
     
     type Agents =
@@ -68,6 +68,12 @@ module Virtual =
         
 
 module Fixtures =
+    let private createProcess exe args dir =
+        CreateProcess.fromRawCommand exe args
+        |> CreateProcess.withWorkingDirectory dir
+        |> CreateProcess.ensureExitCode
+    let private node args dir = createProcess "node" args dir |> Proc.run |> ignore
+    
     Npm.setDir RepoRoot.``.``
     |> Npm.run "build"
 
@@ -76,11 +82,12 @@ module Fixtures =
         Npm.setDir fixture.Root
         |> Npm.install
         fixture
+        
     
     let encode fixture =
         try
-        Npm.setDir RepoRoot.``.``
-        |> Npm.exec $"exec . -- {fixture.TypeDefinitionFile} -o {fixture.Output}"
+        RepoRoot.``.``
+        |> node [ "index.js"; fixture.TypeDefinitionFile; "-o"; fixture.Output ]
         Ok fixture
         with e -> Error(e)
     let decode fixture =
@@ -118,7 +125,7 @@ module Fixtures =
     }
     let workersTypes = {
         Name = "Workers Types"
-        TypeDefinitionFile = Virtual.WorkersTypes.node_modules.``@cloudflare``.``workers-types``.dist.``index.d.ts``
+        TypeDefinitionFile = Virtual.WorkersTypes.node_modules.``@cloudflare``.``workers-types``.``index.d.ts``
         Output = Virtual.WorkersTypes.``output.json``
         Root = Root.fixtures.``workers-types``.``.``
     }
