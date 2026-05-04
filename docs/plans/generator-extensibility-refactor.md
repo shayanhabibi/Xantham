@@ -433,3 +433,56 @@ Create `tests/baselines/` (does not currently exist) and, before any code change
 - 1 new test directory (`tests/baselines/`) with the captured baseline.
 - All call sites that previously used `Interceptors.*` migrate mechanically to `HookSlot.run` / `SkippableHookSlot.run`.
 - Runtime cost on the no-handler path: one `bool` branch per stage entry, zero allocations.
+
+## Implementation progress
+
+### Decisions locked during execution
+
+1. **Step 2 (`Generator/HookSlot.fs`) is superseded.** F# strict file ordering required folding into `Types/Generator.fs`; no separate file is created.
+2. **`TypeDefEmit` slot type:** corrected from `WidgetBuilder<Type>` (typo) to `WidgetBuilder<TypeDefn>`.
+3. **`RenderContext.Render` is `RenderMode voption`**, not `RenderMode`. Path resolution legitimately fires before any `RenderScope` is entered, so it sets `Render = ValueNone`. All later `Build`/`Emit`/`Anchored` callers set `ValueSome scope.Render`.
+4. **`PathResolution` slot is split into two slots** to honour the `TypePath` vs `MemberPath` divide that `fromVariable`/`fromFunction` produce: `PathResolutionType: SkippableHookSlot<TypePath>` and `PathResolutionMember: SkippableHookSlot<MemberPath>`. The plan's single-slot table is wrong on that row; the migration map's `MemberPaths` row maps to `PathResolutionMember`.
+5. **Skip is resolved once at the dispatcher level** (`RenderScope.Anchored.fs`). Renderers receive the resolved path as a parameter and stop calling former `pipe*` helpers themselves. Renderer signatures change accordingly. *(Pending — applies in step 5/8.)*
+6. **`Path.tryResolveExport`** is the single dispatcher entry point. Returns `AnchorPath voption`. `ValueNone` ⇒ elide the export. Modules currently bypass resolution to preserve legacy `pipeExport` parity.
+
+### Foundation
+
+- [x] Step 1 — `Types/Generator.fs` (committed in `6c361eb`).
+- [x] Step 2 — superseded (see decision #1).
+- [x] `TypeDefEmit` slot type fix.
+- [x] `RenderContext.Render` made `RenderMode voption`.
+- [x] `PathResolution` slot split into `PathResolutionType` + `PathResolutionMember`; `SlotId` cases, `Customisation.Default`, chainable `add*`, tracked `add*Tracked`, and `remove` dispatcher all updated.
+
+### Step 3 — `TypeRefRender.Paths.fs`
+
+- [x] Removed `module Interceptors` (deleted `shouldIgnoreRender`, `shouldIgnoreExport`, `pipeInterface`, `pipeClass`, `pipeEnum`, `pipeTypeAlias`, `pipeVariable`, `pipeFunction`, `pipeExport`).
+- [x] Added `Path.resolveType` / `Path.resolveMember` returning `SkippableHookResult<…>`.
+- [x] Added `Path.tryResolveTypePath` / `Path.tryResolveMemberPath` (voption convenience).
+- [x] Added `Path.tryResolveExport ctx export : AnchorPath voption` (single dispatcher entry).
+- [ ] Caller migration is **deferred to steps 5, 7, 8** — see "Pending downstream migration" below.
+
+### Pending downstream migration (build is currently red)
+
+Removing `Path.Interceptors.*` and `Customisation.Interceptors.*` left these call sites broken. Each must migrate before the build is green:
+
+| File | Line | What to do |
+|------|------|-----------|
+| `Types/Generator.fs Anchored.addOrReplace` | 339 | **Step 8** — replace `Customisation.Interceptors.AnchoredRender ctx key value` with a `Choice`-arm dispatch: `AnchoredRef` / `AnchoredScope` slot. |
+| `Generator/Render.Enum.fs` | 13, 53 | **Step 5** — drop `Path.Interceptors.pipeEnum`; accept resolved `TypePath` as a parameter instead. Caller in dispatcher passes the value from `Path.tryResolveExport`. |
+| `Generator/Render.TypeAlias.fs` | 22 | **Step 5** — same pattern; drop `Path.Interceptors.pipeTypeAlias`. |
+| `Generator/RenderScope.Prelude.fs` | 31 | **Step 7** — split `ResolvedTypePrelude` invocation into `RenderScopeBuild` + matching `TypeDefBuild*`. |
+| `Generator/RenderScope.Prelude.fs` | 91, 108, 292, 438 | **Step 5** — drop `Path.Interceptors.pipe{Interface,Class,Enum,TypeAlias}`; accept resolved path from caller. |
+| `Generator/RenderScope.Anchored.fs` | 502, 525, 555, 574, 593, 626 | **Step 8 / dispatcher** — replace `Interceptors.shouldIgnoreRender` short-circuit with `Path.tryResolveExport` / appropriate `tryResolveType` / `tryResolveMember` returning `ValueNone` ⇒ skip the export. Plumb the resolved `AnchorPath` into the renderer call. |
+| `Generator/Render.fs` | 25–44 | **Step 9** — migrate the live `Customisation.Interceptors.*` block to the new `Customisation.add*` builders. Add encoder-invariant worked example. |
+| `docs/Xantham.Generator/{pipeline.fsx, paths.md, generator-context.md}` | various | Doc-only — defer until code is green. |
+
+### Remaining work
+
+- [ ] Step 4 — `TypeRefRender.Render.fs`: wrap with `TypeRefBuild`/`TypeRefEmit`; mirror in `Anchored` for `AnchoredRef`; thread `RenderContext` through every recursion site (TypeArg / UnionMember / TupleElement / FunctionParameter|Return / InheritanceRef).
+- [ ] Step 5 — `Render.TypeShapes.fs` / `Render.TypeAlias.fs` / `Render.Enum.fs`: accept resolved path as parameter; invoke matching `TypeDefBuild*` after each `*Render`.
+- [ ] Step 6 — `TypeRender.Render.fs`: invoke `TypeDefEmit` after each `WidgetBuilder<TypeDefn>`.
+- [ ] Step 7 — `RenderScope.Prelude.fs:31`: replace prelude interceptor with `RenderScopeBuild` then payload `TypeDefBuild*`; phys-eq cache invalidation.
+- [ ] Step 8 — `Types/Generator.fs Anchored.addOrReplace`: replace `Interceptors.AnchoredRender` with `AnchoredRef`/`AnchoredScope`.
+- [ ] Step 9 — `Generator/Render.fs`: migrate live customisation; add encoder-invariant worked example.
+- [ ] Step 10 — Audit `Xantham.Fable/Program.fs` and `tests/**` for stale `Interceptors.` references.
+- [ ] Final — `dotnet build`, capture `tests/baselines/output.json`, run new tests.

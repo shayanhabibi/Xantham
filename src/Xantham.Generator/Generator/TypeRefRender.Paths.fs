@@ -130,61 +130,83 @@ let fromResolvedExport (resolvedExport: ResolvedExport) =
         fromFunction func |> AnchorPath.Member
     | ResolvedExport.Function [] -> failwith "Resolved export contained no functions for the function case."
 
-module Interceptors =
-    let inline shouldIgnoreRender (interceptor: Interceptors) (value: ^T when ^T:(member Source: ArenaInterner.QualifiedNamePart option) and ^T:(member FullyQualifiedName: ArenaInterner.QualifiedNamePart list)) =
-        Option.exists interceptor.IgnorePathRender.Source value.Source
-        ||
-        getQualifiedName value
-        |> interceptor.IgnorePathRender.QualifiedName
-    let shouldIgnoreExport (interceptor: Interceptors) (value: ResolvedExport) =
-        match value with
-        | ResolvedExport.Variable value -> shouldIgnoreRender interceptor value
-        | ResolvedExport.Interface value -> shouldIgnoreRender interceptor value
-        | ResolvedExport.TypeAlias value -> shouldIgnoreRender interceptor value
-        | ResolvedExport.Class value -> shouldIgnoreRender interceptor value
-        | ResolvedExport.Enum value -> shouldIgnoreRender interceptor value
-        | ResolvedExport.Function value -> shouldIgnoreRender interceptor value[0]
-        | ResolvedExport.Module value -> shouldIgnoreRender interceptor value
-    let pipeInterface (ctx: GeneratorContext) (iface: Interface) =
-        (Choice1Of4 iface, fromInterface iface)
-        ||> ctx.Customisation.Interceptors.Paths.TypePaths ctx
-    let pipeClass (ctx: GeneratorContext) (cls: Class) =
-        (Choice3Of4 cls, fromClass cls)
-        ||> ctx.Customisation.Interceptors.Paths.TypePaths ctx
-    let pipeEnum (ctx: GeneratorContext) (enum: EnumType) =
-        (Choice2Of4 enum, fromEnum enum)
-        ||> ctx.Customisation.Interceptors.Paths.TypePaths ctx
-    let pipeTypeAlias (ctx: GeneratorContext) (typeAlias: TypeAlias) =
-        (Choice4Of4 typeAlias, fromTypeAlias typeAlias)
-        ||> ctx.Customisation.Interceptors.Paths.TypePaths ctx
-    let pipeVariable (ctx: GeneratorContext) (variable: Variable) =
-        (Choice1Of2 variable, fromVariable variable)
-        ||> ctx.Customisation.Interceptors.Paths.MemberPaths ctx
-    let pipeFunction (ctx: GeneratorContext) (function': Function) =
-        (Choice2Of2 function', fromFunction function')
-        ||> ctx.Customisation.Interceptors.Paths.MemberPaths ctx
-    let pipeExport (ctx: GeneratorContext) (export: ResolvedExport) =
-        match export with
-        | ResolvedExport.Variable variable ->
-            pipeVariable ctx variable
-            |> AnchorPath.create
-        | ResolvedExport.Interface ``interface`` ->
-            pipeInterface ctx ``interface``
-            |> AnchorPath.create
-        | ResolvedExport.TypeAlias typeAlias ->
-            pipeTypeAlias ctx typeAlias
-            |> AnchorPath.create
-        | ResolvedExport.Class ``class`` ->
-            pipeClass ctx ``class``
-            |> AnchorPath.create
-        | ResolvedExport.Enum enumType ->
-            pipeEnum ctx enumType
-            |> AnchorPath.create
-        | ResolvedExport.Function functions ->
-            pipeFunction ctx functions[0]
-            |> AnchorPath.create
-        | ResolvedExport.Module ``module`` ->
-            ``module``
-            |> fromModule
-            |> AnchorPath.create
-    
+let inline private mkRctx (owner: ResolvedType voption) (position: PathPosition) =
+    {
+        Position = PathPos position
+        Owner = owner
+        Render = ValueNone
+        Stage = RenderStage.PathResolution
+    }
+
+/// Runs the `PathResolutionType` slot for a raw `TypePath` produced by one of
+/// the type-level `from*` builders (interface/class/enum/typeAlias). Caller
+/// supplies the owning `ResolvedType` (or `ValueNone` if not applicable) and
+/// the `PathPosition`. `Render` is `ValueNone` because path resolution fires
+/// before any `RenderScope` is entered.
+let resolveType
+    (ctx: GeneratorContext)
+    (owner: ResolvedType voption)
+    (position: PathPosition)
+    (path: TypePath) : SkippableHookResult<TypePath> =
+    SkippableHookSlot.run ctx.Customisation.PathResolutionType ctx (mkRctx owner position) path
+
+/// Runs the `PathResolutionMember` slot for a raw `MemberPath` produced by one
+/// of the member-level `from*` builders (variable/function or member-of-type
+/// paths).
+let resolveMember
+    (ctx: GeneratorContext)
+    (owner: ResolvedType voption)
+    (position: PathPosition)
+    (path: MemberPath) : SkippableHookResult<MemberPath> =
+    SkippableHookSlot.run ctx.Customisation.PathResolutionMember ctx (mkRctx owner position) path
+
+let tryResolveTypePath
+    (ctx: GeneratorContext)
+    (owner: ResolvedType voption)
+    (position: PathPosition)
+    (path: TypePath) : TypePath voption =
+    match resolveType ctx owner position path with
+    | SkippableHookResult.Pass        -> ValueSome path
+    | SkippableHookResult.Replace p   -> ValueSome p
+    | SkippableHookResult.Skip        -> ValueNone
+
+let tryResolveMemberPath
+    (ctx: GeneratorContext)
+    (owner: ResolvedType voption)
+    (position: PathPosition)
+    (path: MemberPath) : MemberPath voption =
+    match resolveMember ctx owner position path with
+    | SkippableHookResult.Pass        -> ValueSome path
+    | SkippableHookResult.Replace p   -> ValueSome p
+    | SkippableHookResult.Skip        -> ValueNone
+
+/// Dispatcher convenience: resolves the anchor path for a `ResolvedExport`,
+/// returning `ValueNone` when the appropriate `PathResolution*` chain returned
+/// `Skip`. Replaces today's `Interceptors.shouldIgnoreExport` short-circuit
+/// *and* the kind-keyed `pipe*` family in one call. Modules currently bypass
+/// resolution to preserve the legacy behaviour from `pipeExport`.
+let tryResolveExport (ctx: GeneratorContext) (export: ResolvedExport) : AnchorPath voption =
+    let inline asType (owner: ResolvedType) (raw: TypePath) =
+        match resolveType ctx (ValueSome owner) PathPosition.TopLevelType raw with
+        | SkippableHookResult.Pass      -> ValueSome (AnchorPath.Type raw)
+        | SkippableHookResult.Replace p -> ValueSome (AnchorPath.Type p)
+        | SkippableHookResult.Skip      -> ValueNone
+    let inline asMember (position: PathPosition) (raw: MemberPath) =
+        match resolveMember ctx ValueNone position raw with
+        | SkippableHookResult.Pass      -> ValueSome (AnchorPath.Member raw)
+        | SkippableHookResult.Replace p -> ValueSome (AnchorPath.Member p)
+        | SkippableHookResult.Skip      -> ValueNone
+    match export with
+    | ResolvedExport.Interface iface     -> asType (ResolvedType.Interface iface) (fromInterface iface)
+    | ResolvedExport.Class cls           -> asType (ResolvedType.Class cls)       (fromClass cls)
+    | ResolvedExport.Enum enumType       -> asType (ResolvedType.Enum enumType)   (fromEnum enumType)
+    // ResolvedType has no `TypeAlias` case; pass `ValueNone` for Owner.
+    | ResolvedExport.TypeAlias typeAlias ->
+        match resolveType ctx ValueNone PathPosition.TopLevelType (fromTypeAlias typeAlias) with
+        | SkippableHookResult.Pass      -> ValueSome (AnchorPath.Type (fromTypeAlias typeAlias))
+        | SkippableHookResult.Replace p -> ValueSome (AnchorPath.Type p)
+        | SkippableHookResult.Skip      -> ValueNone
+    | ResolvedExport.Variable variable   -> asMember PathPosition.VariablePath (fromVariable variable)
+    | ResolvedExport.Function (func :: _) -> asMember PathPosition.FunctionPath (fromFunction func)
+    | ResolvedExport.Function []         -> failwith "Resolved export contained no functions for the function case."
+    | ResolvedExport.Module module'      -> ValueSome (AnchorPath.Module (fromModule module'))

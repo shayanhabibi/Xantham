@@ -61,12 +61,15 @@ type RenderPosition =
 type [<Struct>] RenderContext = {
     Position: RenderPosition
     Owner: ResolvedType voption
-    Render: RenderMode
+    /// `ValueNone` when the hook fires outside any active `RenderScope`
+    /// (e.g. `PathResolution` invoked from the export dispatcher).
+    Render: RenderMode voption
     Stage: RenderStage
 }
 [<RequireQualifiedAccess>]
 type SlotId =
-    | PathResolution
+    | PathResolutionType
+    | PathResolutionMember
     | TypeRefBuild
     | TypeRefEmit
     | RenderScopeBuild
@@ -90,7 +93,8 @@ and SkippableHook<'T> = GeneratorContext -> RenderContext -> 'T -> SkippableHook
 and HookSlot<'T> = { Handlers: Hook<'T> list; HasAny: bool }
 and SkippableHookSlot<'T> = { Handlers: SkippableHook<'T> list; HasAny: bool }
 and Customisation = {
-    PathResolution: SkippableHookSlot<TypePath>
+    PathResolutionType: SkippableHookSlot<TypePath>
+    PathResolutionMember: SkippableHookSlot<MemberPath>
     TypeRefBuild: HookSlot<TypeRefRender>
     TypeRefEmit: HookSlot<WidgetBuilder<Type>>
     RenderScopeBuild: SkippableHookSlot<RenderScope>
@@ -98,7 +102,7 @@ and Customisation = {
     TypeDefBuildAlias: SkippableHookSlot<Concrete.TypeAliasRender>
     TypeDefBuildEnum: SkippableHookSlot<Concrete.LiteralUnionRender<int>>
     TypeDefBuildStringUnion: SkippableHookSlot<Concrete.LiteralUnionRender<TsLiteral>>
-    TypeDefEmit: HookSlot<WidgetBuilder<Type>>
+    TypeDefEmit: HookSlot<WidgetBuilder<TypeDefn>>
     AnchoredRef: SkippableHookSlot<Anchored.TypeRefRender>
     AnchoredScope: SkippableHookSlot<Anchored.RenderScope>
 }
@@ -189,7 +193,8 @@ module SkippableHookSlot =
 
 type Customisation with
     static member Default = {
-        PathResolution = SkippableHookSlot.empty
+        PathResolutionType = SkippableHookSlot.empty
+        PathResolutionMember = SkippableHookSlot.empty
         TypeRefBuild = HookSlot.empty
         TypeRefEmit = HookSlot.empty
         RenderScopeBuild = SkippableHookSlot.empty
@@ -203,7 +208,8 @@ type Customisation with
     }
 
 module Customisation =
-    let addPathResolution hook customisation = { customisation with PathResolution = SkippableHookSlot.add hook customisation.PathResolution }
+    let addPathResolutionType hook customisation = { customisation with PathResolutionType = SkippableHookSlot.add hook customisation.PathResolutionType }
+    let addPathResolutionMember hook customisation = { customisation with PathResolutionMember = SkippableHookSlot.add hook customisation.PathResolutionMember }
     let addTypeRefBuild hook customisation = { customisation with TypeRefBuild = HookSlot.add hook customisation.TypeRefBuild }
     let addTypeRefEmit hook customisation = { customisation with TypeRefEmit = HookSlot.add hook customisation.TypeRefEmit }
     let addRenderScopeBuild hook customisation = { customisation with RenderScopeBuild = SkippableHookSlot.add hook customisation.RenderScopeBuild }
@@ -214,10 +220,15 @@ module Customisation =
     let addTypeDefEmit hook customisation = { customisation with TypeDefEmit = HookSlot.add hook customisation.TypeDefEmit }
     let addAnchoredRef hook customisation = { customisation with AnchoredRef = SkippableHookSlot.add hook customisation.AnchoredRef }
     let addAnchoredScope hook customisation = { customisation with AnchoredScope = SkippableHookSlot.add hook customisation.AnchoredScope }
-    let addPathResolutionTracked hook customisation: Customisation * HandlerToken =
-        let slot, token = SkippableHookSlot.addTracked hook customisation.PathResolution
-        { customisation with PathResolution = slot },
-        (SlotId.PathResolution, token)
+    let addPathResolutionTypeTracked hook customisation: Customisation * HandlerToken =
+        let slot, token = SkippableHookSlot.addTracked hook customisation.PathResolutionType
+        { customisation with PathResolutionType = slot },
+        (SlotId.PathResolutionType, token)
+        |> HandlerToken
+    let addPathResolutionMemberTracked hook customisation: Customisation * HandlerToken =
+        let slot, token = SkippableHookSlot.addTracked hook customisation.PathResolutionMember
+        { customisation with PathResolutionMember = slot },
+        (SlotId.PathResolutionMember, token)
         |> HandlerToken
     let addTypeRefBuildTracked hook customisation =
         let slot, token = HookSlot.addTracked hook customisation.TypeRefBuild
@@ -271,8 +282,10 @@ module Customisation =
         |> HandlerToken
     let remove (HandlerToken (slotId, token)) customisation =
         match slotId with
-        | SlotId.PathResolution ->
-            { customisation with PathResolution = SkippableHookSlot.remove token customisation.PathResolution }
+        | SlotId.PathResolutionType ->
+            { customisation with PathResolutionType = SkippableHookSlot.remove token customisation.PathResolutionType }
+        | SlotId.PathResolutionMember ->
+            { customisation with PathResolutionMember = SkippableHookSlot.remove token customisation.PathResolutionMember }
         | SlotId.TypeRefBuild ->
             { customisation with TypeRefBuild = HookSlot.remove token customisation.TypeRefBuild }
         | SlotId.TypeRefEmit ->
