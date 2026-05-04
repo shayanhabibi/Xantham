@@ -250,30 +250,39 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
-    | ResolvedType.TypeReference { ResolvedType = Some innerResolvedType } 
+    | ResolvedType.TypeReference { ResolvedType = Some innerResolvedType }
     | ResolvedType.TypeReference { Type = innerResolvedType; TypeArguments = [] } ->
         innerResolvedType
         |> prerender ctx scope
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeReference { TypeArguments = typeArguments; Type = innerResolvedType } ->
-        let prefix =
-            innerResolvedType
-            |> prerender ctx scope
-        let postfixArguments =
-            typeArguments
-            |> List.map (prerender ctx scope)
-        // Assert encoder invariant: args count must match declared type parameters
         let innerResolvedTypeValue = innerResolvedType.Value
         let declaredParamCount =
             match innerResolvedTypeValue with
             | ResolvedType.Interface i -> i.TypeParameters.Length
             | ResolvedType.Class c -> c.TypeParameters.Length
             | _ -> typeArguments.Length
-        if postfixArguments.Length <> declaredParamCount then
-            raise (EncoderInvariantViolation (
-                $"TypeReference application has {postfixArguments.Length} arguments but {innerResolvedTypeValue} declares {declaredParamCount} type parameters"
-            ))
+        // Encoder/TS may produce a TypeReference whose argument count doesn't
+        // match the inner type's declared type parameter count — e.g. a class
+        // `extends Body<X>` where the resolved Body declaration has no type
+        // params (arises with declaration merging when the encoder can't
+        // disambiguate). Degrading to the inner type without args is the
+        // correct fallback for F# generation, which would otherwise crash.
+        if typeArguments.Length <> declaredParamCount then
+            printfn "Warning: TypeReference application has %d arguments but %A declares %d type parameters; rendering without arguments"
+                typeArguments.Length innerResolvedTypeValue declaredParamCount
+            innerResolvedType
+            |> prerender ctx scope
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
+        else
+        let prefix =
+            innerResolvedType
+            |> prerender ctx scope
+        let postfixArguments =
+            typeArguments
+            |> List.map (prerender ctx scope)
         (prefix, postfixArguments)
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
