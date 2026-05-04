@@ -133,7 +133,14 @@ let fromResolvedExport (resolvedExport: ResolvedExport) =
 let inline private mkRctx (owner: ResolvedType voption) (position: PathPosition) =
     {
         Position = PathPos position
-        Owner = owner
+        Owner = owner |> ValueOption.map RenderOwner.Type
+        Render = ValueNone
+        Stage = RenderStage.PathResolution
+    }
+let inline private mkRctxExport (owner: ResolvedExport) (position: PathPosition) =
+    {
+        Position = PathPos position
+        Owner = ValueSome (RenderOwner.Export owner)
         Render = ValueNone
         Stage = RenderStage.PathResolution
     }
@@ -150,6 +157,13 @@ let resolveType
     (path: TypePath) : SkippableHookResult<TypePath> =
     SkippableHookSlot.run ctx.Customisation.PathResolutionType ctx (mkRctx owner position) path
 
+let resolveExport
+    (ctx: GeneratorContext)
+    (owner: ResolvedExport)
+    (position: PathPosition)
+    (path: TypePath): SkippableHookResult<TypePath> =
+    SkippableHookSlot.run ctx.Customisation.PathResolutionType ctx (mkRctxExport owner position) path
+
 /// Runs the `PathResolutionMember` slot for a raw `MemberPath` produced by one
 /// of the member-level `from*` builders (variable/function or member-of-type
 /// paths).
@@ -160,12 +174,30 @@ let resolveMember
     (path: MemberPath) : SkippableHookResult<MemberPath> =
     SkippableHookSlot.run ctx.Customisation.PathResolutionMember ctx (mkRctx owner position) path
 
+let resolveExportMember
+    (ctx: GeneratorContext)
+    (owner: ResolvedExport)
+    (position: PathPosition)
+    (path: MemberPath) : SkippableHookResult<MemberPath> =
+    SkippableHookSlot.run ctx.Customisation.PathResolutionMember ctx (mkRctxExport owner position) path
+
+
 let tryResolveTypePath
     (ctx: GeneratorContext)
     (owner: ResolvedType voption)
     (position: PathPosition)
     (path: TypePath) : TypePath voption =
     match resolveType ctx owner position path with
+    | SkippableHookResult.Pass        -> ValueSome path
+    | SkippableHookResult.Replace p   -> ValueSome p
+    | SkippableHookResult.Skip        -> ValueNone
+    
+let tryResolveTypePathExport
+    (ctx: GeneratorContext)
+    (owner: ResolvedExport)
+    (position: PathPosition)
+    (path: TypePath) : TypePath voption =
+    match resolveExport ctx owner position path with
     | SkippableHookResult.Pass        -> ValueSome path
     | SkippableHookResult.Replace p   -> ValueSome p
     | SkippableHookResult.Skip        -> ValueNone
@@ -180,26 +212,35 @@ let tryResolveMemberPath
     | SkippableHookResult.Replace p   -> ValueSome p
     | SkippableHookResult.Skip        -> ValueNone
 
+let tryResolveMemberPathExport
+    (ctx: GeneratorContext)
+    (owner: ResolvedExport)
+    (position: PathPosition)
+    (path: MemberPath) : MemberPath voption =
+    match resolveExportMember ctx owner position path with
+    | SkippableHookResult.Pass        -> ValueSome path
+    | SkippableHookResult.Replace p   -> ValueSome p
+    | SkippableHookResult.Skip        -> ValueNone
 /// Dispatcher convenience: resolves the anchor path for a `ResolvedExport`,
 /// returning `ValueNone` when the appropriate `PathResolution*` chain returned
 /// `Skip`. Replaces today's `Interceptors.shouldIgnoreExport` short-circuit
 /// *and* the kind-keyed `pipe*` family in one call. Modules currently bypass
 /// resolution to preserve the legacy behaviour from `pipeExport`.
 let tryResolveExport (ctx: GeneratorContext) (export: ResolvedExport) : AnchorPath voption =
-    let inline asType (owner: ResolvedType) (raw: TypePath) =
-        match resolveType ctx (ValueSome owner) PathPosition.TopLevelType raw with
+    let inline asType (raw: TypePath) =
+        match resolveExport ctx export PathPosition.TopLevelType raw with
         | SkippableHookResult.Pass      -> ValueSome (AnchorPath.Type raw)
         | SkippableHookResult.Replace p -> ValueSome (AnchorPath.Type p)
         | SkippableHookResult.Skip      -> ValueNone
     let inline asMember (position: PathPosition) (raw: MemberPath) =
-        match resolveMember ctx ValueNone position raw with
+        match resolveExportMember ctx export position raw with
         | SkippableHookResult.Pass      -> ValueSome (AnchorPath.Member raw)
         | SkippableHookResult.Replace p -> ValueSome (AnchorPath.Member p)
         | SkippableHookResult.Skip      -> ValueNone
     match export with
-    | ResolvedExport.Interface iface     -> asType (ResolvedType.Interface iface) (fromInterface iface)
-    | ResolvedExport.Class cls           -> asType (ResolvedType.Class cls)       (fromClass cls)
-    | ResolvedExport.Enum enumType       -> asType (ResolvedType.Enum enumType)   (fromEnum enumType)
+    | ResolvedExport.Interface iface     -> asType  (fromInterface iface)
+    | ResolvedExport.Class cls           -> asType  (fromClass cls)
+    | ResolvedExport.Enum enumType       -> asType  (fromEnum enumType)
     // ResolvedType has no `TypeAlias` case; pass `ValueNone` for Owner.
     | ResolvedExport.TypeAlias typeAlias ->
         match resolveType ctx ValueNone PathPosition.TopLevelType (fromTypeAlias typeAlias) with

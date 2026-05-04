@@ -52,48 +52,63 @@ module Pipeline =
 the source data has been replaced with `Lazy<ResolvedType>` and forcing a
 node returns the fully shelled record.
 
-## 2. Build a `GeneratorContext`
+## 2. Build a `GeneratorContext` with `Customisation` hooks
 
-The context carries four caches and a customisation record. The example
-below pins the customisation that ships with the reference generator:
+The context carries four caches and a customisation record that dispatches
+through hook slots at seven pipeline stages. The example below builds the
+customisation that ships with the reference generator using chainable `add*`
+helpers:
 *)
 
+        let renderScopeBuildHook: SkippableHook<RenderScope> =
+            fun ctx rctx scope ->
+                match rctx.Owner with
+                | ValueSome (RenderOwner.Type (ResolvedType.Interface { IsLibEs = true }))
+                | ValueSome (RenderOwner.Type (ResolvedType.Class { IsLibEs = true }))
+                | ValueSome (RenderOwner.Type (ResolvedType.Enum { IsLibEs = true })) ->
+                    SkippableHookResult.Replace { scope with Render = ValueSome (Render.RefOnly scope.TypeRef) }
+                | _ -> SkippableHookResult.Pass
+
+        let pruneTypescriptParentType: SkippableHook<TypePath> =
+            fun ctx rctx path ->
+                match rctx.Owner with
+                | ValueSome (RenderOwner.Type (ResolvedType.Interface { IsLibEs = true }))
+                | ValueSome (RenderOwner.Type (ResolvedType.Class { IsLibEs = true }))
+                | ValueSome (RenderOwner.Type (ResolvedType.Enum { IsLibEs = true })) ->
+                    SkippableHookResult.Replace
+                        (TypePath.pruneParent
+                            (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") path)
+                | _ -> SkippableHookResult.Pass
+
+        let pruneTypescriptParentMember: SkippableHook<MemberPath> =
+            fun ctx rctx path ->
+                match rctx.Owner with
+                | ValueSome (RenderOwner.Type (ResolvedType.Interface { IsLibEs = true }))
+                | ValueSome (RenderOwner.Type (ResolvedType.Class { IsLibEs = true }))
+                | ValueSome (RenderOwner.Type (ResolvedType.Enum { IsLibEs = true })) ->
+                    SkippableHookResult.Replace
+                        (MemberPath.pruneParent
+                            (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") path)
+                | _ -> SkippableHookResult.Pass
+
         let generatorContext: GeneratorContext =
-            GeneratorContext.EmptyWithCustomisation (fun customiser ->
-                { customiser with
-                    Customisation.Interceptors.ResolvedTypePrelude = fun _ -> function
-                        | ResolvedType.Interface { IsLibEs = true }
-                        | ResolvedType.Class { IsLibEs = true }
-                        | ResolvedType.Enum { IsLibEs = true } -> fun renderScope ->
-                            { renderScope with Render = Render.RefOnly renderScope.TypeRef }
-                        | _ -> id
-                    Customisation.Interceptors.IgnorePathRender.Source = function
-                        | QualifiedNamePart.Normal(text)
-                        | QualifiedNamePart.Abnormal(text, _) ->
-                            text.Contains("babel", StringComparison.OrdinalIgnoreCase)
-                            || text.Contains("typescript", StringComparison.OrdinalIgnoreCase)
-                    Customisation.Interceptors.Paths.TypePaths = fun _ typ s ->
-                        match typ with
-                        | Choice1Of4 { IsLibEs = true }
-                        | Choice2Of4 { IsLibEs = true }
-                        | Choice3Of4 { IsLibEs = true }
-                        | Choice4Of4 { IsLibEs = true } ->
-                            TypePath.pruneParent
-                                (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") s
-                        | _ -> s
-                    Customisation.Interceptors.Paths.MemberPaths = fun _ typ s ->
-                        match typ with
-                        | Choice1Of2 { IsLibEs = true }
-                        | Choice2Of2 { IsLibEs = true } ->
-                            MemberPath.pruneParent
-                                (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") s
-                        | _ -> s })
+            GeneratorContext.EmptyWithCustomisation
+                (Customisation.addRenderScopeBuild renderScopeBuildHook
+                 >> Customisation.addPathResolutionType pruneTypescriptParentType
+                 >> Customisation.addPathResolutionMember pruneTypescriptParentMember)
 
 (**
-See [GeneratorContext](generator-context.html) for what each interceptor
-does. In short: lib-ES types become references-only, the synthetic
-`Typescript` module is pruned from their paths, and the `babel` /
-`typescript` qualified-name sources are filtered before path construction.
+The customisation composes three hooks:
+
+* **`RenderScopeBuild`** — wraps lib-ES type definitions in `RefOnly` to emit
+  only type references.
+* **`PathResolutionType`** — prunes the synthetic `Typescript` module from
+  lib-ES type paths.
+* **`PathResolutionMember`** — prunes the synthetic `Typescript` module from
+  member paths under lib-ES types.
+
+See [GeneratorContext](generator-context.html) for hook semantics and
+[Pipeline stages](#pipeline-stages) below for all seven hook slots.
 
 ## 3. Prelude pass
 
@@ -167,6 +182,36 @@ node), run it through `Gen.mkOak >> Gen.run`, and print the result:
         0
 
 (**
+## Pipeline stages
+
+The customisation record dispatches through seven hook slots, one per pipeline
+stage. Each slot is either a `HookSlot<'T>` (non-skippable) or
+`SkippableHookSlot<'T>` (can return `Skip` to elide processing). Handlers
+register via `Customisation.add{Slot}` chainable methods; registration order
+determines execution order (latest-registered runs first).
+
+| Stage | Slot Type | Accepts | Emits | Purpose |
+|-------|-----------|---------|-------|---------|
+| **PathResolutionType** | `SkippableHookSlot<TypePath>` | `RenderContext` + `TypePath` | `TypePath \| Skip` | Rewrite type paths; `Skip` elides the type. Called before any render scope enters. |
+| **PathResolutionMember** | `SkippableHookSlot<MemberPath>` | `RenderContext` + `MemberPath` | `MemberPath \| Skip` | Rewrite member paths; `Skip` elides the member. Called during path resolution. |
+| **TypeRefBuild** | `HookSlot<TypeRefRender>` | `RenderContext` + `TypeRefRender` | `TypeRefRender` | Rewrite a resolved type reference. Runs when building inline type annotations. |
+| **TypeRefEmit** | `HookSlot<WidgetBuilder<Type>>` | `RenderContext` + `WidgetBuilder<Type>` | `WidgetBuilder<Type>` | Rewrite the low-level F# type widget. Runs during AST emission. |
+| **RenderScopeBuild** | `SkippableHookSlot<RenderScope>` | `RenderContext` + `RenderScope` | `RenderScope \| Skip` | Rewrite a prelude render scope (mutations before caching); `Skip` cancels caching and uses a fallback. |
+| **TypeDefBuild*** | `SkippableHookSlot<Concrete.*Render>` | `RenderContext` + shape-specific render | same | Rewrite type definition before lowering to AST (separate slots per shape: Class, Alias, Enum, StringUnion). |
+| **TypeDefEmit** | `HookSlot<WidgetBuilder<TypeDefn>>` | `RenderContext` + `WidgetBuilder<TypeDefn>` | `WidgetBuilder<TypeDefn>` | Rewrite the emitted type definition widget. |
+| **Anchored*** | `SkippableHookSlot<Anchored.*>` | `RenderContext` + anchored render | same | Final chance to rewrite before storing in `AnchorRenders` (separate slots per shape: `AnchoredRef`, `AnchoredScope`). |
+
+`RenderContext` carries:
+- `Owner` — `ValueSome (RenderOwner.Type owner)` or `ValueSome (RenderOwner.Export owner)` or `ValueNone`.
+- `Position` — `RenderPosition.RefPos TypeRefPosition` (for TypeRef*), `RenderPosition.PathPos PathPosition` (for PathResolution*), or `RenderPosition.NotApplicable`.
+- `Render` — `ValueSome renderMode` when inside a `RenderScope`, else `ValueNone`.
+- `Stage` — the current pipeline stage.
+
+Handlers are strict functional transformations — no mutations. Multiple
+handlers compose left-to-right; if any returns `Skip`, downstream handlers
+are not invoked.
+
+(**
 ## What you write vs what you get for free
 
 The generator distinguishes the **machinery** from the **policy**. Out of
@@ -183,7 +228,7 @@ the box you get:
 What you supply:
 
 * the JSON input file
-* a `Customisation` describing your project's conventions
+* a `Customisation` built using `add*` hooks that intercept at the stages above
 * (optional) replacement passes — the reference entry point shows how to
   swap or augment any step by reading from `ctx.AnchorRenders` and emitting
   bespoke widgets before assembling the final `Oak`.

@@ -27,10 +27,21 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 ctx.TypeAliasRemap[lazyResolvedType.Value]
                 |> TypeRefRender.orNullable nullable
             | ref -> ref
-    let inline addOrReplaceScope ctx resolvedType renderScope =
-        let renderScope = ctx.Customisation.Interceptors.ResolvedTypePrelude ctx resolvedType renderScope
-        GeneratorContext.Prelude.addOrReplace ctx resolvedType renderScope
-        Registered (remap renderScope.TypeRef)
+    let inline addOrReplaceScope ctx resolvedType (renderScope: RenderScope) =
+        let rctx : RenderContext = {
+            Position = NotApplicable
+            Owner = ValueSome (RenderOwner.Type resolvedType)
+            Render = ValueSome renderScope.Render
+            Stage = RenderStage.RenderScopeBuild
+        }
+        let scopeToWrite =
+            match SkippableHookSlot.run ctx.Customisation.RenderScopeBuild ctx rctx renderScope with
+            | SkippableHookResult.Pass -> renderScope
+            | SkippableHookResult.Skip -> renderScope
+            | SkippableHookResult.Replace v when System.Object.ReferenceEquals(v, renderScope) -> renderScope
+            | SkippableHookResult.Replace v -> v
+        GeneratorContext.Prelude.addOrReplace ctx resolvedType scopeToWrite
+        Registered (remap scopeToWrite.TypeRef)
     let valueIsCreated = lazyResolvedType.IsValueCreated
     let cachedRenderValue = GeneratorContext.Prelude.tryGet ctx lazyResolvedType.Value
     // a significant portion of the branching logic will not initially register the
@@ -88,7 +99,8 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         
     | ResolvedType.Interface ``interface`` ->
         let scope = RenderScopeStore.create()
-        let path = Path.Interceptors.pipeInterface ctx ``interface``
+        let rawPath = Path.fromInterface ``interface``
+        let path = Path.tryResolveTypePath ctx (ValueSome (ResolvedType.Interface ``interface``)) PathPosition.TopLevelType rawPath |> ValueOption.defaultValue rawPath
         let ref = path |> createConcreteTypeRef
         {
             RenderScope.Type = resolvedType
@@ -105,7 +117,8 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         // |> executeRender
     | ResolvedType.Class ``class`` ->
         let scope = RenderScopeStore.create()
-        let path = Path.Interceptors.pipeClass ctx ``class``
+        let rawPath = Path.fromClass ``class``
+        let path = Path.tryResolveTypePath ctx (ValueSome (ResolvedType.Class ``class``)) PathPosition.TopLevelType rawPath |> ValueOption.defaultValue rawPath
         let ref = path |> createConcreteTypeRef
         {
             RenderScope.Type = resolvedType
@@ -289,7 +302,8 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Enum enumType ->
-        let path = Path.Interceptors.pipeEnum ctx enumType
+        let rawPath = Path.fromEnum enumType
+        let path = Path.tryResolveTypePath ctx (ValueSome (ResolvedType.Enum enumType)) PathPosition.TopLevelType rawPath |> ValueOption.defaultValue rawPath
         let ref = path |> createConcreteTypeRef
         let scope = RenderScopeStore.create()
         { RenderScope.Type = resolvedType
@@ -427,7 +441,8 @@ module TestHelper =
     
 type GeneratorContext with
     static member Empty = GeneratorContext.Create prerender
-    static member EmptyWithCustomisation customisation = GeneratorContext.Create(prerender, Customisation.Create customisation)
+    static member EmptyWithCustomisation (configure: Customisation -> Customisation) =
+        GeneratorContext.Create(prerender, configure Customisation.Default)
     
 module ArenaInterner =
     let prerenderTypeAliases (ctx: GeneratorContext) (arena: ArenaInterner) =
@@ -435,7 +450,8 @@ module ArenaInterner =
         |> Map.iter (fun _ -> List.iter (function
             | ResolvedExport.TypeAlias value ->
                 let resolvedType = value.Type.Value
-                let path = Path.Interceptors.pipeTypeAlias ctx value
+                let rawPath = Path.fromTypeAlias value
+                let path = Path.tryResolveTypePath ctx ValueNone PathPosition.TopLevelType rawPath |> ValueOption.defaultValue rawPath
                 RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
                 |> RenderScopeStore.TypeRef.Unsafe.createAtom
                 |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false

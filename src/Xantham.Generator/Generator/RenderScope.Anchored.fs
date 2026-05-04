@@ -477,7 +477,7 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
         printfn $"Bad scope: %A{badScope}"
 and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: RenderScopeStore) =
     let anchors = Dictionary<ResolvedType, TypePath * Render>()
-    let anchorPath = Interceptors.pipeExport ctx export
+    let anchorPath = Path.tryResolveExport ctx export |> ValueOption.defaultWith (fun () -> failwith "Cannot anchor exported scope: path resolution returned Skip")
     renderScopeStore.TypeStore
     |> Seq.iter (fun (KeyValue(key, value)) ->
         let renderScope =
@@ -497,214 +497,220 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
     let scope = RenderScopeStore.create()
     match export with
     | ResolvedExport.Class value ->
-        let path = Interceptors.pipeClass ctx value
-        let ref = TypeRefRender.create false path
-        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
-            ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
-        else
-        let render =
-            Class.render ctx scope value
-            |> Render.Concrete.anchorTypeDefn ctx
-            |> TypeRender.TypeDefn
-        {
-            Type = ResolvedType.Class value
-            Root = Choice1Of2 path
-            TypeRef = ref
-            Render = Anchored.Render( ref, lazy render )
-            Anchors = anchorPreludeExportScope ctx export scope
-        }
-        |> Choice2Of2
-        |> GeneratorContext.Anchored.addResolvedExport ctx export
-    | ResolvedExport.Variable value ->
-        let path = Interceptors.pipeVariable ctx value
-        let anchorPath = AnchorPath.create path
-        let typeRef =
-            value.Type
-            |> prerender ctx scope
-            |> TypeRefRender.anchorAndLocalise anchorPath
-        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
-            typeRef |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
-        else
-        let render =
+        let rawPath = Path.fromClass value
+        match Path.tryResolveTypePathExport ctx export PathPosition.TopLevelType rawPath with
+        | ValueNone ->
+            TypeRefRender.create false rawPath |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
+        | ValueSome path ->
+            let ref = TypeRefRender.create false path
+            let render =
+                Class.render ctx scope value
+                |> Render.Concrete.anchorTypeDefn ctx
+                |> TypeRender.TypeDefn
             {
-                Metadata = {
-                    Path = Path.create path
-                    Original = Path.create path
-                    Source = value.Source |> Option.toValueOption
-                    FullyQualifiedName = ValueSome value.FullyQualifiedName
-                }
-                TypedNameRender.Name = value.Name
-                Type = typeRef
-                Traits = Set []
-                TypeParameters = []
-                Documentation = value.Documentation
+                Type = ResolvedType.Class value
+                Root = Choice1Of2 path
+                TypeRef = ref
+                Render = Anchored.Render( ref, lazy render )
+                Anchors = anchorPreludeExportScope ctx export scope
             }
-            |> TypeRender.Variable
-        {
-            Type = value.Type.Value
-            Root = Choice2Of2 path 
-            TypeRef = typeRef
-            Render = Anchored.Render( typeRef, lazy render )
-            Anchors = anchorPreludeExportScope ctx export scope
-        }
-        |> Choice2Of2
-        |> GeneratorContext.Anchored.addResolvedExport ctx export
+            |> Choice2Of2
+            |> GeneratorContext.Anchored.addResolvedExport ctx export
+    | ResolvedExport.Variable value ->
+        let rawPath = Path.fromVariable value
+        match Path.tryResolveMemberPathExport ctx export PathPosition.VariablePath rawPath with
+        | ValueNone ->
+            ()  // Skip - do not register this export
+        | ValueSome path ->
+            let anchorPath = AnchorPath.create path
+            let typeRef =
+                value.Type
+                |> prerender ctx scope
+                |> TypeRefRender.anchorAndLocalise anchorPath
+            let render =
+                {
+                    Metadata = {
+                        Path = Path.create path
+                        Original = Path.create path
+                        Source = value.Source |> Option.toValueOption
+                        FullyQualifiedName = ValueSome value.FullyQualifiedName
+                    }
+                    TypedNameRender.Name = value.Name
+                    Type = typeRef
+                    Traits = Set []
+                    TypeParameters = []
+                    Documentation = value.Documentation
+                }
+                |> TypeRender.Variable
+            {
+                Type = value.Type.Value
+                Root = Choice2Of2 path
+                TypeRef = typeRef
+                Render = Anchored.Render( typeRef, lazy render )
+                Anchors = anchorPreludeExportScope ctx export scope
+            }
+            |> Choice2Of2
+            |> GeneratorContext.Anchored.addResolvedExport ctx export
     | ResolvedExport.Interface value ->
-        let path = Interceptors.pipeInterface ctx value
-        let ref = TypeRefRender.create false path
-        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
-            ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
-        else
-        let render =
-            Interface.render ctx scope value
-            |> Render.Concrete.anchorTypeDefn ctx
-            |> TypeRender.TypeDefn
-        {
-            Type = ResolvedType.Interface value
-            Root = Choice1Of2 path
-            TypeRef = ref
-            Render = Anchored.Render( ref, lazy render )
-            Anchors = anchorPreludeExportScope ctx export scope
-        }
-        |> Choice2Of2
-        |> GeneratorContext.Anchored.addResolvedExport ctx export
+        let rawPath = Path.fromInterface value
+        match Path.tryResolveTypePathExport ctx export PathPosition.TopLevelType rawPath with
+        | ValueNone ->
+            TypeRefRender.create false rawPath |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
+        | ValueSome path ->
+            let ref = TypeRefRender.create false path
+            let render =
+                Interface.render ctx scope value
+                |> Render.Concrete.anchorTypeDefn ctx
+                |> TypeRender.TypeDefn
+            {
+                Type = ResolvedType.Interface value
+                Root = Choice1Of2 path
+                TypeRef = ref
+                Render = Anchored.Render( ref, lazy render )
+                Anchors = anchorPreludeExportScope ctx export scope
+            }
+            |> Choice2Of2
+            |> GeneratorContext.Anchored.addResolvedExport ctx export
     | ResolvedExport.TypeAlias value ->
-        let path = Interceptors.pipeTypeAlias ctx value
-        let ref = TypeRefRender.create false path
-        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
-            ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
-        else
-        let render =
-            TypeAlias.render ctx scope value
-            |> Render.Concrete.anchorTypeAlias ctx
-            |> TypeRender.TypeAlias
-        {
-            Type = value.Type.Value
-            Root = Choice1Of2 path
-            TypeRef = ref
-            Render = Anchored.Render( ref, lazy render )
-            Anchors = anchorPreludeExportScope ctx export scope
-        }
-        |> Choice2Of2
-        |> GeneratorContext.Anchored.addResolvedExport ctx export
+        let rawPath = Path.fromTypeAlias value
+        match Path.tryResolveTypePathExport ctx export PathPosition.TopLevelType rawPath with
+        | ValueNone ->
+            TypeRefRender.create false rawPath |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
+        | ValueSome path ->
+            let ref = TypeRefRender.create false path
+            let render =
+                TypeAlias.render ctx scope value
+                |> Render.Concrete.anchorTypeAlias ctx
+                |> TypeRender.TypeAlias
+            {
+                Type = value.Type.Value
+                Root = Choice1Of2 path
+                TypeRef = ref
+                Render = Anchored.Render( ref, lazy render )
+                Anchors = anchorPreludeExportScope ctx export scope
+            }
+            |> Choice2Of2
+            |> GeneratorContext.Anchored.addResolvedExport ctx export
     | ResolvedExport.Enum value ->
-        let path = Interceptors.pipeEnum ctx value
-        let ref = TypeRefRender.create false path
-        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
-            ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
-        else
-        let render =
-            match Enum.render ctx value with
-            | Concrete.TypeRender.EnumUnion enumUnion ->
-                enumUnion
-                |> Render.Concrete.anchorEnum
-                |> TypeRender.EnumUnion
-            | Concrete.TypeRender.StringUnion literalUnionRender ->
-                literalUnionRender
-                |> Render.Concrete.anchorEnum
-                |> TypeRender.StringUnion
-            | _ -> failwith "Unreachable branch"
-        {
-            Type = ResolvedType.Enum value
-            Root = Choice1Of2 path
-            TypeRef = ref
-            Render = Anchored.Render( ref, lazy render )
-            Anchors = anchorPreludeExportScope ctx export scope
-        }
-        |> Choice2Of2
-        |> GeneratorContext.Anchored.addResolvedExport ctx export
+        let rawPath = Path.fromEnum value
+        match Path.tryResolveTypePathExport ctx export PathPosition.TopLevelType rawPath with
+        | ValueNone ->
+            TypeRefRender.create false rawPath |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
+        | ValueSome path ->
+            let ref = TypeRefRender.create false path
+            let render =
+                match Enum.render ctx value with
+                | Concrete.TypeRender.EnumUnion enumUnion ->
+                    enumUnion
+                    |> Render.Concrete.anchorEnum
+                    |> TypeRender.EnumUnion
+                | Concrete.TypeRender.StringUnion literalUnionRender ->
+                    literalUnionRender
+                    |> Render.Concrete.anchorEnum
+                    |> TypeRender.StringUnion
+                | _ -> failwith "Unreachable branch"
+            {
+                Type = ResolvedType.Enum value
+                Root = Choice1Of2 path
+                TypeRef = ref
+                Render = Anchored.Render( ref, lazy render )
+                Anchors = anchorPreludeExportScope ctx export scope
+            }
+            |> Choice2Of2
+            |> GeneratorContext.Anchored.addResolvedExport ctx export
     | ResolvedExport.Function [] -> failwith "Empty function list"
     | ResolvedExport.Function (headFunc :: rest) ->
-        let path = Interceptors.pipeFunction ctx headFunc
-        let anchorPath = AnchorPath.create path
-        let ref =
-            headFunc.SignatureKey.Value
-            |> ResolvedType.TypeLiteral
-            |> LazyContainer.CreateTypeKeyDummy<ResolvedType>
-            |> prerender ctx scope
-            |> TypeRefRender.anchor anchorPath
-        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors headFunc then
-            ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
-        else
-        let render =
-            {
-                FunctionLikeRender.Name = headFunc.Name
-                Metadata = {
-                    Path = Path.create path
-                    Original = Path.create path
-                    Source = headFunc.Source |> Option.toValueOption
-                    FullyQualifiedName = ValueSome headFunc.FullyQualifiedName
+        let rawPath = Path.fromFunction headFunc
+        match Path.tryResolveMemberPathExport ctx export PathPosition.FunctionPath rawPath with
+        | ValueNone ->
+            ()  // Skip - do not register this export
+        | ValueSome path ->
+            let anchorPath = AnchorPath.create path
+            let ref =
+                headFunc.SignatureKey.Value
+                |> ResolvedType.TypeLiteral
+                |> LazyContainer.CreateTypeKeyDummy<ResolvedType>
+                |> prerender ctx scope
+                |> TypeRefRender.anchor anchorPath
+            let render =
+                {
+                    FunctionLikeRender.Name = headFunc.Name
+                    Metadata = {
+                        Path = Path.create path
+                        Original = Path.create path
+                        Source = headFunc.Source |> Option.toValueOption
+                        FullyQualifiedName = ValueSome headFunc.FullyQualifiedName
+                    }
+                    Signatures =
+                        (headFunc :: rest)
+                        |> List.map (fun func ->
+                            {
+                                FunctionLikeSignature.Metadata = {
+                                    Path = Path.create path
+                                    Original = Path.create path
+                                    Source = func.Source |> Option.toValueOption
+                                    FullyQualifiedName = ValueSome func.FullyQualifiedName
+                                }
+                                Parameters =
+                                    func.Parameters
+                                    |> List.map (
+                                        Parameter.render ctx scope
+                                        >> Render.Concrete.anchorTypedNameRender ctx anchorPath
+                                        )
+                                ReturnType =
+                                    func.Type
+                                    |> prerender ctx scope
+                                    |> TypeRefRender.anchorAndLocalise anchorPath
+                                Traits = Set [ RenderTraits.Static ]
+                                Documentation = func.Documentation
+                                TypeParameters =
+                                    func.TypeParameters
+                                    |> List.map (
+                                        _.Value
+                                        >> TypeParameter.render ctx scope
+                                        >> Render.Concrete.anchorTypeParameters ctx anchorPath
+                                        )
+                            }
+                            )
+                    Traits = Set []
+                    TypeParameters =
+                        headFunc.TypeParameters
+                        |> List.map (fun typeParameter ->
+                            let typeParameter = typeParameter.Value
+                            let path =
+                                path
+                                |> TypeParamPath.createOnMember typeParameter.Name
+                            {
+                                TypeParameterRender.Metadata = {
+                                    Path = Path.create path
+                                    Original = Path.create path
+                                    Source = ValueNone
+                                    FullyQualifiedName = ValueNone
+                                }
+                                Name = typeParameter.Name
+                                Constraint =
+                                    typeParameter.Constraint
+                                    |> Option.toValueOption
+                                    |> ValueOption.map (prerender ctx scope >> TypeRefRender.anchorAndLocalise anchorPath)
+                                Default =
+                                    typeParameter.Default
+                                    |> Option.toValueOption
+                                    |> ValueOption.map (prerender ctx scope >> TypeRefRender.anchorAndLocalise anchorPath)
+                                Documentation = typeParameter.Documentation
+                            }
+                            )
+                    Documentation = headFunc.Documentation
                 }
-                Signatures =
-                    (headFunc :: rest)
-                    |> List.map (fun func ->
-                        {
-                            FunctionLikeSignature.Metadata = {
-                                Path = Path.create path
-                                Original = Path.create path
-                                Source = func.Source |> Option.toValueOption
-                                FullyQualifiedName = ValueSome func.FullyQualifiedName
-                            }
-                            Parameters =
-                                func.Parameters
-                                |> List.map (
-                                    Parameter.render ctx scope
-                                    >> Render.Concrete.anchorTypedNameRender ctx anchorPath
-                                    )
-                            ReturnType =
-                                func.Type
-                                |> prerender ctx scope
-                                |> TypeRefRender.anchorAndLocalise anchorPath
-                            Traits = Set [ RenderTraits.Static ]
-                            Documentation = func.Documentation
-                            TypeParameters =
-                                func.TypeParameters
-                                |> List.map (
-                                    _.Value
-                                    >> TypeParameter.render ctx scope
-                                    >> Render.Concrete.anchorTypeParameters ctx anchorPath
-                                    )
-                        }
-                        )
-                Traits = Set []
-                TypeParameters =
-                    headFunc.TypeParameters
-                    |> List.map (fun typeParameter ->
-                        let typeParameter = typeParameter.Value
-                        let path =
-                            path
-                            |> TypeParamPath.createOnMember typeParameter.Name
-                        {
-                            TypeParameterRender.Metadata = {
-                                Path = Path.create path
-                                Original = Path.create path
-                                Source = ValueNone
-                                FullyQualifiedName = ValueNone
-                            }
-                            Name = typeParameter.Name
-                            Constraint =
-                                typeParameter.Constraint
-                                |> Option.toValueOption
-                                |> ValueOption.map (prerender ctx scope >> TypeRefRender.anchorAndLocalise anchorPath)
-                            Default = 
-                                typeParameter.Default
-                                |> Option.toValueOption
-                                |> ValueOption.map (prerender ctx scope >> TypeRefRender.anchorAndLocalise anchorPath)
-                            Documentation = typeParameter.Documentation
-                        }
-                        )
-                Documentation = headFunc.Documentation
+                |> TypeRender.Function
+            {
+                Type = headFunc.SignatureKey.Value |> ResolvedType.TypeLiteral
+                Root = Choice2Of2 path
+                TypeRef = ref
+                Render = Anchored.Render( ref, lazy render )
+                Anchors = anchorPreludeExportScope ctx export scope
             }
-            |> TypeRender.Function
-        {
-            Type = headFunc.SignatureKey.Value |> ResolvedType.TypeLiteral
-            Root = Choice2Of2 path
-            TypeRef = ref 
-            Render = Anchored.Render( ref, lazy render )
-            Anchors = anchorPreludeExportScope ctx export scope
-        }
-        |> Choice2Of2
-        |> GeneratorContext.Anchored.addResolvedExport ctx export
+            |> Choice2Of2
+            |> GeneratorContext.Anchored.addResolvedExport ctx export
     | ResolvedExport.Module value ->
         value.Exports
         |> List.iter (registerAnchorFromExport ctx)

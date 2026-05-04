@@ -128,23 +128,59 @@ let anchored =
     }
 ```
 
-## Mutating and pruning
+## Path hooks: `PathResolutionType` and `PathResolutionMember`
+
+Path construction happens at two stages:
+
+1. **`Path.tryResolveTypePath`** — Takes a raw `TypePath` from one of the
+   builders (`Path.fromInterface`, `Path.fromEnum`, etc.), dispatches through
+   the `PathResolutionType` hook slot, and returns `ValueSome resolved \| ValueNone`
+   (if the hook returned `Skip`). Called for interface, class, enum, and type
+   alias definitions.
+
+2. **`Path.tryResolveMemberPath`** — Takes a raw `MemberPath`, dispatches
+   through the `PathResolutionMember` hook slot, and returns the same options.
+   Called for member paths (properties, methods, variables, functions).
+
+Both hooks receive a `RenderContext` that includes:
+- `Owner` — the `ResolvedType` or `ResolvedExport` containing the path, allowing
+  the handler to match on kind (interface vs class vs enum) or other metadata.
+- `Position` — `RenderPosition.PathPos (PathPosition.TopLevelType \| MemberPath \| VariablePath \| FunctionPath)`,
+  letting the handler disambiguate.
+- `Stage` — always `RenderStage.PathResolution`.
+
+A hook can:
+- Return `SkippableHookResult.Pass` — leave the path unchanged.
+- Return `SkippableHookResult.Replace path'` — use the rewritten path.
+- Return `SkippableHookResult.Skip` — elide the type/member (it will not be
+  rendered).
+
+### Mutating and pruning
 
 `ModulePath.pruneParent predicate` walks up the chain and drops the first
 parent that matches the predicate, replacing it with a name-only root.
 `TypePath.pruneParent` and `MemberPath.pruneParent` lift this onto the
 nested forms.
 
-The reference generator in `Generator/Render.fs` uses this to strip the
-synthetic `Typescript` module from `IsLibEs = true` declarations:
+The reference generator uses `PathResolutionType` and `PathResolutionMember`
+hooks to strip the synthetic `Typescript` module from `IsLibEs = true`
+declarations:
 
 ```fsharp
-Customisation.Interceptors.Paths.TypePaths = fun ctx typ s ->
-    match typ with
-    | Choice1Of4 { IsLibEs = true } | … ->
-        TypePath.pruneParent
-            (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") s
-    | _ -> s
+let pruneTypescriptParentType: SkippableHook<TypePath> =
+    fun ctx rctx path ->
+        match rctx.Owner with
+        | ValueSome (RenderOwner.Type (ResolvedType.Interface { IsLibEs = true }))
+        | ValueSome (RenderOwner.Type (ResolvedType.Class { IsLibEs = true }))
+        | ValueSome (RenderOwner.Type (ResolvedType.Enum { IsLibEs = true })) ->
+            SkippableHookResult.Replace
+                (TypePath.pruneParent
+                    (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") path)
+        | _ -> SkippableHookResult.Pass
+
+// Register:
+GeneratorContext.EmptyWithCustomisation
+    (Customisation.addPathResolutionType pruneTypescriptParentType)
 ```
 
 `ModulePath.mutateChain` is the general escape hatch — it applies a function

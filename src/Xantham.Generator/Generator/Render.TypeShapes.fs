@@ -11,7 +11,8 @@ open Xantham.Generator.Types.Prelude
 
 module Interface =
     let render (ctx: GeneratorContext) scopeStore (shape: Interface) =
-        let path = Interceptors.pipeInterface ctx shape |> Path.create
+        let rawPath = Path.fromInterface shape
+        let path = Path.tryResolveTypePath ctx (ValueSome (ResolvedType.Interface shape)) PathPosition.TopLevelType rawPath |> ValueOption.defaultValue rawPath |> Path.create
         let metadata = RenderMetadata.createWithPathFromExport path shape
         let members, functions =
             shape.Members
@@ -44,7 +45,8 @@ module Interface =
     
 module Class =
     let render (ctx: GeneratorContext) scopeStore (shape: Class) =
-        let path = Interceptors.pipeClass ctx shape |> Path.create
+        let rawPath = Path.fromClass shape
+        let path = Path.tryResolveTypePath ctx (ValueSome (ResolvedType.Class shape)) PathPosition.TopLevelType rawPath |> ValueOption.defaultValue rawPath |> Path.create
         let metadata = RenderMetadata.createWithPathFromExport path shape
         let members, functions =
             shape.Members

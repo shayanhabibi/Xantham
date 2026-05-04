@@ -12,6 +12,25 @@ open Fantomas.Core.SyntaxOak
 
 let private unitPat = Ast.ParameterPat("_", Ast.Unit())
 
+// TODO (post-Anchored.TypeRender augmentation): once cached Module entries carry the originating
+// scope info, propagate Owner/RenderMode here from the caller instead of ValueNone.
+let private applyTypeDefEmit (ctx: GeneratorContext) (renderMode: RenderMode voption) (widget: WidgetBuilder<TypeDefn>) =
+    let rctx = {
+        Position = RenderPosition.NotApplicable
+        Owner = ValueNone
+        Render = renderMode
+        Stage = RenderStage.TypeDefEmit
+    }
+    match HookSlot.run ctx.Customisation.TypeDefEmit ctx rctx widget with
+    | HookResult.Pass -> widget
+    | HookResult.Replace v -> v
+
+// TODO (post-Anchored.TypeRender augmentation): Owner is currently always ValueNone here because
+// `RenderMetadata` doesn't carry the originating `ResolvedType`. When the cached Module entries
+// are extended to carry scope info, replace these `ValueNone` owner arguments with the real owner.
+let private renderTypeRef (ctx: GeneratorContext) (renderMode: RenderMode voption) (position: TypeRefPosition) (value: TypeRefRender) =
+    TypeRefRender.SRTPHelper.RenderWithContext(ctx, renderMode, ValueNone, ValueSome (RenderPosition.RefPos position), value)
+
 module Attributes =
     let inline renderAttributes<^Modifier, ^T
         when (^T or ^Modifier):(static member attributes: ^T * WidgetBuilder<AttributeNode> list -> ^T)
@@ -188,9 +207,6 @@ module LiteralUnionRender =
             requireQualifiedAccess
         })
         |> Documentation.renderForUnion unionType
-        
-    let renderWithPath (anchorPath: AnchorPath) (typeRef: Anchored.TypeRefRender) =
-        TypeRefRender.Anchored.render typeRef
 
 module TypedNameRender =
     /// <summary>
@@ -201,13 +217,13 @@ module TypedNameRender =
     /// <param name="withOptional">Whether to remap any nullability in the type or render to the parameter name.</param>
     /// <param name="ctx"></param>
     /// <param name="typedName"></param>
-    let private renderAsPatternImpl withOptional (ctx: GeneratorContext) (typedName: TypedNameRender) =
+    let private renderAsPatternImpl withOptional (ctx: GeneratorContext) (renderMode: RenderMode voption) (typedName: TypedNameRender) =
         let isOptional = typedName.Traits.Contains(RenderTraits.Optional) || typedName.Type.Nullable
         let typeWidget =
             if withOptional && typedName.Traits.Contains(RenderTraits.Optional) then
-                TypeRefRender.nonNullable typedName.Type 
+                TypeRefRender.nonNullable typedName.Type
             else typedName.Type |> TypeRefRender.setNullable isOptional
-            |> TypeRefRender.render
+            |> renderTypeRef ctx renderMode TypeRefPosition.FunctionParameter
         let name =
             Name.Case.valueOrModified typedName.Name
             |> if withOptional && typedName.Traits.Contains(RenderTraits.Optional) then
@@ -221,35 +237,25 @@ module TypedNameRender =
     /// Renders a typed name as a parameter pattern.
     /// Will route any nullability in the typed name render or the type ref to the parameter name.
     /// </summary>
-    /// <param name="ctx"></param>
-    /// <param name="typedName"></param>
-    let renderAsPatternWithOptionName (ctx: GeneratorContext) (typedName: TypedNameRender) =
-        renderAsPatternImpl true ctx typedName
+    let renderAsPatternWithOptionName (ctx: GeneratorContext) (renderMode: RenderMode voption) (typedName: TypedNameRender) =
+        renderAsPatternImpl true ctx renderMode typedName
     /// <summary>
     /// Renders a typed name as a parameter pattern.
     /// Any optionality in the type ref or the type name render will result in the type being wrapped in option.
     /// </summary>
-    /// <param name="ctx"></param>
-    /// <param name="typedName"></param>
-    let renderAsPattern (ctx: GeneratorContext) (typedName: TypedNameRender) =
-        renderAsPatternImpl false ctx typedName 
+    let renderAsPattern (ctx: GeneratorContext) (renderMode: RenderMode voption) (typedName: TypedNameRender) =
+        renderAsPatternImpl false ctx renderMode typedName
     /// <summary>
     /// Renders a typed name as a type signature (ie, a named type parameter in a delegate or abstract member).
-    /// You can enable or disable the rendering of the optionality in the type, or in the name instead using
-    /// the <c>withOption</c> switch
     /// </summary>
-    /// <param name="withOption"></param>
-    /// <param name="ctx"></param>
-    /// <param name="typedName"></param>
-    /// <param name="anchorPath"></param>
-    let renderAsNamedTypeImpl withOption (ctx: GeneratorContext) (typedName: TypedNameRender) =
+    let renderAsNamedTypeImpl withOption (ctx: GeneratorContext) (renderMode: RenderMode voption) (typedName: TypedNameRender) =
         let typeWidget =
             if withOption then
                 TypeRefRender.nonNullable typedName.Type
             else
                 typedName.Type
                 |> TypeRefRender.orNullable (typedName.Traits.Contains(RenderTraits.Optional) || typedName.Type.Nullable)
-            |> TypeRefRender.render 
+            |> renderTypeRef ctx renderMode TypeRefPosition.FunctionParameter
         let name =
             Name.Case.valueOrModified typedName.Name
             |> if withOption && (typedName.Traits.Contains(RenderTraits.Optional) || typedName.Type.Nullable) then
@@ -259,34 +265,24 @@ module TypedNameRender =
         |> Attributes.renderAttributesForSignature (attributes {
             paramArray (typedName.Traits.Contains(RenderTraits.ParamArray))
         })
-    /// <summary>
-    /// Render a typed name render as a type signature, with the option name rendered instead of wrapping the type
-    /// with option.
-    /// </summary>
-    /// <param name="ctx"></param>
-    /// <param name="typedName"></param>
-    let renderAsNamedTypeWithOptionName (ctx: GeneratorContext) (typedName: TypedNameRender)  =
-        renderAsNamedTypeImpl true ctx typedName 
-    /// <summary>
-    /// Render a typed name render as a type signature, with the optionality being rendered on the type.
-    /// </summary>
-    /// <param name="ctx"></param>
-    /// <param name="typedName"></param>
-    let renderAsNamedType (ctx: GeneratorContext) (typedName: TypedNameRender) =
-        renderAsNamedTypeImpl false ctx typedName 
+    let renderAsNamedTypeWithOptionName (ctx: GeneratorContext) (renderMode: RenderMode voption) (typedName: TypedNameRender)  =
+        renderAsNamedTypeImpl true ctx renderMode typedName
+    let renderAsNamedType (ctx: GeneratorContext) (renderMode: RenderMode voption) (typedName: TypedNameRender) =
+        renderAsNamedTypeImpl false ctx renderMode typedName
     // when extracting type
-    let renderTypeOnly (ctx: GeneratorContext) (typedName: TypedNameRender) = TypeRefRender.render typedName.Type
+    let renderTypeOnly (ctx: GeneratorContext) (renderMode: RenderMode voption) (typedName: TypedNameRender) =
+        renderTypeRef ctx renderMode TypeRefPosition.Standalone typedName.Type
     // rendering properties/members as abstracts
-    let renderAbstractImpl withOption (ctx: GeneratorContext) (typedName: TypedNameRender) = 
+    let renderAbstractImpl withOption (ctx: GeneratorContext) (renderMode: RenderMode voption) (typedName: TypedNameRender) =
         let name = Name.Case.valueOrModified typedName.Name
         let typeWidget =
             if withOption then
                 (typedName.Traits.Contains(RenderTraits.Optional), typedName.Type)
                 ||> TypeRefRender.orNullable
-                |> TypeRefRender.render
+                |> renderTypeRef ctx renderMode TypeRefPosition.MemberType
             else
                 TypeRefRender.nonNullable typedName.Type
-                |> TypeRefRender.render
+                |> renderTypeRef ctx renderMode TypeRefPosition.MemberType
 
         match typedName.Traits.Contains(RenderTraits.Readable), typedName.Traits.Contains(RenderTraits.Writable) with
         | true, true ->
@@ -302,17 +298,17 @@ module TypedNameRender =
         })
         |> if typedName.Traits.Contains(RenderTraits.Static) then _.toStatic() else id
         |> Documentation.renderForAbstractMember typedName
-    let renderAbstract (ctx: GeneratorContext) (typedName: TypedNameRender) =
-        renderAbstractImpl true ctx typedName 
-    let renderAbstractNoOption (ctx: GeneratorContext) (typedName: TypedNameRender) =
-        renderAbstractImpl false ctx typedName 
+    let renderAbstract (ctx: GeneratorContext) (renderMode: RenderMode voption) (typedName: TypedNameRender) =
+        renderAbstractImpl true ctx renderMode typedName
+    let renderAbstractNoOption (ctx: GeneratorContext) (renderMode: RenderMode voption) (typedName: TypedNameRender) =
+        renderAbstractImpl false ctx renderMode typedName
     // rendering properties/members as member definitions
-    let renderMember (ctx: GeneratorContext) (typedName: TypedNameRender) =
+    let renderMember (ctx: GeneratorContext) (renderMode: RenderMode voption) (typedName: TypedNameRender) =
         let name = Name.Case.valueOrModified typedName.Name
         let typeWidget =
             (typedName.Traits.Contains(RenderTraits.Optional), typedName.Type)
             ||> TypeRefRender.orNullable
-            |> TypeRefRender.render
+            |> renderTypeRef ctx renderMode TypeRefPosition.MemberType
         Ast.Member(name, Exprs.jsUndefined, typeWidget)
         |> Attributes.renderAttributesForMember (attributes {
             compiledNameOrErase typedName.Name
@@ -320,12 +316,12 @@ module TypedNameRender =
         |> if typedName.Traits.Contains(RenderTraits.Static) then _.toStatic() else id
         |> if typedName.Traits.Contains(RenderTraits.Writable) then _.toMutable() else id
         |> Documentation.renderForMember typedName
-    let renderValMember (ctx: GeneratorContext) (typedName: TypedNameRender) anchorPath =
+    let renderValMember (ctx: GeneratorContext) (renderMode: RenderMode voption) (typedName: TypedNameRender) anchorPath =
         let name = Name.Case.valueOrModified typedName.Name
         let typeWidget =
             (typedName.Traits.Contains(RenderTraits.Optional), typedName.Type)
             ||> TypeRefRender.orNullable
-            |> TypeRefRender.render
+            |> renderTypeRef ctx renderMode TypeRefPosition.MemberType
         match typedName.Traits.Contains(RenderTraits.Readable), typedName.Traits.Contains(RenderTraits.Writable) with
         | true, true ->
             Ast.MemberVal(name, Exprs.jsUndefined, typeWidget, hasGetter = true, hasSetter = true)
@@ -341,12 +337,12 @@ module TypedNameRender =
         |> Documentation.renderForMember typedName
         |> if typedName.Traits.Contains(RenderTraits.Static) then _.toStatic() else id
     // rendering properties/members/variables as let bindings
-    let renderBinding (ctx: GeneratorContext) (typedName: TypedNameRender) =
+    let renderBinding (ctx: GeneratorContext) (renderMode: RenderMode voption) (typedName: TypedNameRender) =
         let name = Name.Case.valueOrModified typedName.Name
         let typeWidget =
             (typedName.Traits.Contains(RenderTraits.Optional), typedName.Type)
             ||> TypeRefRender.orNullable
-            |> TypeRefRender.render
+            |> renderTypeRef ctx renderMode TypeRefPosition.MemberType
         Ast.Value(name, Exprs.jsUndefined, typeWidget)
         |> Attributes.renderAttributesForBinding (attributes {
             compiledNameOrErase typedName.Name
@@ -356,148 +352,148 @@ module TypedNameRender =
 
 module TypeParameterRender =
     // rendering constraints
-    let renderConstraints (ctx: GeneratorContext) (typeParameter: TypeParameterRender) =
+    let renderConstraints (ctx: GeneratorContext) (renderMode: RenderMode voption) (typeParameter: TypeParameterRender) =
         match typeParameter with
         | { Constraint = ValueNone } -> ValueNone
         | { Constraint = ValueSome constrain } ->
             constrain
             |> TypeRefRender.nonNullable
-            |> TypeRefRender.render
+            |> renderTypeRef ctx renderMode TypeRefPosition.TypeArg
             |> ValueSome
-    
+
     // rendering as typar decl node
-    let renderTypeParameter (ctx: GeneratorContext) (typeParameter: TypeParameterRender) =
+    let renderTypeParameter (ctx: GeneratorContext) (renderMode: RenderMode voption) (typeParameter: TypeParameterRender) =
         let name = Name.Case.valueOrModified typeParameter.Name
-        match renderConstraints ctx typeParameter with
+        match renderConstraints ctx renderMode typeParameter with
         | ValueSome constrain ->
             Ast.TyparDecl(name),
             ValueSome(Ast.SubtypeOf(name, constrain))
         | ValueNone ->
             Ast.TyparDecl(name),
             ValueNone
-        
-    let renderTypeParametersIntoPostfixList (ctx: GeneratorContext) (typeParameters: TypeParameterRender list) =
+
+    let renderTypeParametersIntoPostfixList (ctx: GeneratorContext) (renderMode: RenderMode voption) (typeParameters: TypeParameterRender list) =
         typeParameters
-        |> List.fold (fun (decls, constraints) -> renderTypeParameter ctx >> function
+        |> List.fold (fun (decls, constraints) -> renderTypeParameter ctx renderMode >> function
             | decl, ValueSome typarConstraint -> decl :: decls, typarConstraint :: constraints
             | decl, ValueNone -> decl :: decls, constraints
             ) ([], [])
         |> Ast.PostfixList
-        
+
     // rendering as typar
     let renderType (ctx: GeneratorContext) (typeParameter: TypeParameterRender) =
         Name.Case.valueOrModified typeParameter.Name
         |> Ast.LongIdent
-    
-    let renderTypeWithConstraint (ctx: GeneratorContext) (typeParameter: TypeParameterRender) =
+
+    let renderTypeWithConstraint (ctx: GeneratorContext) (renderMode: RenderMode voption) (typeParameter: TypeParameterRender) =
         renderType ctx typeParameter,
-        snd <| renderTypeParameter ctx typeParameter
+        snd <| renderTypeParameter ctx renderMode typeParameter
         
 
 module FunctionLikeSignature =
-    let renderAbstractWithName (ctx: GeneratorContext) (name: Name<_>) (functionLike: FunctionLikeSignature) =
+    let renderAbstractWithName (ctx: GeneratorContext) (renderMode: RenderMode voption) (name: Name<_>) (functionLike: FunctionLikeSignature) =
         let renderName = Name.Case.valueOrModified name
         let parameters =
             functionLike.Parameters
-            |> List.map (TypedNameRender.renderAsNamedTypeWithOptionName ctx)
+            |> List.map (TypedNameRender.renderAsNamedTypeWithOptionName ctx renderMode)
             |> function
                 | [] -> [ Ast.Unit() ]
                 | paras -> paras
             |> Ast.Tuple
-        let returnType = functionLike.ReturnType |> TypeRefRender.render
+        let returnType = renderTypeRef ctx renderMode TypeRefPosition.FunctionReturn functionLike.ReturnType
         Ast.AbstractMember(renderName, [ parameters ], returnType)
         |> if functionLike.Traits.Contains(RenderTraits.Static) then _.toStatic() else id
         |> Documentation.renderForAbstractMember functionLike
 
-    let renderMember (ctx: GeneratorContext) (name: Name<_>) (functionLike: FunctionLikeSignature) =
+    let renderMember (ctx: GeneratorContext) (renderMode: RenderMode voption) (name: Name<_>) (functionLike: FunctionLikeSignature) =
         let renderName = Name.Case.valueOrModified name
         let parameters =
             functionLike.Parameters
-            |> List.map (TypedNameRender.renderAsPatternWithOptionName ctx)
+            |> List.map (TypedNameRender.renderAsPatternWithOptionName ctx renderMode)
             |> function
                 | [] -> [ unitPat ]
                 | paras -> paras
             |> Ast.TuplePat
             |> Ast.ParenPat
-        let returnType = functionLike.ReturnType |> TypeRefRender.render
+        let returnType = renderTypeRef ctx renderMode TypeRefPosition.FunctionReturn functionLike.ReturnType
         Ast.Member(renderName, parameters, Exprs.jsUndefined, returnType)
         |> if functionLike.Traits.Contains(RenderTraits.Static) then _.toStatic() else id
         |> Documentation.renderForMember functionLike
-    
-    let renderBinding (ctx: GeneratorContext) (name: Name<_>) (functionLike: FunctionLikeSignature) =
+
+    let renderBinding (ctx: GeneratorContext) (renderMode: RenderMode voption) (name: Name<_>) (functionLike: FunctionLikeSignature) =
         let renderName = Name.Case.valueOrModified name
         let parameters =
             functionLike.Parameters
-            |> List.map (TypedNameRender.renderAsPattern ctx >> Ast.ParenPat)
+            |> List.map (TypedNameRender.renderAsPattern ctx renderMode >> Ast.ParenPat)
             |> function
                 | [] -> [ Ast.UnitPat() ]
                 | paras -> paras
-        Ast.Function(renderName, parameters, Exprs.jsUndefined, functionLike.ReturnType |> TypeRefRender.render)
+        Ast.Function(renderName, parameters, Exprs.jsUndefined, renderTypeRef ctx renderMode TypeRefPosition.FunctionReturn functionLike.ReturnType)
         |> Documentation.renderForBinding functionLike
-    
-    let renderSignature (ctx: GeneratorContext) (functionLike: FunctionLikeSignature) =
+
+    let renderSignature (ctx: GeneratorContext) (renderMode: RenderMode voption) (functionLike: FunctionLikeSignature) =
         let parameters =
             functionLike.Parameters
-            |> List.map (TypedNameRender.renderTypeOnly ctx)
+            |> List.map (TypedNameRender.renderTypeOnly ctx renderMode)
             |> function
                 | [] -> [ Ast.Unit() ]
                 | paras -> paras
-        let returnType = functionLike.ReturnType |> TypeRefRender.render
+        let returnType = renderTypeRef ctx renderMode TypeRefPosition.FunctionReturn functionLike.ReturnType
         Ast.Funs(parameters, returnType)
-    
-    let renderDelegate (ctx: GeneratorContext) (name: Name<_>) (functionLike: FunctionLikeSignature) =
+
+    let renderDelegate (ctx: GeneratorContext) (renderMode: RenderMode voption) (name: Name<_>) (functionLike: FunctionLikeSignature) =
         let parameters =
             functionLike.Parameters
-            |> List.map (TypedNameRender.renderAsNamedTypeWithOptionName ctx)
+            |> List.map (TypedNameRender.renderAsNamedTypeWithOptionName ctx renderMode)
             |> function
                 | [] -> [ Ast.Unit() ]
                 | paras -> paras
             |> Ast.Tuple
-        let returnType = functionLike.ReturnType |> TypeRefRender.render
+        let returnType = renderTypeRef ctx renderMode TypeRefPosition.FunctionReturn functionLike.ReturnType
         let renderName = Name.Case.valueOrModified name
         Ast.Delegate(renderName, parameters, returnType)
         |> Documentation.renderForTypeDefn functionLike
 
 module FunctionLikeRender =
     // rendering as abstract
-    let renderAbstract (ctx: GeneratorContext) (functionLike: FunctionLikeRender) =
+    let renderAbstract (ctx: GeneratorContext) (renderMode: RenderMode voption) (functionLike: FunctionLikeRender) =
         functionLike.Signatures
-        |> List.map (FunctionLikeSignature.renderAbstractWithName ctx functionLike.Name)
-        
+        |> List.map (FunctionLikeSignature.renderAbstractWithName ctx renderMode functionLike.Name)
+
     // rendering as member
-    let renderMember (ctx: GeneratorContext) (functionLike: FunctionLikeRender) =
+    let renderMember (ctx: GeneratorContext) (renderMode: RenderMode voption) (functionLike: FunctionLikeRender) =
         functionLike.Signatures
-        |> List.map (FunctionLikeSignature.renderMember ctx functionLike.Name)
-        
+        |> List.map (FunctionLikeSignature.renderMember ctx renderMode functionLike.Name)
+
     // rendering as function/let binding
-    let renderBinding (ctx: GeneratorContext) (functionLike: FunctionLikeRender) =
+    let renderBinding (ctx: GeneratorContext) (renderMode: RenderMode voption) (functionLike: FunctionLikeRender) =
         let signature =
             functionLike.Signatures
             |> List.head
-        FunctionLikeSignature.renderBinding ctx functionLike.Name signature
-        
+        FunctionLikeSignature.renderBinding ctx renderMode functionLike.Name signature
+
     // rendering as function signature
-    let renderSignature (ctx: GeneratorContext) (functionLike: FunctionLikeRender) =
+    let renderSignature (ctx: GeneratorContext) (renderMode: RenderMode voption) (functionLike: FunctionLikeRender) =
         functionLike.Signatures
         |> List.head
-        |> FunctionLikeSignature.renderSignature ctx
+        |> FunctionLikeSignature.renderSignature ctx renderMode
     // rendering as delegate
-    let renderDelegate (ctx: GeneratorContext) (functionLike: FunctionLikeRender) =
+    let renderDelegate (ctx: GeneratorContext) (renderMode: RenderMode voption) (functionLike: FunctionLikeRender) =
         functionLike.Signatures
         |> List.head
-        |> FunctionLikeSignature.renderDelegate ctx functionLike.Name
+        |> FunctionLikeSignature.renderDelegate ctx renderMode functionLike.Name
     // rendering as an extension (member)
-    let renderExtension (ctx: GeneratorContext) (functionLike: FunctionLikeRender) =
-        renderMember ctx functionLike
+    let renderExtension (ctx: GeneratorContext) (renderMode: RenderMode voption) (functionLike: FunctionLikeRender) =
+        renderMember ctx renderMode functionLike
 
 module TypeLikeRender =
-    let renderAbstractConstructors (ctx: GeneratorContext) (typeLike: TypeLikeRender) =
+    let renderAbstractConstructors (ctx: GeneratorContext) (renderMode: RenderMode voption) (typeLike: TypeLikeRender) =
         let returnType = Name.Case.valueOrModified typeLike.Name |> Ast.LongIdent
         typeLike.Constructors
         |> List.map (fun parameters ->
             let parameters =
                 parameters
-                |> List.map (TypedNameRender.renderAsNamedTypeWithOptionName ctx)
+                |> List.map (TypedNameRender.renderAsNamedTypeWithOptionName ctx renderMode)
                 |> function
                     | [] -> [ Ast.Unit() ]
                     | paras -> paras
@@ -507,13 +503,13 @@ module TypeLikeRender =
                 emitConstructor
             })
             )
-    let renderMemberConstructors (ctx: GeneratorContext) (typeLike: TypeLikeRender) =
+    let renderMemberConstructors (ctx: GeneratorContext) (renderMode: RenderMode voption) (typeLike: TypeLikeRender) =
         let returnType = Name.Case.valueOrModified typeLike.Name |> Ast.LongIdent
         typeLike.Constructors
         |> List.map (fun parameters ->
             let parameters =
                 parameters
-                |> List.map (TypedNameRender.renderAsPatternWithOptionName ctx)
+                |> List.map (TypedNameRender.renderAsPatternWithOptionName ctx renderMode)
                 |> function
                     | [] -> [ Ast.UnitPat() ]
                     | paras -> paras
@@ -524,18 +520,18 @@ module TypeLikeRender =
             })
             |> Documentation.renderForMember typeLike
             )
-    let renderInheritance (ctx: GeneratorContext) (inScopeTyparNames: Set<string>) (typeRefRender: TypeRefRender) =
+    let renderInheritance (ctx: GeneratorContext) (renderMode: RenderMode voption) (inScopeTyparNames: Set<string>) (typeRefRender: TypeRefRender) =
         typeRefRender
         |> TypeRefRender.substituteForHeritage inScopeTyparNames
         |> TypeRefRender.nonNullable
-        |> TypeRefRender.render
+        |> renderTypeRef ctx renderMode TypeRefPosition.InheritanceRef
         |> Ast.Inherit
-    let renderConstructors (ctx: GeneratorContext) (typeLike: TypeLikeRender) =
+    let renderConstructors (ctx: GeneratorContext) (renderMode: RenderMode voption) (typeLike: TypeLikeRender) =
         typeLike.Constructors
         |> List.map (fun parameters ->
             Ast.Constructor(
                 parameters
-                |> List.map (TypedNameRender.renderAsPatternWithOptionName ctx)
+                |> List.map (TypedNameRender.renderAsPatternWithOptionName ctx renderMode)
                 |> Ast.TuplePat,
                 Exprs.jsUndefined
             )
@@ -545,21 +541,21 @@ module TypeLikeRender =
             })
             )
     // renders an interface
-    let renderInterface (ctx: GeneratorContext) (typeLike: TypeLikeRender) =
+    let renderInterface (ctx: GeneratorContext) (renderMode: RenderMode voption) (typeLike: TypeLikeRender) =
         let renderName = Name.Case.valueOrModified typeLike.Name
         let typeParameters =
             if List.isEmpty typeLike.TypeParameters then
                 ValueNone
             else
             typeLike.TypeParameters
-            |> TypeParameterRender.renderTypeParametersIntoPostfixList ctx
+            |> TypeParameterRender.renderTypeParametersIntoPostfixList ctx renderMode
             |> ValueSome
         let members =
             typeLike.Members
-            |> List.map (TypedNameRender.renderAbstract ctx)
+            |> List.map (TypedNameRender.renderAbstract ctx renderMode)
         let functions =
             typeLike.Functions
-            |> List.collect (FunctionLikeRender.renderAbstract ctx)
+            |> List.collect (FunctionLikeRender.renderAbstract ctx renderMode)
         let memberCollection = members @ functions
         let inScopeTypars =
             typeLike.TypeParameters
@@ -570,17 +566,18 @@ module TypeLikeRender =
             then Ast.InterfaceEnd(renderName)
             else Ast.TypeDefn(renderName)
         builder {
-            yield! renderAbstractConstructors ctx typeLike
+            yield! renderAbstractConstructors ctx renderMode typeLike
             yield!
                 typeLike.Inheritance
-                |> List.map (renderInheritance ctx inScopeTypars)
+                |> List.map (renderInheritance ctx renderMode inScopeTypars)
             yield! memberCollection
         }
         |> Documentation.renderForTypeDefn typeLike
         |> if typeParameters.IsSome then _.typeParams(typeParameters.Value) else id
-        
+        |> applyTypeDefEmit ctx renderMode
+
     // renders a class
-    let renderClass (ctx: GeneratorContext) (typeLike: TypeLikeRender) =
+    let renderClass (ctx: GeneratorContext) (renderMode: RenderMode voption) (typeLike: TypeLikeRender) =
         let renderName =
             Name.Case.valueOrModified typeLike.Name
         let typeParameters =
@@ -588,16 +585,16 @@ module TypeLikeRender =
                 ValueNone
             else
                 typeLike.TypeParameters
-                |> TypeParameterRender.renderTypeParametersIntoPostfixList ctx
+                |> TypeParameterRender.renderTypeParametersIntoPostfixList ctx renderMode
                 |> ValueSome
         let members =
             typeLike.Members
-            |> List.map (TypedNameRender.renderMember ctx)
+            |> List.map (TypedNameRender.renderMember ctx renderMode)
         let functions =
             typeLike.Functions
-            |> List.collect (FunctionLikeRender.renderMember ctx)
+            |> List.collect (FunctionLikeRender.renderMember ctx renderMode)
         let memberCollection = members @ functions
-        let constructors = renderConstructors ctx typeLike
+        let constructors = renderConstructors ctx renderMode typeLike
         let builder =
             match memberCollection, constructors with
             | [], [] -> Ast.ClassEnd(renderName, Ast.Constructor().toPrivate())
@@ -608,31 +605,33 @@ module TypeLikeRender =
         }
         |> Documentation.renderForTypeDefn typeLike
         |> if typeParameters.IsSome then _.typeParams(typeParameters.Value) else id
+        |> applyTypeDefEmit ctx renderMode
     // renders as a tag (type without explicit constructor)
-    let renderTag (ctx: GeneratorContext) (typeLike: TypeLikeRender) = ()
+    let renderTag (ctx: GeneratorContext) (renderMode: RenderMode voption) (typeLike: TypeLikeRender) = ()
     // renders as a record
-    let renderRecord (ctx: GeneratorContext) (typeLike: TypeLikeRender) = ()
+    let renderRecord (ctx: GeneratorContext) (renderMode: RenderMode voption) (typeLike: TypeLikeRender) = ()
     // renders as an anonymous record
-    let renderAnonymousRecord (ctx: GeneratorContext) (typeLike: TypeLikeRender) = ()
+    let renderAnonymousRecord (ctx: GeneratorContext) (renderMode: RenderMode voption) (typeLike: TypeLikeRender) = ()
 
 module TypeAliasRender =
-    let renderTypeAlias (ctx: GeneratorContext) (typeAliasRef: TypeAliasRenderRef) =
+    let renderTypeAlias (ctx: GeneratorContext) (renderMode: RenderMode voption) (typeAliasRef: TypeAliasRenderRef) =
         let renderName = Name.Case.valueOrModified typeAliasRef.Name
         let typeParameters =
             if List.isEmpty typeAliasRef.TypeParameters then
                 ValueNone
             else
                 typeAliasRef.TypeParameters
-                |> TypeParameterRender.renderTypeParametersIntoPostfixList ctx
+                |> TypeParameterRender.renderTypeParametersIntoPostfixList ctx renderMode
                 |> ValueSome
         let typeRefRender =
             typeAliasRef.Type
-            |> TypeRefRender.render
+            |> renderTypeRef ctx renderMode TypeRefPosition.AliasTarget
         Ast.Abbrev(renderName, typeRefRender)
         |> if typeParameters.IsSome then _.typeParams(typeParameters.Value) else id
         |> Documentation.renderForTypeDefn typeAliasRef
-        
-    
+        |> applyTypeDefEmit ctx renderMode
+
+
 module SpecialRender =
     /// <summary>
     /// Renders a type definition for a SRTP bound <c>typekeyof</c> accessor.

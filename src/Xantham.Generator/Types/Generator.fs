@@ -58,9 +58,12 @@ type RenderPosition =
     | RefPos of TypeRefPosition
     | PathPos of PathPosition
     | NotApplicable
+type RenderOwner =
+    | Type of ResolvedType
+    | Export of ResolvedExport
 type [<Struct>] RenderContext = {
     Position: RenderPosition
-    Owner: ResolvedType voption
+    Owner: RenderOwner voption
     /// `ValueNone` when the hook fires outside any active `RenderScope`
     /// (e.g. `PathResolution` invoked from the export dispatcher).
     Render: RenderMode voption
@@ -151,7 +154,7 @@ module HookSlot =
 
     let clear<'T> : HookSlot<'T> -> HookSlot<'T> = fun _ -> empty<'T>
 
-    let rec private loop (result: HookResult<'T>) current handlers ctx rctx =
+    let rec loop (result: HookResult<'T>) current handlers ctx rctx =
         match handlers with
         | [] -> result
         | h :: rest ->
@@ -178,7 +181,7 @@ module SkippableHookSlot =
 
     let clear<'T> : SkippableHookSlot<'T> -> SkippableHookSlot<'T> = fun _ -> empty<'T>
 
-    let rec private loop result current handlers ctx rctx =
+    let rec loop result current handlers ctx rctx =
         match handlers with
         | [] -> result
         | h :: rest ->
@@ -369,10 +372,48 @@ module GeneratorContext =
             tryGet ctx (Choice2Of2 key)
 
         let addOrReplace (ctx: GeneratorContext) (key: Choice<ResolvedType, ResolvedExport>) (value: Choice<Anchored.TypeRefRender, Anchored.RenderScope>) =
-            let value = ctx.Customisation.Interceptors.AnchoredRender ctx key value
-            ctx.AnchorRenders
-            |> Operation.addOrReplace key value
-            
+            let owner =
+                match key with
+                | Choice1Of2 t -> RenderOwner.Type t
+                | Choice2Of2 e -> RenderOwner.Export e
+            let slotResult =
+                match value with
+                | Choice1Of2 v ->
+                    SkippableHookSlot.run
+                        ctx.Customisation.AnchoredRef
+                        ctx
+                        {
+                            Position = RenderPosition.NotApplicable
+                            Owner = ValueSome owner
+                            Render = ValueNone
+                            Stage = RenderStage.Anchored
+                        }
+                        v
+                    |> Choice1Of2
+                | Choice2Of2 v ->
+                    SkippableHookSlot.run
+                        ctx.Customisation.AnchoredScope
+                        ctx
+                        {
+                            Position = RenderPosition.NotApplicable
+                            Owner = ValueSome owner
+                            Render = ValueNone
+                            Stage = RenderStage.Anchored
+                        }
+                        v
+                    |> Choice2Of2
+            match slotResult with
+            | Choice1Of2 SkippableHookResult.Skip | Choice2Of2 SkippableHookResult.Skip -> ()
+            | Choice1Of2 SkippableHookResult.Pass | Choice2Of2 SkippableHookResult.Pass ->
+                ctx.AnchorRenders
+                |> Operation.addOrReplace key value
+            | Choice1Of2 (SkippableHookResult.Replace v) ->
+                ctx.AnchorRenders
+                |> Operation.addOrReplace key (Choice1Of2 v)
+            | Choice2Of2 (SkippableHookResult.Replace v) ->
+                ctx.AnchorRenders
+                |> Operation.addOrReplace key (Choice2Of2 v)
+                
         let addResolvedType (ctx: GeneratorContext) (key: ResolvedType) (value: Choice<Anchored.TypeRefRender, Anchored.RenderScope>) =
             addOrReplace ctx (Choice1Of2 key) value
             

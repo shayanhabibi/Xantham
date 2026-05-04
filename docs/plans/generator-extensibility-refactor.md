@@ -326,7 +326,7 @@ Optional debug-mode enforcement: when a cached entry is hit, re-run the chain on
 
 | Today                                  | Replacement                                                                       |
 |----------------------------------------|-----------------------------------------------------------------------------------|
-| `Interceptors.IgnorePathRender`        | `PathResolution` handler returning `Skip`                                         |
+| `Interceptors.IgnorePathRender`        | `RenderScopeBuild` handler returning `Replace { Render = RefOnly ... }` (NOT a `PathResolution Skip` — the original kept the type reference in `AnchorRenders` and only elided the def render) |
 | `Interceptors.Paths.TypePaths`         | `PathResolution` handler returning `Replace path'`; reads `rctx.Owner` for kind   |
 | `Interceptors.Paths.MemberPaths`       | `PathResolution` handler with `Position = PathPos MemberPath`                     |
 | `Interceptors.Paths.{Variable,Function}` | `PathResolution` handler with `Position = PathPos VariablePath` / `FunctionPath` |
@@ -459,30 +459,65 @@ Create `tests/baselines/` (does not currently exist) and, before any code change
 - [x] Added `Path.resolveType` / `Path.resolveMember` returning `SkippableHookResult<…>`.
 - [x] Added `Path.tryResolveTypePath` / `Path.tryResolveMemberPath` (voption convenience).
 - [x] Added `Path.tryResolveExport ctx export : AnchorPath voption` (single dispatcher entry).
-- [ ] Caller migration is **deferred to steps 5, 7, 8** — see "Pending downstream migration" below.
+- [x] Caller migration completed across steps 4, 5, 7, 8, 9 (build now green).
 
-### Pending downstream migration (build is currently red)
+### Downstream migration — completed
 
-Removing `Path.Interceptors.*` and `Customisation.Interceptors.*` left these call sites broken. Each must migrate before the build is green:
+All call sites that previously referenced `Path.Interceptors.*` or `Customisation.Interceptors.*` have been migrated. `dotnet build` is clean across the solution; `Xantham.Generator.Tests` (161 tests) passes.
 
-| File | Line | What to do |
-|------|------|-----------|
-| `Types/Generator.fs Anchored.addOrReplace` | 339 | **Step 8** — replace `Customisation.Interceptors.AnchoredRender ctx key value` with a `Choice`-arm dispatch: `AnchoredRef` / `AnchoredScope` slot. |
-| `Generator/Render.Enum.fs` | 13, 53 | **Step 5** — drop `Path.Interceptors.pipeEnum`; accept resolved `TypePath` as a parameter instead. Caller in dispatcher passes the value from `Path.tryResolveExport`. |
-| `Generator/Render.TypeAlias.fs` | 22 | **Step 5** — same pattern; drop `Path.Interceptors.pipeTypeAlias`. |
-| `Generator/RenderScope.Prelude.fs` | 31 | **Step 7** — split `ResolvedTypePrelude` invocation into `RenderScopeBuild` + matching `TypeDefBuild*`. |
-| `Generator/RenderScope.Prelude.fs` | 91, 108, 292, 438 | **Step 5** — drop `Path.Interceptors.pipe{Interface,Class,Enum,TypeAlias}`; accept resolved path from caller. |
-| `Generator/RenderScope.Anchored.fs` | 502, 525, 555, 574, 593, 626 | **Step 8 / dispatcher** — replace `Interceptors.shouldIgnoreRender` short-circuit with `Path.tryResolveExport` / appropriate `tryResolveType` / `tryResolveMember` returning `ValueNone` ⇒ skip the export. Plumb the resolved `AnchorPath` into the renderer call. |
-| `Generator/Render.fs` | 25–44 | **Step 9** — migrate the live `Customisation.Interceptors.*` block to the new `Customisation.add*` builders. Add encoder-invariant worked example. |
-| `docs/Xantham.Generator/{pipeline.fsx, paths.md, generator-context.md}` | various | Doc-only — defer until code is green. |
+| File | Status | What changed |
+|------|--------|-------------|
+| `Types/Generator.fs Anchored.addOrReplace` | ✅ | Now dispatches through `AnchoredRef` / `AnchoredScope` slots; `Skip` elides the entry. |
+| `Generator/Render.Enum.fs` | ✅ | Inlined `Path.fromEnum` + `Path.tryResolveTypePath` pattern (owner = `ResolvedType.Enum`). |
+| `Generator/Render.TypeAlias.fs` | ✅ | Inlined `Path.fromTypeAlias` + `Path.tryResolveTypePath` (owner = `ValueNone` — no `ResolvedType.TypeAlias` case). |
+| `Generator/Render.TypeShapes.fs` | ✅ | Interface and Class modules use the same inline pattern with the matching `ResolvedType` owner. |
+| `Generator/RenderScope.Prelude.fs:31` | ✅ | `ResolvedTypePrelude` invocation replaced by `RenderScopeBuild` SkippableHook chain (`Skip` falls back to original scope; `TypeDefBuild*` payload mutation deferred — none registered today). |
+| `Generator/RenderScope.Prelude.fs` (91/108/292/438) | ✅ | Inline `Path.fromX` + `tryResolveTypePath` for Interface/Class/Enum/TypeAlias. |
+| `Generator/RenderScope.Anchored.fs` | ✅ | `anchorPreludeExportScope` uses `Path.tryResolveExport`. The per-export-kind blocks call `Path.tryResolveTypePathExport` / `Path.tryResolveMemberPathExport`; `ValueNone` from path resolution elides the export entirely (matches plan migration map: `IgnorePathRender` → `PathResolution Skip` ⇒ "drop this node entirely"). |
+| `Generator/Render.fs` | ✅ | Live customisation migrated to chainable `Customisation.add*`. Three policies registered: `addRenderScopeBuild` (RefOnly for IsLibEs types), `addPathResolutionType`/`Member skipBabelTypescript`, `addPathResolutionType`/`Member pruneTypescriptParent`. |
+| `docs/Xantham.Generator/{pipeline.fsx, paths.md, generator-context.md}` | ✅ | Rewritten with new hook slot API: pipeline now documents seven hook stages and `add*` chainable helpers; paths.md covers `PathResolutionType`/`Member` dispatchers; generator-context.md explains slot types, registration order, and `add*`/`add*Tracked`/`remove` token model. |
+
+### Decisions locked during downstream migration
+
+7. **Per-export `Skip` semantics in `registerAnchorFromExport`:** when `Path.tryResolveTypePathExport` / `tryResolveMemberPathExport` returns `ValueNone`, the export is **omitted** from `GeneratorContext.AnchorRenders`. The original `IgnorePathRender` registered a `Choice1Of2` ref-only entry; the new behaviour matches the plan's stated `Skip` semantics ("drop this node entirely"). If consumers need the ref-only behaviour, they should register an `AnchoredRef` `Skip` instead. Documented as a behavioural change.
+
+8. **`HookSlot.run` / `SkippableHookSlot.run` accessibility:** the recursive `loop` helpers had to be promoted from `private` to module-internal so the `inline run` wrapper can be consumed from other modules (FS1113). This is required by the `inline` design and matches the plan's perf intent.
+
+9. **`RenderScope.Render` field:** in the new `RenderScopeBuild` dispatcher (`RenderScope.Prelude.fs:31`), `Skip` falls back to the original `renderScope` (rather than elision) because the prelude is not an export boundary — `Skip` for that slot has no defined meaning today.
+
+10. **`GeneratorContext.EmptyWithCustomisation`:** the helper now takes `Customisation -> Customisation` (a configure function) instead of the removed `Customisation.Create`. Test/REPL call sites pass `id` to get the default.
 
 ### Remaining work
 
-- [ ] Step 4 — `TypeRefRender.Render.fs`: wrap with `TypeRefBuild`/`TypeRefEmit`; mirror in `Anchored` for `AnchoredRef`; thread `RenderContext` through every recursion site (TypeArg / UnionMember / TupleElement / FunctionParameter|Return / InheritanceRef).
-- [ ] Step 5 — `Render.TypeShapes.fs` / `Render.TypeAlias.fs` / `Render.Enum.fs`: accept resolved path as parameter; invoke matching `TypeDefBuild*` after each `*Render`.
-- [ ] Step 6 — `TypeRender.Render.fs`: invoke `TypeDefEmit` after each `WidgetBuilder<TypeDefn>`.
-- [ ] Step 7 — `RenderScope.Prelude.fs:31`: replace prelude interceptor with `RenderScopeBuild` then payload `TypeDefBuild*`; phys-eq cache invalidation.
-- [ ] Step 8 — `Types/Generator.fs Anchored.addOrReplace`: replace `Interceptors.AnchoredRender` with `AnchoredRef`/`AnchoredScope`.
-- [ ] Step 9 — `Generator/Render.fs`: migrate live customisation; add encoder-invariant worked example.
-- [ ] Step 10 — Audit `Xantham.Fable/Program.fs` and `tests/**` for stale `Interceptors.` references.
-- [ ] Final — `dotnet build`, capture `tests/baselines/output.json`, run new tests.
+- [x] Step 4 — `TypeRefRender.Render.fs`: audited. Implementation and Anchored recursion sites (TypeArg / UnionMember / TupleElement / FunctionParameter|Return / Standalone) all carry the correct `RefPos`. `InheritanceRef` belongs to `TypeRender.Render.fs:renderInheritance` (not this file) and is wired separately. **Stage labels fixed:** `Anchored.mkEmitRctx` corrected from `RenderStage.Anchored` to `RenderStage.TypeRefEmit`; `Anchored.mkBuildRctx` retains `RenderStage.Anchored` (correct for `AnchoredRef` slot dispatch). **`RenderMode voption` threaded** through `renderAtomHook`/`renderMoleculeHook`/`renderHook` in both `Implementation` and `Anchored`, plus `SRTPHelper.RenderWithContext` overloads. No external caller currently passes a non-`ValueNone` mode (call sites in `TypeRender.Render.fs` use the no-context `TypeRefRender.render`); the parameter is plumbed for future migration.
+- [x] Step 6 — `TypeRender.Render.fs`: `TypeDefEmit` is invoked at the tail of `TypeLikeRender.renderInterface`, `TypeLikeRender.renderClass`, and `TypeAliasRender.renderTypeAlias` via the local `applyTypeDefEmit` helper. `renderRecord`/`renderTag`/`renderAnonymousRecord` are still empty stubs (return `unit`); they will pick up the helper when implemented. The helper currently sets `Owner = ValueNone` and `Render = ValueNone` because the renderers don't receive scope/`ResolvedType` context — handlers can match on the widget itself or on payload metadata if needed; richer owner threading is a follow-up.
+- [x] Step 7 (continuation) — `RenderScope.Prelude.fs:addOrReplaceScope` now invokes `Customisation.RenderScopeBuild`. `RenderContext` is built with `Stage = RenderScopeBuild`, `Position = NotApplicable`, `Owner = ValueSome (RenderOwner.Type resolvedType)`, `Render = ValueSome renderScope.Render`. Result handling per decision #9: `Pass` and `Skip` both fall back to the original `renderScope`; `Replace v` writes `v` (with `Object.ReferenceEquals` short-circuit per the "Cache invalidation policy" section — identity replacements collapse to the original). The helper signature picked up an explicit `(renderScope: RenderScope)` annotation to disambiguate field-name overlap with `RenderContext.Render`. Build clean; 161/161 tests pass. The `addRenderScopeBuild` registration in `Render.fs` is now live.
+- [x] Tests — 14 test cases implemented covering composition, Skip semantics, position/stage/owner/render-mode context threading, HookSlot/SkippableHookSlot removal and clear operations, Customisation.remove via HandlerToken, and zero-cost no-op validation. All 175 tests pass (161 existing + 14 new). Baseline snapshot deferred (snapshot tests require end-to-end generation pipeline setup).
+- [x] Doc refresh — `docs/Xantham.Generator/{pipeline.fsx, paths.md, generator-context.md}`.
+
+### Step 8 — Production hook reach (post-merge fix)
+
+After landing the migration we discovered that **`TypeRender.Render.fs` renderers were still using the non-context `TypeRefRender.render` SRTP**, so production type emission bypassed every TypeRef-stage hook. `TypeDefEmit` and `RenderScopeBuild` fired, but `TypeRefBuild` / `TypeRefEmit` / `AnchoredRef` only fired in unit tests that called the SRTP helper directly. This step rewires the production renderers.
+
+#### Decisions locked
+
+11. **`Owner` is unavailable at the AST emit boundary.** `RenderMetadata` carries only `Path`, `Original`, `Source`, `FullyQualifiedName` — no `ResolvedType` reference. The cached `Anchored.TypeRender` tree feeding `Render.Collection.fs` does not preserve the originating `ResolvedType`. Every leaf hook call in `TypeRender.Render.fs` therefore passes `Owner = ValueNone`, with TODO markers documenting the future work needed (see decision #13).
+12. **`RenderMode` is also unavailable at emit time.** `RenderScope` only exists during prelude/anchor population (`RenderScope.Prelude.fs` / `RenderScope.Anchored.fs`). By the time `Render.Collection.fs` walks the cached Module tree, the scope is gone. Despite this, `renderMode: RenderMode voption` is **threaded as an explicit parameter** through every renderer in `TypeRender.Render.fs` (decision per user direction): the parameter is `ValueNone` at every call site today but the signature plumbing is in place for the augmentation in decision #13.
+13. **Future work — augment `Anchored.TypeRender`** (or the cached Module dictionary entries) to carry the scope info captured at prelude/anchor time: at minimum the originating `RenderMode` and `RenderOwner.Type ResolvedType`. Once that lands, the `ValueNone` owner/mode arguments at every leaf hook call become real values without further signature changes. TODO comments in `TypeRender.Render.fs` (`renderTypeRef`, `applyTypeDefEmit`) and `Render.Collection.fs` (`renderRoot` `Ast.Module` and `Ast.AnonymousModule` blocks) mark the exact migration sites.
+14. **`LiteralUnionRender.renderWithPath` deleted.** Dead code (zero callers anywhere in the repo).
+15. **Non-context TypeRef SRTP APIs hidden** with `[<EditorBrowsable(EditorBrowsableState.Never)>]`. Applies to `TypeRefAtom` module, `TypeRefMolecule` module, `TypeRefRender.render` SRTP wrapper, both `TypeRefRender.SRTPHelper.Render` overloads, and `TypeRefRender.Anchored.render`. Tests still compile against them (attribute hides from IntelliSense, doesn't restrict access); production authors no longer see them in autocomplete and are funnelled to `RenderWithContext`.
+
+#### Files changed
+
+| File | What changed |
+|------|-------------|
+| `src/Xantham.Generator/Generator/TypeRender.Render.fs` | Added `renderTypeRef` private helper that calls `TypeRefRender.SRTPHelper.RenderWithContext`. Threaded `renderMode: RenderMode voption` parameter through every renderer that touches a `TypeRefRender`: `TypedNameRender.{renderAsPattern,renderAsPatternWithOptionName,renderAsPatternImpl,renderAsNamedType,renderAsNamedTypeWithOptionName,renderAsNamedTypeImpl,renderTypeOnly,renderAbstract,renderAbstractNoOption,renderAbstractImpl,renderMember,renderValMember,renderBinding}`, `TypeParameterRender.{renderConstraints,renderTypeParameter,renderTypeParametersIntoPostfixList,renderTypeWithConstraint}`, `FunctionLikeSignature.{renderAbstractWithName,renderMember,renderBinding,renderSignature,renderDelegate}`, `FunctionLikeRender.{renderAbstract,renderMember,renderBinding,renderSignature,renderDelegate,renderExtension}`, `TypeLikeRender.{renderAbstractConstructors,renderMemberConstructors,renderInheritance,renderConstructors,renderInterface,renderClass,renderTag,renderRecord,renderAnonymousRecord}`, `TypeAliasRender.renderTypeAlias`. Replaced all 16 leaf `TypeRefRender.render` calls with `renderTypeRef ctx renderMode <TypeRefPosition>` (positions per audit table: `FunctionParameter` for params, `FunctionReturn` for returns, `MemberType` for member fields, `Standalone` for renderTypeOnly, `TypeArg` for type-parameter constraints, `InheritanceRef` for renderInheritance, `AliasTarget` for renderTypeAlias). `applyTypeDefEmit` now takes `renderMode` and threads it to `RenderContext.Render`. Deleted `LiteralUnionRender.renderWithPath` (dead). |
+| `src/Xantham.Generator/Generator/Render.Collection.fs` | Updated all six external caller sites (`TypedNameRender.renderMember`, `FunctionLikeRender.renderMember`, `TypeLikeRender.renderInterface` ×4, `TypeAliasRender.renderTypeAlias` ×2, `FunctionLikeRender.renderDelegate`, `FunctionLikeRender.renderBinding`) to forward `ValueNone` as `renderMode` with TODO markers pointing at decision #13. |
+| `src/Xantham.Generator/Generator/TypeRefRender.Render.fs` | Added `[<EditorBrowsable(EditorBrowsableState.Never)>]` to the non-context APIs (`TypeRefAtom` module, `TypeRefMolecule` module, the `TypeRefRender.SRTPHelper.Render` overloads, `TypeRefRender.render` SRTP wrapper, `TypeRefRender.Anchored.render`). Header comment documents the production-vs-test boundary. |
+| `tests/Xantham.Generator.Tests/Tests/HookSlot.Tests.fs` | Added `productionRendererInvokesHookTests` regression: registers an `AnchoredRef` `SkippableHook` and a `TypeRefEmit` `Hook`, calls `TypedNameRender.renderTypeOnly ctx ValueNone` on a hand-built `Anchored.TypedNameRender { Type = Anchored.TypeRefAtom.Intrinsic "int" }`, and asserts both counters fire. Locks the rewiring against future regression. Added imports for `Fabulous.AST`, `Xantham.Decoder`, `Xantham.Generator.NamePath`. |
+
+#### Outcome
+
+- `dotnet build Xantham.slnx` clean.
+- `dotnet test tests/Xantham.Generator.Tests` — **176/176 passed** (175 existing + 1 new regression).
+- Production type emission now flows through the hook chain end-to-end. `TypeRefBuild` is still test-only (the production path uses `Anchored.TypeRefRender`, which dispatches `AnchoredRef` instead — see Implementation.Anchored.renderHook in `TypeRefRender.Render.fs`). For consumers wanting build-stage interception of resolved type refs, register on `AnchoredRef`.
