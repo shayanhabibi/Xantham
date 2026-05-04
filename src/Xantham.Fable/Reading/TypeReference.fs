@@ -135,7 +135,7 @@ let private resolveTypeBase (ctx: TypeScriptReader) (xanTag: XanthamTag) (typ: T
             pushToStack ctx tag
             tag.TypeSignal
 
-let private padTypeArguments (ctx: TypeScriptReader) (xanTag: XanthamTag) (target: Ts.Type) (supplied: Ts.Type[]) : TypeSignal[] =
+let private padTypeArguments (ctx: TypeScriptReader) (xanTag: XanthamTag) (target: Ts.GenericType) (supplied: Ts.Type[]) : TypeSignal[] =
     // Ensure type arguments list is padded to match declared type parameters.
     // For each declared param: use supplied arg if present, else try default, else use the param itself.
     let targetParams =

@@ -11,7 +11,6 @@
         <Compile Include="Mocking\Arena.Interner.Types.fs" />
         <Compile Include="Tests\TypeRefRender.fs" />
         <Compile Include="Tests\TypeRefRenderExtra.fs" />
-        <Compile Include="Tests\Inheritance.fs" />
         <Compile Include="Tests\TypeAliasRender.fs" />
         <Compile Include="Tests\Paths.fs" />
         <Compile Include="Tests\Name.fs" />
