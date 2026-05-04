@@ -217,12 +217,30 @@ let fromType (ctx: TypeScriptReader) (xanTag: XanthamTag) (typ: Ts.TypeReference
     {
         STypeReferenceBuilder.Type = resolveTypeBase ctx xanTag typ
         TypeArguments =
-            ctx.checker.getTypeArguments(typ).AsArray
-            |> Array.map (
-                ctx.CreateXanthamTag
-                >> fst
-                >> TagState.apply (fun _ -> XanthamTag.chainDebug xanTag >> ignore)
-                >> stackPushAndThen ctx _.TypeSignal
+            // see issue #44
+            let targetParams =
+                typ.target.typeParameters
+                |> Option.map _.AsArray
+                |> Option.defaultValue [||]
+            let suppliedParams =
+                if typ.aliasSymbol.IsSome then
+                    typ.aliasTypeArguments
+                    |> Option.map _.AsArray
+                    |> Option.defaultValue [||]
+                else
+                    ctx.checker.getTypeArguments(typ).AsArray
+            targetParams
+            |> Array.mapi (fun i arg ->
+                suppliedParams
+                |> Array.tryItem i
+                |> Option.defaultWith (fun () ->
+                    ctx.checker.getDefaultFromTypeParameter(arg)
+                    |> Option.defaultValue arg
+                    )
+                |> ctx.CreateXanthamTag
+                |> fst
+                |> TagState.apply (fun _ -> XanthamTag.chainDebug xanTag >> ignore)
+                |> stackPushAndThen ctx _.TypeSignal
                 )
         ResolvedType = ValueNone
     }

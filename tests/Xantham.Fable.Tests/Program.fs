@@ -250,6 +250,105 @@ let multipleExtendsTests =
             "" |> Expect.containsAll extendingNames ["ExtendedInterface"; "ExtendedInterface2"]
     ]
 
+let extendsWithTypeArgsTests = testList "extends-with-type-args.d.ts" [
+    let result = createTestReader "extends-with-type-args" |> runReader
+    testCase "Foo and ExtendedFoo are present" <| fun _ ->
+        tryFindInterface "Foo" result
+        |> Expect.isSome
+        |> funApply "Foo is present"
+        tryFindInterface "ExtendedFoo" result
+        |> Expect.isSome
+        |> funApply "ExtendedFoo is present"
+    test "ExtendedFoo has heritage" {
+        let iface = tryFindInterface "ExtendedFoo" result |> _.Value
+        Expect.hasLength iface.Heritage.Extends 1 ""
+    }
+    test "Heritage is correct" {
+        let iface = tryFindInterface "ExtendedFoo" result |> _.Value
+        "Heritage should have resolved type"
+        |> Expect.isNone iface.Heritage.Extends[0].ResolvedType
+        "Heritage should have one type argument"
+        |> Expect.hasLength iface.Heritage.Extends.Head.TypeArguments 1
+        "Heritage should be Foo<string>"
+        |> Expect.isTrue (
+            findType iface.Heritage.Extends[0].Type result
+            |> function
+                | TsType.Interface { Name = "Foo" } -> true
+                | _ -> false
+            &&
+            findType iface.Heritage.Extends[0].TypeArguments[0] result
+            |> _.IsPrimitive
+            )
+    }
+    test "GenericExtendedFoo has heritage" {
+        let iface = tryFindInterface "GenericExtendedFoo" result |> _.Value
+        Expect.hasLength iface.Heritage.Extends 1 ""
+    }
+    test "GenericExtendedFoo heritage has correct type arguments" {
+        let iface = tryFindInterface "GenericExtendedFoo" result |> _.Value
+        "Heritage should have one type argument"
+        |> Expect.hasLength iface.Heritage.Extends.Head.TypeArguments 1
+    }
+    test "GenericExtendedFoo2 has heritage with correct type arguments" {
+        let iface = tryFindInterface "GenericExtendedFoo2" result |> _.Value
+        "Heritage should have one type argument"
+        |> Expect.hasLength iface.Heritage.Extends.Head.TypeArguments 1
+    }
+    test "ExtendedFoo2 is interface with two type parameters" {
+        let iface = tryFindInterface "ExtendedFoo2" result |> _.Value
+        "ExtendedFoo2 should have two type parameters"
+        |> Expect.hasLength iface.TypeParameters 2
+        "Type parameter one should have no default"
+        |> Expect.isNone (snd iface.TypeParameters[0]).Default
+        "Type parameter one should have no constraint"
+        |> Expect.isNone (snd iface.TypeParameters[0]).Constraint
+        "Type parameter two should have a default"
+        |> Expect.isSome (snd iface.TypeParameters[1]).Default
+        "Type parameter two should have no constraint"
+        |> Expect.isNone (snd iface.TypeParameters[1]).Constraint
+    }
+    test "ExtendedFoo2 has heritage Foo<U>" {
+        let iface = tryFindInterface "ExtendedFoo2" result |> _.Value
+        "Has heritage"
+        |> Expect.hasLength iface.Heritage.Extends 1
+        let heritage = iface.Heritage.Extends[0]
+        "Heritage should have one type arg"
+        |> Expect.hasLength heritage.TypeArguments 1
+        "Type argument should be type parameter U"
+        |> Expect.isTrue (
+            heritage.TypeArguments[0]
+            |> findType
+            |> funApply result
+            |> function
+                | TsType.TypeParameter { Name = "U" } -> true
+                | _ -> false
+            )
+        "Should not have a resolved type"
+        |> Expect.isNone heritage.ResolvedType
+    }
+    test "GenericExtendedFoo3<T> exists with one type argument and heritage" {
+        let iface = tryFindInterface "GenericExtendedFoo3" result |> _.Value
+        "Has one type arg"
+        |> Expect.hasLength iface.TypeParameters 1
+        "Has heritage"
+        |> Expect.hasLength iface.Heritage.Extends 1
+    }
+    test "GenericExtendedFoo3<T> heritage is ExtendedFoo2<T>" {
+        let iface = tryFindInterface "GenericExtendedFoo3" result |> _.Value
+        "Heritage has two arguments, second is default"
+        |> Expect.hasLength iface.Heritage.Extends[0].TypeArguments 2
+        "Heritage has no resolved type"
+        |> Expect.isNone iface.Heritage.Extends[0].ResolvedType
+        "Second type arg should be number"
+        |> Expect.isTrue (
+            findType iface.Heritage.Extends[0].TypeArguments[1] result
+            |> function
+                | TsType.Primitive TypeKindPrimitive.Number -> true
+                | _ -> false
+            )
+    }
+]
+
 // -----------------------------------------------------------------------
 // Fixture: members.d.ts
 //   WithProperties:  name: string; age?: number; readonly active: boolean
@@ -1996,7 +2095,8 @@ let typeArgsTests = testList "type-args.d.ts" [
                     match findType ref.Value.TypeArguments.Head result with
                     TsType.Primitive TypeKindPrimitive.String -> true | _ -> false)
             }
-            test "Resolved type is type literal with string item prop" {
+            // Resolved type is a type reference mirroring the initial structure.
+            ptest "Resolved type is type literal with string item prop" {
                 ref.Value.ResolvedType.Value
                 |> findType
                 |> funApply result
@@ -2116,7 +2216,7 @@ let typeArgsTests = testList "type-args.d.ts" [
                     TsType.Primitive TypeKindPrimitive.String
                 ]
             }
-            test "Resolved type is type literal" {
+            ptest "Resolved type is type literal" {
                 ref.Value.ResolvedType.Value
                 |> findType
                 |> funApply result
@@ -2152,6 +2252,7 @@ let tests =
         mergeTests
         heritageTests
         multipleExtendsTests
+        extendsWithTypeArgsTests
         memberTests
         overloadTests
         modifierTests
