@@ -2,6 +2,7 @@
   <Folder Name="/ci/">
     <File Path=".github/workflows/docs.yml" />
     <File Path=".github/workflows/push_master.yml" />
+    <File Path=".github/workflows/regressions_test.yml" />
     <Project Path="Build.fsproj" />
   </Folder>
   <Folder Name="/ai/">
