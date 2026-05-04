@@ -12,6 +12,7 @@
         <TypeScriptCompile Include="TypeFiles\merge.d.ts" />
         <TypeScriptCompile Include="TypeFiles\extends.d.ts" />
         <TypeScriptCompile Include="TypeFiles\multiple-extends.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\extends-with-type-args.d.ts" />
         <TypeScriptCompile Include="TypeFiles\enum.d.ts" />
         <TypeScriptCompile Include="TypeFiles\members.d.ts" />
         <TypeScriptCompile Include="TypeFiles\function.d.ts" />
@@ -56,6 +57,9 @@
         <TypeScriptCompile Include="TypeFiles\ref-enum.d.ts" />
         <TypeScriptCompile Include="TypeFiles\import-package.d.ts" />
         <TypeScriptCompile Include="TypeFiles\aliases.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\nested-generics.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\type-args.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\plan-a-test.d.ts" />
     </ItemGroup>
 
     <ItemGroup>

@@ -250,6 +250,105 @@ let multipleExtendsTests =
             "" |> Expect.containsAll extendingNames ["ExtendedInterface"; "ExtendedInterface2"]
     ]
 
+let extendsWithTypeArgsTests = testList "extends-with-type-args.d.ts" [
+    let result = createTestReader "extends-with-type-args" |> runReader
+    testCase "Foo and ExtendedFoo are present" <| fun _ ->
+        tryFindInterface "Foo" result
+        |> Expect.isSome
+        |> funApply "Foo is present"
+        tryFindInterface "ExtendedFoo" result
+        |> Expect.isSome
+        |> funApply "ExtendedFoo is present"
+    test "ExtendedFoo has heritage" {
+        let iface = tryFindInterface "ExtendedFoo" result |> _.Value
+        Expect.hasLength iface.Heritage.Extends 1 ""
+    }
+    test "Heritage is correct" {
+        let iface = tryFindInterface "ExtendedFoo" result |> _.Value
+        "Heritage should have resolved type"
+        |> Expect.isNone iface.Heritage.Extends[0].ResolvedType
+        "Heritage should have one type argument"
+        |> Expect.hasLength iface.Heritage.Extends.Head.TypeArguments 1
+        "Heritage should be Foo<string>"
+        |> Expect.isTrue (
+            findType iface.Heritage.Extends[0].Type result
+            |> function
+                | TsType.Interface { Name = "Foo" } -> true
+                | _ -> false
+            &&
+            findType iface.Heritage.Extends[0].TypeArguments[0] result
+            |> _.IsPrimitive
+            )
+    }
+    test "GenericExtendedFoo has heritage" {
+        let iface = tryFindInterface "GenericExtendedFoo" result |> _.Value
+        Expect.hasLength iface.Heritage.Extends 1 ""
+    }
+    test "GenericExtendedFoo heritage has correct type arguments" {
+        let iface = tryFindInterface "GenericExtendedFoo" result |> _.Value
+        "Heritage should have one type argument"
+        |> Expect.hasLength iface.Heritage.Extends.Head.TypeArguments 1
+    }
+    test "GenericExtendedFoo2 has heritage with correct type arguments" {
+        let iface = tryFindInterface "GenericExtendedFoo2" result |> _.Value
+        "Heritage should have one type argument"
+        |> Expect.hasLength iface.Heritage.Extends.Head.TypeArguments 1
+    }
+    test "ExtendedFoo2 is interface with two type parameters" {
+        let iface = tryFindInterface "ExtendedFoo2" result |> _.Value
+        "ExtendedFoo2 should have two type parameters"
+        |> Expect.hasLength iface.TypeParameters 2
+        "Type parameter one should have no default"
+        |> Expect.isNone (snd iface.TypeParameters[0]).Default
+        "Type parameter one should have no constraint"
+        |> Expect.isNone (snd iface.TypeParameters[0]).Constraint
+        "Type parameter two should have a default"
+        |> Expect.isSome (snd iface.TypeParameters[1]).Default
+        "Type parameter two should have no constraint"
+        |> Expect.isNone (snd iface.TypeParameters[1]).Constraint
+    }
+    test "ExtendedFoo2 has heritage Foo<U>" {
+        let iface = tryFindInterface "ExtendedFoo2" result |> _.Value
+        "Has heritage"
+        |> Expect.hasLength iface.Heritage.Extends 1
+        let heritage = iface.Heritage.Extends[0]
+        "Heritage should have one type arg"
+        |> Expect.hasLength heritage.TypeArguments 1
+        "Type argument should be type parameter U"
+        |> Expect.isTrue (
+            heritage.TypeArguments[0]
+            |> findType
+            |> funApply result
+            |> function
+                | TsType.TypeParameter { Name = "U" } -> true
+                | _ -> false
+            )
+        "Should not have a resolved type"
+        |> Expect.isNone heritage.ResolvedType
+    }
+    test "GenericExtendedFoo3<T> exists with one type argument and heritage" {
+        let iface = tryFindInterface "GenericExtendedFoo3" result |> _.Value
+        "Has one type arg"
+        |> Expect.hasLength iface.TypeParameters 1
+        "Has heritage"
+        |> Expect.hasLength iface.Heritage.Extends 1
+    }
+    test "GenericExtendedFoo3<T> heritage is ExtendedFoo2<T>" {
+        let iface = tryFindInterface "GenericExtendedFoo3" result |> _.Value
+        "Heritage has two arguments, second is default"
+        |> Expect.hasLength iface.Heritage.Extends[0].TypeArguments 2
+        "Heritage has no resolved type"
+        |> Expect.isNone iface.Heritage.Extends[0].ResolvedType
+        "Second type arg should be number"
+        |> Expect.isTrue (
+            findType iface.Heritage.Extends[0].TypeArguments[1] result
+            |> function
+                | TsType.Primitive TypeKindPrimitive.Number -> true
+                | _ -> false
+            )
+    }
+]
+
 // -----------------------------------------------------------------------
 // Fixture: members.d.ts
 //   WithProperties:  name: string; age?: number; readonly active: boolean
@@ -1881,6 +1980,268 @@ let literalTokenNodeTest =
             |> Expect.isTrue varType.IsLiteral
     ]
 
+// Fixture: nested-generics.d.ts
+let nestedGenericsTests = testList "nested-generics.d.ts" [
+    let result = createTestReader "nested-generics" |> runReader
+    testList "Map<K, V> exists" [
+        let mapInterface = result |> findInterface "Map"
+        testCase "Two type parameters" <| fun _ ->
+            "Map should have two type parameters"
+            |> Expect.hasLength mapInterface.TypeParameters 2
+        testCase "Neither type parameter has defaults or constraints" <| fun _ ->
+            let typeParameters = mapInterface.TypeParameters
+            typeParameters
+            |> List.iter (fun (_, tp) ->
+                "No default" |> Expect.isNone tp.Default
+                "No constraint" |> Expect.isNone tp.Constraint
+            )
+        testCase "Has a getter and a setter method" <| fun _ ->
+            "Has two members" |> Expect.hasLength mapInterface.Members 2
+            #nowarn 25
+            let [ getter; setter ] = mapInterface.Members
+            "Member one is a method getter"
+            |> Expect.isTrue getter.IsMethod
+            let getter = getter.IfIsMethod.Value.ValueOrHead
+            "Member two is a method setter"
+            |> Expect.isTrue setter.IsMethod
+            let setter = setter.IfIsMethod.Value.ValueOrHead
+            "The getter method has a single parameter"
+            |> Expect.hasLength getter.Parameters 1
+            let paramGetter = getter.Parameters.Head
+            let paramGetterType = result |> findType paramGetter.Type
+            "Parameter has type of type parameter"
+            |> Expect.isTrue paramGetterType.IsTypeParameter
+            let getterType = result |> findType getter.Type
+            "Return type of getter method is a type parameter"
+            |> Expect.isTrue getterType.IsTypeParameter
+            let getterType = match getterType with TsType.TypeParameter tp -> tp
+            let paramGetterType = match paramGetterType with TsType.TypeParameter tp -> tp
+            [
+                Expect.isNone paramGetterType.Constraint
+                Expect.isNone paramGetterType.Default
+                Expect.isNone getterType.Constraint
+                Expect.isNone getterType.Default
+            ]
+            |> List.iter (funApply "Return type and parameter type have no constraints or defaults")
+            #warnon 25
+    ]
+    testList "StringMap = Map<string, string> exists" [
+        let stringMap = result |> findAlias "StringMap"
+        let innerTypeRef =
+            lazy
+            match result |> findType stringMap.Type with
+            | TsType.TypeReference ref -> ref
+            | _ -> failwith "Expected TypeReference"
+        testCase "Is type ref" <| fun _ ->
+            let typ = result |> findType stringMap.Type
+            Expect.isTrue typ.IsTypeReference ""
+        testCase "Type ref has resolved type" <| fun _ ->
+            Expect.isSome innerTypeRef.Value.ResolvedType ""
+        testCase "Has two type arguments to unresolved type" <| fun _ ->
+            Expect.hasLength innerTypeRef.Value.TypeArguments 2 ""
+        testCase "Type arguments are string and string" <| fun _ ->
+            #nowarn 25
+            let [ t1; t2 ] = innerTypeRef.Value.TypeArguments
+            #warnon 25
+            let t1 = result |> findType t1
+            let t2 = result |> findType t2
+            "First arg is string"
+            |> Expect.isTrue (match t1 with TsType.Primitive TypeKindPrimitive.String -> true | _ -> false)
+            "Second arg is string"
+            |> Expect.isTrue (match t2 with TsType.Primitive TypeKindPrimitive.String -> true | _ -> false)
+    ]
+]
+
+// Fixture: type-args.d.ts
+let typeArgsTests = testList "type-args.d.ts" [
+    let result = createTestReader "type-args" |> runReader
+    testList "Container<T = number> exists" [
+        let container = result |> findInterface "Container"
+        testCase "Has a type parameter" <| fun _ ->
+            "Has one type parameter" |> Expect.hasLength container.TypeParameters 1
+        testCase "Type parameter has a default" <| fun _ ->
+            Expect.isSome (snd container.TypeParameters.Head).Default ""
+        testCase "Type parameter has no constraint" <| fun _ ->
+            Expect.isNone (snd container.TypeParameters.Head).Constraint ""
+        testCase "Default is `number`" <| fun _ ->
+            findType (snd container.TypeParameters.Head).Default.Value result
+            |> function
+                | TsType.Primitive TypeKindPrimitive.Number -> true
+                | _ -> false
+            |> Expect.isTrue
+            |> funApply ""
+        testList "StringContainer = Container<string> exists" [
+            let ref =
+                lazy
+                match result |> findAlias "StringContainer" |> _.Type |> findType |> funApply result with
+                | TsType.TypeReference ref -> ref
+                | _ -> failwith "Expected TypeReference"
+            test "Is type ref alias" {
+                let alias = result |> findAlias "StringContainer"
+                findType alias.Type result
+                |> _.IsTypeReference
+                |> Expect.isTrue
+                |> funApply ""
+            }
+            test "Reference has resolved type" {
+                Expect.isSome ref.Value.ResolvedType ""
+            }
+            test "Reference has one type argument" {
+                Expect.hasLength ref.Value.TypeArguments 1 ""
+            }
+            test "Type argument is string" {
+                ""
+                |> Expect.isTrue (
+                    match findType ref.Value.TypeArguments.Head result with
+                    TsType.Primitive TypeKindPrimitive.String -> true | _ -> false)
+            }
+            // Resolved type is a type reference mirroring the initial structure.
+            ptest "Resolved type is type literal with string item prop" {
+                ref.Value.ResolvedType.Value
+                |> findType
+                |> funApply result
+                |> function
+                    | TsType.TypeLiteral lit ->
+                        lit.Members
+                        |> Expect.hasLength
+                        |> funApply 1
+                        |> funApply "Type literal has one member"
+                        lit.Members
+                        |> List.head
+                        |> function
+                            | TsMember.Property prop ->
+                                Expect.isTrue (prop.Name = "item") ""
+                                findType prop.Type result
+                                |> function
+                                    | TsType.Primitive TypeKindPrimitive.String -> true
+                                    | _ -> false
+                                |> Expect.isTrue
+                                |> funApply ""
+                            | _ -> failwith "Expected Property"
+                    | value -> failwith $"Expected TypeLiteral, got {value}"
+            }
+        ]
+        testList "NumberContainer = Container exists" [
+            let ref =
+                lazy
+                match result |> findAlias "NumberContainer" |> _.Type |> findType |> funApply result with
+                | TsType.TypeReference ref -> ref
+                | _ -> failwith "Expected TypeReference"
+            test "Is type ref alias" {
+                let alias = result |> findAlias "NumberContainer"
+                findType alias.Type result
+                |> _.IsTypeReference
+                |> Expect.isTrue
+                |> funApply ""
+            }
+            test "Reference has no resolved type" {
+                ref.Value.ResolvedType
+                |> Expect.isNone
+                |> funApply ""
+            }
+            test "Reference has one `number` type argument" {
+                ref.Value.TypeArguments
+                |> Expect.hasLength
+                |> funApply 1
+                |> funApply "Has one type argument"
+                ref.Value.TypeArguments.Head
+                |> findType
+                |> funApply result
+                |> function
+                    | TsType.Primitive TypeKindPrimitive.Number -> true
+                    | _ -> false
+                |> Expect.isTrue
+                |> funApply "Type argument is number"
+            }
+        ]
+    ]
+    testList "DefaultTypeParams<T, U = number, Y = string> exists" [
+        let defaultTypeParams = result |> findInterface "DefaultTypeParams"
+        test "Has three type parameters" {
+            "Has three type parameters" |> Expect.hasLength defaultTypeParams.TypeParameters 3
+            #nowarn 25
+            let [ t1; t2; t3 ] =
+                defaultTypeParams.TypeParameters |> List.map snd
+            #warnon 25
+            "T has no default" |> Expect.isNone t1.Default
+            "T has no constraint" |> Expect.isNone t1.Constraint
+            "U has default" |> Expect.isSome t2.Default
+            "U has no constraint" |> Expect.isNone t2.Constraint
+            "Y has default" |> Expect.isSome t3.Default
+            "Y has no constraint" |> Expect.isNone t3.Constraint
+            t2.Default.Value
+            |> findType
+            |> funApply result
+            |> function
+                | TsType.Primitive TypeKindPrimitive.Number -> true
+                | _ -> false
+            |> Expect.isTrue
+            |> funApply "U default is number"
+            t3.Default.Value
+            |> findType
+            |> funApply result
+            |> function
+                | TsType.Primitive TypeKindPrimitive.String -> true
+                | _ -> false
+            |> Expect.isTrue
+            |> funApply "U default is number"
+        }
+        testList "DefaultTypeParamsSingleArg = DefaultTypeParams<string> exists" [
+            let ref =
+                lazy
+                match findAlias "DefaultTypeParamsSingleArg" result |> _.Type |> findType |> funApply result with
+                | TsType.TypeReference ref -> ref
+                | _ -> failwith "Expected TypeReference"
+            test "Is type ref alias" {
+                let alias = result |> findAlias "DefaultTypeParamsSingleArg"
+                findType alias.Type result
+                |> _.IsTypeReference
+                |> Expect.isTrue
+                |> funApply ""
+            }
+            test "Reference has resolved type" {
+                Expect.isSome ref.Value.ResolvedType ""
+            }
+            test "Reference has three type arguments" {
+                Expect.hasLength ref.Value.TypeArguments 3 ""
+            }
+            test "Type arguments are string, number, and string" {
+                #nowarn 25
+                let [ t1; t2; t3 ] = ref.Value.TypeArguments |> List.map (findType >> funApply result)
+                #warnon 25
+                ""
+                |> Expect.equal [t1;t2;t3] [
+                    TsType.Primitive TypeKindPrimitive.String
+                    TsType.Primitive TypeKindPrimitive.Number
+                    TsType.Primitive TypeKindPrimitive.String
+                ]
+            }
+            ptest "Resolved type is type literal" {
+                ref.Value.ResolvedType.Value
+                |> findType
+                |> funApply result
+                |> function
+                    | TsType.TypeLiteral _ -> true
+                    // | TsType.TypeReference { Type = t } as value ->
+                    //     let t = result |> findType t
+                    //     match t with
+                    //     | TsType.Interface { Members = members } ->
+                    //         members
+                    //         |> List.map (fun m ->
+                    //             m.IfIsProperty
+                    //             |> ValueOption.map (_.Type >> findType >> funApply result))
+                    //         |> fun a ->
+                    //             failwith $"Expected TypeLiteral, got {value} with type {t} and members {a}"
+                    //     | _ -> failwithf $"Expected TypeLiteral, got {value} with type {t}"
+                    | value -> failwith $"Expected TypeLiteral, got {value}"
+                |> Expect.isTrue
+                |> funApply ""
+            }
+        ]
+    ]
+]
+    
+
 // -----------------------------------------------------------------------
 // Suite
 // -----------------------------------------------------------------------
@@ -1891,6 +2252,7 @@ let tests =
         mergeTests
         heritageTests
         multipleExtendsTests
+        extendsWithTypeArgsTests
         memberTests
         overloadTests
         modifierTests
@@ -1930,6 +2292,8 @@ let tests =
         leafDirectSourceTests
         aliasTests
         literalTokenNodeTest
+        nestedGenericsTests
+        typeArgsTests
     ]
 
 Mocha.runTests tests |> ignore

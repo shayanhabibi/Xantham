@@ -151,6 +151,46 @@ module TypeRefRender =
     let nullable typeRefRender = setNullable true typeRefRender
     let nonNullable typeRefRender = setNullable false typeRefRender
 
+    let substituteForHeritage (inScopeTyparNames: Set<string>) (render: TypeRefRender) : TypeRefRender =
+        let rec walk (render: TypeRefRender) : TypeRefRender =
+            match render.Kind with
+            | TypeRefKind.Atom atom ->
+                let newAtom =
+                    match atom with
+                    | TypeRefAtom.Intrinsic "_" ->
+                        TypeRefAtom.Intrinsic "obj"
+                    | TypeRefAtom.Intrinsic s when s.StartsWith("'") ->
+                        if Set.contains s inScopeTyparNames then
+                            atom
+                        else
+                            printfn "Warning: orphan type parameter '%s' in heritage clause, substituting with 'obj'" s
+                            TypeRefAtom.Intrinsic "obj"
+                    | _ -> atom
+                { render with Kind = TypeRefKind.Atom newAtom }
+            | TypeRefKind.Molecule molecule ->
+                let newMolecule =
+                    match molecule with
+                    | TypeRefMolecule.Tuple typeRefs ->
+                        typeRefs
+                        |> List.map walk
+                        |> TypeRefMolecule.Tuple
+                    | TypeRefMolecule.Union typeRefs ->
+                        typeRefs
+                        |> List.map walk
+                        |> TypeRefMolecule.Union
+                    | TypeRefMolecule.Function(parameters, returnType) ->
+                        TypeRefMolecule.Function(
+                            parameters |> List.map walk,
+                            walk returnType
+                        )
+                    | TypeRefMolecule.Prefix(prefix, args) ->
+                        TypeRefMolecule.Prefix(
+                            walk prefix,
+                            args |> List.map walk
+                        )
+                { render with Kind = TypeRefKind.Molecule newMolecule }
+        walk render
+
 
 type TypeName = Name<Case.pascal>
 type MemberName = Name<Case.camel>

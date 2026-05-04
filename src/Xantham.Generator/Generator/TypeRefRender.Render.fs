@@ -1,4 +1,4 @@
-﻿[<AutoOpen>]
+[<AutoOpen>]
 module Xantham.Generator.Generator.TypeRefRender
 
 open System.ComponentModel
@@ -17,7 +17,7 @@ module private Implementation =
     let renderAtom (atom: TypeRefAtom) =
         match atom with
         | TypeRefAtom.Intrinsic s ->
-            Ast.LongIdent s
+            Ast.LongIdent [ s ]
         | TypeRefAtom.Widget widgetBuilder ->
             widgetBuilder
         | TypeRefAtom.ConcretePath typePath ->
@@ -60,6 +60,7 @@ module private Implementation =
             let isNullable = prefix.Nullable
             let prefix = render { prefix with Nullable = false }
             let args = args |> List.map render
+            
             Ast.AppPrefix(prefix, args)
             |> if isNullable then Ast.OptionPrefix else id
 
@@ -94,6 +95,7 @@ module private Implementation =
                 let isNullable = prefix.Nullable
                 let prefix = render { prefix with Nullable = false }
                 let args = args |> List.map render
+                
                 Ast.AppPrefix(prefix, args)
                 |> if isNullable then Ast.OptionPrefix else id
             | Anchored.TypeRefMolecule.Tuple typeRefRenders ->

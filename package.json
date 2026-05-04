@@ -17,7 +17,7 @@
         "node": ">=16"
     },
     "scripts": {
-        "pretest": "dotnet fable -c Debug --cwd tests/Xantham.Fable.Tests -o dist/tests",
+        "pretest": "dotnet fable -c Debug -e .fs.js --cwd tests/Xantham.Fable.Tests -o dist/tests",
         "test": "mocha tests/Xantham.Fable.Tests/dist/tests",
         "watch-test": "dotnet fable --cwd tests/Xantham.Fable.Tests -e .fs.js --noCache --watch --runWatch mocha Program.fs.js",
         "prestart": "dotnet fable --cwd src/Xantham.Fable -o output -e .fs.js",

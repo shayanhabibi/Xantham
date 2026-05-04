@@ -135,14 +135,36 @@ let private resolveTypeBase (ctx: TypeScriptReader) (xanTag: XanthamTag) (typ: T
             pushToStack ctx tag
             tag.TypeSignal
 
-let private resolveTypeArgumentsFromType (ctx: TypeScriptReader) (_xanTag: XanthamTag) (typ: Ts.Type) =
+let private padTypeArguments (ctx: TypeScriptReader) (xanTag: XanthamTag) (target: Ts.GenericType) (supplied: Ts.Type[]) : TypeSignal[] =
+    // Ensure type arguments list is padded to match declared type parameters.
+    // For each declared param: use supplied arg if present, else try default, else use the param itself.
+    let targetParams =
+        target.typeParameters
+        |> Option.map _.AsArray
+        |> Option.defaultValue [||]
+
+    targetParams
+    |> Array.mapi (fun i param ->
+        supplied
+        |> Array.tryItem i
+        |> Option.defaultWith (fun () ->
+            ctx.checker.getDefaultFromTypeParameter(param)
+            |> Option.defaultValue param
+            )
+        |> ctx.CreateXanthamTag
+        |> fst
+        |> stackPushAndThen ctx _.TypeSignal
+        )
+
+let private resolveTypeArgumentsFromType (ctx: TypeScriptReader) (xanTag: XanthamTag) (typ: Ts.Type) =
     // Use checker.getTypeArguments on the semantic TypeReference so that default
     // type arguments and inferred positions are included, not just what is written.
     if typ.flags.HasFlag Ts.TypeFlags.Object then
         let objType = unbox<Ts.ObjectType> typ
         if objType.objectFlags.HasFlag Ts.ObjectFlags.Reference then
-            ctx.checker.getTypeArguments(unbox<Ts.TypeReference> typ).AsArray
-            |> Array.map (ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx _.TypeSignal)
+            let typeRef = unbox<Ts.TypeReference> typ
+            let supplied = ctx.checker.getTypeArguments(typeRef).AsArray
+            padTypeArguments ctx xanTag typeRef.target supplied
         else [||]
     else [||]
 
@@ -179,9 +201,11 @@ let fromNode (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.TypeReferenc
             // type arguments are already resolved and will be ephemereal.
             // We don't want to lose the information when we're not
             // not looking at the resolved type.
-            match resolveTypeArgumentsFromType ctx xanTag resolvedType with
-            | [||] -> resolveTypeArgumentsFromNode ctx xanTag node
-            | args -> args
+            let typeArguments = resolveTypeArgumentsFromType ctx xanTag resolvedType
+            let typeNodeArguments = resolveTypeArgumentsFromNode ctx xanTag node
+            if typeArguments.Length > typeNodeArguments.Length then
+                typeArguments
+            else typeNodeArguments
         ResolvedType =
             // Only emit a ResolvedType when the instantiated type is a distinct identity
             // from the tag itself (avoids self-referential noise).
@@ -215,12 +239,30 @@ let fromType (ctx: TypeScriptReader) (xanTag: XanthamTag) (typ: Ts.TypeReference
     {
         STypeReferenceBuilder.Type = resolveTypeBase ctx xanTag typ
         TypeArguments =
-            ctx.checker.getTypeArguments(typ).AsArray
-            |> Array.map (
-                ctx.CreateXanthamTag
-                >> fst
-                >> TagState.apply (fun _ -> XanthamTag.chainDebug xanTag >> ignore)
-                >> stackPushAndThen ctx _.TypeSignal
+            // see issue #44
+            let targetParams =
+                typ.target.typeParameters
+                |> Option.map _.AsArray
+                |> Option.defaultValue [||]
+            let suppliedParams =
+                if typ.aliasSymbol.IsSome then
+                    typ.aliasTypeArguments
+                    |> Option.map _.AsArray
+                    |> Option.defaultValue [||]
+                else
+                    ctx.checker.getTypeArguments(typ).AsArray
+            targetParams
+            |> Array.mapi (fun i arg ->
+                suppliedParams
+                |> Array.tryItem i
+                |> Option.defaultWith (fun () ->
+                    ctx.checker.getDefaultFromTypeParameter(arg)
+                    |> Option.defaultValue arg
+                    )
+                |> ctx.CreateXanthamTag
+                |> fst
+                |> TagState.apply (fun _ -> XanthamTag.chainDebug xanTag >> ignore)
+                |> stackPushAndThen ctx _.TypeSignal
                 )
         ResolvedType = ValueNone
     }
