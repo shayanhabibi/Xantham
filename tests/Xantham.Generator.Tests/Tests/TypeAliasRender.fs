@@ -48,6 +48,29 @@ let typeRefReplaceTests =
             let strRef = TestHelper.prerender ctx (primitive TypeKindPrimitive.String)
             TypeRefRender.replace strRef strRef strRef
             |> Flip.Expect.equal "" strRef
+
+        // Encountered with the agents and workers-types packages: when the
+        // substitution target (`new'`) contains the value being substituted
+        // (`old`) — e.g. old=A, new'=Union<A,B> — the previous code recursed
+        // into new' via `replace old new' new'`, which immediately re-entered
+        // the same case for new's inner A, looping forever. Fix: when
+        // render = old, return new' without further recursion. The substitute
+        // is the value to insert verbatim; sub-references inside it are not
+        // additional substitution opportunities.
+        testCase "replace returns new' verbatim when render = old and new' contains old" <| fun _ ->
+            let strRef = TestHelper.prerender ctx (primitive TypeKindPrimitive.String)
+            let unionContainingStr =
+                TestHelper.prerender ctx (
+                    Union.create [
+                        primitive TypeKindPrimitive.String
+                        primitive TypeKindPrimitive.Integer
+                    ])
+            // Pre-condition sanity: new' really does contain old structurally.
+            // (If this changes, the test is no longer covering the regression.)
+            Expect.notEqual unionContainingStr strRef
+                "new' must be different from old to exercise the second guard"
+            TypeRefRender.replace strRef unionContainingStr strRef
+            |> Flip.Expect.equal "" unionContainingStr
     ]
 
 // ---------------------------------------------------------------------------
