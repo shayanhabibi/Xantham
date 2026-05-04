@@ -1,0 +1,7 @@
+﻿{
+    "type": "module",
+    "name": "xantham",
+    "dependencies": {
+        "@cloudflare/dynamic-workflows": "*"
+    }
+}

@@ -28,3 +28,17 @@ jobs:
         run: dotnet restore Build.fsproj
       - name: Run FAKE
         run: dotnet run -- tests
+  encoder-decoder-regressions:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout source code
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+      - name: Restore Tools
+        run: dotnet tool restore 
+      - name: Restore Sln
+        run: dotnet restore
+      - name: Run regression tests
+        run: dotnet run --project tests/Xantham.Decoder.Tests/Xantham.Decoder.Tests.fsproj
+        
