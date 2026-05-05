@@ -30,16 +30,18 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
     let remap = function
             | { Nullable = nullable } when ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Raw) ->
-                // If this TypeKey's alias body is currently being rendered,
-                // returning the alias's ConcretePath ref would emit a
-                // recursive `type T = U2<A, T>` which F# rejects (FS0953).
-                // Substitute with `obj` to break the cycle. Glutinum's TS
-                // preprocessor does the equivalent (`any` for cyclic refs).
-                if ctx.RenderingAliasBodyKeys.Contains(lazyResolvedType.Raw) then
+                // If this lookup's target ref is currently being rendered
+                // as an alias body, returning it would emit a recursive
+                // `type T = U2<A, T>` which F# rejects (FS0953). Substitute
+                // with `obj` to break the cycle. Tracking by target ref
+                // (rather than body TypeKey) catches cycles routed through
+                // intermediate wrappers (Optional, etc.) that lose the
+                // original Raw via `LazyContainer.CreateFromValue`.
+                let target = ctx.TypeAliasRemap[lazyResolvedType.Raw]
+                if ctx.RenderingAliasTargetRefs.Contains(target) then
                     objRefRender |> TypeRefRender.orNullable nullable
                 else
-                    ctx.TypeAliasRemap[lazyResolvedType.Raw]
-                    |> TypeRefRender.orNullable nullable
+                    target |> TypeRefRender.orNullable nullable
             | ref -> ref
     let inline addOrReplaceScope ctx resolvedType renderScope =
         let renderScope = ctx.Customisation.Interceptors.ResolvedTypePrelude ctx resolvedType renderScope

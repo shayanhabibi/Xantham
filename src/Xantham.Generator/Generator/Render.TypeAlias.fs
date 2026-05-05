@@ -249,15 +249,31 @@ module TypeAlias =
                     Documentation = documentation
                 }
                 |> TypeAliasRender.TypeDefn
-        // Mark this alias's body TypeKey as in-flight so any self-reference
-        // encountered during prerender below resolves to `obj` instead of
-        // re-emitting the alias's own ConcretePath ref. F# rejects
-        // recursive type aliases (FS0953); the only safe rendering is to
-        // break the cycle. Matches Glutinum's TS-preprocessing behaviour
-        // (cyclic refs replaced with `any`/`obj`).
-        let bodyKey = innerType.Raw
-        let added = ctx.RenderingAliasBodyKeys.Add(bodyKey)
+        // Mark this alias's TypeAliasRemap target ref as in-flight so any
+        // self-reference encountered during prerender below resolves to
+        // `obj` instead of re-emitting the alias's own ConcretePath ref.
+        // F# rejects recursive type aliases (FS0953); the only safe
+        // rendering is to break the cycle. Matches Glutinum's TS-
+        // preprocessing behaviour (cyclic refs replaced with `any`/`obj`).
+        //
+        // We track by *target ref* rather than body TypeKey because the
+        // encoder produces multiple TypeKeys per conceptual alias (decl
+        // and body), and intermediate wrappers like
+        // `ResolvedType.Optional`'s `LazyContainer.CreateFromValue` lose
+        // the original Raw. The remap value (the alias's ConcretePath
+        // ref) is the stable identity all references converge on.
+        let aliasTarget =
+            match ctx.TypeAliasRemap.TryGetValue(innerType.Raw) with
+            | true, target -> ValueSome target
+            | _ -> ValueNone
+        let added =
+            match aliasTarget with
+            | ValueSome target -> ctx.RenderingAliasTargetRefs.Add(target)
+            | ValueNone -> false
         try
             matchImpl innerType.Value
         finally
-            if added then ctx.RenderingAliasBodyKeys.Remove(bodyKey) |> ignore
+            if added then
+                match aliasTarget with
+                | ValueSome target -> ctx.RenderingAliasTargetRefs.Remove(target) |> ignore
+                | ValueNone -> ()

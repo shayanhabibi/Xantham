@@ -148,13 +148,13 @@ let typeAliasSelfReferenceTests =
             let typeAlias = TypeAlias.create body "Recursive"
             let scopeStore = RenderScopeStore.create()
             let _ = Render_TypeAlias.TypeAlias.render ctx scopeStore typeAlias
-            // After rendering, the in-flight key MUST have been removed so
-            // it doesn't poison subsequent rendering. This is the most
-            // observable invariant that doesn't depend on the internal
-            // structure of the rendered Union.
+            // After rendering, the in-flight target ref MUST have been
+            // removed so it doesn't poison subsequent rendering. This is
+            // the most observable invariant that doesn't depend on the
+            // internal structure of the rendered Union.
             Expect.isFalse
-                (ctx.RenderingAliasBodyKeys.Contains(bodyKey))
-                "RenderingAliasBodyKeys should release bodyKey after render returns"
+                (ctx.RenderingAliasTargetRefs.Contains(aliasPathRef))
+                "RenderingAliasTargetRefs should release the alias's target after render returns"
     ]
 
 [<Tests>]

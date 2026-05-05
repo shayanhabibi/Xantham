@@ -69,13 +69,15 @@ and GeneratorContext =
         // instance from the alias's registration site. TypeKey is the stable
         // identity that survives across reference sites.
         TypeAliasRemap: DictionaryImpl<TypeKey, TypeRefRender>
-        // TypeKeys whose alias body is currently being rendered. References
-        // to these from within their own bodies must not resolve via
-        // TypeAliasRemap to the alias's own ConcretePath ref — that would
-        // emit a recursive type alias (`type T = U2<A, T>`) which F# rejects
-        // with FS0953. Substitute with `obj` instead, matching how Glutinum
-        // breaks cycles in TS preprocessing.
-        RenderingAliasBodyKeys: HashSet<TypeKey>
+        // Keyed by the alias's TypeAliasRemap target ref (the ConcretePath
+        // ref the remap would substitute references to). Tracking by target
+        // ref instead of by body TypeKey is robust against the encoder
+        // producing multiple TypeKeys for the same conceptual alias and
+        // against intermediate wrappers (e.g. ResolvedType.Optional uses
+        // LazyContainer.CreateFromValue which loses the original Raw).
+        // A reference whose remap target matches an in-flight alias's
+        // target is a recursive ref and gets substituted with `obj`.
+        RenderingAliasTargetRefs: HashSet<TypeRefRender>
         PreludeGetTypeRef: PreludeGetTypeRefFunc
         PreludeRenders: PreludeScopeStore
         AnchorRenders: AnchorScopeStore
@@ -90,7 +92,7 @@ and GeneratorContext =
         PreludeGetTypeRef = preludeGetTypeRefFunc
         InFlight = HashSet()
         TypeAliasRemap = DictionaryImpl()
-        RenderingAliasBodyKeys = HashSet()
+        RenderingAliasTargetRefs = HashSet()
         Customisation = defaultArg customisation Customisation.Default
     }
     
