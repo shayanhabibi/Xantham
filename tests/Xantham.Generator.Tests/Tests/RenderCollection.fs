@@ -3,9 +3,12 @@ module Xantham.Generator.Tests.Tests.RenderCollection
 open System.Collections.Generic
 open Expecto
 open Fabulous.AST
+open Xantham
+open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
 open Xantham.Generator.Generator
 open Xantham.Generator.Types
+open Mocking.ArenaInterner.ResolvedType
 
 // renderRoot used to call renderModuleInterface unconditionally on every
 // top-level module, while renderModule guards the same call with
@@ -70,4 +73,43 @@ let tests =
             Expect.isFalse
                 (bareTypeDefnRegex.IsMatch output)
                 (sprintf "expected no bare `type X =` facades; got:\n%s" output)
+
+        // After Bug A fix: when a child module has package-level Members, the
+        // generated facade type (`I<ModuleName>`) is emitted INSIDE that
+        // child module's own block rather than at the parent level. Aligning
+        // emission location with the canonical anchor lets sibling type
+        // references inside the facade resolve by short name.
+        //
+        // Concretely, for a function at FQN [Cloudflare; DynamicWorkflows; doThing]:
+        //   Pre-fix output (BUG):
+        //     module Cloudflare =
+        //         type IDynamicWorkflows =     <- column 4: inside Cloudflare, NOT inside DynamicWorkflows
+        //         module DynamicWorkflows =
+        //             type ...
+        //   Post-fix output:
+        //     module Cloudflare =
+        //         module DynamicWorkflows =
+        //             type IDynamicWorkflows = <- column 8: inside DynamicWorkflows
+        //             type ...
+        testCase "module with non-empty Members emits its facade inside its own block" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let func =
+                Function.create "doThing" (primitive TypeKindPrimitive.String)
+                |> Function.withPath [ "Cloudflare"; "DynamicWorkflows" ]
+            registerAnchorFromExport ctx (ResolvedExport.Function [ func ])
+            let root = RootModule.collectModules ctx
+            let output = renderRootToString ctx root
+            // The facade's indentation pinpoints which module hosts it.
+            // Pre-fix it sits at column 4 (Cloudflare's block); post-fix
+            // it sits at column 8 (DynamicWorkflows' block).
+            let facadeLine =
+                output.Split('\n')
+                |> Array.tryFind (fun line -> line.Contains "type IDynamicWorkflows")
+            match facadeLine with
+            | None ->
+                failtestf "expected the IDynamicWorkflows facade to be present; got:\n%s" output
+            | Some line ->
+                let leadingSpaces = line.Length - line.TrimStart(' ').Length
+                Expect.isGreaterThan leadingSpaces 4
+                    (sprintf "expected facade to be nested inside `module DynamicWorkflows = ` (indent > 4); got line %A in:\n%s" line output)
     ]

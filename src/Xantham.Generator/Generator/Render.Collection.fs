@@ -353,9 +353,13 @@ let rec renderModule (ctx: GeneratorContext) (root: Module) =
             | EnumUnion literalUnionRender ->
                 LiteralUnionRender.renderEnum ctx literalUnionRender
             | _ -> ()
-        for module' in root.Modules.Values do
-            if module'.Members.Count > 0 then
-                renderModuleInterface ctx module'
+        // Emit THIS module's static-class facade (if any package-level
+        // Members exist) inside this module's own block. Doing so keeps the
+        // facade's emission location aligned with the canonical anchor that
+        // its members' TypeRefRenders were localised against — sibling type
+        // references then resolve by short name without forward-ref errors.
+        if root.Members.Count > 0 then
+            renderModuleInterface ctx root
         yield! nextModules
     }
 
@@ -385,8 +389,10 @@ let renderRoot (ctx: GeneratorContext) (root: RootModule) =
             | EnumUnion literalUnionRender ->
                 LiteralUnionRender.renderEnum ctx literalUnionRender
             | _ -> ()
-        for module' in root.Modules.Values do
-            if module'.Members.Count > 0 then
-                renderModuleInterface ctx module'
+        // Each child module is responsible for emitting its own facade
+        // inside itself; root no longer emits child facades at the root
+        // level. (Root-level Members of the anonymous module are not
+        // currently emitted; package-level functions live inside named
+        // submodules.)
         yield! nextModules
     }

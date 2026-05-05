@@ -33,16 +33,24 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         Registered (remap renderScope.TypeRef)
     let valueIsCreated = lazyResolvedType.IsValueCreated
     let cachedRenderValue = GeneratorContext.Prelude.tryGet ctx lazyResolvedType.Value
-    // a significant portion of the branching logic will not initially register the
-    // type ref before proceeding.
-    if valueIsCreated && cachedRenderValue.IsSome then
+    // Cache hit takes precedence regardless of `valueIsCreated`. The local
+    // `lazyResolvedType.IsValueCreated` reflects the state of *this* Lazy
+    // wrapper, but the cache is keyed by the underlying ResolvedType — so a
+    // separate Lazy wrapper around the same value (e.g. Function.Parameters[0].Type
+    // vs CallSignature.Parameters[0].Type both pointing at the same TypeLiteral)
+    // must reuse the cached render. Previously the conjunction `valueIsCreated
+    // && cachedRenderValue.IsSome` bypassed the cache for any unforced lazy,
+    // which let the second call site overwrite the first with a path derived
+    // from a different scope.PathContext. The InFlight stack-overflow check
+    // below still depends on `valueIsCreated`; cache lookup does not.
+    if cachedRenderValue.IsSome then
         let resolvedType = lazyResolvedType.Value
         match cachedRenderValue.Value with
         | { Root = ValueSome (TypeLikePath.Transient path); TypeRef = ref } ->
             scope
             |> RenderScopeStore.tryAdd resolvedType path
             remap ref
-            
+
         | { TypeRef = ref } ->
             remap ref
     // a first visit to a type will either see the 'resolved type' as having been
@@ -396,17 +404,36 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
         | _, _ ->
-            let path = TransientTypePath.Anchored
-            let ref = RenderScopeStore.TypeRefRender.create scope resolvedType false path
-            let scope = RenderScopeStore.create()
+            // The Root must reflect scope.PathContext so that two different
+            // TypeLiterals processed under different scopes (e.g. a function's
+            // call-signature literal vs an inline parameter-type literal of
+            // the same function) produce distinct Roots.
+            //
+            // Previously the Root was hardcoded to TransientTypePath.Anchored,
+            // which made every multi-member literal collide on the same final
+            // TypePath after anchoring. collectModules then merged them via
+            // combine, producing synthetic conflated types like a function
+            // gaining `ctx`, `env` members from one of its parameter shapes.
+            //
+            // Grafting the scope's PathContext onto the transient yields a
+            // Root that carries the scope's nesting (e.g. "context" for an
+            // inline parameter type), keeping each literal at its own path.
+            // Note: TypeRefRender.create grafts internally for TransientTypePath
+            // arguments, so we pass bare Anchored (it will graft to the same
+            // result) and compute rootPath separately for the Root field.
+            let rootPath =
+                TransientPath.toTransientModulePath scope.PathContext
+                |> TransientTypePath.graft
+            let ref = RenderScopeStore.TypeRefRender.create scope resolvedType false TransientTypePath.Anchored
+            let childScope = RenderScopeStore.create()
             {
                 RenderScope.Type = resolvedType
-                Root = path |> TypeLikePath.create |> ValueSome
+                Root = rootPath |> TypeLikePath.create |> ValueSome
                 TypeRef = ref
                 Render =
-                    lazy TypeLiteral.render ctx scope typeLiteral
+                    lazy TypeLiteral.render ctx childScope typeLiteral
                     |> Render.create ref
-                TransientChildren = ValueSome scope
+                TransientChildren = ValueSome childScope
             }
             |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TemplateLiteral templateLiteral ->
