@@ -61,11 +61,32 @@ module LibEsDefaults =
         |> RenderScopeStore.TypeRef.Unsafe.createAtom
         |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
 
-    /// Default `ResolvedTypePrelude` interceptor. For lib.es types with a
-    /// known F# substitution, swaps the renderScope's TypeRef with the
-    /// intrinsic ref so all reference sites resolve through the cache. For
-    /// other lib.es types, falls back to RefOnly (don't render the body —
-    /// it's a TS lib type, not part of the consumer's binding surface).
+    /// Treat a type as eligible for the lib.es substitution table if
+    /// it's flagged IsLibEs OR its Source is the TypeScript compiler
+    /// (`typescript`). The encoder's `LibEsExports` set doesn't always
+    /// include every type from the TS standard libs (e.g. `Disposable`
+    /// from lib.es2022.disposable has Source="typescript" but isn't in
+    /// the LibEs set). The substitution itself only fires for types
+    /// in the table; un-mapped types fall through to normal emission
+    /// (so consumer-augmented types like the workers-types Request/Response
+    /// that the consumer redefines are still rendered with their body).
+    let private isSubstitutionEligible (isLibEs: bool) (source: ArenaInterner.QualifiedNamePart option) =
+        isLibEs
+        ||
+        match source with
+        | Some (ArenaInterner.QualifiedNamePart.Normal s)
+        | Some (ArenaInterner.QualifiedNamePart.Abnormal (s, _)) ->
+            s.Equals("typescript", System.StringComparison.OrdinalIgnoreCase)
+        | None -> false
+
+    /// Default `ResolvedTypePrelude` interceptor. For lib-sourced types
+    /// with a known F# substitution, swaps the renderScope's TypeRef with
+    /// the intrinsic ref so all reference sites resolve through the cache.
+    /// For other lib-sourced types flagged IsLibEs, falls back to RefOnly
+    /// (don't render the body). Lib-sourced types that aren't IsLibEs and
+    /// aren't in the substitution table render normally — this is the
+    /// declaration-merging escape: types like `Request`/`Response` that
+    /// the consumer's package redefines/augments still get emitted.
     let resolvedTypePreludeInterceptor _ resolvedType =
         let trySubstitute (name: Name<_>) =
             let key = Name.Case.valueOrSource name
@@ -76,18 +97,22 @@ module LibEsDefaults =
             else
                 ValueNone
         match resolvedType with
-        | ResolvedType.Interface { IsLibEs = true; Name = name } ->
+        | ResolvedType.Interface { IsLibEs = isLibEs; Source = source; Name = name }
+          when isSubstitutionEligible isLibEs source ->
             match trySubstitute name with
             | ValueSome f -> f
-            | ValueNone ->
+            | ValueNone when isLibEs ->
                 fun renderScope ->
                     { renderScope with Render = Render.RefOnly renderScope.TypeRef }
-        | ResolvedType.Class { IsLibEs = true; Name = name } ->
+            | ValueNone -> id
+        | ResolvedType.Class { IsLibEs = isLibEs; Source = source; Name = name }
+          when isSubstitutionEligible isLibEs source ->
             match trySubstitute name with
             | ValueSome f -> f
-            | ValueNone ->
+            | ValueNone when isLibEs ->
                 fun renderScope ->
                     { renderScope with Render = Render.RefOnly renderScope.TypeRef }
+            | ValueNone -> id
         | ResolvedType.Enum { IsLibEs = true } ->
             fun renderScope ->
                 { renderScope with Render = Render.RefOnly renderScope.TypeRef }
