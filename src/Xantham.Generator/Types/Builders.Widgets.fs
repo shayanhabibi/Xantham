@@ -64,6 +64,7 @@ module WidgetTypes =
         let float = "float"
         let bigint = "bigint"
         let obj = "obj"
+        let exn = "exn"
         let char = "char"
         let objNull = "objnull"
         let array = "Array"
