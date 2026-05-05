@@ -250,30 +250,55 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
-    | ResolvedType.TypeReference { ResolvedType = Some innerResolvedType } 
+    | ResolvedType.TypeReference { ResolvedType = Some innerResolvedType }
     | ResolvedType.TypeReference { Type = innerResolvedType; TypeArguments = [] } ->
         innerResolvedType
         |> prerender ctx scope
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeReference { TypeArguments = typeArguments; Type = innerResolvedType } ->
-        let prefix =
-            innerResolvedType
-            |> prerender ctx scope
-        let postfixArguments =
-            typeArguments
-            |> List.map (prerender ctx scope)
-        // Assert encoder invariant: args count must match declared type parameters
         let innerResolvedTypeValue = innerResolvedType.Value
         let declaredParamCount =
             match innerResolvedTypeValue with
             | ResolvedType.Interface i -> i.TypeParameters.Length
             | ResolvedType.Class c -> c.TypeParameters.Length
             | _ -> typeArguments.Length
-        if postfixArguments.Length <> declaredParamCount then
-            raise (EncoderInvariantViolation (
-                $"TypeReference application has {postfixArguments.Length} arguments but {innerResolvedTypeValue} declares {declaredParamCount} type parameters"
-            ))
+        // Encoder/TS may produce a TypeReference whose argument count doesn't
+        // match the inner type's declared type parameter count — happens with
+        // declaration merging where the encoder can't disambiguate which
+        // declaration's arity to honour (e.g. lib.dom Body has 0 type params
+        // but a downstream class `extends Body<X>` was authored against a
+        // merged extension). Align the args to the declaration's arity so the
+        // emitted F# is well-formed: truncate excess args, pad missing args
+        // with `obj`. Both directions log a warning so the upstream encoder
+        // discrepancy stays visible.
+        let alignedArguments =
+            if typeArguments.Length = declaredParamCount then
+                typeArguments
+            elif typeArguments.Length > declaredParamCount then
+                printfn "Warning: TypeReference application has %d arguments but %A declares %d type parameters; truncating to declared arity"
+                    typeArguments.Length innerResolvedTypeValue declaredParamCount
+                typeArguments |> List.truncate declaredParamCount
+            else
+                printfn "Warning: TypeReference application has %d arguments but %A declares %d type parameters; padding with obj to declared arity"
+                    typeArguments.Length innerResolvedTypeValue declaredParamCount
+                let padCount = declaredParamCount - typeArguments.Length
+                let objArg =
+                    LazyContainer.CreateFromValue
+                        (ResolvedType.Primitive TypeKindPrimitive.NonPrimitive)
+                typeArguments @ List.replicate padCount objArg
+        if List.isEmpty alignedArguments then
+            innerResolvedType
+            |> prerender ctx scope
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
+        else
+        let prefix =
+            innerResolvedType
+            |> prerender ctx scope
+        let postfixArguments =
+            alignedArguments
+            |> List.map (prerender ctx scope)
         (prefix, postfixArguments)
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
