@@ -24,13 +24,91 @@ type DictionaryImpl<'Key, 'Value> =
 
 type PreludeScopeStore = DictionaryImpl< ResolvedType, RenderScope >
 type AnchorScopeStore = DictionaryImpl<Choice<ResolvedType, ResolvedExport>, Choice<Anchored.TypeRefRender, Anchored.RenderScope>>
+
+/// Default lib.es type substitutions applied to every Xantham consumer.
+/// TS standard-library types that have F# equivalents get rendered as
+/// references to those equivalents instead of as path-based references
+/// to undefined `Typescript.X` names.
+module LibEsDefaults =
+    /// Map from TS lib.es type name to F# intrinsic name. The F# name is
+    /// emitted via Ast.LongIdent so multi-segment names (e.g.
+    /// `System.Collections.Generic.IReadOnlyList`) work as-is.
+    let substitutions =
+        Map.ofList [
+            // `Error` → `exn` (F# alias for System.Exception). Supports
+            // `inherit exn()` for TS classes that extend Error.
+            "Error", Intrinsic.exn
+            // `Array<T>` → `ResizeArray<T>` (F# alias for List<T>; Fable
+            // maps to JS Array). Same intrinsic the generator uses for `T[]`.
+            "Array", Intrinsic.array
+            // `PromiseLike<T>` → `Promise<T>` (Fable.Core.JS.Promise satisfies
+            // PromiseLike's structural interface).
+            "PromiseLike", "Promise"
+            // `Disposable` → `System.IDisposable` (direct semantic equivalent).
+            "Disposable", "System.IDisposable"
+            // `Iterable<T>` → `seq<T>` (F# alias for IEnumerable<T>).
+            "Iterable", "seq"
+            // `IterableIterator<T>` and `ArrayIterator<T>` → IEnumerator<T>.
+            "IterableIterator", "System.Collections.Generic.IEnumerator"
+            "ArrayIterator", "System.Collections.Generic.IEnumerator"
+            "AsyncIterableIterator", "System.Collections.Generic.IAsyncEnumerator"
+            // `ReadonlyArray<T>` → `IReadOnlyList<T>` (read-only with index).
+            "ReadonlyArray", "System.Collections.Generic.IReadOnlyList"
+        ]
+
+    let private intrinsicRef (name: string) =
+        RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic name
+        |> RenderScopeStore.TypeRef.Unsafe.createAtom
+        |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+
+    /// Default `ResolvedTypePrelude` interceptor. For lib.es types with a
+    /// known F# substitution, swaps the renderScope's TypeRef with the
+    /// intrinsic ref so all reference sites resolve through the cache. For
+    /// other lib.es types, falls back to RefOnly (don't render the body —
+    /// it's a TS lib type, not part of the consumer's binding surface).
+    let resolvedTypePreludeInterceptor _ resolvedType =
+        let trySubstitute (name: Name<_>) =
+            let key = Name.Case.valueOrSource name
+            if substitutions.ContainsKey key then
+                let ref = intrinsicRef substitutions.[key]
+                ValueSome (fun renderScope ->
+                    { renderScope with TypeRef = ref; Render = Render.RefOnly ref })
+            else
+                ValueNone
+        match resolvedType with
+        | ResolvedType.Interface { IsLibEs = true; Name = name } ->
+            match trySubstitute name with
+            | ValueSome f -> f
+            | ValueNone ->
+                fun renderScope ->
+                    { renderScope with Render = Render.RefOnly renderScope.TypeRef }
+        | ResolvedType.Class { IsLibEs = true; Name = name } ->
+            match trySubstitute name with
+            | ValueSome f -> f
+            | ValueNone ->
+                fun renderScope ->
+                    { renderScope with Render = Render.RefOnly renderScope.TypeRef }
+        | ResolvedType.Enum { IsLibEs = true } ->
+            fun renderScope ->
+                { renderScope with Render = Render.RefOnly renderScope.TypeRef }
+        | _ -> id
+
 type PreludeGetTypeRefFunc = GeneratorContext -> RenderScopeStore -> LazyResolvedType -> TypeRefRender
 and InterceptorIgnorePathRender = {
     Source: ArenaInterner.QualifiedNamePart -> bool
     QualifiedName: QualifiedName -> bool
 } with
     static member Default = {
-        Source = fun _ -> false
+        // Ignore TS toolchain packages — `typescript` (compiler types) and
+        // `@babel/*` (parser internals). These are infrastructure, not
+        // consumer libraries; their declarations leak into encoder output
+        // when the consumer pulls them transitively but should never reach
+        // the F# binding.
+        Source = function
+            | QualifiedNamePart.Normal text
+            | QualifiedNamePart.Abnormal(text, _) ->
+                text.Contains("babel", System.StringComparison.OrdinalIgnoreCase)
+                || text.Contains("typescript", System.StringComparison.OrdinalIgnoreCase)
         QualifiedName = fun _ -> false
     }
 and InterceptorPaths = {
@@ -38,8 +116,15 @@ and InterceptorPaths = {
     MemberPaths: GeneratorContext -> Choice<Variable, Function> -> MemberPath -> MemberPath
 } with
     static member Default = {
-        TypePaths = fun _ _ -> id
-        MemberPaths = fun _ _ -> id
+        // Prune `Typescript` parent unconditionally. The `Typescript` module
+        // is an artifact of how the encoder represents TS lib.* types'
+        // source — it is never emitted as an F# module, so any `Typescript.X`
+        // reference is unresolvable. Pruning it everywhere makes references
+        // bare so the lib.es substitution interceptors can fire on them.
+        TypePaths = fun _ _ ->
+            TypePath.pruneParent (_.Name >> Name.Case.valueOrModified >> (=) "Typescript")
+        MemberPaths = fun _ _ ->
+            MemberPath.pruneParent (_.Name >> Name.Case.valueOrModified >> (=) "Typescript")
     }
 and Interceptors = {
     IgnorePathRender: InterceptorIgnorePathRender
@@ -50,7 +135,7 @@ and Interceptors = {
     static member Default = {
         IgnorePathRender = InterceptorIgnorePathRender.Default
         Paths = InterceptorPaths.Default
-        ResolvedTypePrelude = fun _ _ -> id
+        ResolvedTypePrelude = LibEsDefaults.resolvedTypePreludeInterceptor
         AnchoredRender = fun _ _ -> id
     }
 and Customisation = {
