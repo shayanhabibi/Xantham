@@ -91,11 +91,11 @@ let primitiveArrays =
     primitives
     |> List.map (fun (primitive, expectedTypeText) ->
         let label =
-            $"Primitive %A{primitive} Array = Array<%s{expectedTypeText}>"
+            $"Primitive %A{primitive} Array = ResizeArray<%s{expectedTypeText}>"
         testCase label <| fun _ ->
             ResolvedType.Primitive primitive
             |> Array.create
-            |> testRender $"Array<%s{expectedTypeText}>"
+            |> testRender $"ResizeArray<%s{expectedTypeText}>"
             ||> Flip.Expect.equal ""
         )
     |> testList "Primitive arrays"
@@ -473,7 +473,7 @@ let tests = testList "TypeRef" [
     testCase "Primitive Array" <| fun _ ->
         primitive TypeKindPrimitive.String
         |> Array.create
-        |> testRender "Array<string>"
+        |> testRender "ResizeArray<string>"
         ||> Flip.Expect.equal "" 
     testCase "Tuple array" <| fun _ ->
         [
@@ -485,7 +485,7 @@ let tests = testList "TypeRef" [
         |> Tuple.create
         |> Tuple.wrap
         |> Array.create
-        |> testRender "Array<string * int>"
+        |> testRender "ResizeArray<string * int>"
         ||> Flip.Expect.equal "" 
        
 ]

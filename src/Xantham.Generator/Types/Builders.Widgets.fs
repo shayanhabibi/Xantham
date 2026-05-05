@@ -67,7 +67,12 @@ module WidgetTypes =
         let exn = "exn"
         let char = "char"
         let objNull = "objnull"
-        let array = "Array"
+        // F# resolves bare `Array` to `System.Array` (non-generic, FS0033
+        // when applied with type args). `ResizeArray` is F#'s alias for
+        // `Collections.Generic.List<T>` and Fable maps it to JS Array —
+        // the right TS Array-compatible binding for both `T[]` syntax and
+        // lib.es `Array<T>` references.
+        let array = "ResizeArray"
         let option = "option"
         let proptypekey = "proptypekey"
         let keyof = "keyof"

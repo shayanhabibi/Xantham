@@ -18,14 +18,14 @@ let nestedArrayTests = testList "Nested Arrays" [
         primitive TypeKindPrimitive.String
         |> Array.create
         |> Array.create
-        |> testRender "Array<Array<string>>"
+        |> testRender "ResizeArray<ResizeArray<string>>"
         ||> Flip.Expect.equal ""
     testCase "Array of Array of Array" <| fun _ ->
         primitive TypeKindPrimitive.Integer
         |> Array.create
         |> Array.create
         |> Array.create
-        |> testRender "Array<Array<Array<int>>>"
+        |> testRender "ResizeArray<ResizeArray<ResizeArray<int>>>"
         ||> Flip.Expect.equal ""
     testCase "Array of union" <| fun _ ->
         [
@@ -34,7 +34,7 @@ let nestedArrayTests = testList "Nested Arrays" [
         ]
         |> Union.create
         |> Array.create
-        |> testRender "Array<U2<string, int>>"
+        |> testRender "ResizeArray<U2<string, int>>"
         ||> Flip.Expect.equal ""
     testCase "Array of nullable primitive" <| fun _ ->
         [
@@ -43,7 +43,7 @@ let nestedArrayTests = testList "Nested Arrays" [
         ]
         |> Union.create
         |> Array.create
-        |> testRender "Array<option<string>>"
+        |> testRender "ResizeArray<option<string>>"
         ||> Flip.Expect.equal ""
 ]
 
@@ -86,7 +86,7 @@ let extraTupleTests = testList "Extra Tuples" [
         ]
         |> Tuple.create
         |> Tuple.wrap
-        |> testRender "Array<string> * Array<int>"
+        |> testRender "ResizeArray<string> * ResizeArray<int>"
         ||> Flip.Expect.equal ""
     testCase "Tuple of unions" <| fun _ ->
         [
@@ -116,7 +116,7 @@ let extraTypeReferenceTests = testList "Extra TypeReferences" [
             |> Array.create
         ]
         |> TypeReference.wrap
-        |> testRender "obj<Array<string>>"
+        |> testRender "obj<ResizeArray<string>>"
         ||> Flip.Expect.equal ""
     testCase "TypeReference with tuple argument" <| fun _ ->
         primitive TypeKindPrimitive.NonPrimitive
@@ -141,7 +141,7 @@ let extraUnionTests = testList "Extra Unions" [
             primitive TypeKindPrimitive.Integer |> Array.create
         ]
         |> Union.create
-        |> testRender "U2<Array<string>, Array<int>>"
+        |> testRender "U2<ResizeArray<string>, ResizeArray<int>>"
         ||> Flip.Expect.equal ""
     testCase "Union of tuples" <| fun _ ->
         [
@@ -190,7 +190,7 @@ let extraCallSignatureTests = testList "Extra Call Signatures" [
         |> TypeLiteral.addMember
         |> funApply TypeLiteral.empty
         |> TypeLiteral.wrap
-        |> testRender "unit -> Array<string>"
+        |> testRender "unit -> ResizeArray<string>"
         ||> Flip.Expect.equal ""
     testCase "returns union" <| fun _ ->
         [
@@ -220,7 +220,7 @@ let extraCallSignatureTests = testList "Extra Call Signatures" [
         |> TypeLiteral.addMember
         |> funApply TypeLiteral.empty
         |> TypeLiteral.wrap
-        |> testRender "Array<string> -> Array<int>"
+        |> testRender "ResizeArray<string> -> ResizeArray<int>"
         ||> Flip.Expect.equal ""
 ]
 
