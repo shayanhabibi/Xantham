@@ -483,21 +483,36 @@ module ArenaInterner =
                 // a lib.dom interface (e.g. @cloudflare/workers-types
                 // redeclaring `Request`), the encoder emits two views per
                 // TypeKey — the export view at `typeExportMap[K]` carries
-                // the merged interface (TS-resolved Source="typescript"),
-                // and `typeMap[K]` carries the consumer's declaration
-                // alone. The merged export view is the right body to
-                // emit; we just need to flip its Source to the consumer's
-                // so it isn't swept up by source-based ignore filters
-                // (which would skip pure-TS-toolchain declarations).
+                // the merged interface (TS-resolved, often labeled
+                // Source="typescript"), and `typeMap[K]` carries the
+                // consumer's declaration alone. The merged export view
+                // is the right body to emit; the trick is keeping its
+                // body but freeing it from source-based ignore filters
+                // that would skip pure-TS-toolchain declarations.
+                //
+                // Augmentation signals (either is sufficient):
+                //   1. The two views have different Source values — the
+                //      type view names a consumer source; use it.
+                //   2. The two views have different member counts — the
+                //      consumer redeclared (whatever Source label the
+                //      encoder applied); strip Source so the filter sees
+                //      nothing to ignore.
                 let export = typeExportMap[typeKey]
+                let augmentedSource (eMembers: TsMember list) (tMembers: TsMember list)
+                                    (eSource: string option) (tSource: string option) =
+                    if eSource <> tSource && tSource.IsSome then tSource
+                    elif List.length eMembers <> List.length tMembers then None
+                    else eSource
                 let export =
                     match export, typeMap.TryGetValue(typeKey) with
-                    | TsExportDeclaration.Interface eIface, (true, TsType.Interface tIface)
-                      when eIface.Source <> tIface.Source && tIface.Source.IsSome ->
-                        TsExportDeclaration.Interface { eIface with Source = tIface.Source }
-                    | TsExportDeclaration.Class eCls, (true, TsType.Class tCls)
-                      when eCls.Source <> tCls.Source && tCls.Source.IsSome ->
-                        TsExportDeclaration.Class { eCls with Source = tCls.Source }
+                    | TsExportDeclaration.Interface eIface, (true, TsType.Interface tIface) ->
+                        let newSource = augmentedSource eIface.Members tIface.Members eIface.Source tIface.Source
+                        if newSource = eIface.Source then export
+                        else TsExportDeclaration.Interface { eIface with Source = newSource }
+                    | TsExportDeclaration.Class eCls, (true, TsType.Class tCls) ->
+                        let newSource = augmentedSource eCls.Members tCls.Members eCls.Source tCls.Source
+                        if newSource = eCls.Source then export
+                        else TsExportDeclaration.Class { eCls with Source = newSource }
                     | _ -> export
                 let resolvedValue = buildFromExport (isLibEs typeKey) export
                 resolvedExports[typeKey] <- resolvedValue
