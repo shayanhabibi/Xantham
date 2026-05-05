@@ -479,7 +479,27 @@ module ArenaInterner =
             match resolvedExports.TryGetValue(typeKey) with
             | true, value -> Ok value
             | _ when typeExportMap.ContainsKey(typeKey) ->
-                let resolvedValue = buildFromExport (isLibEs typeKey) typeExportMap[typeKey]
+                // TS declaration merging: when a consumer package augments
+                // a lib.dom interface (e.g. @cloudflare/workers-types
+                // redeclaring `Request`), the encoder emits two views per
+                // TypeKey — the export view at `typeExportMap[K]` carries
+                // the merged interface (TS-resolved Source="typescript"),
+                // and `typeMap[K]` carries the consumer's declaration
+                // alone. The merged export view is the right body to
+                // emit; we just need to flip its Source to the consumer's
+                // so it isn't swept up by source-based ignore filters
+                // (which would skip pure-TS-toolchain declarations).
+                let export = typeExportMap[typeKey]
+                let export =
+                    match export, typeMap.TryGetValue(typeKey) with
+                    | TsExportDeclaration.Interface eIface, (true, TsType.Interface tIface)
+                      when eIface.Source <> tIface.Source && tIface.Source.IsSome ->
+                        TsExportDeclaration.Interface { eIface with Source = tIface.Source }
+                    | TsExportDeclaration.Class eCls, (true, TsType.Class tCls)
+                      when eCls.Source <> tCls.Source && tCls.Source.IsSome ->
+                        TsExportDeclaration.Class { eCls with Source = tCls.Source }
+                    | _ -> export
+                let resolvedValue = buildFromExport (isLibEs typeKey) export
                 resolvedExports[typeKey] <- resolvedValue
                 resolvedValue
                 |> Ok
