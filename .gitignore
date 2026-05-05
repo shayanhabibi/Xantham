@@ -13,3 +13,5 @@ riderModule.iml
 *.fs.js
 /fable_modules/
 node_modules/
+tests/**/output.json
+tests/**/package-lock.json
