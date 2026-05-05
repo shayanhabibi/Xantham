@@ -153,7 +153,9 @@ let tests =
             let facadeIdx =
                 lineIndexOf (fun l -> l.Contains "type IDynamicWorkflows")
             let submoduleIdx =
-                lineIndexOf (fun l -> l.TrimStart(' ').StartsWith("module DoThing"))
+                lineIndexOf (fun l ->
+                    let t = l.TrimStart(' ')
+                    t.StartsWith("module DoThing") || t.StartsWith("module rec DoThing"))
             match submoduleIdx, facadeIdx with
             | Some sIdx, Some fIdx ->
                 Expect.isLessThan sIdx fIdx
@@ -162,4 +164,29 @@ let tests =
                 failtestf "expected a `module DoThing` synthetic submodule to be present; got:\n%s" output
             | _, None ->
                 failtestf "expected the IDynamicWorkflows facade to be present; got:\n%s" output
+
+        // Each generated nested module is emitted as `module rec X = ...`.
+        // F# is single-pass; without `rec`, types and the static-class facade
+        // inside a module can only reference siblings that come *before*
+        // them in source order. TypeScript declarations have no such
+        // ordering constraint (interface/type augmentation is free-form,
+        // types reference each other in any order), so the natural
+        // analogue is `module rec`. This test pins the `rec` keyword in
+        // the emitted `Ast.Module` blocks.
+        testCase "nested modules emitted with `module rec` to match TS forward-ref semantics" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let func =
+                Function.create "doThing" (primitive TypeKindPrimitive.String)
+                |> Function.withPath [ "Cloudflare"; "DynamicWorkflows" ]
+            registerAnchorFromExport ctx (ResolvedExport.Function [ func ])
+            let root = RootModule.collectModules ctx
+            let output = renderRootToString ctx root
+            // Both the outer `Cloudflare` module and the inner
+            // `DynamicWorkflows` module must carry the `rec` keyword.
+            Expect.isTrue
+                (output.Contains "module rec Cloudflare")
+                (sprintf "expected outer `module rec Cloudflare`; got:\n%s" output)
+            Expect.isTrue
+                (output.Contains "module rec DynamicWorkflows")
+                (sprintf "expected inner `module rec DynamicWorkflows`; got:\n%s" output)
     ]

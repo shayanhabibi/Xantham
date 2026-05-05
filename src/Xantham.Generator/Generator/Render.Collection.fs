@@ -325,15 +325,9 @@ let rec renderModule (ctx: GeneratorContext) (root: Module) =
     let nextModules =
         root.Modules.Values
         |> Seq.map (renderModule ctx)
+    // `rec` matches TS's free-form forward references; submodules-first
+    // keeps emission order stable for Fantomas.
     Ast.Module(root.Name) {
-        // Emit nested submodules first so that types and the static-class
-        // facade declared below can resolve references into them. F# is
-        // single-pass — a `type X = abstract foo: SubModule.Y -> ...` only
-        // compiles if `module SubModule` is in scope at the point of `X`.
-        // The synthetic submodules generated for inline transient types
-        // (e.g. parameter-shape literals, callable-type bodies) are leaf
-        // hosts that don't refer back into their parent module's types,
-        // so emitting them first is safe.
         yield! nextModules
         for KeyValue(_, render) in root.Types do
             match render with
@@ -362,12 +356,10 @@ let rec renderModule (ctx: GeneratorContext) (root: Module) =
             | EnumUnion literalUnionRender ->
                 LiteralUnionRender.renderEnum ctx literalUnionRender
             | _ -> ()
-        // The static-class facade (if any package-level Members exist) is
-        // emitted last so it can reference both submodules and types
-        // declared above.
         if root.Members.Count > 0 then
             renderModuleInterface ctx root
     }
+    |> _.toRecursive()
 
 let renderRoot (ctx: GeneratorContext) (root: RootModule) =
     let nextModules =

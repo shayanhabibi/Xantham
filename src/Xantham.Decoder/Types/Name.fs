@@ -105,15 +105,19 @@ module Name =
             | Custom of (string -> string)
             static member inline Default = Setting.Backticks
         let mutable private setting = Setting.Default
-        let mutable private normalize_ = NormalizeIdentifierBackticks
+        // Sanitize first (drop @, $) then fall through to Fantomas's
+        // backtick wrap. Sanitization is structural — applied unconditionally
+        // so the produced Name reflects a valid F# identifier without callers
+        // having to opt in via global mutable state.
+        let mutable private normalize_ = Identifier.sanitize >> NormalizeIdentifierBackticks
         let normalize text = normalize_ text
         let setNormalizeSetting (newSetting: Setting) =
             setting <- newSetting
             match newSetting with
             | Backticks ->
-                normalize_ <- NormalizeIdentifierBackticks
+                normalize_ <- Identifier.sanitize >> NormalizeIdentifierBackticks
             | SafeCustom stringFunc ->
-                normalize_ <- stringFunc >> NormalizeIdentifierBackticks
+                normalize_ <- stringFunc >> Identifier.sanitize >> NormalizeIdentifierBackticks
             | Custom stringFunc ->
                 normalize_ <- stringFunc
     /// Creates a Name from a string. Will automatically normalize the name with backticks if required..
@@ -182,7 +186,11 @@ module Name =
             s |> Seq.forall (fun c -> System.Char.IsUpper(c) || c = '_' || System.Char.IsDigit(c)) &&
             s |> Seq.exists System.Char.IsUpper
 
-        let pascalCaseRegex = Regex(@"(?:^|[-_])(.)", RegexOptions.Compiled)
+        // `.` and `/` are TS-source structural separators (e.g. nested
+        // module paths, npm package paths). Treating them as word boundaries
+        // lets pascal-casing fold them into a clean identifier instead of
+        // forcing backtick-quoting.
+        let pascalCaseRegex = Regex(@"(?:^|[-_./])(.)", RegexOptions.Compiled)
         let toPascalCase (s: string) =
             if isUpperSnakeCase s then s
             else
@@ -208,20 +216,26 @@ module Name =
         let normalizeString = Normalization.normalize
     /// Normalizes the name by adding backticks if needed
     let normalize (name: Name) = name |> map Normalization.normalize
+    // Sanitize before casing so dropped characters (e.g. `@`) don't block
+    // the regex from finding the leading-letter boundary. Otherwise an
+    // input like "@cloudflare" pascals to "@cloudflare" → sanitizes to
+    // "cloudflare" (lowercase) instead of the intended "Cloudflare".
     /// Removes backticks, applies casing, and then reapplies backticks if necessary.
     let private _pascalCase (fn: (string -> string) -> Name -> Name) name =
-        name |> fn (Internal.stripBackticks >> Internal.toPascalCase >> Internal.normalizeString)
+        name |> fn (Internal.stripBackticks >> Identifier.sanitize >> Internal.toPascalCase >> Internal.normalizeString)
     /// Removes backticks, applies casing, and then reapplies backticks if necessary.
     let private _capitalize (fn: (string -> string) -> Name -> Name) name =
         name |> fn (
             Internal.stripBackticks
-            >> fun s -> s.Substring(0, 1).ToUpperInvariant() + s.Substring(1)
+            >> Identifier.sanitize
+            >> fun s -> if s.Length > 0 then s.Substring(0, 1).ToUpperInvariant() + s.Substring(1) else s
             >> Internal.normalizeString
             )
     /// Removes backticks, applies casing, and then reapplies backticks if necessary.
     let private _camelCase (fn: (string -> string) -> Name -> Name) name =
         name |> fn (
             Internal.stripBackticks
+            >> Identifier.sanitize
             >> Internal.toCamelCase
             >> Internal.normalizeString
             )
