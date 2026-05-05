@@ -194,13 +194,28 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             let path =
                 if lazyResolvedType.Raw = LazyContainer<_, _>.DummyTypeKey then
                     Name.Pascal.create "Literals"
-                    |> TransientTypePath.AnchoredAndMoored 
+                    |> TransientTypePath.AnchoredAndMoored
                 else
                     TransientTypePath.Anchored
             let ref = RenderScopeStore.TypeRefRender.create scope resolvedType nullable path
+            // Resolve the path against scope.PathContext so the Root agrees
+            // with the TypeRef. Without this, Root stays as bare
+            // `TransientTypePath.Anchored` and the synthetic transient anchors
+            // at the parent type's TypePath — colliding with the parent's
+            // own emission (e.g. an inline `1 | 2 | 3` literal in a property
+            // position would emit at the parent's name and overwrite the
+            // parent's TypeDefn via Render.Collection.combine). The TypeRef
+            // goes through createTransientPath which already grafts onto
+            // PathContext; Root needs the same transformation.
+            let rootPath =
+                match path with
+                | TransientTypePath.Anchored ->
+                    TransientPath.toTransientModulePath scope.PathContext
+                    |> TransientTypePath.graft
+                | _ -> path
             {
                 Transient.RenderScope.Type = resolvedType
-                Root = TypeLikePath.create path |> ValueSome
+                Root = TypeLikePath.create rootPath |> ValueSome
                 TypeRef = ref
                 Render =
                     lazy Union.renderLiterals ctx scope literals
@@ -227,10 +242,15 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
     | ResolvedType.Intersection intersection ->
         let path = TransientTypePath.Anchored
         let ref = RenderScopeStore.TypeRefRender.create scope resolvedType false path
+        // Resolve Root against scope.PathContext — see the literals-union
+        // branch above for the rationale.
+        let rootPath =
+            TransientPath.toTransientModulePath scope.PathContext
+            |> TransientTypePath.graft
         let scope = RenderScopeStore.create()
         {
             Transient.RenderScope.Type = resolvedType
-            Root = TypeLikePath.create path |> ValueSome
+            Root = TypeLikePath.create rootPath |> ValueSome
             TypeRef = ref
             Render =
                 lazy Intersection.render ctx scope intersection

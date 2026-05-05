@@ -74,7 +74,7 @@ let tests =
                 (bareTypeDefnRegex.IsMatch output)
                 (sprintf "expected no bare `type X =` facades; got:\n%s" output)
 
-        // After Bug A fix: when a child module has package-level Members, the
+        // When a child module has package-level Members, the
         // generated facade type (`I<ModuleName>`) is emitted INSIDE that
         // child module's own block rather than at the parent level. Aligning
         // emission location with the canonical anchor lets sibling type
@@ -227,4 +227,64 @@ let tests =
             Expect.isFalse
                 (doubledModuleType.IsMatch output)
                 (sprintf "expected no `module Context = type Context` doubled-name pattern (anchor-double-counting regression); got:\n%s" output)
+
+        // A TypeAlias whose body is a TypeLiteral with an inline-literal
+        // property used to emit the synthetic enum at the parent's TypePath
+        // (with the parent's name), colliding with the parent's actual
+        // TypeDefn emission. First-registered won via
+        // Render.Collection.combine, so the wrong variant survived and the
+        // parent appeared to be the inline literal.
+        //
+        // Root cause: in prerender's Union literal-only branch and
+        // Intersection branch, the renderScope's `Root` was set to bare
+        // `TransientTypePath.Anchored` even though the TypeRef went through
+        // `createTransientPath` which grafts onto `scope.PathContext`. The
+        // two paths disagreed; anchoring used `Root`, references used the
+        // TypeRef.
+        //
+        // Fix: resolve `Root` against `scope.PathContext` the same way
+        // `createTransientPath` does, so the property-name-appended
+        // PathContext becomes the synthetic's anchor location.
+        testCase "inline-literal property does not collide with parent alias name" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            // type MyAlias = { score?: 1 | 2 | 3 }
+            let inlineUnion =
+                Union.create [
+                    Literal.createInt 1 |> Literal.wrap
+                    Literal.createInt 2 |> Literal.wrap
+                    Literal.createInt 3 |> Literal.wrap
+                ]
+            let body =
+                TypeLiteral.empty
+                |> TypeLiteral.addMember (
+                    Property.create "score" inlineUnion
+                    |> Property.optional
+                    |> Property.wrap)
+                |> TypeLiteral.wrap
+            let alias =
+                TypeAlias.create body "MyAlias"
+                |> TypeAlias.withPath [ QualifiedNamePart.Normal "Cloudflare"; QualifiedNamePart.Normal "TestPkg" ]
+            registerAnchorFromExport ctx (ResolvedExport.TypeAlias alias)
+            let root = RootModule.collectModules ctx
+            let output = renderRootToString ctx root
+            // Pre-fix the parent alias `type MyAlias` would be emitted as the
+            // numeric enum body (`| ``1`` = 1 | ``2`` = 2 | ``3`` = 3`)
+            // because the synthetic enum collided on the parent's name and
+            // won the combine. The actual TypeLiteral body's properties
+            // (the `score` abstract member) would be missing or moved.
+            let parentAsEnum =
+                System.Text.RegularExpressions.Regex(
+                    @"type\s+MyAlias\s*=\s*\n\s*\|\s*``1``",
+                    System.Text.RegularExpressions.RegexOptions.Compiled)
+            Expect.isFalse
+                (parentAsEnum.IsMatch output)
+                (sprintf "expected `type MyAlias` to render as a TypeLiteral with members (not as a numeric enum); got:\n%s" output)
+            // Post-fix the parent alias renders with the `score` abstract member.
+            let scoreMember =
+                System.Text.RegularExpressions.Regex(
+                    @"abstract\s+score\s*:",
+                    System.Text.RegularExpressions.RegexOptions.Compiled)
+            Expect.isTrue
+                (scoreMember.IsMatch output)
+                (sprintf "expected `abstract score:` member in MyAlias; got:\n%s" output)
     ]

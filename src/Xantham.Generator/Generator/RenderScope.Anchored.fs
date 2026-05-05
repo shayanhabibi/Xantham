@@ -464,7 +464,12 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
         |> Seq.iter (anchor ctx anchors anchorPath)
     | { Root = ValueSome (TypeLikePath.Transient path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren } ->
         let path = TransientTypePath.anchor anchorPath path
-        let render = Render.Transient.anchor ctx anchorPath renderTuple
+        // The transient's render uses its own anchored path so the type's
+        // emitted Name matches the synthesized location (e.g. inline literal
+        // at `<parent>.<PropertyPascal>` gets named after the property, not
+        // the parent — preventing the synthesized type from colliding with
+        // the parent's actual emission via Render.Collection.combine).
+        let render = Render.Transient.anchor ctx (AnchorPath.create path) renderTuple
         anchors
         |> Dictionary.tryAdd renderScope.Type (path, render)
         transientChildren.TypeStore.Keys
