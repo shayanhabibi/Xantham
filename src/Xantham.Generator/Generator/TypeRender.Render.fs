@@ -302,8 +302,13 @@ module TypedNameRender =
             Ast.AbstractMember(name, typeWidget, hasSetter = true)
         | false, false ->
             Ast.AbstractMember(name, typeWidget)
+        // EmitProperty (not CompiledName) is the right rename attribute for
+        // property abstracts. F# rejects [<CompiledName>] on combined
+        // `abstract X: T with get, set` (FS0755). EmitProperty is Fable's
+        // purpose-built attribute for property renaming and handles get+set
+        // together. Falls through to no-op when the name is unmodified.
         |> Attributes.renderAttributesForAbstractMember (attributes {
-            compiledName typedName.Name
+            emitProperty typedName.Name
         })
         |> if typedName.Traits.Contains(RenderTraits.Static) then _.toStatic() else id
         |> Documentation.renderForAbstractMember typedName
