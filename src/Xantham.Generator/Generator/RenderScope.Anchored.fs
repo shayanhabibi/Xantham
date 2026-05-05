@@ -486,7 +486,7 @@ and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: R
     let anchors = Dictionary<ResolvedType, TypePath * Render>()
     let anchorPath = Interceptors.pipeExport ctx export
     renderScopeStore.TypeStore
-    |> Seq.iter (fun (KeyValue(key, scopePath)) ->
+    |> Seq.iter (fun (KeyValue(key, _)) ->
         let renderScope =
             GeneratorContext.Prelude.tryGet ctx key
             |> ValueOption.orElseWith (fun () ->
@@ -496,18 +496,6 @@ and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: R
                 )
             |> ValueOption.defaultWith (fun () ->
                 failwith "Could not find render scope for key")
-        // For interned synthetic types referenced from multiple call sites,
-        // the cached renderScope.Root carries the FIRST call site's path.
-        // Each call site's scope.TypeStore stores its own per-call-site path
-        // (built from its own scope.PathContext). Use the per-call-site path
-        // when anchoring so each scope emits the synthetic in its own local
-        // hierarchy — preserving type-identity (shared body lazy) while
-        // making `<Parent>.X` references resolve naturally in each scope.
-        let renderScope =
-            match renderScope.Root with
-            | ValueSome (TypeLikePath.Transient _) ->
-                { renderScope with Root = ValueSome (TypeLikePath.Transient scopePath) }
-            | _ -> renderScope
         // Pass the export's anchor (e.g. the function's MemberPath) directly
         // rather than pre-anchoring the literal's transient. The Transient
         // arm of anchorPreludeAnchorScope already runs TransientTypePath.anchor

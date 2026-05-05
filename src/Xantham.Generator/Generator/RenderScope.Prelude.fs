@@ -62,46 +62,10 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
     if cachedRenderValue.IsSome then
         let resolvedType = lazyResolvedType.Value
         match cachedRenderValue.Value with
-        | { Root = ValueSome (TypeLikePath.Transient cachedPath); TypeRef = cachedRef } ->
-            // The encoder interns structurally-identical inline-literal types
-            // (e.g. `"r2" | "web-crawler" | string` appearing as `type` in
-            // multiple distinct interfaces) under one TypeKey. The cached
-            // renderScope's Root is bound to the FIRST call site's
-            // scope.PathContext. If we just hand back the cached ref,
-            // subsequent call sites would all reference the FIRST site's
-            // emission location — which is in a different module hierarchy
-            // and won't resolve via local-shortened paths.
-            //
-            // Recompute a per-call-site transient path from the current
-            // scope.PathContext + the cached type's name, store THAT in this
-            // scope's TypeStore, and return a TypeRef pointing at it. The
-            // anchor flow uses the stored path as the Root for this scope's
-            // emission, so each scope gets its own local emission and
-            // `<Parent>.X` references resolve naturally.
-            //
-            // The body Render is shared via the cached lazy; only the path
-            // and per-call-site TypeRef are fresh.
-            let typeName =
-                match cachedPath with
-                | TransientTypePath.AnchoredAndMoored name -> ValueSome name
-                | TransientTypePath.Moored(_, name) -> ValueSome name
-                | TransientTypePath.Anchored -> ValueNone
-            match typeName with
-            | ValueSome name ->
-                let localPath =
-                    TransientPath.toTransientModulePath scope.PathContext
-                    |> TransientTypePath.createOnTransientModuleWithName name
-                scope
-                |> RenderScopeStore.tryAdd resolvedType localPath
-                let localRef =
-                    RenderScopeStore.TypeRefAtom.Unsafe.createTransientPath localPath
-                    |> RenderScopeStore.TypeRef.Unsafe.createAtom
-                    |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind cachedRef.Nullable
-                remap localRef
-            | ValueNone ->
-                scope
-                |> RenderScopeStore.tryAdd resolvedType cachedPath
-                remap cachedRef
+        | { Root = ValueSome (TypeLikePath.Transient path); TypeRef = ref } ->
+            scope
+            |> RenderScopeStore.tryAdd resolvedType path
+            remap ref
 
         | { TypeRef = ref } ->
             remap ref
