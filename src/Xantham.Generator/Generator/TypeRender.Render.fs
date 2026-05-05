@@ -76,10 +76,15 @@ module Documentation =
                 makeClosingTag tag
             ]
     let private normalizeDocString (docString: string) =
+        // TS doc strings often carry `\r\n` line endings. Splitting on `\n`
+        // alone leaves a trailing `\r` on each line, and the F# XML-doc
+        // parser treats that `\r` as a line break — so any `<br/>` we then
+        // append ends up on a "new" logical line and gets parsed as code,
+        // not as XML content. Trim the `\r` per line before joining.
         (docString.Split("\n"), [])
         ||> Array.foldBack (fun line -> function
-            | [] -> [ line ]
-            | lines -> line + "<br/>" :: lines
+            | [] -> [ line.TrimEnd('\r') ]
+            | lines -> line.TrimEnd('\r') + "<br/>" :: lines
             )
     let render (documentation: TsComment list) =
         documentation
