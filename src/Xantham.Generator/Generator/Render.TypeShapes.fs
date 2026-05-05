@@ -21,6 +21,34 @@ module Interface =
                 | MemberRender.Property typedNameRender -> typedNameRender :: members, functions
                 | MemberRender.Method functionLikeRender -> members, functionLikeRender :: functions
                 ) ([], [])
+        let inheritanceRefs =
+            shape.Heritage.Extends
+            |> List.map (
+                ResolvedType.TypeReference
+                >> LazyContainer.CreateFromValue
+                >> ctx.PreludeGetTypeRef ctx scopeStore
+                )
+        // F# rejects `inherit Y` inside an `interface ... end` body when
+        // Y is a class. If any heritage target resolves to a class-shaped
+        // F# type, force class-shape rendering for this binding too via
+        // IsClass=true (which dispatches to renderAbstractClass and emits
+        // `inherit Y()`). Detection: source is a TS class (P4+P5), or the
+        // rendered TypeRef is a class-shaped intrinsic — `exn` (from
+        // driver-level lib.es Error → System.Exception substitution) or
+        // `obj` (cycle-break artifact).
+        let inheritsClass =
+            (shape.Heritage.Extends |> List.exists (fun tr ->
+                match tr.Type.Value with
+                | ResolvedType.Class _ -> true
+                | _ -> false))
+            ||
+            (inheritanceRefs |> List.exists (fun r ->
+                match r.Kind with
+                | TypeRefKind.Atom atom ->
+                    match atom with
+                    | TypeRefAtom.Intrinsic ("exn" | "obj") -> true
+                    | _ -> false
+                | _ -> false))
         {
             Metadata = metadata
             TypeLikeRender.Name = shape.Name
@@ -31,16 +59,10 @@ module Interface =
                 members
             Functions =
                 functions
-            Inheritance =
-                shape.Heritage.Extends
-                |> List.map (
-                    ResolvedType.TypeReference
-                    >> LazyContainer.CreateFromValue
-                    >> ctx.PreludeGetTypeRef ctx scopeStore
-                    )
+            Inheritance = inheritanceRefs
             Constructors = []
             Documentation = shape.Documentation
-            IsClass = false
+            IsClass = inheritsClass
         }
 
 module Class =
