@@ -29,6 +29,39 @@ let tests =
 
         testCase "drops multiple decorative chars" <| fun _ ->
             Expect.equal (Identifier.sanitize "@$weird") "weird" "both @ and $ dropped"
+
+        // Destructured TS parameters like `fn({type, payload}: T)` come into
+        // the encoder with the literal destructure text as the parameter
+        // name. Without stripping, this becomes a multi-line backtick-
+        // wrapped F# identifier the parser can't parse. Drop `{`, `}`, `,`,
+        // and whitespace/newlines so the result fuses into a single F#-
+        // valid token (e.g. "typepayload").
+        testCase "strips destructure-pattern braces and commas" <| fun _ ->
+            Expect.equal (Identifier.sanitize "{type, payload}") "typepayload" "{}, , and whitespace dropped"
+
+        testCase "strips multi-line destructure patterns" <| fun _ ->
+            let multi = "{\n    type,\n    payload,\n  }"
+            Expect.equal (Identifier.sanitize multi) "typepayload" "newlines/indent dropped along with structural punctuation"
+
+        testCase "leaves carriage-return-only lines empty rather than corrupt" <| fun _ ->
+            // CR-stripping is also part of doc-comment handling; verify CR
+            // alone doesn't survive sanitize.
+            Expect.equal (Identifier.sanitize "foo\rbar") "foobar" "CR dropped"
+
+        testCase "tab characters are stripped" <| fun _ ->
+            Expect.equal (Identifier.sanitize "foo\tbar") "foobar" "tab dropped"
+
+        // TS computed property names like `[Symbol.iterator]` and
+        // `[__WORKFLOW_ENTRYPOINT_BRAND]` come through with literal `[` `]`.
+        // F# allows backticked member identifiers with brackets but
+        // REJECTS bracketed type names (FS0883). Strip in sanitize; the
+        // unstripped original survives via `[<CompiledName>]` for
+        // round-tripping the JS-side name.
+        testCase "strips computed-property-name brackets" <| fun _ ->
+            Expect.equal (Identifier.sanitize "[SymbolUnscopables]") "SymbolUnscopables" "brackets dropped"
+
+        testCase "strips brackets in nested-symbol names" <| fun _ ->
+            Expect.equal (Identifier.sanitize "[__WORKFLOW_ENTRYPOINT_BRAND]") "__WORKFLOW_ENTRYPOINT_BRAND" "brackets dropped"
     ]
 
 [<Tests>]
