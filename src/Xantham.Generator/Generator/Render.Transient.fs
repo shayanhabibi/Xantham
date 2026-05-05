@@ -40,6 +40,12 @@ module Union =
                 }
                 Name =
                     match tsLiteral with
+                    // Empty string literals would render as bare backticks
+                    // (`````` ``), which F# rejects (FS3563: not a valid
+                    // identifier). Use `Empty` as the F# case name; the
+                    // CompiledName attribute preserves the empty-string
+                    // value for round-trip.
+                    | TsLiteral.String "" -> "Empty"
                     | TsLiteral.String value -> value
                     | TsLiteral.Int value -> string value
                     | TsLiteral.Float value -> string value
@@ -304,6 +310,11 @@ module Literal =
                         |> RenderMetadata.createWithPath
                     Name =
                         match literal with
+                        // Empty string literals would render as bare backticks
+                        // (`````` ``), which F# rejects (FS3563). Use `Empty`
+                        // as the F# case name; CompiledName preserves the
+                        // empty-string value for round-trip.
+                        | TsLiteral.String "" -> "Empty"
                         | TsLiteral.String value -> value
                         | TsLiteral.Int value -> string value
                         | TsLiteral.Float value -> string value
