@@ -87,9 +87,12 @@ let typeAliasSelfReferenceTests =
             let innerResolvedType = primitive TypeKindPrimitive.NonPrimitive
             // Populate PreludeRenders so PreludeRenders[innerResolvedType].TypeRef = innerRef
             let innerRef = TestHelper.prerender ctx innerResolvedType
-            // Simulate prerenderTypeAliases: innerResolvedType → innerRef
-            // This makes TypeAliasRemap[innerType] = innerRef = PreludeRenders[innerType].TypeRef
-            GeneratorContext.Prelude.addTypeAliasRemap ctx innerResolvedType innerRef
+            // Simulate prerenderTypeAliases: innerType's TypeKey → innerRef.
+            // TypeAliasRemap is keyed by TypeKey (the encoder's stable identity)
+            // — TestHelper.prerender wraps via CreateFromValue (Raw = default TypeKey),
+            // so the alias body's lookup must match that same default key.
+            let innerTypeKey = Unchecked.defaultof<TypeKey>
+            GeneratorContext.Prelude.addTypeAliasRemap ctx innerTypeKey innerRef
             let typeAlias = TypeAlias.create innerResolvedType "Simplify"
             let scopeStore = RenderScopeStore.create()
             // resolveInnerRef calls replace(innerRef, innerRef, innerRef); must not recurse.

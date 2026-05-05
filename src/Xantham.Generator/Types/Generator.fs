@@ -4,6 +4,7 @@ open System.Collections.Generic
 open System.ComponentModel
 open Fabulous.AST
 open Fantomas.Core.SyntaxOak
+open Xantham
 open Xantham.Decoder.ArenaInterner
 open Xantham.Decoder
 open Xantham.Generator.NamePath
@@ -61,7 +62,13 @@ and Customisation = {
     static member Create fn: Customisation = fn Customisation.Default
 and GeneratorContext =
     {
-        TypeAliasRemap: DictionaryImpl<ResolvedType, TypeRefRender>
+        // Keyed by the inner type's encoder TypeKey rather than ResolvedType.
+        // The encoder produces multiple ResolvedType.TypeLiteral instances for
+        // the same conceptual TS type, so reference-equality lookups by
+        // ResolvedType miss whenever a reference site receives a different
+        // instance from the alias's registration site. TypeKey is the stable
+        // identity that survives across reference sites.
+        TypeAliasRemap: DictionaryImpl<TypeKey, TypeRefRender>
         PreludeGetTypeRef: PreludeGetTypeRefFunc
         PreludeRenders: PreludeScopeStore
         AnchorRenders: AnchorScopeStore

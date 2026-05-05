@@ -27,7 +27,7 @@ module TypeAlias =
             let oldRef = ctx.PreludeGetTypeRef ctx scopeStore innerType
             match ctx.PreludeRenders.TryGetValue(innerType.Value) with
             | true, newRef ->
-                match ctx.TypeAliasRemap.TryGetValue(innerType.Value) with
+                match ctx.TypeAliasRemap.TryGetValue(innerType.Raw) with
                 | true, value ->
                     let stripped = { oldRef with Nullable = false }
                     TypeRefRender.replace value newRef.TypeRef stripped

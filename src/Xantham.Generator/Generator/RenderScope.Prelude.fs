@@ -23,8 +23,8 @@ let private createConcreteTypeRef (path: TypePath) =
 type private Registered = Registered of TypeRefRender
 let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolvedType: LazyResolvedType): TypeRefRender =
     let remap = function
-            | { Nullable = nullable } when ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Value) ->
-                ctx.TypeAliasRemap[lazyResolvedType.Value]
+            | { Nullable = nullable } when ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Raw) ->
+                ctx.TypeAliasRemap[lazyResolvedType.Raw]
                 |> TypeRefRender.orNullable nullable
             | ref -> ref
     let inline addOrReplaceScope ctx resolvedType renderScope =
@@ -476,8 +476,8 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     |> function
-        | Registered { Nullable = nullable } when ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Value) ->
-            ctx.TypeAliasRemap[lazyResolvedType.Value]
+        | Registered { Nullable = nullable } when ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Raw) ->
+            ctx.TypeAliasRemap[lazyResolvedType.Raw]
             |> TypeRefRender.orNullable nullable
         | Registered ref -> ref
 
@@ -492,17 +492,23 @@ type GeneratorContext with
     
 module ArenaInterner =
     let prerenderTypeAliases (ctx: GeneratorContext) (arena: ArenaInterner) =
-        arena.ExportMap
-        |> Map.iter (fun _ -> List.iter (function
+        // Register both the alias declaration TypeKey (what TypeReferences
+        // resolve to) and the alias body TypeKey (what direct prerender of
+        // the inner type would see). Both keys point to the same canonical
+        // ConcretePath ref so any reference site picks up the alias path.
+        arena.ResolvedExports
+        |> Seq.iter (fun (KeyValue(declTypeKey, export)) ->
+            match export with
             | ResolvedExport.TypeAlias value ->
-                let resolvedType = value.Type.Value
+                let bodyTypeKey = value.Type.Raw
                 let path = Path.Interceptors.pipeTypeAlias ctx value
-                RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
-                |> RenderScopeStore.TypeRef.Unsafe.createAtom
-                |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
-                |> GeneratorContext.Prelude.addTypeAliasRemap ctx resolvedType
-            | _ -> ()
-            ))
+                let ref =
+                    RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
+                    |> RenderScopeStore.TypeRef.Unsafe.createAtom
+                    |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+                GeneratorContext.Prelude.addTypeAliasRemap ctx declTypeKey ref
+                GeneratorContext.Prelude.addTypeAliasRemap ctx bodyTypeKey ref
+            | _ -> ())
     let private getTopologicalSort (_: ArenaInterner) (graph: Graph) =
         let degrees = ConcurrentDictionary graph.Degrees
         let dependencies =

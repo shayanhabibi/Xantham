@@ -35,7 +35,12 @@ module CallSignature =
         }
         
     let renderMember (ctx: GeneratorContext) scopeStore (callSignatures: CallSignature list) =
-        let path = Path.create TransientMemberPath.Anchored
+        // Carry "Invoke" as the transient member name so anchoring against a
+        // type's TypePath produces a MemberPath named "invoke" rather than
+        // falling back to the type's own name (which would double the type
+        // name into the path — e.g. `LoadWorkflowRunner.LoadWorkflowRunner`
+        // rather than `LoadWorkflowRunner.Invoke`).
+        let path = Path.create (TransientMemberPath.AnchoredAndMoored (Name.Camel.create "Invoke"))
         let metadata = {
             Path = path
             Original = path
@@ -169,7 +174,7 @@ module SetAccessor =
     
 module IndexSignature =
     let render (ctx: GeneratorContext) scopeStore (indexSignature: IndexSignature) =
-        let path = Path.create TransientMemberPath.Anchored
+        let path = Path.create (TransientMemberPath.AnchoredAndMoored (Name.Camel.create "Item"))
         let metadata = {
             Path = path
             Original = path
@@ -208,7 +213,7 @@ module IndexSignature =
     
 module ConstructSignature =
     let render (ctx: GeneratorContext) scopeStore (constructSignature: ConstructSignature list) =
-        let path = Path.create TransientMemberPath.Anchored
+        let path = Path.create (TransientMemberPath.AnchoredAndMoored (Name.Camel.create "Create"))
         let metadata = {
             Path = path
             Original = path
