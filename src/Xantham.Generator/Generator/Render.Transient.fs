@@ -244,6 +244,7 @@ module TemplateLiteral =
                 Inheritance = []
                 Constructors = []
                 Documentation = []
+                IsClass = false
             }
             |> TypeDefn
 module Members =
@@ -270,6 +271,7 @@ module Members =
             Functions = functions
             Constructors = []
             Documentation = []
+            IsClass = false
         }
         |> Transient.TypeRender.TypeDefn
     let inline render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (members: Member list) =

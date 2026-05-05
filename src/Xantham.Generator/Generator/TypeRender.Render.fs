@@ -535,6 +535,14 @@ module TypeLikeRender =
         |> TypeRefRender.nonNullable
         |> TypeRefRender.render
         |> Ast.Inherit
+    // Class-body variant: F# requires a constructor invocation (`inherit Y()`)
+    // when the body shape is a class. Interfaces accept bare `inherit Y`.
+    let renderInheritanceForClass (ctx: GeneratorContext) (inScopeTyparNames: Set<string>) (typeRefRender: TypeRefRender) =
+        typeRefRender
+        |> TypeRefRender.substituteForHeritage inScopeTyparNames
+        |> TypeRefRender.nonNullable
+        |> TypeRefRender.render
+        |> Ast.InheritUnit
     let renderConstructors (ctx: GeneratorContext) (typeLike: TypeLikeRender) =
         typeLike.Constructors
         |> List.map (fun parameters ->
@@ -584,6 +592,49 @@ module TypeLikeRender =
         |> Documentation.renderForTypeDefn typeLike
         |> if typeParameters.IsSome then _.typeParams(typeParameters.Value) else id
         
+    // renders an abstract class — used for TS `class` declarations whose
+    // bindings need to participate in class inheritance (`inherit Y` where
+    // Y is a class is rejected inside an `interface ... end` body). Members
+    // remain abstract so consumers don't need to implement anything; the
+    // class shape exists purely so [<AbstractClass>] applies.
+    let renderAbstractClass (ctx: GeneratorContext) (typeLike: TypeLikeRender) =
+        let renderName = Name.Case.valueOrModified typeLike.Name
+        let typeParameters =
+            if List.isEmpty typeLike.TypeParameters then
+                ValueNone
+            else
+                typeLike.TypeParameters
+                |> TypeParameterRender.renderTypeParametersIntoPostfixList ctx
+                |> ValueSome
+        let members =
+            typeLike.Members
+            |> List.map (TypedNameRender.renderAbstract ctx)
+        let functions =
+            typeLike.Functions
+            |> List.collect (FunctionLikeRender.renderAbstract ctx)
+        let memberCollection = members @ functions
+        let inScopeTypars =
+            typeLike.TypeParameters
+            |> List.map (fun tp -> "'" + Name.Case.valueOrModified tp.Name)
+            |> Set.ofList
+        let abstractCtors = renderAbstractConstructors ctx typeLike
+        // F# class-body rule: `inherit` must precede other body items.
+        // Empty body (no members, no constructors, no inheritance) requires
+        // explicit `class end` form; non-empty uses class with private ().
+        let builder =
+            match memberCollection, abstractCtors, typeLike.Inheritance with
+            | [], [], [] -> Ast.ClassEnd(renderName, Ast.Constructor().toPrivate())
+            | _ -> Ast.TypeDefn(renderName, Ast.Constructor().toPrivate())
+        builder {
+            yield!
+                typeLike.Inheritance
+                |> List.map (renderInheritanceForClass ctx inScopeTypars)
+            yield! abstractCtors
+            yield! memberCollection
+        }
+        |> Documentation.renderForTypeDefn typeLike
+        |> if typeParameters.IsSome then _.typeParams(typeParameters.Value) else id
+
     // renders a class
     let renderClass (ctx: GeneratorContext) (typeLike: TypeLikeRender) =
         let renderName =

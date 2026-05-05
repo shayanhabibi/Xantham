@@ -178,6 +178,7 @@ module Render =
                     typeDefn.Constructors
                     |> List.map (List.map (anchorTypedNameRender ctx anchorPath))
                 Documentation = typeDefn.Documentation
+                IsClass = typeDefn.IsClass
             }
         let anchorTypeAlias (ctx: GeneratorContext) (anchorPath: AnchorPath) (typeAlias: Transient.TypeAliasRender) =
             match typeAlias with
@@ -356,6 +357,7 @@ module Render =
                     typeDefn.Constructors
                     |> List.map (List.map (anchorTypedNameRender ctx anchorPath))
                 Documentation = typeDefn.Documentation
+                IsClass = typeDefn.IsClass
             }
         let anchorTypeAlias (ctx: GeneratorContext) (typeAlias: Concrete.TypeAliasRender) =
             match typeAlias with

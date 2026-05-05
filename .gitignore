@@ -12,4 +12,4 @@ riderModule.iml
 /_ReSharper.Caches/
 *.fs.js
 /fable_modules/
-/node_modules/
+node_modules/

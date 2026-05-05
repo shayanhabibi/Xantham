@@ -40,8 +40,9 @@ module Interface =
                     )
             Constructors = []
             Documentation = shape.Documentation
+            IsClass = false
         }
-    
+
 module Class =
     let render (ctx: GeneratorContext) scopeStore (shape: Class) =
         let path = Interceptors.pipeClass ctx shape |> Path.create
@@ -79,6 +80,7 @@ module Class =
                     >> List.map (Parameter.render ctx scopeStore)
                     )
             Documentation = []
+            IsClass = true
         }
 
 module TypeLiteral =

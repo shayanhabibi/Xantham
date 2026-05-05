@@ -72,11 +72,12 @@ module TypeAlias =
                     TypeLikeRender.Metadata = metadata
                     Name = name
                     TypeParameters = typeParameters
-                    Members = members 
-                    Functions = functions 
+                    Members = members
+                    Functions = functions
                     Inheritance = []
                     Constructors = []
                     Documentation = documentation
+                    IsClass = false
                 }
                 |> TypeAliasRender.TypeDefn
             | ResolvedType.Union _ ->
@@ -158,6 +159,7 @@ module TypeAlias =
                     Inheritance = []
                     Constructors = []
                     Documentation = documentation
+                    IsClass = false
                 }
                 |> TypeAliasRender.TypeDefn
             | ResolvedType.EnumCase enumCase ->
@@ -247,6 +249,7 @@ module TypeAlias =
                     Inheritance = []
                     Constructors = []
                     Documentation = documentation
+                    IsClass = false
                 }
                 |> TypeAliasRender.TypeDefn
         // Mark this alias's TypeAliasRemap target ref as in-flight so any

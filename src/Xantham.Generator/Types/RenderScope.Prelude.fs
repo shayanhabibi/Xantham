@@ -480,6 +480,13 @@ type TypeLikeRender<'RenderType, 'TypeName, 'MemberName, 'TyparName> = {
     Functions: FunctionLikeRender<'RenderType, 'MemberName, 'TyparName> list
     Constructors: TypedNameRender<'RenderType, 'MemberName, 'TyparName> list list
     Documentation: TsComment list
+    // True when the source declaration was a TS `class` (vs. interface,
+    // type literal, intersection). Drives dispatch to `renderAbstractClass`
+    // (vs. `renderInterface`) and `[<AbstractClass>]`/`[<AllowNullLiteral>]`
+    // attribute emission. F# rejects `inherit Y` inside an `interface ... end`
+    // body when Y is a class; the abstract-class form (`type X private () =`
+    // with `inherit Y()`) lets the same shape participate in class inheritance.
+    IsClass: bool
 }
 
 type TypeAliasRender<'RenderType, 'TypeName, 'MemberName, 'TyparName> =

@@ -49,6 +49,17 @@ type ArenaInterner.QualifiedNamePart with
         | Abnormal(_, diagnostic) -> ValueSome diagnostic
         
 
+// Class-mark attributes for TypeLikeRenders that came from a TS class
+// declaration. `[<AbstractClass>]` lets the body shape (`type X = inherit
+// Y; abstract member ...`) participate in class inheritance — F# rejects
+// `inherit Y` (where Y is a class) inside a plain interface body.
+// `[<AllowNullLiteral>]` matches Glutinum's emission convention for any TS
+// reference type (lets consumers pass null where TS allows it).
+let tryRenderAbstractClassAttribute (typeLike: Anchored.TypeLikeRender) =
+    if typeLike.IsClass then ValueSome Attributes.abstractClass else ValueNone
+let tryRenderAllowNullLiteralAttribute (typeLike: Anchored.TypeLikeRender) =
+    if typeLike.IsClass then ValueSome Attributes.allowNullLiteral else ValueNone
+
 let tryRenderMetadataImport (metadata: RenderMetadata) =
     match metadata.FullyQualifiedName, metadata.Source with
     | ValueNone, ValueNone -> ValueNone
@@ -332,18 +343,22 @@ let rec renderModule (ctx: GeneratorContext) (root: Module) =
         for KeyValue(_, render) in root.Types do
             match render with
             | TypeDefn typeLikeRender ->
-                TypeLikeRender.renderInterface ctx typeLikeRender
+                (if typeLikeRender.IsClass then TypeLikeRender.renderAbstractClass else TypeLikeRender.renderInterface) ctx typeLikeRender
                 |> typeDefnAttributes {
                     tryRenderMetadataImport typeLikeRender.Metadata
+                    tryRenderAbstractClassAttribute typeLikeRender
+                    tryRenderAllowNullLiteralAttribute typeLikeRender
                 }
             | TypeAlias typeAliasRender ->
                 match typeAliasRender with
                 | TypeAliasRender.Alias typeAliasRenderRef ->
                     TypeAliasRender.renderTypeAlias ctx typeAliasRenderRef
                 | TypeAliasRender.TypeDefn typeLikeRender ->
-                    TypeLikeRender.renderInterface ctx typeLikeRender
+                    (if typeLikeRender.IsClass then TypeLikeRender.renderAbstractClass else TypeLikeRender.renderInterface) ctx typeLikeRender
                     |> _.attributes(attributes {
                         tryRenderMetadataImport typeLikeRender.Metadata
+                        tryRenderAbstractClassAttribute typeLikeRender
+                        tryRenderAllowNullLiteralAttribute typeLikeRender
                     })
                 | TypeAliasRender.StringUnion literalUnionRender ->
                     LiteralUnionRender.renderUnion ctx literalUnionRender
@@ -370,12 +385,20 @@ let renderRoot (ctx: GeneratorContext) (root: RootModule) =
             match render with
             | TypeDefn typeLikeRender ->
                 TypeLikeRender.renderInterface ctx typeLikeRender
+                |> typeDefnAttributes {
+                    tryRenderAbstractClassAttribute typeLikeRender
+                    tryRenderAllowNullLiteralAttribute typeLikeRender
+                }
             | TypeAlias typeAliasRender ->
                 match typeAliasRender with
                 | TypeAliasRender.Alias typeAliasRenderRef ->
                     TypeAliasRender.renderTypeAlias ctx typeAliasRenderRef
                 | TypeAliasRender.TypeDefn typeLikeRender ->
                     TypeLikeRender.renderInterface ctx typeLikeRender
+                    |> _.attributes(attributes {
+                        tryRenderAbstractClassAttribute typeLikeRender
+                        tryRenderAllowNullLiteralAttribute typeLikeRender
+                    })
                 | TypeAliasRender.StringUnion literalUnionRender ->
                     LiteralUnionRender.renderUnion ctx literalUnionRender
                 | TypeAliasRender.EnumUnion literalUnionRender ->

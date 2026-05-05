@@ -146,6 +146,13 @@ type Attributes =
     static member ``class`` = Ast.Attribute("Class")
     /// <summary><c>AllowNullLiteral</c></summary>
     static member allowNullLiteral = Ast.Attribute("AllowNullLiteral")
+    /// <summary><c>AbstractClass</c> — F# attribute marking a type as an
+    /// abstract class. Lets a TS class be emitted as `type X = inherit Y
+    /// abstract member ...` (members are abstract; type may inherit
+    /// another class). Required for TS classes that extend other classes
+    /// because F# rejects class inheritance inside an `interface ... end`
+    /// body.</summary>
+    static member abstractClass = Ast.Attribute("AbstractClass")
     /// <summary><c>Obsolete("[message]")</c></summary>
     /// <param name="message"></param>
     static member obsolete (?message: string) = Ast.Attribute("Obsolete", Ast.ParenExpr(Ast.String(message |> Option.defaultValue "")))
