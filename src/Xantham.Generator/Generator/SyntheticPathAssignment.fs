@@ -56,60 +56,125 @@ module SyntheticPathAssignment =
             ValueSome (Path.Interceptors.pipeEnum ctx enumType)
         | _ -> ValueNone
 
-    let private yieldIfSynthetic (lazyRt: LazyResolvedType) : ResolvedType seq =
+    /// Recursively walk a ResolvedType graph, yielding any synthetic
+    /// literal ResolvedTypes encountered. The `visited` HashSet prevents
+    /// infinite loops on cyclic references — `[<ReferenceEquality>]` on
+    /// ResolvedType records makes identity comparison cheap and correct.
+    /// Yields only the synthetic types (Union, Intersection, TypeLiteral,
+    /// TemplateLiteral); their bodies are walked through to discover
+    /// further nested synthetics.
+    let rec private walk (visited: HashSet<ResolvedType>) (rt: ResolvedType) : ResolvedType seq =
         seq {
-            let rt = lazyRt.Value
-            if isSyntheticLiteral rt then yield rt
+            if visited.Add rt then
+                if isSyntheticLiteral rt then yield rt
+                match rt with
+                | ResolvedType.Union union ->
+                    for t in union.Types do
+                        yield! walk visited t.Value
+                | ResolvedType.Intersection intersection ->
+                    for t in intersection.Types do
+                        yield! walk visited t.Value
+                | ResolvedType.TypeLiteral typeLiteral ->
+                    for memberRef in typeLiteral.Members do
+                        yield! walkMember visited memberRef
+                | ResolvedType.TemplateLiteral template ->
+                    for t in template.Types do
+                        yield! walk visited t.Value
+                | ResolvedType.Interface iface ->
+                    for memberRef in iface.Members do
+                        yield! walkMember visited memberRef
+                | ResolvedType.Class cls ->
+                    for memberRef in cls.Members do
+                        yield! walkMember visited memberRef
+                | ResolvedType.TypeReference typeRef ->
+                    yield! walk visited typeRef.Type.Value
+                    for arg in typeRef.TypeArguments do
+                        yield! walk visited arg.Value
+                | ResolvedType.Array inner ->
+                    yield! walk visited inner
+                | ResolvedType.ReadOnly inner ->
+                    yield! walk visited inner
+                | ResolvedType.Tuple tuple ->
+                    for t in tuple.Types do
+                        yield! walk visited t.Type.Value
+                | ResolvedType.IndexedAccess indexed ->
+                    yield! walk visited indexed.Object.Value
+                    yield! walk visited indexed.Index.Value
+                | ResolvedType.Index index ->
+                    yield! walk visited index.Type.Value
+                | ResolvedType.Optional opt ->
+                    yield! walk visited opt.Type.Value
+                | ResolvedType.TypeQuery query ->
+                    yield! walk visited query.Type.Value
+                | ResolvedType.Conditional cond ->
+                    yield! walk visited cond.Check.Value
+                    yield! walk visited cond.Extends.Value
+                    yield! walk visited cond.True.Value
+                    yield! walk visited cond.False.Value
+                | ResolvedType.Substitution sub ->
+                    yield! walk visited sub.Base.Value
+                | _ -> ()
         }
 
-    let private membersSyntheticRefs (members: Member list) : ResolvedType seq =
+    and private walkMember (visited: HashSet<ResolvedType>) (memberRef: Member) : ResolvedType seq =
         seq {
-            for memberRef in members do
-                match memberRef with
-                | Member.Property prop ->
-                    yield! yieldIfSynthetic prop.Type
-                | Member.Method overloads ->
-                    for m in overloads do
-                        for param in m.Parameters do
-                            yield! yieldIfSynthetic param.Type
-                        yield! yieldIfSynthetic m.Type
-                | Member.GetAccessor get ->
-                    yield! yieldIfSynthetic get.Type
-                | Member.SetAccessor set ->
-                    yield! yieldIfSynthetic set.ArgumentType
-                | Member.IndexSignature idx ->
-                    for param in idx.Parameters do
-                        yield! yieldIfSynthetic param.Type
-                    yield! yieldIfSynthetic idx.Type
-                | Member.CallSignature signatures ->
-                    for sig' in signatures do
-                        for param in sig'.Parameters do
-                            yield! yieldIfSynthetic param.Type
-                        yield! yieldIfSynthetic sig'.Type
-                | Member.ConstructSignature signatures ->
-                    for sig' in signatures do
-                        for param in sig'.Parameters do
-                            yield! yieldIfSynthetic param.Type
-                        yield! yieldIfSynthetic sig'.Type
+            match memberRef with
+            | Member.Property prop ->
+                yield! walk visited prop.Type.Value
+            | Member.Method overloads ->
+                for m in overloads do
+                    for param in m.Parameters do
+                        yield! walk visited param.Type.Value
+                    yield! walk visited m.Type.Value
+            | Member.GetAccessor get ->
+                yield! walk visited get.Type.Value
+            | Member.SetAccessor set ->
+                yield! walk visited set.ArgumentType.Value
+            | Member.IndexSignature idx ->
+                for param in idx.Parameters do
+                    yield! walk visited param.Type.Value
+                yield! walk visited idx.Type.Value
+            | Member.CallSignature signatures ->
+                for sig' in signatures do
+                    for param in sig'.Parameters do
+                        yield! walk visited param.Type.Value
+                    yield! walk visited sig'.Type.Value
+            | Member.ConstructSignature signatures ->
+                for sig' in signatures do
+                    for param in sig'.Parameters do
+                        yield! walk visited param.Type.Value
+                    yield! walk visited sig'.Type.Value
         }
 
     /// Synthetic literal ResolvedTypes reachable from an Interface/Class
-    /// type (one hop through its members).
+    /// type, walking through nested members, function returns, type
+    /// arguments, union/intersection elements, etc.
     let private outgoingSyntheticRefs (resolvedType: ResolvedType) : ResolvedType seq =
-        match resolvedType with
-        | ResolvedType.Interface iface -> membersSyntheticRefs iface.Members
-        | ResolvedType.Class cls -> membersSyntheticRefs cls.Members
-        | _ -> Seq.empty
+        let visited = HashSet<ResolvedType>(HashIdentity.Reference)
+        walk visited resolvedType
 
     /// Synthetic literal ResolvedTypes reachable from a Function export's
-    /// overload list (parameters and return types).
+    /// overload list (parameters and return types), recursively.
     let private functionSyntheticRefs (functions: Function list) : ResolvedType seq =
+        let visited = HashSet<ResolvedType>(HashIdentity.Reference)
         seq {
             for fn in functions do
                 for param in fn.Parameters do
-                    yield! yieldIfSynthetic param.Type
-                yield! yieldIfSynthetic fn.Type
+                    yield! walk visited param.Type.Value
+                yield! walk visited fn.Type.Value
         }
+
+    /// Synthetic literal ResolvedTypes reachable from a TypeAlias export's
+    /// body, recursively.
+    let private typeAliasSyntheticRefs (typeAlias: TypeAlias) : ResolvedType seq =
+        let visited = HashSet<ResolvedType>(HashIdentity.Reference)
+        walk visited typeAlias.Type.Value
+
+    /// Synthetic literal ResolvedTypes reachable from a Variable export's
+    /// type, recursively.
+    let private variableSyntheticRefs (variable: Variable) : ResolvedType seq =
+        let visited = HashSet<ResolvedType>(HashIdentity.Reference)
+        walk visited variable.Type.Value
 
     /// Build a synthetic TypePath under the given home export's parent
     /// module + export name (as a sub-module). Counter ensures uniqueness
@@ -157,6 +222,18 @@ module SyntheticPathAssignment =
                 let homePath = Path.Interceptors.pipeClass ctx cls
                 assignSynthetics ctx counters homePath
                     (outgoingSyntheticRefs (ResolvedType.Class cls))
+            | ResolvedExport.TypeAlias typeAlias when not typeAlias.IsLibEs ->
+                let homePath = Path.Interceptors.pipeTypeAlias ctx typeAlias
+                assignSynthetics ctx counters homePath
+                    (typeAliasSyntheticRefs typeAlias)
+            | ResolvedExport.Variable variable ->
+                let memberPath = Path.Interceptors.pipeVariable ctx variable
+                let homePath =
+                    TypePath.createWithName
+                        (Name.Pascal.fromCase memberPath.Name)
+                        (MemberPath.findParentModule memberPath)
+                assignSynthetics ctx counters homePath
+                    (variableSyntheticRefs variable)
             | ResolvedExport.Function functions ->
                 // Free functions render as static members on a host type.
                 // Use the function's own MemberPath's parent module + the
