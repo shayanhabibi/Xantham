@@ -224,6 +224,14 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             match ctx.SyntheticPaths.TryGetValue resolvedType with
             | true, concretePath ->
                 let ref = createAssignedSyntheticRef concretePath nullable
+                // Track the visit in the outer scope's TypeStore so the
+                // export's anchor pass iterates the synthetic and runs the
+                // body's anchor (which my new Anchored-Root + Transient-Render
+                // case handles). Placeholder Transient.Anchored is never
+                // resolved — the actual emission location lives on the
+                // renderScope.Root.
+                scope.TypeStore.TryAdd(resolvedType, TransientTypePath.Anchored)
+                |> ignore
                 {
                     Transient.RenderScope.Type = resolvedType
                     Root = TypeLikePath.create concretePath |> ValueSome
@@ -278,6 +286,8 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         match ctx.SyntheticPaths.TryGetValue resolvedType with
         | true, concretePath ->
             let ref = createAssignedSyntheticRef concretePath false
+            scope.TypeStore.TryAdd(resolvedType, TransientTypePath.Anchored)
+            |> ignore
             let childScope = RenderScopeStore.create()
             {
                 Transient.RenderScope.Type = resolvedType
@@ -508,10 +518,8 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             match ctx.SyntheticPaths.TryGetValue resolvedType with
             | true, concretePath ->
                 let ref = createAssignedSyntheticRef concretePath false
-                // childScope.PathContext seeded from the concrete path's
-                // module ancestry so inner Members.render produces a
-                // TypeLikeRender with metadata reflecting the literal's
-                // assigned location.
+                scope.TypeStore.TryAdd(resolvedType, TransientTypePath.Anchored)
+                |> ignore
                 let childScope = RenderScopeStore.create()
                 {
                     RenderScope.Type = resolvedType

@@ -54,6 +54,16 @@ module LibEsDefaults =
             "AsyncIterableIterator", "System.Collections.Generic.IAsyncEnumerator"
             // `ReadonlyArray<T>` → `IReadOnlyList<T>` (read-only with index).
             "ReadonlyArray", "System.Collections.Generic.IReadOnlyList"
+            // `ReadonlyMap<K, V>` → `IReadOnlyDictionary<K, V>` (read-only
+            // keyed lookup).
+            "ReadonlyMap", "System.Collections.Generic.IReadOnlyDictionary"
+            // `Map<K, V>` → `IDictionary<K, V>` (mutable keyed lookup; F# has
+            // no direct alias so use the BCL interface).
+            "Map", "System.Collections.Generic.IDictionary"
+            // `ReadonlySet<T>` → `IReadOnlySet<T>` (read-only set).
+            "ReadonlySet", "System.Collections.Generic.IReadOnlySet"
+            // `Set<T>` → `ISet<T>` (mutable set).
+            "Set", "System.Collections.Generic.ISet"
         ]
 
     let private intrinsicRef (name: string) =

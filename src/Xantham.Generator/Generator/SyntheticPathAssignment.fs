@@ -201,6 +201,20 @@ module SyntheticPathAssignment =
                 let path = buildSyntheticPath homePath counter
                 ctx.SyntheticPaths[synthetic] <- path
 
+    /// Source eligibility check matching `LibEsDefaults.isSubstitutionEligible`.
+    /// A type is "infrastructure" (TS lib.* or compiler-internal) if it's
+    /// IsLibEs=true OR its Source is the TypeScript compiler. Such types
+    /// shouldn't be hosts for synthetic assignments — their paths get
+    /// pruned by the default Typescript-pruning interceptor, which would
+    /// produce a homePath that doesn't match what eventual reference sites
+    /// resolve to.
+    let private isInfrastructureSource (source: ArenaInterner.QualifiedNamePart option) =
+        match source with
+        | Some (ArenaInterner.QualifiedNamePart.Normal s)
+        | Some (ArenaInterner.QualifiedNamePart.Abnormal (s, _)) ->
+            s.Equals("typescript", System.StringComparison.OrdinalIgnoreCase)
+        | None -> false
+
     /// Run the path-assignment pass against a fully-resolved arena. After
     /// this returns, `ctx.SyntheticPaths` contains entries for every
     /// multi-position interned synthetic literal reachable from
@@ -214,15 +228,18 @@ module SyntheticPathAssignment =
         // ResolvedType see the existing assignment.
         for KeyValue(_, export) in arena.ResolvedExports do
             match export with
-            | ResolvedExport.Interface iface when not iface.IsLibEs ->
+            | ResolvedExport.Interface iface
+                when not iface.IsLibEs && not (isInfrastructureSource iface.Source) ->
                 let homePath = Path.Interceptors.pipeInterface ctx iface
                 assignSynthetics ctx counters homePath
                     (outgoingSyntheticRefs (ResolvedType.Interface iface))
-            | ResolvedExport.Class cls when not cls.IsLibEs ->
+            | ResolvedExport.Class cls
+                when not cls.IsLibEs && not (isInfrastructureSource cls.Source) ->
                 let homePath = Path.Interceptors.pipeClass ctx cls
                 assignSynthetics ctx counters homePath
                     (outgoingSyntheticRefs (ResolvedType.Class cls))
-            | ResolvedExport.TypeAlias typeAlias when not typeAlias.IsLibEs ->
+            | ResolvedExport.TypeAlias typeAlias
+                when not typeAlias.IsLibEs && not (isInfrastructureSource typeAlias.Source) ->
                 let homePath = Path.Interceptors.pipeTypeAlias ctx typeAlias
                 assignSynthetics ctx counters homePath
                     (typeAliasSyntheticRefs typeAlias)
