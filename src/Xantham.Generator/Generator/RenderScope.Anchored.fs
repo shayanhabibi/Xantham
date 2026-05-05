@@ -479,7 +479,7 @@ and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: R
     let anchors = Dictionary<ResolvedType, TypePath * Render>()
     let anchorPath = Interceptors.pipeExport ctx export
     renderScopeStore.TypeStore
-    |> Seq.iter (fun (KeyValue(key, value)) ->
+    |> Seq.iter (fun (KeyValue(key, _)) ->
         let renderScope =
             GeneratorContext.Prelude.tryGet ctx key
             |> ValueOption.orElseWith (fun () ->
@@ -489,8 +489,12 @@ and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: R
                 )
             |> ValueOption.defaultWith (fun () ->
                 failwith "Could not find render scope for key")
-        let path = TransientPath.anchor anchorPath (TransientPath.create value)
-        anchorPreludeAnchorScope ctx (Some anchors) path renderScope)
+        // Pass the export's anchor (e.g. the function's MemberPath) directly
+        // rather than pre-anchoring the literal's transient. The Transient
+        // arm of anchorPreludeAnchorScope already runs TransientTypePath.anchor
+        // on renderScope.Root — pre-anchoring here causes the literal's leaf
+        // segment to be added twice (e.g. `WrapWorkflowBinding/Metadata/Metadata`).
+        anchorPreludeAnchorScope ctx (Some anchors) anchorPath renderScope)
     anchors
 
 let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport): unit =

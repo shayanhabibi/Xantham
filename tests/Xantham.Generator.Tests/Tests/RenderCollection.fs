@@ -189,4 +189,42 @@ let tests =
             Expect.isTrue
                 (output.Contains "module rec DynamicWorkflows")
                 (sprintf "expected inner `module rec DynamicWorkflows`; got:\n%s" output)
+
+        // Regression test for double-anchoring on inline parameter literals.
+        // Before fix: `anchorPreludeExportScope` pre-anchored the literal's
+        // transient path AND passed the result to `anchorPreludeAnchorScope`,
+        // which anchored it AGAIN through the renderScope's Root transient.
+        // The literal's leaf segment got duplicated, producing a path like
+        // `DoThing/Context/Context/type Context` (3 module levels + type).
+        // The reference site only knows about `DoThing.Context` (one level
+        // deep), so the doubled emission produced unresolvable references.
+        //
+        // The structural fix passes the export's anchor (function MemberPath)
+        // to `anchorPreludeAnchorScope` rather than pre-anchoring. The Transient
+        // arm there does the single anchoring step itself.
+        testCase "inline parameter literal anchors once (not twice)" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let inlineShape =
+                TypeLiteral.empty
+                |> TypeLiteral.addMember (Property.create "x" (primitive TypeKindPrimitive.String) |> Property.wrap)
+                |> TypeLiteral.wrap
+            let func =
+                Function.create "doThing" (primitive TypeKindPrimitive.String)
+                |> Function.withParameters [ Parameter.create "context" inlineShape ]
+                |> Function.withPath [ "Cloudflare"; "DynamicWorkflows" ]
+            registerAnchorFromExport ctx (ResolvedExport.Function [ func ])
+            let root = RootModule.collectModules ctx
+            let output = renderRootToString ctx root
+            // The pre-fix output nested `module Context` *inside* `module DoThing`
+            // wrapping a same-named `type Context`. With single anchoring the
+            // type lives directly under `module DoThing` with no intermediate
+            // module. Detect the regression by looking for the doubled-name
+            // pattern `module rec Context = ... type Context` (any whitespace).
+            let doubledModuleType =
+                System.Text.RegularExpressions.Regex(
+                    @"module(?:\s+rec)?\s+Context\s*=\s*\n\s+type\s+Context\b",
+                    System.Text.RegularExpressions.RegexOptions.Compiled)
+            Expect.isFalse
+                (doubledModuleType.IsMatch output)
+                (sprintf "expected no `module Context = type Context` doubled-name pattern (anchor-double-counting regression); got:\n%s" output)
     ]
