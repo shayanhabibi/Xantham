@@ -33,7 +33,16 @@ module private Implementation =
         | TypeRefMolecule.Tuple typeRefRenders ->
             typeRefRenders
             |> List.map render
-            |> Ast.Tuple
+            |> function
+                // TS `[]` (empty tuple) and single-element tuples don't have
+                // direct F# tuple syntax — emitting `Ast.Tuple` with 0 or 1
+                // elements produces malformed output (e.g. trailing-comma
+                // generics like `U2<A * B, >` where the second arg is an
+                // empty tuple). Fall back to `unit` and the bare element
+                // respectively, matching how Union handles its empty case.
+                | [] -> Ast.Unit()
+                | [ widget ] -> widget
+                | types -> Ast.Tuple types
         | TypeRefMolecule.Union typeRefRenders ->
             typeRefRenders
             |> List.map render
@@ -99,9 +108,15 @@ module private Implementation =
                 Ast.AppPrefix(prefix, args)
                 |> if isNullable then Ast.OptionPrefix else id
             | Anchored.TypeRefMolecule.Tuple typeRefRenders ->
+                // Same empty/single-element handling as the unanchored
+                // renderMolecule above — TS `[]` (empty tuple) and one-
+                // element tuples don't have direct F# syntax.
                 typeRefRenders
                 |> List.map render
-                |> Ast.Tuple
+                |> function
+                    | [] -> Ast.Unit()
+                    | [ widget ] -> widget
+                    | types -> Ast.Tuple types
             | Anchored.TypeRefMolecule.Union typeRefRenders ->
                 typeRefRenders
                 |> List.map render

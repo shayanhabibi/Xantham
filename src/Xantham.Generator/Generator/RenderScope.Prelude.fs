@@ -304,13 +304,24 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         let prefix =
             innerResolvedType
             |> prerender ctx scope
-        let postfixArguments =
-            alignedArguments
-            |> List.map (prerender ctx scope)
-        (prefix, postfixArguments)
-        |> RenderScopeStore.TypeRefRender.create scope resolvedType false
-        |> RenderScope.createRootless resolvedType
-        |> addOrReplaceScope ctx resolvedType
+        // If the prefix is already a Prefix molecule, the encoder produced
+        // nested TypeReferences for this site (outer + inner both carrying
+        // the same TypeArguments). Re-applying our args would produce
+        // `Foo<A,B,C><A,B,C>` — invalid F#. Return the prefix as-is; the
+        // inner Prefix already carries the application.
+        match prefix.Kind with
+        | TypeRefKind.Molecule (TypeRefMolecule.Prefix _) ->
+            prefix
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
+        | _ ->
+            let postfixArguments =
+                alignedArguments
+                |> List.map (prerender ctx scope)
+            (prefix, postfixArguments)
+            |> RenderScopeStore.TypeRefRender.create scope resolvedType false
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Array innerResolvedType ->
         (
             lift Intrinsic.array,
