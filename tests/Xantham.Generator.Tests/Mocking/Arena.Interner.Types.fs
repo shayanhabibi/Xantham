@@ -189,6 +189,25 @@ module ResolvedType =
         }
         let withParameters parameters callSignature = { callSignature with CallSignature.Parameters = parameters }
         let withReturnType returnType callSignature = { callSignature with CallSignature.Type = LazyContainer.CreateFromValue returnType }
+    module Function =
+        let create name returnType =
+            {
+                IsLibEs = false
+                Source = None
+                FullyQualifiedName = [ QualifiedNamePart.Normal name ]
+                Documentation = []
+                IsDeclared = false
+                Function.Name = Name.Camel.create name
+                Type = LazyContainer.CreateFromValue returnType
+                Parameters = []
+                TypeParameters = []
+                SignatureKey = Lazy.CreateFromValue { TypeLiteral.Members = [] }
+            }
+        let withPath modules func =
+            { func with Function.FullyQualifiedName = (List.map QualifiedNamePart.Normal modules) @ func.FullyQualifiedName }
+        let withParameters parameters func = { func with Function.Parameters = parameters }
+        let withReturnType returnType func = { func with Function.Type = LazyContainer.CreateFromValue returnType }
+
     module TypeReference =
         let wrap = ResolvedType.TypeReference
         let create typ = {
