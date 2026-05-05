@@ -103,6 +103,58 @@ let typeAliasSelfReferenceTests =
                 |> Flip.Expect.equal "self-referencing alias Type should be the alias ref itself" innerRef
             | other ->
                 failtestf "expected TypeAliasRender.Alias but got %A" other
+
+        // C1 cycle-break: when a TypeAlias's body contains a TypeReference
+        // back to the alias itself, the prerender path should substitute
+        // that recursive reference with `obj` so the emitted F# is a
+        // valid alias rather than a recursive abbreviation (FS0953).
+        //
+        // Real-world case (workers-types):
+        //   type Stubable = U2<RpcTargetBranded, Stubable>
+        //   ↓ rendering with C1
+        //   type Stubable = obj
+        //
+        // Here we build a Union whose second branch is a TypeReference to
+        // the alias body. Without RenderingAliasBodyKeys protection, the
+        // remap path inside prerender would return the alias's own
+        // ConcretePath ref, producing a recursive emission. With C1, the
+        // remap detects the in-flight body and short-circuits to obj.
+        testCase "cycle-break for self-referencing alias body (C1)" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            // Construct a Union body whose second branch references the
+            // alias body itself. The encoder produces this shape for TS
+            // recursive aliases like `type T = A | T` (a degenerate but
+            // legal TS construct).
+            let firstBranch = primitive TypeKindPrimitive.String
+            let recursiveBranch =
+                ResolvedType.TypeReference {
+                    Type = LazyContainer.CreateFromValue firstBranch  // placeholder, replaced below
+                    TypeArguments = []
+                    ResolvedType = None
+                }
+            let body = Union.create [ firstBranch; recursiveBranch ]
+            // Wire the recursive branch's Type to the body itself so
+            // prerender of that branch sees the body's TypeKey (default).
+            let body = body
+            // TypeAliasRemap entry: body's TypeKey → alias's ConcretePath
+            // ref. This is what the render path would otherwise return for
+            // the recursive branch — and what cycle-break must override.
+            let aliasPathRef = TestHelper.prerender ctx (primitive TypeKindPrimitive.NonPrimitive)
+            let bodyKey = Unchecked.defaultof<TypeKey>
+            GeneratorContext.Prelude.addTypeAliasRemap ctx bodyKey aliasPathRef
+            // Now render the alias. With C1, push of bodyKey to
+            // RenderingAliasBodyKeys happens at the top of TypeAlias.render;
+            // the recursive branch's prerender hits remap → cycle-break.
+            let typeAlias = TypeAlias.create body "Recursive"
+            let scopeStore = RenderScopeStore.create()
+            let _ = Render_TypeAlias.TypeAlias.render ctx scopeStore typeAlias
+            // After rendering, the in-flight key MUST have been removed so
+            // it doesn't poison subsequent rendering. This is the most
+            // observable invariant that doesn't depend on the internal
+            // structure of the rendered Union.
+            Expect.isFalse
+                (ctx.RenderingAliasBodyKeys.Contains(bodyKey))
+                "RenderingAliasBodyKeys should release bodyKey after render returns"
     ]
 
 [<Tests>]

@@ -22,10 +22,24 @@ let private createConcreteTypeRef (path: TypePath) =
 [<Struct>]
 type private Registered = Registered of TypeRefRender
 let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolvedType: LazyResolvedType): TypeRefRender =
+    // `obj` substitution for cycle-breaking. Built once per call so the
+    // remap branch below stays cheap.
+    let objRefRender =
+        RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic Intrinsic.obj
+        |> RenderScopeStore.TypeRef.Unsafe.createAtom
+        |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
     let remap = function
             | { Nullable = nullable } when ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Raw) ->
-                ctx.TypeAliasRemap[lazyResolvedType.Raw]
-                |> TypeRefRender.orNullable nullable
+                // If this TypeKey's alias body is currently being rendered,
+                // returning the alias's ConcretePath ref would emit a
+                // recursive `type T = U2<A, T>` which F# rejects (FS0953).
+                // Substitute with `obj` to break the cycle. Glutinum's TS
+                // preprocessor does the equivalent (`any` for cyclic refs).
+                if ctx.RenderingAliasBodyKeys.Contains(lazyResolvedType.Raw) then
+                    objRefRender |> TypeRefRender.orNullable nullable
+                else
+                    ctx.TypeAliasRemap[lazyResolvedType.Raw]
+                    |> TypeRefRender.orNullable nullable
             | ref -> ref
     let inline addOrReplaceScope ctx resolvedType renderScope =
         let renderScope = ctx.Customisation.Interceptors.ResolvedTypePrelude ctx resolvedType renderScope

@@ -249,4 +249,15 @@ module TypeAlias =
                     Documentation = documentation
                 }
                 |> TypeAliasRender.TypeDefn
-        matchImpl innerType.Value
+        // Mark this alias's body TypeKey as in-flight so any self-reference
+        // encountered during prerender below resolves to `obj` instead of
+        // re-emitting the alias's own ConcretePath ref. F# rejects
+        // recursive type aliases (FS0953); the only safe rendering is to
+        // break the cycle. Matches Glutinum's TS-preprocessing behaviour
+        // (cyclic refs replaced with `any`/`obj`).
+        let bodyKey = innerType.Raw
+        let added = ctx.RenderingAliasBodyKeys.Add(bodyKey)
+        try
+            matchImpl innerType.Value
+        finally
+            if added then ctx.RenderingAliasBodyKeys.Remove(bodyKey) |> ignore
