@@ -319,7 +319,15 @@ module Name =
     /// <para>Backticks are removed prior to applying casing. Normalization is reapplied
     /// after casing is applied.</para>
     /// </remarks>
-    let normalizeForTypeParameter = map (Internal.stripBackticks >> sprintf "'%s")
+    /// Replace TS-source-only characters that can't appear in F# typar
+    /// names. `$` is a valid TypeScript identifier character (and a common
+    /// convention prefix in libraries like Zod) but invalid in F# typars
+    /// (`'X` requires X to follow F# identifier rules). Replacing with `_S`
+    /// rather than stripping avoids collapsing `$Foo` and `Foo` onto the
+    /// same name in scopes where both appear as typars.
+    let private sanitizeTyparCharacters (s: string) =
+        s.Replace("$", "_S")
+    let normalizeForTypeParameter = map (Internal.stripBackticks >> sanitizeTyparCharacters >> sprintf "'%s")
     /// <summary>
     /// Pascal cases the source name, and prefixes with a single quote.
     /// </summary>
@@ -328,7 +336,7 @@ module Name =
     /// after casing is applied.</para>
     /// <para>The function is applied to the source string, even if the name is modified</para>
     /// </remarks>
-    let sourceNormalizeForTypeParameter = mapSource (Internal.stripBackticks >> sprintf "'%s")
+    let sourceNormalizeForTypeParameter = mapSource (Internal.stripBackticks >> sanitizeTyparCharacters >> sprintf "'%s")
     /// <summary>
     /// Pascal cases the name, and prefixes with <c>I</c>.
     /// </summary>
