@@ -19,6 +19,16 @@ let private createConcreteTypeRef (path: TypePath) =
     |> RenderScopeStore.TypeRef.Unsafe.createAtom
     |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
 
+/// Build a TypeRefRender for a synthetic literal whose stable concrete
+/// path was assigned by the path-assignment pre-pass. Bypasses the
+/// transient/anchor machinery — the ref is concrete from the start, so
+/// references at any call site localise via `getRelativePath` against the
+/// assigned absolute path rather than re-anchoring per call site.
+let private createAssignedSyntheticRef (path: TypePath) (nullable: bool) =
+    RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
+    |> RenderScopeStore.TypeRef.Unsafe.createAtom
+    |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind nullable
+
 [<Struct>]
 type private Registered = Registered of TypeRefRender
 let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolvedType: LazyResolvedType): TypeRefRender =
@@ -66,7 +76,21 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             scope
             |> RenderScopeStore.tryAdd resolvedType path
             remap ref
-
+        | { Root = ValueSome (TypeLikePath.Anchored _); TypeRef = ref }
+            when ctx.SyntheticPaths.ContainsKey resolvedType ->
+            // Synthetic literal with a path-assignment-pass-assigned
+            // concrete TypePath. Track the visit so the export's
+            // anchorPreludeExportScope iteration sees this ResolvedType
+            // and runs the body's anchor pass — without this, the
+            // synthetic's body never gets emitted. The TypeStore value
+            // is a placeholder; the actual emission location lives on
+            // the cached renderScope.Root. Guarded by SyntheticPaths
+            // membership so named Interface/Class/Enum/TypeAlias exports
+            // (which also have Anchored Root) don't get re-anchored as
+            // siblings of the export that referenced them.
+            scope.TypeStore.TryAdd(resolvedType, TransientTypePath.Anchored)
+            |> ignore
+            remap ref
         | { TypeRef = ref } ->
             remap ref
     // a first visit to a type will either see the 'resolved type' as having been
@@ -191,38 +215,49 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> addOrReplaceScope ctx resolvedType
         // direct type render of literals union
         | { LiteralLike = literals; Others = []; EnumLike = []; Primitives = []; Nullable = nullable } ->
-            let path =
-                if lazyResolvedType.Raw = LazyContainer<_, _>.DummyTypeKey then
-                    Name.Pascal.create "Literals"
-                    |> TransientTypePath.AnchoredAndMoored
-                else
-                    TransientTypePath.Anchored
-            let ref = RenderScopeStore.TypeRefRender.create scope resolvedType nullable path
-            // Resolve the path against scope.PathContext so the Root agrees
-            // with the TypeRef. Without this, Root stays as bare
-            // `TransientTypePath.Anchored` and the synthetic transient anchors
-            // at the parent type's TypePath — colliding with the parent's
-            // own emission (e.g. an inline `1 | 2 | 3` literal in a property
-            // position would emit at the parent's name and overwrite the
-            // parent's TypeDefn via Render.Collection.combine). The TypeRef
-            // goes through createTransientPath which already grafts onto
-            // PathContext; Root needs the same transformation.
-            let rootPath =
-                match path with
-                | TransientTypePath.Anchored ->
-                    TransientPath.toTransientModulePath scope.PathContext
-                    |> TransientTypePath.graft
-                | _ -> path
-            {
-                Transient.RenderScope.Type = resolvedType
-                Root = TypeLikePath.create rootPath |> ValueSome
-                TypeRef = ref
-                Render =
-                    lazy Union.renderLiterals ctx scope literals
-                    |> Render.create ref
-                TransientChildren = ValueSome <| RenderScopeStore.create()
-            }
-            |> addOrReplaceScope ctx resolvedType
+            // Path-assignment pre-pass may have assigned a stable concrete
+            // path for this interned synthetic. When present, emit at the
+            // concrete path with a ConcretePath ref; bypass the transient
+            // graft/anchor machinery entirely. References at any call site
+            // localise via `getRelativePath` and resolve correctly across
+            // multiple positions.
+            match ctx.SyntheticPaths.TryGetValue resolvedType with
+            | true, concretePath ->
+                let ref = createAssignedSyntheticRef concretePath nullable
+                {
+                    Transient.RenderScope.Type = resolvedType
+                    Root = TypeLikePath.create concretePath |> ValueSome
+                    TypeRef = ref
+                    Render =
+                        lazy Union.renderLiterals ctx scope literals
+                        |> Render.create ref
+                    TransientChildren = ValueSome <| RenderScopeStore.create()
+                }
+                |> addOrReplaceScope ctx resolvedType
+            | _ ->
+                let path =
+                    if lazyResolvedType.Raw = LazyContainer<_, _>.DummyTypeKey then
+                        Name.Pascal.create "Literals"
+                        |> TransientTypePath.AnchoredAndMoored
+                    else
+                        TransientTypePath.Anchored
+                let ref = RenderScopeStore.TypeRefRender.create scope resolvedType nullable path
+                let rootPath =
+                    match path with
+                    | TransientTypePath.Anchored ->
+                        TransientPath.toTransientModulePath scope.PathContext
+                        |> TransientTypePath.graft
+                    | _ -> path
+                {
+                    Transient.RenderScope.Type = resolvedType
+                    Root = TypeLikePath.create rootPath |> ValueSome
+                    TypeRef = ref
+                    Render =
+                        lazy Union.renderLiterals ctx scope literals
+                        |> Render.create ref
+                    TransientChildren = ValueSome <| RenderScopeStore.create()
+                }
+                |> addOrReplaceScope ctx resolvedType
         | { Others = others; LiteralLike = literals; EnumLike = enumLike; Primitives = primitives; Nullable = nullable } ->
             seq {
                 if not <| List.isEmpty literals then
@@ -240,24 +275,37 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Intersection intersection ->
-        let path = TransientTypePath.Anchored
-        let ref = RenderScopeStore.TypeRefRender.create scope resolvedType false path
-        // Resolve Root against scope.PathContext — see the literals-union
-        // branch above for the rationale.
-        let rootPath =
-            TransientPath.toTransientModulePath scope.PathContext
-            |> TransientTypePath.graft
-        let scope = RenderScopeStore.create()
-        {
-            Transient.RenderScope.Type = resolvedType
-            Root = TypeLikePath.create rootPath |> ValueSome
-            TypeRef = ref
-            Render =
-                lazy Intersection.render ctx scope intersection
-                |> Render.create ref
-            TransientChildren = ValueSome scope
-        }
-        |> addOrReplaceScope ctx resolvedType
+        match ctx.SyntheticPaths.TryGetValue resolvedType with
+        | true, concretePath ->
+            let ref = createAssignedSyntheticRef concretePath false
+            let childScope = RenderScopeStore.create()
+            {
+                Transient.RenderScope.Type = resolvedType
+                Root = TypeLikePath.create concretePath |> ValueSome
+                TypeRef = ref
+                Render =
+                    lazy Intersection.render ctx childScope intersection
+                    |> Render.create ref
+                TransientChildren = ValueSome childScope
+            }
+            |> addOrReplaceScope ctx resolvedType
+        | _ ->
+            let path = TransientTypePath.Anchored
+            let ref = RenderScopeStore.TypeRefRender.create scope resolvedType false path
+            let rootPath =
+                TransientPath.toTransientModulePath scope.PathContext
+                |> TransientTypePath.graft
+            let childScope = RenderScopeStore.create()
+            {
+                Transient.RenderScope.Type = resolvedType
+                Root = TypeLikePath.create rootPath |> ValueSome
+                TypeRef = ref
+                Render =
+                    lazy Intersection.render ctx childScope intersection
+                    |> Render.create ref
+                TransientChildren = ValueSome childScope
+            }
+            |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Literal tsLiteral ->
         let path = TransientTypePath.Anchored
         let ref = RenderScopeStore.TypeRefRender.create scope resolvedType false path
@@ -316,16 +364,22 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         // emitted F# is well-formed: truncate excess args, pad missing args
         // with `obj`. Both directions log a warning so the upstream encoder
         // discrepancy stays visible.
+        let innerKind =
+            match innerResolvedTypeValue with
+            | ResolvedType.Interface i -> sprintf "Interface %s" (Name.Case.valueOrSource i.Name)
+            | ResolvedType.Class c -> sprintf "Class %s" (Name.Case.valueOrSource c.Name)
+            | ResolvedType.Enum e -> sprintf "Enum %s" (Name.Case.valueOrSource e.Name)
+            | _ -> "non-named-type"
         let alignedArguments =
             if typeArguments.Length = declaredParamCount then
                 typeArguments
             elif typeArguments.Length > declaredParamCount then
-                printfn "Warning: TypeReference application has %d arguments but %A declares %d type parameters; truncating to declared arity"
-                    typeArguments.Length innerResolvedTypeValue declaredParamCount
+                printfn "Warning: TypeReference application has %d arguments but %s declares %d type parameters; truncating to declared arity"
+                    typeArguments.Length innerKind declaredParamCount
                 typeArguments |> List.truncate declaredParamCount
             else
-                printfn "Warning: TypeReference application has %d arguments but %A declares %d type parameters; padding with obj to declared arity"
-                    typeArguments.Length innerResolvedTypeValue declaredParamCount
+                printfn "Warning: TypeReference application has %d arguments but %s declares %d type parameters; padding with obj to declared arity"
+                    typeArguments.Length innerKind declaredParamCount
                 let padCount = declaredParamCount - typeArguments.Length
                 let objArg =
                     LazyContainer.CreateFromValue
@@ -451,47 +505,42 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
         | _, _ ->
-            // The Root must reflect scope.PathContext so that two different
-            // TypeLiterals processed under different scopes (e.g. a function's
-            // call-signature literal vs an inline parameter-type literal of
-            // the same function) produce distinct Roots.
-            //
-            // Previously the Root was hardcoded to TransientTypePath.Anchored,
-            // which made every multi-member literal collide on the same final
-            // TypePath after anchoring. collectModules then merged them via
-            // combine, producing synthetic conflated types like a function
-            // gaining `ctx`, `env` members from one of its parameter shapes.
-            //
-            // Grafting the scope's PathContext onto the transient yields a
-            // Root that carries the scope's nesting (e.g. "context" for an
-            // inline parameter type), keeping each literal at its own path.
-            // Note: TypeRefRender.create grafts internally for TransientTypePath
-            // arguments, so we pass bare Anchored (it will graft to the same
-            // result) and compute rootPath separately for the Root field.
-            let rootPath =
-                TransientPath.toTransientModulePath scope.PathContext
-                |> TransientTypePath.graft
-            let ref = RenderScopeStore.TypeRefRender.create scope resolvedType false TransientTypePath.Anchored
-            // Seed the child scope's PathContext with the same rootPath so
-            // that the inner Members.render produces a TypeLikeRender whose
-            // Metadata.Path reflects this literal's own position. Without
-            // this, the literal's anchored Name falls back to the parent
-            // anchor's Name (e.g. a function-as-type-anchor's name) rather
-            // than the leaf segment that distinguishes this literal
-            // (e.g. "Context" for an inline parameter shape).
-            let childScope =
-                { RenderScopeStore.create() with
-                    PathContext = TransientPath.create rootPath }
-            {
-                RenderScope.Type = resolvedType
-                Root = rootPath |> TypeLikePath.create |> ValueSome
-                TypeRef = ref
-                Render =
-                    lazy TypeLiteral.render ctx childScope typeLiteral
-                    |> Render.create ref
-                TransientChildren = ValueSome childScope
-            }
-            |> addOrReplaceScope ctx resolvedType
+            match ctx.SyntheticPaths.TryGetValue resolvedType with
+            | true, concretePath ->
+                let ref = createAssignedSyntheticRef concretePath false
+                // childScope.PathContext seeded from the concrete path's
+                // module ancestry so inner Members.render produces a
+                // TypeLikeRender with metadata reflecting the literal's
+                // assigned location.
+                let childScope = RenderScopeStore.create()
+                {
+                    RenderScope.Type = resolvedType
+                    Root = TypeLikePath.create concretePath |> ValueSome
+                    TypeRef = ref
+                    Render =
+                        lazy TypeLiteral.render ctx childScope typeLiteral
+                        |> Render.create ref
+                    TransientChildren = ValueSome childScope
+                }
+                |> addOrReplaceScope ctx resolvedType
+            | _ ->
+                let rootPath =
+                    TransientPath.toTransientModulePath scope.PathContext
+                    |> TransientTypePath.graft
+                let ref = RenderScopeStore.TypeRefRender.create scope resolvedType false TransientTypePath.Anchored
+                let childScope =
+                    { RenderScopeStore.create() with
+                        PathContext = TransientPath.create rootPath }
+                {
+                    RenderScope.Type = resolvedType
+                    Root = rootPath |> TypeLikePath.create |> ValueSome
+                    TypeRef = ref
+                    Render =
+                        lazy TypeLiteral.render ctx childScope typeLiteral
+                        |> Render.create ref
+                    TransientChildren = ValueSome childScope
+                }
+                |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TemplateLiteral templateLiteral ->
         let path = TransientTypePath.Anchored
         scope |> RenderScopeStore.tryAdd resolvedType path

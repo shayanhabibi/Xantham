@@ -462,6 +462,20 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
         transientChildren.TypeStore.Keys
         |> Seq.filter (anchors.ContainsKey >> not)
         |> Seq.iter (anchor ctx anchors anchorPath)
+    | { Root = ValueSome (TypeLikePath.Anchored path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren }
+        when ctx.SyntheticPaths.ContainsKey renderScope.Type ->
+        // Synthetic literal whose stable concrete path was assigned by the
+        // path-assignment pre-pass. Path is already concrete; the body
+        // renders against this path directly without transient resolution.
+        // Guarded by SyntheticPaths membership so unrelated Anchored-Root +
+        // Transient-Render combinations (e.g. some TypeAlias body shapes)
+        // continue through their existing handlers.
+        let render = Render.Transient.anchor ctx (AnchorPath.create path) renderTuple
+        anchors
+        |> Dictionary.tryAdd renderScope.Type (path, render)
+        transientChildren.TypeStore.Keys
+        |> Seq.filter (anchors.ContainsKey >> not)
+        |> Seq.iter (anchor ctx anchors (AnchorPath.create path))
     | { Root = ValueSome (TypeLikePath.Transient path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren } ->
         let path = TransientTypePath.anchor anchorPath path
         // The transient's render uses its own anchored path so the type's
@@ -725,5 +739,9 @@ let private registerExportsForAnchoring (ctx: GeneratorContext) = List.iter (reg
 
 module ArenaInterner =
     let processExports (ctx: GeneratorContext) (interner: ArenaInterner) =
+        // Nanopass-adjacent: assign stable concrete TypePaths to interned
+        // synthetic literals before the export-anchor pass forces their
+        // bodies. See `Generator/SyntheticPathAssignment.fs`.
+        SyntheticPathAssignment.run ctx interner
         interner.ExportMap
         |> Map.iter (fun _ -> registerExportsForAnchoring ctx)

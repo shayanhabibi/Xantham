@@ -193,7 +193,17 @@ and GeneratorContext =
         AnchorRenders: AnchorScopeStore
         InFlight: HashSet<ResolvedType>
         Customisation: Customisation
-        
+        // Stable concrete paths for interned synthetic literal types (Union of
+        // literals, Intersection, multi-member TypeLiteral, TemplateLiteral)
+        // that appear in multiple positions and would otherwise produce
+        // mismatched references when each call site re-anchors the cached
+        // transient atom against its own anchorPath. Populated by a pre-pass
+        // before `prerenderFromGraph`. When prerender encounters a synthetic
+        // literal whose ResolvedType is in this map, it produces a
+        // ConcretePath ref + Anchored Root rather than a Transient pair.
+        // Additive to the documented Transient/Anchor system; non-interned
+        // single-position literals continue through the documented path.
+        SyntheticPaths: DictionaryImpl<ResolvedType, TypePath>
     }
     override this.ToString() = $"GeneratorContext(%d{this.PreludeRenders.Count})"
     static member internal Create(preludeGetTypeRefFunc, ?customisation) = {
@@ -204,6 +214,7 @@ and GeneratorContext =
         TypeAliasRemap = DictionaryImpl()
         RenderingAliasTargetRefs = HashSet()
         Customisation = defaultArg customisation Customisation.Default
+        SyntheticPaths = DictionaryImpl()
     }
     
 

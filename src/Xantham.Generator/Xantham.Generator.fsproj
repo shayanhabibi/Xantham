@@ -23,6 +23,7 @@
         <Compile Include="Types\Generator.fs" />
         <Compile Include="Generator\ResolvedType.Categorization.fs" />
         <Compile Include="Generator\TypeRefRender.Paths.fs" />
+        <Compile Include="Generator\SyntheticPathAssignment.fs" />
         <Compile Include="Generator\TypeRefRender.Render.fs" />
         <Compile Include="Generator\Render.TypeParameter.fs" />
         <Compile Include="Generator\Render.Parameter.fs" />

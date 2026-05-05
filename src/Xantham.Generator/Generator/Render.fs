@@ -49,6 +49,7 @@ let main argv =
                      
          })
     ArenaInterner.prerenderTypeAliases generatorContext interner
+    SyntheticPathAssignment.run generatorContext interner
     // ArenaInterner.prerenderFromGraph generatorContext interner
     ArenaInterner.processExports generatorContext interner
     let renders =
