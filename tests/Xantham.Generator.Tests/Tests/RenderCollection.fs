@@ -112,4 +112,54 @@ let tests =
                 let leadingSpaces = line.Length - line.TrimStart(' ').Length
                 Expect.isGreaterThan leadingSpaces 4
                     (sprintf "expected facade to be nested inside `module DynamicWorkflows = ` (indent > 4); got line %A in:\n%s" line output)
+
+        // F# is single-pass. When a child module hosts BOTH a
+        // package-level facade AND synthetic transient submodules
+        // (created for inline parameter-shape literals, callable-type
+        // bodies, etc.), the facade and the module's own types reference
+        // those submodules by name. Those references only resolve if the
+        // submodules are emitted before the references. `renderModule`
+        // therefore emits submodules first, then types, then the facade.
+        //
+        // This test constructs a function whose inline parameter literal
+        // forces a synthetic submodule to be created, then asserts the
+        // submodule appears before the facade in the rendered output.
+        testCase "submodules emitted before facade in same module" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            // A function `doThing(context: { x: string })` — the inline
+            // `{ x: string }` parameter shape becomes a synthetic submodule
+            // named after the function (Pascal-cased "DoThing") hosting a
+            // type for that shape. Both that submodule and the facade end
+            // up in `module DynamicWorkflows = ...`.
+            let inlineShape =
+                TypeLiteral.empty
+                |> TypeLiteral.addMember (Property.create "x" (primitive TypeKindPrimitive.String) |> Property.wrap)
+                |> TypeLiteral.wrap
+            let func =
+                Function.create "doThing" (primitive TypeKindPrimitive.String)
+                |> Function.withParameters [ Parameter.create "context" inlineShape ]
+                |> Function.withPath [ "Cloudflare"; "DynamicWorkflows" ]
+            registerAnchorFromExport ctx (ResolvedExport.Function [ func ])
+            let root = RootModule.collectModules ctx
+            let output = renderRootToString ctx root
+            let lines = output.Split('\n')
+            let lineIndexOf (predicate: string -> bool) =
+                lines
+                |> Array.tryFindIndex predicate
+            // Look for the synthetic submodule for the function and the
+            // facade inside DynamicWorkflows. The submodule's exact name
+            // depends on the case-modification rules; the structural
+            // property we care about is "submodule-line < facade-line".
+            let facadeIdx =
+                lineIndexOf (fun l -> l.Contains "type IDynamicWorkflows")
+            let submoduleIdx =
+                lineIndexOf (fun l -> l.TrimStart(' ').StartsWith("module DoThing"))
+            match submoduleIdx, facadeIdx with
+            | Some sIdx, Some fIdx ->
+                Expect.isLessThan sIdx fIdx
+                    (sprintf "expected synthetic `module DoThing` to appear before `type IDynamicWorkflows` (so the facade can reference it); got submodule at line %d, facade at line %d in:\n%s" sIdx fIdx output)
+            | None, _ ->
+                failtestf "expected a `module DoThing` synthetic submodule to be present; got:\n%s" output
+            | _, None ->
+                failtestf "expected the IDynamicWorkflows facade to be present; got:\n%s" output
     ]

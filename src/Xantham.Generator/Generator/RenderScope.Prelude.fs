@@ -425,7 +425,16 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 TransientPath.toTransientModulePath scope.PathContext
                 |> TransientTypePath.graft
             let ref = RenderScopeStore.TypeRefRender.create scope resolvedType false TransientTypePath.Anchored
-            let childScope = RenderScopeStore.create()
+            // Seed the child scope's PathContext with the same rootPath so
+            // that the inner Members.render produces a TypeLikeRender whose
+            // Metadata.Path reflects this literal's own position. Without
+            // this, the literal's anchored Name falls back to the parent
+            // anchor's Name (e.g. a function-as-type-anchor's name) rather
+            // than the leaf segment that distinguishes this literal
+            // (e.g. "Context" for an inline parameter shape).
+            let childScope =
+                { RenderScopeStore.create() with
+                    PathContext = TransientPath.create rootPath }
             {
                 RenderScope.Type = resolvedType
                 Root = rootPath |> TypeLikePath.create |> ValueSome

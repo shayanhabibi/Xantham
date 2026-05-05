@@ -248,8 +248,20 @@ module TemplateLiteral =
             |> TypeDefn
 module Members =
     let renderFromMembersAndFunctions (ctx: GeneratorContext) (scopeStore: RenderScopeStore) members functions =
+        // Derive Metadata.Path from scopeStore.PathContext so that the
+        // resulting TypeLikeRender carries this literal's position rather
+        // than a bare Anchored placeholder. After anchoring, the Name
+        // fallback in `anchorTypeDefn` reads the path's leaf segment as
+        // the Name when none is supplied — giving inline parameter shapes
+        // a meaningful name (e.g. "Context") instead of inheriting the
+        // parent type's name (e.g. "DispatchWorkflow") via the surrounding
+        // anchor.
+        let scopedPath =
+            TransientPath.toTransientModulePath scopeStore.PathContext
+            |> TransientTypePath.graft
+            |> Path.create
         {
-            Transient.TypeLikeRender.Metadata = { Path = Path.create TransientTypePath.Anchored; Original = Path.create TransientTypePath.Anchored
+            Transient.TypeLikeRender.Metadata = { Path = scopedPath; Original = scopedPath
                                                   Source = ValueNone; FullyQualifiedName = ValueNone }
             Name = ValueNone
             TypeParameters = []
