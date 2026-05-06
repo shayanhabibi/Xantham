@@ -101,6 +101,10 @@ let private callSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Signature
         | TagState.Visited t -> t
     {
         SCallSignatureBuilder.Parameters = signatureToParamSlots ctx signature
+        // TS Signature objects don't expose typeParameters as nodes; the
+        // declaration-side reads (CallSignature.read in MemberDeclaration.fs)
+        // do. Leave empty for these synthetic signature-only call sites.
+        TypeParameters = [||]
         Type = returnTag.TypeSignal
         Documentation = []
     }
@@ -120,6 +124,7 @@ let private constructSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Sign
         | TagState.Visited t -> t
     {
         SConstructSignatureBuilder.Parameters = signatureToParamSlots ctx signature
+        TypeParameters = [||]
         Type = returnTag.TypeSignal
     }
     |> SMemberBuilder.ConstructSignature

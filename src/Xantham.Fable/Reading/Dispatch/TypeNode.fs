@@ -40,6 +40,24 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
     let inline getParamSlots (parameters: ResizeArray<Ts.ParameterDeclaration>) =
         parameters.AsArray
         |> Array.map (Member.resolveToParameterBuilder ctx)
+    /// Build method-scope typar slots from an optional list of
+    /// TypeParameterDeclarations (TS function-type / constructor-type nodes).
+    let inline getTypeParamSlots (typeParams: ResizeArray<Ts.TypeParameterDeclaration> option) =
+        typeParams
+        |> Option.map _.AsArray
+        |> Option.defaultValue [||]
+        |> Array.map (
+            ctx.CreateXanthamTag
+            >> fst >> stackPushAndThen ctx (fun tag -> tag.TypeSignal, tag.Builder)
+            >> fun signals -> signals ||> Signal.map2 (fun typeKey -> function
+                | ValueSome (SType.TypeParameter tp) ->
+                    ValueSome {
+                        Type = typeKey
+                        TypeParameter = tp
+                    }
+                | _ -> ValueNone
+                )
+            )
     match tag with
     | TypeNode.AnyKeyword _       -> setKeyword TypeKindPrimitive.Any
     | TypeNode.StringKeyword _    -> setKeyword TypeKindPrimitive.String
@@ -350,11 +368,12 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         routeViaChecker importTypeNode
     | TypeNode.FunctionType funcTypeNode ->
         XanthamTag.debugLocationAndForget "TypeNode.dispatch | FunctionType" xanTag
-        // (x: T) => R — emit as a CallSignature (type params not captured; schema has no slot)
+        // (x: T) => R — emit as a CallSignature with method-scope typars.
         {
             Members = [|
                 {
                     SCallSignatureBuilder.Parameters = getParamSlots funcTypeNode.parameters
+                    TypeParameters = getTypeParamSlots funcTypeNode.typeParameters
                     Type = getTypeSignalFromNode funcTypeNode.``type``
                     Documentation = []
                 }
@@ -368,11 +387,12 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         setTypeKeyFromNode funcTypeNode
     | TypeNode.ConstructorType ctorTypeNode ->
         XanthamTag.debugLocationAndForget "TypeNode.dispatch | ConstructorType" xanTag
-        // new (x: T) => R — emit as a ConstructSignature
+        // new (x: T) => R — emit as a ConstructSignature with method-scope typars.
         {
             Members = [|
                 {
                     SConstructSignatureBuilder.Parameters = getParamSlots ctorTypeNode.parameters
+                    TypeParameters = getTypeParamSlots ctorTypeNode.typeParameters
                     Type = getTypeSignalFromNode ctorTypeNode.``type``
                 }
                 |> SMemberBuilder.ConstructSignature

@@ -10,8 +10,24 @@ open Xantham
 /// Collects keys from <c>TsMember</c>'s
 /// </summary>
 let rec private getKeysFromMember (memberInfo: TsMember) =
+    let typarKeys (typars: InlinedTsTypeParameter list) =
+        typars
+        |> List.collect (function
+            | typ, { Constraint = c; Default = d } ->
+                [
+                    typ
+                    match c with Some v -> v | _ -> ()
+                    match d with Some v -> v | _ -> ()
+                ])
     match memberInfo with
-    | TsMember.Method glueMethod -> glueMethod.ToArray() |> Array.map _.Type
+    | TsMember.Method glueMethod ->
+        glueMethod.ToArray()
+        |> Array.collect (fun glueMethod ->
+            [|
+                glueMethod.Type
+                yield! glueMethod.Parameters |> List.map _.Type
+                yield! typarKeys glueMethod.TypeParameters
+            |])
     | TsMember.Property glueProperty -> [| glueProperty.Type |]
     | TsMember.GetAccessor glueGetAccessor -> [| glueGetAccessor.Type |]
     | TsMember.SetAccessor glueSetAccessor -> [| glueSetAccessor.ArgumentType |]
@@ -21,6 +37,7 @@ let rec private getKeysFromMember (memberInfo: TsMember) =
             [|
                 glueCallSignature.Type
                 yield! glueCallSignature.Parameters |> List.map _.Type
+                yield! typarKeys glueCallSignature.TypeParameters
             |]
         )
     | TsMember.IndexSignature glueIndexSignature ->
@@ -33,6 +50,7 @@ let rec private getKeysFromMember (memberInfo: TsMember) =
             [|
                 glueConstruct.Type
                 yield! glueConstruct.Parameters |> List.map _.Type
+                yield! typarKeys glueConstruct.TypeParameters
             |])
 
 /// <summary>
@@ -176,6 +194,12 @@ and getKeysFromExport export =
 let private compressWithMap (types: Map<TypeKey, TsType>) (compressions: Dictionary<TypeKey, TypeKey>) =
     let inline swap key = compressions[key]
     let swapParameter (parameter: TsParameter) = { parameter with Type = swap parameter.Type }
+    let swapTypar (typar: TsTypeParameter) = {
+        typar with
+            Default = typar.Default |> Option.map swap
+            Constraint = typar.Constraint |> Option.map swap
+    }
+    let swapInlinedTypar (key, typar) = swap key, swapTypar typar
     let swapMember = function
         | TsMember.Method glueMethod ->
             glueMethod.Values
@@ -183,6 +207,7 @@ let private compressWithMap (types: Map<TypeKey, TsType>) (compressions: Diction
                 glueMethod with
                     Parameters = glueMethod.Parameters |> List.map swapParameter
                     Type = swap glueMethod.Type
+                    TypeParameters = glueMethod.TypeParameters |> List.map swapInlinedTypar
             })
             |> TsOverloadableConstruct.Create
             |> TsMember.Method
@@ -195,6 +220,7 @@ let private compressWithMap (types: Map<TypeKey, TsType>) (compressions: Diction
                 callSignature with
                     Parameters = callSignature.Parameters |> List.map swapParameter
                     Type = swap callSignature.Type
+                    TypeParameters = callSignature.TypeParameters |> List.map swapInlinedTypar
             })
             |> TsOverloadableConstruct.Create
             |> TsMember.CallSignature
@@ -210,14 +236,10 @@ let private compressWithMap (types: Map<TypeKey, TsType>) (compressions: Diction
                 constructSignature with
                     Parameters = constructSignature.Parameters |> List.map swapParameter
                     Type = swap constructSignature.Type
+                    TypeParameters = constructSignature.TypeParameters |> List.map swapInlinedTypar
             })
             |> TsOverloadableConstruct.Create
             |> TsMember.ConstructSignature
-    let swapTypar (typar: TsTypeParameter) = {
-        typar with
-            Default = typar.Default |> Option.map swap
-            Constraint = typar.Constraint |> Option.map swap
-    }
     let rec swapType = function
         | TsType.TypeReference value ->
             TsType.TypeReference {
@@ -394,6 +416,12 @@ let private compressResult (types: Map<TypeKey, TsType>) (protectedKeys: TypeKey
 let private compressExports (exports: Map<TypeKey, TsExportDeclaration>) (compressions: Dictionary<TypeKey, TypeKey>) =
     let inline swap key = compressions[key]
     let swapParameter (parameter: TsParameter) = { parameter with Type = swap parameter.Type }
+    let swapTypar (typar: TsTypeParameter) = {
+        typar with
+            Default = typar.Default |> Option.map swap
+            Constraint = typar.Constraint |> Option.map swap
+    }
+    let swapInlinedTypar (key, typar) = swap key, swapTypar typar
     let swapMember = function
         | TsMember.Method glueMethod ->
             glueMethod.Values
@@ -401,6 +429,7 @@ let private compressExports (exports: Map<TypeKey, TsExportDeclaration>) (compre
                 glueMethod with
                     Parameters = glueMethod.Parameters |> List.map swapParameter
                     Type = swap glueMethod.Type
+                    TypeParameters = glueMethod.TypeParameters |> List.map swapInlinedTypar
             })
             |> TsOverloadableConstruct.Create
             |> TsMember.Method
@@ -413,6 +442,7 @@ let private compressExports (exports: Map<TypeKey, TsExportDeclaration>) (compre
                 callSignature with
                     Parameters = callSignature.Parameters |> List.map swapParameter
                     Type = swap callSignature.Type
+                    TypeParameters = callSignature.TypeParameters |> List.map swapInlinedTypar
             })
             |> TsOverloadableConstruct.Create
             |> TsMember.CallSignature
@@ -428,14 +458,10 @@ let private compressExports (exports: Map<TypeKey, TsExportDeclaration>) (compre
                 constructSignature with
                     Parameters = constructSignature.Parameters |> List.map swapParameter
                     Type = swap constructSignature.Type
+                    TypeParameters = constructSignature.TypeParameters |> List.map swapInlinedTypar
             })
             |> TsOverloadableConstruct.Create
             |> TsMember.ConstructSignature
-    let swapTypar (typar: TsTypeParameter) = {
-        typar with
-            Default = typar.Default |> Option.map swap
-            Constraint = typar.Constraint |> Option.map swap
-    }
     let rec swapExport = function
         | TsExportDeclaration.Variable glueVariable -> TsExportDeclaration.Variable { glueVariable with Type = swap glueVariable.Type }
         | TsExportDeclaration.Interface tsInterface -> TsExportDeclaration.Interface {

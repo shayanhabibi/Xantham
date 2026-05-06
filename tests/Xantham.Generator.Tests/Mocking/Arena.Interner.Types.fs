@@ -186,6 +186,7 @@ module ResolvedType =
             Documentation = []
             Parameters = []
             CallSignature.Type = LazyContainer.CreateFromValue returnType
+            TypeParameters = []
         }
         let withParameters parameters callSignature = { callSignature with CallSignature.Parameters = parameters }
         let withReturnType returnType callSignature = { callSignature with CallSignature.Type = LazyContainer.CreateFromValue returnType }

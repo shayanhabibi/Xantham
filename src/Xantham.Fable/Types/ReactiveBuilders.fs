@@ -189,6 +189,11 @@ type SMethodBuilder = {
     Name: string
     /// Reactive parameter slots — filled when each parameter is processed.
     Parameters: Signal<SParameterBuilder voption> array
+    /// Reactive method-scope type-parameter slots. TS allows generic methods
+    /// (`foo<T>(x: T): T`); rendering must emit `<'T>` on the F# method
+    /// declaration, otherwise typars referenced in parameters/return read
+    /// as undefined (FS0039).
+    TypeParameters: Signal<InlinedSTypeParameterBuilder voption> array
     Type: TypeSignal
     IsOptional: bool
     IsStatic: bool
@@ -202,6 +207,10 @@ type SMethodBuilder = {
               |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
               |> Array.toList
           Type = this.Type.Value
+          TypeParameters =
+              this.TypeParameters
+              |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
+              |> Array.toList
           IsOptional = this.IsOptional
           IsStatic = this.IsStatic
           Documentation = this.Documentation }
@@ -238,6 +247,9 @@ type SFunctionBuilder = {
 type SCallSignatureBuilder = {
     Parameters: Signal<SParameterBuilder voption> array
     Type: TypeSignal
+    /// Reactive call-signature-scope type-parameter slots. Mirrors the
+    /// `<T>` slot on TS `(x: T): R` call signatures.
+    TypeParameters: Signal<InlinedSTypeParameterBuilder voption> array
     Documentation: TsComment list
 } with
     interface IOverloadable
@@ -247,18 +259,29 @@ type SCallSignatureBuilder = {
               |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
               |> Array.toList
           Type = this.Type.Value
+          TypeParameters =
+              this.TypeParameters
+              |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
+              |> Array.toList
           Documentation = this.Documentation }
 
 /// Signal-based equivalent of <c>TsConstructSignatureBuilder</c>, builds to <see cref="T:Xantham.TsConstructSignature"/>.
 type SConstructSignatureBuilder = {
     Type: TypeSignal
     Parameters: Signal<SParameterBuilder voption> array
+    /// Reactive construct-signature-scope type-parameter slots. Mirrors the
+    /// `<T>` slot on TS `new <T>(x: T): R` construct signatures.
+    TypeParameters: Signal<InlinedSTypeParameterBuilder voption> array
 } with
     interface IOverloadable
     member this.Build() : TsConstructSignature =
         { Type = this.Type.Value
           Parameters =
               this.Parameters
+              |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
+              |> Array.toList
+          TypeParameters =
+              this.TypeParameters
               |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
               |> Array.toList }
 

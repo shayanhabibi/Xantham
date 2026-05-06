@@ -266,6 +266,7 @@ and [<ReferenceEquality>] Method = {
     Name: Name<Case.camel>
     Parameters: Parameter list
     Type: LazyResolvedType
+    TypeParameters: Lazy<TypeParameter> list
     Documentation: TsComment list
     IsOptional: bool
     IsStatic: bool
@@ -275,11 +276,13 @@ and [<ReferenceEquality>] CallSignature = {
     Documentation: TsComment list
     Parameters: Parameter list
     Type: LazyResolvedType
+    TypeParameters: Lazy<TypeParameter> list
 } with interface IOverloadable
 
 and [<ReferenceEquality>] ConstructSignature = {
     Type: LazyResolvedType
     Parameters: Parameter list
+    TypeParameters: Lazy<TypeParameter> list
 } with interface IOverloadable
 
 and [<ReferenceEquality>] Constructor = {
@@ -792,6 +795,7 @@ module ArenaInterner =
                     Method.Name = Name.Camel.create method.Name
                     Parameters = method.Parameters |> List.map buildFromParameter
                     Type = { Data = method.Type; Result = lazy resolve method.Type }
+                    TypeParameters = method.TypeParameters |> List.map buildFromTypeParameter
                     Documentation = method.Documentation
                     IsOptional = method.IsOptional
                     IsStatic = method.IsStatic
@@ -825,6 +829,7 @@ module ArenaInterner =
                     CallSignature.Documentation = value.Documentation
                     Parameters = value.Parameters |> List.map buildFromParameter
                     Type = { Data = value.Type; Result = lazy resolve value.Type }
+                    TypeParameters = value.TypeParameters |> List.map buildFromTypeParameter
                 })
                 |> Member.CallSignature
             | TsMember.IndexSignature tsIndexSignature ->
@@ -838,6 +843,7 @@ module ArenaInterner =
                 |> List.map (fun value -> {
                     ConstructSignature.Type = { Data = value.Type; Result = lazy resolve value.Type }
                     Parameters = value.Parameters |> List.map buildFromParameter
+                    TypeParameters = value.TypeParameters |> List.map buildFromTypeParameter
                 })
                 |> Member.ConstructSignature
 

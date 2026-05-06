@@ -405,6 +405,17 @@ module TypeParameterRender =
         
 
 module FunctionLikeSignature =
+    /// Build the typeParams widget when the signature carries method-scope
+    /// typars. Returns ValueNone when the typar list is empty so call sites
+    /// can short-circuit and avoid emitting a `<>` no-op.
+    let private renderTypeParameters (ctx: GeneratorContext) (functionLike: FunctionLikeSignature) =
+        if List.isEmpty functionLike.TypeParameters then
+            ValueNone
+        else
+            functionLike.TypeParameters
+            |> TypeParameterRender.renderTypeParametersIntoPostfixList ctx
+            |> ValueSome
+
     let renderAbstractWithName (ctx: GeneratorContext) (name: Name<_>) (functionLike: FunctionLikeSignature) =
         let renderName = Name.Case.valueOrModified name
         let parameters =
@@ -415,8 +426,10 @@ module FunctionLikeSignature =
                 | paras -> paras
             |> Ast.Tuple
         let returnType = functionLike.ReturnType |> TypeRefRender.render
+        let typeParameters = renderTypeParameters ctx functionLike
         Ast.AbstractMember(renderName, [ parameters ], returnType)
         |> if functionLike.Traits.Contains(RenderTraits.Static) then _.toStatic() else id
+        |> if typeParameters.IsSome then _.typeParams(typeParameters.Value) else id
         |> Documentation.renderForAbstractMember functionLike
 
     let renderMember (ctx: GeneratorContext) (name: Name<_>) (functionLike: FunctionLikeSignature) =
@@ -430,10 +443,12 @@ module FunctionLikeSignature =
             |> Ast.TuplePat
             |> Ast.ParenPat
         let returnType = functionLike.ReturnType |> TypeRefRender.render
+        let typeParameters = renderTypeParameters ctx functionLike
         Ast.Member(renderName, parameters, Exprs.jsUndefined, returnType)
         |> if functionLike.Traits.Contains(RenderTraits.Static) then _.toStatic() else id
+        |> if typeParameters.IsSome then _.typeParams(typeParameters.Value) else id
         |> Documentation.renderForMember functionLike
-    
+
     let renderBinding (ctx: GeneratorContext) (name: Name<_>) (functionLike: FunctionLikeSignature) =
         let renderName = Name.Case.valueOrModified name
         let parameters =
@@ -442,7 +457,9 @@ module FunctionLikeSignature =
             |> function
                 | [] -> [ Ast.UnitPat() ]
                 | paras -> paras
+        let typeParameters = renderTypeParameters ctx functionLike
         Ast.Function(renderName, parameters, Exprs.jsUndefined, functionLike.ReturnType |> TypeRefRender.render)
+        |> if typeParameters.IsSome then _.typeParams(typeParameters.Value) else id
         |> Documentation.renderForBinding functionLike
     
     let renderSignature (ctx: GeneratorContext) (functionLike: FunctionLikeSignature) =

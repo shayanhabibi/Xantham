@@ -215,6 +215,7 @@ type TsMethod = {
     Name: string
     Parameters: TsParameter list
     Type: TypeKey
+    TypeParameters: InlinedTsTypeParameter list
     IsOptional: bool
     IsStatic: bool
     Documentation: TsComment list
@@ -232,6 +233,7 @@ type TsCallSignature = {
     Documentation: TsComment list
     Parameters: TsParameter list
     Type: TypeKey
+    TypeParameters: InlinedTsTypeParameter list
 } with interface IOverloadable
 
 /// <summary>
@@ -245,6 +247,7 @@ type TsCallSignature = {
 type TsConstructSignature = {
     Type: TypeKey
     Parameters: TsParameter list
+    TypeParameters: InlinedTsTypeParameter list
 } with interface IOverloadable
 
 /// Represents a class constructor declaration.
@@ -1077,6 +1080,7 @@ module TsMethod =
             "Name", Encode.string value.Name
             "Parameters", value.Parameters |> List.map TsParameter.encode |> Encode.list
             "Type", TypeKey.encode value.Type
+            "TypeParameters", value.TypeParameters |> List.map InlinedTsTypeParameter.encode |> Encode.list
             "IsOptional", Encode.bool value.IsOptional
             "IsStatic", Encode.bool value.IsStatic
             "Documentation", value.Documentation |> List.map TsComment.encode |> Encode.list
@@ -1086,6 +1090,9 @@ module TsMethod =
             Name = get.Required.Field "Name" Decode.string
             Parameters = get.Required.Field "Parameters" (Decode.list TsParameter.decode)
             Type = get.Required.Field "Type" TypeKey.decode
+            TypeParameters =
+                get.Optional.Field "TypeParameters" (Decode.list InlinedTsTypeParameter.decode)
+                |> Option.defaultValue []
             IsOptional = get.Required.Field "IsOptional" Decode.bool
             IsStatic = get.Required.Field "IsStatic" Decode.bool
             Documentation = get.Required.Field "Documentation" (Decode.list TsComment.decode)
@@ -1097,12 +1104,16 @@ module TsCallSignature =
             "Documentation", value.Documentation |> List.map TsComment.encode |> Encode.list
             "Parameters", value.Parameters |> List.map TsParameter.encode |> Encode.list
             "Type", TypeKey.encode value.Type
+            "TypeParameters", value.TypeParameters |> List.map InlinedTsTypeParameter.encode |> Encode.list
         ]
     let decode: Decoder<TsCallSignature> =
         Decode.object <| fun get -> {
-            Documentation = get.Required.Field "Documentation" (Decode.list TsComment.decode)
+            TsCallSignature.Documentation = get.Required.Field "Documentation" (Decode.list TsComment.decode)
             Parameters = get.Required.Field "Parameters" (Decode.list TsParameter.decode)
             Type = get.Required.Field "Type" TypeKey.decode
+            TypeParameters =
+                get.Optional.Field "TypeParameters" (Decode.list InlinedTsTypeParameter.decode)
+                |> Option.defaultValue []
         }
 
 module TsConstructSignature =
@@ -1110,11 +1121,15 @@ module TsConstructSignature =
         Encode.object [
             "Type", TypeKey.encode value.Type
             "Parameters", value.Parameters |> List.map TsParameter.encode |> Encode.list
+            "TypeParameters", value.TypeParameters |> List.map InlinedTsTypeParameter.encode |> Encode.list
         ]
     let decode: Decoder<TsConstructSignature> =
         Decode.object <| fun get -> {
             Type = get.Required.Field "Type" TypeKey.decode
             Parameters = get.Required.Field "Parameters" (Decode.list TsParameter.decode)
+            TypeParameters =
+                get.Optional.Field "TypeParameters" (Decode.list InlinedTsTypeParameter.decode)
+                |> Option.defaultValue []
         }
 
 module TsConstructor =

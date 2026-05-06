@@ -16,7 +16,7 @@ module CallSignature =
         (scopeStore: RenderScopeStore)
         (callSignature: CallSignature) =
         let path = Path.create TransientMemberPath.Anchored
-        let metadata = 
+        let metadata =
             { Path = path
               Original = path
               Source = ValueNone
@@ -24,13 +24,16 @@ module CallSignature =
         let parameters =
             callSignature.Parameters
             |> List.map (Parameter.render ctx scopeStore)
+        let typeParameters =
+            callSignature.TypeParameters
+            |> List.map (_.Value >> TypeParameter.render ctx scopeStore)
         let returnType = ctx.PreludeGetTypeRef ctx scopeStore callSignature.Type
         {
             Prelude.FunctionLikeSignature.Metadata = metadata
             Parameters = parameters
             ReturnType = returnType
             Traits = Set [ ]
-            TypeParameters = []
+            TypeParameters = typeParameters
             Documentation = callSignature.Documentation
         }
         
@@ -77,6 +80,9 @@ module Method =
         let scopeStore =
             method.Name
             |> RenderScopeStore.appendNameToPathContext scopeStore
+        let typeParameters =
+            method.TypeParameters
+            |> List.map (_.Value >> TypeParameter.render ctx scopeStore)
         {
             Metadata = metadata
             Prelude.FunctionLikeRender.Name = method.Name
@@ -87,7 +93,7 @@ module Method =
                      |> List.map (Parameter.render ctx scopeStore)
                  ReturnType = ctx.PreludeGetTypeRef ctx scopeStore method.Type
                  Traits = Set []
-                 TypeParameters = []
+                 TypeParameters = typeParameters
                  Documentation = []
              }]
             Traits = Set [
@@ -236,7 +242,9 @@ module ConstructSignature =
                             |> List.map (Parameter.render ctx scopeStore)
                         ReturnType = ctx.PreludeGetTypeRef ctx scopeStore constructSignature.Type
                         Traits = Set [ RenderTraits.JSConstructor ]
-                        TypeParameters = []
+                        TypeParameters =
+                            constructSignature.TypeParameters
+                            |> List.map (_.Value >> TypeParameter.render ctx scopeStore)
                         Documentation = []
                     }
             ]

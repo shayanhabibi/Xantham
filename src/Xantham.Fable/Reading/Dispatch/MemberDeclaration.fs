@@ -137,6 +137,7 @@ module Method =
         let builder = {
             SMethodBuilder.Name = NameHelpers.getName node.name
             Parameters = getParameterSlots ctx node.parameters
+            TypeParameters = getTypeParamSlots ctx node.typeParameters
             Type = getReturnTypeSignal ctx xanTag node.``type``
             IsOptional = node.questionToken.IsSome
             IsStatic = false
@@ -150,6 +151,7 @@ module Method =
             {
                 SMethodBuilder.Name = NameHelpers.getName node.name
                 Parameters = getParameterSlots ctx node.parameters
+                TypeParameters = getTypeParamSlots ctx node.typeParameters
                 Type = getReturnTypeSignal ctx xanTag node.``type``
                 IsOptional = false
                 IsStatic = node.modifiers |> unbox |> optionArrayHasModifier _.IsStatic
@@ -174,6 +176,7 @@ module CallSignature =
         xanTag.MemberBuilder <-
             {
                 SCallSignatureBuilder.Parameters = getParameterSlots ctx node.parameters
+                TypeParameters = getTypeParamSlots ctx node.typeParameters
                 Type = getReturnTypeSignal ctx xanTag node.``type``
                 Documentation = JSDocTags.resolveDocsForTag ctx xanTag
             }
@@ -186,6 +189,7 @@ module ConstructSignature =
             {
                 SConstructSignatureBuilder.Type = getReturnTypeSignal ctx xanTag node.``type``
                 Parameters = getParameterSlots ctx node.parameters
+                TypeParameters = getTypeParamSlots ctx node.typeParameters
             }
             |> SMemberBuilder.ConstructSignature
 
