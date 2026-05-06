@@ -360,11 +360,20 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeReference { TypeArguments = typeArguments; Type = innerResolvedType } ->
         let innerResolvedTypeValue = innerResolvedType.Value
+        // For lib.es types whose F# substitution diverges from the source's
+        // typar arity (e.g. TS `IterableIterator<TY,TR,TN>` → F# `IEnumerator<T>`,
+        // or TS `Uint8Array<TBuf>` → Fable's non-generic `Uint8Array`), the
+        // *target's* arity is what governs the rendered application — not the
+        // TS source's. The substitution table carries both; when present, use
+        // the target arity so the args list reconciles correctly.
         let declaredParamCount =
-            match innerResolvedTypeValue with
-            | ResolvedType.Interface i -> i.TypeParameters.Length
-            | ResolvedType.Class c -> c.TypeParameters.Length
-            | _ -> typeArguments.Length
+            match LibEsDefaults.tryLookupSubstitution innerResolvedTypeValue with
+            | ValueSome sub -> sub.Arity
+            | ValueNone ->
+                match innerResolvedTypeValue with
+                | ResolvedType.Interface i -> i.TypeParameters.Length
+                | ResolvedType.Class c -> c.TypeParameters.Length
+                | _ -> typeArguments.Length
         // Encoder/TS may produce a TypeReference whose argument count doesn't
         // match the inner type's declared type parameter count — happens with
         // declaration merging where the encoder can't disambiguate which

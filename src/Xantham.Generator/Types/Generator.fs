@@ -30,40 +30,73 @@ type AnchorScopeStore = DictionaryImpl<Choice<ResolvedType, ResolvedExport>, Cho
 /// references to those equivalents instead of as path-based references
 /// to undefined `Typescript.X` names.
 module LibEsDefaults =
-    /// Map from TS lib.es type name to F# intrinsic name. The F# name is
-    /// emitted via Ast.LongIdent so multi-segment names (e.g.
+    /// A substitution maps a TS lib.es type name to an F# target type
+    /// name AND its target arity. Arity awareness is essential because
+    /// TS and F# bindings diverge on type parameter count: TS 5.6+ gave
+    /// `IterableIterator` three typars (`<TYield, TReturn, TNext>`) while
+    /// the F# `IEnumerator<T>` analogue has one. TS 5.7+ made typed
+    /// arrays generic (`Uint8Array<TBuf>`) while Fable's bindings remain
+    /// non-generic. Without arity awareness the renderer mechanically
+    /// keeps the source's arg list and emits invalid `IEnumerator<a,b,c>`
+    /// or `Uint8Array<a>` (FS0033). The applier reconciles by truncating
+    /// excess args, padding missing args with `obj`, or dropping all args
+    /// when the target is non-generic.
+    type Substitution = {
+        Target: string
+        Arity: int
+    }
+
+    /// Map from TS lib.es type name to its F# substitution. The F# name
+    /// is emitted via Ast.LongIdent so multi-segment names (e.g.
     /// `System.Collections.Generic.IReadOnlyList`) work as-is.
     let substitutions =
         Map.ofList [
             // `Error` → `exn` (F# alias for System.Exception). Supports
             // `inherit exn()` for TS classes that extend Error.
-            "Error", Intrinsic.exn
+            "Error", { Target = Intrinsic.exn; Arity = 0 }
             // `Array<T>` → `ResizeArray<T>` (F# alias for List<T>; Fable
             // maps to JS Array). Same intrinsic the generator uses for `T[]`.
-            "Array", Intrinsic.array
+            "Array", { Target = Intrinsic.array; Arity = 1 }
             // `PromiseLike<T>` → `Promise<T>` (Fable.Core.JS.Promise satisfies
             // PromiseLike's structural interface).
-            "PromiseLike", "Promise"
+            "PromiseLike", { Target = "Promise"; Arity = 1 }
             // `Disposable` → `System.IDisposable` (direct semantic equivalent).
-            "Disposable", "System.IDisposable"
+            "Disposable", { Target = "System.IDisposable"; Arity = 0 }
             // `Iterable<T>` → `seq<T>` (F# alias for IEnumerable<T>).
-            "Iterable", "seq"
-            // `IterableIterator<T>` and `ArrayIterator<T>` → IEnumerator<T>.
-            "IterableIterator", "System.Collections.Generic.IEnumerator"
-            "ArrayIterator", "System.Collections.Generic.IEnumerator"
-            "AsyncIterableIterator", "System.Collections.Generic.IAsyncEnumerator"
+            "Iterable", { Target = "seq"; Arity = 1 }
+            // `IterableIterator`/`ArrayIterator` → `IEnumerator<T>`. TS 5.6+
+            // expanded these to three typars (`<TYield, TReturn, TNext>`);
+            // the F# analogue keeps one. Excess args truncated.
+            "IterableIterator", { Target = "System.Collections.Generic.IEnumerator"; Arity = 1 }
+            "ArrayIterator", { Target = "System.Collections.Generic.IEnumerator"; Arity = 1 }
+            "AsyncIterableIterator", { Target = "System.Collections.Generic.IAsyncEnumerator"; Arity = 1 }
             // `ReadonlyArray<T>` → `IReadOnlyList<T>` (read-only with index).
-            "ReadonlyArray", "System.Collections.Generic.IReadOnlyList"
-            // `ReadonlyMap<K, V>` → `IReadOnlyDictionary<K, V>` (read-only
-            // keyed lookup).
-            "ReadonlyMap", "System.Collections.Generic.IReadOnlyDictionary"
-            // `Map<K, V>` → `IDictionary<K, V>` (mutable keyed lookup; F# has
-            // no direct alias so use the BCL interface).
-            "Map", "System.Collections.Generic.IDictionary"
-            // `ReadonlySet<T>` → `IReadOnlySet<T>` (read-only set).
-            "ReadonlySet", "System.Collections.Generic.IReadOnlySet"
+            "ReadonlyArray", { Target = "System.Collections.Generic.IReadOnlyList"; Arity = 1 }
+            // `ReadonlyMap<K, V>` → `IReadOnlyDictionary<K, V>`.
+            "ReadonlyMap", { Target = "System.Collections.Generic.IReadOnlyDictionary"; Arity = 2 }
+            // `Map<K, V>` → `IDictionary<K, V>` (mutable keyed lookup).
+            "Map", { Target = "System.Collections.Generic.IDictionary"; Arity = 2 }
+            // `ReadonlySet<T>` → `IReadOnlySet<T>`.
+            "ReadonlySet", { Target = "System.Collections.Generic.IReadOnlySet"; Arity = 1 }
             // `Set<T>` → `ISet<T>` (mutable set).
-            "Set", "System.Collections.Generic.ISet"
+            "Set", { Target = "System.Collections.Generic.ISet"; Arity = 1 }
+            // TS 5.7+ typed arrays: `Uint8Array<TBuf extends ArrayBufferLike>`.
+            // Fable's `Fable.Core.JS.Uint8Array` etc. are non-generic; the
+            // wrapper opens `Fable.Core.JS` so a bare name resolves. Drop
+            // the typar arg at use sites.
+            "Uint8Array", { Target = "Uint8Array"; Arity = 0 }
+            "Uint8ClampedArray", { Target = "Uint8ClampedArray"; Arity = 0 }
+            "Uint16Array", { Target = "Uint16Array"; Arity = 0 }
+            "Uint32Array", { Target = "Uint32Array"; Arity = 0 }
+            "Int8Array", { Target = "Int8Array"; Arity = 0 }
+            "Int16Array", { Target = "Int16Array"; Arity = 0 }
+            "Int32Array", { Target = "Int32Array"; Arity = 0 }
+            "Float32Array", { Target = "Float32Array"; Arity = 0 }
+            "Float64Array", { Target = "Float64Array"; Arity = 0 }
+            "BigInt64Array", { Target = "BigInt64Array"; Arity = 0 }
+            "BigUint64Array", { Target = "BigUint64Array"; Arity = 0 }
+            "ArrayBufferView", { Target = "ArrayBufferView"; Arity = 0 }
+            "DataView", { Target = "DataView"; Arity = 0 }
         ]
 
     let private intrinsicRef (name: string) =
@@ -89,6 +122,27 @@ module LibEsDefaults =
             s.Equals("typescript", System.StringComparison.OrdinalIgnoreCase)
         | None -> false
 
+    /// Lookup a `Substitution` for a `ResolvedType`. Returns the
+    /// substitution only if the type is lib.es-eligible AND its name is
+    /// in the table. Used by `prerender` to read the target arity when
+    /// reconciling TypeReference args; mirrors the eligibility check
+    /// used by `resolvedTypePreludeInterceptor` so name-substitution and
+    /// arity-reconciliation always agree on which types are substituted.
+    let tryLookupSubstitution (resolvedType: ResolvedType) : Substitution voption =
+        let lookup isLibEs source (name: Name<_>) =
+            if isSubstitutionEligible isLibEs source then
+                let key = Name.Case.valueOrSource name
+                match Map.tryFind key substitutions with
+                | Some s -> ValueSome s
+                | None -> ValueNone
+            else ValueNone
+        match resolvedType with
+        | ResolvedType.Interface { IsLibEs = isLibEs; Source = source; Name = name } ->
+            lookup isLibEs source name
+        | ResolvedType.Class { IsLibEs = isLibEs; Source = source; Name = name } ->
+            lookup isLibEs source name
+        | _ -> ValueNone
+
     /// Default `ResolvedTypePrelude` interceptor. For lib-sourced types
     /// with a known F# substitution, swaps the renderScope's TypeRef with
     /// the intrinsic ref so all reference sites resolve through the cache.
@@ -100,12 +154,12 @@ module LibEsDefaults =
     let resolvedTypePreludeInterceptor _ resolvedType =
         let trySubstitute (name: Name<_>) =
             let key = Name.Case.valueOrSource name
-            if substitutions.ContainsKey key then
-                let ref = intrinsicRef substitutions.[key]
+            match Map.tryFind key substitutions with
+            | Some s ->
+                let ref = intrinsicRef s.Target
                 ValueSome (fun renderScope ->
                     { renderScope with TypeRef = ref; Render = Render.RefOnly ref })
-            else
-                ValueNone
+            | None -> ValueNone
         match resolvedType with
         | ResolvedType.Interface { IsLibEs = isLibEs; Source = source; Name = name }
           when isSubstitutionEligible isLibEs source ->
