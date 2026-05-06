@@ -32,29 +32,53 @@ module TypeAlias =
         // fires through prerender's `remap`; this catches cases that
         // survive past remap and reach the resolved molecule.
         let breakSelfReference (ref: TypeRefRender) =
-            // The alias's own body is being resolved as a Union/Prefix
-            // molecule. Any inner atom that's a bare `TransientPath
-            // Anchored` would anchor to the alias's call-site (the alias
-            // itself) at render time, producing `type X = U15<X, X, ...>`
-            // which F# rejects as a cyclic abbreviation (FS0953). Rewrite
-            // those atoms to `obj` to break the cycle. Complements the
-            // documented `RenderingAliasTargetRefs` cycle-break by
-            // handling cases where the cycle survives past prerender's
-            // `remap` and reaches the resolved molecule via uninitialised
-            // `LazyContainer.CreateFromValue` Raw zeros.
+            // The alias's own body is being resolved. Any atom that
+            // re-references the alias being rendered would produce
+            // `type X = ...X...` which F# rejects as a cyclic abbreviation
+            // (FS0953). Rewrite those atoms to `obj` to break the cycle.
+            // Self-reference can take three atom shapes depending on how
+            // the encoder/prerender pipeline resolved the inner reference:
+            //   1. `TransientPath Anchored` — anchors to the alias's
+            //      call-site (the alias itself) at render time.
+            //   2. `TransientPath (AnchoredAndMoored n)` where `n` is the
+            //      alias's own name — resolves to the alias's name within
+            //      its own parent module (e.g. `option<LiteralPart>` in
+            //      a `LiteralPart` body, where `option` is just the
+            //      Nullable flag and the underlying atom is the
+            //      self-reference).
+            //   3. `ConcretePath p` where `p = path` — direct
+            //      self-reference via the alias's own assigned TypePath
+            //      (e.g. `option<U5<..., JSONValue, ...>>` in a
+            //      `JSONValue` body).
+            // Complements the documented `RenderingAliasTargetRefs`
+            // cycle-break by handling cases where the cycle survives past
+            // prerender's `remap` and reaches the resolved render.
             //
-            // Skip top-level atoms — the legitimate alias-to-alias case
-            // is handled earlier by the `replace value newRef.TypeRef
-            // stripped` line above.
-            match ref.Kind with
-            | TypeRefKind.Atom _ -> ref
-            | TypeRefKind.Molecule _ ->
-                ref
-                |> TypeRefRender.mapAtoms (fun atom ->
-                    match atom with
-                    | TypeRefAtom.TransientPath TransientTypePath.Anchored ->
-                        RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic Intrinsic.obj
-                    | _ -> atom)
+            // Both top-level atoms and atoms nested inside molecules
+            // need rewriting: a body resolved as `Optional(Self)` is a
+            // top-level Atom with Nullable=true; a body resolved as
+            // `option<U5<...,Self,...>>` is a Molecule whose Prefix args
+            // contain the self-reference atom.
+            // Self-application like `Self<TParA, TParB>` resolves as
+            // `Prefix(SelfRef, args)`. Replacing only the prefix atom
+            // produces invalid `obj<TParA, TParB>` (FS0033). When the
+            // rewrite turns an atom into the obj placeholder, also drop
+            // the surrounding generic-application args so the entire
+            // self-application collapses to plain `obj`.
+            let objAtom =
+                RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic Intrinsic.obj
+            let rewriteAtom (atom: TypeRefAtom) =
+                match atom with
+                | TypeRefAtom.TransientPath TransientTypePath.Anchored -> objAtom
+                | TypeRefAtom.TransientPath (TransientTypePath.AnchoredAndMoored n)
+                    when n = path.Name -> objAtom
+                | TypeRefAtom.ConcretePath p when p = path -> objAtom
+                | _ -> atom
+            let isObjAtom (atom: TypeRefAtom) =
+                match atom with
+                | TypeRefAtom.Intrinsic s -> s = Intrinsic.obj
+                | _ -> false
+            ref |> TypeRefRender.mapAtomsWithPrefixCollapse rewriteAtom isObjAtom
         let resolveInnerRef () =
             let oldRef = ctx.PreludeGetTypeRef ctx scopeStore innerType
             match ctx.PreludeRenders.TryGetValue(innerType.Value) with

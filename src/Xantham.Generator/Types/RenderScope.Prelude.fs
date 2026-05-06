@@ -150,6 +150,42 @@ module TypeRefRender =
                         mapAtoms f prefix,
                         args |> List.map (mapAtoms f))
             { render with Kind = TypeRefKind.Molecule_ newMolecule }
+
+    /// Like `mapAtoms`, but when an atom rewrite produces an atom matching
+    /// `collapsesPrefix`, collapse any enclosing `Prefix(rewritten, args)`
+    /// molecule to just the rewritten atom (dropping args). Used when an
+    /// atom replacement (e.g. with a non-generic placeholder like `obj`)
+    /// would otherwise leave invalid `obj<X, Y>` self-applications.
+    let rec mapAtomsWithPrefixCollapse
+        (f: TypeRefAtom -> TypeRefAtom)
+        (collapsesPrefix: TypeRefAtom -> bool)
+        (render: TypeRefRender) =
+        let recur = mapAtomsWithPrefixCollapse f collapsesPrefix
+        match render.Kind with
+        | TypeRefKind.Atom_ atom ->
+            { render with Kind = TypeRefKind.Atom_ (f atom) }
+        | TypeRefKind.Molecule_ (TypeRefMolecule.Prefix_ (prefix, args)) ->
+            let newPrefix = recur prefix
+            match newPrefix.Kind with
+            | TypeRefKind.Atom_ atom when collapsesPrefix atom ->
+                { render with Kind = TypeRefKind.Atom_ atom }
+            | _ ->
+                let newArgs = args |> List.map recur
+                { render with
+                    Kind = TypeRefKind.Molecule_ (TypeRefMolecule.Prefix_ (newPrefix, newArgs)) }
+        | TypeRefKind.Molecule_ molecule ->
+            let newMolecule =
+                match molecule with
+                | TypeRefMolecule.Tuple_ typeRefs ->
+                    typeRefs |> List.map recur |> TypeRefMolecule.Tuple_
+                | TypeRefMolecule.Union_ typeRefs ->
+                    typeRefs |> List.map recur |> TypeRefMolecule.Union_
+                | TypeRefMolecule.Function_ (parameters, returnType) ->
+                    TypeRefMolecule.Function_ (
+                        parameters |> List.map recur,
+                        recur returnType)
+                | TypeRefMolecule.Prefix_ _ -> molecule
+            { render with Kind = TypeRefKind.Molecule_ newMolecule }
     let orNullable (value: bool) (typeRefRender: TypeRefRender) = { typeRefRender with Nullable = value || typeRefRender.Nullable }
     let setNullable (value: bool) (typeRefRender: TypeRefRender) = { typeRefRender with Nullable = value }
     let nullable (typeRefRender: TypeRefRender) = setNullable true typeRefRender
