@@ -416,4 +416,10 @@ let renderRoot (ctx: GeneratorContext) (root: RootModule) =
         // currently emitted; package-level functions live inside named
         // submodules.)
         yield! nextModules
+        // Emit erased-union types (U9, U10, ...) that the binding render
+        // produced and that aren't shipped by Fable.Core's built-in U2..U8.
+        // The `erasedUnion` builder records each new arity in
+        // `UnionLengths`; sorting keeps output deterministic across runs.
+        for caseCount in erasedUnion.UnionLengths |> Seq.sort do
+            SpecialRender.renderErasedUnion caseCount
     }

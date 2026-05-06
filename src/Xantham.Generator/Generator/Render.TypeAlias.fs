@@ -23,6 +23,38 @@ module TypeAlias =
         let metadata =
             (Path.create path, typ)
             ||> RenderMetadata.createWithPathFromExport
+        // Replace any self-reference to the alias's own target ref inside
+        // the resolved molecule with `obj`. The CreateFromValue wrapping
+        // used for Union elements zeroes the LazyContainer's Raw, which
+        // can collide with a real alias TypeKey and produce
+        // `type X = U15<X, X, ..., X>` (FS0953 cyclic abbreviation).
+        // The documented cycle-break via RenderingAliasTargetRefs only
+        // fires through prerender's `remap`; this catches cases that
+        // survive past remap and reach the resolved molecule.
+        let breakSelfReference (ref: TypeRefRender) =
+            // The alias's own body is being resolved as a Union/Prefix
+            // molecule. Any inner atom that's a bare `TransientPath
+            // Anchored` would anchor to the alias's call-site (the alias
+            // itself) at render time, producing `type X = U15<X, X, ...>`
+            // which F# rejects as a cyclic abbreviation (FS0953). Rewrite
+            // those atoms to `obj` to break the cycle. Complements the
+            // documented `RenderingAliasTargetRefs` cycle-break by
+            // handling cases where the cycle survives past prerender's
+            // `remap` and reaches the resolved molecule via uninitialised
+            // `LazyContainer.CreateFromValue` Raw zeros.
+            //
+            // Skip top-level atoms — the legitimate alias-to-alias case
+            // is handled earlier by the `replace value newRef.TypeRef
+            // stripped` line above.
+            match ref.Kind with
+            | TypeRefKind.Atom _ -> ref
+            | TypeRefKind.Molecule _ ->
+                ref
+                |> TypeRefRender.mapAtoms (fun atom ->
+                    match atom with
+                    | TypeRefAtom.TransientPath TransientTypePath.Anchored ->
+                        RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic Intrinsic.obj
+                    | _ -> atom)
         let resolveInnerRef () =
             let oldRef = ctx.PreludeGetTypeRef ctx scopeStore innerType
             match ctx.PreludeRenders.TryGetValue(innerType.Value) with
@@ -32,8 +64,9 @@ module TypeAlias =
                     let stripped = { oldRef with Nullable = false }
                     TypeRefRender.replace value newRef.TypeRef stripped
                     |> TypeRefRender.orNullable oldRef.Nullable
-                | _ -> newRef.TypeRef
-            | false, _ -> oldRef
+                    |> breakSelfReference
+                | _ -> newRef.TypeRef |> breakSelfReference
+            | false, _ -> oldRef |> breakSelfReference
         let rec matchImpl = function
             | ResolvedType.TypeQuery { Type = Resolve typ } ->
                 matchImpl typ

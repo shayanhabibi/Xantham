@@ -127,6 +127,29 @@ module TypeRefRender =
                 | atom -> atom
             { render with Kind = kind }
         else render
+    /// Walk every atom in a TypeRefRender (descending through molecules)
+    /// and apply a mapping function. Used to rewrite atoms inside composite
+    /// renders without exposing the private molecule constructors.
+    let rec mapAtoms (f: TypeRefAtom -> TypeRefAtom) (render: TypeRefRender) =
+        match render.Kind with
+        | TypeRefKind.Atom_ atom ->
+            { render with Kind = TypeRefKind.Atom_ (f atom) }
+        | TypeRefKind.Molecule_ molecule ->
+            let newMolecule =
+                match molecule with
+                | TypeRefMolecule.Tuple_ typeRefs ->
+                    typeRefs |> List.map (mapAtoms f) |> TypeRefMolecule.Tuple_
+                | TypeRefMolecule.Union_ typeRefs ->
+                    typeRefs |> List.map (mapAtoms f) |> TypeRefMolecule.Union_
+                | TypeRefMolecule.Function_ (parameters, returnType) ->
+                    TypeRefMolecule.Function_ (
+                        parameters |> List.map (mapAtoms f),
+                        mapAtoms f returnType)
+                | TypeRefMolecule.Prefix_ (prefix, args) ->
+                    TypeRefMolecule.Prefix_ (
+                        mapAtoms f prefix,
+                        args |> List.map (mapAtoms f))
+            { render with Kind = TypeRefKind.Molecule_ newMolecule }
     let orNullable (value: bool) (typeRefRender: TypeRefRender) = { typeRefRender with Nullable = value || typeRefRender.Nullable }
     let setNullable (value: bool) (typeRefRender: TypeRefRender) = { typeRefRender with Nullable = value }
     let nullable (typeRefRender: TypeRefRender) = setNullable true typeRefRender
