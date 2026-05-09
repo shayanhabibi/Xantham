@@ -526,3 +526,64 @@ type SourceTag with
     member this.SubModule =
         SymbolTypeKey.access subModuleTagKey this
         |> ValueOption.flatten
+let private exportPointCanonicalKey = SymbolTypeKey.create<ExportPoint> "ExportPointCanonical"
+let private exportPointsKey = SymbolTypeKey.create<HashSet<ExportPoint>> "ExportPoints"
+let private exportPointKey = SymbolTypeKey.create<ExportPoint> "ExportPoint"
+type Ts.Program with
+    member this.SeedExportPoints() =
+        let checker = this.getTypeChecker()
+        let sourceFiles =
+            this.getSourceFiles().AsArray
+            |> Array.choose (fun sf ->
+                checker.getSymbolAtLocation sf
+                |> Option.map (fun symbol -> SourceTag.CreateValue(this, sf), symbol)
+                )
+        for sourceFile, symbol in sourceFiles do
+            let subModule = sourceFile.SubModule
+            if subModule.IsNone then () else
+            let subModule = subModule.Value
+            let exports =
+                symbol.exports
+                |> unbox<Fable.Core.JS.Map<string, Ts.Symbol> option>
+                |> Option.defaultValue (Fable.Core.JS.Constructors.Map.Create [])
+            exports.forEach(fun exportSymbol exportName _ ->
+                let exportPoint = {
+                    Name = exportName
+                    SubModule = subModule.Key
+                }
+                SymbolTypeKey.set exportPointKey exportPoint exportSymbol
+                if exportSymbol.flags.HasFlag(Ts.SymbolFlags.Alias) then
+                    checker.getAliasedSymbol exportSymbol
+                else exportSymbol
+                |> SymbolTypeKey.accessOrInit exportPointsKey (fun () -> HashSet())
+                |> _.Add(exportPoint)
+                |> ignore
+                )
+
+type Ts.Program with
+    member this.GetExportCollection(symbol: Ts.Symbol) =
+        let checker = this.getTypeChecker()
+        if symbol.flags.HasFlag(Ts.SymbolFlags.Alias) then
+            checker.getAliasedSymbol symbol
+        else symbol
+        |> fun symbol ->
+            let exportPoints =
+                SymbolTypeKey.access exportPointsKey symbol
+                |> ValueOption.map Seq.toArray
+            match SymbolTypeKey.access exportPointKey symbol with
+            | ValueSome exportPoint when exportPoints.IsSome ->
+                {
+                    Canonical = exportPoint
+                    Aliases = exportPoints.Value
+                }
+                |> ValueSome
+            | ValueNone when exportPoints.IsSome ->
+                {
+                    Canonical = exportPoints.Value |> Array.head
+                    Aliases = exportPoints.Value
+                }
+                |> ValueSome
+            | _ -> ValueNone
+            
+                
+

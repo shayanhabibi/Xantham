@@ -70,6 +70,13 @@ let packages = reader.program.CompilePackageCache()
 match packages with
 | Ok pkgs -> Log.traceTo 4 pkgs
 | Error e -> Log.error <| e.ToString()
+reader.program.SeedExportPoints()
+reader.program.getSourceFiles().AsArray
+|> Array.iter (fun sf ->
+    reader.checker.getSymbolAtLocation(sf)
+    |> Option.bind _.exports
+    |> Option.iter (_.values() >> Seq.iter (reader.program.GetExportCollection >> Log.traceTo 1))
+    )
 // |> Log.traceTo 2
 // reader.program.getSourceFiles().AsArray
 // |> Array.iter (fun sf ->

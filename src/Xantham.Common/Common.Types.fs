@@ -64,7 +64,11 @@ type ExportPoint = {
 [<Struct>]
 type ExportCollection = {
     Canonical: ExportPoint
+    #if FABLE_COMPILER
+    Aliases: ExportPoint array
+    #else
     Aliases: ExportPoint list
+    #endif
 }
 
 /// <summary>
