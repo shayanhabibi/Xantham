@@ -7,6 +7,7 @@ open TypeScript
 open Fable.Core.JsInterop
 open Fable.Core
 open Xantham.Fable.Types.Signal
+open Xantham.Fable.Types.Tracer
 
 let inline private getText mapping (tag: ^T when ^T:(member comment: Option<U2<string, ResizeArray<Ts.JSDocComment>>>)) =
     tag.comment

@@ -8,6 +8,7 @@ open Xantham.Fable
 open Xantham.Fable.Reading.Member
 open Xantham.Fable.Types
 open Xantham.Fable.Types.Signal
+open Xantham.Fable.Types.Tracer
 
 // ---------------------------------------------------------------------------
 // Private helpers

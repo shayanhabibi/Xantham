@@ -23,6 +23,50 @@ module TypeKey =
     let decode: Decoder<TypeKey> = Decode.int
 #endif
 
+[<Struct>]
+type PackageId = PackageId of name: string * version: string
+
+[<Struct>]
+type SubModuleId = SubModuleId of packageId: PackageId * subModuleName: string
+
+[<Struct>]
+type Package = {
+    Name: string
+    Version: string
+    #if FABLE_COMPILER
+    SubModules: SubModuleId array
+    Entry: SubModuleId array
+    #else
+    SubModules: SubModuleId list
+    Entry: SubModuleId list
+    #endif
+} with member inline this.Key = PackageId(this.Name, this.Version)
+
+[<Struct>]
+type SubModule = {
+    Package: PackageId
+    Name: string
+    Path: string
+} with member inline this.Key = SubModuleId(this.Package, this.Name)
+
+[<Struct>]
+type SubModuleRelation = {
+    Dependent: SubModuleId
+    Dependency: SubModuleId
+}
+
+[<Struct>]
+type ExportPoint = {
+    Name: string
+    SubModule: SubModuleId
+}
+
+[<Struct>]
+type ExportCollection = {
+    Canonical: ExportPoint
+    Aliases: ExportPoint list
+}
+
 /// <summary>
 /// Indicates a type can be a member of a <c>TsOverloadableConstruct</c> collection.
 /// </summary>
@@ -32,10 +76,17 @@ type IOverloadable = interface end
 /// <summary>
 /// Represents a non-empty collection of overloads of a type.
 /// </summary>
+/// <remarks>
+/// Constructors ensure that the collection is never empty.
+/// </remarks>
 /// <category>Container</category>
 type TsOverloadableConstruct<'T when 'T:>IOverloadable and 'T : equality and 'T : comparison> =
     | NoOverloads of 'T
     | Overloaded of 'T Set
+    /// <summary>
+    /// Selects the value if there is only one signature (no overloads), or the <i>max</i> element of the
+    /// overload set if there are multiple signatures.
+    /// </summary>
     member this.ValueOrHead =
         match this with
         | NoOverloads value -> value
@@ -71,8 +122,10 @@ type TsOverloadableConstruct<'T when 'T:>IOverloadable and 'T : equality and 'T 
         | Overloaded l, NoOverloads r -> Overloaded (Set.add r l)
         | Overloaded l, Overloaded r -> Overloaded (Set.union l r)
         | NoOverloads l, Overloaded r -> Overloaded (Set.add l r)
+    /// <summary>
+    /// Alias for <c>_.ToArray()</c>.
+    /// </summary>
     member this.Values = this.ToArray()
-
 
 /// <summary>
 /// DU of TS comment tag types.

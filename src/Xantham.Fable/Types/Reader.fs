@@ -17,7 +17,8 @@ let private commonCompilerOptions = jsOptions<Ts.CompilerOptions>(fun c ->
     // Without this, unions with null and undefined are reduced out when resolving
     // a type node to a type. This increases workaround logic.
     c.strictNullChecks <- Some true
-    )
+    c.resolvePackageJsonExports <- Some true
+    c.resolvePackageJsonImports <- Some true)
 
 let private createProgram (entryFile: string): Ts.Program =
     let entryFile = String.normalizePath entryFile

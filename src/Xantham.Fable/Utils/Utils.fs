@@ -3,7 +3,27 @@ module Xantham.Fable.Utils
 
 open Fable.Core
 
-let inline funApply args f = f args
+/// <summary>
+/// Apply args to a function. Used for sugar in long pipe chains.
+/// <example><code lang="fsharp">
+/// fn |> funApply args
+/// // Same as
+/// fn args
+/// 
+/// // Example use case
+/// (* Some calc *)
+/// |> (+) 1
+/// |> Array.skip
+/// |> funApply arr
+/// // Same as
+/// (* Some calc *)
+/// |> (+) 1
+/// |> fun count -> Array.skip count arr
+/// </code></example>
+/// </summary>
+/// <param name="args"></param>
+/// <param name="fn"></param>
+let inline funApply args fn = fn args
 
 type System.Collections.Generic.List<'T> with
     [<Emit "$0">]

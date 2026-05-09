@@ -5,7 +5,7 @@ open Xantham
 open Xantham.Fable
 open Xantham.Fable.Types.Signal
 
-let inline private ifHasThenGetOrNone (xanTag: XanthamTag) (v: GuardedData.KeyedSymbolSlot<'T>) =
+let inline private ifHasThenGetOrNone (xanTag: XanthamTag) (v: GuardedData.KeyedSymbolSlot<_, 'T>) =
     if v.has xanTag then ValueSome (v.get xanTag) else ValueNone
 
 type XanthamTag with

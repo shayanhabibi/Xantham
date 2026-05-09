@@ -1,11 +1,51 @@
 [<AutoOpen>]
 module TypeScriptExtensions
 
+open System.Collections.Generic
 open Fable.Core
 open TypeScript
 open Fable.Core.JsInterop
 open Xantham
 
+
+type Ts.Program with
+    /// <summary>
+    /// </summary>
+    /// <param name="callback"><br/>
+    /// resolution: ResolvedModuleWithFailedLookupLocations<br/>
+    /// moduleName: string<br/>
+    /// mode: ResolutionMode<br/>
+    /// filePath: Path<br/>
+    /// </param>
+    /// <param name="file"></param>
+    [<EmitMethod "forEachResolvedModule">]
+    member this.forEachResolvedModule(callback: Ts.ResolvedModuleWithFailedLookupLocations -> string -> Ts.ResolutionMode -> string -> unit, ?file: Ts.SourceFile): unit = ()
+
+type PackageJsonPathFields =
+    abstract typings: string option
+    abstract types: string option
+    abstract main: string option
+    abstract ``type``: string option
+    abstract name: string option
+    abstract description: string option
+    abstract version: string option
+    abstract license: string option
+    abstract author: string option
+    abstract repository: string option
+    abstract imports: obj option
+    abstract exports: obj option
+
+type PackageJsonInfoContents =
+    abstract packageJsonContent: PackageJsonPathFields
+    abstract resolvedEntrypoints: U2<string array, bool>
+
+type PackageJsonInfo =
+    abstract contents: PackageJsonInfoContents
+    abstract packageDirectory: string
+
+type Ts.SourceFile with
+    [<EmitProperty "packageJsonScope">]
+    member this.packageJsonScope: PackageJsonInfo option = jsNative
 
 type Ts.Type with
     [<EmitProperty "id">]
@@ -1248,6 +1288,10 @@ module Patterns =
             let (|NamedImports|NamespaceImport|): Ts.NamedImportBindings -> _ = unbox >> function
                 | NamedImports node -> NamedImports node
                 | NamespaceImport node -> NamespaceImport node
+        module ModuleExportNamePatterns =
+            let (|Identifier|StringLiteral|): Ts.ModuleExportName -> _ = unbox >> function
+                | Identifier node -> Identifier node
+                | StringLiteral node -> StringLiteral node
         #warnon 25
     /// <summary>
     /// Patterns for determining the presence of a TypeFlag on a <c>Ts.Type</c> derivative, and
