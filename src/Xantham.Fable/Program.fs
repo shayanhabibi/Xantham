@@ -34,8 +34,6 @@ open TypeScript
 //     |> Option.bind (_.resolvedFileName >> reader.program.getSourceFile)
 //     |> Log.traceTo 1
 //     )
-reader.program.SeedResolvedModules()
-let packages = reader.program.CompilePackageCache()
 // reader.program.getSourceFiles().AsArray
 // |> Array.iter (fun sf ->
 //     // let guard = SourceGuard.create reader.program reader.checker sf
@@ -67,16 +65,15 @@ let packages = reader.program.CompilePackageCache()
 //     a.Value.PackageInfo
 //     |> Log.traceTo 1
 //     )
-match packages with
-| Ok pkgs -> Log.traceTo 4 pkgs
-| Error e -> Log.error <| e.ToString()
-reader.program.SeedExportPoints()
-reader.program.getSourceFiles().AsArray
-|> Array.iter (fun sf ->
-    reader.checker.getSymbolAtLocation(sf)
-    |> Option.bind _.exports
-    |> Option.iter (_.values() >> Seq.iter (reader.program.GetExportCollection >> Log.traceTo 1))
-    )
+// match packages with
+// | Ok pkgs -> Log.traceTo 4 pkgs
+// | Error e -> Log.error <| e.ToString()
+// reader.program.getSourceFiles().AsArray
+// |> Array.iter (fun sf ->
+//     reader.checker.getSymbolAtLocation(sf)
+//     |> Option.bind _.exports
+//     |> Option.iter (_.values() >> Seq.iter (reader.program.GetExportCollection >> Log.traceTo 1))
+//     )
 // |> Log.traceTo 2
 // reader.program.getSourceFiles().AsArray
 // |> Array.iter (fun sf ->

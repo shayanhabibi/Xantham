@@ -10,33 +10,6 @@ open Xantham.Fable
 open Xantham.Fable.Types.Tracer
 open Fable.Core.DynamicExtensions
 
-
-type ConditionalPackageExport =
-    | Types of PackageExportKind
-    | Default of PackageExportKind
-    | Browser of PackageExportKind
-    | Development of PackageExportKind
-    | Production of PackageExportKind
-    | NodeAddons of PackageExportKind
-    | Node of PackageExportKind
-    | Import of PackageExportKind
-    | Require of PackageExportKind
-    | ModuleSync of PackageExportKind
-    | Unknown of key: string * value: PackageExportKind
-
-and PackageExportKind =
-    | String of string
-    | Conditional of ConditionalPackageExport list
-
-/// <summary>
-/// Export metadata from a <c>package.json</c> file.
-/// This serves no purpose in the <c>Xantham.Fable</c> encoder at this time, and
-/// is purposed as metadata for consumers.
-/// </summary>
-type PackageExport =
-    | Abbrev of string * PackageExportKind
-    | Full of (string * PackageExportKind) list
-
 /// <summary>
 /// LibEs default packages are not tracked further.
 /// The DU serves as the point of identification so that descendant nodes will
@@ -68,7 +41,7 @@ let private programKey = SymbolTypeKey.create<Ts.Program> "Program"
 /// <summary>
 /// Stores the export metadata that will be provided for consumers.
 /// </summary>
-let private exportKey = SymbolTypeKey.create<PackageExport voption> "PackageExports"
+let private exportKey = SymbolTypeKey.create<Export voption> "PackageExports"
 /// <summary>
 /// Tracks dependencies of a source tag
 /// </summary>
@@ -96,10 +69,10 @@ let private packageIdKey = SymbolTypeKey.create<PackageId voption> "PackageId"
 
 module PackageExportKind =
     let rec readValue: obj -> _ = function
-        | :? string as value -> PackageExportKind.String value
+        | :? string as value -> ExportValue.String value
         | value ->
             readConditionalValues value
-            |> PackageExportKind.Conditional
+            |> ExportValue.Conditional
     and private readConditionalValues values =
         Fable.Core.JS.Constructors.Object.entries values |> _.AsArray
         |> Array.map (fun (key, value) -> createConditionalValue key value)
@@ -116,21 +89,23 @@ module PackageExportKind =
         | "import" -> Import(readValue value)
         | "require" -> Require(readValue value)
         | "module-sync" -> ModuleSync(readValue value)
+        | "module" -> Module(readValue value)
+        | "esnext" -> ESNext(readValue value)
         | _ -> Unknown(key, readValue value)
 module PackageExport =
-    let private tryFromExports (jsonFields: PackageJsonPathFields) =
+    let private tryFromExports (jsonFields: PackageJsonPathFields): Export option =
         match jsonFields.exports with
         | Some (:? string as export) ->
-            PackageExport.Abbrev(".", PackageExportKind.String export)
+            Map [ ExportPath ".", ExportValue.String export ]
             |> Some
         | Some exports ->
             Fable.Core.JS.Constructors.Object.entries exports |> _.AsArray
-            |> Array.map (fun (key, value) -> key, PackageExportKind.readValue value)
-            |> Array.toList
-            |> PackageExport.Full
+            |> Array.map (fun (key, value) -> ExportPath key, PackageExportKind.readValue value)
+            |> Map
             |> Some
         | None -> None
-    let inline private makeDummyAbbrev (value: string) = Abbrev(".", PackageExportKind.String(value))
+    let inline private makeDummyAbbrev (value: string) =
+        Map [ ExportPath ".", ExportValue.String value ]
     let private tryFromTypes (jsonFields: PackageJsonPathFields) =
         Option.map makeDummyAbbrev jsonFields.types
     let private tryFromTypings (jsonFields: PackageJsonPathFields) =
@@ -310,7 +285,7 @@ type SourceGuard with
     /// If they exist, and they are conditional exports/entry points, then the values are provided
     /// in the order they are defined.
     /// </summary>
-    member this.Exports: PackageExport voption = SourceGuard.getExports this
+    member this.Exports: Export voption = SourceGuard.getExports this
 
 type SourceTag with
     member inline this.Exports = this.Guard.Exports
@@ -450,9 +425,12 @@ type Ts.Program with
             |> Array.map (fun kv ->
                 let info = kv.Value
                 let key = kv.Key
+                let mutable exportData: Export voption = ValueNone
                 let subModules =
                     info.AssociatedTags
                     |> Array.map (fun tag ->
+                        if exportData.IsNone then
+                            exportData <- tag.Exports
                         let subModuleName =
                             tag.SubModuleName
                             |> ValueOption.defaultValue ""
@@ -507,6 +485,7 @@ type Ts.Program with
                         |> not)
                 {
                     Name = info.Name
+                    Json = exportData
                     Version = info.Version
                     SubModules = subModules
                     Entry = assumedEntries
@@ -551,14 +530,12 @@ type Ts.Program with
                     Name = exportName
                     SubModule = subModule.Key
                 }
-                SymbolTypeKey.set exportPointKey exportPoint exportSymbol
                 if exportSymbol.flags.HasFlag(Ts.SymbolFlags.Alias) then
                     checker.getAliasedSymbol exportSymbol
                 else exportSymbol
                 |> SymbolTypeKey.accessOrInit exportPointsKey (fun () -> HashSet())
                 |> _.Add(exportPoint)
-                |> ignore
-                )
+                |> ignore)
 
 type Ts.Program with
     member this.GetExportCollection(symbol: Ts.Symbol) =

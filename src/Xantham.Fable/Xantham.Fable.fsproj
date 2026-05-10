@@ -22,7 +22,6 @@
         <Compile Include="Types\XanTagKind.fs" />
         <Compile Include="Types\SourceTag.fs" />
         <Compile Include="Types\XanTag.fs" />
-        <Compile Include="Types\ModuleMap.fs" />
         <Compile Include="Types\ReactiveBuilders.fs" />
         <Compile Include="Types\GuardedData.fs" />
         <Compile Include="Types\Reader.fs" />

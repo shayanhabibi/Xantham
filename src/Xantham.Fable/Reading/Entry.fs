@@ -75,11 +75,7 @@ let getDeclarations (ctx: TypeScriptReader) (sourceFile: Ts.SourceFile) =
                 |> Option.map _.AsArray
                 |> Option.defaultValue [||]
                 |> Array.map (fun decl ->
-                    ctx.CreateXanthamTag(decl) |> fst |> TagState.value |> fun tag ->
-                        tag // route symbol source in case of barrel exports
-                        |> GuardedData.Source.Keyed.getOrSetWith (fun _ -> Signal.source ctx.moduleMap[sourceFile])
-                        |> _.Set(ctx.moduleMap[sourceFile])
-                        tag
+                    ctx.CreateXanthamTag(decl) |> fst |> TagState.value 
                     ))
             >> expandDeclarations ctx
             )

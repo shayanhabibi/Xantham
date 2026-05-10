@@ -65,6 +65,6 @@ type XanthamTag with
             |> Signal.fill value
     // ===== Source Bag ======
     member this.TrySource with get() = ifHasThenGetOrNone this GuardedData.Source
-    member this.Source with set(value: ModuleName) =
-        GuardedData.Source.getOrSetWith (fun () -> Signal.source value) this
-        |> _.Set(value)
+    member this.Source with set(value: ExportCollection) =
+        GuardedData.Source.getOrSetWith (fun () -> Signal.source (ValueSome value)) this
+        |> Signal.fill value

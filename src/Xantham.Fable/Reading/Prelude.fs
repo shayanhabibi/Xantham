@@ -11,20 +11,21 @@ open TypeScriptExtensions
 
 type MemoryHandlerError =
     | DuplicateValue
-let private isLibFile (file: string) =
-    file.Contains("/lib/lib.") && file.EndsWith(".d.ts")
 
 let private libCacheMemoryHandler (ctx: TypeScriptReader) (tag: XanthamTag) =
+    let inline isLibEs sym =
+        let maybeSymbol = ((^T or SourceFileHelper):(static member getSourceFile: ^T -> Ts.SourceFile option) sym)
+        maybeSymbol |> Option.exists (ctx.CreateSourceTagValue >> _.Value.IsLibEs)
     match tag.Guard.Value with
-    | IdentityKey.Symbol sym when Some sym |> isFromEs5Lib ->
+    | IdentityKey.Symbol sym when isLibEs sym  ->
         ctx.libCache.Add(tag.IdentityKey) |> ignore
-    | IdentityKey.AliasSymbol sym when Some sym |> isFromEs5Lib ->
+    | IdentityKey.AliasSymbol sym when isLibEs sym ->
         ctx.libCache.Add(tag.IdentityKey) |> ignore
     | IdentityKey.DeclarationPosition _ ->
         match tag.ToUnderlyingValue() with
-        | Choice2Of2 node when node.getSourceFile().fileName |> isLibFile ->
+        | Choice2Of2 node when ctx.CreateSourceTagValue(node.getSourceFile()).Value.IsLibEs ->
             ctx.libCache.Add(tag.IdentityKey) |> ignore
-        | Choice1Of2 typ when typ.aliasSymbol |> isFromEs5Lib || typ.getSymbol() |> isFromEs5Lib ->
+        | Choice1Of2 typ when isLibEs typ ->
             ctx.libCache.Add(tag.IdentityKey) |> ignore
         | _ -> ()
     | _ -> ()
@@ -192,29 +193,10 @@ type TypeScriptReader with
         |> _.TypeSignal
         |> Signal.fulfillWith(fun () -> signal.Value)
         signal
-    /// The tags source is filled by the given source signal
-    member this.routeSourceTo (tag: XanthamTag) (source: Signal<ModuleName>) =
-        tag
-        |> XanthamTag.withDebugOneShot "RouteSource" (fun tag ->
-            Signal.effect (fun () ->
-                XanthamTag.debugCommentAndForget $"Source changed to match {source.Value}" tag
-                ) [ source.Invalidated ]
-            |> ignore
-            )
-        |> GuardedData.Source.getOrSetWith (fun () -> source) 
-        |> Signal.fulfillWith(fun () -> source.Value)
 
 let setTypeKeyForTag (tag: XanthamTag) (typ: TypeKey) =
     XanthamTag.debugLocationAndCommentAndForget "Prelude.setTypeKeyForTag" $"TypeKey changed to {typ}. %A{tag.TypeSignal}" tag
     (GuardedData.TypeSignal.getOrSetDefault tag).Set typ
-
-/// Sets the source if it doesn't have a connected signal
-let trySetSourceForTag (tag: XanthamTag) (source: ModuleName) =
-    GuardedData.Source.getOrSetWith (fun () -> Signal.source source) tag
-let setSourceForTag (tag: XanthamTag) (source: ModuleName) =
-    XanthamTag.debugLocationAndCommentAndForget "Prelude.setSourceForTag" $"Source changed to {source}" tag
-    GuardedData.Source.getOrSetWith (fun () -> Signal.source source) tag
-    |> _.Set(source)
 
 let tagPrimitives (ctx: TypeScriptReader) =
     let addToMemory (tag: XanthamTag) =

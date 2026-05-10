@@ -3,6 +3,10 @@
 open Thoth.Json
 open Fable.Core
 /// <summary>
+/// In Fable, this is an array. In DotNet, this is a list.
+/// </summary>
+type listOrArray<'T> = 'T array
+/// <summary>
 /// A unique identifier for a type.
 /// </summary>
 [<Erase>]
@@ -14,6 +18,10 @@ module TypeKey =
 #else
 open Thoth.Json.Net
 /// <summary>
+/// In Fable, this is an array. In DotNet, this is a list.
+/// </summary>
+type listOrArray<'T> = 'T list
+/// <summary>
 /// A unique identifier for a type.
 /// </summary>
 type TypeKey = System.Int32
@@ -23,6 +31,34 @@ module TypeKey =
     let decode: Decoder<TypeKey> = Decode.int
 #endif
 
+type ConditionalExport =
+    | Types of ExportValue
+    | Default of ExportValue
+    | Browser of ExportValue
+    | Development of ExportValue
+    | Production of ExportValue
+    | NodeAddons of ExportValue
+    | Node of ExportValue
+    | Import of ExportValue
+    | Require of ExportValue
+    | ModuleSync of ExportValue
+    | Module of ExportValue
+    | ESNext of ExportValue
+    | Unknown of key: string * value: ExportValue
+
+and ExportValue =
+    | String of string
+    | Conditional of ConditionalExport list
+#if FABLE_COMPILER
+[<Erase>]
+#endif
+[<Struct>]
+type ExportPath = ExportPath of string with
+    member inline this.Value = let (ExportPath value) = this in value
+    static member inline Create value = ExportPath value
+    
+type Export = Map<ExportPath, ExportValue>
+    
 [<Struct>]
 type PackageId = PackageId of name: string * version: string
 
@@ -33,13 +69,9 @@ type SubModuleId = SubModuleId of packageId: PackageId * subModuleName: string
 type Package = {
     Name: string
     Version: string
-    #if FABLE_COMPILER
-    SubModules: SubModuleId array
-    Entry: SubModuleId array
-    #else
-    SubModules: SubModuleId list
-    Entry: SubModuleId list
-    #endif
+    Json: Export voption
+    SubModules: SubModuleId listOrArray
+    Entry: SubModuleId listOrArray
 } with member inline this.Key = PackageId(this.Name, this.Version)
 
 [<Struct>]
@@ -61,14 +93,27 @@ type ExportPoint = {
     SubModule: SubModuleId
 }
 
+/// <summary>
+/// Can be absent on a declaration in two scenarios:<br/>
+/// 1. When the declaration is not exported from the module.<br/>
+/// 2. When the declaration is a default library type<br/>
+/// <br/>
+/// In the case of (1), the declaration still exists in our type hierarchy
+/// as it may be a structural member or contributor to some type.
+/// </summary>
+/// <remarks>
+/// This provides the names with which a declaration is exported per submodule.
+/// This will allow you to correctly generate import statements, as the imported
+/// name does not have to be related to the declaration name.<br/><br/>
+/// A declaration which has no associated export collection, and contains a file path
+/// in its fully qualified name, is a declaration that is not explicitly exported.
+/// A declaration which has no associated export collection, and does not contain
+/// a file path in its fully qualified name, is a default library declaration.
+/// </remarks>
 [<Struct>]
 type ExportCollection = {
     Canonical: ExportPoint
-    #if FABLE_COMPILER
-    Aliases: ExportPoint array
-    #else
-    Aliases: ExportPoint list
-    #endif
+    Aliases: ExportPoint listOrArray
 }
 
 /// <summary>
@@ -173,7 +218,10 @@ type TsLiteral =
 /// <category>Type Representation</category>
 type TsEnumCase = {
     Parent: TypeKey
-    Source: string option
+    /// <summary>
+    /// <c>ValueNone</c> when a LibEs type.
+    /// </summary>
+    Source: ExportCollection voption
     FullyQualifiedName: string list
     Name: string
     Value: TsLiteral
@@ -191,7 +239,7 @@ type TsEnumCase = {
 /// </example>
 /// <category>Type Representation</category>
 type TsEnumType = {
-    Source: string option
+    Source: ExportCollection voption
     FullyQualifiedName: string list
     Name: string
     Members: TsEnumCase list
@@ -209,7 +257,7 @@ type TsEnumType = {
 /// </example>
 /// <category>Declaration Representation</category>
 type TsVariable = {
-    Source: string option
+    Source: ExportCollection voption
     FullyQualifiedName: string list
     Name: string
     Type: TypeKey
@@ -395,7 +443,7 @@ type TsIndexSignature = {
 /// export function sum<T extends number>(a: T, b: T): T { return (a + b) as T }
 /// ```
 type TsFunction = {
-    Source: string option
+    Source: ExportCollection voption
     FullyQualifiedName: string list
     Documentation: TsComment list
     IsDeclared: bool
@@ -526,7 +574,7 @@ type TsClassHeritage = {
 /// export interface IterableLike<T> extends Iterable<T> { length: number }
 /// ```
 type TsInterface = {
-    Source: string option
+    Source: ExportCollection voption
     FullyQualifiedName: string list
     Enumerable: bool
     Name: string
@@ -567,7 +615,7 @@ type TsIndexAccessType = {
 /// export type ReadonlyList<T> = ReadonlyArray<T>
 /// ```
 type TsTypeAlias = {
-    Source: string option
+    Source: ExportCollection voption
     FullyQualifiedName: string list
     Name: string
     Type: TypeKey
@@ -594,7 +642,7 @@ type TsSubstitutionType = {
 /// export class C<T> implements Iterable<T> { constructor(public value: T) {} length = 0 }
 /// ```
 type TsClass = {
-    Source: string option
+    Source: ExportCollection voption
     FullyQualifiedName: string list
     Enumerable: bool
     Name: string
@@ -716,7 +764,7 @@ type TsTypeQuery = {
 /// </code>
 /// </example>
 and TsModule = {
-    Source: string option
+    Source: ExportCollection voption
     FullyQualifiedName: string list
     Name: string
     IsNamespace: bool
@@ -932,10 +980,207 @@ and [<RequireQualifiedAccess>] TsAstNode =
         | Optional _ -> ValueNone
     member this.ToTypeExportDeclaration() =
         this.ToType(), this.ToExportDeclaration()
+
+module Schema =
+    type TsIdentityKey =
+        | DeclarationFile of file: string * startPos: int * endPos: int
+        | Symbol of name: string
+        | Type of TypeKey
+    type DuplicateEncoding<'T> = {
+        Identity: TsIdentityKey
+        Value: 'T
+    }
+    type PackageMap = {
+        Packages: Map<PackageId, Package>
+        SubModuleRelations: SubModuleRelation listOrArray
+        SubModules: Map<SubModuleId, SubModule>
+    }
+    type EncodedResult = {
+        PackageMap: PackageMap
+        ExportedDeclarations: Map<TypeKey, TsExportDeclaration>
+        Types: Map<TypeKey, TsType>
+        DuplicateExports: Map<TypeKey, DuplicateEncoding<TsExportDeclaration> list>
+        DuplicateTypes: Map<TypeKey, DuplicateEncoding<TsType> list>
+        TopLevelExports: TypeKey list
+        LibEsExports: TypeKey list
+    }
+
+(* =================================== *)
+(* ===== END OF TYPE DEFINITIONS ===== *)
+(* =================================== *)
         
+        
+(* =================================== *)
+(* ==== THOTH ENCODERS & DECODERS ==== *)
+(* =================================== *)
+
 [<AutoOpen>]
 module private Utils =
     let inline mock<'T> = Unchecked.defaultof<'T>
+    module Decode =
+        let listOrArray decoder path value =
+            #if FABLE_COMPILER
+            Decode.array decoder path value
+            #else
+            Decode.list decoder path value
+            #endif
+    module Encode =
+        let listOrArray =
+            #if FABLE_COMPILER
+            Encode.array
+            #else
+            Encode.list
+            #endif
+
+
+module private ExportValueImpl =
+    let rec encode (value: ExportValue) =
+        match value with
+        | ExportValue.String value -> Encode.string value
+        | ExportValue.Conditional values -> encodeConditionals values
+    and encodeConditionals (value: ConditionalExport list) =
+        value
+        |> List.map (function
+            | Types value -> nameof ConditionalExport.Types, encode value
+            | Default exportValue -> nameof ConditionalExport.Default, encode exportValue
+            | Browser exportValue -> nameof ConditionalExport.Browser, encode exportValue
+            | Development exportValue -> nameof ConditionalExport.Development, encode exportValue
+            | Production exportValue -> nameof ConditionalExport.Production, encode exportValue
+            | NodeAddons exportValue -> nameof ConditionalExport.NodeAddons, encode exportValue
+            | Node exportValue -> nameof ConditionalExport.Node, encode exportValue
+            | Import exportValue -> nameof ConditionalExport.Import, encode exportValue
+            | Require exportValue -> nameof ConditionalExport.Require, encode exportValue
+            | ModuleSync exportValue -> nameof ConditionalExport.ModuleSync, encode exportValue
+            | Module exportValue -> nameof ConditionalExport.Module, encode exportValue
+            | ESNext exportValue -> nameof ConditionalExport.ESNext, encode exportValue
+            | Unknown(key, value) -> key, encode value
+            )
+        |> Encode.object
+    let rec decode: Decoder<ExportValue> = fun path value ->
+        Decode.oneOf [
+            Decode.string |> Decode.map ExportValue.String
+            decodeConditionals |> Decode.map ExportValue.Conditional
+        ] path value
+    and decodeConditionals: Decoder<ConditionalExport list> =
+        Decode.keyValuePairs decode
+        |> Decode.map (List.map (fun (key, value) ->
+            match key with
+            | "types" | "Types" -> Types value
+            | "default" | "Default" -> Default value
+            | "browser" | "Browser" -> Browser value
+            | "development" | "Development" -> Development value
+            | "production" | "Production" -> Production value
+            | "node-addons" | "NodeAddons" -> NodeAddons value
+            | "node" | "Node" -> Node value
+            | "import" | "Import" -> Import value
+            | "require" | "Require" -> Require value
+            | "module-sync" | "ModuleSync" -> ModuleSync value
+            | "module" | "Module" -> Module value
+            | "esnext" | "ESNext" -> ESNext value
+            | key -> Unknown(key, value)
+            ))
+module ExportValue =
+    let encode = ExportValueImpl.encode
+    let decode: Decoder<_> = ExportValueImpl.decode
+
+module ExportPath =
+    let encode (value: ExportPath) = value.Value |> Encode.string
+    let decode: Decoder<ExportPath> = Decode.string |> Decode.map ExportPath.Create
+
+module Export =
+    let encode (value: Export) = Encode.map ExportPath.encode ExportValue.encode value
+    let decode: Decoder<Export> = Decode.map' ExportPath.decode ExportValue.decode
+
+module PackageId =
+    let encode (PackageId(name, version)) =
+        Encode.object [
+            "Name", Encode.string name
+            "Version", Encode.string version
+        ]
+    let decode: Decoder<PackageId> = Decode.object <| fun get ->
+        let name = get.Required.Field "Name" Decode.string
+        let version = get.Required.Field "Version" Decode.string
+        PackageId(name, version)
+
+module SubModuleId =
+    let encode (SubModuleId(packageId, subModuleName)) =
+        Encode.object [
+            "PackageId", PackageId.encode packageId
+            "SubModuleName", Encode.string subModuleName
+        ]
+    let decode: Decoder<SubModuleId> = Decode.object <| fun get ->
+        let packageId = get.Required.Field "PackageId" PackageId.decode
+        let subModuleName = get.Required.Field "SubModuleName" Decode.string
+        SubModuleId(packageId, subModuleName)
+
+module Package =
+    let encode (package: Package) =
+        Encode.object [
+            nameof mock<Package>.Name, Encode.string package.Name
+            nameof mock<Package>.Version, Encode.string package.Version
+            nameof mock<Package>.SubModules, package.SubModules |> Seq.map SubModuleId.encode |> Encode.seq
+            nameof mock<Package>.Entry, package.Entry |> Seq.map SubModuleId.encode |> Encode.seq
+            if package.Json.IsSome then
+                nameof mock<Package>.Json, package.Json.Value |> Export.encode
+        ]
+    let decode: Decoder<Package> = Decode.object <| fun get ->
+        {
+            Name = get.Required.Field (nameof mock<Package>.Name) Decode.string
+            Json = get.Optional.Field (nameof mock<Package>.Json) Export.decode |> Option.toValueOption
+            Version = get.Required.Field (nameof mock<Package>.Version) Decode.string
+            SubModules = get.Required.Field (nameof mock<Package>.SubModules) (Decode.listOrArray SubModuleId.decode)
+            Entry = get.Required.Field (nameof mock<Package>.Entry) (Decode.listOrArray SubModuleId.decode)
+        }
+
+module SubModule =
+    let encode (value: SubModule) =
+        Encode.object [
+            nameof mock<SubModule>.Package, PackageId.encode value.Package
+            nameof mock<SubModule>.Name, Encode.string value.Name
+            nameof mock<SubModule>.Path, Encode.string value.Path
+        ]
+    let decode: Decoder<SubModule> = Decode.object <| fun get ->
+        {
+            Package = get.Required.Field (nameof mock<SubModule>.Package) PackageId.decode
+            Name = get.Required.Field (nameof mock<SubModule>.Name) Decode.string
+            Path = get.Required.Field (nameof mock<SubModule>.Path) Decode.string
+        }
+
+module SubModuleRelation =
+    let encode (value: SubModuleRelation) =
+        Encode.object [
+            nameof mock<SubModuleRelation>.Dependent, SubModuleId.encode value.Dependent
+            nameof mock<SubModuleRelation>.Dependency, SubModuleId.encode value.Dependency
+        ]
+    let decode: Decoder<SubModuleRelation> = Decode.object <| fun get ->
+        {
+            Dependent = get.Required.Field (nameof mock<SubModuleRelation>.Dependent) SubModuleId.decode
+            Dependency = get.Required.Field (nameof mock<SubModuleRelation>.Dependency) SubModuleId.decode
+        }
+
+module ExportPoint =
+    let encode (value: ExportPoint) =
+        Encode.object [
+            nameof mock<ExportPoint>.SubModule, SubModuleId.encode value.SubModule
+            nameof mock<ExportPoint>.Name, Encode.string value.Name
+        ]
+    let decode: Decoder<ExportPoint> = Decode.object <| fun get ->
+        {
+            Name = get.Required.Field (nameof mock<ExportPoint>.Name) Decode.string
+            SubModule = get.Required.Field (nameof mock<ExportPoint>.SubModule) SubModuleId.decode
+        }
+
+module ExportCollection =
+    let encode (value: ExportCollection) =
+        Encode.object [
+            nameof mock<ExportCollection>.Canonical, ExportPoint.encode value.Canonical 
+            nameof mock<ExportCollection>.Aliases, value.Aliases |> Seq.map ExportPoint.encode |> Encode.seq
+        ]
+    let decode: Decoder<ExportCollection> = Decode.object <| fun get ->
+        {
+            Canonical = get.Required.Field (nameof mock<ExportCollection>.Canonical) ExportPoint.decode
+            Aliases = get.Required.Field (nameof mock<ExportCollection>.Aliases) (Decode.listOrArray ExportPoint.decode)
+        }
 
 module TsOverloadableConstruct =
     let encode (encoder: Encoder<'T>) (value: TsOverloadableConstruct<'T>) =
@@ -1033,7 +1278,8 @@ module TsEnumCase =
     let encode (value: TsEnumCase) =
         Encode.object [
             "Parent", TypeKey.encode value.Parent
-            "Source", value.Source |> Encode.option Encode.string
+            if value.Source.IsSome then
+                "Source", value.Source.Value |> ExportCollection.encode
             "FullyQualifiedName", value.FullyQualifiedName |> List.map Encode.string |> Encode.list
             "Name", Encode.string value.Name
             "Value", TsLiteral.encode value.Value
@@ -1042,7 +1288,7 @@ module TsEnumCase =
     let decode: Decoder<TsEnumCase> =
         Decode.object <| fun get -> {
             Parent = get.Required.Field "Parent" TypeKey.decode
-            Source = get.Required.Field "Source" (Decode.option Decode.string)
+            Source = get.Optional.Field "Source" ExportCollection.decode |> Option.toValueOption
             FullyQualifiedName = get.Required.Field "FullyQualifiedName" (Decode.list Decode.string)
             Name = get.Required.Field "Name" Decode.string
             Value = get.Required.Field "Value" TsLiteral.decode
@@ -1052,7 +1298,8 @@ module TsEnumCase =
 module TsEnumType =
     let encode (value: TsEnumType) =
         Encode.object [
-            "Source", value.Source |> Encode.option Encode.string
+            if value.Source.IsSome then
+                "Source", value.Source.Value |> ExportCollection.encode
             "FullyQualifiedName", value.FullyQualifiedName |> List.map Encode.string |> Encode.list
             "Name", Encode.string value.Name
             "Members", value.Members |> List.map TsEnumCase.encode |> Encode.list
@@ -1060,7 +1307,7 @@ module TsEnumType =
         ]
     let decode: Decoder<TsEnumType> =
         Decode.object <| fun get -> {
-            Source = get.Required.Field "Source" (Decode.option Decode.string)
+            Source = get.Optional.Field "Source" ExportCollection.decode |> Option.toValueOption
             FullyQualifiedName = get.Required.Field "FullyQualifiedName" (Decode.list Decode.string)
             Name = get.Required.Field "Name" Decode.string
             Members = get.Required.Field "Members" (Decode.list TsEnumCase.decode)
@@ -1070,7 +1317,8 @@ module TsEnumType =
 module TsVariable =
     let encode (value: TsVariable) =
         Encode.object [
-            "Source", value.Source |> Encode.option Encode.string
+            if value.Source.IsSome then
+                "Source", value.Source.Value |> ExportCollection.encode
             "FullyQualifiedName", value.FullyQualifiedName |> List.map Encode.string |> Encode.list
             "Name", Encode.string value.Name
             "Type", TypeKey.encode value.Type
@@ -1078,7 +1326,7 @@ module TsVariable =
         ]
     let decode: Decoder<TsVariable> =
         Decode.object <| fun get -> {
-            Source = get.Required.Field "Source" (Decode.option Decode.string)
+            Source = get.Optional.Field "Source" ExportCollection.decode |> Option.toValueOption
             FullyQualifiedName = get.Required.Field "FullyQualifiedName" (Decode.list Decode.string)
             Name = get.Required.Field "Name" Decode.string
             Type = get.Required.Field "Type" TypeKey.decode
@@ -1287,7 +1535,8 @@ module TsIndexSignature =
 module TsFunction =
     let encode (value: TsFunction) =
         Encode.object [
-            "Source", value.Source |> Encode.option Encode.string
+            if value.Source.IsSome then
+                "Source", value.Source.Value |> ExportCollection.encode
             "FullyQualifiedName", value.FullyQualifiedName |> List.map Encode.string |> Encode.list
             "Documentation", value.Documentation |> List.map TsComment.encode |> Encode.list
             "IsDeclared", Encode.bool value.IsDeclared
@@ -1299,7 +1548,7 @@ module TsFunction =
         ]
     let decode: Decoder<TsFunction> =
         Decode.object <| fun get -> {
-            Source = get.Required.Field "Source" (Decode.option Decode.string)
+            Source = get.Optional.Field "Source" ExportCollection.decode |> Option.toValueOption
             FullyQualifiedName = get.Required.Field "FullyQualifiedName" (Decode.list Decode.string)
             Documentation = get.Required.Field "Documentation" (Decode.list TsComment.decode)
             IsDeclared = get.Required.Field "IsDeclared" Decode.bool
@@ -1408,7 +1657,8 @@ module TsClassHeritage =
 module TsInterface =
     let encode (value: TsInterface) =
         Encode.object [
-            "Source", value.Source |> Encode.option Encode.string
+            if value.Source.IsSome then
+                "Source", value.Source.Value |> ExportCollection.encode
             "FullyQualifiedName", value.FullyQualifiedName |> List.map Encode.string |> Encode.list
             "Enumerable", Encode.bool value.Enumerable
             "Name", Encode.string value.Name
@@ -1419,7 +1669,7 @@ module TsInterface =
         ]
     let decode: Decoder<TsInterface> =
         Decode.object <| fun get -> {
-            Source = get.Required.Field "Source" (Decode.option Decode.string)
+            Source = get.Optional.Field "Source" ExportCollection.decode |> Option.toValueOption
             FullyQualifiedName = get.Required.Field "FullyQualifiedName" (Decode.list Decode.string)
             Enumerable = get.Required.Field "Enumerable" Decode.bool
             Name = get.Required.Field "Name" Decode.string
@@ -1454,7 +1704,8 @@ module TsIndexAccessType =
 module TsTypeAlias =
     let encode (value: TsTypeAlias) =
         Encode.object [
-            "Source", value.Source |> Encode.option Encode.string
+            if value.Source.IsSome then
+                "Source", value.Source.Value |> ExportCollection.encode
             "FullyQualifiedName", value.FullyQualifiedName |> List.map Encode.string |> Encode.list
             "Name", Encode.string value.Name
             "Type", TypeKey.encode value.Type
@@ -1463,7 +1714,7 @@ module TsTypeAlias =
         ]
     let decode: Decoder<TsTypeAlias> =
         Decode.object <| fun get -> {
-            Source = get.Required.Field "Source" (Decode.option Decode.string)
+            Source = get.Optional.Field "Source" ExportCollection.decode |> Option.toValueOption
             FullyQualifiedName = get.Required.Field "FullyQualifiedName" (Decode.list Decode.string)
             Name = get.Required.Field "Name" Decode.string
             Type = get.Required.Field "Type" TypeKey.decode
@@ -1486,7 +1737,8 @@ module TsSubstitutionType =
 module TsClass =
     let encode (value: TsClass) =
         Encode.object [
-            "Source", value.Source |> Encode.option Encode.string
+            if value.Source.IsSome then
+                "Source", value.Source.Value |> ExportCollection.encode
             "FullyQualifiedName", value.FullyQualifiedName |> List.map Encode.string |> Encode.list
             "Enumerable", Encode.bool value.Enumerable
             "Name", Encode.string value.Name
@@ -1497,7 +1749,7 @@ module TsClass =
         ]
     let decode: Decoder<TsClass> =
         Decode.object <| fun get -> {
-            Source = get.Required.Field "Source" (Decode.option Decode.string)
+            Source = get.Optional.Field "Source" ExportCollection.decode |> Option.toValueOption
             FullyQualifiedName = get.Required.Field "FullyQualifiedName" (Decode.list Decode.string)
             Enumerable = get.Required.Field "Enumerable" Decode.bool
             Name = get.Required.Field "Name" Decode.string
@@ -1708,7 +1960,8 @@ module TsType =
 module TsModule =
     let rec encode (value: TsModule) : JsonValue =
         Encode.object [
-            "Source", value.Source |> Encode.option Encode.string
+            if value.Source.IsSome then
+                "Source", value.Source.Value |> ExportCollection.encode
             "FullyQualifiedName", value.FullyQualifiedName |> List.map Encode.string |> Encode.list
             "Name", Encode.string value.Name
             "IsNamespace", Encode.bool value.IsNamespace
@@ -1729,7 +1982,7 @@ module TsModule =
     and decode: Decoder<TsModule> =
         fun path value ->
             (Decode.object <| fun get -> {
-                Source = get.Required.Field "Source" (Decode.option Decode.string)
+                Source = get.Optional.Field "Source" ExportCollection.decode |> Option.toValueOption
                 FullyQualifiedName = get.Required.Field "FullyQualifiedName" (Decode.list Decode.string)
                 Name = get.Required.Field "Name" Decode.string
                 IsNamespace = get.Required.Field "IsNamespace" Decode.bool
@@ -1752,92 +2005,109 @@ module TsExportDeclaration =
     let encode = TsModule.encodeExport
     let decode = TsModule.decodeExport
 
-module Schema =
-    type TsIdentityKey =
-        | DeclarationFile of file: string * startPos: int * endPos: int
-        | Symbol of name: string
-        | Type of TypeKey
-    module TsIdentityKey =
-        let encode (value: TsIdentityKey) =
-            match value with
-            | DeclarationFile(file, startPos, endPos) ->
-                Encode.object [ "DeclarationFile", Encode.string file; "StartPos", Encode.int startPos; "EndPos", Encode.int endPos ]
-            | Symbol name -> Encode.object [ "Symbol", Encode.string name ]
-            | Type i -> Encode.object [ "Type", TypeKey.encode i ]
-        let decode: Decoder<TsIdentityKey> = Decode.oneOf [
-            Decode.object <| fun get ->
-                let file = get.Required.Field "DeclarationFile" Decode.string
-                let startPos = get.Required.Field "StartPos" Decode.int
-                let endPos = get.Required.Field "EndPos" Decode.int
-                DeclarationFile(file, startPos, endPos)
-            Decode.object <| fun get -> get.Required.Field "Symbol" Decode.string |> Symbol
-            Decode.object <| fun get -> get.Required.Field "Type" TypeKey.decode |> Type
-        ]
+[<AutoOpen>]
+module SchemaThoth =
+    open Schema
+    
+    module Schema =
+        module TsIdentityKey =
+            let encode (value: TsIdentityKey) =
+                match value with
+                | DeclarationFile(file, startPos, endPos) ->
+                    Encode.object [ "DeclarationFile", Encode.string file; "StartPos", Encode.int startPos; "EndPos", Encode.int endPos ]
+                | Symbol name -> Encode.object [ "Symbol", Encode.string name ]
+                | Type i -> Encode.object [ "Type", TypeKey.encode i ]
+            let decode: Decoder<TsIdentityKey> = Decode.oneOf [
+                Decode.object <| fun get ->
+                    let file = get.Required.Field "DeclarationFile" Decode.string
+                    let startPos = get.Required.Field "StartPos" Decode.int
+                    let endPos = get.Required.Field "EndPos" Decode.int
+                    DeclarationFile(file, startPos, endPos)
+                Decode.object <| fun get -> get.Required.Field "Symbol" Decode.string |> Symbol
+                Decode.object <| fun get -> get.Required.Field "Type" TypeKey.decode |> Type
+            ]
 
-    type DuplicateEncoding<'T> = {
-        Identity: TsIdentityKey
-        Value: 'T
-    }
-    module DuplicateEncoding =
-        let encode (encoder: Encoder<'T>) (value: DuplicateEncoding<'T>) =
-            Encode.object [
-                "Identity", TsIdentityKey.encode value.Identity
-                "Value", encoder value.Value
+        module DuplicateEncoding =
+            let encode (encoder: Encoder<'T>) (value: DuplicateEncoding<'T>) =
+                Encode.object [
+                    "Identity", TsIdentityKey.encode value.Identity
+                    "Value", encoder value.Value
+                ]
+            let inline decode<'T> (decoder: Decoder<'T>): Decoder<DuplicateEncoding<'T>> =
+                Decode.object <| fun get -> {
+                    Identity = get.Required.Field "Identity" TsIdentityKey.decode
+                    Value = get.Required.Field "Value" decoder
+                }
+        module PackageMap =
+            module Packages =
+                let encode (value: Map<PackageId, Package>) = Encode.map PackageId.encode Package.encode value
+                let decode: Decoder<Map<PackageId, Package>> = Decode.map' PackageId.decode Package.decode
+            module SubModules =
+                let encode (value: Map<SubModuleId, SubModule>) = Encode.map SubModuleId.encode SubModule.encode value
+                let decode: Decoder<Map<SubModuleId, SubModule>> = Decode.map' SubModuleId.decode SubModule.decode
+            let encode (value: PackageMap) = Encode.object [
+                nameof value.Packages, Packages.encode value.Packages
+                nameof value.SubModules, SubModules.encode value.SubModules
+                nameof value.SubModuleRelations,
+                value.SubModuleRelations
+                #if FABLE_COMPILER
+                |> Array.map
+                #else
+                |> List.map
+                #endif
+                    SubModuleRelation.encode
+                |> Encode.listOrArray
             ]
-        let inline decode<'T> (decoder: Decoder<'T>): Decoder<DuplicateEncoding<'T>> =
-            Decode.object <| fun get -> {
-                Identity = get.Required.Field "Identity" TsIdentityKey.decode
-                Value = get.Required.Field "Value" decoder
+            let decode: Decoder<PackageMap> = Decode.object <| fun get -> {
+                Packages = get.Required.Field (nameof mock.Packages) Packages.decode
+                SubModuleRelations = get.Required.Field (nameof mock.SubModuleRelations) (Decode.listOrArray SubModuleRelation.decode)
+                SubModules = get.Required.Field (nameof mock.SubModules) SubModules.decode
             }
-    type EncodedResult = {
-        ExportedDeclarations: Map<TypeKey, TsExportDeclaration>
-        Types: Map<TypeKey, TsType>
-        DuplicateExports: Map<TypeKey, DuplicateEncoding<TsExportDeclaration> list>
-        DuplicateTypes: Map<TypeKey, DuplicateEncoding<TsType> list>
-        TopLevelExports: TypeKey list
-        LibEsExports: TypeKey list
-    }
-    module EncodedResult =
-        let encode (value: EncodedResult) =
-            Encode.object [
-                
-                "ExportedDeclarations",
-                value.ExportedDeclarations
-                |> Encode.map TypeKey.encode TsExportDeclaration.encode
-                
-                "Types",
-                value.Types
-                |> Encode.map TypeKey.encode TsType.encode
-                
-                "DuplicateExports",
-                value.DuplicateExports
-                |> Encode.map TypeKey.encode (
-                    List.map (DuplicateEncoding.encode TsExportDeclaration.encode)
-                    >> Encode.list
-                )
-                
-                "DuplicateTypes",
-                value.DuplicateTypes
-                |> Encode.map TypeKey.encode (
-                    List.map (DuplicateEncoding.encode TsType.encode)
-                    >> Encode.list
-                )
-                
-                "TopLevelExports",
-                value.TopLevelExports
-                |> List.map TypeKey.encode
-                |> Encode.list
-                
-                "LibEsExports",
-                value.LibEsExports
-                |> List.map TypeKey.encode
-                |> Encode.list
-            ]
-        let decode: Decoder<EncodedResult> = Decode.object <| fun get -> {
-            ExportedDeclarations = get.Required.Field "ExportedDeclarations" (Decode.map' TypeKey.decode TsExportDeclaration.decode)
-            Types = get.Required.Field "Types" (Decode.map' TypeKey.decode TsType.decode)
-            DuplicateExports = get.Required.Field "DuplicateExports" (Decode.map' TypeKey.decode (Decode.list (DuplicateEncoding.decode TsExportDeclaration.decode)))
-            DuplicateTypes = get.Required.Field "DuplicateTypes" (Decode.map' TypeKey.decode (Decode.list (DuplicateEncoding.decode TsType.decode)))
-            TopLevelExports = get.Required.Field "TopLevelExports" (Decode.list TypeKey.decode)
-            LibEsExports = get.Required.Field "LibEsExports" (Decode.list TypeKey.decode)
-        }
+        module EncodedResult =
+            let encode (value: EncodedResult) =
+                Encode.object [
+                    nameof value.PackageMap,
+                    value.PackageMap
+                    |> PackageMap.encode
+                    
+                    "ExportedDeclarations",
+                    value.ExportedDeclarations
+                    |> Encode.map TypeKey.encode TsExportDeclaration.encode
+                    
+                    "Types",
+                    value.Types
+                    |> Encode.map TypeKey.encode TsType.encode
+                    
+                    "DuplicateExports",
+                    value.DuplicateExports
+                    |> Encode.map TypeKey.encode (
+                        List.map (DuplicateEncoding.encode TsExportDeclaration.encode)
+                        >> Encode.list
+                    )
+                    
+                    "DuplicateTypes",
+                    value.DuplicateTypes
+                    |> Encode.map TypeKey.encode (
+                        List.map (DuplicateEncoding.encode TsType.encode)
+                        >> Encode.list
+                    )
+                    
+                    "TopLevelExports",
+                    value.TopLevelExports
+                    |> List.map TypeKey.encode
+                    |> Encode.list
+                    
+                    "LibEsExports",
+                    value.LibEsExports
+                    |> List.map TypeKey.encode
+                    |> Encode.list
+                ]
+            let decode: Decoder<EncodedResult> = Decode.object <| fun get -> {
+                PackageMap = get.Required.Field (nameof mock.PackageMap) PackageMap.decode
+                ExportedDeclarations = get.Required.Field "ExportedDeclarations" (Decode.map' TypeKey.decode TsExportDeclaration.decode)
+                Types = get.Required.Field "Types" (Decode.map' TypeKey.decode TsType.decode)
+                DuplicateExports = get.Required.Field "DuplicateExports" (Decode.map' TypeKey.decode (Decode.list (DuplicateEncoding.decode TsExportDeclaration.decode)))
+                DuplicateTypes = get.Required.Field "DuplicateTypes" (Decode.map' TypeKey.decode (Decode.list (DuplicateEncoding.decode TsType.decode)))
+                TopLevelExports = get.Required.Field "TopLevelExports" (Decode.list TypeKey.decode)
+                LibEsExports = get.Required.Field "LibEsExports" (Decode.list TypeKey.decode)
+            }

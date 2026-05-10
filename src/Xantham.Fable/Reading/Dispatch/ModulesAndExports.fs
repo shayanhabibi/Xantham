@@ -6,6 +6,7 @@ open Xantham.Fable.Types
 open Fable.Core
 open Fable.Core.JsInterop
 open Xantham.Fable.Types.Signal
+open Xantham.Fable.Types.SourceTag
 
 let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExports) =
     let debugLocation moduleAndExportName =
@@ -26,12 +27,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
                 symbol.declarations
                 |> Option.map (
                     _.AsArray
-                    >> Array.map ( ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx (fun tag ->
-                        if GuardedData.Source.Keyed.has xanTag then
-                            tag
-                            |> GuardedData.Source.Keyed.getOrSetWith(fun _ -> Signal.source <| ModuleName "")
-                            |> Signal.fulfillWith(fun _ -> GuardedData.Source.Keyed.get xanTag |> _.Value)
-                        tag))
+                    >> Array.map (ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx id)
                     )
                 |> Option.defaultValue [||]
             match declarations with
@@ -57,11 +53,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
                 symbol.declarations
                 |> Option.map (
                     _.AsArray
-                    >> Array.map ( ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx (fun tag ->
-                        if GuardedData.Source.Keyed.has xanTag then
-                            GuardedData.Source.Keyed.getOrSetWith(fun _ -> Signal.source <| ModuleName "") tag
-                            |> Signal.fulfillWith(fun _ -> GuardedData.Source.Keyed.get xanTag |> _.Value)
-                        tag))
+                    >> Array.map ( ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx id)
                     )
                 |> Option.defaultValue [||]
             match declarations with
@@ -112,12 +104,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
                                 symbol.declarations
                                 |> Option.map (
                                     _.AsArray
-                                    >> Array.map ( ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx (fun tag ->
-                                        if GuardedData.Source.Keyed.has xanTag then
-                                            tag
-                                            |> GuardedData.Source.Keyed.getOrSetWith(fun _ -> Signal.source <| ModuleName "")
-                                            |> Signal.fulfillWith(fun _ -> GuardedData.Source.Keyed.get xanTag |> _.Value)
-                                        tag))
+                                    >> Array.map ( ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx id)
                                     )
                                 |> Option.defaultValue [||]
                             match declarations with
@@ -137,7 +124,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
         
         let source =
             xanTag
-            |> GuardedData.Source.getOrSetWith (fun () -> Signal.source <| ctx.moduleMap.Item(exportSpecifier.getSourceFile()))
+            |> GuardedData.Source.getOrSetWith (fun () -> Signal.source <| (ctx.checker.getSymbolAtLocation exportSpecifier |> Option.toValueOption |> ValueOption.bind ctx.program.GetExportCollection))
             |> if GuardedData.Source.Keyed.has xanTag then
                 fun signal ->
                     signal
@@ -152,10 +139,10 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
                 |> Option.map (
                     _.AsArray
                     >> Array.map ( ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx (fun tag ->
-                        if GuardedData.Source.Keyed.has xanTag then
-                            GuardedData.Source.Keyed.getOrSetWith(fun _ -> Signal.source <| ModuleName "") tag
-                            |> Signal.fulfillWith(fun _ -> GuardedData.Source.Keyed.get xanTag |> _.Value)
-                        else ctx.routeSourceTo tag source
+                        // if GuardedData.Source.Keyed.has xanTag then
+                            // GuardedData.Source.Keyed.getOrSetWith(fun _ -> Signal.source <| ModuleName "") tag
+                            // |> Signal.fulfillWith(fun _ -> GuardedData.Source.Keyed.get xanTag |> _.Value)
+                        // else ctx.routeSourceTo tag source
                         tag ))
                     )
                 |> Option.defaultValue [||]
