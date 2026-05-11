@@ -352,12 +352,33 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
-    | ResolvedType.TypeReference { ResolvedType = Some innerResolvedType }
+    | ResolvedType.TypeReference { ResolvedType = Some innerResolvedType; TypeArguments = typeArguments }
+        // The encoder fills `ResolvedType` for two distinct reasons:
+        //   (1) substituted alias bodies — `type Foo<U> = X | Y | Z` resolves
+        //       to the Union body, with `TypeArguments = [U]` retained for
+        //       context but already consumed by the substitution. Re-applying
+        //       the args would produce `Union<U>` (invalid).
+        //   (2) generic-interface heritage / type instantiation — `EventTarget<X>`
+        //       resolves to the EventTarget interface itself (still generic);
+        //       `TypeArguments = [X]` is the application at this site and
+        //       MUST be re-applied or the inheriting class loses its typar.
+        // Distinguish by inspecting the resolved type's kind: only re-apply
+        // when it's a named generic type (Interface/Class) — those carry
+        // declared typars that need to be filled. For Union/Intersection/
+        // TypeLiteral/etc., treat the args as already consumed.
+        when (match innerResolvedType.Value with
+              | ResolvedType.Interface _ | ResolvedType.Class _ -> false
+              | _ -> true) ->
+        innerResolvedType
+        |> prerender ctx scope
+        |> RenderScope.createRootless resolvedType
+        |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeReference { Type = innerResolvedType; TypeArguments = [] } ->
         innerResolvedType
         |> prerender ctx scope
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
+    | ResolvedType.TypeReference { TypeArguments = typeArguments; ResolvedType = Some innerResolvedType }
     | ResolvedType.TypeReference { TypeArguments = typeArguments; Type = innerResolvedType } ->
         let innerResolvedTypeValue = innerResolvedType.Value
         // For lib.es types whose F# substitution diverges from the source's
