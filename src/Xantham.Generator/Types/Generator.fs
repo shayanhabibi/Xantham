@@ -131,6 +131,67 @@ module LibEsDefaults =
             "TransformStream", { Target = Intrinsic.obj; Arity = 0 }
             "CustomEvent", { Target = Intrinsic.obj; Arity = 0 }
             "MessageEvent", { Target = Intrinsic.obj; Arity = 0 }
+            // Workers-types augments these via TS declaration merging, but
+            // the Map<Source, _>-keyed `interner.ExportMap` collapses
+            // multiple lib.dom-rooted exports into one bucket — the
+            // augmented bodies never emit. Substituting to `obj` here
+            // preserves compilation; consumers refine via `Fable.Browser.Types`
+            // or driver-side customisation. Once the Map-collision issue
+            // gets a structural fix that emits all augmented exports, these
+            // entries can drop and consumers get the full Cloudflare-extended
+            // shapes (`Request.cf`, `Response.headers`, etc.).
+            "Request", { Target = Intrinsic.obj; Arity = 0 }
+            "Response", { Target = Intrinsic.obj; Arity = 0 }
+            "RequestInit", { Target = Intrinsic.obj; Arity = 0 }
+            "RequestInfo", { Target = Intrinsic.obj; Arity = 0 }
+            "ResponseInit", { Target = Intrinsic.obj; Arity = 0 }
+            "Body", { Target = Intrinsic.obj; Arity = 0 }
+            // TS Streams API
+            "QueuingStrategy", { Target = Intrinsic.obj; Arity = 0 }
+            "QueuingStrategyInit", { Target = Intrinsic.obj; Arity = 0 }
+            "QueuingStrategySize", { Target = Intrinsic.obj; Arity = 0 }
+            "UnderlyingSource", { Target = Intrinsic.obj; Arity = 0 }
+            "UnderlyingSink", { Target = Intrinsic.obj; Arity = 0 }
+            "Transformer", { Target = Intrinsic.obj; Arity = 0 }
+            "ReadableByteStreamController", { Target = Intrinsic.obj; Arity = 0 }
+            "ReadableStreamBYOBReader", { Target = Intrinsic.obj; Arity = 0 }
+            "ReadableStreamBYOBRequest", { Target = Intrinsic.obj; Arity = 0 }
+            "ReadableStreamDefaultController", { Target = Intrinsic.obj; Arity = 0 }
+            "WritableStreamDefaultController", { Target = Intrinsic.obj; Arity = 0 }
+            "TransformStreamDefaultController", { Target = Intrinsic.obj; Arity = 0 }
+            "ByteLengthQueuingStrategy", { Target = Intrinsic.obj; Arity = 0 }
+            "CountQueuingStrategy", { Target = Intrinsic.obj; Arity = 0 }
+            // TS Encoding API
+            "TextEncoder", { Target = Intrinsic.obj; Arity = 0 }
+            "TextDecoder", { Target = Intrinsic.obj; Arity = 0 }
+            "TextEncoderStream", { Target = Intrinsic.obj; Arity = 0 }
+            "TextDecoderStream", { Target = Intrinsic.obj; Arity = 0 }
+            "TextDecoderOptions", { Target = Intrinsic.obj; Arity = 0 }
+            "TextDecoderStreamInit", { Target = Intrinsic.obj; Arity = 0 }
+            // TS Crypto
+            "Crypto", { Target = Intrinsic.obj; Arity = 0 }
+            "SubtleCrypto", { Target = Intrinsic.obj; Arity = 0 }
+            "CryptoKey", { Target = Intrinsic.obj; Arity = 0 }
+            "CryptoKeyPair", { Target = Intrinsic.obj; Arity = 0 }
+            "JsonWebKey", { Target = Intrinsic.obj; Arity = 0 }
+            // TS DOM Event init / misc
+            "EventInit", { Target = Intrinsic.obj; Arity = 0 }
+            "CustomEventInit", { Target = Intrinsic.obj; Arity = 0 }
+            "MessageEventInit", { Target = Intrinsic.obj; Arity = 0 }
+            "ErrorEvent", { Target = Intrinsic.obj; Arity = 0 }
+            "ErrorEventInit", { Target = Intrinsic.obj; Arity = 0 }
+            "PromiseRejectionEvent", { Target = Intrinsic.obj; Arity = 0 }
+            "DOMException", { Target = Intrinsic.obj; Arity = 0 }
+            "URLSearchParams", { Target = Intrinsic.obj; Arity = 0 }
+            "URLSearchParamsInit", { Target = Intrinsic.obj; Arity = 0 }
+            // TS WebAssembly
+            "WebAssembly.Module", { Target = Intrinsic.obj; Arity = 0 }
+            "WebAssembly.Instance", { Target = Intrinsic.obj; Arity = 0 }
+            "WebAssembly.Memory", { Target = Intrinsic.obj; Arity = 0 }
+            "WebAssembly.Table", { Target = Intrinsic.obj; Arity = 0 }
+            "WebAssembly.Global", { Target = Intrinsic.obj; Arity = 0 }
+            "WebAssembly.Tag", { Target = Intrinsic.obj; Arity = 0 }
+            "WebAssembly.Exception", { Target = Intrinsic.obj; Arity = 0 }
         ]
 
     let private intrinsicRef (name: string) =
@@ -172,6 +233,8 @@ module LibEsDefaults =
         | ResolvedType.Interface { Source = source; Name = name } ->
             lookup source name
         | ResolvedType.Class { Source = source; Name = name } ->
+            lookup source name
+        | ResolvedType.Enum { Source = source; Name = name } ->
             lookup source name
         | _ -> ValueNone
 
