@@ -70,6 +70,14 @@ module LibEsDefaults =
             "IterableIterator", { Target = "System.Collections.Generic.IEnumerator"; Arity = 1 }
             "ArrayIterator", { Target = "System.Collections.Generic.IEnumerator"; Arity = 1 }
             "AsyncIterableIterator", { Target = "System.Collections.Generic.IAsyncEnumerator"; Arity = 1 }
+            // TS 5.6+ added `Iterator<T, TReturn, TNext>` / `Generator<T, TReturn, TNext>`
+            // as distinct from the legacy `IterableIterator`. Same arity-3 to F#-arity-1
+            // collapse applies. `AsyncIterator` / `AsyncGenerator` are the async parallels.
+            "Iterator", { Target = "System.Collections.Generic.IEnumerator"; Arity = 1 }
+            "Generator", { Target = "System.Collections.Generic.IEnumerator"; Arity = 1 }
+            "AsyncIterator", { Target = "System.Collections.Generic.IAsyncEnumerator"; Arity = 1 }
+            "AsyncGenerator", { Target = "System.Collections.Generic.IAsyncEnumerator"; Arity = 1 }
+            "AsyncIterable", { Target = "System.Collections.Generic.IAsyncEnumerable"; Arity = 1 }
             // `ReadonlyArray<T>` → `IReadOnlyList<T>` (read-only with index).
             "ReadonlyArray", { Target = "System.Collections.Generic.IReadOnlyList"; Arity = 1 }
             // `ReadonlyMap<K, V>` → `IReadOnlyDictionary<K, V>`.

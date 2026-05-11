@@ -629,17 +629,38 @@ module ArenaInterner =
         // Register both the alias declaration TypeKey (what TypeReferences
         // resolve to) and the alias body TypeKey (what direct prerender of
         // the inner type would see). Both keys point to the same canonical
-        // ConcretePath ref so any reference site picks up the alias path.
+        // ref so any reference site picks up the alias's chosen rendering.
+        //
+        // For lib.es-sourced aliases whose name appears in `LibEsDefaults.substitutions`
+        // (e.g. `PropertyKey`, `JSONSchema` if added), use the substitution's
+        // target as the remap ref instead of the alias's concrete path.
+        // `ResolvedType` has no `TypeAlias` case (aliases resolve through
+        // to their body, losing identity), so the substitution interceptor
+        // can't catch alias references at prerender time — the only place
+        // the alias's name is still in hand is here, where the export is
+        // a `ResolvedExport.TypeAlias` record.
         arena.ResolvedExports
         |> Seq.iter (fun (KeyValue(declTypeKey, export)) ->
             match export with
             | ResolvedExport.TypeAlias value ->
                 let bodyTypeKey = value.Type.Raw
-                let path = Path.Interceptors.pipeTypeAlias ctx value
                 let ref =
-                    RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
-                    |> RenderScopeStore.TypeRef.Unsafe.createAtom
-                    |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+                    let substitution =
+                        match value.Source with
+                        | ArenaInterner.Source.LibEs _ ->
+                            let key = Name.Case.valueOrSource value.Name
+                            Map.tryFind key LibEsDefaults.substitutions
+                        | _ -> None
+                    match substitution with
+                    | Some s ->
+                        RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic s.Target
+                        |> RenderScopeStore.TypeRef.Unsafe.createAtom
+                        |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+                    | None ->
+                        let path = Path.Interceptors.pipeTypeAlias ctx value
+                        RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
+                        |> RenderScopeStore.TypeRef.Unsafe.createAtom
+                        |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
                 GeneratorContext.Prelude.addTypeAliasRemap ctx declTypeKey ref
                 GeneratorContext.Prelude.addTypeAliasRemap ctx bodyTypeKey ref
             | _ -> ())
