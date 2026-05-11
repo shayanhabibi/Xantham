@@ -23,6 +23,28 @@ module TypeAlias =
         let metadata =
             (Path.create path, typ)
             ||> RenderMetadata.createWithPathFromExport
+        // Drop typars from the alias declaration that aren't referenced in
+        // the resolved body. F# rejects type abbreviations with unused
+        // declared typars (FS0035). The cycle-break pass and lib.es
+        // substitutions can both eliminate references to typars from the
+        // body while the declaration still names them. Re-derive the
+        // declaration's typar list by intersecting the original typar
+        // names with the set of typar Intrinsics actually used in the
+        // rendered body.
+        let pruneUnusedTypars (resolvedRef: TypeRefRender) =
+            if List.isEmpty typeParameters then typeParameters
+            else
+                let usedTyparNames =
+                    (Set.empty, resolvedRef)
+                    ||> TypeRefRender.foldAtoms (fun acc atom ->
+                        match atom with
+                        | TypeRefAtom.Intrinsic s when s.StartsWith("'") ->
+                            Set.add s acc
+                        | _ -> acc)
+                typeParameters
+                |> List.filter (fun tp ->
+                    let typarRef = "'" + (Name.Case.valueOrModified tp.Name)
+                    Set.contains typarRef usedTyparNames)
         // Replace any self-reference to the alias's own target ref inside
         // the resolved molecule with `obj`. The CreateFromValue wrapping
         // used for Union elements zeroes the LazyContainer's Raw, which
@@ -109,12 +131,13 @@ module TypeAlias =
             | ResolvedType.Conditional _
             | ResolvedType.Enum _
             | ResolvedType.Array _ ->
+                let body = resolveInnerRef ()
                 {
                     TypeAliasRenderRef.Documentation = documentation
                     Metadata = metadata
                     Name = name
-                    TypeParameters = typeParameters
-                    Type = resolveInnerRef ()
+                    TypeParameters = pruneUnusedTypars body
+                    Type = body
                 }
                 |> TypeAliasRender.Alias
             | ResolvedType.Intersection _ 
@@ -138,13 +161,14 @@ module TypeAlias =
                 }
                 |> TypeAliasRender.TypeDefn
             | ResolvedType.Union _ ->
+                let body = resolveInnerRef ()
                 let typeRefRender =
                     {
                         TypeAliasRenderRef.Documentation = documentation
                         Metadata = metadata
                         Name = name
-                        TypeParameters = typeParameters
-                        Type = resolveInnerRef ()
+                        TypeParameters = pruneUnusedTypars body
+                        Type = body
                     }
                     |> TypeAliasRender.Alias
                 match ResolvedTypeCategories.create innerType.Value with

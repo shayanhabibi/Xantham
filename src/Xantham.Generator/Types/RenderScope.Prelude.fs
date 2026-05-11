@@ -127,6 +127,26 @@ module TypeRefRender =
                 | atom -> atom
             { render with Kind = kind }
         else render
+    /// Fold over every atom in a TypeRefRender, descending through
+    /// molecules. Used for read-only inspection (e.g. collecting typars
+    /// referenced inside a resolved alias body so unused declared typars
+    /// can be dropped — F# rejects type abbreviations whose declared
+    /// typars aren't used in the body with FS0035).
+    let rec foldAtoms (f: 'State -> TypeRefAtom -> 'State) (state: 'State) (render: TypeRefRender) : 'State =
+        match render.Kind with
+        | TypeRefKind.Atom_ atom -> f state atom
+        | TypeRefKind.Molecule_ molecule ->
+            match molecule with
+            | TypeRefMolecule.Tuple_ typeRefs
+            | TypeRefMolecule.Union_ typeRefs ->
+                typeRefs |> List.fold (foldAtoms f) state
+            | TypeRefMolecule.Function_ (parameters, returnType) ->
+                let state = parameters |> List.fold (foldAtoms f) state
+                foldAtoms f state returnType
+            | TypeRefMolecule.Prefix_ (prefix, args) ->
+                let state = foldAtoms f state prefix
+                args |> List.fold (foldAtoms f) state
+
     /// Walk every atom in a TypeRefRender (descending through molecules)
     /// and apply a mapping function. Used to rewrite atoms inside composite
     /// renders without exposing the private molecule constructors.
