@@ -88,6 +88,7 @@ let MemberBuilder = Helpers.makePendingSlot<XanTagKind, GuardTracer, SMemberBuil
 let AstNodeBuilder = Helpers.makePendingSlot<XanTagKind, GuardTracer, SType> "AstNodeBuilder"
 let TypeSignal = Helpers.makeSlotWithDefault<XanTagKind, GuardTracer, TypeSignal> (fun () -> TypeSignal.pending()) "TypeSignal"
 let Source = Helpers.makeSlot<XanTagKind, GuardTracer, Signal<ExportCollection voption>> "Source"
+let Metadata = Helpers.makeSlot<XanTagKind, GuardTracer, Signal<Metadata>> "Metadata"
 let ExportBuilder = Helpers.makePendingSlot<XanTagKind, GuardTracer, STsExportDeclaration> "ExportBuilder"
 type OutputKind =
     | None = 0

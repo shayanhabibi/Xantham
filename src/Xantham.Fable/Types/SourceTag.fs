@@ -78,20 +78,8 @@ module PackageExportKind =
         |> Array.map (fun (key, value) -> createConditionalValue key value)
         |> Array.toList
     and private createConditionalValue (key: string) value =
-        match key with
-        | "types" -> Types(readValue value)
-        | "default" -> Default(readValue value)
-        | "browser" -> Browser(readValue value)
-        | "development" -> Development(readValue value)
-        | "production" -> Production(readValue value)
-        | "node-addons" -> NodeAddons(readValue value)
-        | "node" -> Node(readValue value)
-        | "import" -> Import(readValue value)
-        | "require" -> Require(readValue value)
-        | "module-sync" -> ModuleSync(readValue value)
-        | "module" -> Module(readValue value)
-        | "esnext" -> ESNext(readValue value)
-        | _ -> Unknown(key, readValue value)
+        readValue value
+        |> ConditionalExport.create key
 module PackageExport =
     let private tryFromExports (jsonFields: PackageJsonPathFields): Export option =
         match jsonFields.exports with
@@ -505,6 +493,8 @@ type SourceTag with
     member this.SubModule =
         SymbolTypeKey.access subModuleTagKey this
         |> ValueOption.flatten
+    member inline this.SubModuleId =
+        this.SubModule |> ValueOption.map _.Key
 let private exportPointCanonicalKey = SymbolTypeKey.create<ExportPoint> "ExportPointCanonical"
 let private exportPointsKey = SymbolTypeKey.create<HashSet<ExportPoint>> "ExportPoints"
 let private exportPointKey = SymbolTypeKey.create<ExportPoint> "ExportPoint"
