@@ -97,6 +97,40 @@ module LibEsDefaults =
             "BigUint64Array", { Target = "BigUint64Array"; Arity = 0 }
             "ArrayBufferView", { Target = "ArrayBufferView"; Arity = 0 }
             "DataView", { Target = "DataView"; Arity = 0 }
+            // TS lib.es / lib.dom built-ins that Fable.Core.JS doesn't
+            // provide a binding for. Without substitution these emit as
+            // bare names (`URL`, `RegExp`, `AbortSignal`, ...) that F# can't
+            // resolve (FS0039). `obj` is a placeholder — preserves
+            // compilation while losing structural type info; consumers
+            // refine via `Fable.Browser.Types` etc. at the binding layer.
+            // Listed only for types with no augmentation path through the
+            // declaration-merging escape (consumers of workers-types
+            // augment Request/Response/RequestInit/Headers — those stay
+            // unmapped here so the augmented bodies emit once the
+            // declaration-merging fix lands).
+            "PropertyKey", { Target = Intrinsic.obj; Arity = 0 }
+            "RegExp", { Target = Intrinsic.obj; Arity = 0 }
+            "URL", { Target = Intrinsic.obj; Arity = 0 }
+            "AbortSignal", { Target = Intrinsic.obj; Arity = 0 }
+            "AbortController", { Target = Intrinsic.obj; Arity = 0 }
+            "WebSocket", { Target = Intrinsic.obj; Arity = 0 }
+            "EventTarget", { Target = Intrinsic.obj; Arity = 0 }
+            "Event", { Target = Intrinsic.obj; Arity = 0 }
+            "EventListener", { Target = Intrinsic.obj; Arity = 0 }
+            "EventListenerObject", { Target = Intrinsic.obj; Arity = 0 }
+            "AddEventListenerOptions", { Target = Intrinsic.obj; Arity = 0 }
+            "EventListenerOptions", { Target = Intrinsic.obj; Arity = 0 }
+            "Blob", { Target = Intrinsic.obj; Arity = 0 }
+            "File", { Target = Intrinsic.obj; Arity = 0 }
+            "FormData", { Target = Intrinsic.obj; Arity = 0 }
+            "Headers", { Target = Intrinsic.obj; Arity = 0 }
+            "ReadableStream", { Target = Intrinsic.obj; Arity = 0 }
+            "ReadableStreamDefaultReader", { Target = Intrinsic.obj; Arity = 0 }
+            "WritableStream", { Target = Intrinsic.obj; Arity = 0 }
+            "WritableStreamDefaultWriter", { Target = Intrinsic.obj; Arity = 0 }
+            "TransformStream", { Target = Intrinsic.obj; Arity = 0 }
+            "CustomEvent", { Target = Intrinsic.obj; Arity = 0 }
+            "MessageEvent", { Target = Intrinsic.obj; Arity = 0 }
         ]
 
     let private intrinsicRef (name: string) =
