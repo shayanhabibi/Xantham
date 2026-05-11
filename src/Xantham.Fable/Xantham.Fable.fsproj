@@ -20,11 +20,11 @@
         <Compile Include="Types\Symbol.fs" />
         <Compile Include="Types\Tracer.fs" />
         <Compile Include="Types\XanTagKind.fs" />
+        <Compile Include="Types\SourceTag.fs" />
         <Compile Include="Types\XanTag.fs" />
-        <Compile Include="Types\ModuleMap.fs" />
         <Compile Include="Types\ReactiveBuilders.fs" />
-        <Compile Include="Types\Reader.fs" />
         <Compile Include="Types\GuardedData.fs" />
+        <Compile Include="Types\Reader.fs" />
         <Compile Include="Types\Reader.Extensions.fs" />
         <Compile Include="Types\XanTag.Extensions.fs" />
         <Compile Include="Reading\Prelude.fs" />

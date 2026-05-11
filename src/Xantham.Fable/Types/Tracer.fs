@@ -45,6 +45,7 @@ module Xantham.Fable.Types.Tracer
 
 open Fable.Core
 open Fable.Core.DynamicExtensions
+open Fable.Core.JsInterop
 open TypeScript
 open Xantham
 open Xantham.Fable
@@ -325,3 +326,119 @@ module GuardedTracer =
 type KeyedGuardedTracer<'WrappedType, 'Guard, 'Key> =
     inherit GuardedTracer<'WrappedType, 'Guard>
     abstract Key: 'Key with get, set
+
+type GuardedTracer<'T, 'U> with
+    // -----------------------------------
+    // Data access
+    // -----------------------------------
+    member inline this.TryGet(symbol: SymbolTypeKey<'Data>) =
+        symbol.Invoke(this)
+    member inline this.Get(symbol: SymbolTypeKey<'Data>) =
+        SymbolTypeKey.unsafeAccess symbol this
+    member inline this.Has(symbol: SymbolTypeKey<'Data>) = SymbolTypeKey.has symbol this
+    member inline this.GetOrInit(symbol: SymbolTypeKey<'Data>, initFn: unit -> 'Data) =
+        SymbolTypeKey.accessOrInit symbol initFn this
+    member inline this.Set(symbol: SymbolTypeKey<'Data>, value: 'Data) =
+        SymbolTypeKey.set symbol value this
+    member inline this.Clear(symbol: SymbolTypeKey<'Data>) = SymbolTypeKey.remove symbol this
+    member inline this.TryGet<'Data>(): 'Data voption =
+        this.Item(typeof<'Data>.Name)
+        |> unbox
+    member inline this.Get<'Data>(): 'Data =
+        this.TryGet<'Data>() |> ValueOption.get
+    member inline this.Has<'Data>() = this.TryGet<'Data>() |> _.IsSome
+    member inline this.GetOrInit<'Data>(initFn: unit -> 'Data) =
+        match this.TryGet<'Data>() with
+        | ValueNone ->
+            this.Item typeof<'Data>.Name <- initFn()
+            this.Get<'Data>()
+        | ValueSome value -> value
+    member inline this.Set<'Data>(value: 'Data) =
+        this.Item typeof<'Data>.Name <- value
+    member inline this.Clear<'Data>() = this.Item typeof<'Data>.Name <- JS.undefined
+    // -----------------------------------
+    // Keyed data access (stored on Guard)
+    // -----------------------------------
+    /// <summary>
+    /// Reads/writes data stored on the <c>Guard</c> object rather than the tag itself,
+    /// giving data partitioned by the guard's identity (symbol or <c>TypeKey</c>).
+    /// All <c>Keyed*</c> members mirror the plain <c>Get/Set/Has/Clear/GetOrInit</c>
+    /// API but target <c>this.Guard</c> as the backing store.
+    /// </summary>
+    member inline this.KeyedTryGet(symbol: SymbolTypeKey<'Data>) =
+        symbol.Invoke(this.Guard)
+    member inline this.KeyedGet(symbol: SymbolTypeKey<'Data>) =
+        SymbolTypeKey.unsafeAccess symbol this.Guard
+    member inline this.KeyedHas(symbol: SymbolTypeKey<'Data>) = SymbolTypeKey.has symbol this.Guard
+    member inline this.KeyedGetOrInit(symbol: SymbolTypeKey<'Data>, initFn: unit -> 'Data) =
+        SymbolTypeKey.accessOrInit symbol initFn this.Guard
+    member inline this.KeyedSet(symbol: SymbolTypeKey<'Data>, value: 'Data) =
+        SymbolTypeKey.set symbol value this.Guard
+    member inline this.KeyedClear(symbol: SymbolTypeKey<'Data>) = SymbolTypeKey.remove symbol this.Guard
+    member inline this.KeyedTryGet<'Data>(): 'Data voption =
+        this.Guard.Item(typeof<'Data>.Name)
+        |> unbox
+    member inline this.KeyedGet<'Data>(): 'Data =
+        this.KeyedTryGet<'Data>() |> ValueOption.get
+    member inline this.KeyedHas<'Data>() = this.KeyedTryGet<'Data>() |> _.IsSome
+    member inline this.KeyedGetOrInit<'Data>(initFn: unit -> 'Data) =
+        match this.KeyedTryGet<'Data>() with
+        | ValueNone ->
+            this.Guard.Item typeof<'Data>.Name <- initFn()
+            this.KeyedGet<'Data>()
+        | ValueSome value -> value
+    member inline this.KeyedSet<'Data>(value: 'Data) =
+        this.Guard.Item typeof<'Data>.Name <- value
+    member inline this.KeyedClear<'Data>() = this.Guard.Item typeof<'Data>.Name <- JS.undefined
+
+[<RequireQualifiedAccess>]
+type TagState<'T> =
+    | Visited of 'T
+    | Unvisited of 'T
+    /// <summary>
+    /// Optimised for performance, emits immediate access to the underlying value
+    /// </summary>
+    member inline this.Value: 'T =
+        emitJsExpr this "$0.fields[0]"
+
+module TagState =
+    let createVisited (value: 'T) = TagState.Visited value
+    let createUnvisited (value: 'T) = TagState.Unvisited value
+    let inline isVisited (state: TagState<'T>) = state.IsVisited
+    let inline isUnvisited (state: TagState<'T>) = state.IsUnvisited
+    let inline value (state: TagState<'T>) = state.Value
+    let inline mapUnvisited (f: 'T -> 'T) (state: TagState<'T>) =
+        match state with
+        | TagState.Unvisited v -> TagState.Unvisited (f v)
+        | v -> v
+    let inline mapVisited (f: 'T -> 'T) (state: TagState<'T>) =
+        match state with
+        | TagState.Visited v -> TagState.Visited (f v)
+        | v -> v
+    let inline applyUnvisited (f: 'T -> 'U) (state: TagState<'T>) =
+        match state with
+        | TagState.Unvisited v -> f v |> ValueSome
+        | _ -> ValueNone
+    let inline applyVisited (f: 'T -> 'U) (state: TagState<'T>) =
+        match state with
+        | TagState.Visited v -> f v |> ValueSome
+        | _ -> ValueNone
+    /// <param name="fn">First parameter is true when the state has been seen for the first time.</param>
+    /// <param name="state"></param>
+    let inline map (fn: bool -> 'T -> 'U) (state: TagState<'T>) =
+        match state with
+        | TagState.Unvisited v -> TagState.Unvisited (fn true v)
+        | TagState.Visited v -> TagState.Visited (fn false v)
+    let inline bindUnvisited (fn: 'T -> 'T) (state: TagState<'T>) =
+        match state with
+        | TagState.Unvisited v -> TagState.Visited (fn v)
+        | _ -> state
+    let inline bind (fn: 'T -> 'T) (state: TagState<'T>) =
+        match state with
+        | TagState.Visited v -> TagState.Visited (fn v)
+        | TagState.Unvisited v -> TagState.Visited (fn v)
+    let inline apply (fn: bool -> 'T -> unit) (state: TagState<'T>) =
+        match state with
+        | TagState.Unvisited v -> fn true v
+        | TagState.Visited v -> fn false v
+        state

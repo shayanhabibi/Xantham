@@ -5,7 +5,7 @@ open Xantham
 open Xantham.Fable
 open Xantham.Fable.Types.Signal
 
-let inline private ifHasThenGetOrNone (xanTag: XanthamTag) (v: GuardedData.KeyedSymbolSlot<'T>) =
+let inline private ifHasThenGetOrNone (xanTag: XanthamTag) (v: GuardedData.KeyedSymbolSlot<_, 'T>) =
     if v.has xanTag then ValueSome (v.get xanTag) else ValueNone
 
 type XanthamTag with
@@ -65,6 +65,6 @@ type XanthamTag with
             |> Signal.fill value
     // ===== Source Bag ======
     member this.TrySource with get() = ifHasThenGetOrNone this GuardedData.Source
-    member this.Source with set(value: ModuleName) =
-        GuardedData.Source.getOrSetWith (fun () -> Signal.source value) this
-        |> _.Set(value)
+    member this.Source with set(value: ExportCollection) =
+        GuardedData.Source.getOrSetWith (fun () -> Signal.source (ValueSome value)) this
+        |> Signal.fill value

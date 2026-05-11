@@ -17,7 +17,8 @@ let private commonCompilerOptions = jsOptions<Ts.CompilerOptions>(fun c ->
     // Without this, unions with null and undefined are reduced out when resolving
     // a type node to a type. This increases workaround logic.
     c.strictNullChecks <- Some true
-    )
+    c.resolvePackageJsonExports <- Some true
+    c.resolvePackageJsonImports <- Some true)
 
 let private createProgram (entryFile: string): Ts.Program =
     let entryFile = String.normalizePath entryFile
@@ -33,22 +34,6 @@ let private createProgramForFiles (entryFiles: string array): Ts.Program =
         o.options <- commonCompilerOptions
         ))
 
-// Original impl Credit @MangelMaxine
-let isFromEs5Lib (symbolOpt: Ts.Symbol option) =
-    match symbolOpt with
-    | None -> false
-    | Some symbol ->
-        match symbol.declarations with
-        | Some declarations when declarations.Count > 0 && !!declarations[0].parent ->
-            match declarations[0].parent with
-            | node when ts.isSourceFile node ->
-                (node :?> Ts.SourceFile).fileName.EndsWith("lib/lib.es5.d.ts")
-            | _ -> false
-        | _ ->
-            // For some reason, I can't seem to resolve the actual symbol for some Es5 types
-            // So, we make a naive fallback checking the name of the symbol
-            [ "Iterable"; "IterableIterator" ] |> List.contains symbol.name
-
 [<ReferenceEquality>]
 type TypeScriptReader = {
     Stack: Stack<XanthamTag>
@@ -56,7 +41,6 @@ type TypeScriptReader = {
     Program: Ts.Program
     Checker: Ts.TypeChecker
     Warnings: ResizeArray<string>
-    ModuleMap: ModuleMap
     SignalCache: Dictionary<IdentityKey, TypeStore>
     ExportCache: Dictionary<IdentityKey, ExportStore>
     MemberCache: Dictionary<IdentityKey, MemberStore>
@@ -68,7 +52,6 @@ type TypeScriptReader = {
     member inline this.program = this.Program
     member inline this.checker = this.Checker
     member inline this.warnings = this.Warnings
-    member inline this.moduleMap = this.ModuleMap
     member inline this.signalCache = this.SignalCache
     member inline this.memberCache = this.MemberCache
     member inline this.libCache = this.LibCache
@@ -94,7 +77,6 @@ module TypeScriptReader =
             Stack = stack
             EntryFiles = entryFiles
             Warnings = warnings
-            ModuleMap = ModuleMap.Create program
             SignalCache = signalCache
             LibCache = libCache
             MemberCache = memberCache

@@ -1515,6 +1515,22 @@ type TypeDeclaration with
     member inline this.Value: Ts.Node = emitJsExpr this "$0.fields[0]"
     static member Create(decl: Ts.Node) = Internal.typeDeclarationKindSetMap[decl.kind] decl
     static member IsTypeDeclarationKind(decl: Ts.Node) = Internal.typeDeclarationKindSetMap.ContainsKey decl.kind
+    /// <summary>
+    /// Will return <c>ValueNone</c> if the declaration is a <c>HeritageClause</c>
+    /// or <c>VariableStatement</c>.
+    /// </summary>
+    member inline this.Symbol: Ts.Symbol voption =
+        match this with
+        | TypeDeclaration.HeritageClause _ -> ValueNone
+        | TypeDeclaration.VariableStatement _ -> ValueNone
+        | _ ->
+        let node = this.Value
+        if node?symbol then
+            ValueSome node?symbol
+        else
+            Log.error $"TypeDeclaration.Symbol: unexpected failure to find symbol for %A{this}. Please raise an issue."
+            ValueNone
+
 type TypeNode with
     /// <summary>
     /// Optimised for performance, emits immediate access to the underlying value

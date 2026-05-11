@@ -8,6 +8,7 @@ open Xantham
 open Xantham.Fable.Reading
 open Xantham.Fable.Reading.Entry
 open Xantham.Fable.Types
+open Xantham.Fable.Types.SourceTag
 open Xantham.Fable.Types.Tracer
 
 module Internal =
@@ -353,6 +354,9 @@ module Internal =
             ExportedDeclarations = mergeWinnersInto result.DuplicateExports result.ExportedDeclarations }
 open Schema
 let read (reader: TypeScriptReader) =
+    reader.program.SeedResolvedModules()
+    let packages = reader.program.CompilePackageCache()
+    reader.program.SeedExportPoints()
     let exportTags =
         Internal.initialise reader
         |> Internal.getAndPrepareExports
@@ -372,6 +376,21 @@ let read (reader: TypeScriptReader) =
         |> Array.append exportTagIdentities
         |> Array.distinct
     {
+        PackageMap =
+            match packages with
+            | Error _ -> { Packages = Map.empty; SubModuleRelations = [||]; SubModules = Map.empty }
+            | Ok packages ->
+                {
+                    Packages =
+                        packages.Packages
+                        |> Seq.map (fun package -> package.Key, package)
+                        |> Map
+                    SubModuleRelations = packages.SubModuleRelations
+                    SubModules =
+                        packages.SubModules
+                        |> Seq.map (fun subModule -> subModule.Key, subModule)
+                        |> Map
+                }
         ExportedDeclarations =
             exportResults.NonDuplicates
             |> Array.map (fun ir -> ir.Key, ir.Node)

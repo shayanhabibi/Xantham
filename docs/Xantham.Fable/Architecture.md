@@ -311,6 +311,94 @@ Type-safe data access with separation of concerns:
 └─────────────────┴─────────────────┴───────────────────────────┘
 ```
 
+### Source Metadata and `SourceTag`
+
+In addition to the `XanthamTag` attached to every AST node, source files
+themselves carry a `SourceTag` — a `GuardedTracer<SourceKind, SourceGuard>`
+that classifies the file and exposes the package/submodule graph used by the
+encoder to populate the `Metadata` field on every emitted declaration.
+
+```fsharp
+type SourceKind =
+    | LibEs
+    | Ambient  of Ts.SourceFile
+    | Package  of Ts.Symbol
+
+type SourceTag =
+    inherit GuardedTracer<SourceKind, SourceGuard>
+    member this.PackageName    : string voption
+    member this.PackageVersion : string voption
+    member this.SubModuleName  : string voption
+    member this.SubModule      : SubModule voption
+    member this.SubModuleId    : SubModuleId voption
+    member this.PackageInfo    : PackageInfo voption
+    member this.Declarations   : Ts.Symbol array
+    member this.Dependencies   : ResizeArray<SourceTag>
+    member this.Dependents     : HashSet<SourceTag>
+```
+
+`Declarations` resolves to the appropriate symbol table for each
+`SourceKind` (globals for `Ambient`, module exports for `Package`, ambient
+modules off the type checker for `LibEs`), so downstream dispatchers can
+iterate a file's declarations without re-implementing the lookup per kind.
+
+Every builder/type declaration produced by the encoder now carries a
+`Metadata` field instead of a bare `Source` string:
+
+```fsharp
+[<Struct>]
+type Metadata = { Source : Source }
+
+[<Struct>]
+type Source =
+    | LibEs           of fileName: string
+    | PackageInternal of subModuleId: SubModuleId
+    | Package         of exportCollection: ExportCollection
+
+[<Struct>]
+type ExportPoint      = { Name: string; SubModule: SubModuleId }
+[<Struct>]
+type ExportCollection = { Canonical: ExportPoint; Aliases: ExportPoint listOrArray }
+```
+
+This split lets the downstream decoder distinguish three provenance cases
+without re-walking the program:
+
+* `LibEs fileName` — declaration lives in a TS standard library file.
+* `PackageInternal subModuleId` — declaration is reachable through a
+  package the input depends on, but is not part of its public surface.
+* `Package exportCollection` — declaration is a public export. `Canonical`
+  is the originating export point; `Aliases` lists every re-export site
+  (barrel files, default re-exports, etc.) pointing at the same symbol.
+
+### Read pipeline seeding
+
+Before AST traversal begins, `Read.read` performs three seeding passes on
+`Ts.Program` that populate the caches the metadata pipeline depends on:
+
+```fsharp
+reader.program.SeedResolvedModules()      // package + submodule graph
+let packages = reader.program.CompilePackageCache()
+reader.program.SeedExportPoints()         // index symbols by ExportPoint
+```
+
+* **`SeedResolvedModules`** walks the program's resolved module references
+  to build the package/submodule graph and attach a `SourceTag` to every
+  source file with the right `SourceKind`.
+* **`CompilePackageCache`** consolidates the per-`SourceTag` package data
+  into a `PackageCache` keyed by `PackageId`, available via
+  `program.PackageCache`.
+* **`SeedExportPoints`** indexes each exported symbol by its
+  `ExportPoint` (name + submodule) and tracks aliases, so
+  `program.GetExportCollection(symbol)` can later return an
+  `ExportCollection voption` in O(1) when a dispatcher needs to stamp
+  `Source.Package` metadata on a declaration.
+
+With those caches in place, `ModulesAndExports` and `TypeDeclaration`
+dispatchers can build `Metadata` for each emitted construct by looking up
+the owning `SourceTag` and, for public exports, resolving the corresponding
+`ExportCollection` directly from the program.
+
 ## Data Flow Through the System
 
 ### 1. Input Processing

@@ -69,8 +69,15 @@ The shape returned on success:
 * `TypeMap : Map<TypeKey, TsType>` — every structural type in the input.
 * `ExportTypeMap : Map<TypeKey, TsExportDeclaration>` — every exported
   declaration.
-* `ExportMap : Map<string, Set<TypeKey>>` — exports grouped by source module
-  path.
+* `ExportMap : Map<SubModuleId voption, Set<TypeKey>>` — exports grouped by
+  submodule (where `ValueNone` represents default library declarations).
+* `SourceDependencyMap : Map<SubModuleId, SubModuleRelation list>` — dependency
+  relationships between submodules.
+* `SourceDependeeMap : Map<SubModuleId, SubModuleRelation list>` — reverse
+  dependency tracking: modules that depend on each submodule.
+* `SubModuleMap : Map<SubModuleId, SubModule>` — submodule definitions and
+  metadata.
+* `PackageMap : Map<PackageId, Package>` — package definitions and metadata.
 * `TopLevelExports : TypeKey list` — exports declared at the top level of the
   input.
 * `LibEsExports : TypeKey list` — exports that originate from the TS standard

@@ -1,11 +1,52 @@
 [<AutoOpen>]
 module TypeScriptExtensions
 
+open System.Collections.Generic
 open Fable.Core
 open TypeScript
 open Fable.Core.JsInterop
 open Xantham
+open Xantham.Fable
 
+
+type Ts.Program with
+    /// <summary>
+    /// </summary>
+    /// <param name="callback"><br/>
+    /// resolution: ResolvedModuleWithFailedLookupLocations<br/>
+    /// moduleName: string<br/>
+    /// mode: ResolutionMode<br/>
+    /// filePath: Path<br/>
+    /// </param>
+    /// <param name="file"></param>
+    [<EmitMethod "forEachResolvedModule">]
+    member this.forEachResolvedModule(callback: Ts.ResolvedModuleWithFailedLookupLocations -> string -> Ts.ResolutionMode -> string -> unit, ?file: Ts.SourceFile): unit = ()
+
+type PackageJsonPathFields =
+    abstract typings: string option
+    abstract types: string option
+    abstract main: string option
+    abstract ``type``: string option
+    abstract name: string option
+    abstract description: string option
+    abstract version: string option
+    abstract license: string option
+    abstract author: string option
+    abstract repository: string option
+    abstract imports: obj option
+    abstract exports: obj option
+
+type PackageJsonInfoContents =
+    abstract packageJsonContent: PackageJsonPathFields
+    abstract resolvedEntrypoints: U2<string array, bool>
+
+type PackageJsonInfo =
+    abstract contents: PackageJsonInfoContents
+    abstract packageDirectory: string
+
+type Ts.SourceFile with
+    [<EmitProperty "packageJsonScope">]
+    member this.packageJsonScope: PackageJsonInfo option = jsNative
 
 type Ts.Type with
     [<EmitProperty "id">]
@@ -1248,6 +1289,10 @@ module Patterns =
             let (|NamedImports|NamespaceImport|): Ts.NamedImportBindings -> _ = unbox >> function
                 | NamedImports node -> NamedImports node
                 | NamespaceImport node -> NamespaceImport node
+        module ModuleExportNamePatterns =
+            let (|Identifier|StringLiteral|): Ts.ModuleExportName -> _ = unbox >> function
+                | Identifier node -> Identifier node
+                | StringLiteral node -> StringLiteral node
         #warnon 25
     /// <summary>
     /// Patterns for determining the presence of a TypeFlag on a <c>Ts.Type</c> derivative, and
@@ -2368,115 +2413,18 @@ type NameHelpers =
         | Patterns.Node.ModuleNamePatterns.StringLiteral value ->
             value.text
             
-
-// Original impl Credit @MangelMaxine
-let isFromEs5Lib (symbolOpt: Ts.Symbol option) =
-    match symbolOpt with
-    | None -> false
-    | Some symbol ->
-        match symbol.declarations with
-        | Some declarations when declarations.Count > 0 && !!declarations[0].parent ->
-            match declarations[0].parent with
-            | Patterns.Node.SourceFile sourceFile ->
-                // All TypeScript built-in lib files follow the pattern */lib/lib.*.d.ts
-                let fn = sourceFile.fileName
-                fn.Contains("/lib/lib.") && fn.EndsWith(".d.ts")
-            | _ -> false
-        | _ ->
-            // For some reason, I can't seem to resolve the actual symbol for some Es5 types
-            // So, we make a naive fallback checking the name of the symbol
-            [ "Iterable"; "IterableIterator" ] |> List.contains symbol.name
-            
-module TypeCrawler =
-    type InterfaceTypeAliasDeclarations =
-        | Interface of Ts.InterfaceDeclaration
-        | TypeAlias of Ts.TypeAliasDeclaration
-        | PropertySignature of Ts.PropertySignature
-        | MethodSignature of Ts.MethodSignature
-        | IndexSignature of Ts.IndexSignatureDeclaration
-        | CallSignature of Ts.CallSignatureDeclaration
-        | ConstructSignature of Ts.ConstructSignatureDeclaration
-        | GetAccessor of Ts.GetAccessorDeclaration
-        | SetAccessor of Ts.SetAccessorDeclaration
-        | HeritageClause of Ts.HeritageClause
-    type ClassDeclarations =
-        | ClassDeclaration of Ts.ClassDeclaration
-        | Property of Ts.PropertyDeclaration
-        | Method of Ts.MethodDeclaration
-        | Constructor of Ts.ConstructorDeclaration
-        | GetAccessor of Ts.GetAccessorDeclaration
-        | SetAccessor of Ts.SetAccessorDeclaration
-        | HeritageClause of Ts.HeritageClause
-        | ExpressionWithTypeArguments of Ts.ExpressionWithTypeArguments
-    type EnumDeclarations =
-        | EnumMember of Ts.EnumMember
-        | EnumDeclaration of Ts.EnumDeclaration
-    
-    type VariableDeclarations =
-        | VariableStatement of Ts.VariableStatement
-        | VariableDeclaration of Ts.VariableDeclaration
-    type FunctionDeclarations =
-        | FunctionDeclaration of Ts.FunctionDeclaration
-    type ParameterDeclaration =
-        | Parameter of Ts.ParameterDeclaration
-    
-    type TypeDeclaration =
-        | Interface of Ts.InterfaceDeclaration
-        | TypeAlias of Ts.TypeAliasDeclaration
-        | PropertySignature of Ts.PropertySignature
-        | MethodSignature of Ts.MethodSignature
-        | IndexSignature of Ts.IndexSignatureDeclaration
-        | CallSignature of Ts.CallSignatureDeclaration
-        | ConstructSignature of Ts.ConstructSignatureDeclaration
-        | Class of Ts.ClassDeclaration
-        | Property of Ts.PropertyDeclaration
-        | Method of Ts.MethodDeclaration
-        | Constructor of Ts.ConstructorDeclaration
-        | GetAccessor of Ts.GetAccessorDeclaration
-        | SetAccessor of Ts.SetAccessorDeclaration
-        | HeritageClause of Ts.HeritageClause
-        | ExpressionWithTypeArguments of Ts.ExpressionWithTypeArguments
-        | EnumDeclaration of Ts.EnumDeclaration
-        | EnumMember of Ts.EnumMember
-        | VariableStatement of Ts.VariableStatement
-        | VariableDeclaration of Ts.VariableDeclaration
-        | FunctionDeclaration of Ts.FunctionDeclaration
-        | Parameter of Ts.ParameterDeclaration
-    
-    type TypeNodes =
-        | StringKeyword of Ts.KeywordTypeNode
-        | NumberKeyword of Ts.KeywordTypeNode
-        | BooleanKeyword of Ts.KeywordTypeNode
-        | NullKeyword of Ts.KeywordTypeNode
-        | UndefinedKeyword of Ts.KeywordTypeNode
-        | VoidKeyword of Ts.KeywordTypeNode
-        | NeverKeyword of Ts.KeywordTypeNode
-        | AnyKeyword of Ts.KeywordTypeNode
-        | UnknownKeyword of Ts.KeywordTypeNode
-        | ObjectKeyword of Ts.KeywordTypeNode
-        | SymbolKeyword of Ts.KeywordTypeNode
-        | BigIntKeyword of Ts.KeywordTypeNode
-        | UnionType of Ts.UnionTypeNode
-        | IntersectionType of Ts.IntersectionTypeNode
-        | ArrayType of Ts.ArrayTypeNode
-        | TupleType of Ts.TupleTypeNode
-        | NamedTupleMember of Ts.NamedTupleMember
-        | RestType of Ts.RestTypeNode
-        | OptionalType of Ts.OptionalTypeNode
-        | ParenthesizedType of Ts.ParenthesizedTypeNode
-        | TypeReference of Ts.TypeReferenceNode
-        | TypeParameter of Ts.TypeParameter
-        | TypePredicate of Ts.TypePredicateNode
-        | TypeQuery of Ts.TypeQueryNode
-        | TypeOperator of Ts.TypeOperatorNode
-        | IndexedAccessType of Ts.IndexedAccessTypeNode
-        | MappedType of Ts.MappedTypeNode
-        | ConditionalType of Ts.ConditionalTypeNode
-        | InferType of Ts.InferTypeNode
-        | TemplateLiteralType of Ts.TemplateLiteralTypeNode
-        | TemplateLiteralTypeSpan of Ts.TemplateLiteralTypeSpan
-        | FunctionType of Ts.FunctionTypeNode
-        | ConstructorType of Ts.ConstructorTypeNode
-        | TypeLiteral of Ts.TypeLiteralNode
-        | LiteralType of Ts.LiteralTypeNode
-        | ThisType of Ts.ThisTypeNode
+[<AutoOpen>]
+type SourceFileHelper =
+    static member getSourceFile (node: Ts.Node) = node.getSourceFile()
+    static member getSourceFile (sym: Ts.Symbol) =
+        sym.getDeclarations()
+        |> Option.map _.AsArray
+        |> Option.orElse (
+            sym.valueDeclaration
+            |> Option.map Array.singleton
+            )
+        |> Option.bind (Array.tryPick (_.getSourceFile() >> Option.ofObj))
+    static member getSourceFile (typ: Ts.Type) =
+        typ.getSymbol()
+        |> Option.orElse typ.aliasSymbol
+        |> Option.bind getSourceFile

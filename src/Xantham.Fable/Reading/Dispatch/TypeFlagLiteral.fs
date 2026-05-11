@@ -5,6 +5,7 @@ open Xantham
 open Xantham.Fable
 open Xantham.Fable.Types
 open Xantham.Fable.Types.Signal
+open Xantham.Fable.Types.Tracer
 
 let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagLiteral) =
     let inline setAstSignal builder =

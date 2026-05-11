@@ -6,6 +6,7 @@ open Fable.Core.JsInterop
 open Xantham
 open Xantham.Fable
 open Xantham.Fable.Types
+open Xantham.Fable.Types.SourceTag
 open Xantham.Fable.Types.Signal
 open Xantham.Fable.Types.Tracer
 
@@ -99,6 +100,11 @@ let private getTypeParamSlots (ctx: TypeScriptReader) (typeParams: ResizeArray<T
             )
         )
 
+// let trySetSourceForTag (tag: XanthamTag) (source: ExportCollection voption) =
+//     GuardedData.Source.Keyed.getOrSetWith (fun () -> Signal.source source) tag
+let trySetSourceForTag (tag: XanthamTag) (metadata: Metadata) =
+    GuardedData.Metadata.Keyed.getOrSetWith (fun () -> Signal.source metadata) tag
+
 // ---------------------------------------------------------------------------
 // Per-declaration sub-readers
 // ---------------------------------------------------------------------------
@@ -127,9 +133,9 @@ module TypeParameter =
         pushToStackIfTypeUnseen ctx paramType
 
 module Interface =
-    let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.InterfaceDeclaration) (source: ModuleName) =
+    let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.InterfaceDeclaration) source =
         let builder = {
-            Source = trySetSourceForTag xanTag source
+            Metadata = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Enumerable = false
             SInterfaceBuilder.Name = NameHelpers.getName node.name
@@ -178,13 +184,13 @@ module Interface =
         |> setTypeKeyForTag xanTag
 
 module TypeAlias =
-    let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.TypeAliasDeclaration) (source: ModuleName) =
+    let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.TypeAliasDeclaration) source =
         let innerTypeSignal, innerBuilderSignal =
             ctx.CreateXanthamTag node.``type``
             |> fst
             |> stackPushAndThen ctx (XanthamTag.chainDebug xanTag >> fun tag -> tag.TypeSignal, tag.Builder)
         let builder = {
-            SAliasBuilder.Source = trySetSourceForTag xanTag source
+            SAliasBuilder.Metadata = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             Type = innerTypeSignal |> ctx.routeTypeTo xanTag
@@ -212,9 +218,9 @@ module Enum =
             | _ -> ValueNone
             )
 
-    let readDeclaration (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.EnumDeclaration) (source: ModuleName) =
+    let readDeclaration (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.EnumDeclaration) source =
         let builder = {
-            SEnumTypeBuilder.Source = trySetSourceForTag xanTag source
+            SEnumTypeBuilder.Metadata = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             Members = node.members.AsArray |> Array.map (resolveEnumMemberSlot ctx)
@@ -235,8 +241,7 @@ module Enum =
                 )
             |> Option.defaultValue (TsLiteral.String (NameHelpers.getName node.name))
         {
-            SEnumCaseBuilder.Source = trySetSourceForTag xanTag (ctx.moduleMap.Item(node.parent.getSourceFile()))
-            Parent = ctx.CreateXanthamTag node.parent |> fst |> stackPushAndThen ctx _.TypeSignal
+            SEnumCaseBuilder.Parent = ctx.CreateXanthamTag node.parent |> fst |> stackPushAndThen ctx _.TypeSignal
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             Value = value
@@ -248,11 +253,11 @@ module Enum =
         |> setTypeKeyForTag xanTag
 
 module Variable =
-    let readDeclaration (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.VariableDeclaration) (source: ModuleName) =
+    let readDeclaration (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.VariableDeclaration) source =
         let innerTypeSignal, innerBuilderSignal =
             getSignalsFromTypeNodeOption ctx node.``type`` (unbox<Ts.Node> node)
         let variableBuilder = {
-            SVariableBuilder.Source = trySetSourceForTag xanTag source
+            SVariableBuilder.Metadata = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             Type =
@@ -264,7 +269,7 @@ module Variable =
         |> Signal.fulfillWith(fun () -> innerBuilderSignal.Value)
 
 module FunctionDecl =
-    let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.FunctionDeclaration) (source: ModuleName) =
+    let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.FunctionDeclaration) source =
         // the underlying type will have the 'reference' type representation of the function
         let signature = ctx.checker.getTypeAtLocation node |> ctx.CreateXanthamTag |> fst // get underlying type
         let typeSignal, builderSignal = stackPushAndThen ctx (fun tag -> tag.TypeSignal, tag.Builder) signature
@@ -274,7 +279,7 @@ module FunctionDecl =
         |> Signal.fulfillWith (fun () -> builderSignal.Value)
         // fulfill this nodes builder with the representation of the function
         let fnBuilder = { // create the export builder
-            SFunctionBuilder.Source = trySetSourceForTag xanTag source
+            SFunctionBuilder.Metadata = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             IsDeclared = node.body.IsNone
@@ -325,12 +330,12 @@ module Class =
             Implements = implementsSlot
         })
 
-    let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.ClassDeclaration) (source: ModuleName) =
+    let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.ClassDeclaration) source =
         let ctors, members =
             node.members.AsArray
             |> Array.partition (fun elem -> (unbox<Ts.Node> elem).kind = Ts.SyntaxKind.Constructor)
         let builder = {
-            SClassBuilder.Source = trySetSourceForTag xanTag source
+            SClassBuilder.Metadata = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Enumerable = false
             Name = NameHelpers.getName node.name
@@ -346,7 +351,7 @@ module Class =
         
 
 module Module =
-    let private collectModuleTypes (ctx: TypeScriptReader) (body: Ts.ModuleBody option) (source: ModuleName) =
+    let private collectModuleTypes (ctx: TypeScriptReader) (body: Ts.ModuleBody option) source =
         match body with
         | None -> [||]
         | Some body ->
@@ -370,9 +375,9 @@ module Module =
                 |> Array.singleton
             | _ -> [||]
 
-    let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.ModuleDeclaration) (source: ModuleName) =
+    let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.ModuleDeclaration) source =
         let moduleBuilder = {
-            SModuleBuilder.Source = trySetSourceForTag xanTag source
+            SModuleBuilder.Metadata = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
             IsNamespace = node.flags.HasFlag(Ts.NodeFlags.Namespace)
@@ -391,28 +396,49 @@ module Module =
 // ---------------------------------------------------------------------------
 // Dispatch
 // ---------------------------------------------------------------------------
-
 let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration) =
-    let source =
-        if xanTag |> GuardedData.Source.Keyed.has then
-            xanTag
-            |> GuardedData.Source.Keyed.get
-            |> _.Value
-        else
-        ctx.moduleMap[node]
+    let metadata =
+        node.Symbol
+        |> ValueOption.bind (fun symbol ->
+            if symbol.flags.HasFlag(Ts.SymbolFlags.Alias) then
+                ctx.checker.getAliasedSymbol symbol
+            else ctx.checker.getMergedSymbol symbol
+            |> ctx.program.GetExportCollection
+            |> ValueOption.map Source.Package
+            )
+        |> ValueOption.defaultWith (fun () ->
+            let sourceTag = ctx.CreateSourceTagValue(node)
+            match sourceTag.Value with
+            | SourceKind.LibEs ->
+                sourceTag.Guard.Source.fileName
+                |> Node.Api.path.basename
+                |> Source.LibEs
+            | SourceKind.Package _ when sourceTag.SubModuleId.IsSome ->
+                sourceTag.SubModuleId.Value
+                |> Source.PackageInternal
+            | SourceKind.Ambient _ when sourceTag.SubModuleId.IsSome ->
+                sourceTag.SubModuleId.Value
+                |> Source.PackageInternal
+            | _ ->
+                Log.error "Invariant: a declaration was not identified as a lib-es decl, had no export collection, and no submodule id. Defaulting Metadata to Source.LibEs."
+                sourceTag.Guard.Source.fileName
+                |> Node.Api.path.basename
+                |> Source.LibEs
+            )
+        |> fun source -> { Source = source }
     match node with
     | TypeDeclaration.TypeParameter typeParameterDeclaration ->
         XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | TypeParameter" xanTag
         TypeParameter.read ctx xanTag typeParameterDeclaration
     | TypeDeclaration.Interface interfaceDeclaration ->
         XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Interface" xanTag
-        Interface.read ctx xanTag interfaceDeclaration source
+        Interface.read ctx xanTag interfaceDeclaration metadata
     | TypeDeclaration.TypeAlias typeAliasDeclaration ->
         XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | TypeAlias" xanTag
-        TypeAlias.read ctx xanTag typeAliasDeclaration source
+        TypeAlias.read ctx xanTag typeAliasDeclaration metadata
     | TypeDeclaration.Class classDeclaration ->
         XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Class" xanTag
-        Class.read ctx xanTag classDeclaration source
+        Class.read ctx xanTag classDeclaration metadata
     | TypeDeclaration.HeritageClause heritageClause ->
         XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | HeritageClause" xanTag
         // Wire this tag to the first type in the clause so Interface.read's Heritage
@@ -441,7 +467,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
         |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
     | TypeDeclaration.Enum enumDeclaration ->
         XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Enum" xanTag
-        Enum.readDeclaration ctx xanTag enumDeclaration source
+        Enum.readDeclaration ctx xanTag enumDeclaration metadata
     | TypeDeclaration.EnumMember enumMember ->
         XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | EnumMember" xanTag
         Enum.readMember ctx xanTag enumMember
@@ -464,15 +490,15 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
             xanTag.ExportBuilder |> Signal.fulfillWith(fun () -> firstTag.ExportBuilder.Value)
     | TypeDeclaration.VariableDeclaration variableDeclaration ->
         XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | VariableDeclaration" xanTag
-        Variable.readDeclaration ctx xanTag variableDeclaration source
+        Variable.readDeclaration ctx xanTag variableDeclaration metadata
     | TypeDeclaration.FunctionDeclaration functionDeclaration ->
         XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | FunctionDeclaration" xanTag
-        FunctionDecl.read ctx xanTag functionDeclaration source
+        FunctionDecl.read ctx xanTag functionDeclaration metadata
     | TypeDeclaration.Module moduleDeclaration ->
         XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Module" xanTag
-        Module.read ctx xanTag moduleDeclaration source
+        Module.read ctx xanTag moduleDeclaration metadata
     | TypeDeclaration.Namespace namespaceDeclaration ->
         XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Namespace" xanTag
-        Module.read ctx xanTag namespaceDeclaration source
+        Module.read ctx xanTag namespaceDeclaration metadata
     | TypeDeclaration.ModuleBlock _ ->
         () // Processed inline during Module/Namespace dispatch; no standalone signal needed

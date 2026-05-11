@@ -17,7 +17,6 @@
 module Xantham.Fable.Types.ReactiveBuilders
 
 open Xantham
-open Xantham.Fable
 open Xantham.Fable.Types.Signal
 
 // -----------------------------------------------------------------------
@@ -55,7 +54,6 @@ let inline private resolve (slots: Signal<'a voption> array) =
 
 /// Signal-based equivalent of <c>TsEnumCaseBuilder</c>, builds to <see cref="T:Xantham.TsEnumCase"/>.
 type SEnumCaseBuilder = {
-    Source: Signal<ModuleName>
     Parent: TypeSignal
     FullyQualifiedName: string array
     Name: string
@@ -64,7 +62,6 @@ type SEnumCaseBuilder = {
 } with
     member this.Build() : TsEnumCase =
         { Parent = this.Parent.Value
-          Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Name = this.Name
           Value = this.Value
@@ -72,7 +69,7 @@ type SEnumCaseBuilder = {
 
 /// Signal-based equivalent of <c>TsEnumTypeBuilder</c>, builds to <see cref="T:Xantham.TsEnumType"/>.
 type SEnumTypeBuilder = {
-    Source: Signal<ModuleName>
+    Metadata: Signal<Metadata>
     FullyQualifiedName: string array
     Name: string
     /// Reactive slots; each is filled when an enum case is processed.
@@ -80,7 +77,7 @@ type SEnumTypeBuilder = {
     Documentation: TsComment list
 } with
     member this.Build() : TsEnumType =
-        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
+        { Metadata = this.Metadata.Value
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Name = this.Name
           Members =
@@ -91,14 +88,14 @@ type SEnumTypeBuilder = {
 
 /// Signal-based equivalent of <c>TsVariableBuilder</c>, builds to <see cref="T:Xantham.TsVariable"/>.
 type SVariableBuilder = {
-    Source: Signal<ModuleName>
+    Metadata: Signal<Metadata>
     FullyQualifiedName: string array
     Name: string
     Type: TypeSignal
     Documentation: TsComment list
 } with
     member this.Build() : TsVariable =
-        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
+        { Metadata = this.Metadata.Value
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Name = this.Name
           Type = this.Type.Value
@@ -216,7 +213,7 @@ type SMethodBuilder = {
           Documentation = this.Documentation }
 /// Signal-based equivalent of <c>TsFunctionBuilder</c>, builds to <see cref="T:Xantham.TsFunction"/>.
 type SFunctionBuilder = {
-    Source: Signal<ModuleName>
+    Metadata: Signal<Metadata>
     FullyQualifiedName: string array
     Name: string
     IsDeclared: bool
@@ -227,7 +224,7 @@ type SFunctionBuilder = {
     SignatureKey: TypeSignal
 } with
     member this.Build() : TsFunction =
-        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
+        { Metadata = this.Metadata.Value
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Name = this.Name
           IsDeclared = this.IsDeclared
@@ -382,7 +379,7 @@ type SClassHeritageBuilder = {
 
 /// Signal-based equivalent of <c>TsInterfaceBuilder</c>, builds to <see cref="T:Xantham.TsInterface"/>.
 type SInterfaceBuilder = {
-    Source: Signal<ModuleName>
+    Metadata: Signal<Metadata>
     FullyQualifiedName: string array
     Enumerable: bool
     Name: string
@@ -392,7 +389,7 @@ type SInterfaceBuilder = {
     Heritage: Signal<SInterfaceHeritageBuilder voption>
 } with
     member this.Build() : TsInterface =
-        { Source = this.Source.Value |> (fun (ModuleName s) -> Some s)
+        { Metadata = this.Metadata.Value
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Enumerable = this.Enumerable
           Name = this.Name
@@ -421,7 +418,7 @@ type SIndexAccessTypeBuilder = {
 
 /// Signal-based equivalent of <c>TsTypeAliasBuilder</c>, builds to <see cref="T:Xantham.TsTypeAlias"/>.
 type SAliasBuilder = {
-    Source: Signal<ModuleName>
+    Metadata: Signal<Metadata>
     FullyQualifiedName: string array
     Name: string
     Type: TypeSignal
@@ -429,7 +426,7 @@ type SAliasBuilder = {
     Documentation: TsComment list
 } with
     member this.Build() : TsTypeAlias =
-        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
+        { Metadata = this.Metadata.Value
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Name = this.Name
           Type = this.Type.Value
@@ -450,7 +447,7 @@ type SSubstitutionTypeBuilder = {
 
 /// Signal-based equivalent of <c>TsClassBuilder</c>, builds to <see cref="T:Xantham.TsClass"/>.
 type SClassBuilder = {
-    Source: Signal<ModuleName>
+    Metadata: Signal<Metadata>
     FullyQualifiedName: string array
     Enumerable: bool
     Name: string
@@ -460,7 +457,7 @@ type SClassBuilder = {
     Heritage: Signal<SClassHeritageBuilder voption>
 } with
     member this.Build() : TsClass =
-        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
+        { Metadata = this.Metadata.Value
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Enumerable = this.Enumerable
           Name = this.Name
@@ -580,7 +577,7 @@ type STypeQueryBuilder = {
 
 /// Signal-based equivalent of <c>TsModuleBuilder</c>, builds to <see cref="T:Xantham.TsModule"/>.
 type SModuleBuilder = {
-    Source: Signal<ModuleName>
+    Metadata: Signal<Metadata>
     FullyQualifiedName: string array
     Name: string
     IsNamespace: bool
@@ -589,7 +586,7 @@ type SModuleBuilder = {
     Exports: PendingSignal<STsExportDeclaration> array
 } with
     member this.Build() : TsModule =
-        { Source = Some this.Source.Value |> Option.map (fun (ModuleName s) -> s)
+        { Metadata = this.Metadata.Value
           FullyQualifiedName = Array.toList this.FullyQualifiedName
           Name = this.Name
           IsNamespace = this.IsNamespace

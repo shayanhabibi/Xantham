@@ -21,35 +21,36 @@ open Xantham
 open Xantham.Fable
 open Xantham.Fable.Types
 open Xantham.Fable.Types.Signal
+open Xantham.Fable.Types.Tracer
 
-type KeyedSymbolSlot<'T> =
+type KeyedSymbolSlot<'TagKind, 'T> =
     abstract member get: XanthamTag -> 'T
     abstract member has: XanthamTag -> bool
     abstract member set: 'T -> XanthamTag -> XanthamTag
     abstract member clear: XanthamTag -> XanthamTag
     abstract member getOrSetWith: (unit -> 'T) -> XanthamTag -> 'T
     abstract member getOrMapSet: (XanTagKind -> 'T) -> XanthamTag -> 'T
-type SymbolSlot<'T> =
-    inherit KeyedSymbolSlot<'T>
-    abstract Keyed: KeyedSymbolSlot<'T>
-type KeyedSymbolSlotWithDefault<'T> =
-    inherit KeyedSymbolSlot<'T>
+type SymbolSlot<'TagValue, 'TagGuard, 'T> =
+    inherit KeyedSymbolSlot<'TagValue, 'T>
+    abstract Keyed: KeyedSymbolSlot<'TagGuard, 'T>
+type KeyedSymbolSlotWithDefault<'TagKind, 'T> =
+    inherit KeyedSymbolSlot<'TagKind, 'T>
     abstract getOrSetDefault: XanthamTag -> 'T
-type SymbolSlotWithDefault<'T> =
-    inherit SymbolSlot<'T>
+type SymbolSlotWithDefault<'TagValue, 'TagGuard, 'T> =
+    inherit SymbolSlot<'TagValue, 'TagGuard, 'T>
     abstract getOrSetDefault: XanthamTag -> 'T
-type KeyedPendingSymbolSlot<'T> =
-    inherit KeyedSymbolSlotWithDefault<PendingSignal<'T>>
-type PendingSymbolSlot<'T> =
-    inherit SymbolSlotWithDefault<PendingSignal<'T>>
+type KeyedPendingSymbolSlot<'TagKind, 'T> =
+    inherit KeyedSymbolSlotWithDefault<'TagKind, PendingSignal<'T>>
+type PendingSymbolSlot<'TagValue, 'TagGuard, 'T> =
+    inherit SymbolSlotWithDefault<'TagValue, 'TagGuard, PendingSignal<'T>>
 
 
 [<EditorBrowsable(EditorBrowsableState.Never)>]
 [<RequireQualifiedAccess>]
 module Helpers =
-    let inline makeSlotWithDefault<'T> thunk name =
+    let inline makeSlotWithDefault<'TagValue, 'TagGuard, 'T> thunk name =
         let symbol = SymbolTypeKey.create<'T> name
-        { new SymbolSlotWithDefault<'T> with
+        { new SymbolSlotWithDefault<'TagValue, 'TagGuard, 'T> with
             member _.get tag = tag.Get(symbol)
             member _.has tag = tag.Has(symbol)
             member _.set value tag = tag.Set(symbol, value); tag
@@ -58,7 +59,7 @@ module Helpers =
             member _.getOrMapSet thunk tag = tag.GetOrInit(symbol, fun () -> thunk tag.Value)
             member _.getOrSetDefault tag = tag.GetOrInit(symbol, thunk)
             member _.Keyed = {
-                new KeyedSymbolSlotWithDefault<'T> with
+                new KeyedSymbolSlotWithDefault<'TagGuard, 'T> with
                     member _.get tag = tag.KeyedGet(symbol)
                     member _.has tag = tag.KeyedHas(symbol)
                     member _.set value tag = tag.KeyedSet(symbol, value); tag
@@ -68,26 +69,27 @@ module Helpers =
                     member _.getOrSetDefault tag = tag.KeyedGetOrInit(symbol, thunk)
             }
         }
-    let inline makeSlot<'T> name =
-        makeSlotWithDefault<'T>
+    let inline makeSlot<'TagValue, 'TagGuard, 'T> name =
+        makeSlotWithDefault<'TagValue, 'TagGuard, 'T>
             (fun () -> Fable.Core.JS.undefined)
             name
-        :> SymbolSlot<'T>
-    let inline makePendingSlot<'T> name =
-        makeSlotWithDefault<PendingSignal<'T>>
+        :> SymbolSlot<'TagValue, 'TagGuard, 'T>
+    let inline makePendingSlot<'TagValue, 'TagGuard, 'T> name =
+        makeSlotWithDefault<'TagValue, 'TagGuard, PendingSignal<'T>>
             (fun () -> Signal.pending())
             name
-        :?> PendingSymbolSlot<'T>
+        :?> PendingSymbolSlot<'TagValue, 'TagGuard, 'T>
 
-let SummaryContent = Helpers.makeSlot<TsComment> "SummaryContent"
-let Documentation = Helpers.makeSlot<TsComment array> "Documentation"
-let ParameterBuilder = Helpers.makePendingSlot<SParameterBuilder> "ParameterBuilder"
-let ConstructorBuilder = Helpers.makePendingSlot<SConstructorBuilder> "ConstructorBuilder"
-let MemberBuilder = Helpers.makePendingSlot<SMemberBuilder> "MemberBuilder"
-let AstNodeBuilder = Helpers.makePendingSlot<SType> "AstNodeBuilder"
-let TypeSignal = Helpers.makeSlotWithDefault<TypeSignal> (fun () -> TypeSignal.pending()) "TypeSignal"
-let Source = Helpers.makeSlot<Signal<ModuleName>> "Source"
-let ExportBuilder = Helpers.makePendingSlot<STsExportDeclaration> "ExportBuilder"
+let SummaryContent = Helpers.makeSlot<XanTagKind, GuardTracer, TsComment> "SummaryContent"
+let Documentation = Helpers.makeSlot<XanTagKind, GuardTracer, TsComment array> "Documentation"
+let ParameterBuilder = Helpers.makePendingSlot<XanTagKind, GuardTracer, SParameterBuilder> "ParameterBuilder"
+let ConstructorBuilder = Helpers.makePendingSlot<XanTagKind, GuardTracer, SConstructorBuilder> "ConstructorBuilder"
+let MemberBuilder = Helpers.makePendingSlot<XanTagKind, GuardTracer, SMemberBuilder> "MemberBuilder"
+let AstNodeBuilder = Helpers.makePendingSlot<XanTagKind, GuardTracer, SType> "AstNodeBuilder"
+let TypeSignal = Helpers.makeSlotWithDefault<XanTagKind, GuardTracer, TypeSignal> (fun () -> TypeSignal.pending()) "TypeSignal"
+let Source = Helpers.makeSlot<XanTagKind, GuardTracer, Signal<ExportCollection voption>> "Source"
+let Metadata = Helpers.makeSlot<XanTagKind, GuardTracer, Signal<Metadata>> "Metadata"
+let ExportBuilder = Helpers.makePendingSlot<XanTagKind, GuardTracer, STsExportDeclaration> "ExportBuilder"
 type OutputKind =
     | None = 0
     | Type = (1 <<< 0)
