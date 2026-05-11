@@ -18,6 +18,18 @@ type TypeMap = Map<TypeKey, TsType>
 type ExportTypeMap = Map<TypeKey, TsExportDeclaration>
 
 /// <summary>
+/// Key of ValueNone is representative of default library declarations.
+/// </summary>
+type SourceExportMap = Map<SubModuleId voption, Set<TypeKey>>
+
+type SourceDependencyMap = Map<SubModuleId, SubModuleRelation list>
+
+type SubModuleMap = Map<SubModuleId, SubModule>
+
+type PackageMap = Map<PackageId, Package>
+
+
+/// <summary>
 /// Map from a source module path (string) to the set of <c>TypeKey</c>s
 /// declared as exports by that source. Used to look up all exports originating
 /// from a given <c>.d.ts</c> file or module.
@@ -58,8 +70,11 @@ type DecodedResult = {
     TypeMap: TypeMap
     /// All exported declarations, keyed by <c>TypeKey</c>.
     ExportTypeMap: ExportTypeMap
-    /// Mapping from source module path to the set of <c>TypeKey</c>s exported by it.
-    ExportMap: ExportMap
+    ExportMap: SourceExportMap
+    SourceDependencyMap: SourceDependencyMap
+    SourceDependeeMap: SourceDependencyMap
+    SubModuleMap : SubModuleMap
+    PackageMap: PackageMap
     /// The <c>TypeKey</c>s of declarations exported at the top level of the input.
     TopLevelExports: TypeKey list
     /// The <c>TypeKey</c>s belonging to the TypeScript <c>lib.es*</c> standard library.

@@ -9,6 +9,7 @@ open Xantham
 open Xantham.Fable
 open Xantham.Fable.Types.Tracer
 open Fable.Core.DynamicExtensions
+open Fable.Core.JsInterop
 
 /// <summary>
 /// LibEs default packages are not tracked further.
@@ -17,7 +18,23 @@ open Fable.Core.DynamicExtensions
 /// </summary>
 type SourceKind =
     | LibEs
+    | Ambient of Ts.SourceFile
     | Package of Ts.Symbol
+    
+let inline isModuleFileFast (sourceFile: Ts.SourceFile): bool =
+    (sourceFile?externalModuleIndicator && true)
+let inline isModuleFileStable (sourceFile: Ts.SourceFile) =
+    sourceFile.statements.AsArray
+    |> Array.exists (function
+        | Patterns.Node.ImportDeclaration _
+        | Patterns.Node.ExportDeclaration _
+        | Patterns.Node.ExportAssignment _ -> true
+        | _ -> false
+        )
+
+let isModuleFile (sourceFile: Ts.SourceFile) =
+    isModuleFileFast sourceFile || isModuleFileStable sourceFile
+let isAmbientFile: Ts.SourceFile -> _ = isModuleFile >> not 
 
 type SourceGuard =
     inherit GuardTracer
@@ -248,9 +265,18 @@ type SourceTag with
             guardState
             
         let checker = program.getTypeChecker()
-        
         if program.isSourceFileDefaultLibrary sourceFile then
             SourceTag.getOrInit program guard SourceKind.LibEs sourceFile
+            ||> createResultStateTuple
+        elif
+            (
+                sourceFile.fileName.Contains("@types")
+                || isAmbientFile sourceFile
+            )
+            && Option.isNone (checker.getSymbolAtLocation sourceFile)
+        then
+            (SourceKind.Ambient sourceFile, sourceFile)
+            ||> SourceTag.getOrInit program guard
             ||> createResultStateTuple
         else
             checker.getSymbolAtLocation sourceFile
@@ -366,7 +392,7 @@ type Ts.Program with
                         else ValueSome packageId.subModuleName) resolvedSourceTag
                     |> ignore
                     addSourceTagToPackage packageId.name packageId.version
-                | None when resolvedSourceTag.Value.IsPackage && resolvedSourceTag.PackageName.IsSome && resolvedSourceTag.PackageVersion.IsSome ->
+                | None when not resolvedSourceTag.Value.IsLibEs && resolvedSourceTag.PackageName.IsSome && resolvedSourceTag.PackageVersion.IsSome ->
                     // if we don't have the package id, we use the moduleName from the callback
                     SymbolTypeKey.accessOrInit subModuleNameKey (fun () ->
                         if System.String.IsNullOrWhiteSpace(moduleName)
@@ -504,15 +530,21 @@ type Ts.Program with
         let sourceFiles =
             this.getSourceFiles().AsArray
             |> Array.choose (fun sf ->
-                checker.getSymbolAtLocation sf
-                |> Option.map (fun symbol -> SourceTag.CreateValue(this, sf), symbol)
+                let tag = SourceTag.CreateValue(this, sf)
+                match tag.Value with
+                | SourceKind.LibEs -> None
+                | SourceKind.Package pkg -> Some(tag, pkg.exports)
+                | SourceKind.Ambient sf ->
+                    match sf.Item("locals") |> Option.ofObj with
+                    | Some locals -> Some(tag, unbox locals)
+                    | _ -> None
                 )
-        for sourceFile, symbol in sourceFiles do
+        for sourceFile, exports in sourceFiles do
             let subModule = sourceFile.SubModule
             if subModule.IsNone then () else
             let subModule = subModule.Value
             let exports =
-                symbol.exports
+                exports
                 |> unbox<Fable.Core.JS.Map<string, Ts.Symbol> option>
                 |> Option.defaultValue (Fable.Core.JS.Constructors.Map.Create [])
             exports.forEach(fun exportSymbol exportName _ ->

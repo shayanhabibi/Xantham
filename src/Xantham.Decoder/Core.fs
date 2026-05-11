@@ -103,14 +103,15 @@ module Decoder =
                 Compress = compress
                 Sanitize = sanitize
             }
-    let private getExportSource = function
-        | TsExportDeclaration.Variable { Source = source } 
-        | TsExportDeclaration.Interface { Source = source } 
-        | TsExportDeclaration.TypeAlias { Source = source } 
-        | TsExportDeclaration.Class { Source = source } 
-        | TsExportDeclaration.Enum { Source = source } 
-        | TsExportDeclaration.Module { Source = source } -> source.Value
-        | TsExportDeclaration.Function funs -> funs.ValueOrHead.Source.Value
+    let private getExportMetadata = function
+        | TsExportDeclaration.Variable { Metadata = metadata } 
+        | TsExportDeclaration.Interface { Metadata = metadata } 
+        | TsExportDeclaration.TypeAlias { Metadata = metadata } 
+        | TsExportDeclaration.Class { Metadata = metadata } 
+        | TsExportDeclaration.Enum { Metadata = metadata } 
+        | TsExportDeclaration.Module { Metadata = metadata } -> metadata
+        | TsExportDeclaration.Function funs -> funs.ValueOrHead.Metadata
+    let private getSource = getExportMetadata >> _.Source
     /// <summary>
     /// Decode a xantham produced <c>.json</c> file with the settings provided.
     /// </summary>
@@ -128,10 +129,27 @@ module Decoder =
                     ExportTypeMap = result.ExportedDeclarations
                     ExportMap =
                         result.ExportedDeclarations
-                        |> Seq.map (fun (KeyValue(key, value)) -> key, value)
-                        |> Seq.groupBy (snd >> getExportSource)
-                        |> Seq.map (fun (key, value) -> key, value |> Seq.map fst |> Set.ofSeq)
-                        |> Map
+                        |> Seq.collect (fun kv ->
+                            match getSource kv.Value with
+                            | Source.LibEs _ -> seq { ValueNone, kv.Key }
+                            | Source.PackageInternal package -> seq { ValueSome package, kv.Key }
+                            | Source.Package { Aliases = aliases } ->
+                                aliases
+                                |> Seq.map (fun { SubModule = subModule } -> ValueSome subModule, kv.Key)
+                            )
+                        |> Seq.groupBy fst
+                        |> Seq.map (fun (key, values) -> key, values |> Seq.map snd |> Set.ofSeq)
+                        |> Map.ofSeq
+                    SourceDependencyMap =
+                        result.PackageMap.SubModuleRelations
+                        |> List.groupBy _.Dependent
+                        |> Map.ofList
+                    SourceDependeeMap =
+                        result.PackageMap.SubModuleRelations
+                        |> List.groupBy _.Dependency
+                        |> Map.ofList
+                    SubModuleMap = result.PackageMap.SubModules
+                    PackageMap = result.PackageMap.Packages
                     TopLevelExports = result.TopLevelExports |> List.distinct
                     LibEsExports = result.LibEsExports
                 }

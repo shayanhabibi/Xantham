@@ -56,6 +56,8 @@ open Xantham
 open Xantham.Decoder
 open Xantham.Decoder.Types.Graph
 
+#nowarn 44
+
 /// <summary>
 /// Bit flags describing structural anomalies in a single segment of a fully
 /// qualified TypeScript name (e.g. embedded quotation marks, slashes, or periods).
@@ -149,10 +151,46 @@ and LazyContainer<'RawData, 'LazyResult> = {
     member inline this.Raw with get() = this.Data
 and LazyResolvedType = LazyContainer<TypeKey, ResolvedType>
 and LazyResolvedExport = LazyContainer<TypeKey, ResolvedExport>
+and LazyPackage = LazyContainer<PackageId, ResolvedPackage>
+and LazySubModule = LazyContainer<SubModuleId, ResolvedSubModule>
+and LazyExportPoint = LazyContainer<Xantham.ExportPoint, ResolvedExportPoint>
+
+and [<ReferenceEquality>] ResolvedPackage = {
+    Name: string
+    Version: string
+    Json: Export voption
+    SubModules: LazySubModule list
+    Entry: LazySubModule list
+}
+
+and [<ReferenceEquality>] ResolvedSubModule = {
+    Name: string
+    Path: string
+    Package: LazyPackage
+    Dependees: LazySubModule list
+    Dependencies: LazySubModule list
+    Exports: LazyResolvedExport list
+}
+
+and [<ReferenceEquality>] ResolvedExportPoint = {
+    Name: string
+    SubModule: LazySubModule
+}
+
+and ResolvedExportCollection = {
+    Canonical: ResolvedExportPoint
+    Aliases: ResolvedExportPoint list
+}
+
+and Source =
+    | LibEs of fileName: string
+    | PackageInternal of LazySubModule
+    | Package of ResolvedExportCollection
 
 and [<ReferenceEquality>] Module = {
+    [<System.Obsolete "Match against the Source field instead.">]
     IsLibEs: bool
-    Source: QualifiedNamePart option
+    Source: Source
     FullyQualifiedName: QualifiedNamePart list
     Name: Name<Case.pascal>
     IsNamespace: bool
@@ -226,8 +264,9 @@ and [<ReferenceEquality>] Predicate = {
 }
 
 and [<ReferenceEquality>] EnumType = {
+    [<System.Obsolete "Match against the Source field instead.">]
     IsLibEs: bool
-    Source: QualifiedNamePart option
+    Source: Source
     FullyQualifiedName: QualifiedNamePart list
     Name: Name<Case.pascal>
     Members: Lazy<EnumCase> list
@@ -235,15 +274,15 @@ and [<ReferenceEquality>] EnumType = {
 }
 and [<ReferenceEquality>] EnumCase = {
     Parent: Lazy<EnumType>
-    Source: QualifiedNamePart option
     FullyQualifiedName: QualifiedNamePart list
     Name: Name<Case.pascal>
     Value: TsLiteral
     Documentation: TsComment list
 }
 and [<ReferenceEquality>] Variable = {
+    [<System.Obsolete "Match against the Source field instead.">]
     IsLibEs: bool
-    Source: QualifiedNamePart option
+    Source: Source
     FullyQualifiedName: QualifiedNamePart list
     Name: Name<Case.camel>
     Type: LazyResolvedType
@@ -320,8 +359,9 @@ and [<ReferenceEquality>] IndexSignature = {
     IsReadOnly: bool
 }
 and [<ReferenceEquality>] Function = {
+    [<System.Obsolete "Match against the Source field instead.">]
     IsLibEs: bool
-    Source: QualifiedNamePart option
+    Source: Source
     FullyQualifiedName: QualifiedNamePart list
     Documentation: TsComment list
     IsDeclared: bool
@@ -361,8 +401,9 @@ and [<ReferenceEquality>] ClassHeritage = {
     Extends: TypeReference list
 }
 and [<ReferenceEquality>] Interface = {
+    [<System.Obsolete "Match against the Source field instead.">]
     IsLibEs: bool
-    Source: QualifiedNamePart option
+    Source: Source
     FullyQualifiedName: QualifiedNamePart list
     Name: Name<Case.pascal>
     Members: Member list
@@ -371,8 +412,9 @@ and [<ReferenceEquality>] Interface = {
     Heritage: InterfaceHeritage
 }
 and [<ReferenceEquality>] Class = {
+    [<System.Obsolete "Match against the Source field instead.">]
     IsLibEs: bool
-    Source: QualifiedNamePart option
+    Source: Source
     FullyQualifiedName: QualifiedNamePart list
     Name: Name<Case.pascal>
     Members: Member list
@@ -389,8 +431,9 @@ and [<ReferenceEquality>] IndexAccessType = {
     Index: LazyResolvedType
 }
 and [<ReferenceEquality>] TypeAlias = {
+    [<System.Obsolete "Match against the Source field instead.">]
     IsLibEs: bool
-    Source: QualifiedNamePart option
+    Source: Source
     FullyQualifiedName: QualifiedNamePart list
     Name: Name<Case.pascal>
     Type: LazyResolvedType
@@ -415,12 +458,18 @@ type ArenaInterner = {
     /// Resolve a <c>TypeKey</c> to a <see cref="T:ResolvedExport"/> if it identifies an
     /// exported declaration; otherwise return the structural type as <c>Error</c>.
     ResolveExport: TypeKey -> Result<ResolvedExport, ResolvedType>
+    ResolvePackage: PackageId -> ResolvedPackage
+    ResolveSubModule: SubModuleId -> ResolvedSubModule
+    ResolveExportPoint: Xantham.ExportPoint -> ResolvedExportPoint
     /// Cache of all resolved structural types keyed by their <c>TypeKey</c>.
-    ResolvedTypes: Dictionary<TypeKey, ResolvedType>
+    ResolvedTypes: IDictionary<TypeKey, ResolvedType>
     /// Cache of all resolved export declarations keyed by their <c>TypeKey</c>.
-    ResolvedExports: Dictionary<TypeKey, ResolvedExport>
+    ResolvedExports: IDictionary<TypeKey, ResolvedExport>
+    ResolvedPackages: IDictionary<PackageId, ResolvedPackage>
+    ResolvedSubModules: IDictionary<SubModuleId, ResolvedSubModule>
+    ResolvedExportPoints: IDictionary<Xantham.ExportPoint, ResolvedExportPoint>
     /// Map from source module path to the list of resolved exports declared in that module.
-    ExportMap: Map<string, ResolvedExport list>
+    ExportMap: Map<Xantham.Source, LazyResolvedExport>
     /// <summary>
     /// WARNING: Evaluation of the graph can be expensive.<br/>
     /// It is useful only when used in combination with the resolve type and resolve export
@@ -451,6 +500,13 @@ module private QualifiedNamePart =
 /// Functions for constructing and walking an <see cref="T:ArenaInterner"/>.
 /// </summary>
 module ArenaInterner =
+    let inline private lazyResolve key  value = {
+        Data = key
+        Result = value
+    }
+    let inline private lazyResolveWith map key =
+        lazy map key
+        |> lazyResolve key
     /// <summary>
     /// Build an <see cref="T:ArenaInterner"/> from a <c>DecodedResult</c>.
     /// Exports are shelled into their resolved form eagerly; structural types
@@ -459,10 +515,12 @@ module ArenaInterner =
     /// <param name="decodedResult">The decoded type/export maps to lift into the lazy graph.</param>
     let create (decodedResult: DecodedResult) =
         let typeMap = decodedResult.TypeMap
-        let exportMap = decodedResult.ExportMap
         let typeExportMap = decodedResult.ExportTypeMap
         let resolved = ConcurrentDictionary<TypeKey, ResolvedType>()
         let resolvedExports = ConcurrentDictionary<TypeKey, ResolvedExport>()
+        let resolvedPackages = ConcurrentDictionary<PackageId, ResolvedPackage>()
+        let resolvedSubModules = ConcurrentDictionary<SubModuleId, ResolvedSubModule>()
+        let resolvedExportPoints = ConcurrentDictionary<Xantham.ExportPoint, ResolvedExportPoint>()
         let libEsSet = decodedResult.LibEsExports.ToFrozenSet()
         let isLibEs = libEsSet.Contains
         
@@ -501,22 +559,23 @@ module ArenaInterner =
                 //      encoder applied); strip Source so the filter sees
                 //      nothing to ignore.
                 let export = typeExportMap[typeKey]
-                let augmentedSource (eMembers: TsMember list) (tMembers: TsMember list)
-                                    (eSource: string option) (tSource: string option) =
-                    if eSource <> tSource && tSource.IsSome then tSource
-                    elif List.length eMembers <> List.length tMembers then None
-                    else eSource
-                let export =
-                    match export, typeMap.TryGetValue(typeKey) with
-                    | TsExportDeclaration.Interface eIface, (true, TsType.Interface tIface) ->
-                        let newSource = augmentedSource eIface.Members tIface.Members eIface.Source tIface.Source
-                        if newSource = eIface.Source then export
-                        else TsExportDeclaration.Interface { eIface with Source = newSource }
-                    | TsExportDeclaration.Class eCls, (true, TsType.Class tCls) ->
-                        let newSource = augmentedSource eCls.Members tCls.Members eCls.Source tCls.Source
-                        if newSource = eCls.Source then export
-                        else TsExportDeclaration.Class { eCls with Source = newSource }
-                    | _ -> export
+                // TODO - is this still required?
+                // let augmentedSource (eMembers: TsMember list) (tMembers: TsMember list)
+                //                     (eSource: string option) (tSource: string option) =
+                //     if eSource <> tSource && tSource.IsSome then tSource
+                //     elif List.length eMembers <> List.length tMembers then None
+                //     else eSource
+                // let export =
+                //     match export, typeMap.TryGetValue(typeKey) with
+                //     | TsExportDeclaration.Interface eIface, (true, TsType.Interface tIface) ->
+                //         let newSource = augmentedSource eIface.Members tIface.Members eIface.Source tIface.Source
+                //         if newSource = eIface.Source then export
+                //         else TsExportDeclaration.Interface { eIface with Source = newSource }
+                //     | TsExportDeclaration.Class eCls, (true, TsType.Class tCls) ->
+                //         let newSource = augmentedSource eCls.Members tCls.Members eCls.Source tCls.Source
+                //         if newSource = eCls.Source then export
+                //         else TsExportDeclaration.Class { eCls with Source = newSource }
+                //     | _ -> export
                 let resolvedValue = buildFromExport (isLibEs typeKey) export
                 resolvedExports[typeKey] <- resolvedValue
                 resolvedValue
@@ -524,6 +583,11 @@ module ArenaInterner =
             | _ ->
                 resolve typeKey
                 |> Error
+        and lazyResolveExport (typeKey: TypeKey) =
+            if typeExportMap.ContainsKey(typeKey) then
+                lazyResolveWith (resolveExport >> Result.toOption >> Option.get) typeKey
+                |> Some
+            else None
         and buildFromExport (isLibEs: bool) (export: TsExportDeclaration): ResolvedExport =
             let inline lazyResolve typ =
                 {
@@ -533,7 +597,7 @@ module ArenaInterner =
             match export with
             | TsExportDeclaration.Variable tsVariable -> ResolvedExport.Variable {
                     IsLibEs = isLibEs
-                    Source = tsVariable.Source |> Option.map QualifiedNamePart.create
+                    Source = buildSourceFromMetadata tsVariable.Metadata
                     FullyQualifiedName = tsVariable.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Variable.Name = Name.Camel.create tsVariable.Name
                     Type = lazyResolve tsVariable.Type
@@ -541,7 +605,7 @@ module ArenaInterner =
                 }
             | TsExportDeclaration.Interface tsInterface -> ResolvedExport.Interface {
                     IsLibEs = isLibEs
-                    Source = tsInterface.Source |> Option.map QualifiedNamePart.create
+                    Source = buildSourceFromMetadata tsInterface.Metadata
                     FullyQualifiedName = tsInterface.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsInterface.Name
                     Members = tsInterface.Members |> List.map buildFromMember
@@ -553,7 +617,7 @@ module ArenaInterner =
                 }
             | TsExportDeclaration.Class tsClass -> ResolvedExport.Class {
                     IsLibEs = isLibEs
-                    Source = tsClass.Source |> Option.map QualifiedNamePart.create
+                    Source = buildSourceFromMetadata tsClass.Metadata
                     FullyQualifiedName = tsClass.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsClass.Name
                     Members = tsClass.Members |> List.map buildFromMember
@@ -570,7 +634,7 @@ module ArenaInterner =
             | TsExportDeclaration.TypeAlias tsTypeAlias ->
                 ResolvedExport.TypeAlias {
                     IsLibEs = isLibEs
-                    Source = tsTypeAlias.Source |> Option.map QualifiedNamePart.create
+                    Source = buildSourceFromMetadata tsTypeAlias.Metadata
                     FullyQualifiedName = tsTypeAlias.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsTypeAlias.Name
                     Type = tsTypeAlias.Type |> lazyResolve
@@ -581,7 +645,7 @@ module ArenaInterner =
                 }
             | TsExportDeclaration.Enum tsEnumType -> ResolvedExport.Enum {
                     IsLibEs = isLibEs
-                    Source = tsEnumType.Source |> Option.map QualifiedNamePart.create
+                    Source = buildSourceFromMetadata tsEnumType.Metadata
                     FullyQualifiedName = tsEnumType.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsEnumType.Name
                     Members = tsEnumType.Members |> List.map (fun value ->
@@ -591,7 +655,6 @@ module ArenaInterner =
                                     match resolve value.Parent with
                                     | ResolvedType.Enum enum -> enum
                                     | _ -> failwith "Inlining an enum returned a non enum type."
-                            EnumCase.Source = value.Source |> Option.map QualifiedNamePart.create
                             FullyQualifiedName = value.FullyQualifiedName |> List.map QualifiedNamePart.create
                             Name = Name.Pascal.create value.Name
                             Value = value.Value
@@ -602,7 +665,7 @@ module ArenaInterner =
             | TsExportDeclaration.Module tsModule ->
                 ResolvedExport.Module {
                     IsLibEs = isLibEs
-                    Source = tsModule.Source |> Option.map QualifiedNamePart.create
+                    Source = buildSourceFromMetadata tsModule.Metadata
                     FullyQualifiedName = tsModule.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsModule.Name
                     IsNamespace = tsModule.IsNamespace
@@ -616,7 +679,7 @@ module ArenaInterner =
                 |> List.map (fun func ->
                     {
                         IsLibEs = isLibEs
-                        Function.Source = func.Source |> Option.map QualifiedNamePart.create
+                        Function.Source = buildSourceFromMetadata func.Metadata
                         FullyQualifiedName = func.FullyQualifiedName |> List.map QualifiedNamePart.create
                         Documentation = func.Documentation
                         IsDeclared = func.IsDeclared
@@ -654,7 +717,7 @@ module ArenaInterner =
                 }
             | TsType.Interface tsInterface -> ResolvedType.Interface {
                     IsLibEs = isLibEs
-                    Source = tsInterface.Source |> Option.map QualifiedNamePart.create
+                    Source = buildSourceFromMetadata tsInterface.Metadata
                     FullyQualifiedName = tsInterface.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsInterface.Name
                     Members = tsInterface.Members |> List.map buildFromMember
@@ -666,7 +729,7 @@ module ArenaInterner =
                 }
             | TsType.Class tsClass -> ResolvedType.Class {
                     IsLibEs = isLibEs
-                    Source = tsClass.Source |> Option.map QualifiedNamePart.create
+                    Source = buildSourceFromMetadata tsClass.Metadata
                     FullyQualifiedName = tsClass.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsClass.Name
                     Members = tsClass.Members |> List.map buildFromMember
@@ -683,7 +746,7 @@ module ArenaInterner =
             | TsType.Primitive typeKindPrimitive -> ResolvedType.Primitive typeKindPrimitive
             | TsType.Enum tsEnumType -> ResolvedType.Enum {
                     IsLibEs = isLibEs
-                    Source = tsEnumType.Source |> Option.map QualifiedNamePart.create
+                    Source = buildSourceFromMetadata tsEnumType.Metadata
                     FullyQualifiedName = tsEnumType.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsEnumType.Name
                     Members = tsEnumType.Members |> List.map (fun value ->
@@ -693,7 +756,6 @@ module ArenaInterner =
                                     match resolve value.Parent with
                                     | ResolvedType.Enum enum -> enum
                                     | _ -> failwith "Inlining an enum returned a non enum type."
-                            EnumCase.Source = value.Source |> Option.map QualifiedNamePart.create
                             FullyQualifiedName = value.FullyQualifiedName |> List.map QualifiedNamePart.create
                             Name = Name.Pascal.create value.Name
                             Value = value.Value
@@ -708,7 +770,6 @@ module ArenaInterner =
                         | ResolvedType.Enum enum -> enum
                         | _ -> failwith "Inlining an enum case returned a non enum type."
                         )
-                    Source = tsEnumCase.Source |> Option.map QualifiedNamePart.create
                     FullyQualifiedName = tsEnumCase.FullyQualifiedName |> List.map QualifiedNamePart.create
                     Name = Name.Pascal.create tsEnumCase.Name 
                     Value = tsEnumCase.Value
@@ -854,27 +915,106 @@ module ArenaInterner =
             Type = { Data = para.Type; Result = lazy resolve para.Type }
             Documentation = para.Documentation
         }
-        
+        and resolvePackage (packageId: PackageId) =
+            match resolvedPackages.TryGetValue(packageId) with
+            | true, value -> value
+            | _ ->
+                let package = decodedResult.PackageMap[packageId]
+                let resolvedValue = buildFromPackage package
+                resolvedPackages[packageId] <- resolvedValue
+                resolvedValue
+        and buildFromPackage (package: Package) =
+            {
+                Name = package.Name
+                Version = package.Version
+                Json = package.Json
+                SubModules =
+                    package.SubModules
+                    |> List.map (lazyResolveWith resolveSubModule)
+                Entry =
+                    package.Entry
+                    |> List.map (lazyResolveWith resolveSubModule)
+            }
+        and resolveSubModule (subModuleId: SubModuleId): ResolvedSubModule =
+            match resolvedSubModules.TryGetValue(subModuleId) with
+            | true, value -> value
+            | _ ->
+                let subModule = decodedResult.SubModuleMap[subModuleId]
+                let resolvedValue = buildFromSubModule subModuleId subModule
+                resolvedSubModules[subModuleId] <- resolvedValue
+                resolvedValue
+        and buildFromSubModule (subModuleId: SubModuleId) (subModule: SubModule): ResolvedSubModule =
+            {
+                Name = subModule.Name
+                Path = subModule.Path
+                Package = lazyResolveWith resolvePackage subModule.Package
+                Dependees =
+                    decodedResult.SourceDependeeMap
+                    |> Map.tryFind subModuleId
+                    |> Option.map (List.map (_.Dependency >> lazyResolveWith resolveSubModule))
+                    |> Option.defaultValue []
+                Dependencies =
+                    decodedResult.SourceDependencyMap
+                    |> Map.tryFind subModuleId
+                    |> Option.map (List.map (_.Dependency >> lazyResolveWith resolveSubModule))
+                    |> Option.defaultValue []
+                Exports =
+                    decodedResult.ExportMap
+                    |> Map.tryFind (ValueSome subModuleId)
+                    |> Option.defaultValue Set.empty
+                    |> Set.toList
+                    |> List.choose lazyResolveExport
+            }
+        and resolveExportPoint (exportPoint: ExportPoint): ResolvedExportPoint =
+            match resolvedExportPoints.TryGetValue(exportPoint) with
+            | true, value -> value
+            | _ ->
+                let resolvedValue = buildFromExportPoint exportPoint
+                resolvedExportPoints[exportPoint] <- resolvedValue
+                resolvedValue
+        and buildFromExportPoint (exportPoint: ExportPoint) =
+            { Name = exportPoint.Name
+              SubModule = lazyResolveWith resolveSubModule exportPoint.SubModule }
+        and buildSourceFromMetadata (metadata: Metadata) =
+            match metadata.Source with
+            | Xantham.Source.LibEs fileName -> Source.LibEs fileName
+            | Xantham.Source.PackageInternal subModuleId ->
+                lazyResolveWith resolveSubModule subModuleId |> Source.PackageInternal
+            | Xantham.Source.Package exports ->
+                {
+                    Canonical = exports.Canonical |> resolveExportPoint
+                    Aliases = exports.Aliases |> List.map resolveExportPoint
+                }
+                |> Source.Package
         let exportMap =
-            exportMap
-            |> Seq.map (_.Deconstruct() >> (fun (key, value) -> key, seq value))
-            |> Seq.map (fun (key, value) ->
-                let exports =
-                    value
-                    |> Seq.choose (resolveExport >> Result.toOption)
-                    |> Seq.toList
-                key, exports
+            typeExportMap
+            |> Seq.map (fun (KeyValue(key, value)) ->
+                match value with
+                | TsExportDeclaration.Variable { Metadata = metadata } 
+                | TsExportDeclaration.Interface { Metadata = metadata } 
+                | TsExportDeclaration.TypeAlias { Metadata = metadata } 
+                | TsExportDeclaration.Class { Metadata = metadata } 
+                | TsExportDeclaration.Enum { Metadata = metadata } 
+                | TsExportDeclaration.Module { Metadata = metadata } -> metadata.Source
+                | TsExportDeclaration.Function funs -> funs.ValueOrHead.Metadata.Source
+                , (lazyResolveExport key).Value
                 )
-            |> Map
-        
+            |> Map.ofSeq
         {
             ResolveType = resolve
             ResolveExport = resolveExport
+            ResolveExportPoint = resolveExportPoint
+            ResolvePackage = resolvePackage
+            ResolveSubModule = resolveSubModule
             ExportMap = exportMap
             Graph = lazy Graph.create false decodedResult
-            ResolvedTypes = Dictionary resolved
-            ResolvedExports = Dictionary resolvedExports
+            ResolvedTypes = resolved
+            ResolvedExports = resolvedExports
+            ResolvedSubModules = resolvedSubModules
+            ResolvedPackages = resolvedPackages
+            ResolvedExportPoints = resolvedExportPoints
         }
+        
 
 /// <summary>
 /// Active pattern for ergonomic forcing of a <see cref="T:LazyContainer`2"/>:
