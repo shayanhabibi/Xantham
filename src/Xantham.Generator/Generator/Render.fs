@@ -22,28 +22,31 @@ let main argv =
          {
              customiser with
                  Customisation.Interceptors.ResolvedTypePrelude = fun _ -> function
-                     | ResolvedType.Interface { IsLibEs = true }
-                     | ResolvedType.Class { IsLibEs = true }
-                     | ResolvedType.Enum { IsLibEs = true } -> fun renderScope ->
+                     | ResolvedType.Interface { Source = Source.LibEs _ }
+                     | ResolvedType.Class { Source = Source.LibEs _ }
+                     | ResolvedType.Enum { Source = Source.LibEs _ } -> fun renderScope ->
                          { renderScope with Render = Render.RefOnly renderScope.TypeRef }
                      | _ -> id
                  Customisation.Interceptors.IgnorePathRender.Source = function
-                     | QualifiedNamePart.Normal(text)
-                     | QualifiedNamePart.Abnormal(text,_) ->
-                         text.Contains("babel", StringComparison.OrdinalIgnoreCase)
-                         || text.Contains("typescript", StringComparison.OrdinalIgnoreCase)
+                     | Source.LibEs _ -> true
+                     | Source.PackageInternal sm ->
+                         sm.Value.Package.Value.Name.Contains(
+                             "babel", StringComparison.OrdinalIgnoreCase)
+                     | Source.Package coll ->
+                         coll.Canonical.SubModule.Value.Package.Value.Name.Contains(
+                             "babel", StringComparison.OrdinalIgnoreCase)
                  Customisation.Interceptors.Paths.TypePaths = fun ctx typ s ->
                      match typ with
-                     | Choice1Of4 { IsLibEs = true }
-                     | Choice2Of4 { IsLibEs = true }
-                     | Choice3Of4 { IsLibEs = true }
-                     | Choice4Of4 { IsLibEs = true } ->
+                     | Choice1Of4 { Source = Source.LibEs _ }
+                     | Choice2Of4 { Source = Source.LibEs _ }
+                     | Choice3Of4 { Source = Source.LibEs _ }
+                     | Choice4Of4 { Source = Source.LibEs _ } ->
                          TypePath.pruneParent (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") s
                      | _ -> s
                  Customisation.Interceptors.Paths.MemberPaths = fun ctx typ s ->
                      match typ with
-                     | Choice1Of2 { IsLibEs = true }
-                     | Choice2Of2 { IsLibEs = true } ->
+                     | Choice1Of2 { Source = Source.LibEs _ }
+                     | Choice2Of2 { Source = Source.LibEs _ } ->
                          MemberPath.pruneParent (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") s
                      | _ -> s
                      

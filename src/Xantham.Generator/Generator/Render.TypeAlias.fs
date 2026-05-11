@@ -228,7 +228,7 @@ module TypeAlias =
                             LiteralCaseRender.Metadata = {
                                 Path = Path.create TransientMemberPath.Anchored
                                 Original = Path.create TransientMemberPath.Anchored
-                                Source = enumCase.Source |> Option.toValueOption
+                                Source = ValueSome enumCase.Parent.Value.Source
                                 FullyQualifiedName = ValueSome enumCase.FullyQualifiedName
                             }
                             Name = enumCase.Name

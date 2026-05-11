@@ -18,11 +18,14 @@ module Union =
                 Case.unboxMeasure enumCase.Name
                 |> TransientMemberPath.AnchoredAndMoored
                 |> Path.create
+            // EnumCase no longer carries Source post source-attribution
+            // refactor — provenance lives on the containing EnumType,
+            // reachable via `enumCase.Parent.Value.Source`.
             {
                 LiteralCaseRender.Metadata = {
                     Path = path
                     Original = path
-                    Source = enumCase.Source |> Option.toValueOption
+                    Source = ValueSome enumCase.Parent.Value.Source
                     FullyQualifiedName = ValueSome enumCase.FullyQualifiedName
                 }
                 Name = enumCase.Name |> ValueSome
@@ -104,7 +107,7 @@ module Union =
             {
                 Metadata = { Path = path
                              Original = path
-                             Source = enumCase.Source |> Option.toValueOption
+                             Source = ValueSome enumCase.Parent.Value.Source
                              FullyQualifiedName = ValueSome enumCase.FullyQualifiedName }
                 Name = enumCase.Name |> ValueSome
                 Value = value
@@ -333,19 +336,22 @@ module Literal =
 
 module EnumCase =
     let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (enumCase: EnumCase) =
+        // EnumCase no longer carries Source; pull provenance from the
+        // containing EnumType via `enumCase.Parent.Value.Source`.
+        let enumSource = enumCase.Parent.Value.Source
         {
             Metadata =
                 TransientTypePath.Anchored
                 |> Path.create
                 |> RenderMetadata.createWithPath
                 |> RenderMetadata.withFullyQualifiedName enumCase.FullyQualifiedName
-                |> RenderMetadata.withSourceOption enumCase.Source
+                |> RenderMetadata.withSource enumSource
             Name = ValueSome enumCase.Name
             Cases = [
                 let path = (Case.unboxMeasure enumCase.Name) |> TransientMemberPath.AnchoredAndMoored |> Path.create
                 {
                     Metadata = { Path = path; Original = path
-                                 Source = enumCase.Source |> Option.toValueOption
+                                 Source = ValueSome enumSource
                                  FullyQualifiedName = ValueSome enumCase.FullyQualifiedName }
                     Name = ValueSome enumCase.Name
                     Value = enumCase.Value

@@ -201,19 +201,15 @@ module SyntheticPathAssignment =
                 let path = buildSyntheticPath homePath counter
                 ctx.SyntheticPaths[synthetic] <- path
 
-    /// Source eligibility check matching `LibEsDefaults.isSubstitutionEligible`.
-    /// A type is "infrastructure" (TS lib.* or compiler-internal) if it's
-    /// IsLibEs=true OR its Source is the TypeScript compiler. Such types
-    /// shouldn't be hosts for synthetic assignments — their paths get
-    /// pruned by the default Typescript-pruning interceptor, which would
-    /// produce a homePath that doesn't match what eventual reference sites
-    /// resolve to.
-    let private isInfrastructureSource (source: ArenaInterner.QualifiedNamePart option) =
+    /// A type is "infrastructure" if its source is a TS standard library
+    /// file (`Source.LibEs _`). Such types shouldn't be hosts for synthetic
+    /// assignments — their paths get pruned by the default Typescript-
+    /// pruning interceptor, which would produce a homePath that doesn't
+    /// match what eventual reference sites resolve to.
+    let private isInfrastructureSource (source: ArenaInterner.Source) =
         match source with
-        | Some (ArenaInterner.QualifiedNamePart.Normal s)
-        | Some (ArenaInterner.QualifiedNamePart.Abnormal (s, _)) ->
-            s.Equals("typescript", System.StringComparison.OrdinalIgnoreCase)
-        | None -> false
+        | ArenaInterner.Source.LibEs _ -> true
+        | _ -> false
 
     /// Run the path-assignment pass against a fully-resolved arena. After
     /// this returns, `ctx.SyntheticPaths` contains entries for every
@@ -229,17 +225,17 @@ module SyntheticPathAssignment =
         for KeyValue(_, export) in arena.ResolvedExports do
             match export with
             | ResolvedExport.Interface iface
-                when not iface.IsLibEs && not (isInfrastructureSource iface.Source) ->
+                when not (isInfrastructureSource iface.Source) ->
                 let homePath = Path.Interceptors.pipeInterface ctx iface
                 assignSynthetics ctx counters homePath
                     (outgoingSyntheticRefs (ResolvedType.Interface iface))
             | ResolvedExport.Class cls
-                when not cls.IsLibEs && not (isInfrastructureSource cls.Source) ->
+                when not (isInfrastructureSource cls.Source) ->
                 let homePath = Path.Interceptors.pipeClass ctx cls
                 assignSynthetics ctx counters homePath
                     (outgoingSyntheticRefs (ResolvedType.Class cls))
             | ResolvedExport.TypeAlias typeAlias
-                when not typeAlias.IsLibEs && not (isInfrastructureSource typeAlias.Source) ->
+                when not (isInfrastructureSource typeAlias.Source) ->
                 let homePath = Path.Interceptors.pipeTypeAlias ctx typeAlias
                 assignSynthetics ctx counters homePath
                     (typeAliasSyntheticRefs typeAlias)
@@ -261,7 +257,7 @@ module SyntheticPathAssignment =
                 // should not be re-anchored here.
                 match functions with
                 | [] -> ()
-                | first :: _ when first.IsLibEs -> ()
+                | first :: _ when isInfrastructureSource first.Source -> ()
                 | first :: _ ->
                     let memberPath = Path.Interceptors.pipeFunction ctx first
                     let homePath =

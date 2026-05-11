@@ -477,7 +477,11 @@ type RenderTraits =
 type RenderMetadata = {
     Path: Path
     Original: Path
-    Source: ArenaInterner.QualifiedNamePart voption
+    /// Provenance for the declaration this render came from. `ValueNone` is
+    /// reserved for synthetic anonymous renders (parameters, inline call
+    /// signatures, etc.) that inherit provenance from a parent; named
+    /// exports always populate this.
+    Source: ArenaInterner.Source voption
     FullyQualifiedName: ArenaInterner.QualifiedNamePart list voption
 }
 
@@ -649,17 +653,15 @@ module RenderScope =
         }
 
 module RenderMetadata =
-    let withSourceOption (source: ArenaInterner.QualifiedNamePart option) metadata =
+    let withSourceOption (source: ArenaInterner.Source option) metadata =
         { metadata with RenderMetadata.Source = ValueOption.ofOption source }
-    let withSource (source: ArenaInterner.QualifiedNamePart) metadata =
+    let withSource (source: ArenaInterner.Source) metadata =
         { metadata with RenderMetadata.Source = ValueSome source }
-    let withSourceString (source: string) (metadata: RenderMetadata) =
-        withSource (ArenaInterner.QualifiedNamePart.Normal source) metadata
     let withFullyQualifiedName (fullyQualifiedName: ArenaInterner.QualifiedNamePart list) metadata =
         { metadata with RenderMetadata.FullyQualifiedName = ValueSome fullyQualifiedName }
     let withFullyQualifiedNameStrings (fullyQualifiedName: string list) (metadata: RenderMetadata) =
         withFullyQualifiedName (fullyQualifiedName |> List.map ArenaInterner.QualifiedNamePart.Normal) metadata
-    let create (path: Path) (original: Path) (source: ArenaInterner.QualifiedNamePart voption) (fullyQualifiedName: ArenaInterner.QualifiedNamePart list voption) =
+    let create (path: Path) (original: Path) (source: ArenaInterner.Source voption) (fullyQualifiedName: ArenaInterner.QualifiedNamePart list voption) =
         {
             Path = path
             Original = original
@@ -674,14 +676,19 @@ module RenderMetadata =
     let createWithAnchorPath = Path.createAnchor >> createWithPath
     let createWithOriginalTransientPath original = Path.createTransient >> createWithOriginalPath (Path.createTransient original)
     let createWithOriginalAnchorPath original = Path.createAnchor >> createWithOriginalPath (Path.createAnchor original)
+    /// Build metadata for a named-export declaration. Carries the export's
+    /// `Source` and `FullyQualifiedName` through to consumers. Lib.es-sourced
+    /// declarations (TS standard library files) skip the FullyQualifiedName
+    /// population — those names aren't useful for Import attributes and the
+    /// path-prune interceptor will drop their Typescript-rooted parents anyway.
     let inline createWithPathFromExport<^T
         when ^T: (member FullyQualifiedName: ArenaInterner.QualifiedNamePart list)
-        and ^T: (member Source: ArenaInterner.QualifiedNamePart option)
-        and ^T: (member IsLibEs: bool)
+        and ^T: (member Source: ArenaInterner.Source)
         > (path: Path) (export: ^T) =
-        if export.IsLibEs && export.Source |> Option.exists (_.Value >> _.Equals("typescript", StringComparison.OrdinalIgnoreCase)) then
+        match export.Source with
+        | ArenaInterner.Source.LibEs _ ->
             createWithPath path
             |> withFullyQualifiedName export.FullyQualifiedName
-        else
-            create path path (ValueOption.ofOption export.Source) (ValueSome export.FullyQualifiedName)
+        | source ->
+            create path path (ValueSome source) (ValueSome export.FullyQualifiedName)
             

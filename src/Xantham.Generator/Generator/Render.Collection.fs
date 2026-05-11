@@ -61,7 +61,20 @@ let tryRenderAllowNullLiteralAttribute (typeLike: Anchored.TypeLikeRender) =
     if typeLike.IsClass then ValueSome Attributes.allowNullLiteral else ValueNone
 
 let tryRenderMetadataImport (metadata: RenderMetadata) =
-    match metadata.FullyQualifiedName, metadata.Source with
+    // Convert the source-attribution DU into the package-name string used
+    // for the `from` clause of `[<Import>]`. LibEs declarations don't need
+    // an import attribute (TS built-ins resolved by Fable). Both
+    // Package and PackageInternal surface their originating package name.
+    let sourcePackageName =
+        metadata.Source
+        |> ValueOption.bind (function
+            | ArenaInterner.Source.LibEs _ -> ValueNone
+            | ArenaInterner.Source.PackageInternal sm ->
+                sm.Value.Package.Value.Name |> ArenaInterner.QualifiedNamePart.Normal |> ValueSome
+            | ArenaInterner.Source.Package coll ->
+                coll.Canonical.SubModule.Value.Package.Value.Name
+                |> ArenaInterner.QualifiedNamePart.Normal |> ValueSome)
+    match metadata.FullyQualifiedName, sourcePackageName with
     | ValueNone, ValueNone -> ValueNone
     | ValueNone, ValueSome qualifiedNamePart ->
         Path.last metadata.Path

@@ -109,18 +109,16 @@ module LibEsDefaults =
     /// (`typescript`). The encoder's `LibEsExports` set doesn't always
     /// include every type from the TS standard libs (e.g. `Disposable`
     /// from lib.es2022.disposable has Source="typescript" but isn't in
-    /// the LibEs set). The substitution itself only fires for types
-    /// in the table; un-mapped types fall through to normal emission
-    /// (so consumer-augmented types like the workers-types Request/Response
-    /// that the consumer redefines are still rendered with their body).
-    let private isSubstitutionEligible (isLibEs: bool) (source: ArenaInterner.QualifiedNamePart option) =
-        isLibEs
-        ||
+    /// True when the declaration came from a TypeScript standard library
+    /// file (lib.es*/lib.dom/etc.). The new `Source.LibEs fileName` case
+    /// captures every case the old `IsLibEs || Source="typescript"`
+    /// disjunction did: the encoder used to leave `IsLibEs=false` on some
+    /// lib types whose Source was the typescript compiler, but the
+    /// source-attribution refactor unified both into `Source.LibEs _`.
+    let private isLibEsSource (source: ArenaInterner.Source) =
         match source with
-        | Some (ArenaInterner.QualifiedNamePart.Normal s)
-        | Some (ArenaInterner.QualifiedNamePart.Abnormal (s, _)) ->
-            s.Equals("typescript", System.StringComparison.OrdinalIgnoreCase)
-        | None -> false
+        | ArenaInterner.Source.LibEs _ -> true
+        | _ -> false
 
     /// Lookup a `Substitution` for a `ResolvedType`. Returns the
     /// substitution only if the type is lib.es-eligible AND its name is
@@ -129,28 +127,29 @@ module LibEsDefaults =
     /// used by `resolvedTypePreludeInterceptor` so name-substitution and
     /// arity-reconciliation always agree on which types are substituted.
     let tryLookupSubstitution (resolvedType: ResolvedType) : Substitution voption =
-        let lookup isLibEs source (name: Name<_>) =
-            if isSubstitutionEligible isLibEs source then
+        let lookup source (name: Name<_>) =
+            if isLibEsSource source then
                 let key = Name.Case.valueOrSource name
                 match Map.tryFind key substitutions with
                 | Some s -> ValueSome s
                 | None -> ValueNone
             else ValueNone
         match resolvedType with
-        | ResolvedType.Interface { IsLibEs = isLibEs; Source = source; Name = name } ->
-            lookup isLibEs source name
-        | ResolvedType.Class { IsLibEs = isLibEs; Source = source; Name = name } ->
-            lookup isLibEs source name
+        | ResolvedType.Interface { Source = source; Name = name } ->
+            lookup source name
+        | ResolvedType.Class { Source = source; Name = name } ->
+            lookup source name
         | _ -> ValueNone
 
     /// Default `ResolvedTypePrelude` interceptor. For lib-sourced types
     /// with a known F# substitution, swaps the renderScope's TypeRef with
     /// the intrinsic ref so all reference sites resolve through the cache.
-    /// For other lib-sourced types flagged IsLibEs, falls back to RefOnly
-    /// (don't render the body). Lib-sourced types that aren't IsLibEs and
-    /// aren't in the substitution table render normally — this is the
-    /// declaration-merging escape: types like `Request`/`Response` that
-    /// the consumer's package redefines/augments still get emitted.
+    /// For other lib-sourced types, falls back to RefOnly (don't render
+    /// the body). Non-lib-sourced types fall through to normal emission —
+    /// this is the declaration-merging escape: types like `Request` /
+    /// `Response` that the consumer's package redefines/augments are
+    /// flagged `Source.Package _`, not `Source.LibEs _`, and still get
+    /// their full body emitted.
     let resolvedTypePreludeInterceptor _ resolvedType =
         let trySubstitute (name: Name<_>) =
             let key = Name.Case.valueOrSource name
@@ -161,43 +160,39 @@ module LibEsDefaults =
                     { renderScope with TypeRef = ref; Render = Render.RefOnly ref })
             | None -> ValueNone
         match resolvedType with
-        | ResolvedType.Interface { IsLibEs = isLibEs; Source = source; Name = name }
-          when isSubstitutionEligible isLibEs source ->
+        | ResolvedType.Interface { Source = ArenaInterner.Source.LibEs _; Name = name }
+        | ResolvedType.Class { Source = ArenaInterner.Source.LibEs _; Name = name } ->
             match trySubstitute name with
             | ValueSome f -> f
-            | ValueNone when isLibEs ->
+            | ValueNone ->
                 fun renderScope ->
                     { renderScope with Render = Render.RefOnly renderScope.TypeRef }
-            | ValueNone -> id
-        | ResolvedType.Class { IsLibEs = isLibEs; Source = source; Name = name }
-          when isSubstitutionEligible isLibEs source ->
-            match trySubstitute name with
-            | ValueSome f -> f
-            | ValueNone when isLibEs ->
-                fun renderScope ->
-                    { renderScope with Render = Render.RefOnly renderScope.TypeRef }
-            | ValueNone -> id
-        | ResolvedType.Enum { IsLibEs = true } ->
+        | ResolvedType.Enum { Source = ArenaInterner.Source.LibEs _ } ->
             fun renderScope ->
                 { renderScope with Render = Render.RefOnly renderScope.TypeRef }
         | _ -> id
 
 type PreludeGetTypeRefFunc = GeneratorContext -> RenderScopeStore -> LazyResolvedType -> TypeRefRender
 and InterceptorIgnorePathRender = {
-    Source: ArenaInterner.QualifiedNamePart -> bool
+    Source: ArenaInterner.Source -> bool
     QualifiedName: QualifiedName -> bool
 } with
     static member Default = {
-        // Ignore TS toolchain packages — `typescript` (compiler types) and
-        // `@babel/*` (parser internals). These are infrastructure, not
+        // Ignore TS toolchain packages — TS standard library (`Source.LibEs`)
+        // and `@babel/*` (parser internals). These are infrastructure, not
         // consumer libraries; their declarations leak into encoder output
         // when the consumer pulls them transitively but should never reach
-        // the F# binding.
+        // the F# binding. Post source-attribution refactor the discriminator
+        // is structural rather than string-based: LibEs uniformly identifies
+        // standard-library files; babel still needs the package-name match.
         Source = function
-            | QualifiedNamePart.Normal text
-            | QualifiedNamePart.Abnormal(text, _) ->
-                text.Contains("babel", System.StringComparison.OrdinalIgnoreCase)
-                || text.Contains("typescript", System.StringComparison.OrdinalIgnoreCase)
+            | ArenaInterner.Source.LibEs _ -> true
+            | ArenaInterner.Source.PackageInternal subModule ->
+                subModule.Value.Package.Value.Name.Contains(
+                    "babel", System.StringComparison.OrdinalIgnoreCase)
+            | ArenaInterner.Source.Package collection ->
+                collection.Canonical.SubModule.Value.Package.Value.Name.Contains(
+                    "babel", System.StringComparison.OrdinalIgnoreCase)
         QualifiedName = fun _ -> false
     }
 and InterceptorPaths = {

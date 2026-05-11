@@ -555,7 +555,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                 Metadata = {
                     Path = Path.create path
                     Original = Path.create path
-                    Source = value.Source |> Option.toValueOption
+                    Source = ValueSome value.Source
                     FullyQualifiedName = ValueSome value.FullyQualifiedName
                 }
                 TypedNameRender.Name = value.Name
@@ -657,7 +657,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                 Metadata = {
                     Path = Path.create path
                     Original = Path.create path
-                    Source = headFunc.Source |> Option.toValueOption
+                    Source = ValueSome headFunc.Source
                     FullyQualifiedName = ValueSome headFunc.FullyQualifiedName
                 }
                 Signatures =
@@ -667,7 +667,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                             FunctionLikeSignature.Metadata = {
                                 Path = Path.create path
                                 Original = Path.create path
-                                Source = func.Source |> Option.toValueOption
+                                Source = ValueSome func.Source
                                 FullyQualifiedName = ValueSome func.FullyQualifiedName
                             }
                             Parameters =
@@ -735,13 +735,16 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
         value.Exports
         |> List.iter (registerAnchorFromExport ctx)
 
-let private registerExportsForAnchoring (ctx: GeneratorContext) = List.iter (registerAnchorFromExport ctx)
-
 module ArenaInterner =
     let processExports (ctx: GeneratorContext) (interner: ArenaInterner) =
         // Nanopass-adjacent: assign stable concrete TypePaths to interned
         // synthetic literals before the export-anchor pass forces their
         // bodies. See `Generator/SyntheticPathAssignment.fs`.
         SyntheticPathAssignment.run ctx interner
+        // ExportMap was previously `Map<string, ResolvedExport list>` and
+        // is now `Map<Xantham.Source, LazyResolvedExport>` post source-
+        // attribution refactor. Force each lazy and register the single
+        // export it produces.
         interner.ExportMap
-        |> Map.iter (fun _ -> registerExportsForAnchoring ctx)
+        |> Map.iter (fun _ lazyExport ->
+            registerAnchorFromExport ctx lazyExport.Value)

@@ -14,6 +14,25 @@ let inline getQualifiedName (container: ^T when ^T:(member FullyQualifiedName: A
 
 let inline private sanitizeSource (source: string) =
     source.Trim('@').Split([|'\\'; '/'|], System.StringSplitOptions.RemoveEmptyEntries) |> Array.toList
+
+/// Convert the post-source-refactor `Source` DU into the `QualifiedNamePart
+/// option` form the legacy module-path construction expects. Lib.es files
+/// surface as "typescript" (so the existing path-prune interceptor still
+/// drops the synthetic Typescript parent). Both `PackageInternal` and
+/// `Package` produce the originating package's name — this keeps the
+/// rendered module path identical to the old behaviour where the encoder
+/// stamped Source with the package name.
+let inline sourceToQualifiedNamePart (source: ArenaInterner.Source) : ArenaInterner.QualifiedNamePart option =
+    match source with
+    | ArenaInterner.Source.LibEs _ ->
+        ArenaInterner.QualifiedNamePart.Normal "typescript" |> Some
+    | ArenaInterner.Source.PackageInternal subModule ->
+        let pkg = subModule.Value.Package.Value
+        ArenaInterner.QualifiedNamePart.Normal pkg.Name |> Some
+    | ArenaInterner.Source.Package collection ->
+        let pkg = collection.Canonical.SubModule.Value.Package.Value
+        ArenaInterner.QualifiedNamePart.Normal pkg.Name |> Some
+
 let inline private createModulePath (qualifiedName: QualifiedName) (source: ArenaInterner.QualifiedNamePart option) =
     let hasNodeModuleFilePath =
         qualifiedName.FilePath
@@ -59,7 +78,7 @@ let inline private createModulePath (qualifiedName: QualifiedName) (source: Aren
 
 let fromVariable (variable: Variable) =
     let qualifiedName = getQualifiedName variable
-    let source = variable.Source
+    let source = sourceToQualifiedNamePart variable.Source
     let renderName = Name.Case.valueOrSource variable.Name
     let path =
         createModulePath qualifiedName source
@@ -68,7 +87,7 @@ let fromVariable (variable: Variable) =
 
 let fromInterface (iface: Interface) =
     let qualifiedName = getQualifiedName iface
-    let source = iface.Source
+    let source = sourceToQualifiedNamePart iface.Source
     let renderName = Name.Case.valueOrSource iface.Name
     let path =
         createModulePath qualifiedName source
@@ -77,21 +96,21 @@ let fromInterface (iface: Interface) =
 
 let fromTypeAlias (typeAlias: TypeAlias) =
     let qualifiedName = getQualifiedName typeAlias
-    let source = typeAlias.Source
+    let source = sourceToQualifiedNamePart typeAlias.Source
     let renderName = Name.Case.valueOrSource typeAlias.Name
     createModulePath qualifiedName source
     |> TypePath.create renderName
 
 let fromClass (cls: Class) =
     let qualifiedName = getQualifiedName cls
-    let source = cls.Source
+    let source = sourceToQualifiedNamePart cls.Source
     let renderName = Name.Case.valueOrSource cls.Name
     createModulePath qualifiedName source
     |> TypePath.create renderName
 
 let fromEnum (enum: EnumType) =
     let qualifiedName = getQualifiedName enum
-    let source = enum.Source
+    let source = sourceToQualifiedNamePart enum.Source
     let renderName = Name.Case.valueOrSource enum.Name
     createModulePath qualifiedName source
     |> TypePath.create renderName
@@ -106,14 +125,14 @@ let fromEnumCase (parentPath: TypePath option) (enum: EnumCase) =
 
 let fromFunction (function': Function) =
     let qualifiedName = getQualifiedName function'
-    let source = function'.Source
+    let source = sourceToQualifiedNamePart function'.Source
     let renderName = Name.Case.valueOrSource function'.Name
     createModulePath qualifiedName source
     |> MemberPath.createOnModule renderName
 
 let fromModule (module': Module) =
     let qualifiedName = getQualifiedName module'
-    let source = module'.Source
+    let source = sourceToQualifiedNamePart module'.Source
     let renderName = Name.Case.valueOrSource module'.Name
     createModulePath qualifiedName source
     |> ModulePath.create renderName
@@ -131,8 +150,8 @@ let fromResolvedExport (resolvedExport: ResolvedExport) =
     | ResolvedExport.Function [] -> failwith "Resolved export contained no functions for the function case."
 
 module Interceptors =
-    let inline shouldIgnoreRender (interceptor: Interceptors) (value: ^T when ^T:(member Source: ArenaInterner.QualifiedNamePart option) and ^T:(member FullyQualifiedName: ArenaInterner.QualifiedNamePart list)) =
-        Option.exists interceptor.IgnorePathRender.Source value.Source
+    let inline shouldIgnoreRender (interceptor: Interceptors) (value: ^T when ^T:(member Source: ArenaInterner.Source) and ^T:(member FullyQualifiedName: ArenaInterner.QualifiedNamePart list)) =
+        interceptor.IgnorePathRender.Source value.Source
         ||
         getQualifiedName value
         |> interceptor.IgnorePathRender.QualifiedName

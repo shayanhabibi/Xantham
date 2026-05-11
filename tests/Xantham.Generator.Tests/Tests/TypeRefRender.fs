@@ -465,10 +465,14 @@ let tests = testList "TypeRef" [
         |> testRender "string * int * option<bool>"
         ||> Flip.Expect.equal "" 
     testCase "Simple interface" <| fun _ ->
+        // Post source-attribution refactor, every type carries a Source.
+        // The mock default (`testPackageSource`) is a `Source.Package` with
+        // package name "test-pkg", which surfaces as the `TestPkg` module
+        // prefix in the rendered path.
         Interface.create "Bar"
         |> Interface.withPath [ "Foo" ]
         |> Interface.wrap
-        |> testRender "Foo.Bar"
+        |> testRender "TestPkg.Foo.Bar"
         ||> Flip.Expect.equal ""
     testCase "Primitive Array" <| fun _ ->
         primitive TypeKindPrimitive.String

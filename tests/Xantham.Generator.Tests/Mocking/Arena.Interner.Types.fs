@@ -4,6 +4,41 @@ open Xantham
 open Xantham.Decoder
 open Xantham.Decoder.ArenaInterner
 
+/// A `Source.Package` fixture that test mocks use as the default
+/// provenance. Uses a placeholder package "test-pkg" / submodule "test"
+/// so the default IgnorePathRender (which filters `Source.LibEs _` and
+/// babel/typescript package names) doesn't drop test-fixture exports.
+/// The cyclic submodule⇄package reference is broken via the
+/// LazyContainer wrappers — the inner thunks never force each other.
+let testPackageSource : Source =
+    let rec subModuleLazy : LazySubModule =
+        {
+            Data = SubModuleId(PackageId("test-pkg", "0.0.0"), "test")
+            Result = lazy {
+                Name = "test"
+                Path = "test"
+                Package = packageLazy
+                Dependees = []
+                Dependencies = []
+                Exports = []
+            }
+        }
+    and packageLazy : LazyPackage =
+        {
+            Data = PackageId("test-pkg", "0.0.0")
+            Result = lazy {
+                Name = "test-pkg"
+                Version = "0.0.0"
+                Json = ValueNone
+                SubModules = [ subModuleLazy ]
+                Entry = [ subModuleLazy ]
+            }
+        }
+    Source.Package {
+        Canonical = { Name = "test"; SubModule = subModuleLazy }
+        Aliases = []
+    }
+
 module ResolvedType =
     let globalThis = ResolvedType.GlobalThis
     let primitive: TypeKindPrimitive -> ResolvedType = ResolvedType.Primitive
@@ -70,7 +105,7 @@ module ResolvedType =
         let wrap = ResolvedType.Interface
         let create name =
             { IsLibEs = false
-              Source = None
+              Source = testPackageSource
               Interface.FullyQualifiedName = [ QualifiedNamePart.Normal name ]
               Name = Name.Pascal.create name
               Members = []
@@ -80,26 +115,25 @@ module ResolvedType =
         let withTypeParameters typeParameters iface = { iface with Interface.TypeParameters = typeParameters |> List.map Lazy.CreateFromValue }
         let withPath modules iface =
             { iface with Interface.FullyQualifiedName = (List.map QualifiedNamePart.Normal modules) @ iface.FullyQualifiedName }
-        let withSource source iface = { iface with Interface.Source = Some (QualifiedNamePart.Normal source) }
+        let withSource source iface = { iface with Interface.Source = Source.LibEs source }
         let esLib iface = { iface with Interface.IsLibEs = true }
     module Enum =
         let wrap = ResolvedType.Enum
         let create name = { IsLibEs = false
-                            Source = None
+                            Source = testPackageSource
                             FullyQualifiedName = [ QualifiedNamePart.Normal name ]
                             EnumType.Name = Name.Pascal.create name
                             Members = []
                             Documentation = [] }
         let withPath modules enum =
             { enum with EnumType.FullyQualifiedName = modules @ enum.FullyQualifiedName }
-        let withSource source enum = { enum with EnumType.Source = Some source }
+        let withSource source enum = { enum with EnumType.Source = Source.LibEs source }
         let withMembers members enum = { enum with EnumType.Members = members }
     module EnumCase =
         let wrap = ResolvedType.EnumCase
         let create name value enum = { EnumCase.Name = Name.Pascal.create name
                                        EnumCase.Value = value
                                        EnumCase.Parent = Lazy.CreateFromValue enum
-                                       Source = None
                                        FullyQualifiedName = [ yield! enum.FullyQualifiedName ; QualifiedNamePart.Normal name ]
                                        Documentation = [] }
     module Literal =
@@ -130,7 +164,7 @@ module ResolvedType =
     module TypeAlias =
         let create innerType name = {
             IsLibEs = false
-            Source = None
+            Source = testPackageSource
             FullyQualifiedName = [ QualifiedNamePart.Normal name ]
             Name = Name.Pascal.create name
             TypeAlias.Type = LazyContainer.CreateFromValue innerType
@@ -138,7 +172,7 @@ module ResolvedType =
             Documentation = []
         }
         
-        let withSource source typeAlias = { typeAlias with TypeAlias.Source = Some source }
+        let withSource source typeAlias = { typeAlias with TypeAlias.Source = Source.LibEs source }
         let withPath modules typeAlias = { typeAlias with TypeAlias.FullyQualifiedName = modules @ typeAlias.FullyQualifiedName }
         let addTypeParameter typeParameter typeAlias = { typeAlias with TypeAlias.TypeParameters = Lazy.CreateFromValue typeParameter :: typeAlias.TypeParameters }
         let addTypeParameters typeParameters typeAlias = { typeAlias with TypeAlias.TypeParameters = (typeParameters |> List.map Lazy.CreateFromValue) @ typeAlias.TypeParameters }
@@ -194,7 +228,7 @@ module ResolvedType =
         let create name returnType =
             {
                 IsLibEs = false
-                Source = None
+                Source = testPackageSource
                 FullyQualifiedName = [ QualifiedNamePart.Normal name ]
                 Documentation = []
                 IsDeclared = false
