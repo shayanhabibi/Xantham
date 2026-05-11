@@ -177,6 +177,7 @@ module private SourceTag =
     let inline setProgram (program: Ts.Program) (tag: SourceTag) =
         SymbolTypeKey.set programKey program tag
     let inline withProgram program tag = setProgram program |> apply tag
+    let inline getProgram tag = SymbolTypeKey.access programKey tag
     let inline initTracer (sourceKind: SourceKind) (target: ^T) =
         // Set the value on target to sourceKind
         Tracer.set<SourceKind> sourceKind target
@@ -231,11 +232,55 @@ module private SourceTag =
         SymbolTypeKey.access packageIdKey tag |> ValueOption.flatten
     let inline setPackageId packageId (tag: SourceTag) =
         SymbolTypeKey.set packageIdKey (ValueSome packageId) tag
-    
-        
-        
-        
-        
+    let inline getDeclarations (tag: SourceTag) =
+        let program =
+            getProgram tag
+            |> ValueOption.defaultWith (fun () -> failwith "Invariant: SourceTag was not initialized with a program")
+        let getDeclarationsFromSymbolTable (symbolTable: Ts.SymbolTable) =
+            symbolTable.values()
+            |> Seq.choose _.declarations
+            |> Seq.collect _.AsArray
+            |> Seq.toArray
+        match tag.Value with
+        | LibEs -> [||]
+        | Ambient sf ->
+            let isAmbientFile = isAmbientFile sf
+            match program.getTypeChecker().getSymbolAtLocation sf with
+            | Some sfSymbol when isAmbientFile ->
+                let globalDeclarations =
+                    sfSymbol?locals
+                    |> Option.map getDeclarationsFromSymbolTable
+                    |> Option.defaultValue [||]
+                let declarations =
+                    program.getTypeChecker().getAmbientModules().AsArray
+                    |> Seq.filter (_.valueDeclaration >> Option.exists (_.getSourceFile() >> (=) sf))
+                    |> Seq.choose _.valueDeclaration
+                    |> Seq.toArray
+                Array.append globalDeclarations declarations
+            | Some sfSymbol ->
+                let globalDeclarations =
+                    sfSymbol.globalExports
+                    |> Option.map getDeclarationsFromSymbolTable
+                    |> Option.defaultValue [||]
+                let declarations =
+                    sfSymbol.exports 
+                    |> Option.map getDeclarationsFromSymbolTable
+                    |> Option.defaultValue [||]
+                Array.append globalDeclarations declarations
+            | None ->
+                sf?locals
+                |> Option.map getDeclarationsFromSymbolTable
+                |> Option.defaultValue [||]
+        | Package symbol ->
+            let globalDeclarations =
+                symbol.globalExports
+                |> Option.map getDeclarationsFromSymbolTable
+                |> Option.defaultValue [||]
+            let declarations =
+                symbol.exports 
+                |> Option.map getDeclarationsFromSymbolTable
+                |> Option.defaultValue [||]
+            Array.append globalDeclarations declarations
 
 /// <summary>
 /// Creating the guard is less expensive than the tag. We do the boiler plate here.
@@ -272,6 +317,7 @@ type SourceTag with
             (
                 sourceFile.fileName.Contains("@types")
                 || isAmbientFile sourceFile
+                || not (ts.isExternalModule sourceFile)
             )
             && Option.isNone (checker.getSymbolAtLocation sourceFile)
         then
@@ -310,6 +356,7 @@ type SourceTag with
     member this.PackageVersion = SourceTag.tryGetPackageVersion this
     member this.SubModuleName = SourceTag.tryGetSubModuleName this
     member this.PackageInfo = SourceTag.tryGetPackageInfo this
+    member this.Declarations = SourceTag.getDeclarations this
 
 
 type PackageId with
@@ -322,6 +369,23 @@ let private packageCache = SymbolTypeKey.create<Dictionary<PackageId, PackageInf
 
 type Ts.Program with
     member this.SeedResolvedModules() =
+        // adds the current iterated source tag to the package cache
+        // using the key created from the given package name and package version.
+        let addSourceTagToPackage (cache: Dictionary<PackageId, PackageInfo>) resolvedSourceTag packageName packageVersion =
+            let packageKey = PackageId.Create(packageName, packageVersion)
+            match cache.TryGetValue(packageKey) with
+            | true, packageInfo ->
+                if packageInfo.AssociatedTags |> Array.contains resolvedSourceTag then
+                    ()
+                else
+                    packageInfo.AssociatedTags
+                    |> unbox<ResizeArray<SourceTag>>
+                    |> _.Add(resolvedSourceTag)
+                SymbolTypeKey.set packageInfoKey packageInfo resolvedSourceTag
+            | _ ->
+                let packageInfo = { Name = packageName; Version = packageVersion; AssociatedTags = [| resolvedSourceTag |] }
+                cache[ packageKey ] <- packageInfo
+                SymbolTypeKey.set packageInfoKey packageInfo resolvedSourceTag
         this.forEachResolvedModule(fun resolvedModule moduleName _ sourceFilePath ->
             let sourceFile = this.getSourceFile(sourceFilePath)
             // if we can't find the source file for the source file path then we early exit.
@@ -365,21 +429,7 @@ type Ts.Program with
                 let cache = SymbolTypeKey.accessOrInit packageCache (fun () -> Dictionary()) this
                 // adds the current iterated source tag to the package cache
                 // using the key created from the given package name and package version.
-                let addSourceTagToPackage packageName packageVersion =
-                    let packageKey = PackageId.Create(packageName, packageVersion)
-                    match cache.TryGetValue(packageKey) with
-                    | true, packageInfo ->
-                        if packageInfo.AssociatedTags |> Array.contains resolvedSourceTag then
-                            ()
-                        else
-                            packageInfo.AssociatedTags
-                            |> unbox<ResizeArray<SourceTag>>
-                            |> _.Add(resolvedSourceTag)
-                        SymbolTypeKey.set packageInfoKey packageInfo resolvedSourceTag
-                    | _ ->
-                        let packageInfo = { Name = packageName; Version = packageVersion; AssociatedTags = [| resolvedSourceTag |] }
-                        cache[ packageKey ] <- packageInfo
-                        SymbolTypeKey.set packageInfoKey packageInfo resolvedSourceTag
+                let addSourceTagToPackage = addSourceTagToPackage cache resolvedSourceTag
                 // If the module comes with a package id, then we use that. Otherwise
                 // we try to use the package name and version from the source file tag which
                 // has a couple different fallbacks.
@@ -406,6 +456,24 @@ type Ts.Program with
                 // Failing that, noop
                 | _ -> ()
             | _ -> ()
+            )
+        this.getSourceFiles().AsArray
+        |> Array.map (fun sf -> SourceTag.CreateValue(this, sf))
+        |> Array.filter _.Value.IsAmbient
+        |> Array.iter (fun tag ->
+            let cache = SymbolTypeKey.accessOrInit packageCache (fun () -> Dictionary()) this
+            let addSourceTagToPackage = addSourceTagToPackage cache tag
+            let packageName =
+                tag.Guard.PackageJsonContent
+                |> ValueOption.bind (_.name >> Option.toValueOption)
+                |> ValueOption.defaultWith (fun () ->
+                    failwith "Invariant: Ambient source has no associated package name."
+                    )
+            let packageVersion =
+                tag.Guard.PackageJsonContent
+                |> ValueOption.bind (_.version >> Option.toValueOption)
+                |> ValueOption.defaultValue "0.0.0"
+            addSourceTagToPackage packageName packageVersion
             )
 
 type CompilePackageCacheError =

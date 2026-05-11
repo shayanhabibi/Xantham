@@ -420,9 +420,6 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
                 sourceTag.SubModuleId.Value
                 |> Source.PackageInternal
             | _ ->
-                // Log.traceTo 0 xanTag
-                // Log.traceTo 0 sourceTag
-                Log.traceTo 0 sourceTag.Guard
                 Log.error "Invariant: a declaration was not identified as a lib-es decl, had no export collection, and no submodule id. Defaulting Metadata to Source.LibEs."
                 sourceTag.Guard.Source.fileName
                 |> Node.Api.path.basename
