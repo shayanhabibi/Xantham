@@ -1030,6 +1030,18 @@ module Schema =
 (* ==== THOTH ENCODERS & DECODERS ==== *)
 (* =================================== *)
 
+(*
+Do NOT use Thoth AUTO encode/decoders. The use of reflection becomes
+very expensive in usage, and can make debugging on large type hierarchies
+next to impossible due to the time spent cycling in reflection overhead.
+
+All Thoth encoders/decoders must be manually written.
+This provides the benefit of allowing us to compress output in select places
+(such as when we have a DU that has different types for each case, we do not
+have to co-locate the DU name with the payload as we can infer the DU case
+from the payload shape itself).
+*)
+
 [<AutoOpen>]
 module private Utils =
     let inline mock<'T> = Unchecked.defaultof<'T>
