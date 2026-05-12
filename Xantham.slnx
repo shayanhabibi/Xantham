@@ -49,6 +49,7 @@
     <File Path="docs/Xantham.Decoder/index.md" />
     <File Path="docs/Xantham.Decoder/names.fsx" />
     <File Path="docs/Xantham.Decoder/runtime.fsx" />
+    <File Path="docs/Xantham.Decoder/source-metadata-migration.md" />
   </Folder>
   <Folder Name="/docs/Xantham.Generator/">
     <File Path="docs/Xantham.Generator/generator-context.md" />

@@ -337,6 +337,14 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
     | TypeNode.MappedType mappedTypeNode ->
         XanthamTag.debugLocationAndForget "TypeNode.dispatch | MappedType" xanTag
         // { [K in keyof T]: T[K] } — route via checker to ObjectFlags.Mapped at the type layer
+        if mappedTypeNode.nameType.IsSome then
+            // `as` clause: IndexSignature can't carry f(K)/never-filter/co-varying V.
+            // Terminate the body as `any`. Surrounding alias becomes `type Foo<'T> = obj`
+            xanTag.TypeSignal
+            |> Signal.fulfillWith (fun () -> TypeKindPrimitive.Any.TypeKey)
+            xanTag.Builder
+            |> Signal.fulfillWithSome (fun () -> SType.Primitive TypeKindPrimitive.Any)
+        else
         routeViaChecker mappedTypeNode
     | TypeNode.ConditionalType conditionalTypeNode ->
         XanthamTag.debugLocationAndForget "TypeNode.dispatch | ConditionalType" xanTag

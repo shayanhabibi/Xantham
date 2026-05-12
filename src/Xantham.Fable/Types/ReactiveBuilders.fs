@@ -491,19 +491,22 @@ type SConditionalTypeBuilder = {
           True = this.True.Value; False = this.False.Value }
 
 
+// TypeUnion and TypeIntersection are commutative; order the keys before assembling.
+// The decoder already has a phase which will dedupe if the order is the same.
+
 /// Signal-based equivalent of <c>TsTypeUnionBuilder</c>, builds to <see cref="T:Xantham.TsTypeUnion"/>.
 type STypeUnionBuilder = {
     Types: TypeSignal array
 } with
     member this.Build() : TsTypeUnion =
-        TsTypeUnion (this.Types |> Array.map _.Value |> Array.toList)
+        TsTypeUnion (this.Types |> Array.map _.Value |> Array.sort |> Array.toList)
 
 /// Signal-based equivalent of <c>TsTypeIntersectionBuilder</c>, builds to <see cref="T:Xantham.TsTypeIntersection"/>.
 type STypeIntersectionBuilder = {
     Types: TypeSignal array
 } with
     member this.Build() : TsTypeIntersection =
-        TsTypeIntersection (this.Types |> Array.map _.Value |> Array.toList)
+        TsTypeIntersection (this.Types |> Array.map _.Value |> Array.sort |> Array.toList)
 
 /// Signal-based equivalent of <c>TsTupleElementTypeBuilder</c>, builds to <see cref="T:Xantham.TsTupleElementType"/>.
 type STupleElementTypeBuilder = {
