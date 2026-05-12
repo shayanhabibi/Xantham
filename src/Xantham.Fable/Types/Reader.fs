@@ -9,30 +9,37 @@ open Xantham.Fable.Types
 open Xantham.Fable.Types.Tracer
 
 let private commonCompilerOptions = jsOptions<Ts.CompilerOptions>(fun c ->
+    // c.traceResolution <- Some true
     c.moduleResolution <- Some Ts.ModuleResolutionKind.Bundler
     c.target <- Some Ts.ScriptTarget.Latest
     c.skipLibCheck <- Some true
     c.declaration <- Some true
     c.emitDeclarationOnly <- Some true
+    c.resolveJsonModule <- Some true
     // Without this, unions with null and undefined are reduced out when resolving
     // a type node to a type. This increases workaround logic.
     c.strictNullChecks <- Some true
     c.resolvePackageJsonExports <- Some true
     c.resolvePackageJsonImports <- Some true)
 
-let private createProgram (entryFile: string): Ts.Program =
-    let entryFile = String.normalizePath entryFile
-    ts.createProgram(jsOptions<Ts.CreateProgramOptions> (fun o ->
-        o.rootNames <- ResizeArray [| entryFile |]
-        o.options <- commonCompilerOptions
-        ))
-    
-let private createProgramForFiles (entryFiles: string array): Ts.Program =
+let private createProgramForFiles (entryFiles: string array) =
     let entryFiles = entryFiles |> Array.map String.normalizePath
-    ts.createProgram(jsOptions<Ts.CreateProgramOptions>(fun o ->
-        o.rootNames <- ResizeArray entryFiles
-        o.options <- commonCompilerOptions
-        ))
+    let xanthamTempDir = Node.Api.fs.mkdtempSync("xantham_")
+    let tempFilePath = Node.Api.path.join(xanthamTempDir, "temp.d.ts")
+    Node.Api.fs.writeFileSync(tempFilePath, String.concat "\n" <| [
+        for entryFile in entryFiles do
+            "import * as _ from '" + entryFile + "';"
+    ])
+    {|
+        TempFilePath = tempFilePath
+        Program =
+            ts.createProgram(jsOptions<Ts.CreateProgramOptions>(fun o ->
+                o.rootNames <- ResizeArray [
+                    tempFilePath
+                ]
+                o.options <- commonCompilerOptions
+                ))
+    |}
 
 [<ReferenceEquality>]
 type TypeScriptReader = {
@@ -45,7 +52,9 @@ type TypeScriptReader = {
     ExportCache: Dictionary<IdentityKey, ExportStore>
     MemberCache: Dictionary<IdentityKey, MemberStore>
     LibCache: HashSet<IdentityKey>
+    TempFilePath: string
 } with
+    member inline this.tempFilePath = this.TempFilePath
     member inline this.stack = this.Stack
     member inline this.entryFile = this.EntryFiles |> Array.head
     member inline this.entryFiles = this.EntryFiles
@@ -65,7 +74,10 @@ module TypeScriptReader =
         let signalCache = Dictionary()
         let memberCache = Dictionary()
         let libCache = HashSet()
-        let program = createProgramForFiles entryFiles
+        let tempFile, program =
+            let programResult = createProgramForFiles entryFiles
+            programResult.TempFilePath, programResult.Program
+            
         let checker = program.getTypeChecker()
         let exportCache = Dictionary()
         #if DEBUG && !FABLE_TEST
@@ -81,6 +93,7 @@ module TypeScriptReader =
             LibCache = libCache
             MemberCache = memberCache
             ExportCache = exportCache
+            TempFilePath = tempFile
         }
     let inline create (entryFile: string) =
         createFor [| entryFile |]

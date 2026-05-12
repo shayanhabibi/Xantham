@@ -24,27 +24,27 @@
         <TypeScriptCompile Include="TypeFiles\tuple.d.ts" />
         <TypeScriptCompile Include="TypeFiles\union.d.ts" />
         <TypeScriptCompile Include="TypeFiles\variable.d.ts" />
+        <Content Include="TypeFiles\package.json" />
         <TypeScriptCompile Include="TypeFiles\intersection.d.ts" />
         <TypeScriptCompile Include="TypeFiles\utility-types.d.ts" />
         <TypeScriptCompile Include="TypeFiles\type-operators.d.ts" />
-        <Content Include="TypeFiles\packages\ui-kit\package.json" />
-        <TypeScriptCompile Include="TypeFiles\packages\ui-kit\index.d.ts" />
-        <Content Include="TypeFiles\packages\validators\package.json" />
-        <TypeScriptCompile Include="TypeFiles\packages\validators\index.d.ts" />
-        <Content Include="TypeFiles\packages\framework\plugins\package.json" />
-        <TypeScriptCompile Include="TypeFiles\packages\framework\plugins\index.d.ts" />
-        <Content Include="TypeFiles\packages\framework\package.json" />
-        <TypeScriptCompile Include="TypeFiles\packages\framework\index.d.ts" />
-        <Content Include="TypeFiles\packages\data-layer\package.json" />
-        <TypeScriptCompile Include="TypeFiles\packages\data-layer\index.d.ts" />
-        <TypeScriptCompile Include="TypeFiles\packages\app\views\dashboard.d.ts" />
-        <TypeScriptCompile Include="TypeFiles\packages\app\components\widget.d.ts" />
-        <Content Include="TypeFiles\packages\app\package.json" />
-        <TypeScriptCompile Include="TypeFiles\packages\app\index.d.ts" />
-        <Content Include="TypeFiles\packages\solid-js\package.json" />
-        <TypeScriptCompile Include="TypeFiles\packages\solid-js\types\index.d.ts" />
-        <TypeScriptCompile Include="TypeFiles\packages\solid-js\types\jsx.d.ts" />
-        <TypeScriptCompile Include="TypeFiles\packages\three\constants.d.ts" />
+        <Content Include="TypeFiles\node_modules\ui-kit\package.json" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\ui-kit\index.d.ts" />
+        <Content Include="TypeFiles\node_modules\validators\package.json" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\validators\index.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\framework\plugins\dist\index.d.ts" />
+        <Content Include="TypeFiles\node_modules\framework\plugins\package.json" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\framework\dist\index.d.ts" />
+        <Content Include="TypeFiles\node_modules\data-layer\package.json" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\data-layer\index.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\app\views\dashboard.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\app\components\widget.d.ts" />
+        <Content Include="TypeFiles\node_modules\app\package.json" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\app\index.d.ts" />
+        <Content Include="TypeFiles\node_modules\solid-js\package.json" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\solid-js\types\index.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\solid-js\types\jsx.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\three\constants.d.ts" />
         <TypeScriptCompile Include="TypeFiles\multi-file\vectors.d.ts" />
         <TypeScriptCompile Include="TypeFiles\multi-file\shapes.d.ts" />
         <TypeScriptCompile Include="TypeFiles\accessors.d.ts" />
@@ -70,6 +70,11 @@
 
     <ItemGroup>
       <PackageReference Include="Fable.Mocha" Version="2.17.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="TypeFiles\node_modules\framework\@app\**" />
+      <EmbeddedResource Remove="TypeFiles\node_modules\framework\framework\**" />
     </ItemGroup>
 
 </Project>

@@ -224,7 +224,9 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) 
                 Array.map (propertySymToMemberSlot ctx) props
             else
                 let keyType =
-                    mappedType.constraintType
+                    mappedType.nameType
+                    |> Option.orElse mappedType.constraintType
+                    |> Option.orElse (mappedType.typeParameter |> Option.bind _.getConstraint())
                     |> Option.filter (_.TypeKey >> (<>) mappedType.TypeKey)
                     |> Option.map (pushTypeToStack ctx >> _.TypeSignal)
                 let valueType =
@@ -233,7 +235,6 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) 
                     |> Option.map (pushTypeToStack ctx >> _.TypeSignal)
                 let isReadOnly = decl.readonlyToken.IsSome
                 let isOptional = decl.questionToken.IsSome
-                // Fully generic mapped type — emit { [key: string]: any } as a safe fallback
                 [|
                     {
                         SIndexSignatureBuilder.Parameters =

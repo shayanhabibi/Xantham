@@ -420,7 +420,10 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
                 sourceTag.SubModuleId.Value
                 |> Source.PackageInternal
             | _ ->
+                #if !FABLE_TEST
+                // This log will reoccur continuously in the test environment.
                 Log.error "Invariant: a declaration was not identified as a lib-es decl, had no export collection, and no submodule id. Defaulting Metadata to Source.LibEs."
+                #endif
                 sourceTag.Guard.Source.fileName
                 |> Node.Api.path.basename
                 |> Source.LibEs

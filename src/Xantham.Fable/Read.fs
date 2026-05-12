@@ -2,6 +2,7 @@
 module Xantham.Fable.Main
 
 open Fable.Core.DynamicExtensions
+open Fable.Core.JsInterop
 open Node
 open Thoth.Json
 open Xantham
@@ -460,6 +461,13 @@ let read (reader: TypeScriptReader) =
     |> Internal.trimTypeReferenceArrayTupleDuplicates
     |> Internal.mergeExports
     |> Internal.selectAndMergeWinnersInDuplicates
+    |> fun result ->
+        reader.program.getRootFileNames().AsArray
+        |> Array.head
+        |> fun file ->
+            fs.unlinkSync(!^file)
+            fs.rmdirSync(!^(path.dirname file))
+        result
 let write (outputDestination: string) (result: EncodedResult) =
     Internal.writeOutput outputDestination result
 let readAndWrite (outputDestination: string) (reader: TypeScriptReader) =

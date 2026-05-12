@@ -64,10 +64,14 @@ type ExportPath = ExportPath of string with
 type Export = Map<ExportPath, ExportValue>
     
 [<Struct>]
-type PackageId = PackageId of name: string * version: string
+type PackageId = PackageId of name: string * version: string with
+    member inline this.Name = let (PackageId (name, _)) = this in name
+    member inline this.Version = let (PackageId (_, version)) = this in version
 
 [<Struct>]
-type SubModuleId = SubModuleId of packageId: PackageId * subModuleName: string
+type SubModuleId = SubModuleId of packageId: PackageId * subModuleName: string with
+    member inline this.PackageId = let (SubModuleId (packageId, _)) = this in packageId
+    member inline this.SubModuleName = let (SubModuleId (_, subModuleName)) = this in subModuleName
 
 [<Struct>]
 type Package = {

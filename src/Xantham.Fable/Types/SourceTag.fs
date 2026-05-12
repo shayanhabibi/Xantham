@@ -458,6 +458,7 @@ type Ts.Program with
             | _ -> ()
             )
         this.getSourceFiles().AsArray
+        |> Array.filter (_.fileName >> (<>) this.getRootFileNames().AsArray[0])
         |> Array.map (fun sf -> SourceTag.CreateValue(this, sf))
         |> Array.filter _.Value.IsAmbient
         |> Array.iter (fun tag ->
@@ -467,7 +468,11 @@ type Ts.Program with
                 tag.Guard.PackageJsonContent
                 |> ValueOption.bind (_.name >> Option.toValueOption)
                 |> ValueOption.defaultWith (fun () ->
+                    #if !FABLE_TEST
                     failwith "Invariant: Ambient source has no associated package name."
+                    #else
+                    Node.Api.path.basename tag.Guard.Source.fileName
+                    #endif
                     )
             let packageVersion =
                 tag.Guard.PackageJsonContent
