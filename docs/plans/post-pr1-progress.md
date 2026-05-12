@@ -551,6 +551,93 @@ These are worth a look before more fixes land:
   the design wants to retain, or is the registration-site workaround
   the intended pattern?
 
+- **SyntheticPathAssignment coverage gap.** Investigation into the
+  `GetWithMetadata` / `Modalities` / `_Lit*.<Property>` family of
+  FS0039 errors in workers-types found that the
+  `SyntheticPathAssignment` pre-pass is *partial*: it assigns
+  concrete paths to some synthetic literals reachable from each
+  export but misses others. Concrete case in workers-types: there
+  are *two distinct* `ResolvedType` `Union` objects for what is
+  semantically `"text" | "audio"` (the `modalities` discriminator)
+  — one with literal order `[text, audio]`, one with `[audio,
+  text]`. The reference-equality interning in the decoder treats
+  these as different identities (different ordering = different
+  reference). Only one of the two ends up in `ctx.SyntheticPaths`;
+  the other falls through to the regular Transient pipeline.
+
+  ```
+  [TRACE-U] modalities-Union? first=text  inSyntheticPaths=true
+  [TRACE-U] modalities-Union? first=audio inSyntheticPaths=false
+  ```
+
+  The audio-first Union (not in `SyntheticPaths`) goes through the
+  Transient cache path. Its cached `TypeRefRender` carries a
+  transient `AnchoredAndMoored "Modalities"` (from the first
+  encounter's `Property.render`-appended `scope.PathContext`).
+  Every subsequent use site cache-hits and re-anchors that
+  transient against its own parent — producing `_Lit163.Modalities`
+  for use site A, `_Lit206.Modalities` for use site B, etc. The
+  body is only *emitted* at site A's location (whichever export
+  rendered it first), so references from sites B, C, … fail
+  FS0039 against paths that don't exist.
+
+  **What `SyntheticPathAssignment` covers:** synthetic literals
+  reachable from non-infrastructure (`Source.LibEs` excluded)
+  Interface / Class / TypeAlias / Variable / Function exports.
+  The walker (`walk` in `SyntheticPathAssignment.fs`) recurses
+  through Union/Intersection/TypeLiteral/Array/Tuple/TypeReference
+  bodies. So a multi-position synthetic should be reached unless
+  *every* path to it goes through a filtered export.
+
+  **Possible explanation for the gap (not verified):** the
+  audio-first Union may only be reachable through a path that
+  shares structure with the text-first version *after* some encoder-
+  side normalization step that splits one TS `"text" | "audio"`
+  declaration into two distinct ResolvedTypes with different orders.
+  If so, the encoder's reference-equality discipline is producing
+  more identities than the design intends. Alternative: there's a
+  specific construct (TypeQuery? Conditional? Substitution?) whose
+  `walk` handler doesn't recurse all the way into the Union, so
+  one path through the graph reaches text-first but a sibling path
+  through the same construct misses audio-first.
+
+  **Attempted fix and revert:** tried seeding `childScope.PathContext`
+  to a transient form of the synthetic's `concretePath` in the
+  synthetic-path `TypeLiteral` branch
+  ([`RenderScope.Prelude.fs:551`](../../src/Xantham.Generator/Generator/RenderScope.Prelude.fs#L551)).
+  The fix is structurally consistent with the non-synthetic branch
+  below (line ~568) which already grafts `scope.PathContext` for
+  its `childScope`. **But** the fix changes nothing in practice
+  because the inner literals are themselves SyntheticPath-assigned
+  and hit the synthetic cache-hit branch ([`RenderScope.Prelude.fs:91-93`](../../src/Xantham.Generator/Generator/RenderScope.Prelude.fs#L91-L93))
+  which stores bare `TransientTypePath.Anchored` in the parent
+  scope's TypeStore regardless of the parent's PathContext. The
+  cache-hit ignores scope-context by design — that's how multi-
+  position synthetics keep a stable concrete path.
+
+  So the actual bug isn't in the parent's childScope construction;
+  it's in `SyntheticPathAssignment` missing one of the two
+  same-content Unions. The fix surface is either:
+    1. Make the encoder normalize literal-union element order so
+       `"text" | "audio"` and `"audio" | "text"` intern to the
+       same `ResolvedType` — eliminates the duplicate identities.
+    2. Extend `SyntheticPathAssignment` to be content-aware: when
+       it encounters a synthetic whose structural content matches
+       one already assigned, reuse the existing assignment instead
+       of treating it as unseen.
+    3. Make the generator's Transient pipeline path-assign on the
+       fly when it sees a multi-position transient that doesn't
+       have a concrete path yet — converting it to the synthetic-
+       path branch retroactively.
+
+  (1) is encoder-side and cleanest. (2) is generator-side but
+  requires defining a content-key for synthetics, which fights
+  reference-equality. (3) is generator-side and respects the
+  existing design, but means the "FIRST encounter wins" semantics
+  changes from "ConcretePath at first encounter" to "ConcretePath
+  promoted retroactively on second encounter," which has its own
+  cascade risks.
+
 ## Reproduction
 
 From either repo:
