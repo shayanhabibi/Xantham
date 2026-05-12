@@ -257,6 +257,58 @@ Three patterns dominate:
    aliases; emit `obj` on collision) but each papers over the
    encoder issue rather than fixing it.
 
+   **Why we didn't try a surface-level substitution.** The obvious
+   next move was to extend the lib.es/lib.dom substitution table —
+   add `WebAssembly.{Exports, Imports, ModuleImports}` (the three
+   not yet covered; the other seven `WebAssembly.*` types are
+   already `obj`-substituted) plus the TS utility types
+   (`Pick`, `Record`, `Partial`, `Omit`, `Readonly`, `Without`) so
+   none of the collision participants can win the cache race.
+   On its face this is principled — those types have no useful
+   F# representation anyway, and `Cloudflare.Exports` /
+   `"cloudflare:pipelines".PipelineRecord` etc. are bag-of-
+   properties shapes whose typed value adds nothing over `obj`.
+   F# users consuming a Workers binding don't reach for
+   `WebAssembly.ModuleImports` as a typed value — they call
+   `WebAssembly.instantiate(env.MY_WASM, imports)` and treat the
+   result as opaque JS, same as the seven already-substituted
+   `WebAssembly.*` types.
+
+   The catch is heritage. The TS pattern
+
+   ```ts
+   interface IncomingRequestCfPropertiesBase
+     extends Record<string, unknown> { ... }
+   ```
+
+   currently emits `inherit WebAssembly.ModuleImports` (wrong path,
+   but a path). If the substitution table covers `Record` and the
+   WebAssembly aliases, the emission becomes `inherit obj` inside
+   an interface body — F# rejects with FS0887 ("'obj' is not
+   interface type"). So a surface fix at the substitution layer
+   trades FS0039 (this bucket) for FS0887 in heritage positions
+   for every `interface X extends Record<...>` in the SDK. That's
+   a different error category but not a smaller one — likely
+   ~66 sites move from FS0039 to FS0887.
+
+   The structurally correct emission for heritage of a Record-
+   shaped type would be **no heritage at all** plus an index
+   signature member on the inheriting interface, or alternatively
+   replacing the heritage with `inherit obj()` only when the
+   target is a class body (not an interface). Both of those are
+   generator-side decisions that depend on whether the inherit
+   target's resolved body is a TypeLiteral with only an index
+   signature — a structural test the generator can do today.
+
+   **Where this lands:** the encoder fix preserves the typar and
+   makes `Pick<T, K>`, `Record<K, V>`, `Omit<T, K>`, etc. resolve
+   to distinct interned bodies, which removes the cache-race
+   premise and lets each alias's own emission decision stand.
+   That's the clean fix. A generator-side band-aid would have to
+   handle the Record-in-heritage case alongside the substitution
+   to avoid FS0887 fallout. Worth flagging together so the encoder
+   fix doesn't get scoped narrowly to one bucket.
+
 ## Outstanding questions for review
 
 These are worth a look before more fixes land:
