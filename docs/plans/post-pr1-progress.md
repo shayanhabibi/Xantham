@@ -638,6 +638,43 @@ These are worth a look before more fixes land:
   promoted retroactively on second encounter," which has its own
   cascade risks.
 
+- **Vacuous-`obj` constraint drop — attempt and dead end.** The
+  agents FS0663 (206) and FS0698 (152) buckets are dominated by
+  the pattern `'Env :> AgentContext` where `AgentContext` resolved
+  through to `option<obj>` (via the chain `AgentContext` alias →
+  `DurableObjectState` → `Primitive Any`). F# rejects `'T :> obj`
+  / `'T :> obj option` both as sealed (FS0698) and as pinning the
+  typar to a single solution (FS0663). The fix shape is obvious:
+  detect a constraint that ultimately resolves to `obj` / `obj
+  option` and drop it — the typar still emits but unconstrained.
+
+  Attempted to apply the check in
+  [`Render.TypeParameter.fs:render`](../../src/Xantham.Generator/Generator/Render.TypeParameter.fs)
+  where the constraint exists as a Prelude `TypeRefRender` with
+  intrinsic-atom info. Tracing revealed the bypass: of 2112 typars
+  with constraints in the agents JSON, only 10 reach this function.
+  A similar trace on `Class.render` (which is supposed to call
+  `TypeParameter.render` for class typars) showed 0 invocations
+  despite 38 classes (with `AbstractClass` attribute) emitted in
+  the output. So the constraint-emission pathway for almost all
+  rendered typars bypasses `Class.render` / `TypeParameter.render`
+  entirely.
+
+  Where the typar constraints actually flow for the rendered output
+  is unclear without more tracing. Candidates:
+    * `RenderScope.Anchored.fs:700-720` (function exports' typars,
+      constructs `Anchored.TypeParameterRender` directly).
+    * `anchorTypeParameters` at line 73 (Transient) and line 258
+      (Concrete) — anchoring passes that consume a pre-existing
+      `TypeParameterRender`; the question is where the input came
+      from.
+    * A separate path for `[<Import>]`-flagged Interface/Class
+      bodies that may emit typars via a leaner direct construction
+      instead of going through `Render.TypeShapes` ↦ `TypeParameter`.
+
+  The fix is small once located. Documenting here so it can be
+  resumed without re-diagnosing the bypass.
+
 ## Reproduction
 
 From either repo:
