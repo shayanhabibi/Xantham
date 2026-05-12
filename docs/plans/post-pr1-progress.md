@@ -27,15 +27,23 @@ zero is a snapshot, not a finish line.
 Real, uncapped error counts (build with `/p:OtherFlags="--maxerrors:10000"`
 to defeat the F# compiler's default `--maxerrors:200` truncation).
 
-| SDK | Pre-PR1 baseline | Current | Δ |
-|---|---:|---:|---:|
-| dynamic-workflows | 18 | 6 | −12 |
-| workers-types | 1,376 | 408 | −968 |
-| agents | 3,932 | 1,498 | −2,434 |
-| **Total** | **5,326** | **1,912** | **−3,414 (−64%)** |
+| SDK | Pre-PR1 baseline | Pre-Literal-fix | Current | Δ vs baseline |
+|---|---:|---:|---:|---:|
+| dynamic-workflows | 18 | 6 | 6 | −12 |
+| workers-types | 1,376 | 408 | 401 | −975 |
+| agents | 3,932 | 1,498 | 1,537 | −2,395 |
+| **Total** | **5,326** | **1,912** | **1,944** | **−3,382 (−64%)** |
 
 The dominant remaining error code is FS0039 ("type or namespace not
-defined"); FS0033, FS0001, FS0663, FS0698, FS0887 round out the long tail.
+defined"); FS0001, FS0033, FS0663, FS0698, FS0887 round out the long tail.
+
+Note the "Pre-Literal-fix" column: the most recent commit
+(see *Synthetic inner-literal anchor* below) is a principled structural
+fix that trades ~290 FS0039 "not defined" errors for ~310 FS0001 latent
+type-mismatch errors that had been hiding behind the not-defined ones.
+Net total goes up by 32, but the underlying bug count is lower and the
+error picture is now honest — the FS0001s are real semantic issues that
+need a separate pass.
 
 ## What landed in `speakez-xantham` since PR #1 (6 commits)
 
@@ -123,6 +131,146 @@ declaration's `TypeKey` and the body's `TypeKey`.
 Also adds an `Enum` case to `tryLookupSubstitution` (currently unused at
 runtime, included for completeness).
 
+### Synthetic inner-literal anchor — graft `scope.PathContext` in the `Literal` branch
+
+The `ResolvedType.Literal` arm of `prerender` in `RenderScope.Prelude.fs`
+was producing the wrong root path for property-level single-literal
+types — the TS pattern `type: "image"` inside an inline record like:
+
+```ts
+{ type: "image"; data: string; mimeType: string; ... }
+```
+
+The encoder represents `"image"` as a singular `ResolvedType.Literal
+(TsLiteral.String "image")` (not wrapped in a `Union`), and the generator
+emits it as a one-case `[<StringEnum>] type Method = | [<CompiledName
+"image">] Image` — fine in isolation. The problem was *where* that
+one-case union got anchored. The two sibling branches did this
+correctly:
+
+* `ResolvedType.TypeLiteral` (the parent record case at line 564–580):
+  computes `rootPath = TransientPath.toTransientModulePath
+  scope.PathContext |> TransientTypePath.graft`. The graft pulls in
+  the parent's accumulated path including the property name
+  (`appendNameToPathContext` ran in `Property.render` before recursing).
+* `ResolvedType.Union` *LiteralLike* branch (line 246–268): same graft
+  when `path = Anchored`.
+
+The `ResolvedType.Literal` arm at line 319–332 instead used the bare
+`TransientTypePath.Anchored` for `Root`. That placeholder means
+"I am exactly the anchor" — so the inner literal got anchored at the
+parent record's path. Two distinct anchors collided at the same `TypePath`
+in `RootModule.collectModules`: the parent record `_Lit70` and the
+inner literal `_Lit70.Method`.
+
+In aggregate this manifested as 518+ FS0039 errors in agents
+(`'Type'` ×244, `'Code'` ×112, `'Method'` ×46, `'Item'` ×36,
+`'TypeName'` ×28, `'State'` ×26, `'Invoke'` ×26, plus tail entries).
+
+Fix: graft `scope.PathContext` in the `Literal` arm, identical to the
+TypeLiteral branch. Output now emits
+
+```fsharp
+module rec _Lit70 =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Method = | [<CompiledName("resources/templates/list")>] ResourcesTemplatesList
+```
+
+at `Agents.Agent._Lit70` (sibling of the parent record `type _Lit70`),
+which F# accepts because `type X` and `module rec X` coexist at the
+same scope.
+
+#### Empirical impact
+
+|  | Before fix | After fix | Δ |
+|---|---:|---:|---:|
+| FS0039 `'Type'` (agents) | 244 | 78 | −166 |
+| FS0039 `'Code'` (agents) | 112 | 34 | −78 |
+| FS0039 `'Method'` (agents) | 46 | 0 | −46 |
+| FS0039 (total, all three SDKs) | ~2,646 | ~2,346 | ~−300 |
+| FS0001 (agents) | 276 | 370 | +94 |
+| FS0698 (agents) | 120 | 146 | +26 |
+| Total errors (all three) | 1,912 | 1,944 | +32 |
+
+#### Why the net went up
+
+The fix is principled but exposes a latent layer that was hiding
+behind FS0039. Previously, every `_Lit70.Method` reference failed early
+with "type 'Method' is not defined" — F# stopped checking. With the
+type now defined, F# proceeds to type-check the *uses*, which surfaces
+real type-mismatch issues that have nothing to do with the inner-literal
+anchor itself. Two patterns dominate the FS0001 increase:
+
+* **Erased-union narrowing** — call sites where a `U18<…, _Lit7, …>`
+  value is passed to a parameter typed as a specific `_Lit7`. F# rejects
+  this even though `_Lit7` is one of the union's erased cases. The
+  generator emits the broader union somewhere upstream of where the
+  narrowed type is expected. Sample:
+
+  ```
+  The type 'U18<Agents.AddMcpServerOptions._Lit5, _Lit28, _Lit54,
+              _Lit56, _Lit64, _Lit66, _Lit68, _Lit69, _Lit70, _Lit71,
+              _Lit72, _Lit73, _Lit74, _Lit75, McpAgent._Lit63,
+              McpAgent._Lit65, McpAgent._Lit66, McpAgent._Lit69>'
+  is not compatible with the type 'Agents.AddMcpServerOptions._Lit7'
+  ```
+
+* **`Typescript.SubmitEvent._Lit*` path leak** — a separate path-
+  pruning bug where the `Typescript` parent prune doesn't fire on
+  member paths nested inside synthetic literals. Sample:
+
+  ```
+  The type 'AgentContext' is not compatible with the type
+  'Typescript.SubmitEvent._Lit1353'
+  ```
+
+Both are real generator bugs that were latent before this fix. The
+"+32" net is the cost of making them visible; the underlying bug
+count went down even though the surface count went up. The error
+picture is now honest — actionable categories instead of a wall of
+not-defined errors that all trace to one root cause.
+
+#### Why this took time to find
+
+Five investigative dead ends before the trace pointed at the right
+branch:
+
+1. *Map-collision in `interner.ExportMap`*: ruled out by direct
+   inspection of how the synthetic literals' ResolvedType reaches
+   the lookup site.
+2. *Cache-race on shared body identity*: that turned out to be a
+   different bug (pattern 4, the `Record<K, V>` collapse — encoder-
+   side).
+3. *Per-scope path-recomputation*: tried wrapping the cache-hit
+   branch in a per-call-site grafted path. Reverted as drift from
+   Shayan's design (one entry per `ResolvedType` in
+   `Choice<ResolvedType, ResolvedExport>`-keyed dictionary).
+4. *Iterate-all in synthetic emission*: regressed +424 errors.
+5. *Resolved-graph typar walking*: regressed +196 errors versus
+   atom-only walk.
+
+The break came from adding `eprintfn` traces at
+`anchorPreludeAnchorScope`'s Transient branch and at
+`Render.Transient.TypeLiteral.render` to confirm whether the inner
+literal was actually being registered with the parent's TypeStore.
+The traces showed two distinct scope IDs — the property's
+`appendNameToPathContext`-derived scope was registering correctly,
+but the *anchor* was reading a different scope. From there, examining
+which `ResolvedType` kind reached the anchor labeled with
+`agents.Agent._Lit70` revealed it was `Literal (Str …)` — not the
+record. Cross-referencing the prerender branch for `ResolvedType.Literal`
+against `ResolvedType.TypeLiteral` and `ResolvedType.Union LiteralLike`
+made the missing graft obvious.
+
+The Literal-arm omission is consistent with how rare single-literal
+property types are: most TS authors write `type: "image" | "audio"`
+(a Union LiteralLike) rather than `type: "image"` alone. The
+`agents` SDK happens to use single-literal property typing heavily
+through `@modelcontextprotocol/sdk`'s discriminated record shapes
+(`{ type: "image"; data: string; mimeType: string }` and friends),
+which is why this bucket showed up so prominently in agents and not
+in dynamic-workflows or workers-types.
+
 ## What landed in `Fidelity.CloudEdge/generators/xantham` since PR #1
 
 One substantive commit plus output regenerations.
@@ -175,25 +323,38 @@ This matches the boundary rule stated in the project notes: general
 TS→F# patterns belong in Xantham; only implementation-specific policy
 should live in a consumer.
 
-## Remaining FS0039 buckets (top 15, agents)
+## Remaining FS0039 buckets (top 15, agents — post Literal-anchor fix)
 
 ```
-244  'Type'
-112  'Code'
- 54  'JSONSchema'
+ 80  'Type'                   ← residual after Literal-anchor fix
+ 54  'JSONSchema'             ← declaration-merge (pattern 3)
  54  'CloudflareAgents.JsonSchemaTyped.Decoder.TestsFixturesAgentsNodeModulesJsonSchemaTypedDraft202012'
- 46  'Method'
- 36  'Item'
- 32  'Props'
- 28  'TypeName'
- 26  'State'
- 26  'Invoke'
- 22  'Optout'
+ 38  'Code'                   ← residual
+ 34  'Item'                   ← residual
+ 30  'Props'                  ← typar
+ 30  'Optout'                 ← inner literal (different position)
+ 28  'TypeName'               ← residual
+ 24  'Invoke'                 ← residual
  22  'Optin'
- 20  'SpecificationVersion'
- 20  '_Lit87'
+ 20  'Output'                 ← typar
+ 20  '_Lit87'                 ← path-navigation residual
  20  'Brand'
+ 18  'State'                  ← typar
+ 18  'Input'                  ← typar
 ```
+
+The `'Type'`, `'Code'`, `'Item'`, `'TypeName'`, `'Invoke'` residuals
+(~200 errors remaining out of the ~518 in this family pre-fix) are
+positions where the inner literal sits inside *nested* synthetic
+contexts (literal in array literal, literal in tuple literal, etc.)
+where the property-name graft alone isn't enough — the parent scope
+itself has a deeper transient context that needs a different anchor
+strategy. Worth a follow-up but smaller than the bucket pre-fix.
+
+In workers-types the top buckets are now dominated by pattern 4
+(`ModuleImports` ×134, `WebAssembly` ×134 — the `Record<K, V>`
+collapse, flagged below) and a separate `GetWithMetadata` ×28 leak
+in `IncomingRequestCfPropertiesTLSClientAuthPlaceholder`.
 
 Three patterns dominate:
 
@@ -206,14 +367,16 @@ Three patterns dominate:
    use site.
 
 2. **Path-navigation residuals** (synthetic `_Lit*` references like
-   `_Lit87`, `_Lit70`, plus `Method`, `Type`, `Item` properties of
-   inner literal scopes). References to interned synthetic literals
-   from call sites where the FIRST encounter's grafted path doesn't
-   navigate cleanly. Open question: does `scope.PathContext` accumulate
-   depth (member, parameter, etc.) that the docs' "transient resolution"
-   semantics doesn't expect to handle? The cached `TypeRefRender`
-   carries the first scope's grafted path, and anchoring against the
-   call-site anchor may not match the actual emission location.
+   `_Lit87`). After the Literal-anchor fix described above, the
+   `Method`/`Type`/`Code`/`Item` property bucket dropped from ~518 to
+   ~200. The remaining ~200 are positions where the inner literal sits
+   inside *nested* synthetic contexts (literal-in-array, literal-in-tuple,
+   nested-inline-shape) where the property-name graft alone isn't
+   enough — the parent scope itself has a deeper transient context
+   that needs a different anchor strategy. The encoder's deduplication
+   of structurally-identical inner literals across distinct outer
+   contexts is also a factor (one resolved-type entry winning the
+   render cache for several call sites).
 
 3. **Declaration-merged augmentations across packages**
    (`JSONSchema`, `StandardSchemaV1`, `ZodType` — module-shaped references

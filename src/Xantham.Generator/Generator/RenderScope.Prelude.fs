@@ -319,15 +319,18 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
     | ResolvedType.Literal tsLiteral ->
         let path = TransientTypePath.Anchored
         let ref = RenderScopeStore.TypeRefRender.create scope resolvedType false path
-        let scope = RenderScopeStore.create()
+        let rootPath =
+            TransientPath.toTransientModulePath scope.PathContext
+            |> TransientTypePath.graft
+        let childScope = RenderScopeStore.create()
         {
             RenderScope.Type = resolvedType
-            Root = path |> TypeLikePath.create |> ValueSome
+            Root = rootPath |> TypeLikePath.create |> ValueSome
             TypeRef = ref
             Render =
-                lazy Literal.render ctx scope tsLiteral
+                lazy Literal.render ctx childScope tsLiteral
                 |> Render.create ref
-            TransientChildren = ValueSome scope
+            TransientChildren = ValueSome childScope
         }
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.IndexedAccess indexAccessType ->
