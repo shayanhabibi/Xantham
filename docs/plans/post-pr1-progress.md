@@ -483,12 +483,66 @@ These are worth a look before more fixes land:
   or a sign the property-scope graft is over-applying? Bears on the
   path-navigation residuals bucket.
 
-- **Map vs MultiMap for `interner.ExportMap`.** Several
-  declaration-merge cases (lib.dom `Request` augmented by
-  workers-types, JSONSchema-typed augmentations across packages) hit
-  a Source-bucket collision. A naive flip to a multi-map cascaded
-  +424 errors when tried in isolation; presumably consumers expect
-  one entry per Source.
+- **Map vs MultiMap for `interner.ExportMap`.** This is the largest
+  single structural issue we've identified that we don't have a
+  clean fix for. `interner.ExportMap : Map<Xantham.Source,
+  LazyResolvedExport>` is built via `Map.ofSeq` from
+  `(metadata.Source, export)` pairs at
+  [`Arena.Interner.fs:989–1002`](../../src/Xantham.Decoder/Types/Arena.Interner.fs#L989-L1002).
+  Duplicate Source keys collapse to one entry (last wins). For
+  packages where many exports share one Source bucket
+  (e.g. `zod/v3/types.d.ts`: **71 exports → 1 surviving entry**),
+  70 exports are silently dropped before the generator ever sees
+  them. The generator's `processExports` iterates `ExportMap`, so
+  dropped exports never get rendered. References to those types
+  then fail with FS0033 (their original typar arity doesn't match
+  the surviving export's arity, or there's no top-level type at the
+  expected module path at all).
+
+  Concrete data: 104 FS0033 errors in agents reference
+  `Zod.Decoder.TestsFixturesAgentsNodeModulesZodV3Types.ZodType<a,b,c>`
+  — the V3 ZodType class (3 typars, 44 members in the encoder JSON)
+  isn't emitted because it shares a Source bucket with another V3
+  export that won the `Map.ofSeq` last-wins race.
+
+  Two attempted generator-side mitigations both regressed:
+
+  1. **Full iterate-all** — replace `Map.iter ExportMap` with
+     `Seq.iter ResolvedExports`. Workers-types −42, agents +178,
+     net **+136**. The agents regression is from newly-rendered
+     types whose inner literals cascade FS0039 (the supplemented
+     exports hit the inner-literal emission bug we partially fixed
+     in `RenderScope.Prelude.fs`'s Literal arm — but the same bug
+     exists in `Interface` and `Class` bodies that the supplement
+     unmasks).
+  2. **Two-pass supplement** — keep `Map.iter ExportMap` first,
+     then `Seq.iter ResolvedExports` skipping anything already in
+     `AnchorRenders`. Workers-types −47, agents +48, net **+1**.
+     Cleaner than iterate-all but agents still regresses on the
+     same cascade — supplementary exports emit `type Interface = ...`
+     without companion `module rec Interface` for their inner string-
+     unions (`UnevaluatedProperties`, `PrefixItems`, …), so refs to
+     `Interface.UnevaluatedProperties` etc. fail FS0039.
+
+  Both attempts share the same shape of failure: making the dropped
+  exports visible exposes inner-literal anchor bugs in the rendering
+  of Interface/Class bodies that the Literal-arm fix didn't cover.
+  A clean fix needs either:
+    * `ExportMap` becomes `Map<Source, LazyResolvedExport list>`
+      (multi-map) AND the inner-literal anchor pass is extended to
+      handle string-union literals on Interface/Class bodies (not
+      just TypeLiteral records), OR
+    * The Source key for the Map is finer-grained — e.g.
+      `Source * Name` — so each export gets its own bucket without
+      changing the Map's cardinality semantics.
+
+  Recording for design input: which way should the model go? The
+  `Source` DU as currently shaped seems to imply "one Source per
+  module" which is true at the module level but not at the export
+  level. The fact that `Source.Package` carries a
+  `ResolvedExportCollection` (with `Canonical` and `Aliases`) hints
+  that each export was meant to carry its own bucket — but the
+  `Map.ofSeq` step loses that intent.
 
 - **`TypeAlias` identity in `ResolvedType`.** The lib.es alias
   substitution had to be done at `prerenderTypeAliases` because
