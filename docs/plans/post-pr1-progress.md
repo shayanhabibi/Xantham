@@ -222,6 +222,41 @@ Three patterns dominate:
    (multiple exports sharing a `Source` bucket) suspected; a previous
    iterate-all attempt regressed by +424 cascade and was reverted.
 
+4. **`Record<K, V>` body collapse** (workers-types: 132 `'ModuleImports'`
+   + 132 `'CloudflareWorkersTypes.Cloudflare.WorkersTypes.WebAssembly'`
+   = ~66 unique sites; also tied to several `'Type'`/`'Item'` bucket
+   entries). The encoder's mapped-type expansion drops the value-type
+   typar — `Record<string, ImportValue>`, `Record<string, unknown>`,
+   `Record<string, T>` for any `T` all resolve to body
+   `{[key: string]: any}` (Type field `-7`). The decoder's
+   reference-equality interning then merges those bodies into a single
+   `ResolvedType`. 19+ TypeAlias declarations end up sharing one body
+   identity in workers-types alone:
+
+   ```
+   Pick, Record, Partial, Omit, Readonly, Without,
+   Cloudflare.Exports, WebAssembly.{Exports,Imports,ModuleImports}
+   (with declaration-merge duplicates),
+   PublicKeyCredentialClientCapabilities,
+   "cloudflare:pipelines".PipelineRecord, Params,
+   FlagshipEvaluationContext, AiModelListType
+   ```
+
+   When the generator caches a `TypeRefRender` for the shared
+   `ResolvedType` (during prerender of the first alias's body), every
+   anonymous `Record<string, X>` reference site cache-hits and emits
+   the cached path. `WebAssembly.ModuleImports` happens to win the
+   cache race, so e.g. `interface IncomingRequestCfPropertiesBase
+   extends Record<string, unknown>` lands as
+   `inherit WebAssembly.ModuleImports`.
+
+   **Fix surface:** encoder-side. The mapped-type expansion in the
+   Xantham.Fable encoder needs to preserve the value-type slot
+   (`Type: 39139` for `ImportValue`, not `Type: -7` for `any`).
+   Generator-side mitigations exist (refuse to cache shared-body
+   aliases; emit `obj` on collision) but each papers over the
+   encoder issue rather than fixing it.
+
 ## Outstanding questions for review
 
 These are worth a look before more fixes land:
