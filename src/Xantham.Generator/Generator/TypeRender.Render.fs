@@ -387,11 +387,17 @@ module TypeParameterRender =
             ValueNone
         
     let renderTypeParametersIntoPostfixList (ctx: GeneratorContext) (typeParameters: TypeParameterRender list) =
+        // foldBack with cons preserves the typar declaration order. The
+        // earlier `List.fold (fun acc x -> x :: acc)` form silently reversed
+        // the list, emitting `<'Internals, 'I, 'O>` for a TS source that
+        // declared `<O, I, Internals>` — type arguments at call sites then
+        // landed in the wrong slots, producing FS0001 type-mismatch cascades.
         typeParameters
-        |> List.fold (fun (decls, constraints) -> renderTypeParameter ctx >> function
+        |> List.foldBack (fun typeParameter (decls, constraints) ->
+            match renderTypeParameter ctx typeParameter with
             | decl, ValueSome typarConstraint -> decl :: decls, typarConstraint :: constraints
             | decl, ValueNone -> decl :: decls, constraints
-            ) ([], [])
+            ) <| ([], [])
         |> Ast.PostfixList
         
     // rendering as typar
