@@ -317,6 +317,123 @@ bugs interacting:
   new scope's TypeStore, with the OLD scope's grafted form — so the
   inner literal anchors at the wrong path.
 
+### Deeper dive: encoder shares one Union ResolvedType across all the failing properties
+
+Inspecting `Interface`'s body TypeLiteral (encoded TypeKey 47870) in
+`agents.json`:
+
+```
+propertyNames:           TypeKey=47981 kind=Union
+unevaluatedItems:        TypeKey=47981 kind=Union  (same!)
+unevaluatedProperties:   TypeKey=47981 kind=Union  (same!)
+```
+
+All three properties resolve to the **same** Union 47981, which has
+three elements: `Literal(18)` = `false`, `Literal(20)` = `true`,
+`TypeLiteral(47980)` = the JSONSchema body. That is, the TS source
+shape is `boolean | JSONSchema` for each property — the literal
+strings `"unevaluatedProperties"` etc. don't appear at the type
+level. Whatever's named `Interface.UnevaluatedProperties` in the
+F# output is the **boolean sub-Union** wrapped as a string-enum,
+which the generator names per-property.
+
+That naming happens at line 269-284 of
+`Generator/RenderScope.Prelude.fs` (the "mixed Union" branch — Union
+with literals + others). It creates a fresh `ResolvedType.Union`
+containing just the literal-like elements, wraps it in
+`LazyContainer.CreateTypeKeyDummy<ResolvedType>` (note: NEW
+ResolvedType value, NOT shared with the parent Union — so each
+property's mixed-Union processing creates its own sub-Union value).
+The sub-Union goes through the LiteralLike branch (line 217+) with
+`lazyResolvedType.Raw = DummyTypeKey`, which sets
+`path = AnchoredAndMoored "Literals"`.
+
+`createTransientPath` (`Types/RenderScope.Prelude.fs:295`) then
+grafts the property's PathContext onto the leaf, producing a stored
+path of `Moored(<PropertyName>, "Literals")` — TWO segments. The
+TypeRef registered in scope.TypeStore points at this two-segment
+path.
+
+But `renderUnionLiterals` (`Render.Transient.fs:89`) sets
+`Metadata.Path = TransientTypePath.Anchored` (bare) and
+`Name = ValueNone`. After anchoring, the body's emission location is
+the **parent's path itself** (bare Anchored anchors to the anchor's
+own TypePath). The Name fallback in `anchorTypeDefn` then reads the
+parent's leaf as the type Name.
+
+### The shape of the mismatch
+
+| | Reference (use site) | Emission (body location) |
+|---|---|---|
+| Stored path | `Moored(<PropertyName>, "Literals")` (2-seg) | (none on `LiteralUnionRender`) |
+| Anchored against `<parent>.Interface` | `<parent>.Interface.<PropertyName>.Literals` | `<parent>.Interface` (collision with parent record) |
+| F# output | `Interface.<PropertyName>` after localise drops the trailing `.Literals` | parent record wins the path; sub-Union body never emits |
+
+So references say `Interface.UnevaluatedProperties` (with the
+`.Literals` segment somehow stripped by the localise pass), and the
+body never emits anywhere — FS0039.
+
+### Attempted fix (reverted)
+
+Tried adding the same `scopedPath` derivation
+(`TransientPath.toTransientModulePath scopeStore.PathContext |> TransientTypePath.graft`)
+to `renderUnionLiterals` that `Members.renderFromMembersAndFunctions`
+already uses for TypeLikeRender. Hypothesis: align the body's
+emission location with the TypeRef's stored path.
+
+Result: massive regression. **Total errors 1,836 → 2,358 (+522)**.
+- workers-types: 370 → 639 (+269)
+- agents: 1,460 → 1,713 (+253)
+- 82 new FS0037 (Duplicate definition of type) errors across both SDKs
+
+The fix double-grafts: `createTransientPath` already grafts
+`scope.PathContext` into the TypeStore-stored path. Adding the same
+graft to the LiteralUnionRender's Metadata.Path produces a body whose
+anchored emission location matches `<PropertyName>` (single segment)
+— but the TypeRef expects `<PropertyName>.Literals` (two segments).
+Three properties referencing the same shared Union 47981 (whose
+mixed-branch path-creation runs once via cache-hit, then re-runs
+fresh per property) end up trying to emit three distinct sub-Unions
+all at `<parent>.UnevaluatedProperties`, `<parent>.UnevaluatedItems`,
+`<parent>.PropertyNames` — but at the EMISSION level, multiple
+ResolvedTypes resolved through to the same identity in some cases,
+triggering FS0037.
+
+### What the right fix needs to do
+
+The root cause is the asymmetric handling of `scope.PathContext`:
+
+1. `createTransientPath` (TypeRef registration) **grafts** scope.PathContext into the stored path
+2. `renderUnionLiterals` (body emission) uses bare `Anchored` — **doesn't graft**
+3. `Members.renderFromMembersAndFunctions` (TypeLikeRender body emission) **grafts** scope.PathContext
+
+So (1) and (3) graft; (2) doesn't. To fix (2), either:
+
+* Make (2) graft AND change (1) so the leaf `"Literals"` isn't
+  appended (because the property-name from PathContext already
+  captures the identity — no need to suffix `.Literals`). Path in
+  TypeStore becomes single-segment matching what (2) would produce.
+* OR — leave (2) and (1) unchanged but change the LiteralUnionRender
+  emission to recognize "I'm at bare Anchored, my actual location is
+  on the TypeRef's stored path." This needs a way to read the
+  stored path from `scope.TypeStore[resolvedType]` at render time
+  and use it as the Metadata.Path. The render is in a `lazy` so the
+  TypeStore is fully populated by then — feasible.
+* OR — restructure the "mixed Union" branch so the sub-Union doesn't
+  need its own emitted type. Could emit the booleans as a `U2<bool>`
+  erased union inline at each call site, avoiding the named type
+  entirely.
+
+The third option is structurally simplest but changes the output's
+F# shape (no more `Interface.UnevaluatedProperties` type — just
+`option<U3<bool, JSONSchema, …>>` or similar). The first option
+requires refactoring `createTransientPath` for the AnchoredAndMoored
+case. The second option adds a TypeStore lookup to the LiteralUnion
+render path.
+
+This investigation didn't land a fix. Worth picking up next session
+with one of the three approaches.
+
 ### Sibling cascade buckets
 
 The same pattern likely drives the other "new" buckets:
