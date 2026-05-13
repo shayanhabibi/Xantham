@@ -11,12 +11,12 @@
 
 # Baseline (post-PR2 era)
 
-| SDK | Pre-PR1 baseline | End of PR1 era | Post-PR2 | After bool-collapse | After path-keyed-anchors | After any/unknown-constraint-drop | Δ vs baseline |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| dynamic-workflows | 18 | 6 | 6 | 6 | 6 | 6 | −12 |
-| workers-types | 1,376 | 401 | 370 | 352 | 358 | 358 | −1,018 |
-| agents | 3,932 | 1,460¹ | 1,460 | 1,417 | 1,407 | 1,405 | −2,527 |
-| **Total** | **5,326** | **1,867** | **1,836** | **1,775** | **1,771** | **1,769** | **−3,557 (−67%)** |
+| SDK | Pre-PR1 baseline | End of PR1 era | Post-PR2 | After bool-collapse | After path-keyed-anchors | After any/unknown-constraint-drop | After visited-pair-keying | After empty-string-collapse | Δ vs baseline |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| dynamic-workflows | 18 | 6 | 6 | 6 | 6 | 6 | 6 | 6 | −12 |
+| workers-types | 1,376 | 401 | 370 | 352 | 358 | 358 | 354 | 337 | −1,039 |
+| agents | 3,932 | 1,460¹ | 1,460 | 1,417 | 1,407 | 1,405 | 1,314 | 1,314 | −2,618 |
+| **Total** | **5,326** | **1,867** | **1,836** | **1,775** | **1,771** | **1,769** | **1,674** | **1,657** | **−3,669 (−69%)** |
 
 ¹ End-of-PR1-era agents count was 1,441 (per post-pr1-progress.md). The
 1,460 post-PR2 number reflects the cascade Shayan predicted: previously-
@@ -40,6 +40,30 @@ The "After any/unknown-constraint-drop" column reflects dropping
 `Primitive Any`/`Unknown` (TS encoder collapsing TS `any`/`unknown`
 or alias chains bottoming at those primitives). Net −2 from
 path-keyed-anchors, −98 from end of PR1.
+
+The "After visited-pair-keying" column reflects fixing the cycle-
+prevention tracker introduced with path-keyed-anchors. The initial
+`HashSet<ResolvedType>` was too aggressive — it prevented the same
+shared literal from being processed at *different* anchorPaths,
+defeating the path-keyed dict's purpose. Re-keyed to
+`HashSet<ResolvedType * AnchorPath>` so cycles are caught (same rt
+at same parent) but multi-parent emissions proceed. Net **−95
+from any/unknown-constraint-drop, −193 from end of PR1**. This is
+where the path-keyed-anchors refactor's intended impact actually
+shows up.
+
+The "After empty-string-collapse" column reflects redirecting the
+`ResolvedType.Literal (TsLiteral.String "")` arm to the `String`
+primitive prerender. The empty-string literal is structurally
+indistinguishable from `string` and carries no useful constraint — TS
+uses it as a placeholder default (lib.dom's
+`IncomingRequestCfPropertiesTLSClientAuthPlaceholder` types 16 cert
+fields as `""`). The encoder interns one shared `Literal (String "")`
+and the downstream path-assignment first-wins on `TryAdd(rt, path)`,
+so only one of 16 fields' anchored types ever emitted. Collapsing
+the literal to the primitive eliminates the synthesis entirely;
+each property's reference resolves to bare `string`. Net **−17 from
+visited-pair-keying, −210 from end of PR1**.
 
 # What PR #2 brought in (Shayan)
 
@@ -296,6 +320,142 @@ constraint":
 
 The narrower variant is a follow-up. Diff stayed clean on the
 revert; no code changes from this attempt landed.
+
+## `<visited-pair-keying>` — fix cycle-prevention tracker to allow per-anchor emissions
+
+The path-keyed-anchors refactor was supposed to enable a single
+shared `ResolvedType` (e.g. the literal `"object"` used as a TS
+discriminator across many JSON Schema variants) to emit at distinct
+paths — one under each parent that references it. The dict became
+`Dictionary<TypePath, Render>` exactly so paths could differ.
+
+But the cycle-prevention tracker I added alongside the refactor was
+`HashSet<ResolvedType>`, keyed only by ResolvedType. The recursion's
+guard `if visited.Add resolvedType then ... else skip` meant the
+SECOND parent's recursion would silently skip the shared literal —
+defeating the entire point of switching to path-keyed. The earlier
+modest +/-4 result reflected this self-defeating behavior.
+
+The fix: re-key the visited tracker by `(ResolvedType, AnchorPath)`.
+Same `(rt, parent)` pair still terminates cycles. Different parents
+of the same rt → process again, anchor at the new parent's
+location. Path-keyed dict accepts the second entry (different path)
+and the body emits at both locations.
+
+```fsharp
+let rec anchor
+    (ctx: GeneratorContext)
+    (visited: HashSet<ResolvedType * AnchorPath>)
+    anchors anchorPath resolvedType =
+    if visited.Add (resolvedType, anchorPath) then
+        GeneratorContext.Prelude.tryGet ctx resolvedType
+        |> ValueOption.iter (anchorPreludeAnchorScope ctx visited
+                              (Some anchors) anchorPath resolvedType-renderScope)
+```
+
+`HashSet<ResolvedType * AnchorPath>` uses F#'s default tuple equality
+(combines each side). `ResolvedType` is `[<ReferenceEquality>]`,
+`AnchorPath` is a structural DU — the combined hash works
+correctly for set membership.
+
+**Empirical impact:**
+
+| | Pre-fix | Post-fix | Δ |
+|---|---:|---:|---:|
+| FS0039 agents | 1,770 | 1,610 | **−160** |
+| FS0033 agents | 348 | 266 | **−82** |
+| FS0001 agents | 134 | 168 | +34 |
+| **agents** | **1,405** | **1,314** | **−91** |
+| FS0039 workers-types | 506 | 498 | −8 |
+| **workers-types** | **358** | **354** | **−4** |
+| **Total** | **1,769** | **1,674** | **−95** |
+
+Top FS0039 bucket changes in agents:
+- `'Type' ×82 → 38` (−44)
+- `'Brand' ×20 → 0` (cleared)
+- `'StringIterator' ×16 → 0` (cleared)
+- `'State' ×26 → 12` (−14)
+- `'_Lit85' ×20 → 0` (cleared)
+- `'Code' ×48 → 42` (−6)
+
+The FS0001 +34 is type-mismatch errors newly exposed where the
+previously-missing inner type now resolves, but its actual shape
+doesn't match expected at the use site (the predicted layered
+cascade Shayan flagged in PR #2's progress note).
+
+178 generator tests pass.
+
+This is what the path-keyed-anchors refactor was always supposed
+to do — the previous +/-4 result was an unintended self-block from
+my over-aggressive cycle guard.
+
+## `<empty-string-collapse>` — collapse `""` literal to `string` primitive
+
+`src/Xantham.Generator/Generator/RenderScope.Prelude.fs:348`. The
+`ResolvedType.Literal (TsLiteral.String "")` arm now redirects to
+the `String` primitive prerender instead of producing a synthesized
+single-case StringEnum:
+
+```fsharp
+| ResolvedType.Literal (TsLiteral.String "") ->
+    ResolvedType.Primitive TypeKindPrimitive.String
+    |> LazyContainer.CreateFromValue
+    |> prerender ctx scope
+    |> RenderScope.createRootless resolvedType
+    |> addOrReplaceScope ctx resolvedType
+```
+
+**Why this fix and not a broader interning fix.** The encoder
+interns one shared `ResolvedType.Literal (String "")` across every
+TS site that types a property as `""`. Downstream, the path-assignment
+pre-pass writes into `scope.TypeStore` via `TryAdd(resolvedType, path)`
+— first-wins. For the lib.dom `IncomingRequestCfPropertiesTLSClientAuthPlaceholder`
+interface (16 of 17 cert fields typed `""`), this meant 15 of 16
+property-derived anchored types were silently dropped; their
+references (`CertNotAfter`, `CertFingerprintSHA256`, …) dangled
+and produced 16 FS0039 errors per consumer of the type. Workers-types,
+agents (via re-export), and dynamic-workflows all paid.
+
+The right fix at the storage layer would be either (a) keying
+`TypeStore` by `(rt, path)` so all 16 paths survive interning, or
+(b) emitting one canonical type and having all 16 properties
+reference it. (a) is structurally invasive — `TypeStore` is read by
+many downstream renderers that assume the rt-key invariant —
+and (b) requires reworking the property-name-derived path
+assignment. Neither is local. But the *semantic* observation is
+that `""` is a vacuous constraint: a property typed "must always
+be the empty string" is just `string` from a binding consumer's
+perspective — the value-shape doesn't constrain anything useful.
+Collapsing at the Literal-arm sidesteps the entire interning-vs-
+multiplicity problem because there's nothing left to dedup.
+
+Narrower than collapsing all string literals: `"NONE"`, `"0"`,
+`"json"`, `"json-schema-typed"` etc. all encode meaningful value
+constraints (sentinel return values, discriminator tags). Those
+remain as single-case StringEnums.
+
+**Empirical impact:**
+
+| | Pre-fix | Post-fix | Δ |
+|---|---:|---:|---:|
+| workers-types | 354 | 337 | **−17** |
+| agents | 1,314 | 1,314 | 0 |
+| dynamic-workflows | 6 | 6 | 0 |
+| **Total** | **1,674** | **1,657** | **−17** |
+
+All 16 TLS placeholder properties (`certNotAfter`, `certNotBefore`,
+`certFingerprintSHA256`, `certFingerprintSHA1`, `certIssuerSKI`,
+`certSKI`, `certIssuerSerial`, `certSerial`, `certSubjectDNLegacy`,
+`certIssuerDNLegacy`, `certSubjectDNRFC2253`, `certIssuerDNRFC2253`,
+`certSubjectDN`, `certIssuerDN`, `certSubjectDN`, …) now emit as
+`abstract certX: string with get, set`. The remaining 2 in that
+interface (`certRevoked: "0"` and `certPresented: "0"`) are
+exhibiting the same pattern under a `"0"` literal — `certRevoked`
+still dangles. That's a smaller bucket and would need either the
+storage-layer fix above or a different surgical move (e.g. a
+property-aliasing pass) — out of scope for this fix.
+
+178 generator tests pass.
 
 ## `<bool-collapse>` — collapse boolean-only literal sub-Union to F# `bool`
 

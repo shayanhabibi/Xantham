@@ -345,6 +345,29 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 TransientChildren = ValueSome childScope
             }
             |> addOrReplaceScope ctx resolvedType
+    | ResolvedType.Literal (TsLiteral.String "") ->
+        // The empty-string literal `""` is structurally just F# `string`.
+        // It carries no semantic constraint — TS uses it as a placeholder
+        // default (e.g. lib.dom's TLSClientAuthPlaceholder: 16 cert fields
+        // all typed `""`). Collapse to the primitive so each property
+        // emits as `string` directly.
+        //
+        // Without this collapse, the encoder interns one shared
+        // `ResolvedType.Literal (String "")` across all 16 sites, the
+        // SyntheticPath/TransientStore TryAdd dedups by ResolvedType
+        // (first wins), and only one of the 16 anchored types gets emitted
+        // under `IncomingRequestCfPropertiesTLSClientAuthPlaceholder.*`.
+        // The remaining 15 references (`CertNotAfter`, `CertNotBefore`, ...)
+        // dangle and produce FS0039.
+        //
+        // Non-empty string literals like `"NONE"`, `"0"` remain as
+        // single-case StringEnums — they encode a real value constraint.
+        // Only `""` is unambiguously vacuous.
+        ResolvedType.Primitive TypeKindPrimitive.String
+        |> LazyContainer.CreateFromValue
+        |> prerender ctx scope
+        |> RenderScope.createRootless resolvedType
+        |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Literal tsLiteral ->
         let path = TransientTypePath.Anchored
         let ref = RenderScopeStore.TypeRefRender.create scope resolvedType false path

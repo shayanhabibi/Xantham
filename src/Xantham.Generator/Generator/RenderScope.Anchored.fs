@@ -439,17 +439,23 @@ let inline addOrReplace (ctx: GeneratorContext) (key: ResolvedType) (value: Choi
     
 
 // Cycle prevention: the `anchor` recursion can reach the same
-// `ResolvedType` through different paths within one export. Without
-// a separate visited tracker, removing the `anchors.ContainsKey` filter
-// (now that `anchors` is path-keyed rather than ResolvedType-keyed)
-// would let cyclic types (A → B → A) loop. The HashSet is allocated
-// fresh per top-level anchor pass and shared down the recursion.
-let rec anchor (ctx: GeneratorContext) (visited: HashSet<ResolvedType>) anchors anchorPath resolvedType =
-    if visited.Add resolvedType then
+// `ResolvedType` through different paths within one export. The
+// visited tracker is keyed by `(ResolvedType, AnchorPath)` pairs
+// rather than just `ResolvedType`, so the same literal reached
+// from distinct parents within one export emits at distinct
+// anchored paths. Same `(rt, parent)` pair is still skipped to
+// stop cycles (A → B → A would otherwise loop).
+//
+// The HashSet uses `HashIdentity.Structural` because `AnchorPath`
+// is a structural-equality DU; pairing it with a reference-eq
+// `ResolvedType` works because F#'s tuple equality combines
+// both sides' equality.
+let rec anchor (ctx: GeneratorContext) (visited: HashSet<ResolvedType * AnchorPath>) anchors anchorPath resolvedType =
+    if visited.Add (resolvedType, anchorPath) then
         GeneratorContext.Prelude.tryGet ctx resolvedType
         |> ValueOption.iter (anchorPreludeAnchorScope ctx visited (Some anchors) anchorPath)
 
-and anchorPreludeAnchorScope (ctx: GeneratorContext) (visited: HashSet<ResolvedType>) anchors anchorPath renderScope =
+and anchorPreludeAnchorScope (ctx: GeneratorContext) (visited: HashSet<ResolvedType * AnchorPath>) anchors anchorPath renderScope =
     let anchors = defaultArg anchors (Dictionary<TypePath, Render>())
     match renderScope with
     | { Root = ValueSome (TypeLikePath.Anchored path); Render = Render.Concrete(renderTuple); TransientChildren = ValueSome transientChildren } ->
@@ -503,7 +509,7 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) (visited: HashSet<ResolvedT
         printfn $"Bad scope: %A{badScope}"
 and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: RenderScopeStore) =
     let anchors = Dictionary<TypePath, Render>()
-    let visited = HashSet<ResolvedType>(HashIdentity.Reference)
+    let visited = HashSet<ResolvedType * AnchorPath>()
     let anchorPath = Interceptors.pipeExport ctx export
     renderScopeStore.TypeStore
     |> Seq.iter (fun (KeyValue(key, _)) ->
