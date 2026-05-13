@@ -1,5 +1,12 @@
 module Fixture
 
+// FS1104: Identifiers containing '@' are reserved for code generation.
+// Suppressed because EasyBuild.FileSystemProvider exposes real npm
+// scope directories (`@types`, `@cloudflare`) as F# identifiers, and
+// those scope prefixes are structural — renaming would break the
+// mapping to actual filesystem paths.
+#nowarn "1104"
+
 open EasyBuild.FileSystemProvider
 open Expecto
 open Fake.Core

@@ -1,7 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
+        <!-- Library (was Exe). Decoder is referenced as a library by
+             Xantham.Generator and Xantham.Decoder.Tests; there is no
+             entry point in Runtime.fs (just library functions). The
+             prior Exe setting triggered FS0988 "Main module of program
+             is empty: nothing will happen when it is run." -->
+        <OutputType>Library</OutputType>
         <TargetFramework>net10.0</TargetFramework>
         <RootNamespace>Xantham.Decoder</RootNamespace>
     </PropertyGroup>

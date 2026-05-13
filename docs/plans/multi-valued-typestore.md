@@ -363,7 +363,22 @@ For multi-emission to work without breaking cycle detection:
 
 - `'SuperRefine'`/`'Prefault'`/`'Pipe'`/`'Overwrite'`/`'Catch'` and
   similar Zod V4 method-parameter brand types: separate generation
-  fix needed (not addressable via multi-emission).
+  fix needed (not addressable via multi-emission). **Forensic
+  finding (investigated and notated for Shayan, not fixed in this
+  pass):** the references come from Zod V4's
+  `$ZodBranded<T, Brand extends string | number | symbol>`
+  (`node_modules/zod/v4/core/core.d.ts:25`). The second typar is
+  literally named `Brand`. When this alias's body is unfolded
+  through `core.$ZodBranded<this, T>` in the `brand()` method's
+  return type, the resulting synthetic gets named `Brand` (from the
+  typar) and references to it inside its own body resolve as
+  `Brand.<member>` — but the synthesised member types (`_input`,
+  `_output`, `_def`, `Type`, `Def`, etc.) are emitted as SIBLINGS
+  of the `Brand` type rather than INSIDE a `Brand` module. The
+  multi-emission cleanup (this branch) makes the `Brand.X.Y` pattern
+  visible by clearing the conflating buckets that were masking it;
+  the categorical fix is a separate investigation in encoder/typar-
+  rendering territory.
 - `'KVNamespace.GetWithMetadata.Options'`-style `TypeLiteral`
   synthetics shared across method overloads: needs either an
   expansion of `SyntheticPathAssignment` to handle method-overload

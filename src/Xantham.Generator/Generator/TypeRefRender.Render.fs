@@ -90,6 +90,11 @@ module private Implementation =
                 TypePath.flatten path
                 |> List.map Name.Case.valueOrModified
                 |> Ast.LongIdent
+            | Anchored.TypeRefAtom.Intrinsic s ->
+                // An intrinsic name (e.g. "obj", "string") renders as a
+                // bare long identifier — matches the sibling `localise`
+                // function in `Types/RenderScope.Anchored.fs`.
+                Ast.LongIdent s
         let rec renderMolecule (molecule: Anchored.TypeRefMolecule) =
             match molecule with
             | Anchored.TypeRefMolecule.Function([], returnType) ->

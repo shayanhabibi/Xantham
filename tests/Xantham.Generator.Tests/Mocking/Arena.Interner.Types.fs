@@ -1,5 +1,20 @@
 ﻿module Mocking.ArenaInterner
 
+// FS0044: deprecation warnings for `IsLibEs` record field. The field is
+// marked `[<Obsolete "Match against the Source field instead.">]` on
+// Interface, Class, Enum, TypeAlias and similar records in
+// `Xantham.Decoder.ArenaInterner`. Test mocks still need to set it
+// because it's a required field on the record — the obsolete annotation
+// is informational pending eventual removal. Suppress here rather than
+// duplicating the annotation explanation at every record construction.
+//
+// FS0040: recursive-object initialization warning for the `subModuleLazy`/
+// `packageLazy` cycle below. The cycle is structurally required to model
+// the bidirectional `SubModule ⇄ Package` relationship and is broken by
+// the `Lazy` wrappers so initialization-soundness is preserved at use.
+#nowarn "44"
+#nowarn "40"
+
 open Xantham
 open Xantham.Decoder
 open Xantham.Decoder.ArenaInterner
