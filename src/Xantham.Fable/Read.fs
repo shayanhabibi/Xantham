@@ -329,10 +329,24 @@ module Internal =
         tagPrimitives reader
 
     let getAndPrepareExports (reader: TypeScriptReader) =
-        reader
-        |> _.program.getSourceFile(reader.tempFilePath)
-        |> Option.defaultWith (fun () -> failwith $"Could not find source file {reader.tempFilePath}.")
-        |> getDeclarations reader
+        reader.entryFiles
+        |> Array.collect (fun entryFile ->
+            reader.program.getSourceFile entryFile
+            |> Option.orElseWith (fun () ->
+                reader.program.getSourceFiles().AsArray
+                |> Array.tryFind _.fileName.EndsWith(entryFile)
+                )
+            |> Option.orElseWith(fun () ->
+                reader.program.getSourceFiles().AsArray
+                |> Array.tryFind (
+                    reader.CreateSourceTagValue
+                    >> _.PackageName
+                    >> ValueOption.exists (fun name -> (=) entryFile name || name.StartsWith(entryFile))
+                    )
+                )
+            |> Option.defaultWith (fun () -> failwith $"Could not find source files and declarations for {entryFile}.")
+            |> getDeclarations reader
+        )
         |> Array.apply (pushToStack reader)
 
     let runReader (reader: TypeScriptReader) =
@@ -463,11 +477,11 @@ let read (reader: TypeScriptReader) =
     |> Internal.trimTypeReferenceArrayTupleDuplicates
     |> Internal.mergeExports
     |> Internal.selectAndMergeWinnersInDuplicates
-    // |> fun result ->
-    //     reader.tempFilePath
-    //     |> path.dirname
-    //     |> Directory.closeRunDirectory
-    //     result
+    |> fun result ->
+        reader.tempFilePath
+        |> path.dirname
+        |> Directory.closeRunDirectory
+        result
 let write (outputDestination: string) (result: EncodedResult) =
     Internal.writeOutput outputDestination result
 let readAndWrite (outputDestination: string) (reader: TypeScriptReader) =

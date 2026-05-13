@@ -57,9 +57,12 @@ let closeXanthamDirectory () =
         try fs.rmdirSync(!^tempDir) with _ -> ()
     |> runThunkIfTempDirExists
 
-let createXanthamDirectory () =
+let createAndCleanXanthamDirectory() =
     cleanupXanthamDirectory
     |> runThunkIfTempDirExistsOrElse (fun () -> fs.mkdirSync(tempDir)) 
+
+let createXanthamDirectory () =
+    runThunkIfTempDirExistsOrElse (fun () -> fs.mkdirSync(tempDir)) ignore
 
 let createXanthamRunDirectory () =
     createXanthamDirectory()
