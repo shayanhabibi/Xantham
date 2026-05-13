@@ -9,20 +9,25 @@
 - **Window:** 2026-05-13, post-merge of PR #2
 - **Status:** 178 generator tests pass; 13 decoder Identifier tests pass
 
-# Baseline (post-PR2, after driver migration)
+# Baseline (post-PR2 era)
 
-| SDK | Pre-PR1 baseline | End of PR1 era | Post-PR2 | Δ vs baseline |
-|---|---:|---:|---:|---:|
-| dynamic-workflows | 18 | 6 | 6 | −12 |
-| workers-types | 1,376 | 401 | 370 | −1,006 |
-| agents | 3,932 | 1,460¹ | 1,460 | −2,472 |
-| **Total** | **5,326** | **1,867** | **1,836** | **−3,490 (−65%)** |
+| SDK | Pre-PR1 baseline | End of PR1 era | Post-PR2 | After bool-collapse | Δ vs baseline |
+|---|---:|---:|---:|---:|---:|
+| dynamic-workflows | 18 | 6 | 6 | 6 | −12 |
+| workers-types | 1,376 | 401 | 370 | 352 | −1,024 |
+| agents | 3,932 | 1,460¹ | 1,460 | 1,417 | −2,515 |
+| **Total** | **5,326** | **1,867** | **1,836** | **1,775** | **−3,551 (−67%)** |
 
 ¹ End-of-PR1-era agents count was 1,441 (per post-pr1-progress.md). The
 1,460 post-PR2 number reflects the cascade Shayan predicted: previously-
 dropped exports now visible expose latent inner-literal anchor bugs in
 Interface/Class bodies. Workers-types' −31 win dominates the net, so
 the overall is still down.
+
+The "After bool-collapse" column reflects the
+*"Collapse boolean-only literal sub-Union to F# `bool`"* fix described
+below under "Investigation and follow-on fix." Net −61 from post-PR2,
+−92 from end of PR1.
 
 # What PR #2 brought in (Shayan)
 
@@ -101,12 +106,14 @@ with proper `package.json` files. Final commits tighten cleanup with
 parallel-safe `try .../with _ -> ()` guards on `.xantham/run_*` race
 conditions.
 
-# Driver migration (post-merge)
+# Generator-side changes after PR #2 merge
+
+Two commits on master, listed in order.
+
+## `b6505d3` — generator: iterate list-valued ExportMap in processExports
 
 PR #2's `ExportMap` shape change required one direct fix in
 speakez-xantham (the sole direct consumer of the old shape).
-
-## `b6505d3` — generator: iterate list-valued ExportMap in processExports
 
 `processExports` at
 [`RenderScope.Anchored.fs:748`](../../src/Xantham.Generator/Generator/RenderScope.Anchored.fs#L748)
@@ -123,7 +130,25 @@ interner.ExportMap
         registerAnchorFromExport ctx lazyExport.Value))
 ```
 
-That's the only generator-side migration required by PR #2.
+## `<bool-collapse>` — collapse boolean-only literal sub-Union to F# `bool`
+
+In `RenderScope.Prelude.fs:269`'s mixed-Union branch (literals + other
+types), when every `TsLiteral` in the LiteralLike subset is a
+`TsLiteral.Bool _`, substitute `ResolvedType.Primitive
+TypeKindPrimitive.Boolean` for the synthesized sub-Union of
+`(false, true)`. Eliminates the synthesized one-or-two-case StringEnum
+wrapper for the common TS pattern `boolean | OtherType` (json-schema-
+typed's ~12 keyword properties, agents inherits via re-export).
+
+The synthesized sub-Union had a path-mismatch bug at the heart of the
+`JsonSchemaTyped.Interface` cascade — TypeRef stored 2-segment path
+`<PropertyName>.Literals`, body emitted at bare-Anchored (the parent's
+own path), collision with parent record. The bool collapse removes
+the synthesized type altogether, sidestepping the mismatch.
+
+Net effect: total errors 1,836 → 1,775 (−61), 178 generator tests pass.
+See "Investigation and follow-on fix" below for the full trace and
+fix derivation.
 
 # Fidelity.CloudEdge driver: scripts under source control
 
@@ -146,9 +171,9 @@ moves these into a stable `generators/xantham/scripts/` folder:
 
 # Where the remaining error count comes from
 
-## Top FS0039 buckets, post-PR2
+## Top FS0039 buckets, post-bool-collapse
 
-### workers-types (370 total, 332 FS0039)
+### workers-types (352 total, 518 FS0039 grep matches)
 
 ```
  28  'Type'
@@ -166,38 +191,43 @@ moves these into a stable `generators/xantham/scripts/` folder:
   6  'ToolChoice', 'Timeout', 'Role'
 ```
 
-`'ModuleImports' ×134` is gone (Record collapse fixed). Remaining
-`'WebAssembly' ×10` is the qualified-path variant referencing
-`WebAssembly.VectorizeModule._Lit7` and similar nested
+`'ModuleImports' ×134` is gone from PR #2 (Record collapse fixed).
+Remaining `'WebAssembly' ×10` is the qualified-path variant
+referencing `WebAssembly.VectorizeModule._Lit7` and similar nested
 synthetic-literal paths.
 
-### agents (1,460 total, 1,202 FS0039 — sample top 20)
+### agents (1,417 total — sample top 20)
 
 ```
- 78  'Type'                       ← residual inner-literal in synthetic _LitN
- 44  'Code'                       ← residual inner-literal
- 38  'CloudflareAgents.JsonSchemaTyped.Interface'  ← NEW: PR2 cascade
- 36  'Item'                       ← residual inner-literal
- 30  'Optin'                      ← residual inner-literal
+ 80  'Type'                       ← residual inner-literal in synthetic _LitN
+ 48  'Code'                       ← residual inner-literal
+ 34  'Item'                       ← residual inner-literal
+ 32  'Optin'                      ← residual inner-literal
  28  'TypeName'                   ← residual inner-literal
  26  'State'                      ← typar
  26  'Invoke'                     ← residual inner-literal
  22  'Optout'                     ← residual inner-literal
- 22  'Flat'                       ← NEW: previously-dropped export now visible
+ 22  'Flat'                       ← previously-dropped export now visible
  20  '_Lit85'                     ← path-navigation residual
  20  'Brand'                      ← typar
- 16  'Success', '_parse', 'NeedsApproval'  ← NEW: previously-dropped
- 14  'Input'                      ← typar
- 14  'CloudflareAgents.JsonSchemaTyped.Decoder.TestsFixturesAgentsNodeModulesJsonSchemaTypedDraft202012.JSONSchemaModule.Number'
- 14  'CloudflareAgents.JsonSchemaTyped.Decoder.TestsFixturesAgentsNodeModulesJsonSchemaTypedDraft202012.JSONSchemaModule.Integer'
+ 18  'Input'                      ← typar
+ 16  'StringIterator'             ← new surface from bool-collapse
+ 14  '_parse'                     ← previously-dropped
  12  'Values'                     ← residual
  12  'SpecificationVersion'       ← residual
+ 12  'Success'                    ← previously-dropped
+ 12  'Inclusive'                  ← residual
+ 10  'Origin', 'McpServer'        ← typar / previously-dropped
 ```
 
-The `'JsonSchemaTyped.Interface'` ×38 bucket is the most visible new
-cascade. See investigation below.
+The `'JsonSchemaTyped.Interface' ×38` bucket that dominated the
+initial post-PR2 snapshot is gone, along with the JSONSchemaModule
+`'Number' ×14` and `'Integer' ×14` siblings (all three were the same
+bool-only mixed-Union pattern). New top buckets are residuals from
+other inner-literal patterns; see "Investigation and follow-on fix"
+below.
 
-## Today's investigation: the `'JsonSchemaTyped.Interface'` cascade
+## Investigation and follow-on fix: the `'JsonSchemaTyped.Interface'` cascade
 
 Sample errors:
 
@@ -431,8 +461,70 @@ requires refactoring `createTransientPath` for the AnchoredAndMoored
 case. The second option adds a TypeStore lookup to the LiteralUnion
 render path.
 
-This investigation didn't land a fix. Worth picking up next session
-with one of the three approaches.
+### Landed: option (3), bool-only collapse
+
+Took the third option of the three. For the specific shape that
+dominated the `JsonSchemaTyped.Interface` cascade —
+`boolean | OtherType` — *every* literal in the mixed-Union branch's
+LiteralLike subset is a `TsLiteral.Bool`. `false | true` is
+structurally F# `bool`. Collapse to the primitive in the mixed
+branch:
+
+```fsharp
+let allLiteralsAreBool =
+    not (List.isEmpty literals)
+    && literals
+       |> List.forall (function
+           | ResolvedTypeLiteralLike.Literal (TsLiteral.Bool _) -> true
+           | _ -> false)
+seq {
+    if allLiteralsAreBool then
+        ResolvedType.Primitive TypeKindPrimitive.Boolean
+    elif not <| List.isEmpty literals then
+        // ... existing sub-Union synthesis for non-bool literals
+        |> ResolvedType.Union
+    ...
+}
+```
+
+No sub-Union created → no path-mismatch trigger → references just say
+`bool` directly. The named `Interface.UnevaluatedProperties`-style
+type disappears from the output; the property's type becomes
+`option<U2<bool, JSONSchema>>` (or whatever) at every call site.
+
+**Empirical impact:**
+
+| | Pre-fix | Post-fix | Δ |
+|---|---:|---:|---:|
+| `'JsonSchemaTyped.Interface'` ×38 | 38 | 0 | **−38** |
+| `'JSONSchemaModule.Number'` ×14 | 14 | 0 | **−14** |
+| `'JSONSchemaModule.Integer'` ×14 | 14 | 0 | **−14** |
+| workers-types total | 370 | 352 | −18 |
+| agents total | 1,460 | 1,417 | −43 |
+| **Grand total** | **1,836** | **1,775** | **−61** |
+
+178 generator tests pass.
+
+The other histograms shifted modestly: agents FS0039 1,834 → 1,782
+(−52), FS0033 350 → 322 (−28), FS0001 130 → 136 (+6); workers-types
+FS0663 34 → 22 (−12), FS0698 20 → 12 (−8). Structurally down across
+the board, no FS-code regressions.
+
+### Non-bool mixed unions still on the path-mismatch path
+
+Mixed unions with non-bool literals (e.g. `"foo" | "bar" | OtherType`)
+still synthesize a sub-Union and still hit the path-mismatch bug
+documented above. The blast radius is much smaller because the bool
+case was the dominant trigger in agents (json-schema-typed re-export);
+remaining surface is in workers-types `'Type'`/`'GetWithMetadata'`
+families and a handful of other agents buckets.
+
+Option (1) or (2) from the previous section is still worth pursuing
+for the residual cases. Option (1) is cleaner architecturally (fixes
+the asymmetry itself) but invasive (touches `createTransientPath`).
+Option (2) is more localized (lookup TypeStore at render time) but
+needs the LiteralUnionRender to read the scope's TypeStore — which
+isn't currently threaded into the renderer.
 
 ### Sibling cascade buckets
 
@@ -468,52 +560,66 @@ questions"; PR #2 addressed them.
 
 ## New, opened by PR #2's surface changes
 
-### Inner-literal anchor cascade for SyntheticPath-assigned literals referenced via cache-hit
+### Non-bool mixed-Union path mismatch (residual)
 
-The largest single observable cascade. ~38 errors in the
-`JsonSchemaTyped.Interface` bucket alone; similar shape in the
-`Flat`/`_parse`/`NeedsApproval`/`Number`/`Integer` buckets and
-contributing to the 'Type'/'Code'/'Method'/'Item' family residuals.
+The investigation under "Investigation and follow-on fix" above
+identified the actual root cause of the
+`'JsonSchemaTyped.Interface' ×38` cascade: asymmetric handling of
+`scope.PathContext` between TypeRef registration and body emission.
+The bool-collapse fix addressed the dominant manifestation (bool-only
+literal subsets in mixed Unions). The general asymmetry still applies
+to mixed Unions where the literal subset contains non-bool values
+(e.g. `"foo" | "bar" | OtherType`).
 
-The shape: inner one-case-string-union literal `X` is referenced from
-multiple parent bodies. `SyntheticPathAssignment.run` assigns it one
-concrete path `<sibling>._LitN`. But each call site emits a reference
-that says `<parent>.X` (two segments, parent + Pascal'd property
-name). Neither path resolves — `_LitN` isn't emitted under each
-parent, and the type isn't navigable via the parent's name in F#'s
-scope resolution.
+Recap:
 
-The clean fix surface is one of:
+1. `createTransientPath` (`Types/RenderScope.Prelude.fs:295`) **grafts**
+   `scope.PathContext` into the TypeRef's stored path
+2. `Members.renderFromMembersAndFunctions`
+   (`Generator/Render.Transient.fs:260`) **grafts** `scope.PathContext`
+   into the TypeLikeRender's Metadata.Path
+3. `renderUnionLiterals` (`Generator/Render.Transient.fs:89`) uses
+   bare `TransientTypePath.Anchored` — **doesn't graft**
 
-1. **Cache-hit re-check** — at
-   [`RenderScope.Prelude.fs:72-94`](../../src/Xantham.Generator/Generator/RenderScope.Prelude.fs#L72-L94)
-   the cache-hit dispatch routes by the cached `Root` kind alone. If
-   the resolvedType is in `ctx.SyntheticPaths`, route to the
-   synthetic-cache-hit branch (line 91-93) regardless of what kind
-   the cached Root has. Stops the transient cache from winning the
-   race for a type that should be referenced via its concrete
-   sibling path.
+For non-bool mixed Unions, the sub-Union's stored TypeRef points at
+`<PropertyName>.Literals` (2-seg) while the body emits at the parent's
+own path (collision). Three candidate fixes documented at "What the
+right fix needs to do" above:
 
-2. **Promote-on-second-encounter** — when the Transient cache hit
-   sees a multi-position transient that doesn't have a concrete path
-   yet, run `SyntheticPathAssignment.assignSynthetics` retroactively
-   for that single ResolvedType and re-route to the concrete-cache-hit
-   branch. The risk (raised in the post-PR1 doc): the "FIRST
-   encounter wins" semantics changes from "ConcretePath at first
-   encounter" to "ConcretePath promoted on second encounter," which
-   could cascade in unexpected ways.
+- (1) Make `renderUnionLiterals` graft AND change `createTransientPath`
+  to not append `"Literals"` for the DummyTypeKey case — symmetric
+  1-segment paths.
+- (2) Make `renderUnionLiterals` look up `scope.TypeStore[resolvedType]`
+  at render time and use the stored path as Metadata.Path. Localised
+  fix, doesn't touch shared infrastructure.
+- (3) For each non-bool mixed Union, find a structural reduction
+  similar to bool-collapse. Harder because non-bool string unions
+  don't have a primitive equivalent.
 
-3. **Inner-literal emission across all body kinds** —
-   `Interface`/`Class` body emissions get a *companion*
-   `module rec X` containing the inner literal types referenced as
-   `X.<PropertyPascal>`, mirroring what the `_LitN` synthetic-anchored
-   pattern does for TypeLiteral bodies. Avoids the cross-parent
-   sharing race entirely by emitting one copy per consumer.
+The bool-collapse used a variant of (3) for the specific bool case.
+For arbitrary string-literal unions, (1) or (2) is the path forward.
 
-(3) is what Shayan flagged as the "Migration work remaining item 5"
-in PR #2's progress note. (1) and (2) are encoder/decoder/generator
-plumbing fixes; (3) is a clean generator-side approach but produces
-N copies of the same one-case enum per N consumers.
+Smaller blast radius than pre-bool-fix; remaining residuals are
+spread across many buckets rather than concentrated in one.
+
+### Inner-literal emission across Interface/Class body kinds (Shayan's item 5)
+
+Independent of the mixed-Union path mismatch. Some Interface/Class
+bodies in agents (e.g. `Flat`, `_parse`, `NeedsApproval`,
+`StringIterator`) contain string-union property values whose inner
+types need `module rec <ParentType>` companions emitted as siblings.
+The post-PR1 Literal-arm fix covers the `ResolvedType.Literal`
+prerender arm; the `TypeLiteral` arm grafts via its own branch; the
+`Union LiteralLike` branch grafts. But for properties of `Interface`
+and `Class` bodies — entered via `Interface.render` / `Class.render`
+at `Render.TypeShapes.fs` — the inner literals' emission isn't being
+surfaced into the parent's anchor scope companion.
+
+Per Shayan's PR #2 progress note: "lift inner-literal anchor across
+all body kinds. The Literal and TypeLiteral arms of prerender now
+graft `scope.PathContext`. Union LiteralLike already does. The
+remaining gap is Interface and Class bodies that contain string-
+union literals as property types."
 
 ### `Source.LibEs` residual fallback
 
