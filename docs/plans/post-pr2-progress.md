@@ -5,9 +5,50 @@
 > The post-PR1 doc (`docs/plans/post-pr1-progress.md`) covers the
 > earlier era and the rationale that fed into PR #2.
 
-- **Branch:** `master` (PR #2 merged direct to master)
+- **Branch:** `verify-cloudflare-sdk-pipeline` on
+  `https://github.com/houstonhaynes/speakez-xantham`
 - **Window:** 2026-05-13, post-merge of PR #2
 - **Status:** 178 generator tests pass; 13 decoder Identifier tests pass
+
+## Late-session snapshot (2026-05-13 evening)
+
+Three encoder-side fixes plus one generator-side fix landed after
+the multi-emission work. The verify pipeline now runs end-to-end
+with the current encoder + decoder (was blocked earlier in the
+session by an encoder regression that broke workers-types
+encoding). All four are documented inline below; this is the
+short index.
+
+| Commit | Layer | Symptom |
+|---|---|---|
+| `3ae5680` | encoder | `T[]` syntactic nodes collided with the `Array` Interface TypeKey; structural `SType.Array` was discarded in duplicate resolution, leaving `ResizeArray` bare at use sites |
+| `a4681bc` | generator | `Render.Collection.combine` preserved t1's TypeParameters when merging two TypeDefns; a synthetic Intersection (empty typars) that landed at the same module+name as a real Class silently dropped the Class's typars (`type ZodType =` instead of `type ZodType<'Output, 'Def, 'Input> =`) |
+| `103d3ea` | encoder | `Variable.readDeclaration` fulfilled `xanTag.Builder` verbatim with `innerBuilderSignal.Value`; for declaration-merged interface+namespace pairs (e.g. `Cloudflare: Cloudflare`), the inner builder is `ValueNone`, leaving the variable's builder unfulfilled and causing `[MISSREF]` at assemble-time + `KeyNotFoundException` in the decoder |
+
+End-of-session verify counts (current encoder + above fixes):
+
+| SDK | Counts |
+|---:|---:|
+| dynamic-workflows | 5 |
+| workers-types | 220 |
+| agents | 1,291 |
+| **Total** | **1,516** |
+
+The agents count is +80 vs the May-11-JSON baseline (1,211) — the
+encoder-fresh JSON surfaces issues the May 11 artifact was hiding,
+specifically multi-emission residue and constraint cascades that
+the bare-generic encoding bug was masking. The T[] fix alone
+dropped agents FS0033 "use-site dropped typars" from 320 → 120
+(−200) — real structural progress; the +80 net reflects the
+other latent buckets becoming visible. Workers-types and
+dynamic-workflows both dropped slightly.
+
+The next concrete bucket — IndexSignature / method-return
+self-reference paths (`_Lit214.Item`, `_Lit162.Type`, etc.) — is
+described at the bottom of this doc under
+"IndexSignature / method-return self-reference paths (next big
+bucket)". I scoped the architectural fix but stopped short of
+landing it; the seam map is captured for you to pick up.
 
 # Baseline (post-PR2 era)
 
@@ -1382,6 +1423,121 @@ thread is the follow-on:
 
 Most Cloudflare SDK use is tier 1 (`Pick`/`Omit`/`Partial`-shaped).
 The agents SDK has at least one tier 2 (per Shayan).
+
+### IndexSignature / method-return self-reference paths (next big bucket)
+
+After landing the three encoder fixes this session, the dominant
+remaining FS0039 bucket in agents is path references like
+`_Lit214.Item`, `_Lit122.Code`, `_Lit197.Catch`,
+`WorkflowName.Item.Key` etc. — `<Type>.<Member>` paths where the
+parent is an emitted Interface/Class/TypeLiteral but no companion
+nested module exists to host the referenced inner name.
+
+Concrete example (agents.wrapped.fs ~line 1986):
+
+```fsharp
+type _Lit214 =
+    abstract Item: k: string ->
+        U2<proptypekey<proptypekey<'T, _Lit214.Item>, _Lit214.Item>, option<obj>>
+```
+
+The `_Lit214.Item` reference is the *return type of `_Lit214`'s
+own `Item` index signature*, used recursively from inside the
+return type itself. F# can't resolve it because `_Lit214` is an
+interface (not a module) — there's nothing at `.Item` as a type.
+
+Top buckets in agents this shape produces:
+- `'Item' ×92` — index signatures
+- `'Type' ×40`, `'Code' ×32`, `'TypeName' ×30`, `'Invoke' ×28`,
+  `'Optout' ×24`, `'Optin' ×22`, `'Flat' ×22` — method/property
+  return-type self-references
+
+Compare with the cases that *work* today, e.g. `_Lit162.Code`
+(agents.wrapped.fs ~line 278):
+
+```fsharp
+module rec _Lit162 =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Code = | [<CompiledName("invalid_value")>] InvalidValue
+
+type _Lit162 =
+    ...
+    abstract code: _Lit162.Code with get, set
+```
+
+The literal-string-union case produces a *companion module* with
+a nested `type Code` alias — and consumers of `_Lit162.Code`
+resolve cleanly. The architecture supports this pattern; it's
+just not extended to IndexSignature returns and method-return
+self-references.
+
+**Architectural fix path (for Shayan):**
+
+The clean fix is a *pre-pass* that walks Interface/Class/TypeLiteral
+resolved types BEFORE the Render-lazy force phase, identifies
+IndexSignature members (and method-returns that contain
+self-referencing path atoms), and synthesizes companion
+`ResolvedExport.TypeAlias` entries anchored at
+`<parent>.<MemberName>`. Those get picked up by the standard
+anchor-registration pass and emitted into the parent's module
+namespace.
+
+The seams I traced while scoping this:
+
+1. **`IndexSignature.render`** (`Render.Member.fs:181-218`) —
+   currently produces only a `MemberRender.Method` at member path
+   `Anchored.Moored "Item"`. Doesn't emit a companion TypeAlias
+   for the return type. Would need a parallel emission, but a
+   `MemberRender` value is single-valued — composing with an
+   additional TypeAlias requires either a richer return shape or
+   a side-channel.
+
+2. **`ctx.AnchorRenders`** (`Types/Generator.fs:26,426`) — the
+   dictionary that drives final emission. Keyed by
+   `Choice<ResolvedType, ResolvedExport>`. Adding a synthetic
+   anchor entry needs a *key*. A fabricated `ResolvedExport.TypeAlias`
+   built around the IndexSignature's return type would work but
+   creating one requires (a) a fresh `TypeKey`, (b) a `Source`
+   inherited from the parent, (c) routing through `pipeTypeAlias`
+   for path interception. Easier said than done from inside
+   `Render.Member.fs`.
+
+3. **The lazy-forcing model** (`RenderScope.Anchored.fs:541-569`,
+   `:571+`) — `anchorPreludeExportScope` iterates `TypeStore` per
+   export; `registerAnchorFromExport` runs per export and forces
+   the `Render` lazy via the `Anchors = anchorPreludeExportScope`
+   binding. Adding to `ctx.AnchorRenders` from *inside* a `Render`
+   lazy risks ordering bugs — the iteration that ought to pick up
+   the new anchor may already have finished. Hence the need for
+   a pre-pass, not in-place injection during member render.
+
+4. **`prerenderFromGraph`** (`RenderScope.Prelude.fs:768-...`) —
+   the top-level pre-render entry point. Already does one pre-pass
+   (`prerenderTypeAliases`) to seed the `TypeAliasRemap`. A second
+   pre-pass to seed synthetic companion exports for IndexSignatures
+   would be parallel in shape.
+
+5. **`TypeLikeRender.renderInterface` / `renderAbstractClass`**
+   (`TypeRender.Render.fs:589, :628`) — final emission. The
+   `members @ functions` list could be augmented at this layer
+   with companion type aliases, but by emission time the anchor
+   dictionary is already locked in. So the fix must land earlier.
+
+**Why the same pattern recurs for non-IndexSignature members:**
+the `'Type'` / `'Code'` / `'Invoke'` etc. buckets are method
+returns where the resolved type internally embeds an Atom whose
+path is `<Self>.<MethodName>` — the encoder is treating the
+method's signature as if its return type were a nested type alias
+of the same name. Same architectural fix applies: synthesize a
+nested module with type aliases for those self-referencing names.
+
+**Investigation overhead estimate:** ~4–8 hours of focused work
+to land cleanly, including the synthesis-key fabrication, the
+pre-pass plumbing, and validation that it doesn't regress the
+existing companion-module pattern (e.g. `_Lit162.Code`).
+Probably worth Shayan's design judgment on whether the synthesis
+should live at the encoder layer (richer `ResolvedExport` shapes)
+or the generator layer (synthetic anchors only).
 
 # Reproduction
 
