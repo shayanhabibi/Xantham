@@ -315,28 +315,52 @@ Companion change in `Reading/Dispatch/TypeNode.fs`:
   semantic key for direct Array Interface references. Same pattern
   as `UnionType` / `IntersectionType`.
 
-**Verification status:**
+**Encoder MISSREF blocker — also fixed (`Variable.readDeclaration`):**
 
-The fix is applied at source in `src/Xantham.Fable/`. Re-encoding
-to validate the verify pipeline downstream is currently blocked by
-a separate, pre-existing encoder regression unrelated to this fix:
-running the current Xantham.Fable encoder against the workers-types
-fixture produces ~75% smaller JSON than the May 11 committed
-artifact and triggers a `[MISSREF] TypeKey -N` at
-`workers-types/index.ts:466:22` (the `export declare const
-Cloudflare: Cloudflare;` line). The same MISSREF reproduces on
-plain HEAD without my fix. Likely introduced by one of the
-post-May-11 Xantham.Fable commits (`2cc1645 fix(types): enhance
-type system with mapped types and reverse-mapped types`,
-`95bbbb8 feat(encoder): generate a temporary .d.ts file when
-starting program`, etc.). Decoder then throws `KeyNotFoundException`
-on the dangling key during the compress pass.
+Re-encoding workers-types with the current encoder triggered a
+`[MISSREF] TypeKey -N` at `workers-types/index.ts:466:22` (the
+`export declare const Cloudflare: Cloudflare;` line). The decoder
+then threw `KeyNotFoundException` during `compressResult` because
+the dangling generated TypeKey was referenced from members but
+had no entry in the types map.
 
-The fix is documented and committed as source — it will land
-correctly once the encoder regression is resolved and JSON
-regeneration is restored. Until then, the verify counts in this
-branch's HEAD reflect the bare-generic bug still present (using
-the May 11 JSON).
+Root cause: declaration-merged interface + namespace pairs share
+a name. The variable's type annotation `: Cloudflare` references
+the merged identity; neither the Interface nor the Namespace
+dispatcher populates the VariableDeclaration's TypeStore Builder
+under the generated key. `Variable.readDeclaration` was fulfilling
+`xanTag.Builder` with the inner type's builder via
+`Signal.fulfillWith(fun () -> innerBuilderSignal.Value)` — if
+the inner is `ValueNone`, the variable's builder stays
+`ValueNone`, surfaces as MISSREF at assemble-time, and downstream
+the decoder choked.
+
+Fix: in `Variable.readDeclaration`, fall back to
+`SType.Primitive NonPrimitive` (renders to F# `obj`) when the
+inner builder is `ValueNone`. Same safe placeholder used elsewhere
+for unresolvable references. Eliminates the MISSREF; downstream
+references to the variable's type resolve to `obj` rather than
+crashing the decoder.
+
+**Verification status (post-MISSREF-fix):**
+
+End-to-end verify pipeline runs cleanly. Re-encoded all three
+SDKs with the current encoder + my fixes; counts:
+
+| SDK | Before encoder regen | After |
+|---|---|---|
+| agents | 1211 | 1291 |
+| workers-types | 223 | 220 |
+| dynamic-workflows | 6 | 5 |
+
+The T[] encoder fix took effect: agents FS0033 "use-site dropped
+typars" dropped from 320 → 120 (−200). But total agents went up
+by 80 because the fresh encoder also surfaces additional FS0039
+multi-emission residue (Item: 38→92, Type: 30→40, etc.) and
+FS0001 type-mismatch cases that were previously masked. Net
+across the three SDKs: 1440 → 1516 (+76), but with the
+structural fixes truly applied — the May 11 JSON had been masking
+both the T[] bug AND the surfacing of other issues.
 
 ### Sibling fix: declaration drops typars when synthetic `TypeDefn` lands at the same module+name
 

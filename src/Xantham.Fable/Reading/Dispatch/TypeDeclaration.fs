@@ -266,7 +266,25 @@ module Variable =
         }
         xanTag.ExportBuilder <- STsExportDeclaration.Variable variableBuilder
         xanTag.Builder
-        |> Signal.fulfillWith(fun () -> innerBuilderSignal.Value)
+        |> Signal.fulfillWith(fun () ->
+            // Fall back to `NonPrimitive` (TS `object`) when the type
+            // annotation's inner builder never resolves. Happens with
+            // declaration-merged interface+namespace pairs like
+            // `export interface Cloudflare { ... }` + `export declare
+            // namespace Cloudflare { ... }` — the variable's type
+            // annotation `: Cloudflare` references the merged identity,
+            // but neither the Interface nor the Namespace dispatcher
+            // populates the TypeReference's TypeStore builder under the
+            // generated key. Without a fallback the entry stays ValueNone,
+            // surfaces as `[MISSREF]` at assemble-time, and downstream
+            // `compressResult` throws `KeyNotFoundException` because
+            // members still embed the generated key in their Type fields
+            // (`compressions[key]` has no entry for keys with empty
+            // builders). NonPrimitive resolves to F# `obj` — the same
+            // safe placeholder used elsewhere for unresolvable references.
+            match innerBuilderSignal.Value with
+            | ValueSome _ as v -> v
+            | ValueNone -> ValueSome (SType.Primitive TypeKindPrimitive.NonPrimitive))
 
 module FunctionDecl =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.FunctionDeclaration) source =
