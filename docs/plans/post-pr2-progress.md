@@ -124,6 +124,63 @@ filter matched on rendered `TypeRefAtom.Intrinsic` (catching
 constraints. This refactor stays at the resolved-type level so
 those rendered constructs are not implicated.
 
+## Investigated, not fixed: bare-generic return types (~206 FS0033 errors)
+
+The dominant remaining FS0033 bucket is bare-generic emission of
+`T[]`-style return types: `ResizeArray<_> expects 1 type argument(s)
+but is given 0` ×192 (agents) + `IReadOnlyList<_> expects 1...` ×14
+(agents). Affects every `T[]` method return inside synthesised
+TypeLiteral bodies for Array<T>'s methods (`push`, `unshift`,
+`toSpliced`, `toSorted`, `toReversed`, `with`, etc.) and similar
+`readonly T[]` callbacks.
+
+Same family appears in the bucket-list under FS0039 as bare-generic
+references on class self-returns (`abstract Create: ... -> Server`
+where Server has 3 typars, ditto Protocol, ExperimentalServerTasks,
+Client, ZodSetInternals, ZodPromiseInternals, ZodOptionalInternals,
+ZodNullableInternals, ZodLazyInternals, ZodDefaultInternals,
+ZodCatchInternals).
+
+Empirical observation:
+- Parameter types of the SAME shape render correctly. Example
+  contrast in workers-types (`Array<T>` synthesised TypeLiteral):
+  - `abstract concat: [<ParamArray>] items: ResizeArray<ConcatArray<'T>> -> ResizeArray`
+  - The parameter is parameterised correctly (`ResizeArray<ConcatArray<'T>>`)
+  - The return is bare `ResizeArray`.
+- `IterableIterator<T>` (a regular TypeReference) renders with
+  args; `T[]` (`ResolvedType.Array`) on the same return position
+  renders bare.
+
+Hypothesis (untested): the issue is downstream of the
+`ResolvedType.Array` prerender in `RenderScope.Prelude.fs:507`
+where `(lift Intrinsic.array, [innerPrerender])` is constructed
+correctly. Args appear to survive `anchor`/`localise` passes
+(both preserve `Prefix(prefix, args)` shape). Suspects: the
+self-reference collapse in `Render.TypeAlias.fs`
+(`mapAtomsWithPrefixCollapse` drops args when the prefix rewrites
+to `obj`), or a similar collapse applied to method-return-type
+positions specifically. Requires a debug-log instrumented run
+to isolate.
+
+Forensic notes for Shayan (deferred):
+- Encoded TS shape for these methods uses `TsType.Array (T)` for `T[]`
+  syntax. The encoder DOES NOT collapse this to `TypeReference Array<T>`.
+- The TypeRefRender for `TypeParameter T` is a Widget atom carrying
+  `'T` as a LongIdent.
+- Constructing the outer `Prefix(Intrinsic "ResizeArray", [Widget 'T])`
+  via the SRTPHelper dispatch resolves to `createPrefix` and produces
+  a correct `Prefix_(...)` molecule. The args list is non-empty.
+- Yet the final rendered F# has bare `ResizeArray`. So args are being
+  stripped between this construction and the emission.
+
+Scope:
+- This bucket is structurally similar to but distinct from the
+  multi-emission and constraint-drop work landed in this branch.
+- Likely requires a debug stream (the file-based logger pattern from
+  multi-valued-typestore.md investigation) to identify the exact
+  stripping site.
+- Deferred to a separate investigation pass.
+
 # What PR #2 brought in (Shayan)
 
 Two structural fixes plus one bug catch, plus encoder ergonomic work.
