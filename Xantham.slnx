@@ -83,6 +83,27 @@
   </Folder>
   <Folder Name="/tests/">
     <File Path="tests/Signal.test.fsx" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/app/components/widget.d.ts" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/app/index.d.ts" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/app/package.json" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/app/views/dashboard.d.ts" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/data-layer/index.d.ts" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/data-layer/package.json" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/framework/dist/index.d.ts" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/framework/package.json" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/framework/plugins/dist/index.d.ts" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/framework/plugins/package.json" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/multi-file/package.json" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/multi-file/shapes.d.ts" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/multi-file/vectors.d.ts" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/solid-js/package.json" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/solid-js/types/index.d.ts" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/solid-js/types/jsx.d.ts" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/three/constants.d.ts" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/ui-kit/index.d.ts" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/ui-kit/package.json" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/validators/index.d.ts" />
+    <File Path="tests/Xantham.Fable.Tests/TypeFiles/node_modules/validators/package.json" />
     <Project Path="tests/Xantham.Decoder.Tests/Xantham.Decoder.Tests.fsproj" />
     <Project Path="tests/Xantham.Fable.Tests/Xantham.Fable.Tests.fsproj" />
     <Project Path="tests/Xantham.Generator.Tests/Xantham.Generator.Tests.fsproj" />
