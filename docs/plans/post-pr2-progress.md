@@ -181,6 +181,64 @@ Scope:
   stripping site.
 - Deferred to a separate investigation pass.
 
+### Follow-up investigation: TypeAliasRemap is the proximate cause (and the half-fix that doesn't hold)
+
+Using the file-based debug-stream pattern, the proximate cause of
+the bare-generic emission was identified:
+
+`RenderScope.Prelude.fs:685-688` — after every prerender path, if
+the rt's TypeKey is in `ctx.TypeAliasRemap`, the registered render
+is REPLACED with the remap target ref:
+
+```fsharp
+|> function
+    | Registered { Nullable = nullable } when ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Raw) ->
+        ctx.TypeAliasRemap[lazyResolvedType.Raw]
+        |> TypeRefRender.orNullable nullable
+    | Registered ref -> ref
+```
+
+For generic substitutions like `Array → ResizeArray` (arity 1) and
+`ReadonlyArray → IReadOnlyList` (arity 1), the remap target is a
+**bare intrinsic atom** built via `intrinsicRef`
+(`Types/Generator.fs:205`). When the body's natural prerender
+produces `Prefix(ResizeArray, [T])`, the remap discards it and
+returns just the bare `ResizeArray` atom — losing the typar arg.
+
+**Naive fix (tried, reverted +40 regression):** Skip
+`addTypeAliasRemap` for the bodyTypeKey when the substitution
+has arity > 0. The body's natural Array-arm prerender produces
+`Prefix(ResizeArray, [T])` directly without the remap clobber.
+
+Tested empirically: dropped some bare cases (32 → ~32 — the count
+held but byte-count grew by ~85KB indicating many newly-correct
+emissions). But agents FS0039 went UP by ~76 because cross-context
+references (where the typar 'T isn't in the current scope) now
+emit `ResizeArray<'T>` with a dangling `'T` — same shape, different
+failure mode.
+
+**The real shape of the problem:** the remap is doing two things at
+once. (a) For LOCAL references within the alias's own context
+(where typars are in scope), the args need to be preserved.
+(b) For CROSS-CONTEXT references (from sites without those typars
+in scope), the args need to be stripped so 'T doesn't dangle.
+
+The current remap collapses both to (b). The naive fix collapses
+both to (a). Neither is correct.
+
+A proper fix needs to discriminate at the reference site whether
+the typars are in scope. Information not easily available at the
+remap point. Either:
+- Defer the remap decision to a later pass where context is known.
+- Eagerly substitute typars at the body-alias-registration time
+  with an `obj` placeholder for cross-context cases, while
+  preserving the original Prefix for local-context cases (would
+  need two cached versions per remapped rt).
+
+Reverted to keep baseline numbers stable. The file-based
+investigation pattern is documented and reusable; deferring to a
+focused pass with deeper encoder/renderer cooperation.
+
 # What PR #2 brought in (Shayan)
 
 Two structural fixes plus one bug catch, plus encoder ergonomic work.
