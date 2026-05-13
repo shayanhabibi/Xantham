@@ -2,6 +2,7 @@
 module Xantham.Generator.Generator.RenderScope_Anchored
 
 open System.Collections.Generic
+open Xantham
 open Xantham.Decoder
 open Xantham.Decoder.ArenaInterner
 open Xantham.Generator
@@ -437,16 +438,23 @@ let inline addOrReplace (ctx: GeneratorContext) (key: ResolvedType) (value: Choi
     GeneratorContext.Anchored.addResolvedType ctx key value
     
 
-let rec anchor (ctx: GeneratorContext) anchors anchorPath resolvedType =
-    GeneratorContext.Prelude.tryGet ctx resolvedType
-    |> ValueOption.iter (anchorPreludeAnchorScope ctx (Some anchors) anchorPath)
-        
-and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderScope =
-    let anchors = defaultArg anchors (Dictionary<ResolvedType, TypePath * Render>())
+// Cycle prevention: the `anchor` recursion can reach the same
+// `ResolvedType` through different paths within one export. Without
+// a separate visited tracker, removing the `anchors.ContainsKey` filter
+// (now that `anchors` is path-keyed rather than ResolvedType-keyed)
+// would let cyclic types (A → B → A) loop. The HashSet is allocated
+// fresh per top-level anchor pass and shared down the recursion.
+let rec anchor (ctx: GeneratorContext) (visited: HashSet<ResolvedType>) anchors anchorPath resolvedType =
+    if visited.Add resolvedType then
+        GeneratorContext.Prelude.tryGet ctx resolvedType
+        |> ValueOption.iter (anchorPreludeAnchorScope ctx visited (Some anchors) anchorPath)
+
+and anchorPreludeAnchorScope (ctx: GeneratorContext) (visited: HashSet<ResolvedType>) anchors anchorPath renderScope =
+    let anchors = defaultArg anchors (Dictionary<TypePath, Render>())
     match renderScope with
     | { Root = ValueSome (TypeLikePath.Anchored path); Render = Render.Concrete(renderTuple); TransientChildren = ValueSome transientChildren } ->
         let anchorPath = AnchorPath.create path
-        let anchors = Dictionary<ResolvedType, TypePath * Render>()
+        let anchors = Dictionary<TypePath, Render>()
         let render = Render.Concrete.anchor ctx renderTuple
         {
             RenderScope.Type = renderScope.Type
@@ -460,8 +468,7 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
         |> Choice2Of2
         |> GeneratorContext.Anchored.addResolvedType ctx renderScope.Type
         transientChildren.TypeStore.Keys
-        |> Seq.filter (anchors.ContainsKey >> not)
-        |> Seq.iter (anchor ctx anchors anchorPath)
+        |> Seq.iter (anchor ctx visited anchors anchorPath)
     | { Root = ValueSome (TypeLikePath.Anchored path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren }
         when ctx.SyntheticPaths.ContainsKey renderScope.Type ->
         // Synthetic literal whose stable concrete path was assigned by the
@@ -472,10 +479,9 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
         // continue through their existing handlers.
         let render = Render.Transient.anchor ctx (AnchorPath.create path) renderTuple
         anchors
-        |> Dictionary.tryAdd renderScope.Type (path, render)
+        |> Dictionary.tryAdd path render
         transientChildren.TypeStore.Keys
-        |> Seq.filter (anchors.ContainsKey >> not)
-        |> Seq.iter (anchor ctx anchors (AnchorPath.create path))
+        |> Seq.iter (anchor ctx visited anchors (AnchorPath.create path))
     | { Root = ValueSome (TypeLikePath.Transient path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren } ->
         let path = TransientTypePath.anchor anchorPath path
         // The transient's render uses its own anchored path so the type's
@@ -485,10 +491,9 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
         // the parent's actual emission via Render.Collection.combine).
         let render = Render.Transient.anchor ctx (AnchorPath.create path) renderTuple
         anchors
-        |> Dictionary.tryAdd renderScope.Type (path, render)
+        |> Dictionary.tryAdd path render
         transientChildren.TypeStore.Keys
-        |> Seq.filter (anchors.ContainsKey >> not)
-        |> Seq.iter (anchor ctx anchors (AnchorPath.create path))
+        |> Seq.iter (anchor ctx visited anchors (AnchorPath.create path))
     | { Root = ValueNone; Render = Render.RefOnly typeRef } ->
         typeRef
         |> TypeRefRender.anchor anchorPath
@@ -497,7 +502,8 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
     | badScope ->
         printfn $"Bad scope: %A{badScope}"
 and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: RenderScopeStore) =
-    let anchors = Dictionary<ResolvedType, TypePath * Render>()
+    let anchors = Dictionary<TypePath, Render>()
+    let visited = HashSet<ResolvedType>(HashIdentity.Reference)
     let anchorPath = Interceptors.pipeExport ctx export
     renderScopeStore.TypeStore
     |> Seq.iter (fun (KeyValue(key, _)) ->
@@ -515,7 +521,7 @@ and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: R
         // arm of anchorPreludeAnchorScope already runs TransientTypePath.anchor
         // on renderScope.Root — pre-anchoring here causes the literal's leaf
         // segment to be added twice (e.g. `WrapWorkflowBinding/Metadata/Metadata`).
-        anchorPreludeAnchorScope ctx (Some anchors) anchorPath renderScope)
+        anchorPreludeAnchorScope ctx visited (Some anchors) anchorPath renderScope)
     anchors
 
 let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport): unit =
@@ -710,6 +716,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                             Name = typeParameter.Name
                             Constraint =
                                 typeParameter.Constraint
+                                |> Option.filter (TypeParameter.isVacuousLazyConstraint >> not)
                                 |> Option.toValueOption
                                 |> ValueOption.map (prerender ctx scope >> TypeRefRender.anchorAndLocalise anchorPath)
                             Default = 

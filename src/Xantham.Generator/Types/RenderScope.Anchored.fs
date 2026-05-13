@@ -213,7 +213,25 @@ type RenderScope = {
     Root: Choice<TypePath, MemberPath>
     TypeRef: TypeRefRender
     Render: Render
-    Anchors: Dictionary<ResolvedType, TypePath * Render>
+    /// Anchored emission entries for the inner types reachable from this
+    /// export. Keyed by the final anchored `TypePath` (the emission
+    /// location), valued by the anchored render.
+    ///
+    /// Previously keyed by `ResolvedType`, which prevented the same
+    /// inner literal — shared across multiple parents within one export
+    /// via reference-equality interning — from emitting at more than one
+    /// location. References from the second-and-later parents resolved
+    /// to a `<parent>.<X>` path that no body was emitted at, producing
+    /// the multi-position-literal cascade documented in
+    /// `docs/plans/post-pr2-progress.md`.
+    ///
+    /// Path-keyed allows the same `ResolvedType` to anchor at multiple
+    /// distinct paths (one per parent that references it within the
+    /// export), each emitting its own copy. `tryAdd` semantics still
+    /// dedup the *path* itself (so the same final location can't be
+    /// claimed twice). Cycle prevention moves to a separate `visited`
+    /// `HashSet<ResolvedType>` tracked in the recursion.
+    Anchors: Dictionary<TypePath, Render>
 }
 
 type AnchorScopeStore = Dictionary<ResolvedType, RenderScope>

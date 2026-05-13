@@ -11,12 +11,12 @@
 
 # Baseline (post-PR2 era)
 
-| SDK | Pre-PR1 baseline | End of PR1 era | Post-PR2 | After bool-collapse | Δ vs baseline |
-|---|---:|---:|---:|---:|---:|
-| dynamic-workflows | 18 | 6 | 6 | 6 | −12 |
-| workers-types | 1,376 | 401 | 370 | 352 | −1,024 |
-| agents | 3,932 | 1,460¹ | 1,460 | 1,417 | −2,515 |
-| **Total** | **5,326** | **1,867** | **1,836** | **1,775** | **−3,551 (−67%)** |
+| SDK | Pre-PR1 baseline | End of PR1 era | Post-PR2 | After bool-collapse | After path-keyed-anchors | After any/unknown-constraint-drop | Δ vs baseline |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| dynamic-workflows | 18 | 6 | 6 | 6 | 6 | 6 | −12 |
+| workers-types | 1,376 | 401 | 370 | 352 | 358 | 358 | −1,018 |
+| agents | 3,932 | 1,460¹ | 1,460 | 1,417 | 1,407 | 1,405 | −2,527 |
+| **Total** | **5,326** | **1,867** | **1,836** | **1,775** | **1,771** | **1,769** | **−3,557 (−67%)** |
 
 ¹ End-of-PR1-era agents count was 1,441 (per post-pr1-progress.md). The
 1,460 post-PR2 number reflects the cascade Shayan predicted: previously-
@@ -28,6 +28,18 @@ The "After bool-collapse" column reflects the
 *"Collapse boolean-only literal sub-Union to F# `bool`"* fix described
 below under "Investigation and follow-on fix." Net −61 from post-PR2,
 −92 from end of PR1.
+
+The "After path-keyed-anchors" column reflects the structural fix to
+the `RenderScope.Anchors` dict — keyed by `TypePath` instead of
+`ResolvedType`, allowing the same `ResolvedType` to anchor at
+multiple distinct paths when reached from different parents within
+one export. Net −4 from bool-collapse, −96 from end of PR1.
+
+The "After any/unknown-constraint-drop" column reflects dropping
+`'T :> Bar` typar constraints where `Bar` resolves through to a
+`Primitive Any`/`Unknown` (TS encoder collapsing TS `any`/`unknown`
+or alias chains bottoming at those primitives). Net −2 from
+path-keyed-anchors, −98 from end of PR1.
 
 # What PR #2 brought in (Shayan)
 
@@ -129,6 +141,161 @@ interner.ExportMap
     |> List.iter (fun lazyExport ->
         registerAnchorFromExport ctx lazyExport.Value))
 ```
+
+## `<path-keyed-anchors>` — switch `RenderScope.Anchors` from ResolvedType-keyed to TypePath-keyed
+
+Tackles the shared-multi-position-literal-within-one-export cascade
+that the bool-collapse fix sidestepped for the specific bool subset.
+
+**The bug shape**: `RenderScope.Anchors : Dictionary<ResolvedType,
+TypePath * Render>` deduped emissions by `ResolvedType`. When the
+same `ResolvedType` (e.g. the shared string-literal `"object"`)
+was reached from multiple parents within one export's anchor pass —
+e.g. _Lit79 contains _Lit246 and _Lit247, both with property
+`type: "object"` — `Dictionary.tryAdd` accepted only the FIRST
+parent's emission. Body emitted at `<parent>._Lit246.Type`;
+references from _Lit247 expected `<parent>._Lit247.Type` and
+failed FS0039.
+
+**The fix**: change `Anchors` to
+`Dictionary<TypePath, Render>` — keyed by the anchored emission
+path rather than the source `ResolvedType`. Multiple emissions of
+the same `ResolvedType` at distinct paths now coexist; only the
+PATH itself is deduped (so the same final location can't be claimed
+twice).
+
+Cycle prevention moves from the `anchors.ContainsKey` filter
+(which previously doubled as the duplicate-emission dedup) to a
+separate `visited: HashSet<ResolvedType>` threaded through the
+`anchor` recursion. Allocated fresh per top-level anchor pass.
+
+`Render.Collection.fs` consumers updated: `x.Anchors.Values |>
+... |> Array.map (fun (typePath, render) -> ...)` becomes
+`x.Anchors |> ... |> Array.map (fun (KeyValue(typePath, render)) ->
+...)` — the path was previously paired with the render in the
+value tuple, now it's the key.
+
+**Empirical impact:**
+
+| | Pre-fix | Post-fix | Δ |
+|---|---:|---:|---:|
+| workers-types | 352 | 358 | +6 |
+| agents | 1,417 | 1,407 | −10 |
+| **Total** | **1,775** | **1,771** | **−4** |
+
+178 generator tests pass. Specific references previously failing
+(e.g. `_Lit247.Type` at agents.wrapped.fs:2872) now resolve. Some
+sibling buckets (`'Brand' ×20`, `'StringIterator' ×16`) cleared
+entirely. New FS0033/FS0663 cases surfaced (+38 combined) — likely
+the duplicate emissions exposed typar-constraint shapes that
+weren't reachable before, similar to the cascade pattern Shayan
+predicted for PR #2.
+
+Net is small. The structural change is sound (the asymmetry was
+real), but most of the cascade was already handled by other
+mechanisms (e.g. the synthetic-anchored branch uses ConcretePath
+refs that don't depend on the parent's anchor).
+
+### Landed follow-up: drop `Any`/`Unknown`-resolved constraints (narrow filter)
+
+After the broader Intrinsic-target filter regressed (next section),
+re-attempted with a narrower filter on the underlying
+`LazyResolvedType` rather than the rendered `TypeRefRender`:
+
+```fsharp
+let rec private isAnyLikeResolved (rt: ResolvedType) =
+    match rt with
+    | ResolvedType.Primitive TypeKindPrimitive.Any
+    | ResolvedType.Primitive TypeKindPrimitive.Unknown -> true
+    | ResolvedType.Optional opt -> isAnyLikeResolved opt.Type.Value
+    | ResolvedType.ReadOnly inner -> isAnyLikeResolved inner
+    | ResolvedType.TypeReference tr ->
+        match tr.ResolvedType with
+        | Some resolved -> isAnyLikeResolved resolved.Value
+        | None -> false
+    | _ -> false
+let isVacuousLazyConstraint (lazyTy: LazyResolvedType) =
+    isAnyLikeResolved lazyTy.Value
+```
+
+Walks the resolved-type graph through transparent wrappers
+(`Optional`, `ReadOnly`, `TypeReference`-with-`ResolvedType`) so an
+alias chain like `AgentContext → DurableObjectState → Primitive
+Any` is caught even though the prerendered `TypeRefRender` is a
+`ConcretePath` to the alias name. Applied in
+`Render.TypeParameter.render` (the prelude builder, before
+prerendering the constraint) and in the function-export-specific
+TypeParameterRender construction at
+`RenderScope.Anchored.fs:725` (which builds an Anchored typar
+directly, bypassing TypeParameter.render).
+
+**Empirical impact:**
+
+| | Pre-attempt | Post-attempt | Δ |
+|---|---:|---:|---:|
+| FS0663 (agents) | 216 | 198 | **−18** ✓ |
+| FS0698 (agents) | 158 | 146 | **−12** ✓ |
+| FS0660 (agents) | 78 | 72 | **−6** ✓ |
+| FS0039 (agents) | 1,738 | 1,770 | **+32** (unmasked) |
+| **Agents total** | **1,407** | **1,405** | **−2** |
+
+Net −2. The intended FS0663/FS0698/FS0660 drop (−36) is real;
+FS0039 increase (+32) is references that previously got masked by
+the early constraint failure now becoming visible. 178 generator
+tests pass.
+
+Modest delta but structurally correct — the `'T :> obj` /
+`'T :> obj option` constraints are vacuous-or-unsatisfiable in F#
+and shouldn't be emitted.
+
+### Attempted follow-up (broader Intrinsic-target filter, reverted)
+
+The path-keyed-anchors fix re-exposed the FS0663 / FS0698 cascade
+documented in post-pr1-progress.md: `'T :> AgentContext` where
+`AgentContext` resolves to `obj option` (sealed), plus `'T :> obj`
+and other Intrinsic-target constraints F# rejects.
+
+Tried lifting a `isVacuousPreludeConstraint` helper to the
+top-level `Render` module checking `TypeRefKind.Atom
+(TypeRefAtom.Intrinsic _)`, threaded through three call sites:
+`Render.TypeParameter.render`, both
+`Render.{Transient,Concrete}.anchorTypeParameters`, and the
+function-export-specific construction in
+`registerAnchorFromExport`.
+
+Result: total **1,771 → 1,802 (+31)** regression.
+
+| Code | Pre-attempt | Post-attempt | Δ |
+|---|---:|---:|---:|
+| FS0663 (agents) | 216 | 144 | **−72** ✓ |
+| FS0698 (agents) | 158 | 118 | **−40** ✓ |
+| FS0660 (agents) | 78 | 42 | **−36** ✓ |
+| FS0033 (agents) | 348 | 444 | **+96** ✗ |
+| FS0001 (agents) | 134 | 134 | 0 |
+| FS0661 (agents) | 6 | 24 | **+18** ✗ |
+| FS0039 (agents) | 1,738 | 1,810 | **+72** ✗ |
+| WT FS0033 | 96 | 120 | +24 |
+| WT FS0663 | 34 | 26 | −8 |
+
+The constraint-drop did clear the intended FS0663/FS0698/FS0660
+cascade (−148 combined). But the typars-now-unconstrained exposed
+typar-arity mismatches elsewhere (FS0033 +96 +24 = +120,
+FS0661 +18, FS0039 +72) — including breaking V3 ZodType emission
+(`type ZodType =` with no typars but body uses `'Def`).
+
+Reverted. The check needs to be narrower than "any Intrinsic
+constraint":
+
+* Drop only `obj` (Intrinsic.obj) — vacuous, can't break anything
+  downstream because no typar can be inferred to satisfy it.
+* Leave `string`/`int`/other primitive-name intrinsics alone —
+  these turn out to be load-bearing somehow (probably as
+  type-arg constraints F# DOES allow despite the FS0698
+  appearance, or constraints encoded as Intrinsic that aren't
+  actually emitted as `:>` in F#).
+
+The narrower variant is a follow-up. Diff stayed clean on the
+revert; no code changes from this attempt landed.
 
 ## `<bool-collapse>` — collapse boolean-only literal sub-Union to F# `bool`
 

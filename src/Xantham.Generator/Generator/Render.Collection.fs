@@ -152,9 +152,9 @@ module RootModuleCollector =
                 [|
                     x.Root, x.Render |> snd |> _.Value
                     yield!
-                        x.Anchors.Values
+                        x.Anchors
                         |> Seq.toArray
-                        |> Array.map (fun (typePath, render) ->
+                        |> Array.map (fun (KeyValue(typePath, render)) ->
                             Choice1Of2 typePath,
                             snd render |> _.Value
                         )
@@ -222,9 +222,9 @@ module RootModule =
                 [|
                     x.Root, x.Render |> snd |> _.Value
                     yield!
-                        x.Anchors.Values
+                        x.Anchors
                         |> Seq.toArray
-                        |> Array.map (fun (typePath, render) ->
+                        |> Array.map (fun (KeyValue(typePath, render)) ->
                             Choice1Of2 typePath,
                             snd render |> _.Value
                         )
