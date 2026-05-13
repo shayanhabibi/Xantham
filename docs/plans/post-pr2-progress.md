@@ -338,6 +338,110 @@ regeneration is restored. Until then, the verify counts in this
 branch's HEAD reflect the bare-generic bug still present (using
 the May 11 JSON).
 
+### Sibling fix: declaration drops typars when synthetic `TypeDefn` lands at the same module+name
+
+The same FS0033 bucket has a second sub-pattern: the *declaration*
+emits without its typars even though the body references them.
+Largest concentration: `type ZodType =` (Zod V3 class) at agents
+line 17011, with body methods using `'Def`, `'Output`, `'Input`
+that don't resolve. 74 of 84 "does not expect any type arguments,
+but here is given N" errors in agents trace to this single
+declaration.
+
+**Forensic trail:**
+
+1. Logged `Class.render` / `Interface.render` for shape name
+   `"ZodType"`: each fired exactly **once**, both with 3 typars
+   (V3 Class: `Output,Def,Input`; V4 Classic Interface:
+   `Output,Input,Internals`). So the named declarations carry
+   their typars correctly out of the shape-render layer.
+
+2. Logged the `module'.Types.TryAdd` collision site in
+   `Render.Collection.fs:286` for any `"ZodType"` name. Three
+   modules report adds/merges — V3Types, V4ClassicSchemas,
+   V4CoreSchemas. V3Types saw two entries:
+
+   ```
+   MODULE-ADD   V3Types ZodType shape=TypeDefn[0]inh=0   ← first
+   MODULE-MERGE V3Types ZodType existing=[0]inh=0 incoming=[3]inh=0
+   ```
+
+   The first entry has **zero typars and zero inheritance**.
+   The incoming real Class has 3 typars. The merge guard at
+   line 127 (`when t1.Inheritance = t2.Inheritance`) passes
+   because both Inheritance lists are empty. Merge fires, and
+   the `{ t1 with Constructors = ...; Members = ...; Functions = ... }`
+   reshaping preserves `t1.TypeParameters` (empty). The real
+   class's 3 typars are silently dropped.
+
+   The V4ClassicSchemas case shows the *correct* behaviour by
+   coincidence: existing `[3]inh=1` vs incoming `[0]inh=0`, so
+   the Inheritance equality guard *fails*, the fallback
+   `| _ -> primary` returns `t1` (the 3-typar entry), and the
+   synthetic 0-typar entry is discarded. Typars preserved.
+
+3. Source of the synthetic 0-typar entry:
+   `Render.Transient.fs:274-285` — `Members.renderFromMembersAndFunctions`
+   produces a `Transient.TypeRender.TypeDefn` with
+   `Name = ValueNone`, `TypeParameters = []`, `Inheritance = []`,
+   `IsClass = false`. Used by `Intersection.render` to flatten
+   `A & B` into a single TypeLiteral-like shape. When the
+   resulting Transient is anchored via `RenderScope.Anchored.fs:147-183`,
+   the `Name = ValueNone` fallback at lines 160-165 reads the
+   leaf segment of the anchor path. If that path tail happens
+   to be `"ZodType"` (e.g. an Intersection authored against
+   Zod V3 `ZodType` lands its anchor at the Class's own path),
+   the synthetic gets named `"ZodType"` and lands at module
+   `V3Types` — colliding with the real Class.
+
+**Fix at source (this branch):** `Render.Collection.fs` `combine`
+function — when merging two `TypeDefn`s, preserve the side with
+non-empty `TypeParameters` rather than always taking `t1`'s. The
+synthetic's empty typar list no longer wins when merged with a
+real declaration's populated list.
+
+```fsharp
+let typeParameters =
+    match t1.TypeParameters, t2.TypeParameters with
+    | [], rhs -> rhs
+    | lhs, _ -> lhs
+{ t1 with
+      TypeParameters = typeParameters
+      Constructors = ...
+      Members = ...
+      Functions = ... }
+```
+
+Mirrored in the `TypeAlias.TypeDefn` arm.
+
+**Effect on agents FS0033:**
+- "does not expect any type arguments": **84 → 10** (−74)
+- "expects N args but given 0": 266 → 320 (+54, downstream
+  exposure)
+
+The bare-generic bucket goes 350 → 330 in agents. Net agents
+total +2 (1209 → 1211) — the synthetic-merge fix corrects the
+declarations, exposing other latent issues (e.g. inheritance
+clauses and constructor-return positions that drop typars at the
+USE site for classes that previously had no typars; the same
+encoder-side `T[]` bug for those classes). Workers-types
+unchanged (the pattern doesn't trigger there). Conceptual win
+even if the count moves slightly: the typar information now
+flows correctly through the data structures.
+
+**Open follow-on for Shayan:**
+- The deeper question is *why* an Intersection.render anchors at
+  the same path as the Class declaration whose body it derives
+  from. The synthetic should anchor at a sibling path (e.g.
+  `ZodType.<intersection-tag>` or a `_Lit*` slot), not at the
+  Class's own path. Investigating that would prevent the
+  collision rather than just resolving it on merge.
+- Inheritance equality could be a weak guard — two entities
+  that *should not* merge (a class declaration and a synthetic
+  TypeLiteral) just happened to both have empty `Inheritance`.
+  A stronger guard might check `IsClass` agreement or whether
+  both sides carry a Source.
+
 # What PR #2 brought in (Shayan)
 
 Two structural fixes plus one bug catch, plus encoder ergonomic work.

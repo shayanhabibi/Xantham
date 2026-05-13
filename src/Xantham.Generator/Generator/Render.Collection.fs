@@ -125,7 +125,23 @@ let combine (primary: Anchored.TypeRender) (secondary: Anchored.TypeRender) =
         { fn1 with Signatures = fn1.Signatures @ fn2.Signatures |> List.distinct }
         |> Anchored.TypeRender.Function
     | Anchored.TypeRender.TypeDefn t1, Anchored.TypeRender.TypeDefn t2 when t1.Inheritance = t2.Inheritance ->
+        // When merging two TypeDefns that landed at the same module+name
+        // (typically a synthetic Intersection/TypeLiteral that anchored at
+        // a path tail matching a real Interface/Class declaration), prefer
+        // the side with non-empty TypeParameters. The synthetic source
+        // produces `TypeParameters = []` (see Members.renderFromMembersAndFunctions
+        // in Render.Transient.fs); the real declaration carries the source's
+        // typar list. Without this preference, a synthetic that lands first
+        // wins on `{ t1 with ... }` reshaping and the real class's typars
+        // are silently dropped — emitting `type ZodType =` (non-generic)
+        // even though use sites and body members reference 'Output, 'Def
+        // etc. (FS0033 "ZodType does not expect any type arguments").
+        let typeParameters =
+            match t1.TypeParameters, t2.TypeParameters with
+            | [], rhs -> rhs
+            | lhs, _ -> lhs
         { t1 with
+              TypeParameters = typeParameters
               Constructors = t1.Constructors @ t2.Constructors |> List.distinct
               Members = t1.Members @ t2.Members |> List.distinct
               Functions = t1.Functions @ t2.Functions |> List.distinct }
@@ -133,7 +149,12 @@ let combine (primary: Anchored.TypeRender) (secondary: Anchored.TypeRender) =
     | Anchored.TypeRender.TypeAlias t1, Anchored.TypeRender.TypeAlias t2 ->
         match t1, t2 with
         | TypeAliasRender.TypeDefn t1, TypeAliasRender.TypeDefn t2 when t1.Inheritance = t2.Inheritance ->
+            let typeParameters =
+                match t1.TypeParameters, t2.TypeParameters with
+                | [], rhs -> rhs
+                | lhs, _ -> lhs
             { t1 with
+                  TypeParameters = typeParameters
                   Constructors = t1.Constructors @ t2.Constructors |> List.distinct
                   Members = t1.Members @ t2.Members |> List.distinct
                   Functions = t1.Functions @ t2.Functions |> List.distinct }
