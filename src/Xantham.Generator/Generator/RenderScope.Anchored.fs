@@ -741,10 +741,14 @@ module ArenaInterner =
         // synthetic literals before the export-anchor pass forces their
         // bodies. See `Generator/SyntheticPathAssignment.fs`.
         SyntheticPathAssignment.run ctx interner
-        // ExportMap was previously `Map<string, ResolvedExport list>` and
-        // is now `Map<Xantham.Source, LazyResolvedExport>` post source-
-        // attribution refactor. Force each lazy and register the single
-        // export it produces.
+        // ExportMap is `Map<Xantham.Source, LazyResolvedExport list>` post
+        // PR #2 (prevent-silent-drops-in-export-map). The list-valued
+        // form preserves multiple exports that share a Source bucket —
+        // singletons under `Source.IsPackage`, multi-entry under
+        // `Source.LibEs` / `Source.PackageInternal`. Iterate each bucket's
+        // contents so no export is silently dropped.
         interner.ExportMap
-        |> Map.iter (fun _ lazyExport ->
-            registerAnchorFromExport ctx lazyExport.Value)
+        |> Map.iter (fun _ lazyExports ->
+            lazyExports
+            |> List.iter (fun lazyExport ->
+                registerAnchorFromExport ctx lazyExport.Value))
