@@ -267,8 +267,37 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 }
                 |> addOrReplaceScope ctx resolvedType
         | { Others = others; LiteralLike = literals; EnumLike = enumLike; Primitives = primitives; Nullable = nullable } ->
+            // When every literal in the LiteralLike subset is a boolean
+            // (`TsLiteral.Bool`), `false | true` is structurally just F#
+            // `bool`. Collapse it to the primitive instead of synthesizing
+            // a named one-case-or-two-case StringEnum.
+            //
+            // The synthesized form had a path-mismatch bug: the inner
+            // sub-Union's stored TypeRef path grafted `scope.PathContext`
+            // (e.g. `<PropertyName>.Literals`) but `renderUnionLiterals`'s
+            // body emission used bare `Anchored` and emitted at the
+            // parent's path — collision with the parent record. For TS
+            // patterns like `boolean | JSONSchema` (json-schema-typed's
+            // ~12 keyword properties), this manifested as ~38 FS0039
+            // errors against the `Interface.<PropertyName>` references.
+            // Collapsing to `bool` removes the synthesized type entirely,
+            // sidestepping the mismatch.
+            //
+            // Non-bool mixed unions (e.g. `"a" | "b" | OtherType`) still
+            // go through the synthesized-sub-Union path. The mismatch
+            // there remains (documented in post-pr2-progress.md "Outstanding
+            // questions for review") but its blast radius is much smaller.
+            let allLiteralsAreBool =
+                not (List.isEmpty literals)
+                &&
+                literals
+                |> List.forall (function
+                    | ResolvedTypeLiteralLike.Literal (TsLiteral.Bool _) -> true
+                    | _ -> false)
             seq {
-                if not <| List.isEmpty literals then
+                if allLiteralsAreBool then
+                    ResolvedType.Primitive TypeKindPrimitive.Boolean
+                elif not <| List.isEmpty literals then
                     { Union.Types =
                         literals
                         |> List.map (_.AsResolvedType >> LazyContainer.CreateTypeKeyDummy<ResolvedType>) }
