@@ -11,12 +11,12 @@
 
 # Baseline (post-PR2 era)
 
-| SDK | Pre-PR1 baseline | End of PR1 era | Post-PR2 | After bool-collapse | After path-keyed-anchors | After any/unknown-constraint-drop | After visited-pair-keying | After empty-string-collapse | Δ vs baseline |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| dynamic-workflows | 18 | 6 | 6 | 6 | 6 | 6 | 6 | 6 | −12 |
-| workers-types | 1,376 | 401 | 370 | 352 | 358 | 358 | 354 | 337 | −1,039 |
-| agents | 3,932 | 1,460¹ | 1,460 | 1,417 | 1,407 | 1,405 | 1,314 | 1,314 | −2,618 |
-| **Total** | **5,326** | **1,867** | **1,836** | **1,775** | **1,771** | **1,769** | **1,674** | **1,657** | **−3,669 (−69%)** |
+| SDK | Pre-PR1 baseline | End of PR1 era | Post-PR2 | After bool-collapse | After path-keyed-anchors | After any/unknown-constraint-drop | After visited-pair-keying | After empty-string-collapse | After multi-valued TypeStore | After extended-constraint-drop | Δ vs baseline |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| dynamic-workflows | 18 | 6 | 6 | 6 | 6 | 6 | 6 | 6 | 6 | 6 | −12 |
+| workers-types | 1,376 | 401 | 370 | 352 | 358 | 358 | 354 | 337 | 285 | 258 | −1,118 |
+| agents | 3,932 | 1,460¹ | 1,460 | 1,417 | 1,407 | 1,405 | 1,314 | 1,314 | 1,341 | 1,220 | −2,712 |
+| **Total** | **5,326** | **1,867** | **1,836** | **1,775** | **1,771** | **1,769** | **1,674** | **1,657** | **1,632** | **1,484** | **−3,842 (−72%)** |
 
 ¹ End-of-PR1-era agents count was 1,441 (per post-pr1-progress.md). The
 1,460 post-PR2 number reflects the cascade Shayan predicted: previously-
@@ -64,6 +64,65 @@ so only one of 16 fields' anchored types ever emitted. Collapsing
 the literal to the primitive eliminates the synthesis entirely;
 each property's reference resolves to bare `string`. Net **−17 from
 visited-pair-keying, −210 from end of PR1**.
+
+The "After multi-valued TypeStore" column reflects the structural
+refactor described in [`docs/plans/multi-valued-typestore.md`](multi-valued-typestore.md).
+`TypeStore` becomes `Dictionary<ResolvedType, HashSet<TransientTypePath>>`;
+Literal-typed rts accumulate every per-reference path within an
+export scope; the anchor pass emits one body per path. Multi-emission
+restricted to Literals because TypeLiteral extension hung agents at
+60s+ via Zod V3's `DeepPartialInternal` recursive type alias (full
+trace in the design doc). Net **−25 from empty-string-collapse,
+−235 from end of PR1**. Categorical FS0039 wins: `CAPTURING_PHASE`,
+`BUBBLING_PHASE`, `AT_TARGET`, `Stream` cleared; `Code`, `Optin`,
+`Type`, `GetWithMetadata` reduced. agents +27 is *predicted inflation*
+from clearing conflating issues, exposing previously-masked Zod V4
+method-parameter brand-type buckets (`SuperRefine`, `Prefault`,
+`Pipe`, `Overwrite`, `Catch`); forensic finding for those is notated
+in the design doc for follow-on encoder/typar-rendering work.
+
+Also landed in this window: the long-standing warning backlog
+documented in [`memory: project_warning_backlog`](#) is now closed
+out — build emits **0 warnings, 0 errors** on `verify-cloudflare-sdk-pipeline`
+after the cleanup pass (NU1605 FSharp.Core downgrade, FS0988 empty
+main, FS3511 state machine, FS0025 incomplete pattern, FS1104 ×3
+`@`-identifiers, FS0044 ×6 + FS0040 deprecated/recursive in test
+mocks). Test fixtures (output.json, package-lock.json) untracked
+from git per the existing `tests/**/output.json` / `package-lock.json`
+gitignore rules; `.xantham/` added to gitignore for decoder per-run
+temp.d.ts directories.
+
+The "After extended-constraint-drop" column reflects broadening
+`Render.TypeParameter.isVacuousResolved` (formerly `isAnyLikeResolved`)
+to cover ALL resolved-type kinds F# can't represent as a typar bound:
+`Primitive _` (any kind, not just Any/Unknown), `Union`, `Intersection`,
+`Tuple`, `Literal`, `Array`, `Index` (keyof), `IndexedAccess` (T[K]),
+`TypeQuery` (typeof), `TemplateLiteral`, `Conditional`, `Predicate`,
+`Substitution`, `EnumCase`. Transparent wrappers (`Optional`,
+`ReadOnly`, `TypeReference` with `ResolvedType`) walk through. **Kept
+out:** `TypeLiteral` (some Zod V3/V4 generics rely on inline-object
+bounds; adding it could re-trigger DeepPartialInternal-style issues),
+`Interface`/`Class`/`Enum`/`TypeParameter`/`GlobalThis` (real F#
+constraint targets).
+
+Net **−148 from multi-valued TypeStore, −383 from end of PR1**.
+Categorical changes:
+- **FS0663**: wt 34→0 (cleared), agents 206→48 (−158)
+- **FS0698 (sealed)**: wt 20→0 (cleared), agents 150→54 (−96)
+- **FS0660**: wt 14→0 (cleared), agents 72→10 (−62)
+- **FS0033/FS0001 inflated** (predicted): agents 242→350 (+108) and
+  186→200 (+16) — downstream type-mismatch errors previously masked
+  by the constraint errors now surface.
+
+178 generator tests pass; build stays at 0 warnings, 0 errors.
+
+The earlier history-comment in `Render.TypeParameter.fs` recorded that
+a *much broader* filter (any `Intrinsic` target at the rendered-atom
+level) regressed +31 by breaking V3 ZodType emission. That broader
+filter matched on rendered `TypeRefAtom.Intrinsic` (catching
+`proptypekey<X>`, `obj`, etc. as bounds), which leaked load-bearing
+constraints. This refactor stays at the resolved-type level so
+those rendered constructs are not implicated.
 
 # What PR #2 brought in (Shayan)
 
