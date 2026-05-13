@@ -253,7 +253,20 @@ module TypeRefRender =
 
 type RenderScopeStore = {
     PathContext: TransientPath
-    TypeStore: Dictionary<ResolvedType, TransientTypePath>
+    /// Multi-valued: each ResolvedType accumulates the *set* of
+    /// `TransientTypePath`s it was reached from within this scope. The
+    /// downstream anchor pass emits one body per path so that all
+    /// reference sites in this scope's body resolve to existing types.
+    ///
+    /// Previously single-valued (`TransientTypePath`) with first-wins
+    /// TryAdd semantics. Empirically this dropped 15-of-16 paths in
+    /// shapes like `IncomingRequestCfPropertiesTLSClientAuthPlaceholder`'s
+    /// 16 `: ""` fields, and ~80% of paths in shapes like
+    /// `_Lit10`'s `BUBBLING_PHASE: 3 | AT_TARGET: 2 | CAPTURING_PHASE: 1`
+    /// where shared interned literals appear at multiple property
+    /// positions. See `docs/plans/multi-valued-typestore.md` for the
+    /// full forensic trace.
+    TypeStore: Dictionary<ResolvedType, HashSet<TransientTypePath>>
 }
 
 /// <summary>
@@ -263,8 +276,18 @@ type RenderScopeStore = {
 module RenderScopeStore =
     let create () = {
             PathContext = TransientPath.create TransientTypePath.Anchored
-            TypeStore = Dictionary<ResolvedType, TransientTypePath>()
+            TypeStore = Dictionary<ResolvedType, HashSet<TransientTypePath>>()
         }
+    /// Add a path to the rt's path-set in this scope's TypeStore.
+    /// Creates the set on first encounter; subsequent calls accumulate.
+    let internal addTypeStorePath (scope: RenderScopeStore) (resolvedType: ResolvedType) (path: TransientTypePath) =
+        match scope.TypeStore.TryGetValue(resolvedType) with
+        | true, set ->
+            set.Add(path) |> ignore
+        | _ ->
+            let set = HashSet<TransientTypePath>()
+            set.Add(path) |> ignore
+            scope.TypeStore[resolvedType] <- set
     let mapPathContext (fn: TransientPath -> TransientPath) (scope: RenderScopeStore) = { scope with PathContext = fn scope.PathContext }
     let appendStringToPathContext scope (str: string) =
         mapPathContext (
@@ -293,21 +316,52 @@ module RenderScopeStore =
         let inline createIntrinsic (_scope: RenderScopeStore) (_resolvedType: ResolvedType) (intrinsic: string) =
             Unsafe.createIntrinsic intrinsic
         let createTransientPath (scope: RenderScopeStore) (resolvedType: ResolvedType) (path: TransientTypePath) =
-            match path with
-            | TransientTypePath.Anchored ->
-                TransientPath.toTransientModulePath scope.PathContext
-                |> TransientTypePath.graft
-            | TransientTypePath.Moored(parent, name) ->
-                parent
-                |> TransientModulePath.graft (TransientPath.toTransientModulePath scope.PathContext)
-                |> TransientTypePath.createOnTransientModuleWithName name
-            | TransientTypePath.AnchoredAndMoored name ->
-                TransientPath.toTransientModulePath scope.PathContext
-                |> TransientTypePath.createOnTransientModuleWithName name
-            |> fun path ->
-                scope.TypeStore.TryAdd(resolvedType, path)
-                |> ignore
-            // scope.TryAdd(resolvedType, path) |> ignore
+            // Path computation. Match input shape, produce a transient
+            // path rooted in this scope's PathContext.
+            //
+            // Special case for Literal rts: IGNORE the input path's leaf
+            // name and always compute fresh from current scope.PathContext
+            // (as if input were `TransientTypePath.Anchored`). Reason:
+            // the input on cache-hit is the cached Root.path baked in
+            // first-call's leaf. Combining baked-leaf with current
+            // PathContext produces a DOUBLED path like
+            // `<placeholder>.CertRevoked.CertPresented` (where
+            // CertPresented was the first-call's leaf). Baseline
+            // discarded the doubled path via first-wins TryAdd, so it
+            // didn't matter. With multi-valued accumulation we'd
+            // emit a body at the wrong nesting — producing
+            // `module rec CertRevoked { type CertPresented }` instead
+            // of `type CertRevoked = ...`. Stripping the cached leaf
+            // for Literals fixes the nesting and gives each property's
+            // reference a matching body.
+            // Multi-emission target: Literal rts only. These are leaves
+            // (single StringEnum case body) — cloning per path is cheap
+            // and produces no further recursion. Extending to TypeLiteral
+            // (tried) breaks: TypeLiteral bodies have member recursion
+            // that compounds per-path emission, and tipped agents into
+            // a 60s+ hang via DeepPartialInternal-style reach paths.
+            let computedPath =
+                match resolvedType, path with
+                | ResolvedType.Literal _, _ ->
+                    TransientPath.toTransientModulePath scope.PathContext
+                    |> TransientTypePath.graft
+                | _, TransientTypePath.Anchored ->
+                    TransientPath.toTransientModulePath scope.PathContext
+                    |> TransientTypePath.graft
+                | _, TransientTypePath.Moored(parent, name) ->
+                    parent
+                    |> TransientModulePath.graft (TransientPath.toTransientModulePath scope.PathContext)
+                    |> TransientTypePath.createOnTransientModuleWithName name
+                | _, TransientTypePath.AnchoredAndMoored name ->
+                    TransientPath.toTransientModulePath scope.PathContext
+                    |> TransientTypePath.createOnTransientModuleWithName name
+            match resolvedType with
+            | ResolvedType.Literal _ ->
+                addTypeStorePath scope resolvedType computedPath
+            | _ ->
+                if not (scope.TypeStore.ContainsKey resolvedType) then
+                    addTypeStorePath scope resolvedType computedPath
+            // Return: baseline used the OUTER `path` parameter. Preserved.
             Unsafe.createTransientPath path
         
         type SRTPHelper =

@@ -436,26 +436,43 @@ module Render =
 
 let inline addOrReplace (ctx: GeneratorContext) (key: ResolvedType) (value: Choice<Anchored.TypeRefRender, Anchored.RenderScope>) =
     GeneratorContext.Anchored.addResolvedType ctx key value
-    
+
 
 // Cycle prevention: the `anchor` recursion can reach the same
 // `ResolvedType` through different paths within one export. The
-// visited tracker is keyed by `(ResolvedType, AnchorPath)` pairs
-// rather than just `ResolvedType`, so the same literal reached
-// from distinct parents within one export emits at distinct
-// anchored paths. Same `(rt, parent)` pair is still skipped to
-// stop cycles (A → B → A would otherwise loop).
+// visited tracker is keyed by `(ResolvedType, AnchorPath, TransientTypePath)`
+// so:
+//   - same `(rt, anchor)` pair *with a different path* is allowed
+//     (multi-path emission for shared interned literals — see
+//     `docs/plans/multi-valued-typestore.md`).
+//   - same `(rt, anchor, path)` tuple is skipped, stopping cycles.
 //
-// The HashSet uses `HashIdentity.Structural` because `AnchorPath`
-// is a structural-equality DU; pairing it with a reference-eq
-// `ResolvedType` works because F#'s tuple equality combines
-// both sides' equality.
-let rec anchor (ctx: GeneratorContext) (visited: HashSet<ResolvedType * AnchorPath>) anchors anchorPath resolvedType =
-    if visited.Add (resolvedType, anchorPath) then
+// The HashSet uses default structural equality on the 3-tuple; F#
+// combines each side's equality. `ResolvedType` is reference-eq,
+// `AnchorPath` and `TransientTypePath` are structural-eq DUs.
+//
+// `currentPath` carries the per-reference-site transient path to
+// emit at. For non-Transient root arms (Concrete, Anchored-synthetic,
+// RefOnly) this value is ignored — those arms use their cached Root's
+// absolute path. For the Transient arm it replaces what was previously
+// the cached Root path, so multiple references to the same rt within
+// one parent each emit a body at their own anchored location.
+let rec anchor (ctx: GeneratorContext) (visited: HashSet<ResolvedType * AnchorPath * TransientTypePath>) anchors anchorPath (resolvedType: ResolvedType) (currentPath: TransientTypePath) =
+    // Visited keying:
+    //   Literal rts: (rt, anchor, currentPath) — distinct paths allowed,
+    //     each generates its own body emission. Multi-emission engaged.
+    //   Other rts: (rt, anchor, sentinel=Anchored) — sentinel keeps
+    //     cardinality identical to baseline 2-tuple (no per-path
+    //     blowup). DeepPartialInternal-style recursion terminates.
+    let visitedKey =
+        match resolvedType with
+        | ResolvedType.Literal _ -> (resolvedType, anchorPath, currentPath)
+        | _ -> (resolvedType, anchorPath, TransientTypePath.Anchored)
+    if visited.Add visitedKey then
         GeneratorContext.Prelude.tryGet ctx resolvedType
-        |> ValueOption.iter (anchorPreludeAnchorScope ctx visited (Some anchors) anchorPath)
+        |> ValueOption.iter (anchorPreludeAnchorScope ctx visited (Some anchors) anchorPath currentPath)
 
-and anchorPreludeAnchorScope (ctx: GeneratorContext) (visited: HashSet<ResolvedType * AnchorPath>) anchors anchorPath renderScope =
+and anchorPreludeAnchorScope (ctx: GeneratorContext) visited anchors anchorPath (currentPath: TransientTypePath) renderScope =
     let anchors = defaultArg anchors (Dictionary<TypePath, Render>())
     match renderScope with
     | { Root = ValueSome (TypeLikePath.Anchored path); Render = Render.Concrete(renderTuple); TransientChildren = ValueSome transientChildren } ->
@@ -473,33 +490,47 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) (visited: HashSet<ResolvedT
         }
         |> Choice2Of2
         |> GeneratorContext.Anchored.addResolvedType ctx renderScope.Type
-        transientChildren.TypeStore.Keys
-        |> Seq.iter (anchor ctx visited anchors anchorPath)
+        for KeyValue(childRt, childPaths) in transientChildren.TypeStore do
+            match childRt with
+            | ResolvedType.Literal _ ->
+                for childPath in childPaths do
+                    anchor ctx visited anchors anchorPath childRt childPath
+            | _ ->
+                anchor ctx visited anchors anchorPath childRt TransientTypePath.Anchored
     | { Root = ValueSome (TypeLikePath.Anchored path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren }
         when ctx.SyntheticPaths.ContainsKey renderScope.Type ->
-        // Synthetic literal whose stable concrete path was assigned by the
-        // path-assignment pre-pass. Path is already concrete; the body
-        // renders against this path directly without transient resolution.
-        // Guarded by SyntheticPaths membership so unrelated Anchored-Root +
-        // Transient-Render combinations (e.g. some TypeAlias body shapes)
-        // continue through their existing handlers.
         let render = Render.Transient.anchor ctx (AnchorPath.create path) renderTuple
         anchors
         |> Dictionary.tryAdd path render
-        transientChildren.TypeStore.Keys
-        |> Seq.iter (anchor ctx visited anchors (AnchorPath.create path))
-    | { Root = ValueSome (TypeLikePath.Transient path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren } ->
-        let path = TransientTypePath.anchor anchorPath path
-        // The transient's render uses its own anchored path so the type's
-        // emitted Name matches the synthesized location (e.g. inline literal
-        // at `<parent>.<PropertyPascal>` gets named after the property, not
-        // the parent — preventing the synthesized type from colliding with
-        // the parent's actual emission via Render.Collection.combine).
+        for KeyValue(childRt, childPaths) in transientChildren.TypeStore do
+            match childRt with
+            | ResolvedType.Literal _ ->
+                for childPath in childPaths do
+                    anchor ctx visited anchors (AnchorPath.create path) childRt childPath
+            | _ ->
+                anchor ctx visited anchors (AnchorPath.create path) childRt TransientTypePath.Anchored
+    | { Root = ValueSome (TypeLikePath.Transient cachedPath); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren } ->
+        // Path used for THIS rt's emission:
+        //   Literal rt: use currentPath (per-call) — multi-emission.
+        //     Each call from a distinct property position emits at its own
+        //     anchored location, giving each reference a matching body.
+        //   Other rt: use cachedPath (baseline) — single emission at
+        //     first-prerender's location. Avoids DeepPartialInternal-style
+        //     non-termination through recursive type aliases.
+        let path =
+            match renderScope.Type with
+            | ResolvedType.Literal _ -> TransientTypePath.anchor anchorPath currentPath
+            | _ -> TransientTypePath.anchor anchorPath cachedPath
         let render = Render.Transient.anchor ctx (AnchorPath.create path) renderTuple
         anchors
         |> Dictionary.tryAdd path render
-        transientChildren.TypeStore.Keys
-        |> Seq.iter (anchor ctx visited anchors (AnchorPath.create path))
+        for KeyValue(childRt, childPaths) in transientChildren.TypeStore do
+            match childRt with
+            | ResolvedType.Literal _ ->
+                for childPath in childPaths do
+                    anchor ctx visited anchors (AnchorPath.create path) childRt childPath
+            | _ ->
+                anchor ctx visited anchors (AnchorPath.create path) childRt TransientTypePath.Anchored
     | { Root = ValueNone; Render = Render.RefOnly typeRef } ->
         typeRef
         |> TypeRefRender.anchor anchorPath
@@ -509,10 +540,9 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) (visited: HashSet<ResolvedT
         printfn $"Bad scope: %A{badScope}"
 and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: RenderScopeStore) =
     let anchors = Dictionary<TypePath, Render>()
-    let visited = HashSet<ResolvedType * AnchorPath>()
+    let visited = HashSet<ResolvedType * AnchorPath * TransientTypePath>()
     let anchorPath = Interceptors.pipeExport ctx export
-    renderScopeStore.TypeStore
-    |> Seq.iter (fun (KeyValue(key, _)) ->
+    for KeyValue(key, paths) in renderScopeStore.TypeStore do
         let renderScope =
             GeneratorContext.Prelude.tryGet ctx key
             |> ValueOption.orElseWith (fun () ->
@@ -522,12 +552,20 @@ and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: R
                 )
             |> ValueOption.defaultWith (fun () ->
                 failwith "Could not find render scope for key")
-        // Pass the export's anchor (e.g. the function's MemberPath) directly
-        // rather than pre-anchoring the literal's transient. The Transient
-        // arm of anchorPreludeAnchorScope already runs TransientTypePath.anchor
-        // on renderScope.Root — pre-anchoring here causes the literal's leaf
-        // segment to be added twice (e.g. `WrapWorkflowBinding/Metadata/Metadata`).
-        anchorPreludeAnchorScope ctx visited (Some anchors) anchorPath renderScope)
+        // Multi-path emission target: Literal rts only. These are leaf
+        // types (single StringEnum case body) — cloning per path is
+        // cheap and produces no further recursion. Extending to
+        // TypeLiteral was tried but hits a 60s+ hang via Zod V3's
+        // DeepPartialInternal recursive type alias: TypeLiteral bodies
+        // have member-level recursion that compounds when emitted
+        // per-path. For other rt kinds: single call with sentinel
+        // (baseline behavior).
+        match key with
+        | ResolvedType.Literal _ ->
+            for path in paths do
+                anchorPreludeAnchorScope ctx visited (Some anchors) anchorPath path renderScope
+        | _ ->
+            anchorPreludeAnchorScope ctx visited (Some anchors) anchorPath TransientTypePath.Anchored renderScope
     anchors
 
 let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport): unit =

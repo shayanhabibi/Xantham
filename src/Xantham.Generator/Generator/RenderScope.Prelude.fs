@@ -88,8 +88,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             // membership so named Interface/Class/Enum/TypeAlias exports
             // (which also have Anchored Root) don't get re-anchored as
             // siblings of the export that referenced them.
-            scope.TypeStore.TryAdd(resolvedType, TransientTypePath.Anchored)
-            |> ignore
+            RenderScopeStore.addTypeStorePath scope resolvedType TransientTypePath.Anchored
             remap ref
         | { TypeRef = ref } ->
             remap ref
@@ -230,8 +229,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 // case handles). Placeholder Transient.Anchored is never
                 // resolved — the actual emission location lives on the
                 // renderScope.Root.
-                scope.TypeStore.TryAdd(resolvedType, TransientTypePath.Anchored)
-                |> ignore
+                RenderScopeStore.addTypeStorePath scope resolvedType TransientTypePath.Anchored
                 {
                     Transient.RenderScope.Type = resolvedType
                     Root = TypeLikePath.create concretePath |> ValueSome
@@ -315,8 +313,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         match ctx.SyntheticPaths.TryGetValue resolvedType with
         | true, concretePath ->
             let ref = createAssignedSyntheticRef concretePath false
-            scope.TypeStore.TryAdd(resolvedType, TransientTypePath.Anchored)
-            |> ignore
+            RenderScopeStore.addTypeStorePath scope resolvedType TransientTypePath.Anchored
             let childScope = RenderScopeStore.create()
             {
                 Transient.RenderScope.Type = resolvedType
@@ -603,8 +600,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             match ctx.SyntheticPaths.TryGetValue resolvedType with
             | true, concretePath ->
                 let ref = createAssignedSyntheticRef concretePath false
-                scope.TypeStore.TryAdd(resolvedType, TransientTypePath.Anchored)
-                |> ignore
+                RenderScopeStore.addTypeStorePath scope resolvedType TransientTypePath.Anchored
                 let childScope = RenderScopeStore.create()
                 {
                     RenderScope.Type = resolvedType
@@ -787,7 +783,18 @@ module ArenaInterner =
                 match renderScopes.TryGetValue renderType with
                 | true, scope ->
                     for kv in renderScope.TypeStore do
-                        scope.TypeStore.TryAdd(kv.Key, kv.Value) |> ignore
+                        // Only propagate first path here (matches baseline).
+                        // Multi-valued accumulation happens at the per-scope
+                        // (export-level) TypeStore via createTransientPath.
+                        // This global merge across topological keys would
+                        // accumulate paths from every scope that touched the
+                        // rt — for agents' heavily-shared Zod types that's
+                        // thousands of entries, with O(depth) hash cost
+                        // per Add. Empirically this was the bottleneck.
+                        match kv.Value |> Seq.tryHead with
+                        | Some path ->
+                            RenderScopeStore.addTypeStorePath scope kv.Key path
+                        | None -> ()
                 | _ ->
                     renderScopes.TryAdd(renderType, renderScope) |> ignore
             )
@@ -798,8 +805,16 @@ module ArenaInterner =
                 renderScope.TransientChildren
                 |> ValueOption.iter (fun scope ->
                     for kv in kv.Value.TypeStore do
-                        scope
-                        |> RenderScopeStore.tryAdd kv.Key kv.Value
+                        // Experiment: only propagate the FIRST path per rt
+                        // into TransientChildren. The multi-path emission
+                        // (option A) still applies at the top-level export
+                        // scope; nested scopes get baseline single-path
+                        // behavior. Reverts if this isn't the bottleneck.
+                        match kv.Value |> Seq.tryHead with
+                        | Some path ->
+                            scope
+                            |> RenderScopeStore.tryAdd kv.Key path
+                        | None -> ()
                     )
                 )
         renderScopes.Clear()
