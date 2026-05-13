@@ -2,9 +2,11 @@
 module Xantham.Fable.Main
 
 open Fable.Core.DynamicExtensions
+open Fable.Core.JsInterop
 open Node
 open Thoth.Json
 open Xantham
+open Xantham.Fable.Temp
 open Xantham.Fable.Reading
 open Xantham.Fable.Reading.Entry
 open Xantham.Fable.Types
@@ -327,9 +329,31 @@ module Internal =
         tagPrimitives reader
 
     let getAndPrepareExports (reader: TypeScriptReader) =
-        reader
-        |> _.program.getSourceFile(reader.entryFile).Value
-        |> getDeclarations reader
+        reader.entryFiles
+        |> Array.collect (fun entryFile ->
+            reader.program.getSourceFile entryFile
+            |> Option.map Array.singleton
+            |> Option.orElseWith (fun () ->
+                reader.program.getSourceFiles().AsArray
+                |> Array.filter _.fileName.EndsWith(entryFile)
+                |> function
+                    | [||] -> None
+                    | sources -> Some sources
+                )
+            |> Option.orElseWith(fun () ->
+                reader.program.getSourceFiles().AsArray
+                |> Array.filter (
+                    reader.CreateSourceTagValue
+                    >> _.PackageName
+                    >> ValueOption.exists (fun name -> (=) entryFile name || name.StartsWith(entryFile))
+                    )
+                |> function
+                    | [||] -> None
+                    | sources -> Some sources
+                )
+            |> Option.defaultWith (fun () -> failwith $"Could not find source files and declarations for {entryFile}.")
+            |> Array.collect (getDeclarations reader)
+        )
         |> Array.apply (pushToStack reader)
 
     let runReader (reader: TypeScriptReader) =
@@ -460,6 +484,11 @@ let read (reader: TypeScriptReader) =
     |> Internal.trimTypeReferenceArrayTupleDuplicates
     |> Internal.mergeExports
     |> Internal.selectAndMergeWinnersInDuplicates
+    |> fun result ->
+        reader.tempFilePath
+        |> path.dirname
+        |> Directory.closeRunDirectory
+        result
 let write (outputDestination: string) (result: EncodedResult) =
     Internal.writeOutput outputDestination result
 let readAndWrite (outputDestination: string) (reader: TypeScriptReader) =

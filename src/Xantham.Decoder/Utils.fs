@@ -303,11 +303,13 @@ let private compressWithMap (types: Map<TypeKey, TsType>) (compressions: Diction
         | TsType.Union (TsTypeUnion values) ->
             values
             |> List.map swap
+            |> List.sort
             |> TsTypeUnion
             |> TsType.Union
         | TsType.Intersection (TsTypeIntersection values) ->
             values
             |> List.map swap
+            |> List.sort
             |> TsTypeIntersection
             |> TsType.Intersection
         | TsType.IndexedAccess tsIndexAccessType ->

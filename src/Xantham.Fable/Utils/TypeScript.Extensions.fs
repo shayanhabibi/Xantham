@@ -51,7 +51,44 @@ type Ts.SourceFile with
 type Ts.Type with
     [<EmitProperty "id">]
     member inline this.TypeKey: TypeKey = jsNative
+
+type TypeMapKind =
+    | Simple = 0
+    | Array = 1
+    | Deferred = 2
+    | Function = 3
+    | Composite = 4
+    | Merged = 5
+[<TypeScriptTaggedUnion "kind"; RequireQualifiedAccess>]
+type TypeMapper =
+    | [<CompiledValue(TypeMapKind.Simple)>] Simple of source: Ts.Type * target: Ts.Type
+    | [<CompiledValue(TypeMapKind.Array)>] Array of sources: Ts.Type array * targets: Ts.Type array option
+    | [<CompiledValue(TypeMapKind.Deferred)>] Deferred of sources: Ts.Type array * targets: (unit -> Ts.Type) array
+    | [<CompiledValue(TypeMapKind.Function)>] Function of func: (Ts.Type -> Ts.Type) * debugInfo: (unit -> string) option
+    | [<CompiledValue(TypeMapKind.Composite)>] Composite of mapper1: TypeMapper * mapper2: TypeMapper
+    | [<CompiledValue(TypeMapKind.Merged)>] Merged of mapper1: TypeMapper * mapper2: TypeMapper
     
+type AnonymousType =
+    inherit Ts.ObjectType
+    abstract target: AnonymousType option
+    abstract mapper: TypeMapper option
+    abstract instantiations: JS.Map<string, Ts.Type> option
+type MappedType =
+    inherit AnonymousType
+    abstract declaration: Ts.MappedTypeNode
+    abstract typeParameter: Ts.TypeParameter option
+    abstract constraintType: Ts.Type option
+    abstract nameType: Ts.Type option
+    abstract templateType: Ts.Type option
+    abstract modifiersType: Ts.Type option
+    abstract resolvedApparentType: Ts.Type option
+    abstract containsError: bool option
+type ReverseMappedType =
+    inherit AnonymousType
+    abstract source: Ts.Type
+    abstract mappedType: MappedType
+    abstract constraintType: Ts.IndexType
+
 type HasTypeArguments =
     | CallExpression of Ts.CallExpression
     | NewExpression of Ts.NewExpression

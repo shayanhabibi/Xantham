@@ -5,7 +5,7 @@
 //   - AppButton (defined here) gets fallback Source
 //   - The re-used Button type from ui-kit retains Source = "ui-kit"
 
-import { Button } from "./packages/ui-kit/index";
+import { Button } from "ui-kit";
 
 export interface AppButton extends Button {
     theme: string;

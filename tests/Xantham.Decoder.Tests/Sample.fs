@@ -18,6 +18,7 @@ module Npm =
 type Fixture = {
     Name: string
     TypeDefinitionFile: string
+    Target: string option
     Output: string
     Root: string
 } with override this.ToString() = this.Name
@@ -87,7 +88,7 @@ module Fixtures =
     let encode fixture =
         try
         RepoRoot.``.``
-        |> node [ "index.js"; fixture.TypeDefinitionFile; "-o"; fixture.Output ]
+        |> node [ "index.js"; fixture.Target |> Option.defaultValue fixture.TypeDefinitionFile; "-o"; fixture.Output ]
         Ok fixture
         with e -> Error(e)
     let decode fixture =
@@ -102,30 +103,35 @@ module Fixtures =
     let agents = {
         Name = "Agents"
         TypeDefinitionFile = Virtual.Agents.node_modules.agents.dist.``index.d.ts``
+        Target = None
         Output = Virtual.Agents.``output.json``
         Root = Root.fixtures.agents.``.``
     }
     let solidjs = {
         Name = "SolidJs"
         TypeDefinitionFile = Virtual.SolidJs.node_modules.``solid-js``.types.``index.d.ts``
+        Target = None
         Output = Virtual.SolidJs.``output.json``
         Root = Root.fixtures.``solid-js``.``.``
     }
     let three = {
         Name = "Three"
         TypeDefinitionFile = Virtual.Three.node_modules.``@types``.three.``index.d.ts``
+        Target = None
         Output = Virtual.Three.``output.json``
         Root = Root.fixtures.three.``.``
     }
     let dynamicWorkflows = {
         Name = "Dynamic Workflows"
         TypeDefinitionFile = Virtual.DynamicWorkflows.node_modules.``@cloudflare``.``dynamic-workflows``.dist.``index.d.ts``
+        Target = None
         Output = Virtual.DynamicWorkflows.``output.json``
         Root = Root.fixtures.``dynamic-workflows``.``.``
     }
     let workersTypes = {
         Name = "Workers Types"
         TypeDefinitionFile = Virtual.WorkersTypes.node_modules.``@cloudflare``.``workers-types``.``index.d.ts``
+        Target = Some "@cloudflare/workers-types"
         Output = Virtual.WorkersTypes.``output.json``
         Root = Root.fixtures.``workers-types``.``.``
     }

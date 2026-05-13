@@ -469,7 +469,8 @@ type ArenaInterner = {
     ResolvedSubModules: IDictionary<SubModuleId, ResolvedSubModule>
     ResolvedExportPoints: IDictionary<Xantham.ExportPoint, ResolvedExportPoint>
     /// Map from source module path to the list of resolved exports declared in that module.
-    ExportMap: Map<Xantham.Source, LazyResolvedExport>
+    /// Note: Lists should be singletons where `Xantham.Source.IsPackage`.
+    ExportMap: Map<Xantham.Source, LazyResolvedExport list>
     /// <summary>
     /// WARNING: Evaluation of the graph can be expensive.<br/>
     /// It is useful only when used in combination with the resolve type and resolve export
@@ -998,6 +999,10 @@ module ArenaInterner =
                 | TsExportDeclaration.Module { Metadata = metadata } -> metadata.Source
                 | TsExportDeclaration.Function funs -> funs.ValueOrHead.Metadata.Source
                 , (lazyResolveExport key).Value
+                )
+            |> Seq.groupBy fst
+            |> Seq.map (fun (source, values) ->
+                source, values |> Seq.map snd |> List.ofSeq
                 )
             |> Map.ofSeq
         {

@@ -382,6 +382,8 @@ let pushToStack (ctx: TypeScriptReader) (tag: XanthamTag) =
     tag.Builder |> ignore
     tag.TypeSignal |> ignore
     ctx.stack.Push tag
+let pushTypeToStack (ctx: TypeScriptReader) (node: Ts.Type) =
+    ctx.CreateXanthamTag node |> fst |> stackPushAndThen ctx id
 let arrayHasModifier (modifier: Modifiers -> bool) (arr: ResizeArray<Ts.Modifier>) =
     arr.AsArray |> Array.exists (Modifiers.Create >> modifier)
 let optionArrayHasModifier (modifier: Modifiers -> bool) (arr: ResizeArray<Ts.Modifier> option) =

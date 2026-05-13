@@ -217,28 +217,40 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) 
     | TypeFlagObject.Mapped mappedType ->
         nameof TypeFlagObject.Mapped |> debugLocation
         // Try enumerating concrete properties first; fall back to a string-index for generic cases.
+        let decl = mappedType.declaration
         let props = ctx.checker.getPropertiesOfType(mappedType).AsArray
         let members =
             if props.Length > 0 then
                 Array.map (propertySymToMemberSlot ctx) props
             else
-                // Fully generic mapped type — emit { [key: string]: any } as a safe fallback
+                let keyType =
+                    mappedType.nameType
+                    |> Option.orElse mappedType.constraintType
+                    |> Option.orElse (mappedType.typeParameter |> Option.bind _.getConstraint())
+                    |> Option.filter (_.TypeKey >> (<>) mappedType.TypeKey)
+                    |> Option.map (pushTypeToStack ctx >> _.TypeSignal)
+                let valueType =
+                    mappedType.templateType
+                    |> Option.filter (_.TypeKey >> (<>) mappedType.TypeKey)
+                    |> Option.map (pushTypeToStack ctx >> _.TypeSignal)
+                let isReadOnly = decl.readonlyToken.IsSome
+                let isOptional = decl.questionToken.IsSome
                 [|
                     {
                         SIndexSignatureBuilder.Parameters =
                             [|
                                 {
                                     SParameterBuilder.Name = "key"
-                                    IsOptional = false
+                                    IsOptional = isOptional
                                     IsSpread = false
-                                    Type = TypeSignal.ofKey TypeKindPrimitive.String.TypeKey
+                                    Type = keyType |> Option.defaultValue (TypeSignal.ofKey TypeKindPrimitive.String.TypeKey)
                                     Documentation = []
                                 }
                                 |> ValueSome
                                 |> Signal.source
                             |]
-                        Type = TypeSignal.ofKey TypeKindPrimitive.Any.TypeKey
-                        IsReadOnly = false
+                        Type = valueType |> Option.defaultValue (TypeSignal.ofKey TypeKindPrimitive.Any.TypeKey)
+                        IsReadOnly = isReadOnly
                     }
                     |> SMemberBuilder.IndexSignature
                     |> ValueSome
@@ -252,8 +264,8 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) 
         mappedType.TypeKey
         |> setTypeKeyForTag xanTag
 
-    | TypeFlagObject.Instantiated objType ->
-        nameof TypeFlagObject.Instantiated |> debugLocation
+    | TypeFlagObject.ReverseMapped objType ->
+        nameof TypeFlagObject.ReverseMapped |> debugLocation
         // A generic type applied to concrete arguments — same shape as Reference.
         // If the target equals itself (uninstantiated), forward to the declaration instead.
         let typeRef = unbox<Ts.TypeReference> objType

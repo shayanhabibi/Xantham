@@ -180,6 +180,11 @@ module private Internal =
             Ts.TypeFlags.NumberLiteral >-> TypeFlagLiteral.Number
             Ts.TypeFlags.StringLiteral >-> TypeFlagLiteral.String
         |]
+    /// <summary>
+    /// <a href="https://github.com/microsoft/TypeScript/blob/v5.9.3/src/compiler/types.ts#L6513">
+    /// Unique identifiers for type of object.
+    /// </a>
+    /// </summary>
     let typeFlagObjectKindSet: (Ts.ObjectFlags * (obj -> TypeFlagObject))[] =
         [|
             Ts.ObjectFlags.Class >-> TypeFlagObject.Class
@@ -188,7 +193,7 @@ module private Internal =
             Ts.ObjectFlags.Reference >-> TypeFlagObject.Reference
             Ts.ObjectFlags.Anonymous >-> TypeFlagObject.Anonymous
             Ts.ObjectFlags.Mapped >-> TypeFlagObject.Mapped
-            Ts.ObjectFlags.Instantiated >-> TypeFlagObject.Instantiated
+            Ts.ObjectFlags.ReverseMapped >-> TypeFlagObject.ReverseMapped
             Ts.ObjectFlags.EvolvingArray >-> TypeFlagObject.EvolvingArray
         |]
     #nowarn 40
@@ -1167,7 +1172,7 @@ type TypeFlagObject =
     /// <c>checker.getPropertiesOfType</c> and <c>checker.getSignaturesOfType</c> to enumerate members.
     /// Example: the type <c>{ x: number; y: number }</c>.
     /// </remarks>
-    | Anonymous of Ts.ObjectType
+    | Anonymous of AnonymousType
     /// <summary>
     /// A mapped type at the checker layer: <c>{ [K in keyof T]: T[K] }</c>.
     /// </summary>
@@ -1177,7 +1182,7 @@ type TypeFlagObject =
     /// instantiations. Inspect <c>mappedType.declaration</c> to navigate back to the AST node.
     /// Example: the type produced by <c>{ [K in keyof T]?: T[K] }</c>.
     /// </remarks>
-    | Mapped of Ts.ObjectType
+    | Mapped of MappedType
     /// <summary>
     /// An instantiated object type — a generic type applied to concrete type arguments.
     /// </summary>
@@ -1186,7 +1191,7 @@ type TypeFlagObject =
     /// a generic interface or class is specialised. The target type and type arguments can be accessed
     /// via the <c>Ts.TypeReference</c> cast on the object. Example: <c>Foo&lt;string&gt;</c> resolved.
     /// </remarks>
-    | Instantiated of Ts.ObjectType
+    | ReverseMapped of ReverseMappedType
     /// <summary>
     /// A type reference object type — a generic type applied with explicit type arguments, at the
     /// checker layer.
