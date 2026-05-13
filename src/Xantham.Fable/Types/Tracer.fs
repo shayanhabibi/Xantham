@@ -345,7 +345,7 @@ type GuardedTracer<'T, 'U> with
         this.Item(typeof<'Data>.Name)
         |> unbox
     member inline this.Get<'Data>(): 'Data =
-        this.TryGet<'Data>() |> ValueOption.get
+        this.TryGet<'Data>() |> ValueOption.defaultWith (fun () -> failwith "Attempted unwrap Get value")
     member inline this.Has<'Data>() = this.TryGet<'Data>() |> _.IsSome
     member inline this.GetOrInit<'Data>(initFn: unit -> 'Data) =
         match this.TryGet<'Data>() with
@@ -379,7 +379,7 @@ type GuardedTracer<'T, 'U> with
         this.Guard.Item(typeof<'Data>.Name)
         |> unbox
     member inline this.KeyedGet<'Data>(): 'Data =
-        this.KeyedTryGet<'Data>() |> ValueOption.get
+        this.KeyedTryGet<'Data>() |> ValueOption.defaultWith (fun () -> failwith "Attempted unwrap KeyedGet value")
     member inline this.KeyedHas<'Data>() = this.KeyedTryGet<'Data>() |> _.IsSome
     member inline this.KeyedGetOrInit<'Data>(initFn: unit -> 'Data) =
         match this.KeyedTryGet<'Data>() with

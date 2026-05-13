@@ -22,14 +22,10 @@ let private commonCompilerOptions = jsOptions<Ts.CompilerOptions>(fun c ->
     c.resolvePackageJsonExports <- Some true
     c.resolvePackageJsonImports <- Some true)
 
+
 let private createProgramForFiles (entryFiles: string array) =
     let entryFiles = entryFiles |> Array.map String.normalizePath
-    let xanthamTempDir = Node.Api.fs.mkdtempSync("xantham_")
-    let tempFilePath = Node.Api.path.join(xanthamTempDir, "temp.d.ts")
-    Node.Api.fs.writeFileSync(tempFilePath, String.concat "\n" <| [
-        for entryFile in entryFiles do
-            "import * as _ from '" + entryFile + "';"
-    ])
+    let tempFilePath = Temp.Directory.createXanthamDummyFileWithRefs entryFiles
     {|
         TempFilePath = tempFilePath
         Program =

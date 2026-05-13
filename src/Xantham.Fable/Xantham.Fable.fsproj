@@ -15,6 +15,7 @@
         <Compile Include="Utils\Array.fs" />
         <Compile Include="Utils\Utils.fs" />
         <Compile Include="Utils\TypeScript.Extensions.fs" />
+        <Compile Include="Utils\Xantham.Directory.fs" />
         <Compile Include="Types\TypeKeyExtensions.fs" />
         <Compile Include="Types\Signal.fs" />
         <Compile Include="Types\Symbol.fs" />

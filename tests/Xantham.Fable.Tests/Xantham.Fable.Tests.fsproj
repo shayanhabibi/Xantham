@@ -17,6 +17,8 @@
         <TypeScriptCompile Include="TypeFiles\members.d.ts" />
         <TypeScriptCompile Include="TypeFiles\function.d.ts" />
         <TypeScriptCompile Include="TypeFiles\generics.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\multi-file\shapes.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\multi-file\vectors.d.ts" />
         <TypeScriptCompile Include="TypeFiles\overloads.d.ts" />
         <TypeScriptCompile Include="TypeFiles\optional-readonly.d.ts" />
         <TypeScriptCompile Include="TypeFiles\index-access.d.ts" />
@@ -45,8 +47,7 @@
         <TypeScriptCompile Include="TypeFiles\node_modules\solid-js\types\index.d.ts" />
         <TypeScriptCompile Include="TypeFiles\node_modules\solid-js\types\jsx.d.ts" />
         <TypeScriptCompile Include="TypeFiles\node_modules\three\constants.d.ts" />
-        <TypeScriptCompile Include="TypeFiles\multi-file\vectors.d.ts" />
-        <TypeScriptCompile Include="TypeFiles\multi-file\shapes.d.ts" />
+        <Content Include="TypeFiles\node_modules\multi-file\package.json" />
         <TypeScriptCompile Include="TypeFiles\accessors.d.ts" />
         <TypeScriptCompile Include="TypeFiles\namespace.d.ts" />
         <TypeScriptCompile Include="TypeFiles\conditional.d.ts" />

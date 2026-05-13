@@ -120,31 +120,28 @@ open TypeScript
 #endif
 
 let private readFile (file: string) (destination: string) =
-    let fn fileExists =
-        if fileExists then
-            TypeScriptReader.create file
-            |> readAndWrite (
-                if isNull destination then
-                    "output.json"
-                else
-                    destination
-                )
-        else failwithf "File not found: %s" file
-    fs.exists(!^file, fn)
+    TypeScriptReader.create file
+    |> readAndWrite (
+        if isNull destination then
+            "output.json"
+        else
+            destination
+        )
 
 let printHelp() =
     """
 Generate Xantham IR json.
 
 USAGE
-    xantham <INPUT> [OPTIONS]       Processes the given input `.d.ts` file.
+    xantham <INPUT> [OPTIONS]       Processes the given input (installed) package or `.d.ts` file.
 
 EXAMPLE
-    xantham ./node_modules/solid-js/types/index.d.ts
+    xantham solid-js
 
 OPTIONS
     --help                          Prints this message.
     -o, --output <OUTPUT>           Sets the output path for the generated json.
+    --clean                         Removes any stale folders in the `.xantham` directory at the end of the operation.
 """
     |> printfn "%s"
     
@@ -167,5 +164,7 @@ let main argv =
         readFile input null
     | _ ->
         printHelp()
+    if List.contains "--clean" argv then
+        Temp.Directory.closeXanthamDirectory()
     0
 #endif
