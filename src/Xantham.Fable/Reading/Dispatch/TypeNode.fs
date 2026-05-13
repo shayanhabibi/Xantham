@@ -155,7 +155,27 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
             }
             |> SType.Array
             )
-        setTypeKeyFromNode arrayTypeNode
+        // TypeStore.Key is a generated unique key (see `usesGeneratedKey` for
+        // `TypeNode.ArrayType` in Prelude.fs) — `getTypeFromTypeNode` on `T[]`
+        // returns the same `Ts.Type` (and TypeKey) as the underlying `Array<T>`
+        // Interface declaration, so without a generated key the structural
+        // `SType.Array` entry collided with the Interface entry in the types
+        // map and lost the duplicate-resolution coin-flip (e.g. method returns
+        // emitting bare `ResizeArray` instead of `ResizeArray<'T>`). Set the
+        // TypeSignal to the generated TypeStore key so parents embed the
+        // structural entry's key in their Type fields. Same pattern as
+        // `TypeNode.UnionType` above.
+        ctx.signalCache[xanTag.IdentityKey].Key
+        |> setTypeKeyForTag xanTag
+        // Force-push the semantic Array type so its declaration dispatcher
+        // (TypeFlagObject.Interface for `Array`) still registers a TypeStore
+        // entry at the semantic key — without this, downstream references to
+        // the Array Interface symbol have no entry to resolve to.
+        let semanticArray = ctx.checker.getTypeFromTypeNode arrayTypeNode
+        ctx.CreateXanthamTag semanticArray
+        |> fst
+        |> TagState.apply (fun _ -> pushToStack ctx)
+        |> ignore
     | TypeNode.TupleType tupleTypeNode ->
         XanthamTag.debugLocationAndForget "TypeNode.dispatch | TupleType" xanTag
         let fixedLength, minLength =

@@ -239,6 +239,105 @@ Reverted to keep baseline numbers stable. The file-based
 investigation pattern is documented and reusable; deferring to a
 focused pass with deeper encoder/renderer cooperation.
 
+### Root cause and source fix: `T[]` collides with `Array` Interface TypeKey
+
+The TypeAliasRemap clobber turned out to be a downstream symptom.
+The actual root cause is in the encoder, and the bare-generic
+emission for `T[]` returns has a clean source fix.
+
+**Forensic trail (file-based instrumentation at three layers):**
+
+1. Logged the final `prerender` return for any `Atom(Intrinsic
+   "ResizeArray")` — fired only 2 times across the whole agents
+   regen. So bare-ResizeArray is not a direct prerender return.
+
+2. Logged `Method.render`'s `returnType` when it's a bare
+   ResizeArray atom — fired **88 times in agents**. All 88 have
+   `method.Type.Value = ResolvedType.Interface(Array)` directly
+   (NOT `ResolvedType.Array` or `ResolvedType.TypeReference`).
+
+3. The 88 fires bucket cleanly:
+
+   | Method | Count | `method.Type.Raw` |
+   |---|---|---|
+   | `with`, `toSpliced`, `toSorted`, `toReversed`, `splice`, `slice`, `reverse`, `concat` | 11 each | **65** |
+
+   `8 methods × 11 synthetic TypeLiteral copies = 88`. TypeKey 65
+   is the Array Interface itself. The method's `Type` field points
+   to the bare Array Interface — no TypeReference wrapper, no
+   typar application.
+
+**Why this happens (encoder-side):**
+
+`Reading/Dispatch/TypeNode.fs` dispatches `TypeNode.ArrayType`
+(syntactic `T[]`) and calls `setTypeKeyFromNode arrayTypeNode`,
+which evaluates `ctx.checker.getTypeFromTypeNode arrayTypeNode |>
+_.TypeKey`. TS's TypeChecker returns the same `Ts.Type` for `T[]`
+and the `Array<T>` Interface declaration — they share `type.id`.
+So the SType.Array structural form (built from the syntactic node)
+and the Interface declaration (built from the Array symbol) both
+register TypeStore entries at the same TypeKey.
+
+The duplicate-resolution pass picks one winner. The Interface wins
+on identity priority (its declaration position is more authoritative
+than the synthetic SType.Array). All references to TypeKey 65
+resolve to the Interface — losing the element-type application.
+
+When the Array Interface's `resolvedTypePreludeInterceptor` then
+substitutes `Array → ResizeArray` (arity 1) and returns the bare
+intrinsic atom, the use site has no remaining `<T>` to apply, and
+emits bare `ResizeArray`.
+
+**Fix at source (Xantham.Fable encoder):**
+
+`Reading/Prelude.fs` already has a `usesGeneratedKey` list of tag
+kinds that need a fresh TypeKey for exactly this reason —
+TypeChecker collapsing distinct syntactic nodes onto a shared
+semantic TypeKey. The list includes `UnionType`, `IntersectionType`,
+`TypeQuery`, `TypePredicate`, `TypeReference` (with args). It was
+missing `ArrayType`.
+
+Added `XanTagKind.TypeNode (TypeNode.ArrayType _) -> true` so each
+`T[]` syntactic node gets its own TypeStore entry distinct from
+the Array Interface. With this change, the SType.Array entry no
+longer collides with the Interface — references to `T[]` resolve
+to the structural Array form, which goes through
+`ResolvedType.Array` in the generator and builds
+`Prefix(ResizeArray, [T])` correctly.
+
+Companion change in `Reading/Dispatch/TypeNode.fs`:
+- Set TypeSignal to `ctx.signalCache[xanTag.IdentityKey].Key` (the
+  generated key), so parents embed the structural-entry key in
+  their Type fields. (`setTypeKeyFromNode` would have embedded the
+  semantic key, defeating the purpose.) Same pattern as `UnionType`.
+- Force-push the semantic Array type so its declaration dispatcher
+  (`TypeFlagObject.Interface`) still registers an entry at the
+  semantic key for direct Array Interface references. Same pattern
+  as `UnionType` / `IntersectionType`.
+
+**Verification status:**
+
+The fix is applied at source in `src/Xantham.Fable/`. Re-encoding
+to validate the verify pipeline downstream is currently blocked by
+a separate, pre-existing encoder regression unrelated to this fix:
+running the current Xantham.Fable encoder against the workers-types
+fixture produces ~75% smaller JSON than the May 11 committed
+artifact and triggers a `[MISSREF] TypeKey -N` at
+`workers-types/index.ts:466:22` (the `export declare const
+Cloudflare: Cloudflare;` line). The same MISSREF reproduces on
+plain HEAD without my fix. Likely introduced by one of the
+post-May-11 Xantham.Fable commits (`2cc1645 fix(types): enhance
+type system with mapped types and reverse-mapped types`,
+`95bbbb8 feat(encoder): generate a temporary .d.ts file when
+starting program`, etc.). Decoder then throws `KeyNotFoundException`
+on the dangling key during the compress pass.
+
+The fix is documented and committed as source — it will land
+correctly once the encoder regression is resolved and JSON
+regeneration is restored. Until then, the verify counts in this
+branch's HEAD reflect the bare-generic bug still present (using
+the May 11 JSON).
+
 # What PR #2 brought in (Shayan)
 
 Two structural fixes plus one bug catch, plus encoder ergonomic work.

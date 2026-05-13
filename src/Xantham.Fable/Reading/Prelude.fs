@@ -83,6 +83,19 @@ module TypeStore =
         // boolean type, so all predicates would share the boolean TypeKey. Generated key
         // gives each predicate node its own unique TypeStore entry.
         | XanTagKind.TypeNode (TypeNode.TypePredicate _) -> true
+        // TypeNode.ArrayType: getTypeFromTypeNode on `T[]` returns the same Ts.Type
+        // (and TypeKey) as the underlying `Array<T>` Interface declaration —
+        // both are the same semantic generic. The TypeStore would then hold two
+        // entries at one key: the Interface (from the declaration) and the
+        // SType.Array structural form (from `T[]` syntactic usage). Duplicate
+        // resolution then picks one and silently discards the other. When the
+        // structural Array entry is the discarded one, callers that referenced
+        // `T[]` resolve to the bare Array Interface and lose the element-type
+        // application — emitting bare `ResizeArray` instead of `ResizeArray<'T>`.
+        // Generated key gives each syntactic `T[]` node its own TypeStore entry
+        // distinct from the Array Interface; same pattern as `TypeNode.UnionType`
+        // / `IntersectionType` which face the same checker-expansion collision.
+        | XanTagKind.TypeNode (TypeNode.ArrayType _) -> true
         | XanTagKind.ModulesAndExports _ -> true
         | XanTagKind.MemberDeclaration _ -> true
         | _ -> false
