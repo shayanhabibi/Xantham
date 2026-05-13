@@ -332,20 +332,27 @@ module Internal =
         reader.entryFiles
         |> Array.collect (fun entryFile ->
             reader.program.getSourceFile entryFile
+            |> Option.map Array.singleton
             |> Option.orElseWith (fun () ->
                 reader.program.getSourceFiles().AsArray
-                |> Array.tryFind _.fileName.EndsWith(entryFile)
+                |> Array.filter _.fileName.EndsWith(entryFile)
+                |> function
+                    | [||] -> None
+                    | sources -> Some sources
                 )
             |> Option.orElseWith(fun () ->
                 reader.program.getSourceFiles().AsArray
-                |> Array.tryFind (
+                |> Array.filter (
                     reader.CreateSourceTagValue
                     >> _.PackageName
                     >> ValueOption.exists (fun name -> (=) entryFile name || name.StartsWith(entryFile))
                     )
+                |> function
+                    | [||] -> None
+                    | sources -> Some sources
                 )
             |> Option.defaultWith (fun () -> failwith $"Could not find source files and declarations for {entryFile}.")
-            |> getDeclarations reader
+            |> Array.collect (getDeclarations reader)
         )
         |> Array.apply (pushToStack reader)
 
