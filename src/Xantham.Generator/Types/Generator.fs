@@ -80,6 +80,15 @@ module LibEsDefaults =
             "AsyncIterable", { Target = "System.Collections.Generic.IAsyncEnumerable"; Arity = 1 }
             // `ReadonlyArray<T>` → `IReadOnlyList<T>` (read-only with index).
             "ReadonlyArray", { Target = "System.Collections.Generic.IReadOnlyList"; Arity = 1 }
+            // `ConcatArray<T>` → `IReadOnlyList<T>`. Lib.es5 defines
+            // `ConcatArray<T>` as a structural subset of Array: just
+            // `length`, indexed access, `join`, and `slice`. The closest
+            // F# analogue is `IReadOnlyList<T>` (length + index +
+            // structural enumeration). Without this substitution,
+            // `concat(...items: ConcatArray<T>[])` references dangle —
+            // the parameter type renders as `ResizeArray<ConcatArray<'T>>`
+            // and ConcatArray has no definition in the binding surface.
+            "ConcatArray", { Target = "System.Collections.Generic.IReadOnlyList"; Arity = 1 }
             // `ReadonlyMap<K, V>` → `IReadOnlyDictionary<K, V>`.
             "ReadonlyMap", { Target = "System.Collections.Generic.IReadOnlyDictionary"; Arity = 2 }
             // `Map<K, V>` → `IDictionary<K, V>` (mutable keyed lookup).
@@ -102,7 +111,13 @@ module LibEsDefaults =
             "Float32Array", { Target = "Float32Array"; Arity = 0 }
             "Float64Array", { Target = "Float64Array"; Arity = 0 }
             "BigInt64Array", { Target = "BigInt64Array"; Arity = 0 }
-            "BigUint64Array", { Target = "BigUint64Array"; Arity = 0 }
+            // Fable.Core.JS provides BigInt64Array but NOT BigUint64Array.
+            // Without a placeholder we get FS0039 "type 'BigUint64Array'
+            // is not defined" at every reference site. Map to obj as the
+            // safest workaround: preserves compilation; consumers refine
+            // via their own Fable.Browser.* bindings if needed. Same
+            // pattern as PropertyKey/RegExp/etc. below.
+            "BigUint64Array", { Target = Intrinsic.obj; Arity = 0 }
             "ArrayBufferView", { Target = "ArrayBufferView"; Arity = 0 }
             "DataView", { Target = "DataView"; Arity = 0 }
             // TS lib.es / lib.dom built-ins that Fable.Core.JS doesn't
@@ -192,7 +207,43 @@ module LibEsDefaults =
             "DOMException", { Target = Intrinsic.obj; Arity = 0 }
             "URLSearchParams", { Target = Intrinsic.obj; Arity = 0 }
             "URLSearchParamsInit", { Target = Intrinsic.obj; Arity = 0 }
-            // TS WebAssembly
+            // Lib.dom / lib.webworker types referenced from binding
+            // outputs but not surfaced by the encoder (LibEs-source
+            // filter; no consumer declaration-merge). Map to `obj` /
+            // `string` so references compile.
+            //
+            // `CompressionFormat` and `RequestPriority` are TS type
+            // aliases to literal-string unions ("deflate"|"gzip"|... and
+            // "auto"|"high"|"low"). Mapping to `string` preserves the
+            // structural shape (a string with constrained values);
+            // consumers can validate at boundaries.
+            "CompressionFormat", { Target = Intrinsic.string; Arity = 0 }
+            "RequestPriority", { Target = Intrinsic.string; Arity = 0 }
+            // `Comment` (DOM Comment node), `StreamPipeOptions` (pipeTo
+            // config), `FontFaceDescriptors` (CSS Font Loading API):
+            // structural interfaces with consumer-side configurability
+            // that's not worth surfacing through F# bindings. `obj` placeholder.
+            "Comment", { Target = Intrinsic.obj; Arity = 0 }
+            "StreamPipeOptions", { Target = Intrinsic.obj; Arity = 0 }
+            "FontFaceDescriptors", { Target = Intrinsic.obj; Arity = 0 }
+            // More lib.dom / lib.webworker types referenced via consumer
+            // declaration-merging surfaces but not emitted by the encoder.
+            // `URL` is a JS built-in (consumers should map to
+            // `Fable.Core.JS.URL` or `Browser.Types.Url` at use sites).
+            // `BlobPart` is a TS type alias for `BufferSource | Blob | string`;
+            // `obj` is the closest F# placeholder.
+            // `CacheQueryOptions` / `CloseEventInit`: config interfaces.
+            // `ReadableStreamReadValueResult<T>`: stream reader result tuple;
+            // arity 1 in TS, mapped to `obj` arity 0 (truncates).
+            "URL", { Target = Intrinsic.obj; Arity = 0 }
+            "BlobPart", { Target = Intrinsic.obj; Arity = 0 }
+            "CacheQueryOptions", { Target = Intrinsic.obj; Arity = 0 }
+            "CloseEventInit", { Target = Intrinsic.obj; Arity = 0 }
+            "ReadableStreamReadValueResult", { Target = Intrinsic.obj; Arity = 0 }
+            // TS WebAssembly. The dotted-key entries (`WebAssembly.Module`
+            // etc.) below DON'T fire — the substitution lookup uses the
+            // type's bare Name field, never a qualified namespace key.
+            // Left in as documentation of intent; harmless dead entries.
             "WebAssembly.Module", { Target = Intrinsic.obj; Arity = 0 }
             "WebAssembly.Instance", { Target = Intrinsic.obj; Arity = 0 }
             "WebAssembly.Memory", { Target = Intrinsic.obj; Arity = 0 }
@@ -200,6 +251,24 @@ module LibEsDefaults =
             "WebAssembly.Global", { Target = Intrinsic.obj; Arity = 0 }
             "WebAssembly.Tag", { Target = Intrinsic.obj; Arity = 0 }
             "WebAssembly.Exception", { Target = Intrinsic.obj; Arity = 0 }
+            // Lib.webworker.d.ts defines `WebAssembly.GlobalDescriptor`,
+            // `MemoryDescriptor`, `TableDescriptor`, `ModuleImportDescriptor`,
+            // `ModuleExportDescriptor` as nested interfaces. The encoder
+            // doesn't surface them in the F# output (probably the
+            // LibEs-source filter — peers like `WebAssembly.Global` get
+            // kept because the consumer package redeclares them via
+            // declaration merging, but the *Descriptor types aren't
+            // augmented and so stay filtered). References to them
+            // (`WebAssembly.Global.Create(d: GlobalDescriptor, ...)`)
+            // dangle as FS0039. Map to `obj` so the references collapse;
+            // consumers who need the concrete shape construct ad-hoc
+            // anonymous records. Arity 0 so any applied typar args
+            // truncate cleanly.
+            "GlobalDescriptor", { Target = Intrinsic.obj; Arity = 0 }
+            "MemoryDescriptor", { Target = Intrinsic.obj; Arity = 0 }
+            "TableDescriptor", { Target = Intrinsic.obj; Arity = 0 }
+            "ModuleImportDescriptor", { Target = Intrinsic.obj; Arity = 0 }
+            "ModuleExportDescriptor", { Target = Intrinsic.obj; Arity = 0 }
         ]
 
     let private intrinsicRef (name: string) =
