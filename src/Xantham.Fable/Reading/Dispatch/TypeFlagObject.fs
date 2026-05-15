@@ -182,8 +182,7 @@ let private buildMembersFromType (ctx: TypeScriptReader) (objType: Ts.ObjectType
 // ---------------------------------------------------------------------------
 
 let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) =
-    let debugLocation typeFlagObjectType =
-        XanthamTag.debugLocationAndForget $"TypeFlagObject.dispatch | %s{typeFlagObjectType}" xanTag
+    let debugLocation = sprintf "Dispatching type flag object of type %s" >> xanTag.doDebugMessage
     let inline setAstSignal (astValue: SType) =
         xanTag.Builder <- astValue
     match tag with

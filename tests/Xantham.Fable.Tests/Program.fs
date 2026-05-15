@@ -7,6 +7,7 @@ open Node.Api
 open Fable.Mocha
 open Xantham.Schema
 open Fable.Core.JsInterop
+open Xantham.Fable.Utils
 
 // -----------------------------------------------------------------------
 // Infrastructure

@@ -28,7 +28,9 @@ module Internal =
     }
     module Log =
         let prefix = chalk.redBright.Invoke "[CIRCREF]"
-        let inline healthCheckError<'T> (typeKey: TypeKey) (typ: 'T) (o: obj) = Log.emit $"{prefix} - { chalk.yellowBright.Invoke typeof<'T>.Name}: {o} references itself [{chalk.yellowBright.Invoke typeKey}]"
+        let inline healthCheckError<'T> (typeKey: TypeKey) (typ: 'T) (o: obj) =
+            Log.emit $"{prefix} - { chalk.yellowBright.Invoke typeof<'T>.Name}: {o} references itself [{chalk.yellowBright.Invoke typeKey}]"
+        
             
     let rec healthCheckType (typKey: TypeKey) (node: TsType) =
         match node with
@@ -125,7 +127,12 @@ module Internal =
                 let { Key = typeKey; Builder = builder } = kv.Value
                 match builder.Value with
                 | ValueNone when keys.Contains typeKey |> not ->
-                    let error (pos: obj) = (chalk.redBright.Invoke "[MISSREF]" + $" - TypeKey {chalk.yellowBright.Invoke typeKey} - Missing type builder value - {chalk.yellow.Invoke pos}") |> Log.emit
+                    let error (pos: obj) =
+                        reader.logger.logfe
+                            "[%s{event}] TypeKey %A{refKey} is missing a type builder value. Identity or Position: %A{identOrPos}"
+                            "MISSREF"
+                            typeKey
+                            pos
                     match identityKey with
                     | IdentityKey.DeclarationPosition(file, _, _) ->
                         error file
@@ -151,7 +158,12 @@ module Internal =
                 let { RefKey = typeKey; Builder = builder } = kv.Value
                 match builder.Value with
                 | ValueNone when keys.Contains typeKey |> not -> 
-                    let error (pos: obj) = (chalk.redBright.Invoke "[MISSREF]" + $" - RefKey {chalk.yellowBright.Invoke typeKey} - Missing export builder value - {chalk.yellow.Invoke pos}") |> Log.emit
+                    let error (pos: obj) =
+                        reader.logger.logfe
+                            "[%s{event}] Refkey %A{refKey} is missing an export build value. Identity or Position: %A{identOrPos}"
+                            "MISSREF"
+                            typeKey
+                            pos
                     match identityKey with
                     | IdentityKey.DeclarationPosition(file, _, _) ->
                         error file
@@ -485,8 +497,7 @@ let read (reader: TypeScriptReader) =
     |> Internal.mergeExports
     |> Internal.selectAndMergeWinnersInDuplicates
     |> fun result ->
-        reader.tempFilePath
-        |> path.dirname
+        reader.tempDirectory
         |> Directory.closeRunDirectory
         result
 let write (outputDestination: string) (result: EncodedResult) =

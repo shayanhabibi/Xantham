@@ -14,6 +14,7 @@
         <Compile Include="Utils\String.fs" />
         <Compile Include="Utils\Array.fs" />
         <Compile Include="Utils\Utils.fs" />
+        <Compile Include="Utils\Logging.fs" />
         <Compile Include="Utils\TypeScript.Extensions.fs" />
         <Compile Include="Utils\Xantham.Directory.fs" />
         <Compile Include="Types\TypeKeyExtensions.fs" />
@@ -49,6 +50,7 @@
 
     <ItemGroup>
       <PackageReference Include="Fable.Core" Version="5.0.0-beta.3" />
+      <PackageReference Include="Fable.FSharp.Logf" Version="1.2.2" />
       <PackageReference Include="Fable.Node" Version="1.6.0" />
       <PackageReference Include="Glutinum.Chalk" Version="1.0.0" />
       <PackageReference Include="Thoth.Json" Version="10.4.1" />

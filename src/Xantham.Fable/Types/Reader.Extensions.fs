@@ -7,9 +7,17 @@ open Xantham.Fable.Types.SourceTag
 
 type TypeScriptReader with
     member this.CreateXanthamTag(node: Ts.Node) =
-        XanthamTag.Create(node, this.checker)
+        let r1, r2 = XanthamTag.Create(node, this.checker)
+        r1.Value
+        |> GuardedData.Log.set (ValueSome this.logger)
+        |> ignore
+        r1, r2
     member this.CreateXanthamTag(typ: Ts.Type) =
-        XanthamTag.Create(typ, this.checker)
+        let r1, r2 = XanthamTag.Create(typ, this.checker)
+        r1.Value
+        |> GuardedData.Log.set (ValueSome this.logger)
+        |> ignore
+        r1, r2
 
 module XanthamTag =
     let createForNode (ctx: TypeScriptReader) (node: Ts.Node) = ctx.CreateXanthamTag node

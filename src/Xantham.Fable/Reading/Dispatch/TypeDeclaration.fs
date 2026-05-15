@@ -188,7 +188,7 @@ module TypeAlias =
         let innerTypeSignal, innerBuilderSignal =
             ctx.CreateXanthamTag node.``type``
             |> fst
-            |> stackPushAndThen ctx (XanthamTag.chainDebug xanTag >> fun tag -> tag.TypeSignal, tag.Builder)
+            |> stackPushAndThen ctx (_.chainDebug(xanTag) >> fun tag -> tag.TypeSignal, tag.Builder)
         let builder = {
             SAliasBuilder.Metadata = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
@@ -447,21 +447,22 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
                 |> Source.LibEs
             )
         |> fun source -> { Source = source }
+    let makeDebugMessage = sprintf "Dispatched type declaration -> %s" >> xanTag.doDebugMessage
     match node with
     | TypeDeclaration.TypeParameter typeParameterDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | TypeParameter" xanTag
+        "Type Parameter" |> makeDebugMessage 
         TypeParameter.read ctx xanTag typeParameterDeclaration
     | TypeDeclaration.Interface interfaceDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Interface" xanTag
+        "Interface" |> makeDebugMessage 
         Interface.read ctx xanTag interfaceDeclaration metadata
     | TypeDeclaration.TypeAlias typeAliasDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | TypeAlias" xanTag
+        "TypeAlias" |> makeDebugMessage 
         TypeAlias.read ctx xanTag typeAliasDeclaration metadata
     | TypeDeclaration.Class classDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Class" xanTag
+        "Class" |> makeDebugMessage 
         Class.read ctx xanTag classDeclaration metadata
     | TypeDeclaration.HeritageClause heritageClause ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | HeritageClause" xanTag
+        makeDebugMessage "Heritage Clause"
         // Wire this tag to the first type in the clause so Interface.read's Heritage
         // computed signal can read a TypeReference builder from it.
         match heritageClause.types.AsArray |> Array.tryHead with
@@ -478,7 +479,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
             xanTag.Builder
             |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
     | TypeDeclaration.ExpressionWithTypeArguments exprWithTypeArgs ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | ExpressionWithTypeArguments" xanTag
+        "Expression With Type Arguments" |> makeDebugMessage 
         // Route via checker; consumers look up TypeSignal/Builder on this tag.
         let resolvedType = ctx.checker.getTypeAtLocation exprWithTypeArgs
         let innerTag = ctx.CreateXanthamTag resolvedType |> fst |> stackPushAndThen ctx id
@@ -487,13 +488,13 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
         xanTag.Builder
         |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
     | TypeDeclaration.Enum enumDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Enum" xanTag
+        "Enum" |> makeDebugMessage
         Enum.readDeclaration ctx xanTag enumDeclaration metadata
     | TypeDeclaration.EnumMember enumMember ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | EnumMember" xanTag
+        "Enum Member" |> makeDebugMessage
         Enum.readMember ctx xanTag enumMember
     | TypeDeclaration.VariableStatement variableStatement ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | VariableStatement" xanTag
+        "Variable Statement" |> makeDebugMessage
         // Push each inner VariableDeclaration and wire this tag's signals to the first one.
         let tags =
             variableStatement.declarationList.declarations.AsArray
@@ -510,16 +511,17 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
             xanTag.TypeSignal |> Signal.fulfillWith (fun () -> firstTag.TypeSignal.Value)
             xanTag.ExportBuilder |> Signal.fulfillWith(fun () -> firstTag.ExportBuilder.Value)
     | TypeDeclaration.VariableDeclaration variableDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | VariableDeclaration" xanTag
+        "Variable Declaration" |> makeDebugMessage
         Variable.readDeclaration ctx xanTag variableDeclaration metadata
     | TypeDeclaration.FunctionDeclaration functionDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | FunctionDeclaration" xanTag
+        "Function Declaration" |> makeDebugMessage
         FunctionDecl.read ctx xanTag functionDeclaration metadata
     | TypeDeclaration.Module moduleDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Module" xanTag
+        "Module" |> makeDebugMessage
         Module.read ctx xanTag moduleDeclaration metadata
     | TypeDeclaration.Namespace namespaceDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Namespace" xanTag
+        "Namespace" |> makeDebugMessage
         Module.read ctx xanTag namespaceDeclaration metadata
     | TypeDeclaration.ModuleBlock _ ->
+        "Module Block" |> makeDebugMessage
         () // Processed inline during Module/Namespace dispatch; no standalone signal needed

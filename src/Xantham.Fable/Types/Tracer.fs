@@ -88,14 +88,28 @@ let getDebugId() =
     DebugIdCounter
 
 type Tracer<'T> with
+    #if DEBUG
+    /// <summary>
+    /// Only compiled in Debug builds
+    /// </summary>
+    member inline this.TraceId with get() =
+        this["DebugId"] :?> int option
+        |> Option.defaultWith (fun () ->
+            this["DebugId"] <- getDebugId()
+            this["DebugId"] :?> int
+            )
+    #endif
     member inline this.DebugId with get() = this["DebugId"] :?> int option |> Option.defaultValue -1
     member inline this.Debug
         with inline get() = this["Debug"] :?> bool option |> Option.defaultValue false
         and inline set(value: bool) =
+            #if DEBUG
+            if value && not this.Debug && (this["DebugId"] :?> int option).IsNone then
+            #else
             if value && not this.Debug then
+            #endif
                 this["DebugId"] <- getDebugId()
             this["Debug"] <- value
-            
         
     member inline this.TYPE_Valid = TRACER_PROXY.Invoke(this).IsSome && TRACER_PROXY.UnsafeInvoke(this) = typeof<'T>.Name
     member inline this.TYPE_Invalid = this.TYPE_Valid |> not

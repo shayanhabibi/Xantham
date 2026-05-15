@@ -14,8 +14,8 @@ open Xantham.Fable.Types.Tracer
 let inline private getTypeSignalFromNode (ctx: TypeScriptReader) (parent: XanthamTag) (node: Ts.TypeNode)  =
     ctx.CreateXanthamTag node |> fst
     |> fun tagState ->
-        XanthamTag.chainDebug parent tagState.Value
-        |> XanthamTag.debugLocationAndForget "MemberDeclaration.getTypeSignalFromNode"
+        tagState.Value.chainDebug(parent)
+        |> ignore
         tagState
     |> stackPushAndThen ctx _.TypeSignal
 
@@ -35,10 +35,10 @@ let private getSignalFromTypeNodeOption (ctx: TypeScriptReader) (typ: Ts.TypeNod
             |> ctx.CreateXanthamTag
         with
         | _, TagState.Visited guard when ctx.signalCache.ContainsKey(guard.Value) ->
-            XanthamTag.chainDebug parentTag (unbox guard) |> ignore
+            (unbox<XanthamTag> guard).chainDebug(parentTag) |> ignore
             TypeSignal.ofKey ctx.signalCache[guard.Value].Key
         | tagState, _ ->
-            XanthamTag.chainDebug parentTag (unbox tagState.Value) |> ignore
+            tagState.Value.chainDebug(parentTag) |> ignore
             stackPushAndThen ctx _.TypeSignal tagState
         )
 /// Returns TypeSignal voption for constraint/default slots on type parameters.
@@ -133,7 +133,7 @@ module Property =
 
 module Method =
     let readSignature (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.MethodSignature) =
-        XanthamTag.debugLocationAndForget "Method.readSignature" xanTag
+        xanTag.doDebugMessage "Method.readSignature" 
         let builder = {
             SMethodBuilder.Name = NameHelpers.getName node.name
             Parameters = getParameterSlots ctx node.parameters
@@ -146,7 +146,7 @@ module Method =
         xanTag.MemberBuilder <-  builder |> SMemberBuilder.Method
 
     let readDeclaration (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.MethodDeclaration) =
-        XanthamTag.debugLocationAndForget "Method.readDeclaration" xanTag
+        xanTag.doDebugMessage "Method.readDeclaration" 
         xanTag.MemberBuilder <-
             {
                 SMethodBuilder.Name = NameHelpers.getName node.name
@@ -161,7 +161,7 @@ module Method =
 
 module IndexSignature =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.IndexSignatureDeclaration) =
-        XanthamTag.debugLocationAndForget "IndexSignature.read" xanTag
+        xanTag.doDebugMessage "IndexSignature.read" 
         xanTag.MemberBuilder <-
             {
                 SIndexSignatureBuilder.Parameters = getParameterSlots ctx node.parameters
@@ -172,7 +172,7 @@ module IndexSignature =
 
 module CallSignature =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.CallSignatureDeclaration) =
-        XanthamTag.debugLocationAndForget "CallSignature.read" xanTag
+        xanTag.doDebugMessage "CallSignature.read" 
         xanTag.MemberBuilder <-
             {
                 SCallSignatureBuilder.Parameters = getParameterSlots ctx node.parameters
@@ -184,7 +184,7 @@ module CallSignature =
 
 module ConstructSignature =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.ConstructSignatureDeclaration) =
-        XanthamTag.debugLocationAndForget "ConstructSignature.read" xanTag
+        xanTag.doDebugMessage "ConstructSignature.read"
         xanTag.MemberBuilder <-
             {
                 SConstructSignatureBuilder.Type = getReturnTypeSignal ctx xanTag node.``type``
@@ -195,7 +195,7 @@ module ConstructSignature =
 
 module Constructor =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.ConstructorDeclaration) =
-        XanthamTag.debugLocationAndForget "Constructor.read" xanTag
+        xanTag.doDebugMessage "Constructor.read"
         xanTag.ConstructorBuilder <-
             {
                 SConstructorBuilder.Parameters = getParameterSlots ctx node.parameters
@@ -204,7 +204,7 @@ module Constructor =
 
 module GetAccessor =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.GetAccessorDeclaration) =
-        XanthamTag.debugLocationAndForget "GetAccessor.read" xanTag
+        xanTag.doDebugMessage "GetAccessor.read"
         xanTag.MemberBuilder <-
         {
             SGetAccessorBuilder.Name = NameHelpers.getName node.name
@@ -218,7 +218,7 @@ module GetAccessor =
 
 module SetAccessor =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.SetAccessorDeclaration) =
-        XanthamTag.debugLocationAndForget "SetAccessor.read" xanTag
+        xanTag.doDebugMessage "SetAccessor.read"
         // Argument type comes from the first parameter; fall back to checker on the node itself.
         let argType =
             node.parameters.AsArray
@@ -239,7 +239,7 @@ module SetAccessor =
 
 module Parameter =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.ParameterDeclaration) =
-        XanthamTag.debugLocationAndForget "Parameter.read" xanTag
+        xanTag.doDebugMessage "Parameter.read"
         xanTag.ParameterBuilder <-
         {
             SParameterBuilder.Name = NameHelpers.getName node.name
@@ -252,8 +252,7 @@ module Parameter =
         }
         
 let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: MemberDeclaration) =
-    let debugLocation memberType =
-       XanthamTag.debugLocationAndForget $"MemberDeclaration.dispatch | %s{memberType}" xanTag
+    let debugLocation = sprintf "Dispatching member declaration of type %s" >> xanTag.doDebugMessage
     match node with
     | MemberDeclaration.PropertySignature propertySignature ->
         nameof MemberDeclaration.PropertySignature |> debugLocation

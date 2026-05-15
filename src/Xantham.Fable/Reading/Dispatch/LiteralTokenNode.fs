@@ -7,33 +7,34 @@ open Xantham.Fable
 open Xantham.Fable.Types
 
 let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: LiteralTokenNodes) =
+    let debugLocation = sprintf "Literal token dispatched of type %s" >> xanTag.doDebugMessage
     let inline setAstSignal builder =
         xanTag.Builder <- builder
     match tag with
     | LiteralTokenNodes.StringLiteral stringLiteral ->
-        XanthamTag.debugLocationAndForget "LiteralTokenNode.dispatch | StringLiteral" xanTag
+        nameof LiteralTokenNodes.StringLiteral |> debugLocation
         TsLiteral.String stringLiteral.text
     | LiteralTokenNodes.BigIntLiteral bigIntLiteral ->
-        XanthamTag.debugLocationAndForget "LiteralTokenNode.dispatch | BigIntLiteral" xanTag
+        nameof LiteralTokenNodes.BigIntLiteral |> debugLocation
         bigIntLiteral.text
         |> System.Numerics.BigInteger.Parse
         |> TsLiteral.BigInt
     | LiteralTokenNodes.NumericLiteral numericLiteral ->
-        XanthamTag.debugLocationAndForget "LiteralTokenNode.dispatch | NumericLiteral" xanTag
+        nameof LiteralTokenNodes.NumericLiteral |> debugLocation
         let v = JS.Constructors.Number.parseFloat numericLiteral.text
         if JS.Constructors.Number.isSafeInteger v then v |> int |> TsLiteral.Int
         else v |> TsLiteral.Float
     | LiteralTokenNodes.TrueLiteral _ ->
-        XanthamTag.debugLocationAndForget "LiteralTokenNode.dispatch | TrueLiteral" xanTag
+        nameof LiteralTokenNodes.TrueLiteral |> debugLocation
         TsLiteral.Bool true
     | LiteralTokenNodes.FalseLiteral _ ->
-        XanthamTag.debugLocationAndForget "LiteralTokenNode.dispatch | FalseLiteral" xanTag
+        nameof LiteralTokenNodes.FalseLiteral |> debugLocation
         TsLiteral.Bool false
     | LiteralTokenNodes.NullLiteral _ ->
-        XanthamTag.debugLocationAndForget "LiteralTokenNode.dispatch | NullLiteral" xanTag
+        nameof LiteralTokenNodes.NullLiteral |> debugLocation
         TsLiteral.Null
     | LiteralTokenNodes.PrefixUnaryExpression prefixUnaryExpression ->
-        XanthamTag.debugLocationAndForget "LiteralTokenNode.dispatch | PrefixUnaryExpression" xanTag
+        nameof LiteralTokenNodes.PrefixUnaryExpression |> debugLocation
         let inline op factor =
             match prefixUnaryExpression.operator with
             | Ts.SyntaxKind.MinusToken -> (*) (factor -1) // -1
@@ -46,7 +47,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: LiteralTokenNode
             else v |> op float |> TsLiteral.Float
         | _ -> TsLiteral.Null
     | LiteralTokenNodes.NoSubstitutionTemplateLiteral noSubstitutionTemplateLiteral ->
-        XanthamTag.debugLocationAndForget "LiteralTokenNode.dispatch | NoSubstitutionTemplateLiteral" xanTag
+        nameof LiteralTokenNodes.NoSubstitutionTemplateLiteral |> debugLocation
         TsLiteral.String noSubstitutionTemplateLiteral.text
     |> SType.Literal
     |> setAstSignal

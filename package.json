@@ -25,6 +25,7 @@
         "run": "dotnet fable --cwd src/Xantham.Fable -e .fs.js -c DEBUG --noCache -o output --run node output/Program.fs.js",
         "watch": "dotnet fable --cwd src/Xantham.Fable --noCache -e .fs.js -o output --watch --run node --watch output/Program.fs.js",
         "test:signal": "dotnet fable --cwd tests/ --noCache Signal.test.fsx && node tests/Signal.test.fs.js",
+    "test:logging": "dotnet fable tests/Logging.test.fsx --noCache && node tests/Logging.test.fs.js",
         "prebuild": "dotnet fable --cwd src/Xantham.Fable -c Release --noCache -o output -e .fs.js",
         "build": ""
     },
