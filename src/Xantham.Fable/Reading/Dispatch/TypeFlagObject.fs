@@ -58,7 +58,9 @@ let private forwardToSymbolDeclaration (ctx: TypeScriptReader) (xanTag: XanthamT
             >> Array.map (ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx _.chainDebug(xanTag))
             )
         |> Option.defaultValue [||]
-        |> Array.filter ((<>) xanTag)
+        |> Array.filter (fun tag ->
+            tag <> xanTag
+            && not (unbox<Ts.Node> tag.Value.Value |> ModulesAndExports.IsModulesAndExportsKind))
     let firstValidTag: Signal<XanthamTag voption> = Signal.source ValueNone
     // We track the declarations, and will accept the first declaration that provides us a builder value.
     // TODO - determinism
@@ -80,19 +82,27 @@ let private forwardToSymbolDeclaration (ctx: TypeScriptReader) (xanTag: XanthamT
             firstValidTag.Value
             |> ValueOption.map (fun tag ->
                 runner.Dispose()
-                tag.TypeSignal.Value, tag.Builder.Value
+                tag.TypeSignal, tag.Builder
             ))
     xanTag.TypeSignal
     |> Signal.fulfillWith (fun () ->
         combinedSignal.Value
-        |> ValueOption.map fst
-        |> ValueOption.defaultValue TypeKindPrimitive.Unknown.TypeKey
+        |> ValueOption.map (fst >> _.Value)
+        |> ValueOption.defaultValue (
+            declarations
+            |> Array.head
+            |> _.TypeSignal.Value
+            )
         )
     xanTag.Builder
     |> Signal.fulfillWith (fun () ->
         combinedSignal.Value
-        |> ValueOption.map snd
-        |> ValueOption.defaultValue ValueNone
+        |> ValueOption.map (snd >> _.Value)
+        |> ValueOption.defaultValue (
+            declarations
+            |> Array.head
+            |> _.Builder.Value
+            )
         )
 
 /// Build parameter slots from the checker-level parameters of a Ts.Signature.
