@@ -14,7 +14,9 @@ module Literals =
     [<Literal>]
     let runTempFileName = "temp"
     [<Literal>]
-    let tempLogFileName = "log"
+    let tempLogFileName = "log_"
+    [<Literal>]
+    let maxTempLogCount = 10
 
 let tempDir = "./" + Literals.tempDirName
 let runTempFileName = $"{Literals.runTempFileName}.d.ts"
@@ -22,7 +24,23 @@ let runTempDirPrefix = $"{Literals.tempDirName}{path.sep}{Literals.runTempPrefix
 
 let private mkTempLogName () =
     let now = JS.Constructors.Date.now()
-    $"{Literals.tempLogFileName}_{now}.txt"
+    $"{Literals.tempLogFileName}{now}.txt"
+
+let private cleanUpTempLogs  () =
+    if fs.existsSync(!^tempDir) |> not then () else
+    let dirFiles = fs.readdirSync(!^tempDir).AsArray
+    let logFiles = dirFiles |> Array.filter _.StartsWith(Literals.tempLogFileName)
+    if logFiles.Length > Literals.maxTempLogCount then
+        logFiles
+        |> Array.sort
+        |> Array.take (logFiles.Length - Literals.maxTempLogCount)
+        |> Array.map (fun subpath -> path.join(tempDir, subpath))
+        |> Array.filter ((!^) >> fs.lstatSync >> _.isFile())
+        |> Array.map (fun tempFilePath ->
+            fs.accessSync(!^tempFilePath, fs.constants.W_OK)
+            tempFilePath
+            )
+        |> Array.iter ((!^) >> fs.unlinkSync)
     
 
 let private runThunkIfTempDirExists (thunk: unit -> unit) =
@@ -69,7 +87,7 @@ let private createAndCleanXanthamDirectory() =
     |> runThunkIfTempDirExistsOrElse (fun () -> fs.mkdirSync(tempDir)) 
 
 let private createXanthamDirectory () =
-    runThunkIfTempDirExistsOrElse (fun () -> fs.mkdirSync(tempDir)) ignore
+    runThunkIfTempDirExistsOrElse (fun () -> fs.mkdirSync(tempDir)) cleanUpTempLogs
 
 let createXanthamRunDirectory () =
     createXanthamDirectory()
