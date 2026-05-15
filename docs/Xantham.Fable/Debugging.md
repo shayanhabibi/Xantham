@@ -133,6 +133,98 @@ typeReferenceArgs
     |> stackPushAndThen ctx (XanthamTag.chainDebug parentTag))
 ```
 
+## File logging
+
+As of the structured-logging refactor every reader run also writes a
+**file-backed JSON log** alongside the synthesized `temp.d.ts`. This is the
+primary diagnostics surface; the console is now warning-only by default.
+
+### Where logs live
+
+`TypeScriptReader.createWithLogger[For]` provisions two sinks:
+
+| Sink              | Default level | Format        | Lifetime                                        |
+|-------------------|---------------|---------------|-------------------------------------------------|
+| `ConsoleLogger`   | `Warning`     | colourised    | stderr/stdout of the running process            |
+| `TextWriterLogger`| `Trace`       | JSON-per-line | `.xantham/log_<ts>.txt` (sibling of `run_*/`)   |
+
+The log file is written to `.xantham/` itself, **not** inside the
+per-invocation `run_<ts>/` directory. This is deliberate &mdash; the run
+directory is destroyed at the end of every non-`--debug` invocation, but
+the log file is what you want to keep, so it lives one level up and
+persists regardless of the `--debug` flag.
+
+(In `#if DEBUG` builds the console is bumped to `Debug` so traces remain
+visible at the REPL.) Both sinks are wrapped by a single
+`Utils.Logging.CombinedLogger`, exposed on the reader as
+`reader.Log` / `reader.logger`, so a single call site emits to both.
+
+### Driving from the CLI
+
+`Program.fs` selects the logger based on build symbols and CLI flags:
+
+```text
+xantham <input> [--debug] [-o <output>]
+```
+
+* In non-RELEASE builds the file-backed logger is always installed.
+* In RELEASE builds it is installed **only** when `--debug` is passed.
+* The per-run scratch directory is preserved iff `--debug` was passed;
+  otherwise `Temp.Directory.closeRunDirectory` deletes it after `read`.
+
+```text
+# Inspect previous logs (one per invocation, newest last)
+ls .xantham/log_*.txt
+```
+
+### Line shape
+
+Each line is a single JSON object emitted by `formatEntryAsJson`:
+
+```json
+{"level":"Debug","format":"TypeReference.resolveTypeBase | Shared symbol: [42]","at":"src/Xantham.Fable/Reading/TypeReference.fs:118"}
+{"level":"Trace","format":"Dispatcher.dispatch | {kind} {key}","at":"src/Xantham.Fable/Reading/Dispatcher.fs:24","data":{"kind":"TypeDeclaration","key":"Symbol(Promise)"}}
+{"level":"Warning","format":"[CIRCREF] | {key}","at":"src/Xantham.Fable/Read.fs:36","data":{"key":"Id 17"}}
+```
+
+* `level` &mdash; `Trace | Debug | Information | Warning | Error | Critical`.
+* `format` &mdash; the printf/Serilog-style template with `{name}` holes left
+  in place; named holes follow Serilog conventions (the `@` sigil is stripped
+  from the key but preserved structurally).
+* `at` &mdash; `file:line` of the call site captured by `[<CallerFilePath>]` /
+  `[<CallerLineNumber>]`. Paths are relativised to the repo root.
+* `data` &mdash; nested object containing every argument by name (unnamed
+  printf specifiers are keyed `arg0`, `arg1`, ...). Omitted when there are
+  none, keeping the top-level schema stable for `jq` / LLM consumption.
+
+### Logging helpers
+
+The reader and tags both expose printf-style entry points. Prefer these over
+raw `printfn` so output stays structured:
+
+| Helper       | Level        | Notes                                      |
+|--------------|--------------|--------------------------------------------|
+| `log.logft`  | `Trace`      | per-dispatch traces                        |
+| `log.logfd`  | `Debug`      | targeted diagnostics                       |
+| `log.logfi`  | `Information`| run-level milestones                       |
+| `log.logfw`  | `Warning`    | console-visible by default                 |
+| `log.logfe`  | `Error`      | recoverable failures                       |
+| `log.logfc`  | `Critical`   | unrecoverable failures                     |
+
+Tags carry a reference to the active logger via `GuardedData.Log` so the
+`XanthamTag.debug*` helpers route through the same JSON pipeline as the
+reader; tracing emitted from a debug-seeded tag therefore lands in the run
+log alongside the dispatcher's own traces, correlated by the yellow `[id]`.
+
+### Dispatcher trace
+
+Every `Dispatcher.dispatch` invocation now emits a `Trace`-level line
+identifying the tag's kind and identity key. With file logging on (the
+default in non-RELEASE), the entire traversal is recoverable from
+`log_*.txt` without seeding any tag &mdash; the per-tag `Debug` flag remains
+the right tool when you want a *focused* slice, but the dispatcher trace is
+the catch-all backbone.
+
 ## Output format
 
 A traced run produces lines like:
@@ -241,8 +333,8 @@ seeded.
 
 ## Build configuration
 
-The helpers are bracketed by `#if DEBUG`. The Fable extractor compiles in
-`Debug` configuration through the default `npm run prestart` /
+The per-tag helpers are bracketed by `#if DEBUG`. The Fable extractor
+compiles in `Debug` configuration through the default `npm run prestart` /
 `npm run watch` paths, so traces are available out of the box during
 development. The Fable test target is also Debug:
 
@@ -250,10 +342,14 @@ development. The Fable test target is also Debug:
 npm run pretest   # dotnet fable -c Debug --cwd tests/Xantham.Fable.Tests -o dist/tests
 ```
 
-For a non-tracing run (e.g. perf measurement) compile with
-`-c Release` &mdash; the tag still carries `Debug`/`DebugId` members, but
-all helpers degrade to identity functions and `setDebug*` does not
-mutate the flag.
+For a non-tracing run (e.g. perf measurement) compile with `-c Release`
+**and** invoke the CLI without `--debug` &mdash; the tag still carries
+`Debug`/`DebugId` members, all `XanthamTag.*` helpers degrade to identity
+functions, `setDebug*` does not mutate the flag, and no
+`TextWriterLogger` is attached so no file log is produced. Passing
+`--debug` to a release build re-enables the file logger (but the per-tag
+helpers are still inert &mdash; you only get the dispatcher trace and any
+`logf*` calls outside `#if DEBUG`).
 
 ## Reference
 

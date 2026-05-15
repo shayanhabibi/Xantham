@@ -54,7 +54,7 @@ OPTIONS
     --help                          Prints this message.
     -o, --output <OUTPUT>           Sets the output path for the generated json.
     --clean                         Removes any stale folders in the `.xantham` directory at the end of the operation.
-    --debug                         Logs are written to {working directory}/.xantham/run_*/log_*.txt
+    --debug                         Logs are written to {working directory}/.xantham/log_*.txt
 """
     |> printfn "%s"
     
