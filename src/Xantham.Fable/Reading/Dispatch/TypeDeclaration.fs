@@ -466,12 +466,14 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
                 |> Source.PackageInternal
             | _ ->
                 #if !FABLE_TEST
-                // This log will reoccur continuously in the test environment.
-                Log.error "Invariant: a declaration was not identified as a lib-es decl, had no export collection, and no submodule id. Defaulting Metadata to Source.LibEs."
+                ctx.logger.logfd "Declaration not identified as a lib-es decl, had no export collection, and no submodule id."
                 #endif
-                sourceTag.Guard.Source.fileName
-                |> Node.Api.path.basename
-                |> Source.LibEs
+                let source =
+                    sourceTag.Guard.Source.fileName
+                    |> Node.Api.path.basename
+                    |> Source.UnknownDeclared
+                xanTag.trace (fun log tagId -> log.logft "[%i{tagId}] [%s{fileName}] Declaration not identified as a lib-es decl, had no export collection, and no submodule id." tagId (source.ToString()))
+                source
             )
         |> fun source -> { Source = source }
     let makeDebugMessage = sprintf "Dispatched type declaration -> %s" >> xanTag.doDebugMessage
@@ -550,5 +552,5 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
         "Namespace" |> makeDebugMessage
         Module.read ctx xanTag namespaceDeclaration metadata
     | TypeDeclaration.ModuleBlock _ ->
+        // Processed inline during Module/Namespace dispatch; no standalone signal needed
         "Module Block" |> makeDebugMessage
-        () // Processed inline during Module/Namespace dispatch; no standalone signal needed

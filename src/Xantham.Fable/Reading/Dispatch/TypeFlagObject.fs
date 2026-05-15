@@ -59,28 +59,40 @@ let private forwardToSymbolDeclaration (ctx: TypeScriptReader) (xanTag: XanthamT
             )
         |> Option.defaultValue [||]
         |> Array.filter ((<>) xanTag)
-    let combinedSignal =
+    let firstValidTag: Signal<XanthamTag voption> = Signal.source ValueNone
+    // We track the declarations, and will accept the first declaration that provides us a builder value.
+    // TODO - determinism
+    let runner =
         declarations
         |> Array.map _.Builder.Invalidated
         |> Array.toList
-        |> Signal.computed (fun () ->
+        |> Signal.effect (fun () ->
             declarations
             |> Array.tryFind _.Builder.Value.IsSome
-            |> Option.map (fun tag ->
-                tag.TypeSignal.Value, tag.Builder.Value
+            |> Option.iter (fun tag ->
+                firstValidTag
+                |> Signal.fill tag
                 )
             )
+    let combinedSignal =
+        // When we get a valid tag value, we cease tracking the declarations to save memory.
+        Signal.auto (fun () ->
+            firstValidTag.Value
+            |> ValueOption.map (fun tag ->
+                runner.Dispose()
+                tag.TypeSignal.Value, tag.Builder.Value
+            ))
     xanTag.TypeSignal
     |> Signal.fulfillWith (fun () ->
         combinedSignal.Value
-        |> Option.map fst
-        |> Option.defaultValue TypeKindPrimitive.Unknown.TypeKey
+        |> ValueOption.map fst
+        |> ValueOption.defaultValue TypeKindPrimitive.Unknown.TypeKey
         )
     xanTag.Builder
     |> Signal.fulfillWith (fun () ->
         combinedSignal.Value
-        |> Option.map snd
-        |> Option.defaultValue ValueNone
+        |> ValueOption.map snd
+        |> ValueOption.defaultValue ValueNone
         )
 
 /// Build parameter slots from the checker-level parameters of a Ts.Signature.

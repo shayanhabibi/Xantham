@@ -1,5 +1,6 @@
 module Main
 
+// open Xantham.Fable.Utils
 open Xantham
 open Xantham.Fable
 open Xantham.Fable.Types
@@ -7,11 +8,12 @@ open Node.Api
 open Fable.Mocha
 open Xantham.Schema
 open Fable.Core.JsInterop
-open Xantham.Fable.Utils
 
 // -----------------------------------------------------------------------
 // Infrastructure
 // -----------------------------------------------------------------------
+
+let inline funApply arg fn = fn arg
 
 let createTestReader (fileName: string) =
     let filePath = path.join(__SOURCE_DIRECTORY__, $"/TypeFiles/{fileName}.d.ts")
@@ -47,12 +49,14 @@ let sourceName (md: Metadata) : string option =
     | Source.Package coll ->
         let (SubModuleId(PackageId(pkgName, _), _)) = coll.Canonical.SubModule
         Some pkgName
+    | UnknownDeclared fileName -> Some fileName
 
 let inline packageOrFileName (value: ^T when ^T: (member Metadata: Metadata)) =
     match value.Metadata.Source with
     | LibEs fileName -> fileName
     | Package col -> col.Canonical.SubModule.PackageId.Name
     | PackageInternal pkgId -> pkgId.PackageId.Name
+    | UnknownDeclared fileName -> fileName
 
 type TsInterface with member this.PackageName = packageOrFileName this
 type TsTypeAlias with member this.PackageName = packageOrFileName this
@@ -743,6 +747,7 @@ let indexAccessTests =
                     findType indexAccessType.Object result
                 "Type should be an interface by the name of AccessedInterface"
                 |> Expect.isTrue (
+                    Utils.Log.trace nestedType
                     match nestedType with
                     | TsType.TypeReference { ResolvedType = Some typKey } ->
                         match findType typKey result with
