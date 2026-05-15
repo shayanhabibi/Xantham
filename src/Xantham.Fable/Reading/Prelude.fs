@@ -1,3 +1,5 @@
+// ReSharper disable FSharpInterpolatedString
+
 [<AutoOpen>]
 module Xantham.Fable.Reading.Prelude
 
@@ -109,7 +111,7 @@ module TypeStore =
             let withGeneratedKey (tag: XanthamTag) =
                 withTypeKeyMap (fun _ ->
                     let typeKey = TypeKey.create()
-                    XanthamTag.debugLocationAndCommentAndForget "Prelude.TypeStore.Create.withGeneratedKey" $"Generated key {typeKey}" tag
+                    tag.doDebugMessage $"Generated key {typeKey}"
                     typeKey
                     ) tag
                 
@@ -125,11 +127,10 @@ module TypeStore =
                         | Choice2Of2 node ->
                             ctx.checker.getTypeAtLocation node
                             |> _.TypeKey)
-                tag
-                |> XanthamTag.debugLocationAndComment "Prelude.TypeStore.Create.create" $"TypeStore created with key {typeKey.Key}"
-                |> XanthamTag.withDebugOneShot "typestore:created" (fun tag ->
+                tag.doDebugMessage $"TypeStore created with key {typeKey.Key}"
+                tag.withDebugOneShot "typestore:created" (fun tag ->
                     Signal.effect (fun () ->
-                        XanthamTag.debugCommentAndForget $"TypeBuilder changed to {typeKey.Builder.Value}" tag
+                        tag.doDebugMessage $"TypeBuilder changed to {typeKey.Builder.Value}"
                         ) [ typeKey.Builder.Invalidated ]
                     |> ignore
                     )
@@ -140,17 +141,17 @@ module TypeStore =
 module MemberStore =
     module Parameter =
         let create (ctx: TypeScriptReader) (tag: XanthamTag) =
-            XanthamTag.debugLocationAndComment "Prelude.MemberStore.Parameter.create" "Creating" tag
+            tag.debugMessage "Setting up Parameter MemberStore"
             |> GuardedData.ParameterBuilder.getOrSetDefault
             |> MemberStore.Parameter
     module Member =
         let create (ctx: TypeScriptReader) (tag: XanthamTag) =
-            XanthamTag.debugLocationAndComment "Prelude.MemberStore.Member.create" "Creating" tag
+            tag.debugMessage "Setting up Member MemberStore"
             |> GuardedData.MemberBuilder.getOrSetDefault
             |> MemberStore.Member
     module Constructor =
         let create (ctx: TypeScriptReader) (tag: XanthamTag) =
-            XanthamTag.debugLocationAndComment "Prelude.MemberStore.Constructor.create" "Creating" tag
+            tag.debugMessage "Setting up Constructor MemberStore"
             |> GuardedData.ConstructorBuilder.getOrSetDefault 
             |> MemberStore.Constructor
     let create (ctx: TypeScriptReader) (tag: XanthamTag) =
@@ -170,7 +171,7 @@ module ExportStore =
             match tdecl with
             | TypeDeclaration.VariableDeclaration _
             | TypeDeclaration.VariableStatement _ ->
-                XanthamTag.debugLocationAndCommentAndForget "Prelude.ExportStore.usesGeneratedKey" "Uses generated key" tag
+                tag.doDebugMessage "Uses generated export store key"
                 true
             | _ -> false
         | _ -> false
@@ -183,7 +184,7 @@ module ExportStore =
             | Choice2Of2 node ->
                 ctx.checker.getTypeAtLocation node
                 |> _.TypeKey
-        XanthamTag.debugLocationAndCommentAndForget "Prelude.ExportStore.create" $"ExportStore created with key {key}" tag
+        tag.doDebugMessage $"ExportStore created with key {key}"
         {
             RefKey = key
             Builder = GuardedData.ExportBuilder.getOrSetDefault tag
@@ -196,10 +197,9 @@ module ExportStore =
     
 type TypeScriptReader with
     member this.routeTypeTo (tag: XanthamTag) (signal: TypeSignal) =
-        tag
-        |> XanthamTag.withDebugOneShot "RouteTypeSignal" (fun tag ->
+        tag.withDebugOneShot "RouteTypeSignal" (fun tag ->
             Signal.effect (fun () ->
-                XanthamTag.debugCommentAndForget $"TypeSignal changed to match {signal.Value}" tag
+                tag.doDebugMessage $"TypeSignal changed to match {signal.Value.Value}"
                 ) [ signal.Invalidated ]
             |> ignore
             ) 
@@ -208,7 +208,7 @@ type TypeScriptReader with
         signal
 
 let setTypeKeyForTag (tag: XanthamTag) (typ: TypeKey) =
-    XanthamTag.debugLocationAndCommentAndForget "Prelude.setTypeKeyForTag" $"TypeKey changed to {typ}. %A{tag.TypeSignal}" tag
+    tag.doDebugMessage $"TypeKey changed to {typ}."
     (GuardedData.TypeSignal.getOrSetDefault tag).Set typ
 
 let tagPrimitives (ctx: TypeScriptReader) =
@@ -299,7 +299,7 @@ let tryGetOrRegisterExportedStore (ctx: TypeScriptReader) (tag: XanthamTag) : Ex
     let key = tag.IdentityKey
     match ctx.exportCache.TryGetValue key with
     | true, store ->
-        XanthamTag.debugLocationAndComment "Prelude.tryGetOrRegisterExportedStore" $"Already cached {store.RefKey}" tag
+        tag.debugMessage $"Export store creation failed; already cached {store.RefKey}"
         |> GuardedData.ExportBuilder.getOrSetDefault 
         |> Signal.fulfillWith (fun () -> store.Builder.Value)
         GuardedData.TypeSignal.getOrSetDefault tag
@@ -307,7 +307,7 @@ let tryGetOrRegisterExportedStore (ctx: TypeScriptReader) (tag: XanthamTag) : Ex
         None
     | false, _ ->
         let store =
-            XanthamTag.debugLocationAndComment "Prelude.tryGetOrRegisterExportedStore" "Creating store" tag
+            tag.debugMessage "Creating export store"
             |> ExportStore.create ctx 
         ctx.exportCache.Add(key, store)
         Some store
@@ -343,7 +343,7 @@ let tryGetOrRegisterStore (ctx: TypeScriptReader) (tag: XanthamTag) : TypeStore 
         | _ -> None
     match ctx.signalCache.TryGetValue key with
     | true, store when maybeTypeKey.IsNone || store.Key = maybeTypeKey.Value ->
-        XanthamTag.debugLocationAndComment "Prelude.tryGetOrRegisterStore" $"Already cached {store.Key}" tag
+        tag.debugMessage $"Tried to create type store; Already cached {store.Key}" 
         |> GuardedData.AstNodeBuilder.getOrSetDefault 
         |> Signal.fulfillWith (fun () -> store.Builder.Value)
         // Two different Ts.Type objects can share the same IdentityKey (same symbol) because
@@ -360,7 +360,7 @@ let tryGetOrRegisterStore (ctx: TypeScriptReader) (tag: XanthamTag) : TypeStore 
             )
         None
     | true, _ ->
-        XanthamTag.debugLocationAndCommentAndForget "Prelude.tryGetOrRegisterStore" $"Already cached {key}" tag
+        tag.doDebugMessage $"Tried to create typestore, Already cached {key}" 
         // Hack for now; need to wire up the signals properly
         tag.Guard <- unbox<GuardTracer> {| Value = IdentityKey.Id maybeTypeKey.Value |}
         tag.Guard.Imprint
@@ -375,13 +375,14 @@ let tryGetOrRegisterStore (ctx: TypeScriptReader) (tag: XanthamTag) : TypeStore 
         Some store
 
 let stackPushAndThen (ctx: TypeScriptReader) (f: XanthamTag -> 'a) (tag: TagState<XanthamTag>): 'a =
+    
     match tag with
     | TagState.Visited tag ->
-        XanthamTag.debugLocationAndComment "Prelude.stackPushAndThen" "Already visited" tag
+        tag.debugMessage "Stack push attempted. Already visited" 
         |> f 
     | TagState.Unvisited tag ->
         ctx.stack.Push tag
-        XanthamTag.debugLocationAndComment "Prelude.stackPushAndThen" "Pushed to stack" tag
+        tag.debugMessage "Stack push. Success" 
         |> f 
 
 let pushToStackIfNodeUnseen (ctx: TypeScriptReader) (node: Ts.Node) =

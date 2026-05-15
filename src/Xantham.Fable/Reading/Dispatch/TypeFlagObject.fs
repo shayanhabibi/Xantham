@@ -44,27 +44,66 @@ let private makeIndexSlot (ctx: TypeScriptReader) (primitiveType: TypeKindPrimit
         )
     |> Option.toValueOption
 
-/// Forward this tag's signals to the first usable declaration of a named type's symbol.
-/// Skips re-export specifiers (ExportSpecifier, ExportDeclaration, etc.) which are Ignore-
-/// classified and would leave the forwarded signals permanently unfulfilled.
+/// <summary>
+/// Forward the given tag's type signal and builder signal to the first declaration of the given symbol
+/// that does not match the tag, and provides a valid builder value.
+/// </summary>
 let private forwardToSymbolDeclaration (ctx: TypeScriptReader) (xanTag: XanthamTag) (sym: Ts.Symbol) =
-    let firstUsableDecl =
+    let declarations =
+        // if we default to 'the first usable decl', then we may find ourselves in a situation where
+        // the first symbol declaration points to the tag itself (and will therefor stall and never resolve).
         sym.declarations
-        |> Option.bind (fun decls ->
-            decls.AsArray
-            |> Array.tryFind (fun d ->
-                not (ModulesAndExports.IsModulesAndExportsKind d)))
-    match firstUsableDecl with
-    | None -> ()
-    | Some decl ->
-        let innerTag =
-            match ctx.CreateXanthamTag (unbox<Ts.Node> (decl :> obj)) |> fst with
-            | TagState.Unvisited t -> pushToStack ctx t; t
-            | TagState.Visited t -> t
-        xanTag.TypeSignal
-        |> Signal.fulfillWith (fun () -> innerTag.TypeSignal.Value)
-        xanTag.Builder
-        |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
+        |> Option.map (
+            _.AsArray
+            >> Array.map (ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx _.chainDebug(xanTag))
+            )
+        |> Option.defaultValue [||]
+        |> Array.filter (fun tag ->
+            tag <> xanTag
+            && not (unbox<Ts.Node> tag.Value.Value |> ModulesAndExports.IsModulesAndExportsKind))
+    let firstValidTag: Signal<XanthamTag voption> = Signal.source ValueNone
+    // We track the declarations, and will accept the first declaration that provides us a builder value.
+    // TODO - determinism
+    let runner =
+        declarations
+        |> Array.map _.Builder.Invalidated
+        |> Array.toList
+        |> Signal.effect (fun () ->
+            declarations
+            |> Array.tryFind _.Builder.Value.IsSome
+            |> Option.iter (fun tag ->
+                firstValidTag
+                |> Signal.fill tag
+                )
+            )
+    let combinedSignal =
+        // When we get a valid tag value, we cease tracking the declarations to save memory.
+        Signal.auto (fun () ->
+            firstValidTag.Value
+            |> ValueOption.map (fun tag ->
+                runner.Dispose()
+                tag.TypeSignal, tag.Builder
+            ))
+    xanTag.TypeSignal
+    |> Signal.fulfillWith (fun () ->
+        combinedSignal.Value
+        |> ValueOption.map (fst >> _.Value)
+        |> ValueOption.defaultValue (
+            declarations
+            |> Array.head
+            |> _.TypeSignal.Value
+            )
+        )
+    xanTag.Builder
+    |> Signal.fulfillWith (fun () ->
+        combinedSignal.Value
+        |> ValueOption.map (snd >> _.Value)
+        |> ValueOption.defaultValue (
+            declarations
+            |> Array.head
+            |> _.Builder.Value
+            )
+        )
 
 /// Build parameter slots from the checker-level parameters of a Ts.Signature.
 let private signatureToParamSlots (ctx: TypeScriptReader) (signature: Ts.Signature) =
@@ -182,8 +221,7 @@ let private buildMembersFromType (ctx: TypeScriptReader) (objType: Ts.ObjectType
 // ---------------------------------------------------------------------------
 
 let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) =
-    let debugLocation typeFlagObjectType =
-        XanthamTag.debugLocationAndForget $"TypeFlagObject.dispatch | %s{typeFlagObjectType}" xanTag
+    let debugLocation = sprintf "Dispatching type flag object of type %s" >> xanTag.doDebugMessage
     let inline setAstSignal (astValue: SType) =
         xanTag.Builder <- astValue
     match tag with

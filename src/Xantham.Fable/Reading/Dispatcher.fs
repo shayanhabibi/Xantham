@@ -4,38 +4,45 @@ open Xantham.Fable
 open Xantham.Fable.Types
 
 let dispatch (ctx: TypeScriptReader) (tag: XanthamTag) =
+    // Writes to log when building in debug mode
+    tag.trace (fun logger traceId ->
+        logger.logft
+            "[%i{traceId}] Preparing dispatch for %s{identityKey} of: %s{tagKind}"
+            traceId (tag.IdentityKey.ToString()) (tag.Value.ToString())
+        )
+    let debugMessage = sprintf "Dispatching tag of kind %s" >> tag.doDebugMessage
     match tag.Value with
     // noop
     | Ignore _ -> ()
     // ====== Member-Level Dispatch ========
     // Already dispatched - noop
     | XanTagKind.MemberDeclaration _ when tryGetOrRegisterMemberStore ctx tag |> Option.isNone ->
-        XanthamTag.debugLocationAndCommentAndForget "Dispatcher.dispatch | MemberDeclaration" "Already dispatched" tag
+        tag.doDebugMessage "Dispatch early return: MemberStore has been registered already"
     // Dispatch
     | XanTagKind.MemberDeclaration memberDeclaration ->
-        XanthamTag.debugLocationAndCommentAndForget "Dispatcher.dispatch | MemberDeclaration" "dispatch" tag
+        debugMessage "MemberDeclaration" 
         MemberDeclaration.dispatch ctx tag memberDeclaration
     // ====== Type-Level Dispatch ========
     // Already dispatched - noop
     | _ when tryGetOrRegisterStore ctx tag |> Option.isNone -> 
-        XanthamTag.debugLocationAndCommentAndForget "Dispatcher.dispatch | _" "TypeStore has been registered already" tag
+        tag.doDebugMessage "Dispatch early return: TypeStore has been registered already"
     | Patterns.XanTagKind.CanBeExported when tryGetOrRegisterExportedStore ctx tag |> Option.isNone ->
-        XanthamTag.debugLocationAndCommentAndForget "Dispatcher.dispatch | CanBeExported" "ExportStore has been registered already" tag
+        tag.doDebugMessage "Dispatch early return: ExportStore has been registered already"
     | XanTagKind.ModulesAndExports modulesAndExports ->
-        XanthamTag.debugLocationAndForget "Dispatcher.dispatch | ModulesAndExports" tag
+        debugMessage "ModulesAndExports"
         ModulesAndExports.dispatch ctx tag modulesAndExports
     | XanTagKind.Type typeFlagPrimary ->
-        XanthamTag.debugLocationAndForget "Dispatcher.dispatch | Type" tag
+        debugMessage "TypeFlagPrimary"
         TypeFlagPrimary.dispatch ctx tag typeFlagPrimary
     | XanTagKind.TypeDeclaration typeDeclaration ->
-        XanthamTag.debugLocationAndForget "Dispatcher.dispatch | TypeDeclaration" tag
+        nameof XanTagKind.TypeDeclaration |> debugMessage
         TypeDeclaration.dispatch ctx tag typeDeclaration
     | XanTagKind.TypeNode typeNode ->
-        XanthamTag.debugLocationAndForget "Dispatcher.dispatch | TypeNode" tag
+        nameof XanTagKind.TypeNode |> debugMessage
         TypeNode.dispatch ctx tag typeNode
     | XanTagKind.JSDocTag jsDocTags ->
-        XanthamTag.debugLocationAndForget "Dispatcher.dispatch | JSDocTag" tag
+        nameof XanTagKind.JSDocTag |> debugMessage
         JSDocTags.read ctx tag jsDocTags |> unbox
     | XanTagKind.LiteralTokenNode literalTokenNodes ->
-        XanthamTag.debugLocationAndForget "Dispatcher.dispatch | LiteralTokenNode" tag
+        nameof XanTagKind.LiteralTokenNode |> debugMessage
         LiteralTokenNode.dispatch ctx tag literalTokenNodes

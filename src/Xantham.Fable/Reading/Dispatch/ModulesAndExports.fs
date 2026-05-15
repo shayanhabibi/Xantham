@@ -3,14 +3,12 @@
 open TypeScript
 open Xantham.Fable
 open Xantham.Fable.Types
-open Fable.Core
 open Fable.Core.JsInterop
 open Xantham.Fable.Types.Signal
 open Xantham.Fable.Types.SourceTag
 
 let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExports) =
-    let debugLocation moduleAndExportName =
-        XanthamTag.debugLocationAndForget $"ModulesAndExports.dispatch | %s{moduleAndExportName}" xanTag
+    let debugLocation = sprintf "Dispatching module and export of type %s" >> xanTag.doDebugMessage
     match tag with
     | ModulesAndExports.ImportDeclaration _ -> nameof ModulesAndExports.ImportDeclaration |> debugLocation
     | ModulesAndExports.ImportClause _ -> nameof ModulesAndExports.ImportClause |> debugLocation
@@ -79,7 +77,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: ModulesAndExport
                 let namedTags =
                     namedExports.elements
                     |> _.AsArray
-                    |> Array.map (ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx (XanthamTag.chainDebug xanTag))
+                    |> Array.map (ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx _.chainDebug(xanTag))
                 namedTags
                 |> Array.tryHead
                 |> Option.iter (fun tag ->

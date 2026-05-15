@@ -28,12 +28,14 @@ let inline private getReturnTypeSignal (ctx: TypeScriptReader) (typeNode: Ts.Typ
     |> Option.defaultValue (TypeSignal.ofKey TypeKindPrimitive.Void.TypeKey)
 
 /// Resolves an optional TypeNode to a TypeSignal, falling back to checker.getTypeAtLocation when None.
-let private getSignalsFromTypeNodeOption (ctx: TypeScriptReader) (typ: Ts.TypeNode option) (node: Ts.Node) =
+let private getSignalsFromTypeNodeOption callingTag (ctx: TypeScriptReader) (typ: Ts.TypeNode option) (node: Ts.Node) =
     typ
     |> Option.map (
         ctx.CreateXanthamTag
         >> fst
-        >> stackPushAndThen ctx (fun tag -> tag.TypeSignal, tag.Builder)
+        >> stackPushAndThen ctx (
+            _.chainDebug(callingTag)
+            >> fun tag -> tag.TypeSignal, tag.Builder)
         )
     |> Option.defaultWith (fun () ->
         match
@@ -42,7 +44,7 @@ let private getSignalsFromTypeNodeOption (ctx: TypeScriptReader) (typ: Ts.TypeNo
         with
         | _, TagState.Visited guard when ctx.signalCache.ContainsKey(guard.Value) ->
             TypeSignal.ofKey ctx.signalCache[guard.Value].Key, ctx.signalCache[guard.Value].Builder
-        | tagState, _ -> stackPushAndThen ctx (fun tag -> tag.TypeSignal, tag.Builder) tagState)
+        | tagState, _ -> stackPushAndThen ctx (_.chainDebug(callingTag) >> fun tag -> tag.TypeSignal, tag.Builder) tagState)
 
 /// Returns TypeSignal voption for constraint/default slots on type parameters.
 let inline getTypeSignalFromOption (ctx: TypeScriptReader) (typ: Ts.TypeNode option) =
@@ -188,7 +190,7 @@ module TypeAlias =
         let innerTypeSignal, innerBuilderSignal =
             ctx.CreateXanthamTag node.``type``
             |> fst
-            |> stackPushAndThen ctx (XanthamTag.chainDebug xanTag >> fun tag -> tag.TypeSignal, tag.Builder)
+            |> stackPushAndThen ctx (_.chainDebug(xanTag) >> fun tag -> tag.TypeSignal, tag.Builder)
         let builder = {
             SAliasBuilder.Metadata = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
@@ -255,7 +257,15 @@ module Enum =
 module Variable =
     let readDeclaration (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.VariableDeclaration) source =
         let innerTypeSignal, innerBuilderSignal =
-            getSignalsFromTypeNodeOption ctx node.``type`` (unbox<Ts.Node> node)
+            getSignalsFromTypeNodeOption xanTag ctx node.``type`` (unbox<Ts.Node> node)
+        let innerTag =
+            node.``type``
+            |> Option.map (ctx.CreateXanthamTag >> fst >> _.Value)
+            |> Option.defaultWith (fun () ->
+                ctx.checker.getTypeAtLocation node
+                |> ctx.CreateXanthamTag
+                |> fst |> _.Value
+                )
         let variableBuilder = {
             SVariableBuilder.Metadata = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
@@ -267,24 +277,41 @@ module Variable =
         xanTag.ExportBuilder <- STsExportDeclaration.Variable variableBuilder
         xanTag.Builder
         |> Signal.fulfillWith(fun () ->
-            // Fall back to `NonPrimitive` (TS `object`) when the type
-            // annotation's inner builder never resolves. Happens with
-            // declaration-merged interface+namespace pairs like
-            // `export interface Cloudflare { ... }` + `export declare
-            // namespace Cloudflare { ... }` — the variable's type
-            // annotation `: Cloudflare` references the merged identity,
-            // but neither the Interface nor the Namespace dispatcher
-            // populates the TypeReference's TypeStore builder under the
-            // generated key. Without a fallback the entry stays ValueNone,
-            // surfaces as `[MISSREF]` at assemble-time, and downstream
-            // `compressResult` throws `KeyNotFoundException` because
-            // members still embed the generated key in their Type fields
-            // (`compressions[key]` has no entry for keys with empty
-            // builders). NonPrimitive resolves to F# `obj` — the same
-            // safe placeholder used elsewhere for unresolvable references.
             match innerBuilderSignal.Value with
             | ValueSome _ as v -> v
-            | ValueNone -> ValueSome (SType.Primitive TypeKindPrimitive.NonPrimitive))
+            | ValueNone when innerTag.TryExportBuilder.IsSome && innerTag.ExportBuilder.Value.IsSome && ctx.exportCache.ContainsKey(innerTag.IdentityKey) ->
+                let refKey = TypeSignal.ofKey ctx.exportCache[innerTag.IdentityKey].RefKey
+                let makeTypeReferenceBuilder innerType innerTypeArguments = ValueSome <| SType.TypeReference {
+                    Type = innerType
+                    TypeArguments = innerTypeArguments
+                    ResolvedType = ValueNone
+                }
+                let makeTypeArgument (signal: Signal<InlinedSTypeParameterBuilder voption>) =
+                    match signal.Value with
+                    | ValueSome { TypeParameter = { Constraint = ValueSome typeSignal } }
+                    | ValueSome { TypeParameter = { Default = ValueSome typeSignal } } -> typeSignal
+                    | ValueSome { Type = typeKey } -> Signal.source typeKey
+                    | ValueNone -> TypeSignal.pending()
+                innerTag.ExportBuilder.Value
+                |> ValueOption.bind (function
+                    | STsExportDeclaration.TypeAlias { TypeParameters = typeParams; Type = aliasType } -> 
+                        typeParams
+                        |> Array.map makeTypeArgument
+                        |> makeTypeReferenceBuilder aliasType
+                    | STsExportDeclaration.Class { TypeParameters = typeParams } 
+                    | STsExportDeclaration.Interface { TypeParameters = typeParams } ->
+                        typeParams
+                        |> Array.map makeTypeArgument
+                        |> makeTypeReferenceBuilder refKey
+                    | STsExportDeclaration.Enum _
+                    | STsExportDeclaration.Variable _
+                    | STsExportDeclaration.Function _
+                    | STsExportDeclaration.Module _ -> makeTypeReferenceBuilder refKey [||]
+                    )
+                // ValueSome (SType.Primitive TypeKindPrimitive.NonPrimitive)
+            | ValueNone ->
+                ValueNone
+            )
 
 module FunctionDecl =
     let read (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.FunctionDeclaration) source =
@@ -439,29 +466,32 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
                 |> Source.PackageInternal
             | _ ->
                 #if !FABLE_TEST
-                // This log will reoccur continuously in the test environment.
-                Log.error "Invariant: a declaration was not identified as a lib-es decl, had no export collection, and no submodule id. Defaulting Metadata to Source.LibEs."
+                ctx.logger.logfd "Declaration not identified as a lib-es decl, had no export collection, and no submodule id."
                 #endif
-                sourceTag.Guard.Source.fileName
-                |> Node.Api.path.basename
-                |> Source.LibEs
+                let source =
+                    sourceTag.Guard.Source.fileName
+                    |> Node.Api.path.basename
+                    |> Source.UnknownDeclared
+                xanTag.trace (fun log tagId -> log.logft "[%i{tagId}] [%s{fileName}] Declaration not identified as a lib-es decl, had no export collection, and no submodule id." tagId (source.ToString()))
+                source
             )
         |> fun source -> { Source = source }
+    let makeDebugMessage = sprintf "Dispatched type declaration -> %s" >> xanTag.doDebugMessage
     match node with
     | TypeDeclaration.TypeParameter typeParameterDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | TypeParameter" xanTag
+        "Type Parameter" |> makeDebugMessage 
         TypeParameter.read ctx xanTag typeParameterDeclaration
     | TypeDeclaration.Interface interfaceDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Interface" xanTag
+        "Interface" |> makeDebugMessage 
         Interface.read ctx xanTag interfaceDeclaration metadata
     | TypeDeclaration.TypeAlias typeAliasDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | TypeAlias" xanTag
+        "TypeAlias" |> makeDebugMessage 
         TypeAlias.read ctx xanTag typeAliasDeclaration metadata
     | TypeDeclaration.Class classDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Class" xanTag
+        "Class" |> makeDebugMessage 
         Class.read ctx xanTag classDeclaration metadata
     | TypeDeclaration.HeritageClause heritageClause ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | HeritageClause" xanTag
+        makeDebugMessage "Heritage Clause"
         // Wire this tag to the first type in the clause so Interface.read's Heritage
         // computed signal can read a TypeReference builder from it.
         match heritageClause.types.AsArray |> Array.tryHead with
@@ -478,7 +508,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
             xanTag.Builder
             |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
     | TypeDeclaration.ExpressionWithTypeArguments exprWithTypeArgs ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | ExpressionWithTypeArguments" xanTag
+        "Expression With Type Arguments" |> makeDebugMessage 
         // Route via checker; consumers look up TypeSignal/Builder on this tag.
         let resolvedType = ctx.checker.getTypeAtLocation exprWithTypeArgs
         let innerTag = ctx.CreateXanthamTag resolvedType |> fst |> stackPushAndThen ctx id
@@ -487,13 +517,13 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
         xanTag.Builder
         |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
     | TypeDeclaration.Enum enumDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Enum" xanTag
+        "Enum" |> makeDebugMessage
         Enum.readDeclaration ctx xanTag enumDeclaration metadata
     | TypeDeclaration.EnumMember enumMember ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | EnumMember" xanTag
+        "Enum Member" |> makeDebugMessage
         Enum.readMember ctx xanTag enumMember
     | TypeDeclaration.VariableStatement variableStatement ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | VariableStatement" xanTag
+        "Variable Statement" |> makeDebugMessage
         // Push each inner VariableDeclaration and wire this tag's signals to the first one.
         let tags =
             variableStatement.declarationList.declarations.AsArray
@@ -510,16 +540,17 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration
             xanTag.TypeSignal |> Signal.fulfillWith (fun () -> firstTag.TypeSignal.Value)
             xanTag.ExportBuilder |> Signal.fulfillWith(fun () -> firstTag.ExportBuilder.Value)
     | TypeDeclaration.VariableDeclaration variableDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | VariableDeclaration" xanTag
+        "Variable Declaration" |> makeDebugMessage
         Variable.readDeclaration ctx xanTag variableDeclaration metadata
     | TypeDeclaration.FunctionDeclaration functionDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | FunctionDeclaration" xanTag
+        "Function Declaration" |> makeDebugMessage
         FunctionDecl.read ctx xanTag functionDeclaration metadata
     | TypeDeclaration.Module moduleDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Module" xanTag
+        "Module" |> makeDebugMessage
         Module.read ctx xanTag moduleDeclaration metadata
     | TypeDeclaration.Namespace namespaceDeclaration ->
-        XanthamTag.debugLocationAndForget "TypeDeclaration.dispatch | Namespace" xanTag
+        "Namespace" |> makeDebugMessage
         Module.read ctx xanTag namespaceDeclaration metadata
     | TypeDeclaration.ModuleBlock _ ->
-        () // Processed inline during Module/Namespace dispatch; no standalone signal needed
+        // Processed inline during Module/Namespace dispatch; no standalone signal needed
+        "Module Block" |> makeDebugMessage

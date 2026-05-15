@@ -48,8 +48,9 @@ let read (reader: TypeScriptReader) (xanTag: XanthamTag) (tag: JSDocTags) =
                             let content = 
                                 if m.Groups["description"].Success then Some m.Groups["description"].Value else None
                             [| TsComment.TypeParam(m.Groups["type"].Value, content) |]
-                        else 
-                            $"Invalid typeParam tag format: {text}" |> reader.warnings.Add
+                        else
+                            text
+                            |> reader.Log.logfw "Invalid typeParam tag format: %s{text}"
                             [||]
                     | _ -> [||]
             | _ -> [||]

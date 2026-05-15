@@ -90,6 +90,7 @@ let TypeSignal = Helpers.makeSlotWithDefault<XanTagKind, GuardTracer, TypeSignal
 let Source = Helpers.makeSlot<XanTagKind, GuardTracer, Signal<ExportCollection voption>> "Source"
 let Metadata = Helpers.makeSlot<XanTagKind, GuardTracer, Signal<Metadata>> "Metadata"
 let ExportBuilder = Helpers.makePendingSlot<XanTagKind, GuardTracer, STsExportDeclaration> "ExportBuilder"
+let Log = Helpers.makeSlot<XanTagKind, GuardTracer, Utils.Logging.Log voption> "Log"
 type OutputKind =
     | None = 0
     | Type = (1 <<< 0)

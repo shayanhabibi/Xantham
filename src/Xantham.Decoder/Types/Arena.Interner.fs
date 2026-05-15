@@ -186,6 +186,7 @@ and Source =
     | LibEs of fileName: string
     | PackageInternal of LazySubModule
     | Package of ResolvedExportCollection
+    | UnknownDeclared of fileName: string
 
 and [<ReferenceEquality>] Module = {
     [<System.Obsolete "Match against the Source field instead.">]
@@ -987,6 +988,7 @@ module ArenaInterner =
                     Aliases = exports.Aliases |> List.map resolveExportPoint
                 }
                 |> Source.Package
+            | Xantham.Source.UnknownDeclared fileName -> Source.UnknownDeclared fileName
         let exportMap =
             typeExportMap
             |> Seq.map (fun (KeyValue(key, value)) ->

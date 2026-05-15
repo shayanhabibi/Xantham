@@ -134,6 +134,7 @@ type Source =
     /// <param name="subModuleId"></param>
     | PackageInternal of subModuleId: SubModuleId
     | Package of exportCollection: ExportCollection
+    | UnknownDeclared of fileName: string
 
 [<Struct>]
 type Metadata = {

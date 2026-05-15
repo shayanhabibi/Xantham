@@ -85,18 +85,49 @@ The core infrastructure for reading and analyzing TypeScript files:
 
 ```fsharp
 type TypeScriptReader = {
-    Stack: Stack<XanthamTag>                // Processing stack
-    EntryFiles: string array                // Input file paths
-    Program: Ts.Program                     // TypeScript compilation program
-    Checker: Ts.TypeChecker                 // Type checker for resolution
-    Warnings: ResizeArray<string>           // Processing diagnostics
-    ModuleMap: ModuleMap                   // Module resolution mapping
-    SignalCache: Dictionary<IdentityKey, TypeStore>  // Type processing cache
+    Stack: Stack<XanthamTag>                          // Processing stack
+    EntryFiles: string array                          // Input file paths
+    Program: Ts.Program                               // TypeScript compilation program
+    Checker: Ts.TypeChecker                           // Type checker for resolution
+    SignalCache: Dictionary<IdentityKey, TypeStore>   // Type processing cache
     ExportCache: Dictionary<IdentityKey, ExportStore> // Export processing cache
     MemberCache: Dictionary<IdentityKey, MemberStore> // Member processing cache
-    LibCache: HashSet<IdentityKey>         // Library type cache
+    LibCache: HashSet<IdentityKey>                    // Library type cache
+    TempRunDirectory: string                          // .xantham/run_<ts>/ for this invocation
+    TempFilePath: string                              // Path to the synthesized temp.d.ts entry
+    Log: Utils.Logging.Log                            // Console + file logger sink
 }
 ```
+
+### Run Directory & Synthetic Entry File
+
+Every invocation of the reader is sandboxed in its own scratch directory:
+
+```
+.xantham/
+├── log_<unix-ms>.txt      ← JSON-lines structured log (one per invocation)
+├── run_<unix-ms>/
+│   └── temp.d.ts          ← synthesized aggregate entry
+└── ...
+```
+
+Note that the log file lives in `.xantham/` itself, **not** inside the
+per-run subdirectory &mdash; so logs survive the cleanup of `run_*/` and
+remain available for inspection even on non-`--debug` invocations.
+
+`Temp.Directory.createXanthamRunDirectory()` allocates the per-run folder, and
+`Temp.Directory.createXanthamDummyFileWithRefs` writes a `temp.d.ts` containing
+one `import * as _ from '<entryFile>';` line per requested entry. **That dummy
+file &mdash; not the user's input &mdash; is the single `rootName` passed to
+`ts.createProgram`**, which lets a single program reference an arbitrary set of
+entry points (a package's `exports` map, a directory of `.d.ts` files, etc.)
+without having to discover or stitch them at the F# layer.
+
+The run directory is cleaned up after `read` finishes via
+`Temp.Directory.closeRunDirectory`, unless the CLI was invoked with `--debug`
+&mdash; in which case the directory (and its log file) are preserved for
+post-mortem inspection. See [Debugging](Debugging.html#file-logging) for the
+log format.
 
 <div class="mermaid">
 flowchart LR

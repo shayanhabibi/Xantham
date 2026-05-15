@@ -13,10 +13,35 @@ module Literals =
     let runTempPrefix = "run_"
     [<Literal>]
     let runTempFileName = "temp"
+    [<Literal>]
+    let tempLogFileName = "log_"
+    [<Literal>]
+    let maxTempLogCount = 10
 
 let tempDir = "./" + Literals.tempDirName
 let runTempFileName = $"{Literals.runTempFileName}.d.ts"
 let runTempDirPrefix = $"{Literals.tempDirName}{path.sep}{Literals.runTempPrefix}"
+
+let private mkTempLogName () =
+    let now = JS.Constructors.Date.now()
+    $"{Literals.tempLogFileName}{now}.txt"
+
+let private cleanUpTempLogs  () =
+    if fs.existsSync(!^tempDir) |> not then () else
+    let dirFiles = fs.readdirSync(!^tempDir).AsArray
+    let logFiles = dirFiles |> Array.filter _.StartsWith(Literals.tempLogFileName)
+    if logFiles.Length > Literals.maxTempLogCount then
+        logFiles
+        |> Array.sort
+        |> Array.take (logFiles.Length - Literals.maxTempLogCount)
+        |> Array.map (fun subpath -> path.join(tempDir, subpath))
+        |> Array.filter ((!^) >> fs.lstatSync >> _.isFile())
+        |> Array.map (fun tempFilePath ->
+            fs.accessSync(!^tempFilePath, fs.constants.W_OK)
+            tempFilePath
+            )
+        |> Array.iter ((!^) >> fs.unlinkSync)
+    
 
 let private runThunkIfTempDirExists (thunk: unit -> unit) =
     if fs.existsSync(!^tempDir) then
@@ -57,20 +82,32 @@ let closeXanthamDirectory () =
         try fs.rmdirSync(!^tempDir) with _ -> ()
     |> runThunkIfTempDirExists
 
-let createAndCleanXanthamDirectory() =
+let private createAndCleanXanthamDirectory() =
     cleanupXanthamDirectory
     |> runThunkIfTempDirExistsOrElse (fun () -> fs.mkdirSync(tempDir)) 
 
-let createXanthamDirectory () =
-    runThunkIfTempDirExistsOrElse (fun () -> fs.mkdirSync(tempDir)) ignore
+let private createXanthamDirectory () =
+    runThunkIfTempDirExistsOrElse (fun () -> fs.mkdirSync(tempDir)) cleanUpTempLogs
 
 let createXanthamRunDirectory () =
     createXanthamDirectory()
     fs.mkdtempSync runTempDirPrefix
 
+let createXanthamLogWriter prependLevel logLevel (runDirectory: string) =
+    if fs.existsSync(!^runDirectory) |> not then
+        Error $"Run directory {runDirectory} does not exist"
+    else
+    let stats = fs.lstatSync(!^runDirectory)
+    let dir =
+        if stats.isFile()
+        then path.dirname runDirectory
+        else runDirectory
+    let fileName = path.join(dir, mkTempLogName())
+    Utils.Logging.TextWriterLogger(fileName, prependLevel, logLevel)
+    |> Ok
 
-let createXanthamDummyFileWithRefs (paths: string seq) =
-    let tempFilePath = path.join(createXanthamRunDirectory(), runTempFileName)
+let createXanthamDummyFileWithRefs (runDirectory: string) (paths: string seq) =
+    let tempFilePath = path.join(runDirectory, runTempFileName)
     fs.writeFileSync(tempFilePath, String.concat "\n" <| [
         for entryFile in paths do
             "import * as _ from '" + String.normalizePath entryFile + "';"
