@@ -63,7 +63,7 @@ type IdentityKey =
         let endPos = node.getEnd()
         let start = sf.getLineAndCharacterOfPosition(startPos)
         let end' = sf.getLineAndCharacterOfPosition(endPos)
-        let fileString = $"file:///%s{sf.fileName}:{start.line + 1.}:{start.character + 1.} (end {end'.line + 1.}:{end'.character + 1.})"
+        let fileString = $"file:///%s{sf.fileName}:{start.line + 1.}:{start.character + 1.} (end {end'.line + 1.}:{end'.character + 1.}) [{startPos}, {endPos}]"
         DeclarationPosition(fileString, startPos, endPos)
     static member Create(typ: Ts.Type) =
         typ.aliasSymbol
@@ -71,6 +71,12 @@ type IdentityKey =
         |> Option.orElse (typ.getSymbol() |> Option.map Symbol)
         |> Option.defaultValue (Id typ.TypeKey)
     static member Create(typ: Ts.Symbol) = Symbol typ
+    override this.ToString() =
+        match this with
+        | Symbol sym -> $"Symbol ({sym.name})"
+        | AliasSymbol sym -> $"AliasSymbol ({sym.name})"
+        | Id typ -> $"Id ({typ})"
+        | DeclarationPosition(file, pos, endPos) -> $"DeclarationPosition ({file}, {pos}, {endPos})"
     
 let TRACER_TAG = Symbol "XanTracer"
 let TRACER_PROXY = SymbolTypeKey.create<string> "XanTracerProxy"

@@ -25,18 +25,51 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
     let inline routeViaChecker (node: Ts.TypeNode) =
         let resolved = ctx.checker.getTypeFromTypeNode node
         let innerTag =
-            match ctx.CreateXanthamTag resolved |> fst with
-            | TagState.Unvisited t ->
-                t.chainDebug xanTag 
-                |> pushToStack ctx
-                t
-            | TagState.Visited t ->
-                t.chainDebug xanTag 
+            ctx.CreateXanthamTag resolved
+            |> fst
+            |> _.Value
+            |> _.chainDebug(xanTag)
+        pushToStack ctx innerTag
         xanTag.TypeSignal
         |> Signal.fulfillWith (fun () ->
             innerTag.TypeSignal.Value)
+
         xanTag.Builder
-        |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
+        |> Signal.fulfillWith(fun () ->
+            match innerTag.Builder.Value with
+            | ValueSome _ as v -> v
+            | ValueNone when innerTag.TryExportBuilder.IsSome && innerTag.ExportBuilder.Value.IsSome && ctx.exportCache.ContainsKey(innerTag.IdentityKey) ->
+                let refKey = TypeSignal.ofKey ctx.exportCache[innerTag.IdentityKey].RefKey
+                let makeTypeReferenceBuilder innerType innerTypeArguments = ValueSome <| SType.TypeReference {
+                    Type = innerType
+                    TypeArguments = innerTypeArguments
+                    ResolvedType = ValueNone
+                }
+                let makeTypeArgument (signal: Signal<InlinedSTypeParameterBuilder voption>) =
+                    match signal.Value with
+                    | ValueSome { TypeParameter = { Constraint = ValueSome typeSignal } }
+                    | ValueSome { TypeParameter = { Default = ValueSome typeSignal } } -> typeSignal
+                    | ValueSome { Type = typeKey } -> Signal.source typeKey
+                    | ValueNone -> TypeSignal.pending()
+                innerTag.ExportBuilder.Value
+                |> ValueOption.bind (function
+                    | STsExportDeclaration.TypeAlias { TypeParameters = typeParams; Type = aliasType } -> 
+                        typeParams
+                        |> Array.map makeTypeArgument
+                        |> makeTypeReferenceBuilder aliasType
+                    | STsExportDeclaration.Class { TypeParameters = typeParams } 
+                    | STsExportDeclaration.Interface { TypeParameters = typeParams } ->
+                        typeParams
+                        |> Array.map makeTypeArgument
+                        |> makeTypeReferenceBuilder refKey
+                    | STsExportDeclaration.Enum _
+                    | STsExportDeclaration.Variable _
+                    | STsExportDeclaration.Function _
+                    | STsExportDeclaration.Module _ -> makeTypeReferenceBuilder refKey [||]
+                    )
+            | ValueNone ->
+                ValueNone
+            )
     /// Build parameter slots from a list of ParameterDeclarations.
     let inline getParamSlots (parameters: ResizeArray<Ts.ParameterDeclaration>) =
         parameters.AsArray

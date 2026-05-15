@@ -44,27 +44,44 @@ let private makeIndexSlot (ctx: TypeScriptReader) (primitiveType: TypeKindPrimit
         )
     |> Option.toValueOption
 
-/// Forward this tag's signals to the first usable declaration of a named type's symbol.
-/// Skips re-export specifiers (ExportSpecifier, ExportDeclaration, etc.) which are Ignore-
-/// classified and would leave the forwarded signals permanently unfulfilled.
+/// <summary>
+/// Forward the given tag's type signal and builder signal to the first declaration of the given symbol
+/// that does not match the tag, and provides a valid builder value.
+/// </summary>
 let private forwardToSymbolDeclaration (ctx: TypeScriptReader) (xanTag: XanthamTag) (sym: Ts.Symbol) =
-    let firstUsableDecl =
+    let declarations =
+        // if we default to 'the first usable decl', then we may find ourselves in a situation where
+        // the first symbol declaration points to the tag itself (and will therefor stall and never resolve).
         sym.declarations
-        |> Option.bind (fun decls ->
-            decls.AsArray
-            |> Array.tryFind (fun d ->
-                not (ModulesAndExports.IsModulesAndExportsKind d)))
-    match firstUsableDecl with
-    | None -> ()
-    | Some decl ->
-        let innerTag =
-            match ctx.CreateXanthamTag (unbox<Ts.Node> (decl :> obj)) |> fst with
-            | TagState.Unvisited t -> pushToStack ctx t; t
-            | TagState.Visited t -> t
-        xanTag.TypeSignal
-        |> Signal.fulfillWith (fun () -> innerTag.TypeSignal.Value)
-        xanTag.Builder
-        |> Signal.fulfillWith (fun () -> innerTag.Builder.Value)
+        |> Option.map (
+            _.AsArray
+            >> Array.map (ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx _.chainDebug(xanTag))
+            )
+        |> Option.defaultValue [||]
+        |> Array.filter ((<>) xanTag)
+    let combinedSignal =
+        declarations
+        |> Array.map _.Builder.Invalidated
+        |> Array.toList
+        |> Signal.computed (fun () ->
+            declarations
+            |> Array.tryFind _.Builder.Value.IsSome
+            |> Option.map (fun tag ->
+                tag.TypeSignal.Value, tag.Builder.Value
+                )
+            )
+    xanTag.TypeSignal
+    |> Signal.fulfillWith (fun () ->
+        combinedSignal.Value
+        |> Option.map fst
+        |> Option.defaultValue TypeKindPrimitive.Unknown.TypeKey
+        )
+    xanTag.Builder
+    |> Signal.fulfillWith (fun () ->
+        combinedSignal.Value
+        |> Option.map snd
+        |> Option.defaultValue ValueNone
+        )
 
 /// Build parameter slots from the checker-level parameters of a Ts.Signature.
 let private signatureToParamSlots (ctx: TypeScriptReader) (signature: Ts.Signature) =
