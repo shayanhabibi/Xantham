@@ -533,9 +533,21 @@ type Ts.Program with
                         |> SymbolTypeKey.set subModuleTagKey (ValueSome subModule)
                         tag
                         |> SymbolTypeKey.set subModuleTagIdKey (ValueSome subModuleKey)
-                        this
-                        |> SymbolTypeKey.accessOrInit subModuleCache (fun () -> Dictionary())
-                        |> _.Add(subModuleKey, tag)
+                        // Dictionary write needs to be idempotent: when multiple tags
+                        // in one package version classify with `SubModuleName = None`
+                        // (e.g. `@types/node` with multiple top-level `.d.ts` files,
+                        // both defaulting to `""` at line 521-523), the `(PackageId,
+                        // "")` key collides. The downstream consumer in
+                        // `Read.fs:425-428` already de-dups via `Map.ofSeq` (silently
+                        // last-wins on duplicate keys); the strict `.Add` here was
+                        // throwing where the downstream Map silently overwrites. Use
+                        // indexer assignment to match — no data is lost relative to
+                        // the downstream view (the Dictionary field is also unread by
+                        // any consumer currently).
+                        let cache =
+                            this
+                            |> SymbolTypeKey.accessOrInit subModuleCache (fun () -> Dictionary())
+                        cache[subModuleKey] <- tag
                         subModuleKey)
                 // now that we have the subModules collected, we will collect relationships
                 let relations =
