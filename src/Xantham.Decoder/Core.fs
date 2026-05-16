@@ -136,6 +136,16 @@ module Decoder =
                             | Source.Package { Aliases = aliases } ->
                                 aliases
                                 |> Seq.map (fun { SubModule = subModule } -> ValueSome subModule, kv.Key)
+                            // `UnknownDeclared` is the encoder's fallback (PR #3, commit
+                            // e97bd70) for declarations that don't classify into a known
+                            // package or submodule. Treat as orphaned for ExportMap
+                            // purposes — same shape as `LibEs` (no submodule key). This
+                            // is round-trip codec completeness, not a downstream-semantic
+                            // claim: the case carries no package attribution, so it
+                            // cannot legitimately key into the package-grouped ExportMap.
+                            // Filed back upstream alongside the encoder-side codec fix
+                            // in src/Xantham.Common/Common.Types.fs (PR pending review).
+                            | Source.UnknownDeclared _ -> seq { ValueNone, kv.Key }
                             )
                         |> Seq.groupBy fst
                         |> Seq.map (fun (key, values) -> key, values |> Seq.map snd |> Set.ofSeq)

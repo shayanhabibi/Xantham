@@ -32,6 +32,14 @@ let inline sourceToQualifiedNamePart (source: ArenaInterner.Source) : ArenaInter
     | ArenaInterner.Source.Package collection ->
         let pkg = collection.Canonical.SubModule.Value.Package.Value
         ArenaInterner.QualifiedNamePart.Normal pkg.Name |> Some
+    // `UnknownDeclared` (PR #3, commit e97bd70) carries no resolvable package
+    // — the declaration didn't classify into a known package or submodule.
+    // No qualifier is appropriate: the rendered path will be the declaration's
+    // local module path without a package-name prefix. Same effective treatment
+    // as a Package whose name happens not to land in the qualified-name part
+    // (returns None). Round-trip codec completeness with the encoder-side
+    // change in src/Xantham.Common/Common.Types.fs.
+    | ArenaInterner.Source.UnknownDeclared _ -> None
 
 let inline private createModulePath (qualifiedName: QualifiedName) (source: ArenaInterner.QualifiedNamePart option) =
     let hasNodeModuleFilePath =
