@@ -1222,7 +1222,32 @@ module Source =
         | Source.LibEs fileName -> Encode.string fileName
         | Source.PackageInternal subModuleId -> SubModuleId.encode subModuleId
         | Source.Package exportCollection -> ExportCollection.encode exportCollection
+        | Source.UnknownDeclared fileName ->
+            // `UnknownDeclared` was introduced in PR #3 (commit e97bd70) as the
+            // fallback for declarations the encoder can't attribute to a known
+            // package or submodule (merged interface+namespace pairs, declarations
+            // pulled in via subpath exports without resolvable SourceTag chains,
+            // etc.). The DU case was added at line 137 but the codec wasn't
+            // extended — `Source.encode` would throw `Match failure: Xantham.Source`
+            // on every package whose graph happens to route any declaration into
+            // this fallback. Surfaces reliably ingesting any of the expanded SDK
+            // set beyond `@cloudflare/codemode` (whose transitive graph happens
+            // to avoid the fallback path).
+            //
+            // Encoded as a tagged object `{ "UnknownDeclared": <fileName> }` to
+            // disambiguate from `Source.LibEs` (the bare-string carrier in this
+            // codec). The choice of object envelope is the minimum shape needed
+            // to round-trip — downstream consumers (`Decoder.Core.fs`,
+            // generator match sites in `Render.fs` / `Types/Generator.fs` /
+            // `TypeRefRender.Paths.fs`) still need their own match sites
+            // extended to give the case a meaningful behaviour, but those are
+            // .NET-side concerns and don't block the JS encoder from completing.
+            Encode.object [ "UnknownDeclared", Encode.string fileName ]
     let decode: Decoder<Source> = Decode.oneOf [
+        // Order matters: the tagged-object case must precede the unwrapped
+        // `Decode.string` branch, otherwise an `UnknownDeclared`-encoded value
+        // would decode as a `LibEs` whose `fileName` is the stringified object.
+        Decode.field "UnknownDeclared" Decode.string |> Decode.map Source.UnknownDeclared
         Decode.string |> Decode.map Source.LibEs
         SubModuleId.decode |> Decode.map Source.PackageInternal
         ExportCollection.decode |> Decode.map Source.Package
