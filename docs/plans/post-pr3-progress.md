@@ -13,6 +13,15 @@
 - **Window:** 2026-05-15, post-merge of PR #3
 - **Status:** 178 generator tests pass
 
+> **Update 2026-05-16:** the original "file back upstream" decision
+> on `Source.UnknownDeclared` was reversed once the goal shifted
+> from "minimise consumer churn" to "get all 13 Cloudflare SDKs
+> generating end-to-end so we can hard-count and classify the
+> remaining errors." A walkthrough of subsequent work is in
+> [§ "Update — work landed since this doc was written"](#update--work-landed-since-this-doc-was-written)
+> at the bottom; the historical snapshot above is preserved as a
+> capture of the decision point.
+
 ## What PR #3 brought in
 
 Seven commits, summarised by Shayan in the PR description:
@@ -341,3 +350,194 @@ cd /home/hhh/repos/Fidelity.CloudEdge/generators/xantham
 ./scripts/wrap-all.sh
 ./scripts/verify-all.sh
 ```
+
+---
+
+# Update — work landed since this doc was written
+
+Window: 2026-05-15 evening → 2026-05-16. Seven commits on
+`verify-cloudflare-sdk-pipeline` past `e65df55`:
+
+| Commit | Layer | What |
+|---|---|---|
+| `15471bb` | FCE driver | Handle expanded Cloudflare SDK set (3 → 13) |
+| `dd16eb8` | encoder | Upstream-side correction |
+| `5098692` | common | `Source.UnknownDeclared` codec wired into `Common.Types.Source.encode/decode` (`{ "UnknownDeclared": <fileName> }` envelope) |
+| `12fb376` `4342c19` | decoder, generator | Exhaustive `Source` match across the six consumer sites enumerated above |
+| `2f22b15` | decoder, generator | **Self-ref `TsType.TypeQuery` cycle break** in `Arena.Interner.resolve` (10 of 13 SDKs hung past 30 min before this) + final `UnknownDeclared` exhaustiveness |
+| `e5feed6` | decoder, generator | **Backtick-free identifier renamer.** `Identifier.toSafe` replaces `NormalizeIdentifierBackticks`; `renderAbstractWithName` switched to `[<EmitMethod>]` (CompiledName is FS0755 on abstract methods) |
+
+## Decisions reversed
+
+**"File `Source.UnknownDeclared` back upstream."** Reversed. The
+goal shifted from "minimise consumer-side churn from PR #3" to
+"get all 13 SDKs generating end-to-end so we have hard error
+counts to classify." Patching exhaustiveness locally was the
+faster path to that goal; if a future upstream redesign of
+`UnknownDeclared` semantics requires consumer-side changes, the
+local match arms are simple to revisit.
+
+The local fix for each of the six consumer sites is a
+conservative default: codec round-trips the case verbatim; the
+qualifier resolver returns `None`; metadata-import lookup
+returns `ValueNone`; ignore-path decisions return `false`. None
+of these change behaviour for `LibEs`/`PackageInternal`/`Package`
+inputs; they only define what happens for `UnknownDeclared`
+inputs, which without the patches threw `Match failure:
+Xantham.Source` at JSON serialisation or render time.
+
+The dangling-path concern documented in the original snapshot
+(`Babel.Types.X` vs bare `Types.X` in agents) is still real, but
+it's an upstream classifier problem (`UnknownDeclared` being
+applied to declarations that *should* attribute to known
+packages), not a consumer-side wiring problem. The local
+exhaustiveness fix doesn't pretend to solve it.
+
+## What unblocked the 13-SDK pipeline
+
+PR #3 made all 13 Cloudflare SDK fixtures decodable end-to-end
+*in principle*, but 10 of 13 hung past 30 minutes in the
+generator. Heartbeat instrumentation localised it to
+`Interface.MessageEvent` member #5 (the `source` property).
+Root cause: `TsType.TypeQuery` self-references — the encoder
+logged `[CIRCREF]` warnings but still emitted them, and
+`Arena.Interner.resolve` had no break for `tq.Type = typeKey`
+self-references. Fixed in `2f22b15` with a self-ref short-circuit
+that returns `ResolvedType.Primitive NonPrimitive` for the
+self-pointing case:
+
+```fsharp
+let resolvedValue =
+    match typeMap[typeKey] with
+    | TsType.TypeQuery tq when tq.Type = typeKey ->
+        ResolvedType.Primitive TypeKindPrimitive.NonPrimitive
+    | t -> buildFrom (isLibEs typeKey) t
+```
+
+Plus a defence-in-depth guard at the `RenderScope.Prelude.TypeQuery`
+branch (`+18 lines`) that liftNullables to `obj` when the
+prerender-side cycle isn't caught upstream.
+
+After these, all 13 SDKs generated F# end-to-end. Total verify
+errors: **666 raw across 13 SDKs** (compared with the 1,516 the
+original snapshot reports for 3 SDKs after the in-session
+exhaustiveness probes).
+
+## Backtick-free identifier renamer
+
+`e5feed6` is a Xantham-wide redesign of the
+"how do we render TS identifiers that collide with F# syntax"
+question. Before this commit the answer was Fantomas's
+`NormalizeIdentifierBackticks`, which wraps any unsafe identifier
+in `` ` ` `` backticks. That works at the compile level but
+leaks into every consumer's call site — `widget.``fixed``()`
+instead of `widget.fixed_()`.
+
+The redesign moves to a **rename-with-Fable-interop-attribute**
+pattern that the existing `Name.Modified(original, renamed)` DU
+already supports:
+
+| Case | Source | F# emitted | Interop attribute |
+|---|---|---|---|
+| F# keyword | `fixed` | `fixed_` | `[<EmitMethod("fixed")>]` |
+| Bare `_` | `_` | `anon` | `[<EmitProperty("_")>]` (property) / none (parameter) |
+| Empty-after-sanitize | `"\n"` | `Newline` | `[<CompiledName("\n")>]` |
+| Leading digit | `2fa` | `_2fa` | `[<CompiledName("2fa")>]` |
+
+Key implementation notes:
+
+1. **`Identifier.toSafe`** replaces `NormalizeIdentifierBackticks` in
+   `Name.fs`'s `Normalization.normalize`. It composes
+   `sanitizeOrName` (which keeps the casing-boundary chars `.` `/`
+   `-` so pascal/camel-case can fold them) with the rename rules
+   above.
+2. **F# keyword list** is current keywords only. Reserved
+   future-use words (`event`, `method`, `mixin`, etc.) pass through
+   unchanged — the F# compiler accepts them today, and renaming
+   them mass-renames real TS API surface (e.g. `event` parameter
+   names) for no compile gain.
+3. **Abstract-method attribute is `EmitMethod`, not `CompiledName`.**
+   F# rejects `[<CompiledName>]` on `abstract X: ... -> T`
+   (FS0755). EmitMethod is Fable's purpose-built attribute for the
+   same role and is accepted in this position. Properties continue
+   to use `EmitProperty` (already in place pre-edit). The
+   `[<CompiledName>]` is still used on union/enum cases where F#
+   does accept it.
+4. **`Name.Modified` propagation** drives the attribute emission
+   automatically via `AttributesBuilderBase.MakeAttributeIfModified`
+   — no per-site decoration needed for individual renames.
+
+## Current state — verify counts
+
+Raw and distinct (file:line:col-deduplicated) error counts after
+all post-`e65df55` work. Pre-edit baseline column re-measured on
+the current branch (so it includes the SDK expansion to 13 but
+none of the post-doc fixes; the doc's original
+1,516-on-3-SDKs number is a snapshot of a different shape):
+
+| SDK | Pre-edit raw | Post-fix raw / distinct |
+|---|---:|---:|
+| Agents | 5 | 2 / 1 |
+| AiChat | 5 | 2 / 1 |
+| Cloudflare | 8 | 7 / 4 |
+| Codemode | 197 | 196 / 70 |
+| Containers | 6 | 2 / 1 |
+| DynamicWorkflows | 45 | 44 / 14 |
+| Puppeteer | 34 | 2 / 1 |
+| Sandbox | 6 | 2 / 1 |
+| Shell | 5 | 2 / 1 |
+| Think | 5 | 2 / 1 |
+| Voice | 5 | 2 / 1 |
+| WorkerBundler | 5 | 2 / 1 |
+| WorkersTypes | 292 | 291 / 79 |
+| **Total** | **623** | **556** |
+
+Net **−67 errors**. The renamer's biggest win is on Puppeteer
+(34 → 2). The big-volume SDKs (`Codemode` 197, `WorkersTypes`
+292) only dropped by 1 each — their remaining errors are
+unrelated to name-escape and break down as:
+
+* FS0033 generic-arity mismatches (`ReadonlyArray<_>` expects 1
+  but given 0, etc.) — likely encoder dispatcher routing for
+  generic type-references whose arity has been lost or
+  partially-applied
+* FS0039 undefined-name resolution failures (`NoInfer`,
+  `Types.X`, `Bind`, `LoadRunner`, etc.) — a mix of the
+  pre-existing `NoInfer` regression flagged in this doc's
+  original "Open questions" §2, the `UnknownDeclared`
+  path-qualifier loss flagged in §3, and synthetic-name
+  references where the synthetic type (`_LitN`) never got
+  emitted
+
+These two categories define the bulk of the remaining work and
+are not addressable by name-escape changes. The original
+"Open questions for review" section above is still load-bearing
+as the roadmap for follow-up encoder-side work.
+
+## Open questions — current status
+
+| Original § | Status |
+|---|---|
+| §1 `Source.UnknownDeclared` wiring | **Resolved locally** in `5098692`/`12fb376`/`4342c19`/`2f22b15`. Six consumer sites have defined behaviour. The qualifier-loss / classifier-routing question (§3 below) is the live remainder. |
+| §2 `NoInfer` re-handling | **Still open.** Largest remaining FS0039 bucket. Untouched in subsequent commits. |
+| §3 `UnknownDeclared` scope (Babel attribution) | **Still open.** Manifests as path-qualifier loss for some references in agents et al. Upstream classifier problem; consumer-side patches can't fix it. |
+| §4 Dispatcher debug-chain semantic equivalence | **Untouched** — no behavioural regressions observed that point at it, so deprioritised. |
+
+New open questions surfaced since:
+
+5. **F# keyword set completeness.** `Identifier.fsharpKeywords` is
+   the current best-guess of what F# rejects today. The
+   bake-in is empirical (errors emerged from real verify
+   output and were added one by one — `const`, `constraint`,
+   etc.). If new TS APIs surface a collision with a word not in
+   the set, the symptom is FS0010 on the generated code. A
+   future audit against the official F# spec keyword list
+   would tighten this.
+
+6. **`L46818`-class structural emission bugs.** The cohort
+   that this session's renamer work targeted included one
+   structural bug: a `module rec Typescript =` emitted at
+   column 0 mid-file in agents.wrapped.fs (when it should have
+   been nested under the parent module). This is a Generator
+   indentation/scope bug, not a name-escape issue. Out of scope
+   for the renamer work but still a real defect.
