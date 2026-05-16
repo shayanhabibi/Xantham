@@ -400,7 +400,7 @@ type Ts.Program with
                     |> Option.orElseWith(fun () ->
                         let removeExtension (path: string) =
                             let extension = Node.Api.path.extname path
-                            let extensionless = resolvedModule.resolvedFileName.Substring(0, path.Length - extension.Length)
+                            let extensionless = path.Substring(0, path.Length - extension.Length)
                             extensionless
                         let extensionless = resolvedModule.resolvedFileName.Substring(0, resolvedModule.resolvedFileName.Length - resolvedModule.extension.Length)
                         this.getSourceFiles().AsArray
