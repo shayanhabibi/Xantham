@@ -433,7 +433,15 @@ module FunctionLikeSignature =
             |> Ast.Tuple
         let returnType = functionLike.ReturnType |> TypeRefRender.render
         let typeParameters = renderTypeParameters ctx functionLike
+        // EmitMethod (not CompiledName) is the right rename attribute for
+        // abstract methods. F# rejects [<CompiledName>] on `abstract X: ... -> T`
+        // (FS0755). EmitMethod is Fable's purpose-built attribute for method
+        // renaming and is accepted in this position. Falls through to no-op
+        // when the name is unmodified.
         Ast.AbstractMember(renderName, [ parameters ], returnType)
+        |> Attributes.renderAttributesForAbstractMember (attributes {
+            emitMethod name
+        })
         |> if functionLike.Traits.Contains(RenderTraits.Static) then _.toStatic() else id
         |> if typeParameters.IsSome then _.typeParams(typeParameters.Value) else id
         |> Documentation.renderForAbstractMember functionLike

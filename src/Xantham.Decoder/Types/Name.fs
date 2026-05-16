@@ -1,7 +1,6 @@
 ﻿namespace Xantham.Decoder
 
 open System.Text.RegularExpressions
-open Fantomas.FCS.Syntax.PrettyNaming
 
 /// <summary>
 /// Utility type for working with names or manipulating the
@@ -109,15 +108,15 @@ module Name =
         // backtick wrap. Sanitization is structural — applied unconditionally
         // so the produced Name reflects a valid F# identifier without callers
         // having to opt in via global mutable state.
-        let mutable private normalize_ = Identifier.sanitize >> NormalizeIdentifierBackticks
+        let mutable private normalize_ = Identifier.toSafe
         let normalize text = normalize_ text
         let setNormalizeSetting (newSetting: Setting) =
             setting <- newSetting
             match newSetting with
             | Backticks ->
-                normalize_ <- Identifier.sanitize >> NormalizeIdentifierBackticks
+                normalize_ <- Identifier.toSafe
             | SafeCustom stringFunc ->
-                normalize_ <- stringFunc >> Identifier.sanitize >> NormalizeIdentifierBackticks
+                normalize_ <- stringFunc >> Identifier.toSafe
             | Custom stringFunc ->
                 normalize_ <- stringFunc
     /// Creates a Name from a string. Will automatically normalize the name with backticks if required..
@@ -222,12 +221,12 @@ module Name =
     // "cloudflare" (lowercase) instead of the intended "Cloudflare".
     /// Removes backticks, applies casing, and then reapplies backticks if necessary.
     let private _pascalCase (fn: (string -> string) -> Name -> Name) name =
-        name |> fn (Internal.stripBackticks >> Identifier.sanitize >> Internal.toPascalCase >> Internal.normalizeString)
+        name |> fn (Internal.stripBackticks >> Identifier.sanitizeOrName >> Internal.toPascalCase >> Internal.normalizeString)
     /// Removes backticks, applies casing, and then reapplies backticks if necessary.
     let private _capitalize (fn: (string -> string) -> Name -> Name) name =
         name |> fn (
             Internal.stripBackticks
-            >> Identifier.sanitize
+            >> Identifier.sanitizeOrName
             >> fun s -> if s.Length > 0 then s.Substring(0, 1).ToUpperInvariant() + s.Substring(1) else s
             >> Internal.normalizeString
             )
@@ -235,7 +234,7 @@ module Name =
     let private _camelCase (fn: (string -> string) -> Name -> Name) name =
         name |> fn (
             Internal.stripBackticks
-            >> Identifier.sanitize
+            >> Identifier.sanitizeOrName
             >> Internal.toCamelCase
             >> Internal.normalizeString
             )

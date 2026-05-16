@@ -65,6 +65,49 @@ let tests =
     ]
 
 [<Tests>]
+let toSafeTests =
+    // toSafe is the backtick-free identifier renamer. Renames are recorded
+    // by callers via `Name.Modified`, and `[<CompiledName>]` emission picks
+    // the original up automatically.
+    testList "Identifier.toSafe" [
+        testCase "F# keyword gets trailing underscore" <| fun _ ->
+            Expect.equal (Identifier.toSafe "fixed") "fixed_" "keyword renamed"
+            Expect.equal (Identifier.toSafe "module") "module_" "keyword renamed"
+            Expect.equal (Identifier.toSafe "type") "type_" "keyword renamed"
+
+        testCase "reserved future-use words pass through unchanged" <| fun _ ->
+            // F# accepts these as identifiers today (mixin/event/method/etc.);
+            // renaming them would mass-rename real TS API surface.
+            Expect.equal (Identifier.toSafe "mixin") "mixin" "no rename — F# accepts mixin"
+            Expect.equal (Identifier.toSafe "method") "method" "no rename — F# accepts method"
+            Expect.equal (Identifier.toSafe "event") "event" "no rename — F# accepts event"
+
+        testCase "bare underscore renamed to anon" <| fun _ ->
+            // F# parses `_` as wildcard pattern; rejecting it as member name.
+            Expect.equal (Identifier.toSafe "_") "anon" "bare _ renamed"
+
+        testCase "leading-digit name gets _ prefix" <| fun _ ->
+            Expect.equal (Identifier.toSafe "2fa") "_2fa" "leading-digit prefixed"
+
+        testCase "newline-only input falls back to Newline" <| fun _ ->
+            Expect.equal (Identifier.toSafe "\n") "Newline" "special-char fallback"
+
+        testCase "empty input falls back to Anon" <| fun _ ->
+            Expect.equal (Identifier.toSafe "") "Anon" "empty fallback"
+
+        testCase "leaves valid identifiers untouched" <| fun _ ->
+            Expect.equal (Identifier.toSafe "Cloudflare") "Cloudflare" "no change for valid identifier"
+            Expect.equal (Identifier.toSafe "myProperty") "myProperty" "no change for valid identifier"
+
+        testCase "preserves casing boundary characters for downstream folding" <| fun _ ->
+            // toSafe is the first step; pascal/camel-case still needs to see
+            // `-`, `_`, `.`, `/` to fold them into a single identifier.
+            Expect.equal (Identifier.toSafe "dynamic-workflows") "dynamic-workflows" "kebab preserved"
+            Expect.equal (Identifier.toSafe "foo.bar") "foo.bar" "dot preserved"
+            Expect.equal (Identifier.toSafe "@scope/foo") "scope/foo" "@ dropped, slash kept"
+    ]
+
+[<Tests>]
 let pascalCaseTests =
     // Pascal-casing folds `.` and `/` into word boundaries — alongside the
     // pre-existing `-` and `_`. `@cloudflare` and friends round-trip to a

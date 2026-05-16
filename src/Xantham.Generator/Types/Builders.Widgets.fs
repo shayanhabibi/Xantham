@@ -173,6 +173,9 @@ type Attributes =
     static member emitConstructor = Ast.Attribute("EmitConstructor")
     /// <summary><c>EmitIndexer</c></summary>
     static member emitIndexer = Ast.Attribute("EmitIndexer")
+    /// <summary><c>EmitMethod( "[methodName]" )</c></summary>
+    /// <param name="value"></param>
+    static member emitMethod (value: string) = Ast.Attribute("EmitMethod", Ast.ParenExpr(Ast.String value))
     /// <summary><c>EmitProperty( "[propertyName]" )</c></summary>
     /// <param name="value"></param>
     static member emitProperty (value: string) = Ast.Attribute("EmitProperty", Ast.ParenExpr(Ast.String value))
@@ -250,6 +253,9 @@ type AttributesBuilderBase() =
     [<CustomOperation("emitPropertyOrErase")>]
     member inline _.EmitPropertyErase(state, value: Name<_>) =
         AttributesBuilderBase.MakeAttributeIfModifiedElse value Attributes.emitProperty Attributes.erase :: state
+    [<CustomOperation("emitMethod")>]
+    member inline _.EmitMethod(state, value: Name<_>) =
+        AttributesBuilderBase.MakeAttributeIfModified value Attributes.emitMethod state
     [<CustomOperation "compiledName">]
     member inline _.CompiledName(state, value: string) =
         Attributes.compiledName value :: state
