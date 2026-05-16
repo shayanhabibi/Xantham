@@ -535,7 +535,22 @@ module ArenaInterner =
                 match resolved.TryGetValue(typeKey) with
                 | true, value -> value
                 | _ ->
-                    let resolvedValue = buildFrom (isLibEs typeKey) typeMap[typeKey]
+                    // Self-referential `TsType.TypeQuery` short-circuit. The encoder
+                    // logs `[CIRCREF]` warnings and emits these anyway (observed
+                    // ingesting worker-bundler: `TsTypeQuery { FullyQualifiedName =
+                    // [MessagePort]; Type = 4587 }` at TypeKey 4587). Without this
+                    // short-circuit the resolver builds a `ResolvedType.TypeQuery`
+                    // whose inner `Type` lazy resolves to itself, and downstream
+                    // prerender loops through it indefinitely. Collapse to
+                    // `NonPrimitive` (renders to F# `obj`) — preserves compilation,
+                    // matches the semantic loss the encoder already accepted, and
+                    // breaks the cycle at its root rather than catching it at every
+                    // consumer site.
+                    let resolvedValue =
+                        match typeMap[typeKey] with
+                        | TsType.TypeQuery tq when tq.Type = typeKey ->
+                            ResolvedType.Primitive TypeKindPrimitive.NonPrimitive
+                        | t -> buildFrom (isLibEs typeKey) t
                     resolved[typeKey] <- resolvedValue
                     resolvedValue
         and resolveExport (typeKey: TypeKey) =

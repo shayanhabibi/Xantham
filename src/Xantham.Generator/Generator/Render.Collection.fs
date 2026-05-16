@@ -73,7 +73,10 @@ let tryRenderMetadataImport (metadata: RenderMetadata) =
                 sm.Value.Package.Value.Name |> ArenaInterner.QualifiedNamePart.Normal |> ValueSome
             | ArenaInterner.Source.Package coll ->
                 coll.Canonical.SubModule.Value.Package.Value.Name
-                |> ArenaInterner.QualifiedNamePart.Normal |> ValueSome)
+                |> ArenaInterner.QualifiedNamePart.Normal |> ValueSome
+            // `UnknownDeclared` (PR #3 fallback) has no resolvable package
+            // — no import attribute can be constructed. Same shape as LibEs.
+            | ArenaInterner.Source.UnknownDeclared _ -> ValueNone)
     match metadata.FullyQualifiedName, sourcePackageName with
     | ValueNone, ValueNone -> ValueNone
     | ValueNone, ValueSome qualifiedNamePart ->

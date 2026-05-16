@@ -653,9 +653,21 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeQuery typeQuery ->
-        prerender ctx scope typeQuery.Type
-        |> RenderScope.createRootless resolvedType
-        |> addOrReplaceScope ctx resolvedType
+        // Defense-in-depth on self-referential `TypeQuery` cycles. The
+        // primary short-circuit is at the decoder level (`Arena.Interner.fs`
+        // `resolve`), which collapses `TsType.TypeQuery { Type = self }` to
+        // `NonPrimitive` before it reaches prerender. This check covers
+        // any path that bypasses the decoder collapse (e.g. fresh
+        // `LazyContainer.CreateFromValue` wrapping a previously-resolved
+        // value that still happens to be a self-ref TypeQuery).
+        if typeQuery.Type.Raw = lazyResolvedType.Raw then
+            liftNullable Intrinsic.obj
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
+        else
+            prerender ctx scope typeQuery.Type
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Substitution substitutionType ->
         substitutionType.Base |> prerender ctx scope
         |> RenderScope.createRootless resolvedType

@@ -367,6 +367,11 @@ and InterceptorIgnorePathRender = {
             | ArenaInterner.Source.Package collection ->
                 collection.Canonical.SubModule.Value.Package.Value.Name.Contains(
                     "babel", System.StringComparison.OrdinalIgnoreCase)
+            // `UnknownDeclared` is the encoder's post-PR3 fallback (commit
+            // e97bd70) for declarations the classifier couldn't attribute.
+            // Don't ignore — let the path render. Round-trip codec
+            // completeness; filed back upstream alongside the codec fix.
+            | ArenaInterner.Source.UnknownDeclared _ -> false
         QualifiedName = fun _ -> false
     }
 and InterceptorPaths = {
