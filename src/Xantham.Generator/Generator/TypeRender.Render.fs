@@ -609,6 +609,19 @@ module TypeLikeRender =
         |> TypeRefRender.nonNullable
         |> TypeRefRender.render
         |> Ast.InheritUnit
+    // Marker `interface X` declaration for TS `implements` clauses.
+    // F# rejects `inherit X()` when X is an interface (FS0946); the
+    // marker form lets the class claim interface conformance without
+    // emitting member implementations. The class is `[<AbstractClass>]`
+    // with all-abstract members, so consumers implement the interface
+    // contract on their concrete subclass.
+    let renderImplementsForClass (ctx: GeneratorContext) (inScopeTyparNames: Set<string>) (typeRefRender: TypeRefRender) =
+        let typeWidget =
+            typeRefRender
+            |> TypeRefRender.substituteForHeritage inScopeTyparNames
+            |> TypeRefRender.nonNullable
+            |> TypeRefRender.render
+        Ast.InterfaceWith(typeWidget) { () }
     let renderConstructors (ctx: GeneratorContext) (typeLike: TypeLikeRender) =
         typeLike.Constructors
         |> List.map (fun parameters ->
@@ -684,17 +697,17 @@ module TypeLikeRender =
             |> List.map (fun tp -> "'" + Name.Case.valueOrModified tp.Name)
             |> Set.ofList
         let abstractCtors = renderAbstractConstructors ctx typeLike
-        // F# class-body rule: at most ONE `inherit X()` (single class
-        // inheritance). The encoder flattens TS `extends` and `implements`
-        // into one `Inheritance` list — the first entry is the class
-        // base, any subsequent entries are interface implementations
-        // that would need `interface X with [...]` blocks (not currently
-        // emitted; consumers lose the interface-impl declaration but the
-        // class itself compiles).
+        // F# class-body rules:
+        //   - At most ONE `inherit X()` (single class inheritance). Source
+        //     is `Inheritance` (TS `extends`); F# only allows one.
+        //   - Each TS `implements I` becomes a marker `interface I`
+        //     declaration. Source is `Implements`. Avoids FS0946
+        //     ("Cannot inherit from interface type") that would fire if
+        //     interface targets were emitted as `inherit X()`.
         let classInheritance = typeLike.Inheritance |> List.truncate 1
         let builder =
-            match memberCollection, abstractCtors, classInheritance with
-            | [], [], [] -> Ast.ClassEnd(renderName, Ast.Constructor().toPrivate())
+            match memberCollection, abstractCtors, classInheritance, typeLike.Implements with
+            | [], [], [], [] -> Ast.ClassEnd(renderName, Ast.Constructor().toPrivate())
             | _ -> Ast.TypeDefn(renderName, Ast.Constructor().toPrivate())
         builder {
             yield!
@@ -702,6 +715,9 @@ module TypeLikeRender =
                 |> List.map (renderInheritanceForClass ctx inScopeTypars)
             yield! abstractCtors
             yield! memberCollection
+            yield!
+                typeLike.Implements
+                |> List.map (renderImplementsForClass ctx inScopeTypars)
         }
         |> Documentation.renderForTypeDefn typeLike
         |> if typeParameters.IsSome then _.typeParams(typeParameters.Value) else id

@@ -169,6 +169,9 @@ module Render =
                 Inheritance =
                     typeDefn.Inheritance
                     |> List.map (TypeRefRender.anchorAndLocalise anchorPath)
+                Implements =
+                    typeDefn.Implements
+                    |> List.map (TypeRefRender.anchorAndLocalise anchorPath)
                 Members =
                     typeDefn.Members
                     |> List.map (anchorTypedNameRender ctx anchorPath)
@@ -347,6 +350,9 @@ module Render =
                     |> List.map (anchorTypeParameters ctx anchorPath)
                 Inheritance =
                     typeDefn.Inheritance
+                    |> List.map (TypeRefRender.anchorAndLocalise anchorPath)
+                Implements =
+                    typeDefn.Implements
                     |> List.map (TypeRefRender.anchorAndLocalise anchorPath)
                 Members =
                     typeDefn.Members

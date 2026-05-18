@@ -251,6 +251,7 @@ module TemplateLiteral =
                     }
                 ]
                 Inheritance = []
+                Implements = []
                 Constructors = []
                 Documentation = []
                 IsClass = false
@@ -276,6 +277,7 @@ module Members =
             Name = ValueNone
             TypeParameters = []
             Inheritance = []
+            Implements = []
             Members = members
             Functions = functions
             Constructors = []

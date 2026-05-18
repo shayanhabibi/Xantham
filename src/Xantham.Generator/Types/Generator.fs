@@ -269,6 +269,41 @@ module LibEsDefaults =
             "TableDescriptor", { Target = Intrinsic.obj; Arity = 0 }
             "ModuleImportDescriptor", { Target = Intrinsic.obj; Arity = 0 }
             "ModuleExportDescriptor", { Target = Intrinsic.obj; Arity = 0 }
+            // TS `Intl` namespace (lib.es2017.intl / lib.es2018.intl):
+            // structural config interfaces with consumer-side defaults.
+            // Lookup uses bare leaf name, so `Intl.NumberFormatOptions`
+            // matches by `NumberFormatOptions`. Same pattern as the
+            // WebAssembly entries above — keep the dotted variants here
+            // as documentation; the bare-leaf entries are what fire.
+            "Intl.NumberFormatOptions", { Target = Intrinsic.obj; Arity = 0 }
+            "Intl.CollatorOptions", { Target = Intrinsic.obj; Arity = 0 }
+            "Intl.LocalesArgument", { Target = Intrinsic.obj; Arity = 0 }
+            "NumberFormatOptions", { Target = Intrinsic.obj; Arity = 0 }
+            "CollatorOptions", { Target = Intrinsic.obj; Arity = 0 }
+            "LocalesArgument", { Target = Intrinsic.obj; Arity = 0 }
+            // Lib.es5 / lib.es2015 structural interfaces. `ArrayLike<T>`
+            // is the index-plus-length structural type; the closest F#
+            // analogue is `IReadOnlyList<T>` (same shape). Mapping to
+            // `obj` arity 0 loses the typar but `IReadOnlyList<_>` is
+            // also a valid choice — `obj` is the conservative default
+            // (consumers can refine when the typar matters).
+            "ArrayLike", { Target = Intrinsic.obj; Arity = 0 }
+            // `EventListenerOrEventListenerObject` is the union alias used
+            // in `EventTarget.addEventListener(type, listener, ...)`.
+            // Maps to `obj` for the same reason `EventListener` does above.
+            "EventListenerOrEventListenerObject", { Target = Intrinsic.obj; Arity = 0 }
+            // Lib.es2017.sharedmemory / lib.es2024.sharedmemory.
+            "SharedArrayBuffer", { Target = Intrinsic.obj; Arity = 0 }
+            // String iteration protocol types (lib.es2015.iterable).
+            "StringIterator", { Target = Intrinsic.obj; Arity = 0 }
+            // TS 5.6+ added `IteratorObject<T, TReturn, TNext>` as the
+            // shared base of `IterableIterator` and friends. Map to `obj`
+            // arity 0 — the typar args truncate.
+            "IteratorObject", { Target = Intrinsic.obj; Arity = 0 }
+            // lib.es2022.error: structural options bag for `Error(message,
+            // options)`. F# has no equivalent constructor-options pattern;
+            // `obj` placeholder.
+            "ErrorOptions", { Target = Intrinsic.obj; Arity = 0 }
         ]
 
     let private intrinsicRef (name: string) =

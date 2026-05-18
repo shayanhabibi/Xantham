@@ -155,6 +155,7 @@ module TypeAlias =
                     Members = members
                     Functions = functions
                     Inheritance = []
+                    Implements = []
                     Constructors = []
                     Documentation = documentation
                     IsClass = false
@@ -238,6 +239,7 @@ module TypeAlias =
                     Members = members
                     Functions = functions
                     Inheritance = []
+                    Implements = []
                     Constructors = []
                     Documentation = documentation
                     IsClass = false
@@ -328,6 +330,7 @@ module TypeAlias =
                         }
                     ]
                     Inheritance = []
+                    Implements = []
                     Constructors = []
                     Documentation = documentation
                     IsClass = false

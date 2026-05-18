@@ -60,6 +60,9 @@ module Interface =
             Functions =
                 functions
             Inheritance = inheritanceRefs
+            // Interfaces don't have a TS `implements` clause; the
+            // Implements channel is reserved for class-shaped renders.
+            Implements = []
             Constructors = []
             Documentation = shape.Documentation
             IsClass = inheritsClass
@@ -77,6 +80,10 @@ module Class =
                 | MemberRender.Property typedNameRender -> typedNameRender :: members, functions
                 | MemberRender.Method functionLikeRender -> members, functionLikeRender :: functions
                 ) ([], [])
+        let toTypeRef =
+            ResolvedType.TypeReference
+            >> LazyContainer.CreateFromValue
+            >> ctx.PreludeGetTypeRef ctx scopeStore
         {
             Metadata = metadata
             TypeLikeRender.Name = shape.Name
@@ -85,16 +92,18 @@ module Class =
                 |> List.map (_.Value >> TypeParameter.render ctx scopeStore)
             Members = members
             Functions = functions
+            // TS class `extends Base` → F# `inherit Base()` (single
+            // class inheritance). TS class `implements I` → F#
+            // `interface I with` (multi-interface implementation).
+            // Keeping these separate lets the renderer emit the
+            // correct shape for each (FS0946 fires on
+            // `inherit X()` where X is an interface).
             Inheritance =
+                shape.Heritage.Extends |> List.map toTypeRef
+            Implements =
                 shape.Heritage.Implements
-                |> Option.map List.singleton
+                |> Option.map (toTypeRef >> List.singleton)
                 |> Option.defaultValue []
-                |> List.append shape.Heritage.Extends
-                |> List.map (
-                    ResolvedType.TypeReference
-                    >> LazyContainer.CreateFromValue
-                    >> ctx.PreludeGetTypeRef ctx scopeStore
-                    )
             Constructors =
                 shape.Constructors
                 |> List.map (
