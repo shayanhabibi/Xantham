@@ -609,6 +609,15 @@ module TypeLikeRender =
         |> TypeRefRender.nonNullable
         |> TypeRefRender.render
         |> Ast.InheritUnit
+    // Detect whether a heritage TypeRefRender collapsed to a bare
+    // non-generic intrinsic (`obj`/`exn`). F# rejects `inherit obj` in
+    // interface bodies (FS0887, "obj is not an interface type") and
+    // `inherit obj()` in class bodies is at best redundant. Filter
+    // these out of the inheritance list before render.
+    let isObjOrExnIntrinsic (typeRefRender: TypeRefRender) =
+        match typeRefRender.Kind with
+        | TypeRefKind.Atom (TypeRefAtom.Intrinsic ("obj" | "exn")) -> true
+        | _ -> false
     // Marker `interface X` declaration for TS `implements` clauses.
     // F# rejects `inherit X()` when X is an interface (FS0946); the
     // marker form lets the class claim interface conformance without
@@ -661,16 +670,29 @@ module TypeLikeRender =
             if List.isEmpty memberCollection
             then Ast.InterfaceEnd(renderName)
             else Ast.TypeDefn(renderName)
+        // Filter heritage targets that collapsed to `obj`/`exn` via
+        // cycle-break or substitution. F# rejects `inherit obj` /
+        // `inherit exn` inside interface bodies (FS0887, "X is not an
+        // interface type"). The class semantic is lost but the
+        // interface still compiles; consumers re-attach interfaces via
+        // driver-side customisation if needed.
+        let filteredInheritance =
+            typeLike.Inheritance
+            |> List.filter (
+                TypeRefRender.substituteForHeritage inScopeTypars
+                >> isObjOrExnIntrinsic
+                >> not
+            )
         builder {
             yield! renderAbstractConstructors ctx typeLike
             yield!
-                typeLike.Inheritance
+                filteredInheritance
                 |> List.map (renderInheritance ctx inScopeTypars)
             yield! memberCollection
         }
         |> Documentation.renderForTypeDefn typeLike
         |> if typeParameters.IsSome then _.typeParams(typeParameters.Value) else id
-        
+
     // renders an abstract class — used for TS `class` declarations whose
     // bindings need to participate in class inheritance (`inherit Y` where
     // Y is a class is rejected inside an `interface ... end` body). Members
@@ -705,8 +727,18 @@ module TypeLikeRender =
         //     ("Cannot inherit from interface type") that would fire if
         //     interface targets were emitted as `inherit X()`.
         let classInheritance = typeLike.Inheritance |> List.truncate 1
+        // Filter `implements` targets that collapsed to `obj`/`exn`.
+        // F# rejects `interface obj with` / `interface exn with` —
+        // neither is a real interface (FS0887).
+        let filteredImplements =
+            typeLike.Implements
+            |> List.filter (
+                TypeRefRender.substituteForHeritage inScopeTypars
+                >> isObjOrExnIntrinsic
+                >> not
+            )
         let builder =
-            match memberCollection, abstractCtors, classInheritance, typeLike.Implements with
+            match memberCollection, abstractCtors, classInheritance, filteredImplements with
             | [], [], [], [] -> Ast.ClassEnd(renderName, Ast.Constructor().toPrivate())
             | _ -> Ast.TypeDefn(renderName, Ast.Constructor().toPrivate())
         builder {
@@ -716,7 +748,7 @@ module TypeLikeRender =
             yield! abstractCtors
             yield! memberCollection
             yield!
-                typeLike.Implements
+                filteredImplements
                 |> List.map (renderImplementsForClass ctx inScopeTypars)
         }
         |> Documentation.renderForTypeDefn typeLike

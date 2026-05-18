@@ -491,8 +491,17 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         // the same TypeArguments). Re-applying our args would produce
         // `Foo<A,B,C><A,B,C>` — invalid F#. Return the prefix as-is; the
         // inner Prefix already carries the application.
+        // If the prefix collapsed to a non-generic intrinsic (`obj`/`exn`)
+        // via cycle-break or substitution-arity-0, the args from this
+        // reference site can't apply — F# rejects `obj<T>` (FS0033).
+        // Emit the bare intrinsic; consumers lose the typar refinement
+        // but the binding compiles.
         match prefix.Kind with
         | TypeRefKind.Molecule (TypeRefMolecule.Prefix _) ->
+            prefix
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
+        | TypeRefKind.Atom (TypeRefAtom.Intrinsic ("obj" | "exn")) ->
             prefix
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType

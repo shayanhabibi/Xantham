@@ -108,6 +108,9 @@ let extraTupleTests = testList "Extra Tuples" [
 ]
 
 let extraTypeReferenceTests = testList "Extra TypeReferences" [
+    // `NonPrimitive` (TS `any`/`unknown`) renders as `obj` which is
+    // non-generic in F#. Args from a reference site can't apply
+    // (FS0033); the renderer strips them so the binding compiles.
     testCase "TypeReference with Array argument" <| fun _ ->
         primitive TypeKindPrimitive.NonPrimitive
         |> TypeReference.create
@@ -116,7 +119,7 @@ let extraTypeReferenceTests = testList "Extra TypeReferences" [
             |> Array.create
         ]
         |> TypeReference.wrap
-        |> testRender "obj<ResizeArray<string>>"
+        |> testRender "obj"
         ||> Flip.Expect.equal ""
     testCase "TypeReference with tuple argument" <| fun _ ->
         primitive TypeKindPrimitive.NonPrimitive
@@ -130,7 +133,7 @@ let extraTypeReferenceTests = testList "Extra TypeReferences" [
             |> Tuple.wrap
         ]
         |> TypeReference.wrap
-        |> testRender "obj<string * int>"
+        |> testRender "obj"
         ||> Flip.Expect.equal ""
 ]
 

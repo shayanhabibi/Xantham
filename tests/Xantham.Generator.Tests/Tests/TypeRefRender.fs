@@ -184,18 +184,23 @@ let typeReferenceTests = testList "TypeReference" [
         |> testRender "string"
         ||> Flip.Expect.equal "Expect to resolve to string instead of int"
     testCase "with single primitive type argument" <| fun _ ->
+        // `NonPrimitive` renders as `obj` which is non-generic in F#.
+        // Applying typar args produces invalid F# (FS0033); the renderer
+        // strips args when the prefix collapses to `obj`/`exn`.
         primitive TypeKindPrimitive.NonPrimitive
         |> TypeReference.create
         |> TypeReference.withTypeArguments [ primitive TypeKindPrimitive.String ]
         |> TypeReference.wrap
-        |> testRender "obj<string>"
+        |> testRender "obj"
         ||> Flip.Expect.equal ""
     testCase "option base type with primitive type argument" <| fun _ ->
+        // `Any` renders as `option<obj>`; args are stripped on the
+        // non-generic `obj` head (FS0033 prevention).
         primitive TypeKindPrimitive.Any
         |> TypeReference.create
         |> TypeReference.withTypeArguments [ primitive TypeKindPrimitive.String ]
         |> TypeReference.wrap
-        |> testRender "option<obj<string>>"
+        |> testRender "option<obj>"
         ||> Flip.Expect.equal ""
     testCase "with multiple primitive type arguments" <| fun _ ->
         primitive TypeKindPrimitive.NonPrimitive
@@ -205,7 +210,7 @@ let typeReferenceTests = testList "TypeReference" [
             primitive TypeKindPrimitive.Integer
         ]
         |> TypeReference.wrap
-        |> testRender "obj<string, int>"
+        |> testRender "obj"
         ||> Flip.Expect.equal ""
 ]
 

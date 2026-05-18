@@ -188,7 +188,20 @@ module TypeRefRender =
                             walk prefix,
                             args |> List.map walk
                         )
-                { render with Kind = TypeRefKind.Molecule newMolecule }
+                let newRender = { render with Kind = TypeRefKind.Molecule newMolecule }
+                // Cycle-break and other substitutions can leave a non-
+                // generic intrinsic (`obj`, `exn`) at the head of a
+                // `Prefix(intrinsic, args)`. F# rejects type-args on
+                // these (FS0033). Collapse the prefix to its head atom
+                // when the head is a non-generic intrinsic. Applied
+                // after `walk` so any nested substitutions have run.
+                match newRender.Kind with
+                | TypeRefKind.Molecule (TypeRefMolecule.Prefix (head, _)) ->
+                    match head.Kind with
+                    | TypeRefKind.Atom (TypeRefAtom.Intrinsic ("obj" | "exn")) ->
+                        { newRender with Kind = head.Kind }
+                    | _ -> newRender
+                | _ -> newRender
         walk render
 
 
