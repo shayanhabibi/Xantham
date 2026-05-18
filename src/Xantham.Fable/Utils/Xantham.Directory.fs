@@ -24,7 +24,7 @@ let runTempDirPrefix = $"{Literals.tempDirName}{path.sep}{Literals.runTempPrefix
 
 let private mkTempLogName () =
     let now = JS.Constructors.Date.now()
-    $"{Literals.tempLogFileName}{now}.txt"
+    $"{Literals.tempLogFileName}{now}.log"
 
 let private cleanUpTempLogs  () =
     if fs.existsSync(!^tempDir) |> not then () else

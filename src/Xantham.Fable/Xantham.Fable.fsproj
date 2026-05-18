@@ -10,10 +10,12 @@
 
     <ItemGroup>
         <Compile Include="..\Xantham.Common\Common.Types.fs" />
+        <Compile Include="Measures.fs" />
         <Compile Include="TypeScript.fs" />
         <Compile Include="Utils\String.fs" />
         <Compile Include="Utils\Array.fs" />
         <Compile Include="Utils\Utils.fs" />
+        <Compile Include="Utils\Path.fs" />
         <Compile Include="Utils\Logging.fs" />
         <Compile Include="Utils\TypeScript.Extensions.fs" />
         <Compile Include="Utils\Xantham.Directory.fs" />
