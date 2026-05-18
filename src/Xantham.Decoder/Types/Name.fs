@@ -195,20 +195,17 @@ module Name =
             else
                 pascalCaseRegex.Replace(s, fun m -> m.Groups.[1].Value.ToUpperInvariant())
 
-        let toCamelCase (s: string) =
-            if isUpperSnakeCase s then s
-            else
-                let p = toPascalCase s
-                if p.Length > 0 then
-                    // Find first letter and lowercase it, keeping leading non-letters
-                    let mutable i = 0
-                    while i < p.Length && not (System.Char.IsLetter(p.[i])) do
-                        i <- i + 1
-                    if i < p.Length then
-                        p.Substring(0, i) + p.Substring(i, 1).ToLowerInvariant() + p.Substring(i + 1)
-                    else
-                        p.ToLowerInvariant()
-                else p
+        let lowercaseFirstLetter (p: string) =
+            if p.Length > 0 then
+                // Find first letter and lowercase it, keeping leading non-letters
+                let mutable i = 0
+                while i < p.Length && not (System.Char.IsLetter(p.[i])) do
+                    i <- i + 1
+                if i < p.Length then
+                    p.Substring(0, i) + p.Substring(i, 1).ToLowerInvariant() + p.Substring(i + 1)
+                else
+                    p.ToLowerInvariant()
+            else p
 
         let stripBackticks (s: string) =
             if s.StartsWith("``") && s.EndsWith("``") then s.Substring(2, s.Length - 4) else s
@@ -230,13 +227,31 @@ module Name =
             >> fun s -> if s.Length > 0 then s.Substring(0, 1).ToUpperInvariant() + s.Substring(1) else s
             >> Internal.normalizeString
             )
-    /// Removes backticks, applies casing, and then reapplies backticks if necessary.
+    /// Removes backticks, applies casing, and then reapplies backticks
+    /// if necessary. Upper-snake-case inputs (e.g. `CAMEL_CASE`, single
+    /// uppercase letters) bypass the pascal-then-lower flow so they
+    /// pass through unchanged; everything else gets pascal-cased and
+    /// then has its first letter lowercased AFTER `normalizeString` so
+    /// the leading-`.`/`/` rename in `Identifier.toSafe` (which emits a
+    /// PascalCase-shaped baseline like `DotNode`) gets correctly
+    /// lower-cased for camel contexts → `dotNode`.
     let private _camelCase (fn: (string -> string) -> Name -> Name) name =
-        name |> fn (
-            Internal.stripBackticks
-            >> Identifier.sanitizeOrName
-            >> Internal.toCamelCase
-            >> Internal.normalizeString
+        name |> fn (fun s ->
+            let pre = s |> Internal.stripBackticks |> Identifier.sanitizeOrName
+            if Internal.isUpperSnakeCase pre then
+                Internal.normalizeString pre
+            else
+                pre
+                |> Internal.toPascalCase
+                |> Internal.normalizeString
+                |> Internal.lowercaseFirstLetter
+                // Re-run `normalizeString` to catch keyword collisions
+                // that surface after lowercasing the first letter:
+                // input "type" pascalises to "Type" (not a keyword, so
+                // `normalizeString` is a no-op), but `lowercaseFirstLetter`
+                // produces "type" (IS a keyword). Idempotent for everything
+                // else.
+                |> Internal.normalizeString
             )
         
     /// <summary>

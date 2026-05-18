@@ -133,7 +133,32 @@ module Identifier =
             sb.ToString()
         let stripped = stripUnsafe sanitized
         let normalized = if System.String.IsNullOrEmpty stripped then "Anon" else stripped
-        if normalized = "_" then "anon"
-        elif System.Char.IsDigit normalized.[0] then "_" + normalized
-        elif fsharpKeywords.Contains normalized then normalized + "_"
-        else normalized
+        // Leading `.` / `/` rename. F# rejects identifiers that *start*
+        // with these chars (e.g. `abstract .node:` from a TS
+        // `[".node"]: any` index signature). Replace each leading
+        // boundary char with its capitalised word-form prefix
+        // (`.` → `Dot`, `/` → `Slash`) and uppercase the next letter so
+        // the rename is a PascalCase-shaped baseline. Downstream casing
+        // produces `DotNode` for pascal contexts and `dotNode` for camel
+        // contexts. Distinguishable from a same-suffixed sibling —
+        // `.node` and `node` produce `DotNode`/`dotNode` and `Node`/`node`,
+        // not both `node`. Same `Name.Modified` machinery as keyword
+        // renames; downstream emits `[<EmitMethod>]` / `[<EmitProperty>]`
+        // / `[<CompiledName>]` from the original.
+        let renamed =
+            if normalized.Length > 0 && (normalized.[0] = '.' || normalized.[0] = '/') then
+                let sb = System.Text.StringBuilder()
+                let mutable i = 0
+                while i < normalized.Length && (normalized.[i] = '.' || normalized.[i] = '/') do
+                    sb.Append(if normalized.[i] = '.' then "Dot" else "Slash") |> ignore
+                    i <- i + 1
+                if i < normalized.Length then
+                    sb.Append(System.Char.ToUpperInvariant normalized.[i]) |> ignore
+                    if i + 1 < normalized.Length then
+                        sb.Append(normalized.Substring(i + 1)) |> ignore
+                sb.ToString()
+            else normalized
+        if renamed = "_" then "anon"
+        elif System.Char.IsDigit renamed.[0] then "_" + renamed
+        elif fsharpKeywords.Contains renamed then renamed + "_"
+        else renamed
