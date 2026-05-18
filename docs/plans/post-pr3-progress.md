@@ -1,6 +1,29 @@
 # Post-PR3 Progress Report
 
-> Handover note for Shayan. Picks up after PR #3
+> **Framing superseded.** This doc was originally written as a
+> handover note framed around upstream/downstream boundaries
+> ("Shayan's domain," "file back upstream," etc.). That framing
+> is no longer in effect — **all of Xantham (encoder, decoder,
+> generator, schema, docs) is fair to fix in this fork**. Any
+> remaining "Shayan to X" / "for upstream" / "follow-up PR by"
+> language below should be read as "the work that needs to
+> happen here." The historical narrative is preserved as a
+> snapshot of the decision points at the time; the *recommendations*
+> within it should be reinterpreted under the fully-open scope.
+>
+> **Target set correction.** The doc originally referred to the
+> Cloudflare SDK set as 13 packages including a `cloudflare`
+> aggregate. That was wrong. The bare `cloudflare` npm package
+> is the management REST client, handled separately via
+> Hawaii + OpenAPI spec on the FCE side — NOT a Xantham target.
+> The actual Xantham target set is **12 runtime SDKs**:
+> `agents`, `@cloudflare/ai-chat`, `@cloudflare/codemode`,
+> `@cloudflare/containers`, `@cloudflare/dynamic-workflows`,
+> `@cloudflare/puppeteer`, `@cloudflare/sandbox`,
+> `@cloudflare/shell`, `@cloudflare/think`, `@cloudflare/voice`,
+> `@cloudflare/worker-bundler`, `@cloudflare/workers-types`.
+
+> **Original framing (preserved):** Picks up after PR #3
 > (`structured-logging-encoder`) merged at commit `3850dd3`.
 > The post-PR2 doc (`docs/plans/post-pr2-progress.md`) covers
 > the immediately-preceding era — the four source fixes that
@@ -15,8 +38,8 @@
 
 > **Update 2026-05-16:** the original "file back upstream" decision
 > on `Source.UnknownDeclared` was reversed once the goal shifted
-> from "minimise consumer churn" to "get all 13 Cloudflare SDKs
-> generating end-to-end so we can hard-count and classify the
+> from "minimise consumer churn" to "get all Cloudflare runtime
+> SDKs generating end-to-end so we can hard-count and classify the
 > remaining errors." A walkthrough of subsequent work is in
 > [§ "Update — work landed since this doc was written"](#update--work-landed-since-this-doc-was-written)
 > at the bottom; the historical snapshot above is preserved as a
@@ -24,7 +47,7 @@
 
 ## What PR #3 brought in
 
-Seven commits, summarised by Shayan in the PR description:
+Seven commits, summarised in the PR description:
 
 > Variable Declarations: The fallback given to variable
 > declarations was investigated in the context of merged
@@ -110,27 +133,44 @@ sites whose matches were exhaustive at three cases pre-PR3):
 *was* updated in `e97bd70` to include the case. Everything else
 on the consumer side wasn't.
 
-**Decision: file this back upstream rather than patch locally.**
-A few candidate exhaustiveness fixes were trialled in-session
-(extending the codec to `{ "UnknownDeclared": <fileName> }`,
-returning `None` for the qualifier, etc.) and *do* stop the
-crashes. But they don't address what `UnknownDeclared` *means* —
-none of the downstream sites have a meaningful answer for "what
-package does this declaration belong to" because the case
-deliberately encodes "I don't know." Returning `None` for the
-qualifier produces dangling path references (see the `Types ×692`
-bucket below). That's not a usable end state.
+**Original (since-reversed) decision: file this back upstream
+rather than patch locally.** A few candidate exhaustiveness fixes
+were trialled in-session (extending the codec to
+`{ "UnknownDeclared": <fileName> }`, returning `None` for the
+qualifier, etc.) and *do* stop the crashes. But they don't address
+what `UnknownDeclared` *means* — none of the downstream sites have
+a meaningful answer for "what package does this declaration belong
+to" because the case deliberately encodes "I don't know." Returning
+`None` for the qualifier produces dangling path references (see the
+`Types ×692` bucket below). That wasn't a usable end state on its
+own; that observation still stands.
 
 The pre-PR3 fallback to `Source.LibEs` was sub-optimal (it
 misattributed unknown declarations as part of the TS standard
 library) but every downstream site had a defined behaviour for
 it and the output compiled. The PR #3 `Source.UnknownDeclared`
-fallback is strictly worse from the consumer's perspective until
-the wiring is complete — and the design choices for what each
-consumer site should *do* with an unknown attribution belong with
-the author of the case, not the downstream user.
+fallback as left in `e97bd70` was strictly worse from the
+consumer's perspective until the wiring was completed.
 
-Recommendation for follow-up PR by Shayan: pick one of —
+**Update — superseded.** The "file back upstream" framing has
+been retired (see top banner). The exhaustiveness patches were
+landed locally in commits `5098692` (codec) / `12fb376` and
+`4342c19` (consumer-site matches) / `2f22b15` (final pass and
+the self-ref TypeQuery cycle break that unblocked the broader
+pipeline). The remaining `UnknownDeclared` work (classifier
+scope — making sure declarations that should attribute to known
+packages don't fall through) lives in the encoder
+(`src/Xantham.Fable/Reading/Dispatch/TypeDeclaration.fs`) and is
+in scope for this fork's continued work — not deferred to anyone
+upstream.
+
+The original three-option recommendation below is preserved as
+the analysis snapshot. **Read it under the corrected scope:**
+every option (revert the fallback flip, complete the wiring, or
+refine the classifier) is an in-scope fix for this fork to
+choose between, not a choice to defer.
+
+Three options:
 
 * (a) **revert the fallback flip in `TypeDeclaration.fs:467`** so
   unattributable declarations stay on `Source.LibEs`. Keep the
@@ -141,16 +181,18 @@ Recommendation for follow-up PR by Shayan: pick one of —
 * (b) **complete the wiring**: codec encode/decode for
   round-trip survival, plus a deliberate choice at each of the
   six consumer sites for what `UnknownDeclared` should
-  semantically map to. Probably needs design discussion — the
-  obvious answer of "treat as LibEs" defeats the purpose of
-  having a distinct case; "treat as none" produces the dangling
-  references we're seeing.
+  semantically map to. (This is what landed in `5098692`–`2f22b15`
+  as a conservative default — codec round-trips verbatim, qualifier
+  returns `None`, metadata import returns `ValueNone`.) The
+  dangling-reference symptom is still present and falls under
+  the classifier scope question.
 * (c) **rethink**: maybe what's needed isn't a new DU case but a
   refinement of when the fallback fires. If most of the agents
   declarations landing in this case *should* have proper
   `Source.Package` attribution (which is what the inconsistency
   in the `Types ×692` cohort below suggests), the right fix is
-  in the classifier, not in adding a fallback case.
+  in the classifier, not in adding a fallback case. This is the
+  remaining live option for fully resolving the cohort.
 
 ## Verify counts after PR #3 (with in-session exhaustiveness probes, since reverted)
 
@@ -162,13 +204,15 @@ Recommendation for follow-up PR by Shayan: pick one of —
 | **Total** | **1,516** | **2,771** | **+1,255** |
 
 These counts are with the six exhaustiveness extensions trialled
-in-session (and then reverted from the working tree, given the
-"file back upstream" decision). They represent the floor of
-what the consumer side can produce *given the new fallback as
-designed* — not a state any consumer should be expected to
-land. Without the codec extension, the pipeline can't even
-serialise; with it, downstream emits dangling references for
-the `UnknownDeclared` declarations.
+in-session (and then reverted from the working tree at the time
+this snapshot was taken, when the framing was still "file upstream").
+They represented the floor of what the consumer side could produce
+*given the new fallback as designed* — not a state any consumer
+should land at without further work. Without the codec extension,
+the pipeline couldn't even serialise; with it, downstream emits
+dangling references for the `UnknownDeclared` declarations.
+*(The exhaustiveness extensions were subsequently landed locally
+in `5098692`+; see the Update section at the bottom.)*
 
 The dynamic-workflows drop is the only clean win. Workers-types
 ticks up slightly. **Agents nearly doubled.** The hypothesis below
@@ -255,18 +299,24 @@ reference becomes `Types.X` instead of `Babel.Types.X`. Other
 references to the *same* underlying type still work because they
 went through different attribution.
 
-The right fix is upstream: declarations that obviously belong to
-a known package shouldn't land in `UnknownDeclared` at all.
-`UnknownDeclared` should be the fallback-of-last-resort for
-genuinely unattributable declarations, not a sink for cases
-PR #3's new routing couldn't classify.
+The right fix is in the encoder classifier: declarations that
+obviously belong to a known package shouldn't land in
+`UnknownDeclared` at all. `UnknownDeclared` should be the
+fallback-of-last-resort for genuinely unattributable declarations,
+not a sink for cases PR #3's new routing couldn't classify. The
+classifier lives in
+`src/Xantham.Fable/Reading/Dispatch/TypeDeclaration.fs` and is
+in scope for this fork's continued work.
 
 ## Open questions for review
 
 1. **`Source.UnknownDeclared` wiring.** The primary blocker
-   (see "Compatibility break" above). Six downstream sites
-   either need behaviour defined or the fallback flip needs to
-   revert to `Source.LibEs`. Filed back to Shayan for resolution.
+   originally (see "Compatibility break" above). Six consumer
+   sites either need behaviour defined or the fallback flip needs
+   to revert to `Source.LibEs`. **Update — superseded**: the
+   exhaustiveness wiring was landed locally in `5098692`–`2f22b15`
+   with conservative defaults. The remaining live question is the
+   classifier-scope one (item 3 below).
 
 2. **`NoInfer` re-handling.** Pre-PR3 the intrinsic was
    short-circuited somewhere in the encoder's dispatch
@@ -298,31 +348,34 @@ PR #3's new routing couldn't classify.
 
 ## Honest take
 
-The pattern from PR #1 → PR #2 → PR #3 is encoder-side work
-increasing in scope and surfacing a wider blast radius
-downstream. PR #1 was schema additions; PR #2 was the
-ExportMap drop fix plus the mapped-type encoder rework that
-required ~10 generator-side patches in the verify-cloudflare-sdk-pipeline
-branch to land cleanly; PR #3 added `UnknownDeclared` as a
-new fallback and the new symbol-routing semantics, which
-required six exhaustiveness patches just to *run*, and the
-fully-running output regressed agents by ~1,250 errors.
+The pattern from PR #1 → PR #2 → PR #3 is encoder-layer work
+increasing in scope and surfacing a wider blast radius across
+the rest of the pipeline. PR #1 was schema additions; PR #2 was
+the ExportMap drop fix plus the mapped-type encoder rework that
+required ~10 generator-side patches in the
+verify-cloudflare-sdk-pipeline branch to land cleanly; PR #3
+added `UnknownDeclared` as a new fallback and the new
+symbol-routing semantics, which required six exhaustiveness
+patches just to *run*, and the fully-running output regressed
+agents by ~1,250 errors at the time the original snapshot was
+taken.
 
 The substrate-flexibility hypothesis (Xantham as a durable
-multi-consumer analysis layer) holds, but the cost of each
-encoder iteration on downstream consumers is meaningful. The
-post-PR2 fixes that landed earlier this session
+multi-consumer analysis layer) holds. Under the corrected
+scope framing (see top banner), iteration cost across layers is
+just normal in-fork work — none of it is downstream-of-upstream
+churn. The post-PR2 fixes that landed in earlier sessions
 (`3ae5680` T[] TypeKey collision, `a4681bc` typar merge,
-`103d3ea` MISSREF fallback) were validated against a stable
-encoder; PR #3 then changed the encoder substantially enough
-that some of that validation isn't directly transferable.
+`103d3ea` MISSREF fallback) were validated against the
+then-current encoder; PR #3 changed the encoder substantially
+enough that some of that validation isn't directly transferable —
+re-validate as the affected paths are touched.
 
 The next concrete bucket — IndexSignature / method-return
-self-reference paths (`Item` ×92, etc.) — described at the
-bottom of post-pr2 is *still the right next architectural
-target* once `NoInfer` and the `UnknownDeclared` scope
-question are addressed; the regression doesn't change its
-priority.
+self-reference paths (`Item` ×N, etc.) — described at the bottom
+of post-pr2 is *still the right next architectural target* once
+`NoInfer` and the `UnknownDeclared` classifier-scope question are
+addressed; the regression doesn't change its priority.
 
 # Reproduction
 
@@ -360,22 +413,22 @@ Window: 2026-05-15 evening → 2026-05-16. Seven commits on
 
 | Commit | Layer | What |
 |---|---|---|
-| `15471bb` | FCE driver | Handle expanded Cloudflare SDK set (3 → 13) |
-| `dd16eb8` | encoder | Upstream-side correction |
+| `15471bb` | FCE driver | Handle expanded Cloudflare runtime SDK set (originally framed as 3 → 13; **correction:** the actual target set is 12 runtime SDKs — see the top banner; the bare `cloudflare` aggregate is not a Xantham target) |
+| `dd16eb8` | encoder | Source-side correction |
 | `5098692` | common | `Source.UnknownDeclared` codec wired into `Common.Types.Source.encode/decode` (`{ "UnknownDeclared": <fileName> }` envelope) |
 | `12fb376` `4342c19` | decoder, generator | Exhaustive `Source` match across the six consumer sites enumerated above |
-| `2f22b15` | decoder, generator | **Self-ref `TsType.TypeQuery` cycle break** in `Arena.Interner.resolve` (10 of 13 SDKs hung past 30 min before this) + final `UnknownDeclared` exhaustiveness |
+| `2f22b15` | decoder, generator | **Self-ref `TsType.TypeQuery` cycle break** in `Arena.Interner.resolve` (10 of the runtime SDKs hung past 30 min before this) + final `UnknownDeclared` exhaustiveness |
 | `e5feed6` | decoder, generator | **Backtick-free identifier renamer.** `Identifier.toSafe` replaces `NormalizeIdentifierBackticks`; `renderAbstractWithName` switched to `[<EmitMethod>]` (CompiledName is FS0755 on abstract methods) |
 
 ## Decisions reversed
 
 **"File `Source.UnknownDeclared` back upstream."** Reversed. The
-goal shifted from "minimise consumer-side churn from PR #3" to
-"get all 13 SDKs generating end-to-end so we have hard error
-counts to classify." Patching exhaustiveness locally was the
-faster path to that goal; if a future upstream redesign of
-`UnknownDeclared` semantics requires consumer-side changes, the
-local match arms are simple to revisit.
+goal shifted from "minimise consumer-side churn" to "get all
+runtime SDKs generating end-to-end so we have hard error counts
+to classify." Patching exhaustiveness locally was the faster path
+to that goal, and (under the now-corrected scope framing — see
+top banner) every layer of Xantham is in scope for this fork
+anyway.
 
 The local fix for each of the six consumer sites is a
 conservative default: codec round-trips the case verbatim; the
@@ -387,16 +440,17 @@ inputs, which without the patches threw `Match failure:
 Xantham.Source` at JSON serialisation or render time.
 
 The dangling-path concern documented in the original snapshot
-(`Babel.Types.X` vs bare `Types.X` in agents) is still real, but
-it's an upstream classifier problem (`UnknownDeclared` being
+(`Babel.Types.X` vs bare `Types.X` in agents) is still real. It's
+a classifier problem in the encoder (`UnknownDeclared` being
 applied to declarations that *should* attribute to known
-packages), not a consumer-side wiring problem. The local
-exhaustiveness fix doesn't pretend to solve it.
+packages), not a consumer-side wiring problem. The classifier
+lives in `src/Xantham.Fable/Reading/Dispatch/TypeDeclaration.fs`
+and is in scope for continued work in this fork.
 
-## What unblocked the 13-SDK pipeline
+## What unblocked the broader runtime-SDK pipeline
 
-PR #3 made all 13 Cloudflare SDK fixtures decodable end-to-end
-*in principle*, but 10 of 13 hung past 30 minutes in the
+PR #3 made the Cloudflare runtime SDK fixtures decodable end-to-end
+*in principle*, but most of them hung past 30 minutes in the
 generator. Heartbeat instrumentation localised it to
 `Interface.MessageEvent` member #5 (the `source` property).
 Root cause: `TsType.TypeQuery` self-references — the encoder
@@ -418,10 +472,13 @@ Plus a defence-in-depth guard at the `RenderScope.Prelude.TypeQuery`
 branch (`+18 lines`) that liftNullables to `obj` when the
 prerender-side cycle isn't caught upstream.
 
-After these, all 13 SDKs generated F# end-to-end. Total verify
-errors: **666 raw across 13 SDKs** (compared with the 1,516 the
-original snapshot reports for 3 SDKs after the in-session
-exhaustiveness probes).
+After these, all runtime SDKs generated F# end-to-end. Total
+verify errors at that point: **666 raw**, compared with the
+1,516 the original snapshot reports for a smaller 3-SDK set after
+the in-session exhaustiveness probes. Current state (post the
+`e5feed6` renamer) is **556 raw / ~170 distinct across the 12
+runtime SDKs** — see [[reference_verify_pipeline]] for the
+breakdown.
 
 ## Backtick-free identifier renamer
 
@@ -471,15 +528,14 @@ Key implementation notes:
 
 Raw and distinct (file:line:col-deduplicated) error counts after
 all post-`e65df55` work. Pre-edit baseline column re-measured on
-the current branch (so it includes the SDK expansion to 13 but
-none of the post-doc fixes; the doc's original
-1,516-on-3-SDKs number is a snapshot of a different shape):
+the current branch. **Cloudflare row dropped** — the bare
+`cloudflare` package is the management REST client, not a Xantham
+target (see top banner). Target set is **12 runtime SDKs**.
 
 | SDK | Pre-edit raw | Post-fix raw / distinct |
 |---|---:|---:|
 | Agents | 5 | 2 / 1 |
 | AiChat | 5 | 2 / 1 |
-| Cloudflare | 8 | 7 / 4 |
 | Codemode | 197 | 196 / 70 |
 | Containers | 6 | 2 / 1 |
 | DynamicWorkflows | 45 | 44 / 14 |
@@ -490,29 +546,46 @@ none of the post-doc fixes; the doc's original
 | Voice | 5 | 2 / 1 |
 | WorkerBundler | 5 | 2 / 1 |
 | WorkersTypes | 292 | 291 / 79 |
-| **Total** | **623** | **556** |
+| **Total** | **615** | **549** |
 
-Net **−67 errors**. The renamer's biggest win is on Puppeteer
-(34 → 2). The big-volume SDKs (`Codemode` 197, `WorkersTypes`
-292) only dropped by 1 each — their remaining errors are
-unrelated to name-escape and break down as:
+(Earlier reports of 623 / 556 totals included a spurious
+`Cloudflare` row of 8 / 7. Removing it yields the 615 / 549
+figures above for the actual 12-SDK target set.)
+
+Net **−66 errors** across the 12 runtime SDKs. The renamer's
+biggest win is on Puppeteer (34 → 2). The big-volume SDKs
+(`Codemode` 197, `WorkersTypes` 292) only dropped by 1 each —
+their remaining errors are unrelated to name-escape and break
+down as:
 
 * FS0033 generic-arity mismatches (`ReadonlyArray<_>` expects 1
-  but given 0, etc.) — likely encoder dispatcher routing for
-  generic type-references whose arity has been lost or
-  partially-applied
+  but given 0, etc.) — encoder dispatcher routing for generic
+  type-references whose arity has been lost or partially-applied;
+  also visible in the substitution-table's name-only mapping
+  losing typar arity. Fixable in encoder dispatch
+  (`src/Xantham.Fable/Reading/Dispatch/TypeFlagObject.fs`) or
+  by making `LibEsDefaults.substitutions` arity-aware.
 * FS0039 undefined-name resolution failures (`NoInfer`,
   `Types.X`, `Bind`, `LoadRunner`, etc.) — a mix of the
-  pre-existing `NoInfer` regression flagged in this doc's
-  original "Open questions" §2, the `UnknownDeclared`
-  path-qualifier loss flagged in §3, and synthetic-name
-  references where the synthetic type (`_LitN`) never got
-  emitted
+  `NoInfer` regression flagged in this doc's original
+  "Open questions" §2 (fixable either in encoder dispatch or by
+  adding `(NoInfer, 1) → (T, identity)` to
+  `LibEsDefaults.substitutions`), the `UnknownDeclared`
+  path-qualifier loss flagged in §3 (encoder classifier in
+  `TypeDeclaration.fs`), and synthetic-name references where
+  the synthetic type (`_LitN`) never got emitted (encoder
+  dispatch order).
 
-These two categories define the bulk of the remaining work and
-are not addressable by name-escape changes. The original
-"Open questions for review" section above is still load-bearing
-as the roadmap for follow-up encoder-side work.
+These two categories define the bulk of the remaining work. All
+of them are in scope for this fork — see [[feedback_no_fix_scope_limits]]
+in memory. The original "Open questions for review" section above
+is the roadmap; under the corrected scope framing every option in
+it is a live in-scope fix to choose between, not an upstream ask.
+
+For the complete current roadmap including the additional
+generator-side categories (`.node` member names, StringEnum
+collisions, AllowNullLiteral discipline, etc.) see
+[[project_pathway_full_sdk_compilation]] in memory.
 
 ## Open questions — current status
 
@@ -520,7 +593,7 @@ as the roadmap for follow-up encoder-side work.
 |---|---|
 | §1 `Source.UnknownDeclared` wiring | **Resolved locally** in `5098692`/`12fb376`/`4342c19`/`2f22b15`. Six consumer sites have defined behaviour. The qualifier-loss / classifier-routing question (§3 below) is the live remainder. |
 | §2 `NoInfer` re-handling | **Still open.** Largest remaining FS0039 bucket. Untouched in subsequent commits. |
-| §3 `UnknownDeclared` scope (Babel attribution) | **Still open.** Manifests as path-qualifier loss for some references in agents et al. Upstream classifier problem; consumer-side patches can't fix it. |
+| §3 `UnknownDeclared` scope (Babel attribution) | **Still open.** Manifests as path-qualifier loss for some references in agents et al. Lives in the encoder classifier (`src/Xantham.Fable/Reading/Dispatch/TypeDeclaration.fs`) — in scope for this fork. |
 | §4 Dispatcher debug-chain semantic equivalence | **Untouched** — no behavioural regressions observed that point at it, so deprioritised. |
 
 New open questions surfaced since:

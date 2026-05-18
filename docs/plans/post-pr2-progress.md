@@ -1,9 +1,25 @@
 # Post-PR2 Progress Report
 
-> Handover note for Shayan. Picks up after PR #2
-> (`prevent-silent-drops-in-export-map`) merged at commit `494a248`.
-> The post-PR1 doc (`docs/plans/post-pr1-progress.md`) covers the
-> earlier era and the rationale that fed into PR #2.
+> **Framing superseded.** This doc was originally written as a
+> handover note framed around upstream/downstream boundaries
+> ("Shayan's domain," "for Shayan's forensic review," etc.). That
+> framing is no longer in effect — all of Xantham (encoder,
+> decoder, generator, schema, docs) is fair to fix in this fork.
+> Any remaining "for Shayan" / "upstream" framings below should
+> be read as "the work that needs to happen here." The historical
+> narrative is preserved; the *recommendations* should be
+> reinterpreted under the fully-open scope.
+>
+> **Target set correction.** This doc was written when the
+> Cloudflare SDK target set was 3 packages. The current target
+> set is **12 runtime SDKs** — see the top banner of
+> `post-pr3-progress.md` for the full list. The bare `cloudflare`
+> npm package is NOT a Xantham target.
+
+> **Original framing (preserved):** Handover note. Picks up after
+> PR #2 (`prevent-silent-drops-in-export-map`) merged at commit
+> `494a248`. The post-PR1 doc (`docs/plans/post-pr1-progress.md`)
+> covers the earlier era and the rationale that fed into PR #2.
 
 - **Branch:** `verify-cloudflare-sdk-pipeline` on
   `https://github.com/houstonhaynes/speakez-xantham`

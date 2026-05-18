@@ -1,6 +1,14 @@
 # Multi-valued TypeStore — design and decision path
 
-> Author: Houston (with Claude). For Shayan's forensic review when he's back online.
+> **Framing superseded.** This doc was originally framed as a
+> design proposal for forensic review by an upstream author.
+> That framing is no longer in effect — all of Xantham (encoder,
+> decoder, generator, schema, docs) is fair to fix in this fork.
+> The design analysis below stands on its own merits; treat it
+> as a design proposal for in-fork work, not a handoff request.
+
+> **Original framing (preserved):** Author: Houston (with Claude).
+> For forensic review.
 > Branch: `verify-cloudflare-sdk-pipeline`, post-`empty-string-collapse` commit.
 > Starting baseline: dyn 6, wt 337, agents 1,314 = **1,657 errors**.
 

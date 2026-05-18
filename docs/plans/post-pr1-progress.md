@@ -1,7 +1,26 @@
 # Post-PR1 Progress Report — verify-cloudflare-sdk-pipeline
 
-> Handover note for Shayan. Covers work on `speakez-xantham` and the
-> consuming driver `Fidelity.CloudEdge/generators/xantham` since PR #1
+> **Framing superseded.** This doc was originally written as a
+> handover note framed around upstream/downstream boundaries
+> ("Shayan's domain," "for Shayan to look at," etc.). That
+> framing is no longer in effect — all of Xantham (encoder,
+> decoder, generator, schema, docs) is fair to fix in this fork.
+> Any remaining "for Shayan" / "upstream" framings below should
+> be read as "the work that needs to happen here." The historical
+> narrative is preserved; the *recommendations* should be
+> reinterpreted under the fully-open scope.
+>
+> **Target set correction.** This doc was written when the
+> Cloudflare SDK target set was 3 packages
+> (`@cloudflare/dynamic-workflows`, `@cloudflare/workers-types`,
+> `agents`). The current target set is **12 runtime SDKs** — see
+> the top banner of `post-pr3-progress.md` for the full list. The
+> bare `cloudflare` npm package is NOT a Xantham target (it's the
+> management REST client, handled separately via Hawaii+OpenAPI).
+
+> **Original framing (preserved):** Handover note. Covers work on
+> `speakez-xantham` and the consuming driver
+> `Fidelity.CloudEdge/generators/xantham` since PR #1
 > (`speakeztech/source-refactor`) merged at commit `791ef9a`.
 
 - **Branch:** `verify-cloudflare-sdk-pipeline` (HEAD `dc7a650`)
