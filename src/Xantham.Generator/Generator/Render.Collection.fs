@@ -58,7 +58,16 @@ type ArenaInterner.QualifiedNamePart with
 let tryRenderAbstractClassAttribute (typeLike: Anchored.TypeLikeRender) =
     if typeLike.IsClass then ValueSome Attributes.abstractClass else ValueNone
 let tryRenderAllowNullLiteralAttribute (typeLike: Anchored.TypeLikeRender) =
-    if typeLike.IsClass then ValueSome Attributes.allowNullLiteral else ValueNone
+    // Emit `[<AllowNullLiteral>]` only on classes WITHOUT heritage. F#
+    // rejects the attribute when the type inherits/implements anything
+    // that doesn't also have `AllowNullLiteral` (FS0935). Since we
+    // don't propagate the attribute up the heritage chain, suppress
+    // here when there's heritage. Consumers can still pass `null` via
+    // `option<>` wrapping; this only sacrifices the Fable null-literal
+    // convenience on inheriting classes.
+    if typeLike.IsClass && List.isEmpty typeLike.Inheritance then
+        ValueSome Attributes.allowNullLiteral
+    else ValueNone
 
 let tryRenderMetadataImport (metadata: RenderMetadata) =
     // Convert the source-attribution DU into the package-name string used
@@ -352,8 +361,19 @@ module RootModule =
         }
 
 let renderModuleInterface (ctx: GeneratorContext) (root: Module) =
-    let moduleName = Name.Module.create root.Name
-    Ast.TypeDefn(Name.Case.valueOrModified moduleName) {
+    // The module-as-type wrapper for static-member packaging is named
+    // by `Name.Module.create` which adds an `I` prefix. When the TS
+    // source already has a same-named type in the same module (e.g.
+    // module `Sandbox` containing an interface literally named
+    // `ISandbox`, the I-prefix collides), suffix with `_` to
+    // disambiguate. The collision is rare — only fires when TS uses
+    // `I`-prefix as a naming convention for an interface inside a
+    // same-named module.
+    let baseName = Name.Case.valueOrModified (Name.Module.create root.Name)
+    let renderName =
+        if root.Types.ContainsKey baseName then baseName + "_"
+        else baseName
+    Ast.TypeDefn(renderName) {
         for KeyValue(_, render) in root.Members do
             match render with
             | Choice1Of2 typedName ->

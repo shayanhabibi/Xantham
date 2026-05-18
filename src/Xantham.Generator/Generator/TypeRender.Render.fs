@@ -684,16 +684,21 @@ module TypeLikeRender =
             |> List.map (fun tp -> "'" + Name.Case.valueOrModified tp.Name)
             |> Set.ofList
         let abstractCtors = renderAbstractConstructors ctx typeLike
-        // F# class-body rule: `inherit` must precede other body items.
-        // Empty body (no members, no constructors, no inheritance) requires
-        // explicit `class end` form; non-empty uses class with private ().
+        // F# class-body rule: at most ONE `inherit X()` (single class
+        // inheritance). The encoder flattens TS `extends` and `implements`
+        // into one `Inheritance` list — the first entry is the class
+        // base, any subsequent entries are interface implementations
+        // that would need `interface X with [...]` blocks (not currently
+        // emitted; consumers lose the interface-impl declaration but the
+        // class itself compiles).
+        let classInheritance = typeLike.Inheritance |> List.truncate 1
         let builder =
-            match memberCollection, abstractCtors, typeLike.Inheritance with
+            match memberCollection, abstractCtors, classInheritance with
             | [], [], [] -> Ast.ClassEnd(renderName, Ast.Constructor().toPrivate())
             | _ -> Ast.TypeDefn(renderName, Ast.Constructor().toPrivate())
         builder {
             yield!
-                typeLike.Inheritance
+                classInheritance
                 |> List.map (renderInheritanceForClass ctx inScopeTypars)
             yield! abstractCtors
             yield! memberCollection

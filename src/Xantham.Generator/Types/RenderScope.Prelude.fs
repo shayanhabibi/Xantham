@@ -612,7 +612,16 @@ type TypeLikeRender<'RenderType, 'TypeName, 'MemberName, 'TyparName> = {
     Metadata: RenderMetadata
     Name: 'TypeName
     TypeParameters: TypeParameterRender<'RenderType, 'TyparName> list
+    /// TS `extends` targets. For interfaces these are multi-interface
+    /// extension (F# accepts multiple `inherit X` in interface bodies).
+    /// For classes this is at most one entry (the class base) — F#
+    /// allows only one `inherit X()` per class.
     Inheritance: 'RenderType list
+    /// TS `implements` targets (class-only). Emitted as
+    /// `interface X with` blocks inside the class body — F# rejects
+    /// `inherit X()` when X is an interface (FS0946). Empty for
+    /// interfaces and synthetic type literals.
+    Implements: 'RenderType list
     Members: TypedNameRender<'RenderType, 'MemberName, 'TyparName> list
     Functions: FunctionLikeRender<'RenderType, 'MemberName, 'TyparName> list
     Constructors: TypedNameRender<'RenderType, 'MemberName, 'TyparName> list list
