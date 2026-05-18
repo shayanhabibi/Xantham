@@ -19,11 +19,43 @@ let private createConcreteTypeRef (path: TypePath) =
     |> RenderScopeStore.TypeRef.Unsafe.createAtom
     |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
 
-/// Build a TypeRefRender for a synthetic literal whose stable concrete
-/// path was assigned by the path-assignment pre-pass. Bypasses the
-/// transient/anchor machinery — the ref is concrete from the start, so
-/// references at any call site localise via `getRelativePath` against the
-/// assigned absolute path rather than re-anchoring per call site.
+/// Canonical construction point for synthetic-literal references whose
+/// stable concrete path was assigned by `SyntheticPathAssignment.run`.
+/// Bypasses the transient/anchor machinery — the ref is concrete from the
+/// start, so references at any call site localise via `getRelativePath`
+/// against the assigned absolute path rather than re-anchoring per site.
+///
+/// **The universe of synthetic-reference-aware sites** (audit map):
+///
+///   1. Union LiteralLike branch (`prerender` ~line 240) — calls this helper.
+///   2. Intersection branch (`prerender` ~line 330) — calls this helper.
+///   3. TypeLiteral non-inline branch (`prerender` ~line 626) — calls this helper.
+///   4. TemplateLiteral branch (`prerender` ~line 657) — `SyntheticPathAssignment`
+///      walks template-literal synthetics, but the prerender branch does NOT
+///      consult `ctx.SyntheticPaths`. Currently a benign omission (template
+///      literals don't capture enclosing typars), revisit if Phase B exposes
+///      a need.
+///   5. Cache-hit Anchored-Root path (`prerender` ~lines 94-107) — returns
+///      the cached `TypeRef` produced by this helper. Any shape change here
+///      must align with what cache hits emit.
+///   6. Synthetic re-anchor pass (`RenderScope.Anchored.fs` ~lines 506-517) —
+///      re-anchors the synthetic body at the consuming export's anchor path.
+///      Reads the helper's TypePath; doesn't reconstruct the ref.
+///   7. Synthetic decl emission (`Render.Transient.fs` `Members.renderFromMembersAndFunctions`
+///      ~line 261) — produces `TypeParameters = []`. Phase B's typar plug-in
+///      point: when `ctx.SyntheticTypars` has entries for the resolvedType,
+///      the decl-side typar list must match what the ref-side helper emits.
+///   8. Synthetic-vs-real merge (`Render.Collection.fs` `combine`
+///      ~lines 139-160) — "non-empty typars wins" rule resolves collisions
+///      between a synthetic that lands at a path tail matching a real
+///      declaration. Phase B may need refinement when synthetics carry typars.
+///
+/// Phase B will switch this helper to consult `ctx.SyntheticTypars` and emit
+/// `Prefix(ConcretePath, [typar-refs])` molecules when the synthetic's body
+/// references typars from an enclosing scope. The cache-hit path (#5) and
+/// the re-anchor pass (#6) will then see Prefix-shaped refs and must
+/// preserve them through their respective transforms (already done for
+/// `remap` per typeref-render.md atom/molecule composition).
 let private createAssignedSyntheticRef (path: TypePath) (nullable: bool) =
     RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
     |> RenderScopeStore.TypeRef.Unsafe.createAtom
@@ -93,6 +125,12 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             remap ref
         | { Root = ValueSome (TypeLikePath.Anchored _); TypeRef = ref }
             when ctx.SyntheticPaths.ContainsKey resolvedType ->
+            // Synthetic-reference audit site #5 (see createAssignedSyntheticRef
+            // for the universe map). The cached `ref` was produced by the
+            // helper on first encounter; this branch returns it for every
+            // subsequent visit. Shape changes in the helper flow through here
+            // automatically; behavioral changes must preserve cache shape.
+            //
             // Synthetic literal with a path-assignment-pass-assigned
             // concrete TypePath. Track the visit so the export's
             // anchorPreludeExportScope iteration sees this ResolvedType
@@ -229,6 +267,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> addOrReplaceScope ctx resolvedType
         // direct type render of literals union
         | { LiteralLike = literals; Others = []; EnumLike = []; Primitives = []; Nullable = nullable } ->
+            // Synthetic-reference audit site #1 (Union LiteralLike).
             // Path-assignment pre-pass may have assigned a stable concrete
             // path for this interned synthetic. When present, emit at the
             // concrete path with a ConcretePath ref; bypass the transient
@@ -325,6 +364,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Intersection intersection ->
+        // Synthetic-reference audit site #2 (Intersection).
         match ctx.SyntheticPaths.TryGetValue resolvedType with
         | true, concretePath ->
             let ref = createAssignedSyntheticRef concretePath false
@@ -621,6 +661,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
         | _, _ ->
+            // Synthetic-reference audit site #3 (TypeLiteral non-inline).
             match ctx.SyntheticPaths.TryGetValue resolvedType with
             | true, concretePath ->
                 let ref = createAssignedSyntheticRef concretePath false
@@ -655,6 +696,13 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 }
                 |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TemplateLiteral templateLiteral ->
+        // Synthetic-reference audit site #4 (TemplateLiteral).
+        // `SyntheticPathAssignment.run` walks TemplateLiteral synthetics
+        // and assigns paths, but this branch does NOT consult
+        // `ctx.SyntheticPaths` — template literals are emitted as bare
+        // transient anchors regardless. Currently benign (template
+        // literals don't capture enclosing typars). Revisit if Phase B/C
+        // surface a need.
         let path = TransientTypePath.Anchored
         scope |> RenderScopeStore.tryAdd resolvedType path
         let scope = RenderScopeStore.create()

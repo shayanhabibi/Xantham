@@ -137,6 +137,12 @@ let combine (primary: Anchored.TypeRender) (secondary: Anchored.TypeRender) =
         { fn1 with Signatures = fn1.Signatures @ fn2.Signatures |> List.distinct }
         |> Anchored.TypeRender.Function
     | Anchored.TypeRender.TypeDefn t1, Anchored.TypeRender.TypeDefn t2 when t1.Inheritance = t2.Inheritance ->
+        // Synthetic-reference audit site #8 (see `createAssignedSyntheticRef`
+        // in RenderScope.Prelude.fs for the universe map). Phase B note:
+        // when synthetics start carrying captured typars from enclosing
+        // scopes, the "non-empty wins" rule below may need refinement —
+        // both sides could be non-empty with different lists.
+        //
         // When merging two TypeDefns that landed at the same module+name
         // (typically a synthetic Intersection/TypeLiteral that anchored at
         // a path tail matching a real Interface/Class declaration), prefer

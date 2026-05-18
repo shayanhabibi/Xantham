@@ -505,6 +505,11 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) visited anchors anchorPath 
                 anchor ctx visited anchors anchorPath childRt TransientTypePath.Anchored
     | { Root = ValueSome (TypeLikePath.Anchored path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren }
         when ctx.SyntheticPaths.ContainsKey renderScope.Type ->
+        // Synthetic-reference audit site #6 (see
+        // `createAssignedSyntheticRef` in RenderScope.Prelude.fs for the
+        // universe map). Re-anchors a synthetic body at the consuming
+        // export's anchor path. Reads the helper-assigned absolute path;
+        // does not reconstruct the TypeRef.
         let render = Render.Transient.anchor ctx (AnchorPath.create path) renderTuple
         anchors
         |> Dictionary.tryAdd path render

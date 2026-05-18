@@ -259,6 +259,13 @@ module TemplateLiteral =
             |> TypeDefn
 module Members =
     let renderFromMembersAndFunctions (ctx: GeneratorContext) (scopeStore: RenderScopeStore) members functions =
+        // Synthetic-reference audit site #7 (see `createAssignedSyntheticRef`
+        // in RenderScope.Prelude.fs for the universe map). Decl-side emission
+        // for synthetic Intersection/TypeLiteral bodies. Currently produces
+        // `TypeParameters = []`. Phase B will consult `ctx.SyntheticTypars`
+        // here so the decl-side typar list matches the ref-side Prefix
+        // molecule's args.
+        //
         // Derive Metadata.Path from scopeStore.PathContext so that the
         // resulting TypeLikeRender carries this literal's position rather
         // than a bare Anchored placeholder. After anchoring, the Name
