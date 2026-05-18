@@ -177,6 +177,35 @@ module LiteralCaseRender =
         |> Documentation.renderForUnionCase unionCase
 
 module LiteralUnionRender =
+    /// Walk a union's cases and rename duplicates with `_2`, `_3`, etc.
+    /// suffixes. F# rejects duplicate case-name definitions in the same
+    /// union (FS0037). Collisions arise from two distinct TS sources
+    /// pascal-casing to the same F# identifier — e.g. `"utf8"` and
+    /// `"utf-8"` both fold to `Utf8`; `bool false` and string `"false"`
+    /// both fold to `False`; underscore-collapsing literals fold to
+    /// `Anon`. The original TS-source value is preserved via the
+    /// existing `[<CompiledName>]`/`[<CompiledValue>]` emission in
+    /// `renderUnionCase` because that decision compares against the
+    /// case's `Value` field (not the rendered name), so the rename is
+    /// invisible at runtime.
+    let private disambiguateCaseNames
+        (cases: LiteralCaseRender<TsLiteral, Name<Case.pascal>> list) =
+        let seen = System.Collections.Generic.HashSet<string>()
+        cases
+        |> List.map (fun case ->
+            let baseName = Name.Case.valueOrModified case.Name
+            if seen.Add baseName then case
+            else
+                let mutable i = 2
+                let mutable candidate = sprintf "%s_%d" baseName i
+                while not (seen.Add candidate) do
+                    i <- i + 1
+                    candidate <- sprintf "%s_%d" baseName i
+                let original = Name.Case.valueOrSource case.Name
+                { case with
+                    Name = Name.Modified(original, candidate) |> Case.addMeasure<Case.pascal> }
+        )
+
     let renderEnum (ctx: GeneratorContext) (enumType: LiteralUnionRender<int, _>) =
         Ast.Enum(Name.Case.valueOrModified enumType.Name) {
             for case in enumType.Cases do
@@ -184,8 +213,9 @@ module LiteralUnionRender =
         }
         |> Documentation.renderForEnum enumType
     let renderUnion (ctx: GeneratorContext) (unionType: LiteralUnionRender<TsLiteral, _>) =
+        let cases = disambiguateCaseNames unionType.Cases
         Ast.Union(Name.Case.valueOrModified unionType.Name) {
-            for case in unionType.Cases do
+            for case in cases do
                 LiteralCaseRender.renderUnionCase ctx case
         }
         |> Attributes.renderAttributesForTypeDefn (attributes {
