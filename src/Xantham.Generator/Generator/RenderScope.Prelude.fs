@@ -38,21 +38,36 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic Intrinsic.obj
         |> RenderScopeStore.TypeRef.Unsafe.createAtom
         |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
-    let remap = function
-            | { Nullable = nullable } when ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Raw) ->
-                // If this lookup's target ref is currently being rendered
-                // as an alias body, returning it would emit a recursive
-                // `type T = U2<A, T>` which F# rejects (FS0953). Substitute
-                // with `obj` to break the cycle. Tracking by target ref
-                // (rather than body TypeKey) catches cycles routed through
-                // intermediate wrappers (Optional, etc.) that lose the
-                // original Raw via `LazyContainer.CreateFromValue`.
-                let target = ctx.TypeAliasRemap[lazyResolvedType.Raw]
-                if ctx.RenderingAliasTargetRefs.Contains(target) then
-                    objRefRender |> TypeRefRender.orNullable nullable
-                else
-                    target |> TypeRefRender.orNullable nullable
-            | ref -> ref
+    let remap (ref: TypeRefRender) =
+        if not (ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Raw)) then ref
+        else
+            // If this lookup's target ref is currently being rendered
+            // as an alias body, returning it would emit a recursive
+            // `type T = U2<A, T>` which F# rejects (FS0953). Substitute
+            // with `obj` to break the cycle. Tracking by target ref
+            // (rather than body TypeKey) catches cycles routed through
+            // intermediate wrappers (Optional, etc.) that lose the
+            // original Raw via `LazyContainer.CreateFromValue`.
+            let target = ctx.TypeAliasRemap[lazyResolvedType.Raw]
+            if ctx.RenderingAliasTargetRefs.Contains target then
+                // Cycle case: collapse to `obj`. Args (if any) are
+                // refs into the cycle itself, so losing them is correct.
+                objRefRender |> TypeRefRender.orNullable ref.Nullable
+            else
+                // Per typeref-render.md atom/molecule composition:
+                // remap stores the alias's canonical *atom*. For atom-
+                // shaped refs, swap wholesale. For Prefix-molecule refs
+                // (the arity reconciler already applied args), replace
+                // only the prefix head with the canonical target — args
+                // stay attached. Non-Prefix molecules are unrelated to
+                // alias application; leave them alone.
+                match ref.Kind with
+                | TypeRefKind.Atom _ ->
+                    target |> TypeRefRender.orNullable ref.Nullable
+                | TypeRefKind.Molecule (TypeRefMolecule.Prefix (_, args)) ->
+                    RenderScopeStore.TypeRefRender.create scope lazyResolvedType.Value ref.Nullable (target, args)
+                | TypeRefKind.Molecule _ ->
+                    ref
     let inline addOrReplaceScope ctx resolvedType renderScope =
         let renderScope = ctx.Customisation.Interceptors.ResolvedTypePrelude ctx resolvedType renderScope
         GeneratorContext.Prelude.addOrReplace ctx resolvedType renderScope
@@ -682,9 +697,26 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     |> function
-        | Registered { Nullable = nullable } when ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Raw) ->
-            ctx.TypeAliasRemap[lazyResolvedType.Raw]
-            |> TypeRefRender.orNullable nullable
+        | Registered ref when ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Raw) ->
+            // Restore atom/molecule composition (per typeref-render.md):
+            // the remap stores the alias's canonical *atom*; molecules
+            // (Prefix-with-args from the arity reconciler) must keep
+            // their args. Only swap when the produced ref is an Atom —
+            // that's the case where the cache disagrees about identity.
+            // For Molecules, replace the molecule's PREFIX head with the
+            // remap target so the canonical name applies but the args
+            // stay attached.
+            let target = ctx.TypeAliasRemap[lazyResolvedType.Raw]
+            match ref.Kind with
+            | TypeRefKind.Atom _ ->
+                target |> TypeRefRender.orNullable ref.Nullable
+            | TypeRefKind.Molecule (TypeRefMolecule.Prefix (_, args)) ->
+                RenderScopeStore.TypeRefRender.create scope lazyResolvedType.Value ref.Nullable (target, args)
+            | TypeRefKind.Molecule _ ->
+                // Non-Prefix molecules (Tuple/Union/Function) don't represent
+                // an alias-with-args application; the remap doesn't model
+                // them. Leave the produced ref alone.
+                ref
         | Registered ref -> ref
 
 module TestHelper =
