@@ -442,16 +442,23 @@ module Module =
 // Dispatch
 // ---------------------------------------------------------------------------
 let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: TypeDeclaration) =
+    // Exhaustive search for source with metadata stored
     let metadata =
+        // Grab symbol, and transitively resolve aliases
         node.Symbol
         |> ValueOption.bind (fun symbol ->
             if symbol.flags.HasFlag(Ts.SymbolFlags.Alias) then
                 ctx.checker.getAliasedSymbol symbol
             else ctx.checker.getMergedSymbol symbol
+            // Method declared in Types/SourceTag.fs scans the symbol
+            // declarations for all exports
             |> ctx.program.GetExportCollection
             |> ValueOption.map Source.Package
             )
         |> ValueOption.defaultWith (fun () ->
+            // If we are unable to resolve a symbol from the node,
+            // then we will directly try to resolve the source from
+            // the node.
             let sourceTag = ctx.CreateSourceTagValue(node)
             match sourceTag.Value with
             | SourceKind.LibEs ->

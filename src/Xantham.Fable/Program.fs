@@ -11,20 +11,20 @@ open Xantham.Fable.Types
 open Fable.Core.JsInterop
 open Xantham.Fable.Types.SourceTag
 
-#if !RELEASE && !FABLE_TEST
-// Can insert play/debug code here.
-#endif
 
 let private readFile (argsv: string list) (file: string) (destination: string) =
+    let files =
+        (file :: (argsv |> List.pairwise |> List.choose (function "-a", file | "--add", file -> Some file | _ -> None)))
+        |> List.toArray
     let reader =
         #if !RELEASE && !FABLE_TEST
         // If in debug mode, and not in a test environment, create a log entry.
-        TypeScriptReader.createWithLogger file
+        TypeScriptReader.createWithLoggerFor files
         #else
         // In release mode, create a log entry only if the `--debug` flag is passed.
         if argsv |> List.contains "--debug" then
-            TypeScriptReader.createWithLogger file
-        else TypeScriptReader.create file
+            TypeScriptReader.createWithLoggerFor files
+        else TypeScriptReader.createFor files
         #endif
     reader
     |> readAndWrite (
@@ -52,6 +52,7 @@ EXAMPLE
 
 OPTIONS
     --help                          Prints this message.
+    -a, --add <PATH|PACKAGE>        Adds the given path/package to the list of packages to process.
     -o, --output <OUTPUT>           Sets the output path for the generated json.
     --clean                         Removes any stale folders in the `.xantham` directory at the end of the operation.
     --debug                         Logs are written to {working directory}/.xantham/log_*.txt
@@ -69,19 +70,27 @@ let main argv =
     | args when args |> List.contains "--help" || args = [] -> printHelp()
     | "clean" :: _ ->
         Temp.Directory.closeXanthamDirectory()
-    | input :: ("--output" | "-o") :: [ output ] ->
-        let pathIsFile = path.extname output <> ""
-        let dirPath =
-            if pathIsFile
-            then path.join(output, "..")
-            else output
-        if fs.existsSync(!^dirPath) |> not then
-            fs.mkdirSync(dirPath)
-        readFile argv input output
-        postCommandOps()
-    | [ input ] ->
-        readFile argv input null
-        postCommandOps()
+    | input :: args ->
+        args
+        |> List.pairwise
+        |> List.filter (fst >> function "-o" | "--output" -> true | _ -> false)
+        |> function
+            | [ (_, output) ] ->
+                let pathIsFile = path.extname output <> ""
+                let dirPath =
+                    if pathIsFile
+                    then path.join(output, "..")
+                    else output
+                if fs.existsSync(!^dirPath) |> not then
+                    fs.mkdirSync(dirPath)
+                readFile argv input output
+                postCommandOps()
+                
+            | [] ->
+                readFile argv input null
+                postCommandOps()
+            | _ ->
+                printHelp()
     | _ ->
         printHelp()
     0
