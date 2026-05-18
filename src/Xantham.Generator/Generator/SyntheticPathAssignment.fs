@@ -186,6 +186,95 @@ module SyntheticPathAssignment =
         let name = sprintf "_Lit%d" counter |> Name.Pascal.create
         TypePath.createWithName name parentModule
 
+    /// Walk a synthetic's body collecting any `ResolvedType.TypeParameter`
+    /// references in first-appearance order. The `seen` set is keyed by the
+    /// underlying `TypeParameter` record's reference identity
+    /// (`[<ReferenceEquality>]` on the decoder record makes this cheap and
+    /// correct).
+    ///
+    /// Walks transparently through every container including
+    /// Interface/Class/Enum and through TypeReferences' declaration bodies.
+    /// Counterintuitively this is the *correct* behavior: TS interns the
+    /// synthetic at one point in the type graph, and the only typars that
+    /// will be in scope at every reference site are typars from the
+    /// surrounding declaration scopes the encoder threaded through. By
+    /// collecting them all we capture the union of typars any reference
+    /// site might need. A narrower walk (stopping at named-type boundaries)
+    /// captures fewer typars and ends up emitting refs whose typars aren't
+    /// in scope at any of the reference sites — strictly worse.
+    ///
+    /// Typars are added at first encounter to preserve declaration order:
+    /// `(value: 'T, index: 'U) => 'R` captures `['T; 'U; 'R]` so the emitted
+    /// synthetic declares typars in the same order references at use sites
+    /// will apply them.
+    let private collectFreeTypars (rootRt: ResolvedType) : TypeParameter list =
+        let seen = HashSet<TypeParameter>(HashIdentity.Reference)
+        let visited = HashSet<ResolvedType>(HashIdentity.Reference)
+        let typars = ResizeArray<TypeParameter>()
+        let rec walkT (rt: ResolvedType) =
+            if visited.Add rt then
+                match rt with
+                | ResolvedType.TypeParameter tp ->
+                    if seen.Add tp then typars.Add tp
+                | ResolvedType.Union union ->
+                    for t in union.Types do walkT t.Value
+                | ResolvedType.Intersection intersection ->
+                    for t in intersection.Types do walkT t.Value
+                | ResolvedType.TypeLiteral typeLiteral ->
+                    for m in typeLiteral.Members do walkM m
+                | ResolvedType.TemplateLiteral template ->
+                    for t in template.Types do walkT t.Value
+                | ResolvedType.Interface iface ->
+                    for m in iface.Members do walkM m
+                | ResolvedType.Class cls ->
+                    for m in cls.Members do walkM m
+                | ResolvedType.TypeReference typeRef ->
+                    walkT typeRef.Type.Value
+                    for arg in typeRef.TypeArguments do walkT arg.Value
+                | ResolvedType.Array inner -> walkT inner
+                | ResolvedType.ReadOnly inner -> walkT inner
+                | ResolvedType.Tuple tuple ->
+                    for t in tuple.Types do walkT t.Type.Value
+                | ResolvedType.IndexedAccess indexed ->
+                    walkT indexed.Object.Value
+                    walkT indexed.Index.Value
+                | ResolvedType.Index index -> walkT index.Type.Value
+                | ResolvedType.Optional opt -> walkT opt.Type.Value
+                | ResolvedType.TypeQuery query -> walkT query.Type.Value
+                | ResolvedType.Conditional cond ->
+                    walkT cond.Check.Value
+                    walkT cond.Extends.Value
+                    walkT cond.True.Value
+                    walkT cond.False.Value
+                | ResolvedType.Substitution sub ->
+                    walkT sub.Base.Value
+                | _ -> ()
+        and walkM (memberRef: Member) =
+            match memberRef with
+            | Member.Property prop ->
+                walkT prop.Type.Value
+            | Member.Method overloads ->
+                for m in overloads do
+                    for param in m.Parameters do walkT param.Type.Value
+                    walkT m.Type.Value
+            | Member.GetAccessor get ->
+                walkT get.Type.Value
+            | Member.SetAccessor set ->
+                walkT set.ArgumentType.Value
+            | Member.IndexSignature idx ->
+                for param in idx.Parameters do walkT param.Type.Value
+                walkT idx.Type.Value
+            | Member.CallSignature signatures ->
+                for sig' in signatures do
+                    for param in sig'.Parameters do walkT param.Type.Value
+                    walkT sig'.Type.Value
+            | Member.ConstructSignature signatures ->
+                for sig' in signatures do
+                    for param in sig'.Parameters do walkT param.Type.Value
+                    walkT sig'.Type.Value
+        walkT rootRt
+        List.ofSeq typars
+
     let private assignSynthetics
         (ctx: GeneratorContext)
         (counters: Dictionary<TypePath, int>)
@@ -200,6 +289,9 @@ module SyntheticPathAssignment =
                 counters[homePath] <- counter
                 let path = buildSyntheticPath homePath counter
                 ctx.SyntheticPaths[synthetic] <- path
+                let capturedTypars = collectFreeTypars synthetic
+                if not (List.isEmpty capturedTypars) then
+                    ctx.SyntheticTypars[synthetic] <- capturedTypars
 
     /// A type is "infrastructure" if its source is a TS standard library
     /// file (`Source.LibEs _`). Such types shouldn't be hosts for synthetic

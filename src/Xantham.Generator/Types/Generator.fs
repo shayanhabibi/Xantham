@@ -477,6 +477,18 @@ and GeneratorContext =
         // Additive to the documented Transient/Anchor system; non-interned
         // single-position literals continue through the documented path.
         SyntheticPaths: DictionaryImpl<ResolvedType, TypePath>
+        // Companion to `SyntheticPaths`. Captures the enclosing-scope typars
+        // that a synthetic literal's body references (e.g. an inline callback
+        // shape `(value: T, index: number) => U` interned as a TypeLiteral
+        // references typars `T`, `U` declared by the surrounding method).
+        // The path-assignment pre-pass walks each synthetic's body collecting
+        // ResolvedType.TypeParameter references in first-appearance order;
+        // prerender's synthetic-reference helper consults this map to emit
+        // a `Prefix(ConcretePath, [typar-refs])` molecule rather than a bare
+        // atom; the decl-side `Members.renderFromMembersAndFunctions` hoists
+        // the same typar list onto the type declaration. Empty list (or
+        // missing key) means "no captured typars" — atom-only behavior.
+        SyntheticTypars: DictionaryImpl<ResolvedType, TypeParameter list>
     }
     override this.ToString() = $"GeneratorContext(%d{this.PreludeRenders.Count})"
     static member internal Create(preludeGetTypeRefFunc, ?customisation) = {
@@ -488,6 +500,7 @@ and GeneratorContext =
         RenderingAliasTargetRefs = HashSet()
         Customisation = defaultArg customisation Customisation.Default
         SyntheticPaths = DictionaryImpl()
+        SyntheticTypars = DictionaryImpl()
     }
     
 

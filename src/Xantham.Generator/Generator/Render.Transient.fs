@@ -258,13 +258,20 @@ module TemplateLiteral =
             }
             |> TypeDefn
 module Members =
-    let renderFromMembersAndFunctions (ctx: GeneratorContext) (scopeStore: RenderScopeStore) members functions =
+    let renderFromMembersAndFunctions
+        (ctx: GeneratorContext)
+        (scopeStore: RenderScopeStore)
+        (resolvedType: ResolvedType voption)
+        members functions =
         // Synthetic-reference audit site #7 (see `createAssignedSyntheticRef`
         // in RenderScope.Prelude.fs for the universe map). Decl-side emission
-        // for synthetic Intersection/TypeLiteral bodies. Currently produces
-        // `TypeParameters = []`. Phase B will consult `ctx.SyntheticTypars`
-        // here so the decl-side typar list matches the ref-side Prefix
-        // molecule's args.
+        // for synthetic Intersection/TypeLiteral bodies. When the
+        // `SyntheticPathAssignment` pre-pass captured typars from the
+        // synthetic's body (e.g. an inline callback referencing enclosing
+        // method/class typars), hoist them onto the type declaration so the
+        // emitted `type _Lit18<'T, 'U> = ...` matches the `Prefix(_Lit18, ['T;'U])`
+        // molecule that reference sites emit. The same dictionary
+        // (`ctx.SyntheticTypars`) is the agreement point for both sides.
         //
         // Derive Metadata.Path from scopeStore.PathContext so that the
         // resulting TypeLikeRender carries this literal's position rather
@@ -278,11 +285,20 @@ module Members =
             TransientPath.toTransientModulePath scopeStore.PathContext
             |> TransientTypePath.graft
             |> Path.create
+        let typeParameters =
+            match resolvedType with
+            | ValueSome rt ->
+                match ctx.SyntheticTypars.TryGetValue rt with
+                | true, typars ->
+                    typars
+                    |> List.map (TypeParameter.render ctx scopeStore)
+                | _ -> []
+            | _ -> []
         {
             Transient.TypeLikeRender.Metadata = { Path = scopedPath; Original = scopedPath
                                                   Source = ValueNone; FullyQualifiedName = ValueNone }
             Name = ValueNone
-            TypeParameters = []
+            TypeParameters = typeParameters
             Inheritance = []
             Implements = []
             Members = members
@@ -292,19 +308,19 @@ module Members =
             IsClass = false
         }
         |> Transient.TypeRender.TypeDefn
-    let inline render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (members: Member list) =
+    let inline render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (resolvedType: ResolvedType voption) (members: Member list) =
         Member.partitionRender ctx scopeStore members
-        ||> renderFromMembersAndFunctions ctx scopeStore
+        ||> renderFromMembersAndFunctions ctx scopeStore resolvedType
 
 module Intersection =
     let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (intersection: Intersection) =
         Member.collectAllRecursively (ResolvedType.Intersection intersection)
-        |> Members.render ctx scopeStore
+        |> Members.render ctx scopeStore (ValueSome (ResolvedType.Intersection intersection))
 
 module TypeLiteral =
     let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (typeLiteral: TypeLiteral) =
         typeLiteral.Members
-        |> Members.render ctx scopeStore
+        |> Members.render ctx scopeStore (ValueSome (ResolvedType.TypeLiteral typeLiteral))
 
 module Literal =
     let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (literal: TsLiteral) =

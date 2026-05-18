@@ -33,33 +33,55 @@ let private createConcreteTypeRef (path: TypePath) =
 ///   4. TemplateLiteral branch (`prerender` ~line 657) — `SyntheticPathAssignment`
 ///      walks template-literal synthetics, but the prerender branch does NOT
 ///      consult `ctx.SyntheticPaths`. Currently a benign omission (template
-///      literals don't capture enclosing typars), revisit if Phase B exposes
-///      a need.
+///      literals don't capture enclosing typars), revisit if a use case
+///      exposes a need.
 ///   5. Cache-hit Anchored-Root path (`prerender` ~lines 94-107) — returns
-///      the cached `TypeRef` produced by this helper. Any shape change here
-///      must align with what cache hits emit.
+///      the cached `TypeRef` produced by this helper. Cache stores whatever
+///      this helper emits, so atom-vs-Prefix shape flows through naturally.
 ///   6. Synthetic re-anchor pass (`RenderScope.Anchored.fs` ~lines 506-517) —
 ///      re-anchors the synthetic body at the consuming export's anchor path.
 ///      Reads the helper's TypePath; doesn't reconstruct the ref.
 ///   7. Synthetic decl emission (`Render.Transient.fs` `Members.renderFromMembersAndFunctions`
-///      ~line 261) — produces `TypeParameters = []`. Phase B's typar plug-in
-///      point: when `ctx.SyntheticTypars` has entries for the resolvedType,
-///      the decl-side typar list must match what the ref-side helper emits.
+///      ~line 261) — consults `ctx.SyntheticTypars` to hoist the captured
+///      typar list onto the type declaration. Must agree with this helper's
+///      typar choice (same dictionary lookup keyed by ResolvedType).
 ///   8. Synthetic-vs-real merge (`Render.Collection.fs` `combine`
 ///      ~lines 139-160) — "non-empty typars wins" rule resolves collisions
 ///      between a synthetic that lands at a path tail matching a real
-///      declaration. Phase B may need refinement when synthetics carry typars.
+///      declaration. May need refinement if both sides become non-empty.
 ///
-/// Phase B will switch this helper to consult `ctx.SyntheticTypars` and emit
-/// `Prefix(ConcretePath, [typar-refs])` molecules when the synthetic's body
-/// references typars from an enclosing scope. The cache-hit path (#5) and
-/// the re-anchor pass (#6) will then see Prefix-shaped refs and must
-/// preserve them through their respective transforms (already done for
-/// `remap` per typeref-render.md atom/molecule composition).
-let private createAssignedSyntheticRef (path: TypePath) (nullable: bool) =
-    RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
-    |> RenderScopeStore.TypeRef.Unsafe.createAtom
-    |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind nullable
+/// When `ctx.SyntheticTypars` has an entry for the resolvedType, the helper
+/// emits a `Prefix(ConcretePath, [typar-refs])` molecule per
+/// `typeref-render.md` atom/molecule composition. The molecule-preserving
+/// `remap` in this file (and the final-pass match) already handle Prefix
+/// shapes correctly.
+let private createAssignedSyntheticRef
+    (ctx: GeneratorContext)
+    (scope: RenderScopeStore)
+    (resolvedType: ResolvedType)
+    (path: TypePath)
+    (nullable: bool) =
+    let atom =
+        RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
+        |> RenderScopeStore.TypeRef.Unsafe.createAtom
+        |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind nullable
+    match ctx.SyntheticTypars.TryGetValue resolvedType with
+    | true, typars when not (List.isEmpty typars) ->
+        // The synthetic's body references typars from an enclosing scope.
+        // Build a ref per captured typar using the same shape the
+        // `ResolvedType.TypeParameter` branch in prerender produces, then
+        // wrap the atom in a Prefix molecule. Reference sites get
+        // `_Lit18<'T, 'U>` rather than bare `_Lit18`, agreeing with the
+        // decl-side hoisting at audit site #7.
+        let typarRefs =
+            typars
+            |> List.map (fun tp ->
+                tp.Name
+                |> Name.Case.valueOrModified
+                |> Ast.LongIdent
+                |> RenderScopeStore.TypeRefRender.create scope resolvedType false)
+        RenderScopeStore.TypeRefRender.create scope resolvedType nullable (atom, typarRefs)
+    | _ -> atom
 
 [<Struct>]
 type private Registered = Registered of TypeRefRender
@@ -276,7 +298,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             // multiple positions.
             match ctx.SyntheticPaths.TryGetValue resolvedType with
             | true, concretePath ->
-                let ref = createAssignedSyntheticRef concretePath nullable
+                let ref = createAssignedSyntheticRef ctx scope resolvedType concretePath nullable
                 // Track the visit in the outer scope's TypeStore so the
                 // export's anchor pass iterates the synthetic and runs the
                 // body's anchor (which my new Anchored-Root + Transient-Render
@@ -367,7 +389,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         // Synthetic-reference audit site #2 (Intersection).
         match ctx.SyntheticPaths.TryGetValue resolvedType with
         | true, concretePath ->
-            let ref = createAssignedSyntheticRef concretePath false
+            let ref = createAssignedSyntheticRef ctx scope resolvedType concretePath false
             RenderScopeStore.addTypeStorePath scope resolvedType TransientTypePath.Anchored
             let childScope = RenderScopeStore.create()
             {
@@ -664,7 +686,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             // Synthetic-reference audit site #3 (TypeLiteral non-inline).
             match ctx.SyntheticPaths.TryGetValue resolvedType with
             | true, concretePath ->
-                let ref = createAssignedSyntheticRef concretePath false
+                let ref = createAssignedSyntheticRef ctx scope resolvedType concretePath false
                 RenderScopeStore.addTypeStorePath scope resolvedType TransientTypePath.Anchored
                 let childScope = RenderScopeStore.create()
                 {
