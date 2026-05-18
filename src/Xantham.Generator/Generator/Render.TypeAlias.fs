@@ -113,6 +113,22 @@ module TypeAlias =
                     |> breakSelfReference
                 | _ -> newRef.TypeRef |> breakSelfReference
             | false, _ -> oldRef |> breakSelfReference
+        // Mark the alias as cycle-broken if its body resolved to a bare
+        // `obj`/`exn` intrinsic (either via `breakSelfReference` rewriting
+        // self-references, or via a lib substitution that collapsed an
+        // alias body to `obj`). Reference sites that would otherwise apply
+        // type-arguments, declare constraints, or take this alias as
+        // heritage consult `ctx.CycleBrokenPaths` and drop the
+        // application/constraint/heritage. Without this metadata, F#
+        // rejects the rendered `Alias<X>`, `'T :> Alias`, or
+        // `inherit Alias()` because the alias erased to a non-generic /
+        // sealed intrinsic.
+        let markCycleBrokenIfErased (body: TypeRefRender) =
+            match body.Kind with
+            | TypeRefKind.Atom (TypeRefAtom.Intrinsic s)
+                when s = Intrinsic.obj || s = Intrinsic.exn ->
+                ctx.CycleBrokenPaths.Add path |> ignore
+            | _ -> ()
         let rec matchImpl = function
             | ResolvedType.TypeQuery { Type = Resolve typ } ->
                 matchImpl typ
@@ -132,6 +148,7 @@ module TypeAlias =
             | ResolvedType.Enum _
             | ResolvedType.Array _ ->
                 let body = resolveInnerRef ()
+                markCycleBrokenIfErased body
                 {
                     TypeAliasRenderRef.Documentation = documentation
                     Metadata = metadata
@@ -163,6 +180,7 @@ module TypeAlias =
                 |> TypeAliasRender.TypeDefn
             | ResolvedType.Union _ ->
                 let body = resolveInnerRef ()
+                markCycleBrokenIfErased body
                 let typeRefRender =
                     {
                         TypeAliasRenderRef.Documentation = documentation

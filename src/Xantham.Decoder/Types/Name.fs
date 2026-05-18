@@ -339,8 +339,17 @@ module Name =
     /// (`'X` requires X to follow F# identifier rules). Replacing with `_S`
     /// rather than stripping avoids collapsing `$Foo` and `Foo` onto the
     /// same name in scopes where both appear as typars.
+    ///
+    /// Bare `_` is TS's "don't care" typar (`Method<T, _>`) but F#'s `'_`
+    /// is the anonymous-typar sigil — declaring `type Foo<'_> = ...` is
+    /// rejected by the parser. Multiple `_` typars in a synthetic's
+    /// captured scope all collapse to one `'Anon` declaration; body
+    /// references all bind to it. Semantically lossy when distinct `_`s
+    /// would have meant distinct types, but TS's `_` convention is
+    /// already "I'm not relying on this typar identity."
     let private sanitizeTyparCharacters (s: string) =
-        s.Replace("$", "_S")
+        let replaced = s.Replace("$", "_S")
+        if replaced = "_" then "Anon" else replaced
     let normalizeForTypeParameter = map (Internal.stripBackticks >> sanitizeTyparCharacters >> sprintf "'%s")
     /// <summary>
     /// Pascal cases the source name, and prefixes with a single quote.

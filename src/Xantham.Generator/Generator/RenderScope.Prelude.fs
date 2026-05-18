@@ -73,8 +73,14 @@ let private createAssignedSyntheticRef
         // wrap the atom in a Prefix molecule. Reference sites get
         // `_Lit18<'T, 'U>` rather than bare `_Lit18`, agreeing with the
         // decl-side hoisting at audit site #7.
+        //
+        // Must dedup by name to match the decl-side dedup in
+        // `Render.Transient.fs Members.renderFromMembersAndFunctions`.
+        // Without matching dedup the reference's Prefix carries more args
+        // than the declaration has typars (FS1242, FS0033).
         let typarRefs =
             typars
+            |> List.distinctBy (fun tp -> Name.Case.valueOrModified tp.Name)
             |> List.map (fun tp ->
                 tp.Name
                 |> Name.Case.valueOrModified
@@ -115,8 +121,19 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 // only the prefix head with the canonical target — args
                 // stay attached. Non-Prefix molecules are unrelated to
                 // alias application; leave them alone.
+                //
+                // If `target` points at a cycle-broken alias path (one
+                // whose body resolved to bare `obj`/`exn`), drop the args
+                // so we don't emit `obj<T>` (FS0033).
+                let targetIsCycleBroken =
+                    match target.Kind with
+                    | TypeRefKind.Atom (TypeRefAtom.ConcretePath p) ->
+                        ctx.CycleBrokenPaths.Contains p
+                    | _ -> false
                 match ref.Kind with
                 | TypeRefKind.Atom _ ->
+                    target |> TypeRefRender.orNullable ref.Nullable
+                | TypeRefKind.Molecule (TypeRefMolecule.Prefix _) when targetIsCycleBroken ->
                     target |> TypeRefRender.orNullable ref.Nullable
                 | TypeRefKind.Molecule (TypeRefMolecule.Prefix (_, args)) ->
                     RenderScopeStore.TypeRefRender.create scope lazyResolvedType.Value ref.Nullable (target, args)
@@ -582,6 +599,16 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             prefix
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
+        | TypeRefKind.Atom (TypeRefAtom.ConcretePath p)
+            when ctx.CycleBrokenPaths.Contains p ->
+            // The alias rendered at this path collapsed to a non-generic
+            // intrinsic (`obj`/`exn`) — see `Render.TypeAlias.fs`
+            // `markCycleBrokenIfErased`. F# rejects `AliasPath<T>` when
+            // `AliasPath = obj`. Drop the args; consumers lose the typar
+            // refinement but compilation proceeds.
+            prefix
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
         | _ ->
             let postfixArguments =
                 alignedArguments
@@ -777,8 +804,20 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             // remap target so the canonical name applies but the args
             // stay attached.
             let target = ctx.TypeAliasRemap[lazyResolvedType.Raw]
+            // If the alias targeted here cycle-broke to bare `obj`/`exn`
+            // (see `Render.TypeAlias.fs markCycleBrokenIfErased`), any args
+            // from the use site can't apply (`AliasPath<T>` where
+            // `AliasPath = obj` → FS0033). Drop them: take the target
+            // atom alone.
+            let targetIsCycleBroken =
+                match target.Kind with
+                | TypeRefKind.Atom (TypeRefAtom.ConcretePath p) ->
+                    ctx.CycleBrokenPaths.Contains p
+                | _ -> false
             match ref.Kind with
             | TypeRefKind.Atom _ ->
+                target |> TypeRefRender.orNullable ref.Nullable
+            | TypeRefKind.Molecule (TypeRefMolecule.Prefix _) when targetIsCycleBroken ->
                 target |> TypeRefRender.orNullable ref.Nullable
             | TypeRefKind.Molecule (TypeRefMolecule.Prefix (_, args)) ->
                 RenderScopeStore.TypeRefRender.create scope lazyResolvedType.Value ref.Nullable (target, args)

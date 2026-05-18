@@ -489,6 +489,17 @@ and GeneratorContext =
         // the same typar list onto the type declaration. Empty list (or
         // missing key) means "no captured typars" — atom-only behavior.
         SyntheticTypars: DictionaryImpl<ResolvedType, TypeParameter list>
+        // TypePaths whose alias body collapses to a non-generic intrinsic
+        // (`obj` / `exn`) — either statically (the alias's substitution
+        // target IS the intrinsic, e.g. `Error → exn`) or dynamically at
+        // render time (the body cycle-breaks through `RenderingAliasTargetRefs`
+        // and produces `objRefRender`). Reference sites that would apply
+        // type-arguments, declare a constraint, or take the alias as
+        // heritage consult this set: when the target is here, drop the
+        // application/constraint/heritage. F# rejects `obj<T>`, `'X :> obj`,
+        // and `inherit obj()` in interface contexts; without this metadata
+        // the rendered F# carries those rejected forms.
+        CycleBrokenPaths: HashSet<TypePath>
     }
     override this.ToString() = $"GeneratorContext(%d{this.PreludeRenders.Count})"
     static member internal Create(preludeGetTypeRefFunc, ?customisation) = {
@@ -501,6 +512,7 @@ and GeneratorContext =
         Customisation = defaultArg customisation Customisation.Default
         SyntheticPaths = DictionaryImpl()
         SyntheticTypars = DictionaryImpl()
+        CycleBrokenPaths = HashSet()
     }
     
 

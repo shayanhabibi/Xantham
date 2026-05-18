@@ -290,7 +290,19 @@ module Members =
             | ValueSome rt ->
                 match ctx.SyntheticTypars.TryGetValue rt with
                 | true, typars ->
+                    // Dedup by name. The walker collects all reachable
+                    // TypeParameter records; cross-scope captures often
+                    // produce same-named distinct records (e.g. two methods
+                    // each declaring `<S>` or `<T>` produce two `S`s). F#
+                    // rejects duplicate typars on a declaration. Body
+                    // references render `tp.Name` via Name.Case.valueOrModified
+                    // and bind by name, so collapsing distinct records that
+                    // share a name to a single declaration entry keeps body
+                    // references resolvable. Bare `_` typars are renamed
+                    // upstream in `Name.Case.typar.sanitizeTyparCharacters`
+                    // so the dedup here catches their collapsed form too.
                     typars
+                    |> List.distinctBy (fun tp -> Name.Case.valueOrModified tp.Name)
                     |> List.map (TypeParameter.render ctx scopeStore)
                 | _ -> []
             | _ -> []
