@@ -47,7 +47,9 @@ those concerns meet new TS-source idioms.
 | **Phase F — Typar atoms as `Intrinsic`; render-layer substitution at body and Union/Tuple/Function sites** | Three connected pieces: (a) `ResolvedType.TypeParameter` and Phase B helper render typars as `Intrinsic_ "'T"` atoms instead of opaque `Widget_` atoms — same emitted text but downstream passes can identify and substitute; (b) `Render.TypeAlias.fs` Alias and Union variants now substitute body typars not in the alias's kept-typar list with `obj` via `substituteForHeritage`; (c) empty-args and args-present `TypeReference` branches with Union/Tuple/Function prefix invoke the same substitution with `Set.empty` (no caller scope). Heritage substitution observed firing ~57× per SDK in practice. Remaining cohort (`'T not defined` etc.) comes from member-type emissions (method params/returns, property types) that don't yet route through the substitution layer — that's Phase G | (Phase F) |
 | **Phase G — Boundary-stop free-typar walkers (synthetic + alias)** | Both `SyntheticPathAssignment.collectFreeTypars` and `Render.TypeAlias.collectBodyTypars` were walking transparently through named-type containers and through `TypeReference.Type.Value`, picking up typars from the target's own declaration scope and hoisting them onto synthetic/alias declarations. A synthetic `_Lit102` whose body uses zero typars was being declared as `_Lit102<'T,'S,'This,'U,'A,'D,'Arr,'InnerArr,'Depth,'Array>` because the walker followed `ResizeArray<U2<float,string>>` into `Array<T>`'s body and collected `Array`'s `T` plus typars from its iterator methods. Boundary-stop both walkers at `Interface`/`Class` and at `tr.Type.Value` — walk only `tr.TypeArguments` (carrying typars from the OUTER scope). The earlier "transparent walk is empirically better" hypothesis (Phase B doc) didn't hold once Phase F's render-layer substitution was in place: over-capture was producing constraint-mismatched refs that no use-site scope could satisfy. Largest single-phase reduction in synthetic-typar cohorts | (Phase G) |
 | **Phase H — Encoder-side alias instantiation via TS's `getTypeOfSymbol`** | At the `TypeReferenceNode` dispatch in `src/Xantham.Fable/Reading/Dispatch/TypeNode.fs`, when the target's instantiated `Ts.Type.aliasSymbol` is set (TS's marker for an alias application), bypass `TypeReference.fromNode` (which emits an un-substituted `TypeReference + TypeArguments`) and emit a `STypeLiteralBuilder` populated by `TypeFlagObject.buildSubstitutedMembersFromType`. That helper enumerates properties via `getPropertiesOfType` and reads each property's TYPE via `ctx.checker.getTypeOfSymbol(propSym)` — the TS checker performs the typar substitution at that call, so the captured property types are already substituted at the use site (`Foo<string>`'s `x: T` becomes `x: string`). Lossy on member-shape distinction (method-vs-property is collapsed to property of function type — the substituted type for a method symbol is the signature's function type) but correct on type content. Closes the `'Value not defined` and `'S not defined` cohorts at instantiated alias sites; WorkersTypes effectively at zero. Surfaces a new FS0033 arity-mismatch cohort (`NonSharedBuffer<_,_,_>`, `ZodTypeAny<_,_,_,_,_,_>`, `OmitKeys<_,_>`, `AnyZodObject<_,_,_,_,_,_,_,_,_,_,_,_,_,_,_>`) — fewer error categories, more per-category repetition. Surviving `'T` / `'Output` / `'EventEmitter` cohorts are non-alias `this`-as-typar bugs from `@types/node/events.d.ts` and downstream Zod inheritance | (Phase H) |
-| **Phase I — Method/signature typar shadowing in free-typar walkers** | All three walkers (`SyntheticPathAssignment.collectFreeTypars`, `Render.TypeAlias.collectBodyTypars`, `RenderScope.Prelude prerenderTypeAliases` walkT) thread a `shadowed: HashSet<TypeParameter>` set; when walking into `Member.Method` / `Member.CallSignature` / `Member.ConstructSignature`, the signature's declared `TypeParameters` extend the shadowed set for the recursive walks into its parameters and return type. Pre-Phase H this didn't matter because alias bodies referenced named-type targets that the walkers boundary-stopped at; Phase H now inlines substituted bodies as `TypeLiteral`s, so the walkers enter method bodies and see method-level typars as if they were free. Shadowing prevents the bogus hoist onto the surrounding alias/synthetic declaration. Small measured impact because the DOMINANT remaining FS0033 cohort (`NonSharedBuffer<_,_,_>`, etc.) traces to a *different* root cause — the encoder's `this`-as-typar bug, where TS's `this` type is encoded as a TypeParameter whose `symbol.name` resolves to the class name (e.g. `'Uint8Array`). The shadowing fix is principled in its own right — walkers should track scope correctly regardless of whether the immediate impact is large | (Phase I) |
+| **Phase I — Method/signature typar shadowing in free-typar walkers** | All three walkers (`SyntheticPathAssignment.collectFreeTypars`, `Render.TypeAlias.collectBodyTypars`, `RenderScope.Prelude prerenderTypeAliases` walkT) thread a `shadowed: HashSet<TypeParameter>` set; when walking into `Member.Method` / `Member.CallSignature` / `Member.ConstructSignature`, the signature's declared `TypeParameters` extend the shadowed set for the recursive walks into its parameters and return type. Pre-Phase H this didn't matter because alias bodies referenced named-type targets that the walkers boundary-stopped at; Phase H now inlines substituted bodies as `TypeLiteral`s, so the walkers enter method bodies and see method-level typars as if they were free. Shadowing prevents the bogus hoist onto the surrounding alias/synthetic declaration. Small measured impact at landing because the DOMINANT remaining FS0033 cohort (`NonSharedBuffer<_,_,_>`, etc.) traces to a *different* root cause — see Phase J/K. The shadowing fix is principled in its own right — walkers should track scope correctly regardless of whether the immediate impact is large | (Phase I) |
+| **Phase J — `this`-as-typar routing to the constraint** | TS represents `this` (in `methodName(): this` etc.) as a polymorphic `TypeParameter` with `isThisType = true` (internal flag) and a `constraint` pointing at the enclosing class. The encoder's `TypeFlagPrimary.TypeParameter` branch read the typar's symbol name as the F# typar name — TS sets that to the *class* symbol — producing orphan typars like `'EventEmitter`, `'Uint8Array` at every `this`-typed position. Fix: detect `isThisType` via `Fable.Core.JsInterop` (`typ?isThisType = true`) and route the xanTag's signals through to the constraint type via `routeToType`, so `this` emits as a reference to the enclosing class rather than a phantom typar. Eliminates the FS0039 `'EventEmitter is not defined` cohort and reduces the FS0033 `NonSharedBuffer<_,_,_>` cohort by one typar slot. Surviving FS0033 in that cohort traces to method-level typars inside the substituted body — addressed by Phase K | (Phase J) |
+| **Phase K — Type-level signature typeParameters in `S{Call,Construct}SignatureBuilder`** | The encoder's `callSigToMemberSlot` and `constructSigToMemberSlot` (in `Reading/Dispatch/TypeFlagObject.fs`) were setting `TypeParameters = [||]` with the comment "TS Signature objects don't expose typeParameters as nodes; the declaration-side reads do." That's true about *nodes* — but signatures DO expose typars at the *type* level via `signature.getTypeParameters()`, each a `Ts.TypeParameter`. With Phase H emitting substituted-method properties as function types whose call signatures carry the method-level typars, the empty array left the synthesized typars invisible to the decoder. Downstream walkers (post-Phase I) shadowed zero typars at the call sig and the method-level typars leaked into the surrounding alias's hoisted typar list. New `getTypeParamSlotsFromSignature` helper mirrors the pattern in `TypeDeclaration.getTypeParamSlots` but operates on the type-level `Ts.TypeParameter` array — tag each, push to stack, weave the resulting `SType.TypeParameter` builder into the `InlinedSTypeParameterBuilder` shape downstream consumers expect. **Eliminates** the bulk of the FS0033 cohort introduced by Phase H | (Phase K) |
 
 ## The principle, restated
 
@@ -496,41 +498,48 @@ fundamentally unclear.
 
 ## Residual cohorts and the principled next steps
 
-The remaining FS0039 cohort is no longer dominated by synthetic-over-
-capture artifacts. The residual `'T / 'F / 'EventEmitter / 'Output / 'Value
-not defined` errors come from:
-- **Encoder-side instantiation gap** (partly addressed by Phase H,
-  remainder is non-alias sources): TS aliases like `QueueItem<T>` are
-  inlined at consumption sites without typar substitution — the body
-  still carries `payload: T` where T was bound at the alias's
-  declaration. Phase H closes this for alias-targeted use sites via
-  TS's `getTypeOfSymbol`; non-alias paths (interface inheritance with
-  generic args, conditional types) still leak typars.
-- **`this`-as-typar bug**: TS `prependListener<K>(...): this` returning
-  `this` is encoded as a `TypeParameter` whose `symbol.name` resolves
-  to the enclosing class (`'EventEmitter`, `'Uint8Array` etc.). This
-  also drives the dominant remaining FS0033 cohort
-  (`NonSharedBuffer<_,_,_>`) because TS exposes the `this` typar with
-  the class as its symbol, and the encoder reads the symbol name as
-  the typar name.
-- **Synthetic submodule path resolution**: `_LitN.Invoke.Options` —
-  the path is constructed but lookup fails. Companion
-  `module _LitN = ...` either isn't being emitted or is emitted at a
-  path the reference doesn't resolve to.
+With Phases H/I/J/K landed, the alias-instantiation gap, the
+`this`-as-typar bug, and the empty-call-signature-typars gap are
+closed at their sources. Remaining residue:
+
+- **Non-alias instantiation gap** (FS0039 `'T`, `'Output`, `'F`
+  cohorts): the encoder substitution in Phase H fires only when
+  `instantiated.aliasSymbol` is set (TS's marker for alias
+  application). Class/Interface instantiations
+  (`extends ZodType<X, Y, Z>`) and conditional/mapped type
+  instantiations don't get the substituted-body treatment. They
+  flow through the existing `TypeReference.fromNode` /
+  `TypeReference.fromType` path which preserves `Type +
+  TypeArguments` separately. Method-level typars in those instantiated
+  bodies still leak as orphan typars.
+- **Synthetic submodule path resolution** (FS0039
+  `_LitN.Invoke.Options` and similar): the path is constructed but
+  lookup fails. Companion `module _LitN = ...` either isn't being
+  emitted or is emitted at a path the reference doesn't resolve to.
+  Likely a path-anchoring discrepancy between declaration site and
+  reference site.
+- **FS0001 missing constraints**: type aliases with many declared
+  typars whose bodies reference synthetics with constrained typars;
+  F# infers the constraints and rejects the alias declaration that
+  lacks them. Downstream of the substitution work — now that more
+  typars are correctly bound, F# can infer more constraint
+  requirements.
 
 The principled next-step targets, in upstream-to-downstream order:
-1. **`this`-as-typar encoding** (encoder, `Reading/Dispatch/TypeFlagPrimary.fs`
-   line ~219 in the `TypeFlagPrimary.TypeParameter` branch) — detect
-   TS's internal `isThisType` flag on the `Ts.Type` and emit as a
-   self-reference to the enclosing class, not as a TypeParameter
-   named after the class. Addresses both the `'EventEmitter` FS0039
-   cohort and the dominant `NonSharedBuffer<_,_,_>` FS0033 cohort
-   (Phase H surfaced this by inlining substituted bodies that
-   reference the `this` typar).
+1. **Extend Phase H's substitution to non-alias instantiations**
+   (`Reading/Dispatch/TypeFlagObject.fs` `TypeFlagObject.Reference`
+   branch). The current path calls `TypeReference.fromType` for
+   `Object.Reference`-flagged types; route through
+   `buildSubstitutedMembersFromType` instead when the instantiated
+   target's generic arguments differ from declaration defaults.
 2. **Synthetic submodule path resolution** — investigate why
    `_LitN.Invoke.Options` lookup fails despite the synthetic existing
-   at a sibling path. Likely a path-anchoring discrepancy between
-   declaration site and reference site.
+   at a sibling path. Likely involves the path interceptors in
+   `Path.Interceptors`.
+3. **Constraint propagation for hoisted typars** — when alias's
+   body-walker hoists typars onto the declaration, the typars'
+   inferred constraints should be hoisted too so F#'s constraint
+   inference doesn't trip on missing bounds.
 
 The session's measurement trajectory and per-SDK breakdown live in
 [`post-pr3-progress.md`](./post-pr3-progress.md) — this document

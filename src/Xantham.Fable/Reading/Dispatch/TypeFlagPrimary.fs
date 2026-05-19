@@ -1,5 +1,6 @@
 ﻿module Xantham.Fable.Reading.TypeFlagPrimary
 
+open Fable.Core.JsInterop
 open TypeScript
 open Xantham
 open Xantham.Fable
@@ -218,6 +219,47 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagPrimary)
         |> setTypeKeyForTag xanTag
     | TypeFlagPrimary.TypeParameter typ ->
         nameof TypeFlagPrimary.TypeParameter |> debugMessage
+        // TS represents `this` (e.g. in `methodName(): this` return
+        // positions) as a polymorphic TypeParameter with the internal
+        // `isThisType = true` flag and a constraint pointing at the
+        // enclosing class type. The default TypeParameter path below
+        // takes the typar's symbol name as the F# typar name, which
+        // for `this` types resolves to the *class* name — producing
+        // orphan typars like `'EventEmitter`, `'Uint8Array` at every
+        // method return / property type that referenced `this`.
+        //
+        // The principled fix is to route through to the constraint
+        // (the class type itself), so `this` emits as a reference to
+        // the enclosing class rather than as a phantom typar. Catches
+        // both the FS0039 `'EventEmitter is not defined` cohort
+        // (Interface methods declaring `prependListener<K>(): this`)
+        // and the FS0033 cohort surfaced by Phase H's substituted
+        // TypeLiterals (`NonSharedBuffer<_,_,_>` — the typars are
+        // class-level `this` references that TS exposed during
+        // `getTypeOfSymbol` on instantiated alias bodies).
+        if typ?isThisType = true then
+            match typ.getConstraint() with
+            | Some constraintType ->
+                "TypeParameter - this-type, routing to constraint" |> debugMessage
+                routeToType xanTag constraintType
+            | None ->
+                // No constraint on a `this` typar shouldn't happen in
+                // well-formed TS; fall through to default emission.
+                {
+                    STypeParameterBuilder.Name =
+                        typ.getSymbol()
+                        |> Option.orElse typ.aliasSymbol
+                        |> Option.map _.name
+                        |> Option.defaultValue "T"
+                    Constraint = ValueNone
+                    Default = typ.getDefault() |> Option.map getTypeSignal |> Option.toValueOption
+                    Documentation = JSDocTags.resolveDocsForTag ctx xanTag
+                }
+                |> SType.TypeParameter
+                |> setAstSignal
+                typ.TypeKey
+                |> setTypeKeyForTag xanTag
+        else
         {
             STypeParameterBuilder.Name =
                 typ.getSymbol()

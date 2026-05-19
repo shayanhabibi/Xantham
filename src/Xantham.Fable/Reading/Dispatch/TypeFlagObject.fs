@@ -129,22 +129,49 @@ let private signatureToParamSlots (ctx: TypeScriptReader) (signature: Ts.Signatu
             |> Signal.source
         )
 
+/// Extract type-parameter slots from a `Ts.Signature`. The TS API exposes
+/// the signature's typars at the *type* level via `getTypeParameters()`
+/// (each item is a `Ts.TypeParameter`, itself a `Ts.Type`). We tag and
+/// push each one so the normal `TypeFlagPrimary.TypeParameter` dispatch
+/// runs, then weave the resulting builder + TypeKey into the
+/// `InlinedSTypeParameterBuilder` shape that downstream
+/// `S{Call,Construct}SignatureBuilder.TypeParameters` expects.
+///
+/// Mirrors `TypeDeclaration.getTypeParamSlots` but operates on the
+/// type-level `Ts.TypeParameter` array instead of the declaration node's
+/// `TypeParameterDeclaration` array. Used when Phase H's substituted
+/// alias bodies emit method-shaped properties whose function types carry
+/// their own typar scopes — without populating these slots, downstream
+/// walkers (`collectFreeTypars`, `collectBodyTypars`,
+/// `prerenderTypeAliases.walkT`) shadow zero typars at the call signature
+/// and the method-level typars leak into the surrounding alias's
+/// declared typar list (FS0033 arity mismatches at use sites).
+let private getTypeParamSlotsFromSignature (ctx: TypeScriptReader) (signature: Ts.Signature) =
+    signature.getTypeParameters()
+    |> Option.map _.AsArray
+    |> Option.defaultValue [||]
+    |> Array.map (fun (tp: Ts.TypeParameter) ->
+        ctx.CreateXanthamTag tp
+        |> fst |> stackPushAndThen ctx (fun tag -> tag.TypeSignal, tag.Builder)
+        |> fun signals -> signals ||> Signal.map2 (fun typeKey -> function
+            | ValueSome (SType.TypeParameter tp) ->
+                ValueSome {
+                    Type = typeKey
+                    TypeParameter = tp
+                }
+            | _ -> ValueNone
+            )
+        )
+
 /// Convert a Ts.Signature to a call-signature member slot.
 let private callSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Signature) : Signal<SMemberBuilder voption> =
-    // let decl = signature.getDeclaration()
-    // if !!decl then
-    //     resolveToMemberBuilder ctx !!decl
-    // else
     let returnTag =
         match ctx.CreateXanthamTag (ctx.checker.getReturnTypeOfSignature signature) |> fst with
         | TagState.Unvisited t -> pushToStack ctx t; t
         | TagState.Visited t -> t
     {
         SCallSignatureBuilder.Parameters = signatureToParamSlots ctx signature
-        // TS Signature objects don't expose typeParameters as nodes; the
-        // declaration-side reads (CallSignature.read in MemberDeclaration.fs)
-        // do. Leave empty for these synthetic signature-only call sites.
-        TypeParameters = [||]
+        TypeParameters = getTypeParamSlotsFromSignature ctx signature
         Type = returnTag.TypeSignal
         Documentation = []
     }
@@ -154,17 +181,13 @@ let private callSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Signature
 
 /// Convert a Ts.Signature to a construct-signature member slot.
 let private constructSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Signature) : Signal<SMemberBuilder voption> =
-    // let decl = signature.getDeclaration()
-    // if !!decl then
-    //     resolveToMemberBuilder ctx !!decl
-    // else
     let returnTag =
         match ctx.CreateXanthamTag (ctx.checker.getReturnTypeOfSignature signature) |> fst with
         | TagState.Unvisited t -> pushToStack ctx t; t
         | TagState.Visited t -> t
     {
         SConstructSignatureBuilder.Parameters = signatureToParamSlots ctx signature
-        TypeParameters = [||]
+        TypeParameters = getTypeParamSlotsFromSignature ctx signature
         Type = returnTag.TypeSignal
     }
     |> SMemberBuilder.ConstructSignature
