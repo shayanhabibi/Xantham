@@ -301,6 +301,12 @@ module Members =
                     // references resolvable. Bare `_` typars are renamed
                     // upstream in `Name.Case.typar.sanitizeTyparCharacters`
                     // so the dedup here catches their collapsed form too.
+                    //
+                    // `TypeParameter.render` carries the constraint /
+                    // default metadata across to the rendered slot — F#'s
+                    // constraint inference at the synthetic's call sites
+                    // requires the bounds to be declared on the synthetic
+                    // itself, otherwise FS0001 fires at the declaration.
                     typars
                     |> List.distinctBy (fun tp -> Name.Case.valueOrModified tp.Name)
                     |> List.map (TypeParameter.render ctx scopeStore)
