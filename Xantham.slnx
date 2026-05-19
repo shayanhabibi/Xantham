@@ -22,7 +22,15 @@
 <!--          DOCUMENTATION         -->
   <Folder Name="/docs/">
     <File Path="docs/index.md" />
-    <File Path="docs/_head.html" />
+  </Folder>
+  <Folder Name="/docs/plans/">
+    <File Path="docs/plans/generator-extensibility-refactor.md" />
+    <File Path="docs/plans/multi-valued-typestore.md" />
+    <File Path="docs/plans/post-pr1-progress.md" />
+    <File Path="docs/plans/post-pr2-progress.md" />
+    <File Path="docs/plans/post-pr3-progress.md" />
+    <File Path="docs/plans/post-pr3-re-engineering.md" />
+    <File Path="docs/plans/prevent-silent-drops-progress.md" />
   </Folder>
   <Folder Name="/docs/Overview/">
     <File Path="docs/Overview/litmus-tests.md" />

@@ -14,10 +14,11 @@
 
     <ItemGroup>
         <PackageReference Include="EasyBuild.FileSystemProvider" Version="1.1.0" />
-        <PackageReference Include="Expecto" Version="10.*"/>
+        <PackageReference Include="Expecto" Version="11.0.0-alpha9" />
         <PackageReference Include="Fake.Core.Process" Version="6.1.4" />
         <PackageReference Include="Fake.Core.Xml" Version="6.1.4" />
         <PackageReference Include="Fake.JavaScript.Npm" Version="6.1.4" />
+        <PackageReference Include="Farse" Version="0.12.2" />
         <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.15.6" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
     </ItemGroup>
