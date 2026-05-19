@@ -53,7 +53,13 @@ module TypeAlias =
                     | ResolvedType.Class cls ->
                         for m in cls.Members do walkM m
                     | ResolvedType.TypeReference tr ->
-                        // Walk args (at this scope) and the substituted body.
+                        // Walk the target body too — synthetic literals
+                        // referenced via TypeReference with empty args at
+                        // the decoder level carry their typar references
+                        // inside their bodies. Must match the walker in
+                        // `prerenderTypeAliases` so the declaration's
+                        // hoisted typar list matches `ctx.TypeAliasArity`.
+                        walkT tr.Type.Value
                         for arg in tr.TypeArguments do walkT arg.Value
                         match tr.ResolvedType with
                         | Some r -> walkT r.Value
@@ -105,7 +111,20 @@ module TypeAlias =
         // typars as synthetic entries (FS0039 prevention for aliases
         // whose body references free typars from another scope, e.g.
         // `type MCPTransportOptions = U3<_Lit3<'T, 'S, ...>, ...>`).
-        let reconcileTyparList (_resolvedRef: TypeRefRender) =
+        //
+        // When the body collapsed to bare `obj`/`exn` (cycle-broken), drop
+        // ALL typars — `type X = obj` with no declared typars matches the
+        // use-site arity (Phase C `CycleBrokenPaths` truncates use-site
+        // args to 0 for cycle-broken aliases). Keeping typars on the decl
+        // with `type X<'T,'U> = obj` triggers FS0035 (unused typars) at
+        // best and FS0033 at use sites at worst.
+        let reconcileTyparList (resolvedRef: TypeRefRender) =
+            let isErased =
+                match resolvedRef.Kind with
+                | TypeRefKind.Atom (TypeRefAtom.Intrinsic s) ->
+                    s = Intrinsic.obj || s = Intrinsic.exn
+                | _ -> false
+            if isErased then [] else
             let bodyTypars = collectBodyTypars innerType
             let bodyNames =
                 bodyTypars
@@ -252,18 +271,52 @@ module TypeAlias =
                     Type = body
                 }
                 |> TypeAliasRender.Alias
-            | ResolvedType.Intersection _ 
+            | ResolvedType.Intersection _
             | ResolvedType.TypeLiteral _ ->
                 let members, functions =
                     Member.collectAllRecursively innerType.Value
                     |> Member.partitionRender ctx scopeStore
-                // if members |> List.isEmpty && functions |> List.forall (_.Name >> Name.Case.valueOrSource >> (=) "Invoke") then
-                    // ()
-                // else
+                // Hoist free typars from the body onto the declaration —
+                // alias bodies that are TypeLiterals/Intersections can
+                // reference typars from elsewhere (synthetic captures,
+                // referenced Promise<T>, etc.) just like Union/Alias-shaped
+                // bodies. Without hoisting, the declaration is non-generic
+                // but use sites apply the hoisted-count args from
+                // `ctx.TypeAliasArity` (FS0033 arity mismatch).
+                //
+                // Skip hoisting when the alias is in `CycleBrokenPaths`
+                // (its rendered body collapsed to obj/exn) — use sites
+                // drop args via Phase C, so the decl shouldn't keep typars
+                // either.
+                let isCycleBroken = ctx.CycleBrokenPaths.Contains path
+                let bodyTypars =
+                    if isCycleBroken then [] else collectBodyTypars innerType
+                let declaredNames =
+                    typeParameters
+                    |> List.map (fun tp -> Name.Case.valueOrModified tp.Name)
+                    |> Set.ofList
+                let extraTypars =
+                    bodyTypars
+                    |> List.filter (fun tp ->
+                        not (Set.contains (Name.Case.valueOrModified tp.Name) declaredNames))
+                    |> List.distinctBy (fun tp -> Name.Case.valueOrModified tp.Name)
+                    |> List.map (fun tp ->
+                        {
+                            Prelude.TypeParameterRender.Name = tp.Name
+                            Metadata = {
+                                Path = Path.create TransientTypePath.Anchored
+                                Original = Path.create TransientTypePath.Anchored
+                                Source = ValueNone
+                                FullyQualifiedName = ValueNone
+                            }
+                            Constraint = ValueNone
+                            Default = ValueNone
+                            Documentation = []
+                        })
                 {
                     TypeLikeRender.Metadata = metadata
                     Name = name
-                    TypeParameters = typeParameters
+                    TypeParameters = typeParameters @ extraTypars
                     Members = members
                     Functions = functions
                     Inheritance = []

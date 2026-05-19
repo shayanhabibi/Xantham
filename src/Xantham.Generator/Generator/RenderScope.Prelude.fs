@@ -586,6 +586,17 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 prefix
                 |> RenderScope.createRootless resolvedType
                 |> addOrReplaceScope ctx resolvedType
+            | TypeRefKind.Molecule (TypeRefMolecule.Prefix _) ->
+                // The prefix is already a Prefix (e.g. via TypeAliasRemap
+                // molecule-preservation, or via Phase B's
+                // `createAssignedSyntheticRef` producing
+                // `Prefix(syntheticPath, [typar-refs])`). Wrapping it again
+                // produces double-args `Foo<A><B>` which F# rejects (FS0010
+                // "Unexpected symbol '<' in type arguments"). Return the
+                // existing Prefix unchanged.
+                prefix
+                |> RenderScope.createRootless resolvedType
+                |> addOrReplaceScope ctx resolvedType
             | _ ->
                 let objArg =
                     LazyContainer.CreateFromValue
@@ -672,7 +683,32 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         // reference site can't apply — F# rejects `obj<T>` (FS0033).
         // Emit the bare intrinsic; consumers lose the typar refinement
         // but the binding compiles.
+        // Detect a "pre-padded" Prefix: the cached TypeRef for a generic
+        // Interface/Class (from `createConcretePaddedRef`) is
+        // `Prefix(atom, [obj × arity])` — all args are bare `obj`
+        // intrinsics. When a use site supplies real args, swap those in
+        // place of the padded obj args rather than wrapping (which would
+        // produce `Foo<obj, obj, obj><real_args>`, invalid F#).
+        let isPrePaddedPrefix =
+            match prefix.Kind with
+            | TypeRefKind.Molecule (TypeRefMolecule.Prefix (_, args)) ->
+                args
+                |> List.forall (fun a ->
+                    match a.Kind with
+                    | TypeRefKind.Atom (TypeRefAtom.Intrinsic s) -> s = Intrinsic.obj
+                    | _ -> false)
+            | _ -> false
         match prefix.Kind with
+        | TypeRefKind.Molecule (TypeRefMolecule.Prefix (innerHead, _)) when isPrePaddedPrefix ->
+            // Pre-padded prefix; replace args with the user's aligned args
+            // (truncated/padded to declaredParamCount).
+            let postfixArguments =
+                alignedArguments
+                |> List.map (prerender ctx scope)
+            (innerHead, postfixArguments)
+            |> RenderScopeStore.TypeRefRender.create scope resolvedType false
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
         | TypeRefKind.Molecule (TypeRefMolecule.Prefix _) ->
             prefix
             |> RenderScope.createRootless resolvedType
@@ -1016,6 +1052,16 @@ module ArenaInterner =
                         | ResolvedType.Class cls ->
                             for m in cls.Members do walkM m
                         | ResolvedType.TypeReference tr ->
+                            // Walk the target body too — synthetic literals
+                            // (Union/Intersection/TypeLiteral/TemplateLiteral
+                            // referenced via TypeReference with empty args
+                            // at the decoder level) carry their typar
+                            // references inside their bodies. Phase B's
+                            // typar capture surfaces these at render time;
+                            // we need to surface them at alias-arity
+                            // precomputation time too so use sites pad
+                            // correctly. seenRt protects against cycles.
+                            walkT tr.Type.Value
                             for arg in tr.TypeArguments do walkT arg.Value
                             match tr.ResolvedType with
                             | Some r -> walkT r.Value
