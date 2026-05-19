@@ -527,60 +527,77 @@ Key implementation notes:
 ## Current state — verify counts
 
 Raw and distinct (file:line:col-deduplicated) error counts after
-all post-`e65df55` work. Pre-edit baseline column re-measured on
-the current branch. **Cloudflare row dropped** — the bare
-`cloudflare` package is the management REST client, not a Xantham
-target (see top banner). Target set is **12 runtime SDKs**.
+the post-PR3 work landed (parser-bail unmask through walker
+boundary-stop). **Cloudflare row dropped** — the bare `cloudflare`
+package is the management REST client, not a Xantham target (see
+top banner). Target set is **12 runtime SDKs**.
 
-| SDK | Pre-edit raw | Post-fix raw / distinct |
+| SDK | Raw | Distinct |
 |---|---:|---:|
-| Agents | 5 | 2 / 1 |
-| AiChat | 5 | 2 / 1 |
-| Codemode | 197 | 196 / 70 |
-| Containers | 6 | 2 / 1 |
-| DynamicWorkflows | 45 | 44 / 14 |
-| Puppeteer | 34 | 2 / 1 |
-| Sandbox | 6 | 2 / 1 |
-| Shell | 5 | 2 / 1 |
-| Think | 5 | 2 / 1 |
-| Voice | 5 | 2 / 1 |
-| WorkerBundler | 5 | 2 / 1 |
-| WorkersTypes | 292 | 291 / 79 |
-| **Total** | **615** | **549** |
+| Agents | 1,648 | 472 |
+| AiChat | 1,568 | 468 |
+| Codemode | 235 | 60 |
+| Containers | 708 | 170 |
+| DynamicWorkflows | 29 | 7 |
+| Puppeteer | 25 | 10 |
+| Sandbox | 716 | 175 |
+| Shell | 707 | 167 |
+| Think | 1,580 | 486 |
+| Voice | 1,670 | 482 |
+| WorkerBundler | 700 | 165 |
+| WorkersTypes | 269 | 86 |
+| **Total** | **9,855** | **2,748** |
 
-(Earlier reports of 623 / 556 totals included a spurious
-`Cloudflare` row of 8 / 7. Removing it yields the 615 / 549
-figures above for the actual 12-SDK target set.)
+The post-PR3 work peeled successive layers of masking and over-
+capture: parser-bail unmask exposed real downstream errors,
+arity reconciliation absorbed most of the use-site noise, and
+boundary-stopping the three free-typar walkers (synthetic in
+`SyntheticPathAssignment`, alias-body in `Render.TypeAlias`,
+arity-precomputation in `prerenderTypeAliases`) eliminated the
+synthetic-typar over-capture cohort. See
+`docs/plans/post-pr3-re-engineering.md` for the principle behind
+each phase.
 
-Net **−66 errors** across the 12 runtime SDKs. The renamer's
-biggest win is on Puppeteer (34 → 2). The big-volume SDKs
-(`Codemode` 197, `WorkersTypes` 292) only dropped by 1 each —
-their remaining errors are unrelated to name-escape and break
-down as:
+The early post-PR3 totals (615 raw / 549 distinct in the table
+that previously occupied this slot) were under parser-bail masking
+— ~6× as much real downstream noise was hidden by an upstream
+parser failure. That table reflected what the F# compiler *saw*
+before bailing, not what was actually wrong.
 
-* FS0033 generic-arity mismatches (`ReadonlyArray<_>` expects 1
-  but given 0, etc.) — encoder dispatcher routing for generic
-  type-references whose arity has been lost or partially-applied;
-  also visible in the substitution-table's name-only mapping
-  losing typar arity. Fixable in encoder dispatch
-  (`src/Xantham.Fable/Reading/Dispatch/TypeFlagObject.fs`) or
-  by making `LibEsDefaults.substitutions` arity-aware.
-* FS0039 undefined-name resolution failures (`NoInfer`,
-  `Types.X`, `Bind`, `LoadRunner`, etc.) — a mix of the
-  `NoInfer` regression flagged in this doc's original
-  "Open questions" §2 (fixable either in encoder dispatch or by
-  adding `(NoInfer, 1) → (T, identity)` to
-  `LibEsDefaults.substitutions`), the `UnknownDeclared`
-  path-qualifier loss flagged in §3 (encoder classifier in
-  `TypeDeclaration.fs`), and synthetic-name references where
-  the synthetic type (`_LitN`) never got emitted (encoder
-  dispatch order).
+The remaining histogram is dominated by:
 
-These two categories define the bulk of the remaining work. All
-of them are in scope for this fork — see [[feedback_no_fix_scope_limits]]
-in memory. The original "Open questions for review" section above
-is the roadmap; under the corrected scope framing every option in
-it is a live in-scope fix to choose between, not an upstream ask.
+* **FS0039 typar-not-defined** (~1,100 across SDKs) — the
+  dominant remaining cohort. Manifestations like `'T not defined`,
+  `'Value not defined`, `'Output not defined`, `'EventEmitter
+  not defined`, `'Options not defined in ...GenerateKeyPairSync...`.
+  Root cause: alias-body use-site instantiation gap. When TS
+  source has `type Foo<T> = { x: T }` and the consumer site uses
+  `Foo<string>`, the encoder/decoder doesn't substitute `T → string`
+  in the body — the body is captured as a structural literal with
+  `x: T` and emitted at the use site with orphan `T`. TS's own
+  compiler API does this substitution implicitly via
+  `getTypeOfSymbol` on the substituted property symbol, but the
+  encoder reads property types through `valueDeclaration` (i.e.
+  source declaration), not through the substituted type chain.
+  Closing this requires the encoder's property-reading path to
+  switch from declaration-based to type-based at instantiation
+  sites — a substantial refactor in `TypeFlagObject` dispatch.
+  See post-pr3-re-engineering.md for the three architectural
+  options enumerated; none is a one-keystroke change.
+* **FS0033 arity mismatches** (~165 Think alone) — surviving
+  use sites where a cycle-broken alias target still receives args
+  (e.g. `ZodTypeAny<obj, ZodTypeDef, 'Output>` where `ZodTypeAny`
+  collapsed to `obj`). Phase C / Phase G fallback drops args at
+  remap and at non-remap Prefix sites, but the dominant
+  ZodTypeAny cohort routes through a path where the head-atom's
+  path doesn't match `CycleBrokenPaths` (target-key vs body-key
+  mismatch). The principled fix requires cycle-broken metadata
+  to flow through the TypeAliasRemap chain consistently.
+* **FS0001 missing constraints** (~163 Think) — type aliases
+  with many declared typars whose bodies reference synthetics
+  with constrained typars; F# infers the constraints and rejects
+  the alias declaration that lacks them. Downstream of the
+  substitution gap above.
 
 For the complete current roadmap including the additional
 generator-side categories (`.node` member names, StringEnum

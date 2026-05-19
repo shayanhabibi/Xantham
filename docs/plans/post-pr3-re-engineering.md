@@ -303,34 +303,118 @@ Threading typar context through `IndexedAccess` resolution; tightening the
 `UnknownDeclared` fallback. Becomes clearer once D and E strip the
 consumer-side noise dominating the histogram today.
 
-### Decoder-side alias-body typar substitution (attempted, reverted)
+### Decoder-side alias-body typar substitution (attempted twice, reverted)
 
-Tried in this session at `src/Xantham.Decoder/Types/Arena.Interner.fs`
-`buildFromTypeReference`. The walker (`substituteResolvedType`,
-`substituteMember`, `buildAliasSubstitution`) correctly produces
+**First attempt:** earlier session at `src/Xantham.Decoder/Types/Arena.Interner.fs`
+`buildFromTypeReference`. Walker (`substituteResolvedType`,
+`substituteMember`, `buildAliasSubstitution`) correctly produced
 self-contained substituted bodies per call site, with TypeKey-keyed
-memoization to avoid creating fresh ResolvedType instances for cyclic
+memoization to avoid fresh ResolvedType instances for cyclic
 references within one substitution.
 
-**Why reverted.** Even with memoization, the substituted bodies have
-fresh `[<ReferenceEquality>]` outer-record identities at every level. The
-generator's anchor pass (`RenderScope.Anchored.fs:479`) uses a `visited`
-HashSet keyed by `(ResolvedType, AnchorPath, TransientTypePath)` — when
-the same conceptual body is reached through different call-site
+**Why reverted (first time).** Even with memoization, the substituted
+bodies had fresh `[<ReferenceEquality>]` outer-record identities at
+every level. The generator's anchor pass uses a `visited` HashSet
+keyed by `(ResolvedType, AnchorPath, TransientTypePath)` — when the
+same conceptual body is reached through different call-site
 substitutions, the visited set doesn't dedup and the anchor walk
 recurses to stack overflow.
 
-**Path forward** (one of three):
-1. Change the anchor pass's `visited` key from ResolvedType-identity to
-   TypeKey (the underlying lazy data is stable across substitutions).
-2. Hash-cons the substituted ResolvedTypes by structural identity.
-3. Move substitution upstream to the encoder where TS's own type
-   instantiation produces self-contained types that share TypeKeys
-   naturally — `src/Xantham.Fable/Reading/TypeReference.fs` `fromType`,
-   using `checker.getTypeAtLocation` or `checker.instantiateType`.
+**Second attempt (this session):** retried with the three-option plan
+in mind:
 
-Option 3 is most architecturally aligned (TS already does the work,
-we'd capture it). Option 1 is the smallest direct change.
+- Added `aliasByBodyKey: ConcurrentDictionary<TypeKey, TypeAlias>` to
+  bridge body-keys to alias declarations (so `buildFromTypeReference`
+  can know whether the target is an alias and look up its declared
+  typars).
+- Added `substitutedBodyCache: ConcurrentDictionary<(TypeKey, TypeKey list), Lazy<ResolvedType>>`
+  — hash-cons keyed by `(alias body TypeKey, args TypeKey list)`.
+  Same `(alias, args)` returns the same `Lazy<ResolvedType>` across
+  all call sites. The Lazy boundary prevents factory re-entry during
+  cyclic construction.
+- Implemented `substituteType` / `substituteLazy` / `substituteMember` /
+  `substituteTupleElement` walkers with per-call memo keyed by
+  input ResolvedType reference identity (so cycles within one
+  substitution stabilise).
+- Routed `buildFromTypeReference` to populate `ResolvedType` with the
+  substituted body when target is a registered alias with declared
+  typars and args are present.
+
+**What went wrong this time.** Three cascading issues:
+
+1. **Per-substitution memo wasn't enough.** Substituted bodies still
+   had fresh outer-record identities ACROSS substitutions — the
+   memo dictionary scopes to one `substituteType` call. The
+   `substitutedBodyCache` shared identity at the OUTER substituted
+   body level (one ResolvedType per `(alias, args)` tuple), but
+   inner TypeReferences inside a substituted body were constructed
+   via `substituteLazyMemo` and produced fresh wrapper LazyResolvedType
+   instances. When the generator's `prerenderTypeAliases` walker
+   traversed the substituted body and followed `tr.ResolvedType.Value`,
+   it kept generating fresh ResolvedTypes through chained lazies
+   until stack overflow.
+2. **Boundary-stopping `prerenderTypeAliases` walker** at TypeReference
+   (matching the discipline already applied to `collectFreeTypars` and
+   `collectBodyTypars`) got past that crash, but then the next walker
+   downstream — path-flattening in `NamePath.flattenModule` — hit its
+   own unbounded recursion through cycles the substituted body
+   exposed. Each substituted body has TypeReferences whose Type field
+   stays unchanged (original alias body) and whose ResolvedType field
+   recursively re-enters substitution lookups. The path graph
+   accumulates synthetic refs without termination.
+3. **The cache-key vs structural-key mismatch is fundamental.**
+   Substituted args carried over the ORIGINAL typar's TypeKey via
+   `LazyResolvedType.Data` (we preserve `Data` to keep identity
+   stable). So a use site of `Foo<string>` and a substituted-inner
+   `Foo<T>` (with T → string applied) produce DIFFERENT cache keys
+   (`(Foo, [string TypeKey])` vs `(Foo, [T TypeKey])`) even though
+   they should resolve to the same substituted body. Without
+   per-step re-keying — which requires assigning TypeKeys to
+   substituted Values, which the encoder owns and we don't —
+   composition across substituted layers fragments identity.
+
+Reverted. The one principled holdover kept: boundary-stopping the
+`prerenderTypeAliases` walker at TypeReference and Interface/Class —
+symmetric to the discipline applied to the other two free-typar
+walkers, valid on its own even without substitution.
+
+**Path forward — re-examined** (none is a small change, listed in
+order of architectural fit vs invasiveness):
+
+1. **Encoder-side substitution via TS's compiler API** —
+   `src/Xantham.Fable/Reading/TypeReference.fs` and the property
+   reader in `Reading/Dispatch/TypeFlagObject.fs`. TS's
+   `checker.getPropertiesOfType` on an instantiated `Ts.Type`
+   returns property symbols; `checker.getTypeOfSymbol(sym)` returns
+   the SUBSTITUTED property type. The encoder currently routes
+   property reads via `valueDeclaration` (source declaration —
+   un-substituted). Switching to `getTypeOfSymbol`-based reading at
+   instantiation sites captures TS's own substitution and gives
+   stable encoder-assigned TypeKeys naturally. This is the
+   architecturally cleanest fix but requires a real refactor of
+   `TypeFlagObject`'s property-emission path (not a one-keystroke
+   change as the original Option-3 paragraph suggested).
+2. **Hash-cons substituted ResolvedTypes by structural identity.**
+   Same intent as the cache attempted in this session, but with
+   structural rather than reference identity. F# `ResolvedType` is
+   `[<ReferenceEquality>]`; layering a structural-equality wrapper
+   (`type StructurallyEq = { Inner: ResolvedType }` with custom
+   `Equals`/`GetHashCode` doing deep comparison) lets the cache key
+   on shape, which makes inner-vs-outer substituted refs converge
+   on the same identity. Substantial: needs structural hash/eq on
+   the whole ResolvedType DU including lazies and nested records.
+3. **Change the anchor pass + `prerenderTypeAliases` + path-flatten
+   visited keys to TypeKey** (smallest direct change in principle,
+   most-invasive across the codebase in practice). Substituted
+   bodies need synthetic TypeKeys, which means a decoder-side TypeKey
+   allocator and threading TypeKey through every visited-set site.
+
+Notes from the reverted attempt are preserved for whoever picks this
+up next. Specifically: the lazy-cache pattern is correct in shape;
+the failures were at the COMPOSITION boundary where one substituted
+body references another substituted body. Whatever path is chosen
+must address that compositional identity, not just identity for one
+substitution in isolation.
 
 ## Notes on metaphor and architecture evolution
 
@@ -419,25 +503,33 @@ Trajectory across the session:
 - After Phase F (typar Intrinsic atoms + render-layer substitution):
   ~13,499 raw / ~2,861 distinct (slight increase as Choice fix +
   quote-doubling unmask exposed a few more constraint sites)
-- After Phase G (boundary-stop free-typar walkers): **9,851 / 2,758**
-  — −4,586 raw (−32%) / −103 distinct vs Phase F state
+- After Phase G (boundary-stop synthetic + alias-body walkers):
+  9,851 / 2,758 — −4,586 raw (−32%) / −103 distinct vs Phase F
+- After Phase G+ (cycle-broken Prefix-head fallback at remap):
+  9,835 / 2,750 (small additional improvement; mostly catches refs
+  whose TypeAliasRemap key didn't match this exact instantiation)
+- After Phase G++ (boundary-stop `prerenderTypeAliases` walker;
+  decoder substitution attempted+reverted): **9,855 / 2,748** —
+  roughly neutral vs prior state; the principled walker discipline
+  is now consistent across all three free-typar walkers in the
+  codebase
 
-Per-SDK after Phase G:
+Per-SDK after Phase G++ (current state):
 
 | SDK | Raw | Distinct |
 |---|---:|---:|
-| Agents | 1,635 | 490 |
-| AiChat | 1,540 | 467 |
-| Codemode | 245 | 60 |
-| Containers | 713 | 172 |
+| Agents | 1,648 | 472 |
+| AiChat | 1,568 | 468 |
+| Codemode | 235 | 60 |
+| Containers | 708 | 170 |
 | DynamicWorkflows | 29 | 7 |
 | Puppeteer | 25 | 10 |
-| Sandbox | 720 | 178 |
-| Shell | 710 | 170 |
-| Think | 1,633 | 473 |
-| Voice | 1,606 | 468 |
-| WorkerBundler | 705 | 168 |
-| WorkersTypes | 290 | 95 |
+| Sandbox | 716 | 175 |
+| Shell | 707 | 167 |
+| Think | 1,580 | 486 |
+| Voice | 1,670 | 482 |
+| WorkerBundler | 700 | 165 |
+| WorkersTypes | 269 | 86 |
 
 The big-SDK SDKs (Agents/AiChat/Think/Voice) all dropped ~1,000 errors
 each — those are the SDKs whose synthetic literals carried 10+ over-
