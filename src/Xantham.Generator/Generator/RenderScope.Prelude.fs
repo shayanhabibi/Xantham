@@ -121,8 +121,25 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic Intrinsic.obj
         |> RenderScopeStore.TypeRef.Unsafe.createAtom
         |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+    let collapseCycleBrokenPrefix (ref: TypeRefRender) =
+        // When a `Prefix(head, _)` reference ends up with a head whose
+        // ConcretePath is in `CycleBrokenPaths`, the args can't apply
+        // (e.g. `ZodTypeAny<X, Y, Z>` where `ZodTypeAny = obj`). Drop
+        // the args; keep the head atom. Catches cases that bypass the
+        // `TypeAliasRemap` keyed lookup (different instantiation args
+        // produce a different TypeKey than what was stored in the
+        // remap on alias-render).
+        match ref.Kind with
+        | TypeRefKind.Molecule (TypeRefMolecule.Prefix (head, _)) ->
+            match head.Kind with
+            | TypeRefKind.Atom (TypeRefAtom.ConcretePath p)
+                when ctx.CycleBrokenPaths.Contains p ->
+                head |> TypeRefRender.orNullable ref.Nullable
+            | _ -> ref
+        | _ -> ref
     let remap (ref: TypeRefRender) =
-        if not (ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Raw)) then ref
+        if not (ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Raw)) then
+            collapseCycleBrokenPrefix ref
         else
             // If this lookup's target ref is currently being rendered
             // as an alias body, returning it would emit a recursive
@@ -993,7 +1010,10 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 // an alias-with-args application; the remap doesn't model
                 // them. Leave the produced ref alone.
                 ref
-        | Registered ref -> ref
+        | Registered ref ->
+            // Fallback for refs where `TypeAliasRemap` didn't match this
+            // exact instantiation's TypeKey. See `collapseCycleBrokenPrefix`.
+            collapseCycleBrokenPrefix ref
 
 module TestHelper =
     let prerender ctx resolvedType =
