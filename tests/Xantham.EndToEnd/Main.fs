@@ -17,4 +17,8 @@ let main argv =
             false
         | _ -> true
         )
-    |> Tests.runTestsInAssemblyWithCLIArgs []
+    |> Tests.runTestsInAssemblyWithCLIArgs [
+        CLIArguments.Colours 256
+        CLIArguments.Log_Name "Xantham.EndToEnd"
+        CLIArguments.Summary
+    ]

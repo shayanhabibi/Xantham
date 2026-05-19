@@ -13,9 +13,14 @@ riderModule.iml
 *.fs.js
 /fable_modules/
 node_modules/
+
+# Tests
 !tests/Xantham.Fable.Tests/TypeFiles/node_modules/
 tests/**/output.json
 tests/**/package-lock.json
+tests/Xantham.EndToEnd/verify/**.*
+tests/Xantham.EndToEnd/output/**.*
+tests/Xantham.EndToEnd/fixtures/**/*
 
 # Decoder test ephemeral run artifacts (per-run temp.d.ts files written
 # into .xantham/run_<id>/temp.d.ts during decoder fixture encoding).

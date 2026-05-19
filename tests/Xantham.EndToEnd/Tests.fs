@@ -5,6 +5,7 @@ open Fake.IO
 open Expecto
 open Fake.JavaScript
 open System.IO
+open Farse
 
 let mutable buildDriver = true
 let mutable runXantham = false
@@ -22,8 +23,8 @@ let createTestsForFixture (fixture: TestFixture) =
             TestFixture.setup fixture
         testCase "encode" <| fun _ ->
             if not runXantham && File.exists fixture.Json && not buildXantham then skiptest "Skipping encode"
-            RepoRoot.``.``
-            |> node [ "index.js"; fixture.TypeDefTarget |> Option.defaultValue fixture.TypeDefinitionFile; "-o"; fixture.Json ]
+            fixture.TypeDefRoot
+            |> node [ Path.combine RepoRoot.``.`` "index.js"; fixture.TypeDefTarget |> Option.defaultValue fixture.TypeDefinitionFile; "-o"; fixture.Json ]
             |> ensureProcessResult (sprintf "Failed encoding: %A")
         testCase "decode" <| fun _ ->
             dotnet [
@@ -71,46 +72,32 @@ let createTestsForFixture (fixture: TestFixture) =
     |> testList fixture.Name
 let fixtures =
     [
-        let agentsRoot = RepoRoot.tests.``Xantham.Decoder.Tests``.fixtures.agents.``.``
-        {
-            Name = "agents"
-            Json = VirtualRoot.output.``agents.json``
-            FSharp = VirtualRoot.output.``agents.fs``
-            VerifyTarget = VirtualRoot.verify.``agents.wrapped.fs``
-            VerifyProject = VirtualRoot.verify.``Verify.Agents.fsproj``
-            TypeDefRoot = agentsRoot
-            TypeDefinitionFile =
-                "node_modules/agents/dist/index.d.ts"
-                |> Path.combine agentsRoot
-            TypeDefTarget = None
-        }
-        let dynamicWorkflowsRoot = RepoRoot.tests.``Xantham.Decoder.Tests``.fixtures.``dynamic-workflows``.``.``
-        {
-            Name = "dynamic-workflows"
-            Json = VirtualRoot.output.``dynamic-workflows.json``
-            FSharp = VirtualRoot.output.``dynamic-workflows.fs``
-            VerifyTarget = VirtualRoot.verify.``dynamic-workflows.wrapped.fs``
-            VerifyProject = VirtualRoot.verify.``Verify.DynamicWorkflows.fsproj``
-            TypeDefRoot = dynamicWorkflowsRoot
-            TypeDefinitionFile =
-                "node_modules/@cloudflare/dynamic-workflows/dist/index.d.ts"
-                |> Path.combine dynamicWorkflowsRoot
-            TypeDefTarget = None
-        }
-        let workersTypesRoot = RepoRoot.tests.``Xantham.Decoder.Tests``.fixtures.``workers-types``.``.``
-        {
-            Name = "workers-types"
-            Json = VirtualRoot.output.``workers-types.json``
-            FSharp = VirtualRoot.output.``workers-types.fs``
-            VerifyTarget = VirtualRoot.verify.``workersTypes.wrapped.fs``
-            VerifyProject = VirtualRoot.verify.``Verify.WorkersTypes.fsproj``
-            TypeDefRoot = workersTypesRoot
-            TypeDefinitionFile =
-                "node_modules/@cloudflare/workers-types/index.d.ts"
-                |> Path.combine workersTypesRoot
-            TypeDefTarget = Some "@cloudflare/workers-types"
-        }
+        TestFixture.create "agents"
+        
+        let createCloudflareTestFixture name =
+            TestFixture.create name
+            |> TestFixture.withTypeDefnFilePath $"@cloudflare/%s{name}/dist/index.d.ts"
+            |> TestFixture.withNpmPackage $"@cloudflare/%s{name}"
+            |> TestFixture.withTypeDefnTarget $"@cloudflare/%s{name}"
+        
+        yield!
+            [
+                "ai-chat"
+                "codemode"
+                "containers"
+                "dynamic-workflows"
+                "puppeteer"
+                "sandbox"
+                "shell"
+                "think"
+                "voice"
+                "worker-bundler"
+                "workers-types"
+            ]
+            |> List.map createCloudflareTestFixture
+        
     ]
+    |> List.map TestFixture.build
 
 let setupDriverTests =
     [
