@@ -38,6 +38,9 @@ those concerns meet new TS-source idioms.
 | **Phase B — synthetic-typar capture** | Multi-position interned literals (`_LitN` from Union/Intersection/TypeLiteral) hoist captured enclosing-scope typars onto the synthetic declaration and emit `Prefix(_LitN, [typars])` at every reference site; `ctx.SyntheticTypars` is the agreement point between helper and decl emission | `0ef73ac` |
 | **Parser-bail unmask** | Bare-`_` source typar → `Anon` (F# rejects `'_` in declaration position); captured-typar dedup-by-name at decl + ref emission so duplicate captures from cross-scope walks don't produce `<'S, 'S>`. Removes parser-mask cascade that hid downstream errors | `39f0053` |
 | **Phase C — `CycleBrokenPaths` metadata** | Tracks alias TypePaths whose body collapsed to bare `obj`/`exn`. Consulted at early `remap`, final-pass remap, and TypeReference branch's Prefix collapse — drops args when target is cycle-broken so `obj<T>` is never emitted | (with parser unmask) |
+| **Phase E1 — Heritage arity reconciliation** | New `Interface.reconcileHeritageArity` reconciles heritage TypeRefRenders against the parent's declared arity. Walks through nested TypeReferences via `resolvedKindArity`; consults `ctx.TypeAliasArity` for TypeLiteral-bodied alias parents | (Phase E1) |
+| **Phase E2 — `TypeAliasArity` context field** | Records every alias's TS-source declared typar count (keyed by both decl + body TypeKey). Populated by `prerenderTypeAliases`. Drives heritage reconciliation, TypeReference arity logic for non-Interface/Class inner, and final-pass remap Prefix truncation | (Phase E2) |
+| **Phase E3 — Class/Interface ref auto-pad** | Cached `TypeRef` for a generic Interface/Class is now `Prefix(path, [obj × arity])` instead of bare atom. Constraints, heritage clauses, and other paths that bypass the TypeReference arity reconciler get padded args automatically. Reduces verify errors by 22% / 17% in one change | (Phase E3) |
 
 ## The principle, restated
 
@@ -248,19 +251,34 @@ needs to either prefer the generic-arity-higher declaration when both are
 real (vs cherry-picking by file position), or merge declared typar lists
 across duplicates.
 
-### Phase E (open) — Heritage clause arity check (generator-side)
+### Phase E — Arity reconciliation across all reference sites ✓ LANDED
 
-Driven by `interface SubAgentConnectionBridgeLike<10 typars>` inside a
-class whose surrounding scope declares those 10 typars, but
-`SubAgentConnectionBridgeLike` itself is non-generic in TS source. The
-heritage clause inherits the surrounding-scope typar list and applies it
-wholesale to the parent target, regardless of the parent's actual arity.
+Three connected pieces shipped together:
 
-**Fix surface:** `src/Xantham.Generator/Generator/Render.TypeShapes.fs`
-`Class.render` / `Interface.render` heritage processing — the
-`toTypeRef` mapping must invoke the same arity reconciler that
-`RenderScope.Prelude.fs` lines ~481-494 use for TypeReferences,
-truncating excess args when the target declares 0 typars.
+1. **Heritage arity reconciliation** (`Render.TypeShapes.fs`):
+   `Interface.reconcileHeritageArity` truncates Prefix args when the
+   parent's declared arity is 0; walks nested TypeReferences to find
+   the named target.
+2. **`TypeAliasArity` context field** (`Types/Generator.fs`,
+   `RenderScope.Prelude.fs prerenderTypeAliases`): records alias
+   declared typar count keyed by both decl + body TypeKey. Consulted
+   wherever the arity reconciler needs to know the alias's TS-source
+   declared count (TypeLiteral-bodied aliases don't expose declared
+   arity through `Interface`/`Class` cases).
+3. **Class/Interface ref auto-pad** (`createConcretePaddedRef` in
+   `RenderScope.Prelude.fs`): cached `TypeRef` for any generic
+   Interface/Class is `Prefix(path, [obj × arity])` instead of bare
+   atom. This catches constraint emission, heritage without explicit
+   args, and any other site that bypasses the TypeReference arity
+   reconciler.
+
+The declaration's own emission uses the type's path + declared
+TypeParameters list directly, so the auto-padding affects only
+references — declarations remain correctly shaped.
+
+**Verified result:** 17,008 → 13,217 raw (-22%), 3,007 → 2,490 distinct
+(-17%). Per-SDK: agents -1,327, ai-chat -1,283, voice -1,366, think
+-1,105.
 
 ### Phase F (open) — `IndexSignature` self-reference + `UnknownDeclared` classifier
 
@@ -337,17 +355,26 @@ fundamentally unclear.
 
 ## Current measurable state (for delta-tracking)
 
-After `39f0053` (parser-bail unmask + Phase C): **2,744 raw / 141
-distinct** verify errors across 12 runtime SDKs. From baseline of 9,155
-raw / 2,817 distinct — a 70% / 95% reduction.
+After Phase E (arity reconciliation across reference sites): **13,217 raw
+/ 2,490 distinct** verify errors across 12 runtime SDKs.
 
-The 2,744 figure benefits from a residual parser-bail effect on `'_`
-typar references; with the bare-underscore rename to `Anon` and
-captured-typar dedup applied (both in `39f0053`), parser bails are
-eliminated and the previously-masked semantic cohort (~5,500 FS0033 +
-~2,800 FS0039 + ~700 FS0663 etc.) becomes visible. The honest measure
-with all unmasking is closer to **17k raw / 3k distinct** — that's the
-real surface Phase D and Phase E need to chip away at.
+Trajectory across the session:
+- Pre-PR3 baseline: 9,155 raw / 2,817 distinct (parser-bail masking
+  ~6× more downstream errors)
+- After Phase B (synthetic-typar capture, `0ef73ac`): 2,744 raw / 141
+  distinct (still parser-bail masked)
+- After parser-bail unmask + Phase C (`39f0053`): 17,109 raw / 3,032
+  distinct (honest, no masking)
+- After Phase E (this commit): **13,217 raw / 2,490 distinct**
+
+Remaining cohorts (sampled from agents):
+- `ZodTypeAny ... given 3 args` (1,556) — cycle-broken alias still
+  receiving args at use sites; the final-pass remap arity truncation
+  catches *some* but not all sites (order-of-rendering issue)
+- `SomeType ... given 25 args` (318) — non-generic class receiving
+  many args, similar pattern
+- FS0001 / FS0698 / FS0663 — class-inherits-obj constraint mismatches
+  (the FS0001 Zod cohort)
 
 178 generator tests pass; 28/29 decoder tests pass (one pre-existing
 fixture failure unrelated). See `reference_verify_pipeline.md` in memory

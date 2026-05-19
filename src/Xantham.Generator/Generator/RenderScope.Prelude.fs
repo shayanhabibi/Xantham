@@ -19,6 +19,30 @@ let private createConcreteTypeRef (path: TypePath) =
     |> RenderScopeStore.TypeRef.Unsafe.createAtom
     |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
 
+/// Build a reference for a generic Interface/Class that may be used at
+/// sites bypassing the TypeReference arity reconciler (constraints
+/// emitted directly from `ResolvedType.Class`/`Interface`, heritage
+/// without explicit args). When `arity > 0` the ref is a Prefix molecule
+/// with `obj`-padded args; when 0 it's the bare atom (same as
+/// `createConcreteTypeRef`). The declaration's own emission uses the
+/// path directly and the type's declared TypeParameters list, not this
+/// reference — so padding doesn't leak into the decl.
+let private createConcretePaddedRef (arity: int) (path: TypePath) =
+    let atom =
+        RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
+        |> RenderScopeStore.TypeRef.Unsafe.createAtom
+        |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+    if arity <= 0 then atom
+    else
+        let scopeStore = RenderScopeStore.create()
+        let objArg =
+            RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic Intrinsic.obj
+            |> RenderScopeStore.TypeRef.Unsafe.createAtom
+            |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+        let args = List.replicate arity objArg
+        let dummyRt = ResolvedType.Primitive TypeKindPrimitive.NonPrimitive
+        RenderScopeStore.TypeRefRender.create scopeStore dummyRt false (atom, args)
+
 /// Canonical construction point for synthetic-literal references whose
 /// stable concrete path was assigned by `SyntheticPathAssignment.run`.
 /// Bypasses the transient/anchor machinery — the ref is concrete from the
@@ -228,7 +252,18 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
     | ResolvedType.Interface ``interface`` ->
         let scope = RenderScopeStore.create()
         let path = Path.Interceptors.pipeInterface ctx ``interface``
-        let ref = path |> createConcreteTypeRef
+        // For generic interfaces (declared typars > 0), the cached
+        // reference must carry `obj`-padded args. When prerender is
+        // invoked with `ResolvedType.Interface` directly (constraint
+        // emission, heritage clauses without explicit args, etc. — paths
+        // that bypass the TypeReference branch's arity reconciler), the
+        // bare atom emits invalid F# (`'T :> Array` for a 1-typar Array
+        // → FS0033). The atom-only path is for the *declaration* — the
+        // type body is emitted via the Render lazy, which uses the path
+        // and the interface's TypeParameters directly. So the cached
+        // *reference* TypeRef being padded doesn't interfere with the
+        // declaration's emission.
+        let ref = path |> createConcretePaddedRef ``interface``.TypeParameters.Length
         {
             RenderScope.Type = resolvedType
             Root = TypeLikePath.create path |> ValueSome
@@ -245,7 +280,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
     | ResolvedType.Class ``class`` ->
         let scope = RenderScopeStore.create()
         let path = Path.Interceptors.pipeClass ctx ``class``
-        let ref = path |> createConcreteTypeRef
+        let ref = path |> createConcretePaddedRef ``class``.TypeParameters.Length
         {
             RenderScope.Type = resolvedType
             Root = path |> TypeLikePath.create |> ValueSome
@@ -520,10 +555,48 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeReference { Type = innerResolvedType; TypeArguments = [] } ->
-        innerResolvedType
-        |> prerender ctx scope
-        |> RenderScope.createRootless resolvedType
-        |> addOrReplaceScope ctx resolvedType
+        // Empty-args reference. If the target declares typars, F# rejects
+        // the bare reference (FS0033 "expects N typars, given 0"). Forward
+        // through to the args-present branch with a synthetic args list
+        // padded with `obj` so the arity reconciler at lines ~536-573 fills
+        // in defaults. Bare references appear in TS source when a class is
+        // used as a value-style type (e.g. `value: Array`), with TS using
+        // any-defaults internally — the F# emission needs explicit args.
+        let innerResolvedTypeValue = innerResolvedType.Value
+        let declaredParamCount =
+            match LibEsDefaults.tryLookupSubstitution innerResolvedTypeValue with
+            | ValueSome sub -> sub.Arity
+            | ValueNone ->
+                match innerResolvedTypeValue with
+                | ResolvedType.Interface i -> i.TypeParameters.Length
+                | ResolvedType.Class c -> c.TypeParameters.Length
+                | _ ->
+                    match ctx.TypeAliasArity.TryGetValue innerResolvedType.Raw with
+                    | true, arity -> arity
+                    | _ -> 0
+        if declaredParamCount = 0 then
+            innerResolvedType
+            |> prerender ctx scope
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
+        else
+            let prefix = innerResolvedType |> prerender ctx scope
+            match prefix.Kind with
+            | TypeRefKind.Atom (TypeRefAtom.Intrinsic ("obj" | "exn")) ->
+                prefix
+                |> RenderScope.createRootless resolvedType
+                |> addOrReplaceScope ctx resolvedType
+            | _ ->
+                let objArg =
+                    LazyContainer.CreateFromValue
+                        (ResolvedType.Primitive TypeKindPrimitive.NonPrimitive)
+                let postfixArguments =
+                    List.replicate declaredParamCount objArg
+                    |> List.map (prerender ctx scope)
+                (prefix, postfixArguments)
+                |> RenderScopeStore.TypeRefRender.create scope resolvedType false
+                |> RenderScope.createRootless resolvedType
+                |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeReference { TypeArguments = typeArguments; ResolvedType = Some innerResolvedType }
     | ResolvedType.TypeReference { TypeArguments = typeArguments; Type = innerResolvedType } ->
         let innerResolvedTypeValue = innerResolvedType.Value
