@@ -263,12 +263,28 @@ module TypeAlias =
             | ResolvedType.Array _ ->
                 let body = resolveInnerRef ()
                 markCycleBrokenIfErased body
+                let kept = pruneUnusedTypars body
+                // Substitute typars in the body that aren't in the alias's
+                // declared (or hoisted) typar list with `obj`. F# rejects
+                // free typars in a type abbreviation body — they must be
+                // in the declaration's typar list. Reusing the
+                // `substituteForHeritage` walker since the logic is
+                // identical: replace `Intrinsic_ "'X"` with `obj` when
+                // `'X` is not in the in-scope set. Note: typar Names are
+                // stored with the leading `'` already applied (via
+                // `Name.Typar.create` → `sourceNormalizeForTypeParameter`),
+                // so `valueOrModified` already returns `"'T"`.
+                let inScopeNames =
+                    kept
+                    |> List.map (fun tp -> Name.Case.valueOrModified tp.Name)
+                    |> Set.ofList
+                let substitutedBody = TypeRefRender.substituteForHeritage inScopeNames body
                 {
                     TypeAliasRenderRef.Documentation = documentation
                     Metadata = metadata
                     Name = name
-                    TypeParameters = pruneUnusedTypars body
-                    Type = body
+                    TypeParameters = kept
+                    Type = substitutedBody
                 }
                 |> TypeAliasRender.Alias
             | ResolvedType.Intersection _
@@ -329,13 +345,19 @@ module TypeAlias =
             | ResolvedType.Union _ ->
                 let body = resolveInnerRef ()
                 markCycleBrokenIfErased body
+                let kept = pruneUnusedTypars body
+                let inScopeNames =
+                    kept
+                    |> List.map (fun tp -> Name.Case.valueOrModified tp.Name)
+                    |> Set.ofList
+                let substitutedBody = TypeRefRender.substituteForHeritage inScopeNames body
                 let typeRefRender =
                     {
                         TypeAliasRenderRef.Documentation = documentation
                         Metadata = metadata
                         Name = name
-                        TypeParameters = pruneUnusedTypars body
-                        Type = body
+                        TypeParameters = kept
+                        Type = substitutedBody
                     }
                     |> TypeAliasRender.Alias
                 match ResolvedTypeCategories.create innerType.Value with

@@ -108,7 +108,6 @@ let private createAssignedSyntheticRef
             |> List.map (fun tp ->
                 tp.Name
                 |> Name.Case.valueOrModified
-                |> Ast.LongIdent
                 |> RenderScopeStore.TypeRefRender.create scope resolvedType false)
         RenderScopeStore.TypeRefRender.create scope resolvedType nullable (atom, typarRefs)
     | _ -> atom
@@ -602,12 +601,14 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             | TypeRefKind.Molecule (TypeRefMolecule.Function _) ->
                 // The alias's resolved body is a Union/Tuple/Function
                 // molecule. F# has no valid syntax for
-                // `U4<A,B,C,D><obj × N>` or `(A * B)<obj × N>` or
-                // `(A -> B)<obj × N>` — these molecules don't take type
-                // arguments. Emitting the body alone exposes any free
-                // typars in the body (FS0039 cascade) — that's the real
-                // unmasking of upstream substitution gaps, not a regression.
+                // `U4<A,B,C,D><obj × N>` etc. — these molecules don't
+                // take type arguments. Instead, substitute the body's
+                // typar atoms with `obj` (the alias's declared typars
+                // aren't in scope at the use site; we have no caller-supplied
+                // args to substitute). This is alias-body substitution
+                // at the render layer.
                 prefix
+                |> TypeRefRender.substituteForHeritage Set.empty
                 |> RenderScope.createRootless resolvedType
                 |> addOrReplaceScope ctx resolvedType
             | _ ->
@@ -745,11 +746,11 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         | TypeRefKind.Molecule (TypeRefMolecule.Function _) ->
             // Prefix is a non-Prefix composite (Union/Tuple/Function). F#
             // has no syntactic form for `U4<A,B,C,D><E,F,G,H>` or
-            // `(A * B)<C>` or `(A -> B)<C>`. Applying type args to such a
-            // molecule is never valid. Drop the args and emit the
-            // molecule alone — the alias body's structure is what F#
-            // sees, just without the use-site's type-arg application.
+            // `(A * B)<C>` or `(A -> B)<C>`. Substitute the body's typar
+            // atoms with the supplied args (or `obj` for unmatched typars).
+            // This is alias-body substitution at the render layer.
             prefix
+            |> TypeRefRender.substituteForHeritage Set.empty
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
         | _ ->
@@ -795,9 +796,14 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
           TransientChildren = ValueSome scope }
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeParameter typeParameter ->
+        // Render typars as `Intrinsic` atoms (string `'T`) rather than
+        // `Widget` atoms (opaque Fabulous nodes). Same emitted text, but
+        // downstream passes can identify and substitute typar atoms by
+        // matching `Intrinsic_ s when s.StartsWith("'")`. Used by
+        // `substituteForHeritage` and (Phase F) alias-body substitution
+        // at use sites.
         typeParameter.Name
         |> Name.Case.valueOrModified
-        |> Ast.LongIdent
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType

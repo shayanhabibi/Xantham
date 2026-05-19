@@ -223,8 +223,12 @@ module TypeRefRender =
                         if Set.contains s inScopeTyparNames then
                             atom
                         else
-                            printfn "Warning: orphan type parameter '%s' in heritage clause, substituting with 'obj'" s
                             TypeRefAtom.Intrinsic_ "obj"
+                    | TypeRefAtom.Widget_ _ ->
+                        // Phase B used to emit typar refs as Widget atoms;
+                        // after the change to render typars as Intrinsic
+                        // atoms, this branch is a safety pass-through.
+                        atom
                     | _ -> atom
                 { render with Kind = TypeRefKind.Atom_ newAtom }
             | TypeRefKind.Molecule_ molecule ->
