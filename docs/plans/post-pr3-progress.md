@@ -535,18 +535,18 @@ target (see top banner). Target set is **12 runtime SDKs**.
 | SDK | Raw | Distinct |
 |---|---:|---:|
 | Agents | 1,372 | 343 |
-| AiChat | 1,352 | 343 |
+| AiChat | 1,352 | 344 |
 | Codemode | 225 | 43 |
-| Containers | 423 | 93 |
+| Containers | 418 | 92 |
 | DynamicWorkflows | 26 | 4 |
 | Puppeteer | 21 | 9 |
-| Sandbox | 425 | 96 |
-| Shell | 415 | 94 |
-| Think | 1,236 | 346 |
-| Voice | 425 | 98 |
-| WorkerBundler | 414 | 94 |
+| Sandbox | 418 | 94 |
+| Shell | 410 | 93 |
+| Think | 1,231 | 345 |
+| Voice | 420 | 97 |
+| WorkerBundler | 409 | 93 |
 | WorkersTypes | 1 | 1 |
-| **Total** | **6,335** | **1,564** |
+| **Total** | **6,303** | **1,558** |
 
 **Headline:** Distinct under 1,600 for the first time. Total
 **6,335 raw / 1,564 distinct** — cumulative reduction vs HEAD
@@ -649,7 +649,8 @@ compiler *saw* before bailing, not what was actually wrong.
 | After Phase L (constraint propagation for hoisted typars) | 9,435 | 2,089 | |
 | After Phase M batch 1 (TS utility-type + iterator substitutions) | 8,493 | 2,055 | |
 | After Phase M batch 2 (lib.dom event-map / iterator / messaging substitutions) | 8,316 | 1,998 | distinct under 2,000 |
-| After Phase N (Intersection / TypeLiteral fallthrough to `obj`) | **6,335** | **1,564** | current; single largest single-pass collapse since Phase G |
+| After Phase N (Intersection / TypeLiteral fallthrough to `obj`) | 6,335 | 1,564 | single largest single-pass collapse since Phase G |
+| After Phase O (`UnknownDeclared` source accepted by substitution gate) | **6,303** | **1,558** | current |
 
 Test status: 178/178 generator tests pass; 28/29 decoder tests
 pass (one pre-existing fixture failure unrelated to this work).

@@ -442,6 +442,22 @@ module LibEsDefaults =
     let private isLibEsSource (source: ArenaInterner.Source) =
         match source with
         | ArenaInterner.Source.LibEs _ -> true
+        // Also accept `UnknownDeclared` — the encoder's classifier in
+        // `TypeDeclaration.fs:467` assigns this fallback when it can't
+        // attribute a declaration to a known package or recognise it as a
+        // TS standard-library declaration. Many lib.dom types (e.g.
+        // `MessageEventInit` from `fetch.d.ts`, `ServiceWorker`,
+        // `WebSocketEventMap`, etc.) end up here because the encoder
+        // sees the file as part of `@cloudflare/workers-types` but TS's
+        // `isSourceFileDefaultLibrary` returns false (it's a consumer
+        // package, not TS-stdlib). Their substituted F# targets are the
+        // same as their LibEs siblings (`obj` for opaque DOM types,
+        // `IEnumerator` for iterators, etc.), and they get re-routed at
+        // use sites the same way. Treating `UnknownDeclared` as
+        // substitution-eligible closes the lib-dom-via-consumer gap
+        // without affecting properly-attributed `Source.Package` types
+        // (where the consumer's full declaration is the intended emission).
+        | ArenaInterner.Source.UnknownDeclared _ -> true
         | _ -> false
 
     /// Lookup a `Substitution` for a `ResolvedType`. Returns the
@@ -485,15 +501,29 @@ module LibEsDefaults =
                 ValueSome (fun renderScope ->
                     { renderScope with TypeRef = ref; Render = Render.RefOnly ref })
             | None -> ValueNone
+        // Same dual-source acceptance as `isLibEsSource` above: types
+        // misclassified as `UnknownDeclared` get the same substitution +
+        // RefOnly treatment as `LibEs` types. Consumer-augmented declarations
+        // under `Source.Package` continue to emit their full bodies.
+        let isSubstitutionSource source =
+            match source with
+            | ArenaInterner.Source.LibEs _
+            | ArenaInterner.Source.UnknownDeclared _ -> true
+            | _ -> false
         match resolvedType with
-        | ResolvedType.Interface { Source = ArenaInterner.Source.LibEs _; Name = name }
-        | ResolvedType.Class { Source = ArenaInterner.Source.LibEs _; Name = name } ->
+        | ResolvedType.Interface { Source = source; Name = name } when isSubstitutionSource source ->
             match trySubstitute name with
             | ValueSome f -> f
             | ValueNone ->
                 fun renderScope ->
                     { renderScope with Render = Render.RefOnly renderScope.TypeRef }
-        | ResolvedType.Enum { Source = ArenaInterner.Source.LibEs _ } ->
+        | ResolvedType.Class { Source = source; Name = name } when isSubstitutionSource source ->
+            match trySubstitute name with
+            | ValueSome f -> f
+            | ValueNone ->
+                fun renderScope ->
+                    { renderScope with Render = Render.RefOnly renderScope.TypeRef }
+        | ResolvedType.Enum { Source = source } when isSubstitutionSource source ->
             fun renderScope ->
                 { renderScope with Render = Render.RefOnly renderScope.TypeRef }
         | _ -> id
