@@ -597,6 +597,19 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 prefix
                 |> RenderScope.createRootless resolvedType
                 |> addOrReplaceScope ctx resolvedType
+            | TypeRefKind.Molecule (TypeRefMolecule.Union _)
+            | TypeRefKind.Molecule (TypeRefMolecule.Tuple _)
+            | TypeRefKind.Molecule (TypeRefMolecule.Function _) ->
+                // The alias's resolved body is a Union/Tuple/Function
+                // molecule. F# has no valid syntax for
+                // `U4<A,B,C,D><obj × N>` or `(A * B)<obj × N>` or
+                // `(A -> B)<obj × N>` — these molecules don't take type
+                // arguments. Emitting the body alone exposes any free
+                // typars in the body (FS0039 cascade) — that's the real
+                // unmasking of upstream substitution gaps, not a regression.
+                prefix
+                |> RenderScope.createRootless resolvedType
+                |> addOrReplaceScope ctx resolvedType
             | _ ->
                 let objArg =
                     LazyContainer.CreateFromValue
@@ -724,6 +737,18 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             // `markCycleBrokenIfErased`. F# rejects `AliasPath<T>` when
             // `AliasPath = obj`. Drop the args; consumers lose the typar
             // refinement but compilation proceeds.
+            prefix
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
+        | TypeRefKind.Molecule (TypeRefMolecule.Union _)
+        | TypeRefKind.Molecule (TypeRefMolecule.Tuple _)
+        | TypeRefKind.Molecule (TypeRefMolecule.Function _) ->
+            // Prefix is a non-Prefix composite (Union/Tuple/Function). F#
+            // has no syntactic form for `U4<A,B,C,D><E,F,G,H>` or
+            // `(A * B)<C>` or `(A -> B)<C>`. Applying type args to such a
+            // molecule is never valid. Drop the args and emit the
+            // molecule alone — the alias body's structure is what F#
+            // sees, just without the use-site's type-arg application.
             prefix
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
