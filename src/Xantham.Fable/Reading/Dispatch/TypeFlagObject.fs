@@ -216,6 +216,66 @@ let private buildMembersFromType (ctx: TypeScriptReader) (objType: Ts.ObjectType
         if stringIndex.IsSome then yield stringIndex.Value
     |]
 
+/// Convert a property symbol to a member slot using TS's SUBSTITUTED type for
+/// the property (`getTypeOfSymbol`), instead of routing via the property's
+/// source declaration. This is the encoder-side substitution capture point —
+/// TS's checker already substitutes typars when computing
+/// `getTypeOfSymbol(propSym)` on an instantiated parent type, so reading the
+/// property's type this way preserves the substitution.
+///
+/// Used by `buildSubstitutedMembersFromType` (the alias-instantiation path).
+/// Always emits as `SPropertyBuilder` regardless of the source declaration's
+/// kind (Method/GetAccessor/etc.) — the substituted type for a method symbol
+/// is its function-typed signature, which F# renders as a property of
+/// function type. Lossy on method-vs-property shape but correct on type
+/// content; acceptable for use sites where the alternative is orphan typars.
+let private substitutedPropertySymToMemberSlot (ctx: TypeScriptReader) (sym: Ts.Symbol) : Signal<SMemberBuilder voption> =
+    {
+        SPropertyBuilder.Name = sym.name
+        Type =
+            ctx.checker.getTypeOfSymbol sym
+            |> ctx.CreateXanthamTag
+            |> fst
+            |> stackPushAndThen ctx _.TypeSignal
+        IsStatic = false
+        IsOptional = sym.flags.HasFlag Ts.SymbolFlags.Optional
+        IsPrivate = false
+        Accessor = TsAccessor.ReadWrite
+        Documentation = []
+    }
+    |> SMemberBuilder.Property
+    |> ValueSome
+    |> Signal.source
+
+/// Build a `STypeLiteralBuilder` whose members carry TS's substituted types,
+/// rather than the un-substituted source declarations. The caller has an
+/// instantiated `Ts.ObjectType` (e.g. from `getTypeFromTypeNode` on a
+/// `Foo<string>` node); this enumerates its properties and signatures and
+/// reads each member's type via `getTypeOfSymbol` / `getReturnTypeOfSignature`,
+/// which TS substitutes against the instantiated parent.
+///
+/// Closes the alias-body instantiation gap that produces orphan-typar
+/// errors like `'T not defined` at use sites of generic type aliases.
+let buildSubstitutedMembersFromType (ctx: TypeScriptReader) (objType: Ts.ObjectType) =
+    let props =
+        ctx.checker.getPropertiesOfType(objType).AsArray
+        |> Array.map (substitutedPropertySymToMemberSlot ctx)
+    let callSigs =
+        ctx.checker.getSignaturesOfType(objType, Ts.SignatureKind.Call).AsArray
+        |> Array.map (callSigToMemberSlot ctx)
+    let constructSigs =
+        ctx.checker.getSignaturesOfType(objType, Ts.SignatureKind.Construct).AsArray
+        |> Array.map (constructSigToMemberSlot ctx)
+    let numberIndex = makeIndexSlot ctx TypeKindPrimitive.Number (objType.getNumberIndexType())
+    let stringIndex = makeIndexSlot ctx TypeKindPrimitive.String (objType.getStringIndexType())
+    [|
+        yield! callSigs
+        yield! constructSigs
+        yield! props
+        if numberIndex.IsSome then yield numberIndex.Value
+        if stringIndex.IsSome then yield stringIndex.Value
+    |]
+
 // ---------------------------------------------------------------------------
 // Dispatch
 // ---------------------------------------------------------------------------
