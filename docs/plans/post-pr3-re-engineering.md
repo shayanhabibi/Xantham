@@ -31,9 +31,16 @@ those concerns meet new TS-source idioms.
 | StringEnum case-name disambiguation | Union-case identity is per-emission, not per-source-literal; collisions get numeric-suffix dedup with `[<CompiledName>]` preserving the source value | `42df1f0` |
 | `Implements` separation; one `inherit` per class; module-as-type vs interface collision; `AllowNullLiteral` heritage discipline | `TypeLikeRender` needs separate channels for class-extends vs class-implements; the emission rules for each are distinct in F# | (combined) |
 | Lib-substitution additions (Intl.\*, ArrayLike, EventListenerOrEventListenerObject, +others) | The `LibEsDefaults.substitutions` table is the documented seam for naming-divergence between TS lib.es and F# stdlib equivalents | (combined) |
-| **`TypeAliasRemap` molecule preservation** | The remap is an identity-stabilisation cache, not a wholesale-replacement rule. Per atom/molecule composition, it stores the canonical *atom* for an alias and references compose `Prefix(canonical, args)` molecules; the final-pass replacement must preserve `Prefix` wrappings | (latest pushed) |
+| `TypeAliasRemap` molecule preservation | The remap is an identity-stabilisation cache, not a wholesale-replacement rule. Per atom/molecule composition, it stores the canonical *atom* for an alias and references compose `Prefix(canonical, args)` molecules; the final-pass replacement must preserve `Prefix` wrappings | `7b3bafa` |
 | `Prefix(obj/exn, args)` collapse | Non-generic intrinsics can't carry typar args; cycle-break/substitution that lowers a Prefix head to `obj` should drop the args | (with the above) |
 | `obj`/`exn` filtering from interface inheritance and class implements | F# rejects `inherit obj` / `interface obj with`; cycle-break artifacts at heritage targets need to be filtered, not emitted | (with the above) |
+| Synthetic-reference site audit map | Single helper `createAssignedSyntheticRef` documents the universe of 8 sites (3 prerender branches, cache-hit, anchor pass, decl emission, merge logic, missing TemplateLiteral) so Phase B's typar emission isn't discovered through error cascades | `c769b68` |
+| **Phase B — synthetic-typar capture** | Multi-position interned literals (`_LitN` from Union/Intersection/TypeLiteral) hoist captured enclosing-scope typars onto the synthetic declaration and emit `Prefix(_LitN, [typars])` at every reference site; `ctx.SyntheticTypars` is the agreement point between helper and decl emission | `0ef73ac` |
+| **Parser-bail unmask** | Bare-`_` source typar → `Anon` (F# rejects `'_` in declaration position); captured-typar dedup-by-name at decl + ref emission so duplicate captures from cross-scope walks don't produce `<'S, 'S>`. Removes parser-mask cascade that hid downstream errors | `39f0053` |
+| **Phase C — `CycleBrokenPaths` metadata** | Tracks alias TypePaths whose body collapsed to bare `obj`/`exn`. Consulted at early `remap`, final-pass remap, and TypeReference branch's Prefix collapse — drops args when target is cycle-broken so `obj<T>` is never emitted | (with parser unmask) |
+| **Phase E1 — Heritage arity reconciliation** | New `Interface.reconcileHeritageArity` reconciles heritage TypeRefRenders against the parent's declared arity. Walks through nested TypeReferences via `resolvedKindArity`; consults `ctx.TypeAliasArity` for TypeLiteral-bodied alias parents | (Phase E1) |
+| **Phase E2 — `TypeAliasArity` context field** | Records every alias's TS-source declared typar count (keyed by both decl + body TypeKey). Populated by `prerenderTypeAliases`. Drives heritage reconciliation, TypeReference arity logic for non-Interface/Class inner, and final-pass remap Prefix truncation | (Phase E2) |
+| **Phase E3 — Class/Interface ref auto-pad** | Cached `TypeRef` for a generic Interface/Class is now `Prefix(path, [obj × arity])` instead of bare atom. Constraints, heritage clauses, and other paths that bypass the TypeReference arity reconciler get padded args automatically. Reduces verify errors by 22% / 17% in one change | (Phase E3) |
 
 ## The principle, restated
 
@@ -58,120 +65,48 @@ doc says it should be.
 
 ## What's open — and why each one is deeper than a one-keystroke fix
 
-### Synthetic-typar capture
+### Synthetic-typar capture — Phase B LANDED (`0ef73ac`), with caveats
 
-**The problem.** TS inline callbacks and similar inline shapes (e.g.
-`(value: T, index: number) => U` inside a method `foo<T, U>(cb: ...)`)
-intern as `ResolvedType.TypeLiteral` with bodies that reference typars
-declared by the *enclosing* method or class. The encoder doesn't carry
-the typar-context as part of the synthetic's identity; the decoder's
-resolved graph stores the typar references as `ResolvedType.TypeParameter`
-nodes pointing back at the enclosing declaration.
+The capture is now live. `ctx.SyntheticTypars` holds captured enclosing-scope
+typars per synthetic; `createAssignedSyntheticRef` consults it to emit
+`Prefix(_LitN, [typars])`; `Members.renderFromMembersAndFunctions` hoists
+the same list onto the declaration. Walker traverses transparently through
+named-type containers (Interface/Class/Enum), which is counterintuitive but
+correct — narrower walks (boundary-stopping) capture fewer typars and end
+up emitting refs whose typars aren't in scope at any reference site (verified
+empirically).
 
-The generator currently emits these synthetics as un-typar'd type
-declarations:
+The cache-hit / anchor-pass concerns from the original framing turned out
+not to be problems: since the helper is the single emission point, the
+cache stores whatever it emits and downstream cache hits return the same
+Prefix shape automatically.
 
-```fsharp
-type _Lit18 =
-    abstract Invoke: value: 'T * index: float * array: ResizeArray<'T> -> bool
-```
+**Verified result (after `0ef73ac`):** verify pipeline 9,155 → 2,744 raw,
+2,812 → 141 distinct. **70% / 95% reduction.** Parser-bail on `'_` was
+masking deeper FS0037/FS0033 cohorts — see the parser-unmask section below.
 
-F# rejects this — `'T` is unbound at the type-declaration scope (FS0039).
+**Open caveats:**
+- Captured typar names sometimes collide across cross-scope captures
+  (multiple methods declaring `<S>` → captured list has two distinct
+  TypeParameter records named `S`). Decl-side and ref-side dedup by name
+  collapses them; F# binds body refs by name. Semantically lossy when
+  distinct `S`s would have meant distinct types.
+- `_` source typars (TS "don't care" convention) collapse to `Anon` —
+  multiple `_` typars in one body all bind to one declaration entry.
 
-**The principled answer.** Per `paths.md`, the path system assigns
-synthetic literals concrete paths via `SyntheticPathAssignment`. Per
-`typeref-render.md`, generic application is a `Prefix` molecule. Combining
-the two: when a synthetic's body uses typars from an enclosing scope, the
-synthetic's declaration must hoist those typars and every reference site
-must compose `Prefix(synthetic-path, [typar-refs])`.
+### TypeAlias cycle-break loses arity — Phase C LANDED (`39f0053`)
 
-**The attempt.** Implemented in three layers:
+`CycleBrokenPaths: HashSet<TypePath>` is now populated by
+`Render.TypeAlias.fs markCycleBrokenIfErased` when the alias body resolves
+to bare `obj`/`exn`. Consulted at three sites: early `remap`, final-pass
+remap (Prefix collapse), and the TypeReference branch's Prefix-construction.
+When the head's atom matches a cycle-broken path, args are dropped — F#
+gets `obj` instead of `obj<T>`.
 
-1. New `GeneratorContext.SyntheticTypars: DictionaryImpl<ResolvedType, TypeParameter list>` paired with the existing `SyntheticPaths`.
-2. `SyntheticPathAssignment` walks each synthetic's body collecting
-   `ResolvedType.TypeParameter` references in first-appearance order.
-3. `Render.Transient.fs.Members.render` consults the dictionary and
-   emits the captured typars on `Transient.TypeLikeRender.TypeParameters`.
-4. `prerender`'s three `SyntheticPaths` consultation sites wrap the
-   atom ref in `Prefix(path, [typar-refs])` via a new
-   `createAssignedSyntheticRefWithTypars` helper.
-
-**What worked.** Synthetic declarations correctly emitted typars
-(including constraints):
-
-```fsharp
-type _Lit1<'TArgs, 'R when 'TArgs :> Types.Node.Array<option<obj>>> = ...
-type _Lit18<'T> =
-    abstract Invoke: value: 'T * index: float * array: ResizeArray<'T> -> bool
-```
-
-**What didn't.** Reference uniformity broke. Histogram went 9,155 → 11,083
-raw, with FS0037 (duplicate definitions) jumping 4–114 → 832 and FS0033
-shifting from "expects 0 given N" patterns to "expects N given 0" patterns
-(`_Lit93<_,_,_>` expects 3 given 0).
-
-**Why.** Synthetic-reference emission has more paths than the three
-`SyntheticPaths` consultation sites I instrumented:
-
-- **Cache-hit paths** (`prerender` lines ~87–109) — when a synthetic's
-  render is already cached, the cached `TypeRef` is returned via `remap`
-  without re-running the typar-capture wrap.
-- **Anchoring/localisation passes** — `RenderScope.Anchored.fs` walks
-  refs converting Transient atoms to Concrete; if it encounters a
-  synthetic-without-typars (cached early) it doesn't know to add typars.
-- **The synthetic-vs-real-class merge logic** in `Render.Collection.fs`
-  intentionally prefers `TypeParameters = []` from one side or non-empty
-  from the other; the rule was designed assuming the synthetic side was
-  always empty. With synthetics now carrying typars, this rule needs
-  refinement.
-- **Path-localisation** (`anchorAndLocalise`) walks atoms; molecules
-  carrying typar args at synthetic paths may not localise the way
-  atoms do.
-
-The pattern: **the typar-aware reference shape needs to flow through every
-emission and every cache-touch path, not just the three SyntheticPaths
-consultations.** That's a coordinated multi-site change, not a single
-landing.
-
-**Reverted.** The structural pieces (`SyntheticTypars` dictionary, the
-walking-and-capture logic, the typar emission on declarations) are
-correct in isolation and worth reviving when the integration surface is
-addressed. For now the working tree is back at the molecule-preservation
-state.
-
-### TypeAlias cycle-break loses arity
-
-**The problem.** `type ZodTypeAny = ZodType<any, any, any>` is a TS alias
-with 0 declared typars (fully-applied). The body (`ZodType<any,any,any>`)
-cycle-breaks to `obj` during render. Result: `type ZodTypeAny = obj`.
-But the encoder produces TypeReference applications like
-`ZodTypeAny<option<obj>, ZodTypeDef, 'Output>` (3 args) — apparently
-preserving the original `ZodType<...>` shape at some call sites. F#
-rejects because the *declaration* is non-generic.
-
-**Detected attempts and walls.** Tried two angles:
-
-- *TypeAliasArity* — pad 0-arg references with `obj`. Reference path
-  bypasses the arity reconciler entirely (consumed by `remap` directly).
-- *ObjAliasPaths* — register aliases that cycle-break to `obj` so Prefix
-  construction at use sites drops args. Detection at remap-setup time
-  sees only the un-broken body (`TypeReference` to ZodType), not the
-  collapse-to-`obj` outcome (which only happens later at render time).
-
-**Why it's deeper.** The cycle-break is a render-time decision driven by
-`RenderingAliasTargetRefs` — a set that's empty at setup and populated
-as alias bodies are entered. By the time we know the body collapsed to
-`obj`, references may have already been rendered with args. Working
-backwards requires either:
-
-- A two-pass architecture (render aliases first, collect cycle-break
-  outcomes, then run references), or
-- A persistent metadata trail (`CycleBrokenPaths: HashSet<TypePath>`
-  populated during render; reference emission re-checks before final
-  emit).
-
-The second is a smaller architectural addition but still touches
-multiple emission paths. Same shape as the synthetic-typar surface.
+**Caveat:** Phase C catches *alias* cycle-break (where the alias's body
+resolves to obj). It does NOT catch *class* cycle-break (where a class's
+heritage is broken). The class case is the FS0001 Zod cohort below, still
+open.
 
 ### Class-shape lost through cycle-break (FS0001 Zod cohort)
 
@@ -256,54 +191,130 @@ neighborhood.
 
 ## Staged path forward
 
-The recurring shape across the open items is: **a render-time decision
-(cycle-break, synthetic-typar-capture, class-shape loss) needs metadata
-that flows through every downstream emission path**, not just the three
-or four sites where the decision originates.
+Phases A–C have landed. The recurring shape that drove them: **a
+render-time decision (cycle-break, synthetic-typar-capture) needs
+metadata that flows through every downstream emission path**. The
+infrastructure that delivers this (`SyntheticPaths`, `SyntheticTypars`,
+`CycleBrokenPaths`) is now in place.
+
+Phases D–F (open) shift the work into the encoder, where the root causes
+of the dominant remaining cohort live (declaration-merge winner,
+alias-body substitution, heritage arity).
 
 A staged approach that doesn't bunch all the surgery in one commit:
 
-### Phase A — single synthetic-reference helper
+### Phase A — single synthetic-reference helper ✓ LANDED `c769b68`
 
-Audit every place a synthetic-reference is emitted (prerender's three
-`SyntheticPaths` sites, the cache-hit `remap`, the anchor pass's
-synthetic handling, the merge logic in `Render.Collection.fs`). Route
-each through a single helper function. Helper currently does the same
-thing the inline code does (atom-only return); the value of the audit
-is **knowing the universe of sites** rather than discovering them
-post-hoc through error cascades.
+Audited every place a synthetic-reference is emitted; documented the
+universe of 8 sites in `createAssignedSyntheticRef`'s comment block.
+Comment-only change; no behavior shift. Preparation for Phase B.
 
-This is preparation, not improvement. Likely zero net error-count
-change. But it sets up Phase B to land cleanly.
+### Phase B — turn on `SyntheticTypars` ✓ LANDED `0ef73ac`
 
-### Phase B — turn on `SyntheticTypars`
+Helper consults `SyntheticTypars`, emits `Prefix(path, [typar-refs])`.
+`Members.renderFromMembersAndFunctions` hoists the same list onto the
+decl side. Walker traverses transparently through named-type containers
+(empirically correct over boundary-stopping). Cache-hit and anchor-pass
+concerns from the original framing didn't materialise because the helper
+is the single emission point.
 
-Once Phase A's helper is the single emission point, switch it to
-consult `SyntheticTypars` and emit `Prefix(path, [typar-refs])`. The
-declaration-emission piece (already verified in the attempt) layers
-back in. Expect a cascade of cleanups and reveal unmasked issues — the
-shape that the molecule-preservation commit already prepared for.
+### Phase C — `CycleBrokenPaths` metadata ✓ LANDED `39f0053`
 
-### Phase C — `CycleBrokenPaths` metadata
+`Render.TypeAlias.fs markCycleBrokenIfErased` populates the set when an
+alias body resolves to bare `obj`/`exn`. Consulted at:
 
-Add a `HashSet<TypePath>` populated during alias rendering when the
-body collapses to bare `obj`/`exn`. Consult it at:
+- The early `remap` in `prerender` (drop args from the Prefix molecule
+  when the remap target is cycle-broken)
+- The final-pass remap (same logic at exit)
+- The TypeReference branch's `Prefix` construction (drop args when the
+  prefix is a ConcretePath atom in `CycleBrokenPaths`)
 
-- Prefix-construction sites (drop args when head is a known cycle-broken
-  alias)
-- Constraint emission (drop constraints when target is a known
-  cycle-broken alias)
-- Heritage rendering (drop heritage when target is known cycle-broken)
+The "constraint emission" and "heritage rendering" bullets from the
+original Phase C framing turned out to overlap with the above three
+sites; constraints go through `ctx.PreludeGetTypeRef = prerender`, so
+they pick up the same drop behavior. Heritage is the open issue — see
+Phase E below for the not-yet-handled case.
 
-Addresses TypeAlias-cycle-break-loses-arity and FS0001 Zod cohort in
-one connected change.
+### Phase D (open) — Encoder-side TypeAlias duplicate winner selection
 
-### Phase D — encoder-side IndexSignature and `UnknownDeclared`
+Driven by errors like `type Schedule = U4<Schedule._Lit2<'T>, ...>` —
+F# rejects because `Schedule` is declared without `<'T>` but the body
+uses `'T`. Root cause: TS source has **two** `Schedule` declarations
+(`agent-tool-types-CM_50fcV.d.ts:1764: type Schedule<T = string>` AND
+`schedule.d.ts:82: type Schedule = z.infer<...>`). The encoder's
+`selectAndMergeWinnersInDuplicates` (`Read.fs:377`) picks the non-generic
+one as winner; the body's `'T` references survive into the generated
+binding but the declaration is non-generic.
 
-Move to `src/Xantham.Fable/Reading/Dispatch/`. Threading typar context
-through `IndexedAccess`; tightening the `UnknownDeclared` fallback.
-These are encoder-deep but their structural shape becomes clearer once
-A–C have stripped the consumer-side noise.
+**Fix surface:** `src/Xantham.Fable/Read.fs` `selectAndMergeWinnersInDuplicates`
+needs to either prefer the generic-arity-higher declaration when both are
+real (vs cherry-picking by file position), or merge declared typar lists
+across duplicates.
+
+### Phase E — Arity reconciliation across all reference sites ✓ LANDED
+
+Three connected pieces shipped together:
+
+1. **Heritage arity reconciliation** (`Render.TypeShapes.fs`):
+   `Interface.reconcileHeritageArity` truncates Prefix args when the
+   parent's declared arity is 0; walks nested TypeReferences to find
+   the named target.
+2. **`TypeAliasArity` context field** (`Types/Generator.fs`,
+   `RenderScope.Prelude.fs prerenderTypeAliases`): records alias
+   declared typar count keyed by both decl + body TypeKey. Consulted
+   wherever the arity reconciler needs to know the alias's TS-source
+   declared count (TypeLiteral-bodied aliases don't expose declared
+   arity through `Interface`/`Class` cases).
+3. **Class/Interface ref auto-pad** (`createConcretePaddedRef` in
+   `RenderScope.Prelude.fs`): cached `TypeRef` for any generic
+   Interface/Class is `Prefix(path, [obj × arity])` instead of bare
+   atom. This catches constraint emission, heritage without explicit
+   args, and any other site that bypasses the TypeReference arity
+   reconciler.
+
+The declaration's own emission uses the type's path + declared
+TypeParameters list directly, so the auto-padding affects only
+references — declarations remain correctly shaped.
+
+**Verified result:** 17,008 → 13,217 raw (-22%), 3,007 → 2,490 distinct
+(-17%). Per-SDK: agents -1,327, ai-chat -1,283, voice -1,366, think
+-1,105.
+
+### Phase F (open) — `IndexSignature` self-reference + `UnknownDeclared` classifier
+
+Original Phase D. Encoder-deep work in `src/Xantham.Fable/Reading/Dispatch/`.
+Threading typar context through `IndexedAccess` resolution; tightening the
+`UnknownDeclared` fallback. Becomes clearer once D and E strip the
+consumer-side noise dominating the histogram today.
+
+### Decoder-side alias-body typar substitution (attempted, reverted)
+
+Tried in this session at `src/Xantham.Decoder/Types/Arena.Interner.fs`
+`buildFromTypeReference`. The walker (`substituteResolvedType`,
+`substituteMember`, `buildAliasSubstitution`) correctly produces
+self-contained substituted bodies per call site, with TypeKey-keyed
+memoization to avoid creating fresh ResolvedType instances for cyclic
+references within one substitution.
+
+**Why reverted.** Even with memoization, the substituted bodies have
+fresh `[<ReferenceEquality>]` outer-record identities at every level. The
+generator's anchor pass (`RenderScope.Anchored.fs:479`) uses a `visited`
+HashSet keyed by `(ResolvedType, AnchorPath, TransientTypePath)` — when
+the same conceptual body is reached through different call-site
+substitutions, the visited set doesn't dedup and the anchor walk
+recurses to stack overflow.
+
+**Path forward** (one of three):
+1. Change the anchor pass's `visited` key from ResolvedType-identity to
+   TypeKey (the underlying lazy data is stable across substitutions).
+2. Hash-cons the substituted ResolvedTypes by structural identity.
+3. Move substitution upstream to the encoder where TS's own type
+   instantiation produces self-contained types that share TypeKeys
+   naturally — `src/Xantham.Fable/Reading/TypeReference.fs` `fromType`,
+   using `checker.getTypeAtLocation` or `checker.instantiateType`.
+
+Option 3 is most architecturally aligned (TS already does the work,
+we'd capture it). Option 1 is the smallest direct change.
 
 ## Notes on metaphor and architecture evolution
 
@@ -322,30 +333,49 @@ fundamentally unclear.
 
 ## Open file pointers (for next-session resumption)
 
-- `src/Xantham.Generator/Generator/RenderScope.Prelude.fs` —
-  `prerender`, the three `SyntheticPaths` consultations
-  (~lines 238, 328, 624), the `remap` cache-hit handler (~lines 41–55),
-  the molecule-preserving final pass (~lines 684–706).
-- `src/Xantham.Generator/Generator/SyntheticPathAssignment.fs` —
-  Phase A/B target. The walking/capture logic for `SyntheticTypars`
-  is preserved in this conversation's transcript.
-- `src/Xantham.Generator/Generator/Render.Transient.fs` —
-  `Members.render`, `renderFromMembersAndFunctions`. The Phase B
-  decl-emission piece.
-- `src/Xantham.Generator/Generator/Render.Collection.fs` —
-  `mergeRenders`. Phase B may need refinement here for synthetic-vs-real
-  typar-list merging.
-- `src/Xantham.Generator/Generator/Render.TypeAlias.fs` —
-  `pruneUnusedTypars`, `breakSelfReference`. Phase C populates
-  `CycleBrokenPaths` here when the body collapses to bare obj/exn.
-- `src/Xantham.Fable/Reading/Dispatch/TypeDeclaration.fs:467` — Phase D
+- `src/Xantham.Fable/Read.fs:377` — `selectAndMergeWinnersInDuplicates`.
+  Phase D entry point: bias winner selection toward generic-arity-higher
+  declaration, or merge typars across duplicates.
+- `src/Xantham.Generator/Generator/Render.TypeShapes.fs` — `Class.render`
+  and `Interface.render` heritage processing (`shape.Heritage.Extends |>
+  List.map toTypeRef`). Phase E entry point: arity-reconcile heritage
+  refs against the parent's declared typar count.
+- `src/Xantham.Generator/Generator/RenderScope.Prelude.fs:481-494` — the
+  existing arity reconciler that needs to be invoked at heritage sites.
+- `src/Xantham.Fable/Reading/TypeReference.fs` `fromType` — decoder-side
+  substitution alternative (option 3 above): set `ResolvedType` to the
+  TS-substituted instantiation rather than `ValueNone`.
+- `src/Xantham.Generator/Generator/RenderScope.Anchored.fs:479` — the
+  anchor pass's `visited` HashSet; key change here would unlock the
+  decoder substitution work (option 1).
+- `src/Xantham.Fable/Reading/Dispatch/TypeDeclaration.fs:467` — Phase F
   `UnknownDeclared` fallback flip site.
-- `src/Xantham.Fable/Reading/Dispatch/TypeFlagObject.fs` — Phase D
+- `src/Xantham.Fable/Reading/Dispatch/TypeFlagObject.fs` — Phase F
   IndexSignature dispatch.
 
 ## Current measurable state (for delta-tracking)
 
-9,155 raw / 2,817 distinct verify errors across 12 runtime SDKs
-(commit `<head>` at time of writing). 178 generator tests pass; 28/29
-decoder tests pass (one pre-existing fixture failure unrelated). See
-`reference_verify_pipeline.md` in memory for run instructions.
+After Phase E (arity reconciliation across reference sites): **13,217 raw
+/ 2,490 distinct** verify errors across 12 runtime SDKs.
+
+Trajectory across the session:
+- Pre-PR3 baseline: 9,155 raw / 2,817 distinct (parser-bail masking
+  ~6× more downstream errors)
+- After Phase B (synthetic-typar capture, `0ef73ac`): 2,744 raw / 141
+  distinct (still parser-bail masked)
+- After parser-bail unmask + Phase C (`39f0053`): 17,109 raw / 3,032
+  distinct (honest, no masking)
+- After Phase E (this commit): **13,217 raw / 2,490 distinct**
+
+Remaining cohorts (sampled from agents):
+- `ZodTypeAny ... given 3 args` (1,556) — cycle-broken alias still
+  receiving args at use sites; the final-pass remap arity truncation
+  catches *some* but not all sites (order-of-rendering issue)
+- `SomeType ... given 25 args` (318) — non-generic class receiving
+  many args, similar pattern
+- FS0001 / FS0698 / FS0663 — class-inherits-obj constraint mismatches
+  (the FS0001 Zod cohort)
+
+178 generator tests pass; 28/29 decoder tests pass (one pre-existing
+fixture failure unrelated). See `reference_verify_pipeline.md` in memory
+for run instructions.

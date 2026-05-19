@@ -19,6 +19,30 @@ let private createConcreteTypeRef (path: TypePath) =
     |> RenderScopeStore.TypeRef.Unsafe.createAtom
     |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
 
+/// Build a reference for a generic Interface/Class that may be used at
+/// sites bypassing the TypeReference arity reconciler (constraints
+/// emitted directly from `ResolvedType.Class`/`Interface`, heritage
+/// without explicit args). When `arity > 0` the ref is a Prefix molecule
+/// with `obj`-padded args; when 0 it's the bare atom (same as
+/// `createConcreteTypeRef`). The declaration's own emission uses the
+/// path directly and the type's declared TypeParameters list, not this
+/// reference — so padding doesn't leak into the decl.
+let private createConcretePaddedRef (arity: int) (path: TypePath) =
+    let atom =
+        RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
+        |> RenderScopeStore.TypeRef.Unsafe.createAtom
+        |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+    if arity <= 0 then atom
+    else
+        let scopeStore = RenderScopeStore.create()
+        let objArg =
+            RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic Intrinsic.obj
+            |> RenderScopeStore.TypeRef.Unsafe.createAtom
+            |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+        let args = List.replicate arity objArg
+        let dummyRt = ResolvedType.Primitive TypeKindPrimitive.NonPrimitive
+        RenderScopeStore.TypeRefRender.create scopeStore dummyRt false (atom, args)
+
 /// Canonical construction point for synthetic-literal references whose
 /// stable concrete path was assigned by `SyntheticPathAssignment.run`.
 /// Bypasses the transient/anchor machinery — the ref is concrete from the
@@ -33,33 +57,61 @@ let private createConcreteTypeRef (path: TypePath) =
 ///   4. TemplateLiteral branch (`prerender` ~line 657) — `SyntheticPathAssignment`
 ///      walks template-literal synthetics, but the prerender branch does NOT
 ///      consult `ctx.SyntheticPaths`. Currently a benign omission (template
-///      literals don't capture enclosing typars), revisit if Phase B exposes
-///      a need.
+///      literals don't capture enclosing typars), revisit if a use case
+///      exposes a need.
 ///   5. Cache-hit Anchored-Root path (`prerender` ~lines 94-107) — returns
-///      the cached `TypeRef` produced by this helper. Any shape change here
-///      must align with what cache hits emit.
+///      the cached `TypeRef` produced by this helper. Cache stores whatever
+///      this helper emits, so atom-vs-Prefix shape flows through naturally.
 ///   6. Synthetic re-anchor pass (`RenderScope.Anchored.fs` ~lines 506-517) —
 ///      re-anchors the synthetic body at the consuming export's anchor path.
 ///      Reads the helper's TypePath; doesn't reconstruct the ref.
 ///   7. Synthetic decl emission (`Render.Transient.fs` `Members.renderFromMembersAndFunctions`
-///      ~line 261) — produces `TypeParameters = []`. Phase B's typar plug-in
-///      point: when `ctx.SyntheticTypars` has entries for the resolvedType,
-///      the decl-side typar list must match what the ref-side helper emits.
+///      ~line 261) — consults `ctx.SyntheticTypars` to hoist the captured
+///      typar list onto the type declaration. Must agree with this helper's
+///      typar choice (same dictionary lookup keyed by ResolvedType).
 ///   8. Synthetic-vs-real merge (`Render.Collection.fs` `combine`
 ///      ~lines 139-160) — "non-empty typars wins" rule resolves collisions
 ///      between a synthetic that lands at a path tail matching a real
-///      declaration. Phase B may need refinement when synthetics carry typars.
+///      declaration. May need refinement if both sides become non-empty.
 ///
-/// Phase B will switch this helper to consult `ctx.SyntheticTypars` and emit
-/// `Prefix(ConcretePath, [typar-refs])` molecules when the synthetic's body
-/// references typars from an enclosing scope. The cache-hit path (#5) and
-/// the re-anchor pass (#6) will then see Prefix-shaped refs and must
-/// preserve them through their respective transforms (already done for
-/// `remap` per typeref-render.md atom/molecule composition).
-let private createAssignedSyntheticRef (path: TypePath) (nullable: bool) =
-    RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
-    |> RenderScopeStore.TypeRef.Unsafe.createAtom
-    |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind nullable
+/// When `ctx.SyntheticTypars` has an entry for the resolvedType, the helper
+/// emits a `Prefix(ConcretePath, [typar-refs])` molecule per
+/// `typeref-render.md` atom/molecule composition. The molecule-preserving
+/// `remap` in this file (and the final-pass match) already handle Prefix
+/// shapes correctly.
+let private createAssignedSyntheticRef
+    (ctx: GeneratorContext)
+    (scope: RenderScopeStore)
+    (resolvedType: ResolvedType)
+    (path: TypePath)
+    (nullable: bool) =
+    let atom =
+        RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
+        |> RenderScopeStore.TypeRef.Unsafe.createAtom
+        |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind nullable
+    match ctx.SyntheticTypars.TryGetValue resolvedType with
+    | true, typars when not (List.isEmpty typars) ->
+        // The synthetic's body references typars from an enclosing scope.
+        // Build a ref per captured typar using the same shape the
+        // `ResolvedType.TypeParameter` branch in prerender produces, then
+        // wrap the atom in a Prefix molecule. Reference sites get
+        // `_Lit18<'T, 'U>` rather than bare `_Lit18`, agreeing with the
+        // decl-side hoisting at audit site #7.
+        //
+        // Must dedup by name to match the decl-side dedup in
+        // `Render.Transient.fs Members.renderFromMembersAndFunctions`.
+        // Without matching dedup the reference's Prefix carries more args
+        // than the declaration has typars (FS1242, FS0033).
+        let typarRefs =
+            typars
+            |> List.distinctBy (fun tp -> Name.Case.valueOrModified tp.Name)
+            |> List.map (fun tp ->
+                tp.Name
+                |> Name.Case.valueOrModified
+                |> Ast.LongIdent
+                |> RenderScopeStore.TypeRefRender.create scope resolvedType false)
+        RenderScopeStore.TypeRefRender.create scope resolvedType nullable (atom, typarRefs)
+    | _ -> atom
 
 [<Struct>]
 type private Registered = Registered of TypeRefRender
@@ -93,8 +145,19 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 // only the prefix head with the canonical target — args
                 // stay attached. Non-Prefix molecules are unrelated to
                 // alias application; leave them alone.
+                //
+                // If `target` points at a cycle-broken alias path (one
+                // whose body resolved to bare `obj`/`exn`), drop the args
+                // so we don't emit `obj<T>` (FS0033).
+                let targetIsCycleBroken =
+                    match target.Kind with
+                    | TypeRefKind.Atom (TypeRefAtom.ConcretePath p) ->
+                        ctx.CycleBrokenPaths.Contains p
+                    | _ -> false
                 match ref.Kind with
                 | TypeRefKind.Atom _ ->
+                    target |> TypeRefRender.orNullable ref.Nullable
+                | TypeRefKind.Molecule (TypeRefMolecule.Prefix _) when targetIsCycleBroken ->
                     target |> TypeRefRender.orNullable ref.Nullable
                 | TypeRefKind.Molecule (TypeRefMolecule.Prefix (_, args)) ->
                     RenderScopeStore.TypeRefRender.create scope lazyResolvedType.Value ref.Nullable (target, args)
@@ -189,7 +252,18 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
     | ResolvedType.Interface ``interface`` ->
         let scope = RenderScopeStore.create()
         let path = Path.Interceptors.pipeInterface ctx ``interface``
-        let ref = path |> createConcreteTypeRef
+        // For generic interfaces (declared typars > 0), the cached
+        // reference must carry `obj`-padded args. When prerender is
+        // invoked with `ResolvedType.Interface` directly (constraint
+        // emission, heritage clauses without explicit args, etc. — paths
+        // that bypass the TypeReference branch's arity reconciler), the
+        // bare atom emits invalid F# (`'T :> Array` for a 1-typar Array
+        // → FS0033). The atom-only path is for the *declaration* — the
+        // type body is emitted via the Render lazy, which uses the path
+        // and the interface's TypeParameters directly. So the cached
+        // *reference* TypeRef being padded doesn't interfere with the
+        // declaration's emission.
+        let ref = path |> createConcretePaddedRef ``interface``.TypeParameters.Length
         {
             RenderScope.Type = resolvedType
             Root = TypeLikePath.create path |> ValueSome
@@ -206,7 +280,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
     | ResolvedType.Class ``class`` ->
         let scope = RenderScopeStore.create()
         let path = Path.Interceptors.pipeClass ctx ``class``
-        let ref = path |> createConcreteTypeRef
+        let ref = path |> createConcretePaddedRef ``class``.TypeParameters.Length
         {
             RenderScope.Type = resolvedType
             Root = path |> TypeLikePath.create |> ValueSome
@@ -276,7 +350,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             // multiple positions.
             match ctx.SyntheticPaths.TryGetValue resolvedType with
             | true, concretePath ->
-                let ref = createAssignedSyntheticRef concretePath nullable
+                let ref = createAssignedSyntheticRef ctx scope resolvedType concretePath nullable
                 // Track the visit in the outer scope's TypeStore so the
                 // export's anchor pass iterates the synthetic and runs the
                 // body's anchor (which my new Anchored-Root + Transient-Render
@@ -367,7 +441,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         // Synthetic-reference audit site #2 (Intersection).
         match ctx.SyntheticPaths.TryGetValue resolvedType with
         | true, concretePath ->
-            let ref = createAssignedSyntheticRef concretePath false
+            let ref = createAssignedSyntheticRef ctx scope resolvedType concretePath false
             RenderScopeStore.addTypeStorePath scope resolvedType TransientTypePath.Anchored
             let childScope = RenderScopeStore.create()
             {
@@ -481,10 +555,48 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeReference { Type = innerResolvedType; TypeArguments = [] } ->
-        innerResolvedType
-        |> prerender ctx scope
-        |> RenderScope.createRootless resolvedType
-        |> addOrReplaceScope ctx resolvedType
+        // Empty-args reference. If the target declares typars, F# rejects
+        // the bare reference (FS0033 "expects N typars, given 0"). Forward
+        // through to the args-present branch with a synthetic args list
+        // padded with `obj` so the arity reconciler at lines ~536-573 fills
+        // in defaults. Bare references appear in TS source when a class is
+        // used as a value-style type (e.g. `value: Array`), with TS using
+        // any-defaults internally — the F# emission needs explicit args.
+        let innerResolvedTypeValue = innerResolvedType.Value
+        let declaredParamCount =
+            match LibEsDefaults.tryLookupSubstitution innerResolvedTypeValue with
+            | ValueSome sub -> sub.Arity
+            | ValueNone ->
+                match innerResolvedTypeValue with
+                | ResolvedType.Interface i -> i.TypeParameters.Length
+                | ResolvedType.Class c -> c.TypeParameters.Length
+                | _ ->
+                    match ctx.TypeAliasArity.TryGetValue innerResolvedType.Raw with
+                    | true, arity -> arity
+                    | _ -> 0
+        if declaredParamCount = 0 then
+            innerResolvedType
+            |> prerender ctx scope
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
+        else
+            let prefix = innerResolvedType |> prerender ctx scope
+            match prefix.Kind with
+            | TypeRefKind.Atom (TypeRefAtom.Intrinsic ("obj" | "exn")) ->
+                prefix
+                |> RenderScope.createRootless resolvedType
+                |> addOrReplaceScope ctx resolvedType
+            | _ ->
+                let objArg =
+                    LazyContainer.CreateFromValue
+                        (ResolvedType.Primitive TypeKindPrimitive.NonPrimitive)
+                let postfixArguments =
+                    List.replicate declaredParamCount objArg
+                    |> List.map (prerender ctx scope)
+                (prefix, postfixArguments)
+                |> RenderScopeStore.TypeRefRender.create scope resolvedType false
+                |> RenderScope.createRootless resolvedType
+                |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeReference { TypeArguments = typeArguments; ResolvedType = Some innerResolvedType }
     | ResolvedType.TypeReference { TypeArguments = typeArguments; Type = innerResolvedType } ->
         let innerResolvedTypeValue = innerResolvedType.Value
@@ -501,7 +613,16 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 match innerResolvedTypeValue with
                 | ResolvedType.Interface i -> i.TypeParameters.Length
                 | ResolvedType.Class c -> c.TypeParameters.Length
-                | _ -> typeArguments.Length
+                | _ ->
+                    // For type-alias targets (whose resolved body is a
+                    // TypeLiteral / Union / Intersection / etc.), the
+                    // alias's declared arity lives in ctx.TypeAliasArity.
+                    // Consult it so use sites like `AddRpcMcpServerOptions<X, Y>`
+                    // against `type AddRpcMcpServerOptions = {...}` (0 declared
+                    // typars) truncate to 0 instead of carrying spurious args.
+                    match ctx.TypeAliasArity.TryGetValue innerResolvedType.Raw with
+                    | true, arity -> arity
+                    | _ -> typeArguments.Length
         // Encoder/TS may produce a TypeReference whose argument count doesn't
         // match the inner type's declared type parameter count — happens with
         // declaration merging where the encoder can't disambiguate which
@@ -557,6 +678,16 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
         | TypeRefKind.Atom (TypeRefAtom.Intrinsic ("obj" | "exn")) ->
+            prefix
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
+        | TypeRefKind.Atom (TypeRefAtom.ConcretePath p)
+            when ctx.CycleBrokenPaths.Contains p ->
+            // The alias rendered at this path collapsed to a non-generic
+            // intrinsic (`obj`/`exn`) — see `Render.TypeAlias.fs`
+            // `markCycleBrokenIfErased`. F# rejects `AliasPath<T>` when
+            // `AliasPath = obj`. Drop the args; consumers lose the typar
+            // refinement but compilation proceeds.
             prefix
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
@@ -664,7 +795,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             // Synthetic-reference audit site #3 (TypeLiteral non-inline).
             match ctx.SyntheticPaths.TryGetValue resolvedType with
             | true, concretePath ->
-                let ref = createAssignedSyntheticRef concretePath false
+                let ref = createAssignedSyntheticRef ctx scope resolvedType concretePath false
                 RenderScopeStore.addTypeStorePath scope resolvedType TransientTypePath.Anchored
                 let childScope = RenderScopeStore.create()
                 {
@@ -755,11 +886,41 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             // remap target so the canonical name applies but the args
             // stay attached.
             let target = ctx.TypeAliasRemap[lazyResolvedType.Raw]
+            // If the alias targeted here cycle-broke to bare `obj`/`exn`
+            // (see `Render.TypeAlias.fs markCycleBrokenIfErased`), any args
+            // from the use site can't apply (`AliasPath<T>` where
+            // `AliasPath = obj` → FS0033). Drop them: take the target
+            // atom alone.
+            let targetIsCycleBroken =
+                match target.Kind with
+                | TypeRefKind.Atom (TypeRefAtom.ConcretePath p) ->
+                    ctx.CycleBrokenPaths.Contains p
+                | _ -> false
+            // If the alias's TS declared arity is N, the rendered Prefix's
+            // arg count must match N. The alias's body may have rendered
+            // into a Prefix with arbitrary args (e.g. body is
+            // `SomeType<X, Y>` where X, Y are typars from elsewhere); after
+            // swapping the head to the alias path, those args leak.
+            // Truncate (or pass through when arity matches).
+            let declaredAliasArity =
+                match ctx.TypeAliasArity.TryGetValue lazyResolvedType.Raw with
+                | true, n -> ValueSome n
+                | _ -> ValueNone
             match ref.Kind with
             | TypeRefKind.Atom _ ->
                 target |> TypeRefRender.orNullable ref.Nullable
+            | TypeRefKind.Molecule (TypeRefMolecule.Prefix _) when targetIsCycleBroken ->
+                target |> TypeRefRender.orNullable ref.Nullable
             | TypeRefKind.Molecule (TypeRefMolecule.Prefix (_, args)) ->
-                RenderScopeStore.TypeRefRender.create scope lazyResolvedType.Value ref.Nullable (target, args)
+                match declaredAliasArity with
+                | ValueSome 0 ->
+                    // Alias is non-generic; drop spurious args from the body.
+                    target |> TypeRefRender.orNullable ref.Nullable
+                | ValueSome n when n < args.Length ->
+                    let truncated = args |> List.truncate n
+                    RenderScopeStore.TypeRefRender.create scope lazyResolvedType.Value ref.Nullable (target, truncated)
+                | _ ->
+                    RenderScopeStore.TypeRefRender.create scope lazyResolvedType.Value ref.Nullable (target, args)
             | TypeRefKind.Molecule _ ->
                 // Non-Prefix molecules (Tuple/Union/Function) don't represent
                 // an alias-with-args application; the remap doesn't model
@@ -815,6 +976,13 @@ module ArenaInterner =
                         |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
                 GeneratorContext.Prelude.addTypeAliasRemap ctx declTypeKey ref
                 GeneratorContext.Prelude.addTypeAliasRemap ctx bodyTypeKey ref
+                // Record the alias's declared typar count, keyed by both
+                // TypeKeys (declaration and body) — heritage rendering
+                // uses this to reconcile arg counts against the parent's
+                // actual arity. See Render.TypeShapes.fs Interface.heritageTargetArity.
+                let arity = List.length value.TypeParameters
+                ctx.TypeAliasArity[declTypeKey] <- arity
+                ctx.TypeAliasArity[bodyTypeKey] <- arity
             | _ -> ())
     let private getTopologicalSort (_: ArenaInterner) (graph: Graph) =
         let degrees = ConcurrentDictionary graph.Degrees
