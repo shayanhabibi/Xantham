@@ -1098,25 +1098,19 @@ module ArenaInterner =
                             for m in tl.Members do walkM m
                         | ResolvedType.TemplateLiteral t ->
                             for t in t.Types do walkT t.Value
-                        | ResolvedType.Interface iface ->
-                            for m in iface.Members do walkM m
-                        | ResolvedType.Class cls ->
-                            for m in cls.Members do walkM m
                         | ResolvedType.TypeReference tr ->
-                            // Walk the target body too — synthetic literals
-                            // (Union/Intersection/TypeLiteral/TemplateLiteral
-                            // referenced via TypeReference with empty args
-                            // at the decoder level) carry their typar
-                            // references inside their bodies. Phase B's
-                            // typar capture surfaces these at render time;
-                            // we need to surface them at alias-arity
-                            // precomputation time too so use sites pad
-                            // correctly. seenRt protects against cycles.
-                            walkT tr.Type.Value
+                            // Boundary at TypeReference: walk only the
+                            // TypeArguments (carrying typars from the outer
+                            // alias's scope). The target's body has its own
+                            // typar scope and its free typars are not free
+                            // here. Symmetric to the boundary-stop applied
+                            // to `collectFreeTypars`/`collectBodyTypars`.
+                            // Also: the decoder's substituted ResolvedType
+                            // can be recursively self-referential by design
+                            // (e.g. `type Foo<T> = { rest: Foo<T> }`);
+                            // walking through it here would recurse
+                            // unboundedly.
                             for arg in tr.TypeArguments do walkT arg.Value
-                            match tr.ResolvedType with
-                            | Some r -> walkT r.Value
-                            | None -> ()
                         | ResolvedType.Array inner -> walkT inner
                         | ResolvedType.ReadOnly inner -> walkT inner
                         | ResolvedType.Tuple t ->
@@ -1126,7 +1120,7 @@ module ArenaInterner =
                             walkT ia.Index.Value
                         | ResolvedType.Index ix -> walkT ix.Type.Value
                         | ResolvedType.Optional tr ->
-                            walkT (ResolvedType.TypeReference tr)
+                            for arg in tr.TypeArguments do walkT arg.Value
                         | ResolvedType.TypeQuery tq -> walkT tq.Type.Value
                         | ResolvedType.Conditional c ->
                             walkT c.Check.Value
@@ -1135,6 +1129,10 @@ module ArenaInterner =
                             walkT c.False.Value
                         | ResolvedType.Substitution s ->
                             walkT s.Base.Value
+                        // Boundary at Interface/Class — their typars are
+                        // declared at their own scope.
+                        | ResolvedType.Interface _
+                        | ResolvedType.Class _
                         | _ -> ()
                 and walkM (m: Member) =
                     match m with
