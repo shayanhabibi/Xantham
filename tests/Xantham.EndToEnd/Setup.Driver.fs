@@ -1,4 +1,12 @@
-﻿module Xantham.Driver.Program
+﻿[<AutoOpen>]
+module SetupDriver
+
+open Fake.Core
+open Fake.IO
+
+[<Literal>]
+let private programSourceCode = """
+module Program
 
 open System
 open Xantham
@@ -54,3 +62,40 @@ let main argv =
     IO.File.WriteAllText(outputFile, output)
     printfn "Wrote %d bytes to %s" output.Length outputFile
     0
+
+"""
+    
+let private createDriverProject ()  =
+    File.create FileSystem.VirtualThis.driver.``Driver.fsproj``
+    Xml.createDoc $"""
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>{Literals.targetFramework}</TargetFramework>
+        <RootNamespace>Driver</RootNamespace>
+        <DefineConstants>CONCURRENT_DICT</DefineConstants>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="{FileSystem.VirtualThis.driver.``Program.fs``}"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="{FileSystem.Source.Decoder.``Xantham.Decoder.fsproj``}" />
+      <ProjectReference Include="{FileSystem.Source.Generator.``Xantham.Generator.fsproj``}" />
+    </ItemGroup>
+
+</Project>
+"""
+    |> Xml.saveDoc FileSystem.VirtualThis.driver.``Driver.fsproj``
+
+let private createDriverProgram () =
+    File.create FileSystem.VirtualThis.driver.``Program.fs``
+    programSourceCode
+    |> File.writeString false FileSystem.VirtualThis.driver.``Program.fs``
+ 
+let setupDriver =
+    lazy
+    createDriverProgram()
+    createDriverProject()
