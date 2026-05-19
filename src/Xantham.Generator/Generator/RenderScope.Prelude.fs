@@ -540,7 +540,16 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 match innerResolvedTypeValue with
                 | ResolvedType.Interface i -> i.TypeParameters.Length
                 | ResolvedType.Class c -> c.TypeParameters.Length
-                | _ -> typeArguments.Length
+                | _ ->
+                    // For type-alias targets (whose resolved body is a
+                    // TypeLiteral / Union / Intersection / etc.), the
+                    // alias's declared arity lives in ctx.TypeAliasArity.
+                    // Consult it so use sites like `AddRpcMcpServerOptions<X, Y>`
+                    // against `type AddRpcMcpServerOptions = {...}` (0 declared
+                    // typars) truncate to 0 instead of carrying spurious args.
+                    match ctx.TypeAliasArity.TryGetValue innerResolvedType.Raw with
+                    | true, arity -> arity
+                    | _ -> typeArguments.Length
         // Encoder/TS may produce a TypeReference whose argument count doesn't
         // match the inner type's declared type parameter count — happens with
         // declaration merging where the encoder can't disambiguate which
@@ -814,13 +823,31 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 | TypeRefKind.Atom (TypeRefAtom.ConcretePath p) ->
                     ctx.CycleBrokenPaths.Contains p
                 | _ -> false
+            // If the alias's TS declared arity is N, the rendered Prefix's
+            // arg count must match N. The alias's body may have rendered
+            // into a Prefix with arbitrary args (e.g. body is
+            // `SomeType<X, Y>` where X, Y are typars from elsewhere); after
+            // swapping the head to the alias path, those args leak.
+            // Truncate (or pass through when arity matches).
+            let declaredAliasArity =
+                match ctx.TypeAliasArity.TryGetValue lazyResolvedType.Raw with
+                | true, n -> ValueSome n
+                | _ -> ValueNone
             match ref.Kind with
             | TypeRefKind.Atom _ ->
                 target |> TypeRefRender.orNullable ref.Nullable
             | TypeRefKind.Molecule (TypeRefMolecule.Prefix _) when targetIsCycleBroken ->
                 target |> TypeRefRender.orNullable ref.Nullable
             | TypeRefKind.Molecule (TypeRefMolecule.Prefix (_, args)) ->
-                RenderScopeStore.TypeRefRender.create scope lazyResolvedType.Value ref.Nullable (target, args)
+                match declaredAliasArity with
+                | ValueSome 0 ->
+                    // Alias is non-generic; drop spurious args from the body.
+                    target |> TypeRefRender.orNullable ref.Nullable
+                | ValueSome n when n < args.Length ->
+                    let truncated = args |> List.truncate n
+                    RenderScopeStore.TypeRefRender.create scope lazyResolvedType.Value ref.Nullable (target, truncated)
+                | _ ->
+                    RenderScopeStore.TypeRefRender.create scope lazyResolvedType.Value ref.Nullable (target, args)
             | TypeRefKind.Molecule _ ->
                 // Non-Prefix molecules (Tuple/Union/Function) don't represent
                 // an alias-with-args application; the remap doesn't model
@@ -876,6 +903,13 @@ module ArenaInterner =
                         |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
                 GeneratorContext.Prelude.addTypeAliasRemap ctx declTypeKey ref
                 GeneratorContext.Prelude.addTypeAliasRemap ctx bodyTypeKey ref
+                // Record the alias's declared typar count, keyed by both
+                // TypeKeys (declaration and body) — heritage rendering
+                // uses this to reconcile arg counts against the parent's
+                // actual arity. See Render.TypeShapes.fs Interface.heritageTargetArity.
+                let arity = List.length value.TypeParameters
+                ctx.TypeAliasArity[declTypeKey] <- arity
+                ctx.TypeAliasArity[bodyTypeKey] <- arity
             | _ -> ())
     let private getTopologicalSort (_: ArenaInterner) (graph: Graph) =
         let degrees = ConcurrentDictionary graph.Degrees
