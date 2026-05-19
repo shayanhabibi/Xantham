@@ -384,6 +384,43 @@ module LibEsDefaults =
             "WeakKey", { Target = Intrinsic.obj; Arity = 0 }
             // `PromisifyFn` / similar utility shapes from Node's util types.
             "PromisifyFn", { Target = Intrinsic.obj; Arity = 0 }
+            // Lib.dom event-map types (`{ name: EventClass }` lookup
+            // dictionaries used with `addEventListener<K extends keyof TheEventMap>(...)`)
+            // and the auxiliary iteration result types from lib.es2015.iterable.
+            // None have F# stdlib analogues; obj placeholder so references
+            // resolve.
+            "WebSocketEventMap", { Target = Intrinsic.obj; Arity = 0 }
+            "WindowEventMap", { Target = Intrinsic.obj; Arity = 0 }
+            "WindowEventHandlersEventMap", { Target = Intrinsic.obj; Arity = 0 }
+            "DocumentAndElementEventHandlersEventMap", { Target = Intrinsic.obj; Arity = 0 }
+            "GlobalEventHandlersEventMap", { Target = Intrinsic.obj; Arity = 0 }
+            "HTMLElementEventMap", { Target = Intrinsic.obj; Arity = 0 }
+            "ElementEventMap", { Target = Intrinsic.obj; Arity = 0 }
+            "DocumentEventMap", { Target = Intrinsic.obj; Arity = 0 }
+            "DedicatedWorkerGlobalScopeEventMap", { Target = Intrinsic.obj; Arity = 0 }
+            "WorkerEventMap", { Target = Intrinsic.obj; Arity = 0 }
+            "WorkerGlobalScopeEventMap", { Target = Intrinsic.obj; Arity = 0 }
+            "SharedWorkerGlobalScopeEventMap", { Target = Intrinsic.obj; Arity = 0 }
+            // Lib.es2015.iterable result types (`{ value: T; done: false }`
+            // / `{ value: TReturn; done: true }` for IteratorYield/Return).
+            // Structurally just wrappers; obj placeholder loses the
+            // structural fact that they contain `value` and `done`.
+            "IteratorYieldResult", { Target = Intrinsic.obj; Arity = 0 }
+            "IteratorReturnResult", { Target = Intrinsic.obj; Arity = 0 }
+            "IteratorResult", { Target = Intrinsic.obj; Arity = 0 }
+            // Lib.dom iteration-protocol wrappers for browser collections.
+            "URLSearchParamsIterator", { Target = Intrinsic.obj; Arity = 0 }
+            "HeadersIterator", { Target = Intrinsic.obj; Arity = 0 }
+            "FormDataIterator", { Target = Intrinsic.obj; Arity = 0 }
+            // Lib.dom messaging / window globals referenced from worker
+            // / browser bindings.
+            "Window", { Target = Intrinsic.obj; Arity = 0 }
+            "MessagePort", { Target = Intrinsic.obj; Arity = 0 }
+            "MessageChannel", { Target = Intrinsic.obj; Arity = 0 }
+            "BroadcastChannel", { Target = Intrinsic.obj; Arity = 0 }
+            // Lib.dom storage/location.
+            "Storage", { Target = Intrinsic.obj; Arity = 0 }
+            "Location", { Target = Intrinsic.obj; Arity = 0 }
         ]
 
     let private intrinsicRef (name: string) =
