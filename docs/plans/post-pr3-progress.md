@@ -534,19 +534,19 @@ target (see top banner). Target set is **12 runtime SDKs**.
 
 | SDK | Raw | Distinct |
 |---|---:|---:|
-| Agents | 2,040 | 464 |
-| AiChat | 2,025 | 463 |
-| Codemode | 227 | 47 |
-| Containers | 997 | 153 |
+| Agents | 2,037 | 466 |
+| AiChat | 2,027 | 463 |
+| Codemode | 225 | 47 |
+| Containers | 992 | 153 |
 | DynamicWorkflows | 26 | 4 |
 | Puppeteer | 25 | 10 |
-| Sandbox | 997 | 153 |
-| Shell | 992 | 151 |
-| Think | 2,088 | 469 |
-| Voice | 1,136 | 172 |
-| WorkerBundler | 987 | 150 |
+| Sandbox | 991 | 153 |
+| Shell | 988 | 151 |
+| Think | 2,038 | 464 |
+| Voice | 1,145 | 173 |
+| WorkerBundler | 988 | 150 |
 | WorkersTypes | 1 | 1 |
-| **Total** | **11,541** | **2,237** |
+| **Total** | **11,483** | **2,235** |
 
 **Headline:** WorkersTypes effectively at zero (1 distinct, FS0037
 duplicate-definition). Voice dropped 482 → 172 distinct. Total
@@ -574,12 +574,44 @@ The post-PR3 work peeled successive layers in this order:
    `TypeFlagObject.buildSubstitutedMembersFromType`. That helper
    uses `ctx.checker.getTypeOfSymbol(propSym)` for each property's
    type — TS already substitutes typars at that call.
+5. Method/signature typar shadowing across all three free-typar
+   walkers — the walkers thread a `shadowed: HashSet<TypeParameter>`
+   through the recursion; at `Member.Method` /
+   `Member.CallSignature` / `Member.ConstructSignature`, the
+   signature's declared typars extend `shadowed` for the
+   recursive walks into params/return. This prevents method-level
+   typars from leaking into the alias/synthetic's declared typar
+   list when the encoder's Phase H substitution inlines a generic's
+   body as a `TypeLiteral` whose methods carry their own typar
+   scopes.
 
 The earlier post-PR3 totals (615 raw / 549 distinct in the table
 that previously occupied this slot) were under parser-bail
 masking — ~6× as much real downstream noise was hidden by an
 upstream parser failure. That table reflected what the F#
 compiler *saw* before bailing, not what was actually wrong.
+
+### Trajectory across the post-PR3 session
+
+| Stage | Raw | Distinct | Notes |
+|---|---:|---:|---|
+| Pre-PR3 baseline | 9,155 | 2,817 | parser-bail masking ~6× downstream errors |
+| After Phase B (synthetic-typar capture, `0ef73ac`) | 2,744 | 141 | still parser-bail masked |
+| After parser-bail unmask + Phase C (`39f0053`) | 17,109 | 3,032 | honest, no masking |
+| After Phase E1–E3 (auto-pad refs) | 13,217 | 2,490 | |
+| After Phase E4 (alias-hoist + arity propagation) | 829 | 207 | |
+| After Phase E5 (parser-wrap masking) | 561 | 51 | |
+| After Phase E6 (unmask via arg-drop) | 13,475 | 2,802 | exposes alias-body substitution gap |
+| After Phase F (Intrinsic atoms + render-layer subst) | ~13,499 | ~2,861 | |
+| After Phase G (boundary-stop synthetic+alias walkers) | 9,851 | 2,758 | largest single-phase drop |
+| After Phase G+ (cycle-broken Prefix-head fallback) | 9,835 | 2,750 | |
+| After Phase G++ (`prerenderTypeAliases` walker boundary; decoder subst tried+reverted) | 9,855 | 2,748 | walker discipline consistent across all three |
+| After Phase H (encoder alias instantiation via `getTypeOfSymbol`) | 11,541 | 2,237 | WorkersTypes 86 → 1; raw rises on new arity-mismatch cohorts |
+| After Phase I (method-scope shadowing) | **11,483** | **2,235** | current |
+
+Test status: 178/178 generator tests pass; 28/29 decoder tests
+pass (one pre-existing fixture failure unrelated to this work).
+See `reference_verify_pipeline.md` in memory for run instructions.
 
 The remaining histogram is dominated by:
 

@@ -1082,22 +1082,30 @@ module ArenaInterner =
                 let seenTp = HashSet<TypeParameter>(HashIdentity.Reference)
                 let seenRt = HashSet<ResolvedType>(HashIdentity.Reference)
                 let extraNames = HashSet<string>()
-                let rec walkT (rt: ResolvedType) =
+                // **Scope tracking:** shadowed carries method/sig-level
+                // typars from inner scopes. See the parallel comment on
+                // `collectFreeTypars` / `collectBodyTypars`. Without this,
+                // the encoder's Phase H substituted TypeLiterals would
+                // leak their method-level typars into alias-arity
+                // accounting, mismatching use-site arg counts.
+                let rec walkT (shadowed: HashSet<TypeParameter>) (rt: ResolvedType) =
                     if seenRt.Add rt then
                         match rt with
+                        | ResolvedType.TypeParameter tp when shadowed.Contains tp ->
+                            ()  // bound at an inner method/sig scope
                         | ResolvedType.TypeParameter tp ->
                             if seenTp.Add tp then
                                 let nm = Name.Case.valueOrModified tp.Name
                                 if not (Set.contains nm declaredNames) then
                                     extraNames.Add nm |> ignore
                         | ResolvedType.Union u ->
-                            for t in u.Types do walkT t.Value
+                            for t in u.Types do walkT shadowed t.Value
                         | ResolvedType.Intersection i ->
-                            for t in i.Types do walkT t.Value
+                            for t in i.Types do walkT shadowed t.Value
                         | ResolvedType.TypeLiteral tl ->
-                            for m in tl.Members do walkM m
+                            for m in tl.Members do walkM shadowed m
                         | ResolvedType.TemplateLiteral t ->
-                            for t in t.Types do walkT t.Value
+                            for t in t.Types do walkT shadowed t.Value
                         | ResolvedType.TypeReference tr ->
                             // Boundary at TypeReference: walk only the
                             // TypeArguments (carrying typars from the outer
@@ -1110,51 +1118,54 @@ module ArenaInterner =
                             // (e.g. `type Foo<T> = { rest: Foo<T> }`);
                             // walking through it here would recurse
                             // unboundedly.
-                            for arg in tr.TypeArguments do walkT arg.Value
-                        | ResolvedType.Array inner -> walkT inner
-                        | ResolvedType.ReadOnly inner -> walkT inner
+                            for arg in tr.TypeArguments do walkT shadowed arg.Value
+                        | ResolvedType.Array inner -> walkT shadowed inner
+                        | ResolvedType.ReadOnly inner -> walkT shadowed inner
                         | ResolvedType.Tuple t ->
-                            for e in t.Types do walkT e.Type.Value
+                            for e in t.Types do walkT shadowed e.Type.Value
                         | ResolvedType.IndexedAccess ia ->
-                            walkT ia.Object.Value
-                            walkT ia.Index.Value
-                        | ResolvedType.Index ix -> walkT ix.Type.Value
+                            walkT shadowed ia.Object.Value
+                            walkT shadowed ia.Index.Value
+                        | ResolvedType.Index ix -> walkT shadowed ix.Type.Value
                         | ResolvedType.Optional tr ->
-                            for arg in tr.TypeArguments do walkT arg.Value
-                        | ResolvedType.TypeQuery tq -> walkT tq.Type.Value
+                            for arg in tr.TypeArguments do walkT shadowed arg.Value
+                        | ResolvedType.TypeQuery tq -> walkT shadowed tq.Type.Value
                         | ResolvedType.Conditional c ->
-                            walkT c.Check.Value
-                            walkT c.Extends.Value
-                            walkT c.True.Value
-                            walkT c.False.Value
+                            walkT shadowed c.Check.Value
+                            walkT shadowed c.Extends.Value
+                            walkT shadowed c.True.Value
+                            walkT shadowed c.False.Value
                         | ResolvedType.Substitution s ->
-                            walkT s.Base.Value
+                            walkT shadowed s.Base.Value
                         // Boundary at Interface/Class — their typars are
                         // declared at their own scope.
                         | ResolvedType.Interface _
                         | ResolvedType.Class _
                         | _ -> ()
-                and walkM (m: Member) =
+                and walkSigLike (shadowed: HashSet<TypeParameter>) (typeParameters: Lazy<TypeParameter> list) (parameters: Parameter list) (returnType: LazyResolvedType) =
+                    let sigShadowed = HashSet<TypeParameter>(shadowed, HashIdentity.Reference)
+                    for tp in typeParameters do
+                        sigShadowed.Add tp.Value |> ignore
+                    for param in parameters do walkT sigShadowed param.Type.Value
+                    walkT sigShadowed returnType.Value
+                and walkM (shadowed: HashSet<TypeParameter>) (m: Member) =
                     match m with
-                    | Member.Property p -> walkT p.Type.Value
+                    | Member.Property p -> walkT shadowed p.Type.Value
                     | Member.Method overloads ->
                         for mt in overloads do
-                            for param in mt.Parameters do walkT param.Type.Value
-                            walkT mt.Type.Value
-                    | Member.GetAccessor g -> walkT g.Type.Value
-                    | Member.SetAccessor s -> walkT s.ArgumentType.Value
+                            walkSigLike shadowed mt.TypeParameters mt.Parameters mt.Type
+                    | Member.GetAccessor g -> walkT shadowed g.Type.Value
+                    | Member.SetAccessor s -> walkT shadowed s.ArgumentType.Value
                     | Member.IndexSignature ix ->
-                        for param in ix.Parameters do walkT param.Type.Value
-                        walkT ix.Type.Value
+                        for param in ix.Parameters do walkT shadowed param.Type.Value
+                        walkT shadowed ix.Type.Value
                     | Member.CallSignature sigs ->
                         for sig' in sigs do
-                            for param in sig'.Parameters do walkT param.Type.Value
-                            walkT sig'.Type.Value
+                            walkSigLike shadowed sig'.TypeParameters sig'.Parameters sig'.Type
                     | Member.ConstructSignature sigs ->
                         for sig' in sigs do
-                            for param in sig'.Parameters do walkT param.Type.Value
-                            walkT sig'.Type.Value
-                walkT value.Type.Value
+                            walkSigLike shadowed sig'.TypeParameters sig'.Parameters sig'.Type
+                walkT (HashSet<TypeParameter>(HashIdentity.Reference)) value.Type.Value
                 let arity = declared + extraNames.Count
                 ctx.TypeAliasArity[declTypeKey] <- arity
                 ctx.TypeAliasArity[bodyTypeKey] <- arity

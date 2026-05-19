@@ -31,73 +31,91 @@ module TypeAlias =
         // the type arguments (carrying typars from the OUTER scope) are
         // walked. Matches the same boundary-stop discipline as Phase B's
         // `collectFreeTypars` in `SyntheticPathAssignment.fs`.
+        // **Scope tracking:** a `shadowed` set carries typars declared at
+        // inner scopes encountered during the walk — currently
+        // `Member.Method` / `Member.CallSignature` /
+        // `Member.ConstructSignature` overloads. Their typars are bound at
+        // the method scope and are NOT free in the alias body's scope.
+        // Without this shadowing, the walker would capture method-level
+        // typars (e.g. `Uint8Array<T>.reduce<U>(...)`'s `U`) when the
+        // encoder's Phase H substitution inlines a generic's body as a
+        // `TypeLiteral` with method members, hoisting `U` onto the alias
+        // declaration and creating FS0033 arity mismatches at use sites.
         let collectBodyTypars (innerLazyResolved: LazyResolvedType) =
             let seenTp = System.Collections.Generic.HashSet<TypeParameter>(HashIdentity.Reference)
             let seenRt = System.Collections.Generic.HashSet<ResolvedType>(HashIdentity.Reference)
             let acc = System.Collections.Generic.List<TypeParameter>()
-            let rec walkT (rt: ResolvedType) =
+            let rec walkT (shadowed: System.Collections.Generic.HashSet<TypeParameter>) (rt: ResolvedType) =
                 if seenRt.Add rt then
                     match rt with
+                    | ResolvedType.TypeParameter tp when shadowed.Contains tp ->
+                        ()  // bound at an inner method/sig scope
                     | ResolvedType.TypeParameter tp ->
                         if seenTp.Add tp then acc.Add tp
                     | ResolvedType.Union u ->
-                        for t in u.Types do walkT t.Value
+                        for t in u.Types do walkT shadowed t.Value
                     | ResolvedType.Intersection i ->
-                        for t in i.Types do walkT t.Value
+                        for t in i.Types do walkT shadowed t.Value
                     | ResolvedType.TypeLiteral tl ->
-                        for m in tl.Members do walkM m
+                        for m in tl.Members do walkM shadowed m
                     | ResolvedType.TemplateLiteral t ->
-                        for t in t.Types do walkT t.Value
+                        for t in t.Types do walkT shadowed t.Value
                     | ResolvedType.TypeReference tr ->
                         // Boundary: do NOT walk `tr.Type.Value` (the
                         // target's body has its own typar scope). Walk
                         // `tr.TypeArguments` only — those carry typars
                         // from the alias body's outer scope.
-                        for arg in tr.TypeArguments do walkT arg.Value
-                    | ResolvedType.Array inner -> walkT inner
-                    | ResolvedType.ReadOnly inner -> walkT inner
+                        for arg in tr.TypeArguments do walkT shadowed arg.Value
+                    | ResolvedType.Array inner -> walkT shadowed inner
+                    | ResolvedType.ReadOnly inner -> walkT shadowed inner
                     | ResolvedType.Tuple t ->
-                        for e in t.Types do walkT e.Type.Value
+                        for e in t.Types do walkT shadowed e.Type.Value
                     | ResolvedType.IndexedAccess ia ->
-                        walkT ia.Object.Value
-                        walkT ia.Index.Value
-                    | ResolvedType.Index ix -> walkT ix.Type.Value
+                        walkT shadowed ia.Object.Value
+                        walkT shadowed ia.Index.Value
+                    | ResolvedType.Index ix -> walkT shadowed ix.Type.Value
                     | ResolvedType.Optional tr ->
-                        walkT (ResolvedType.TypeReference tr)
-                    | ResolvedType.TypeQuery tq -> walkT tq.Type.Value
+                        walkT shadowed (ResolvedType.TypeReference tr)
+                    | ResolvedType.TypeQuery tq -> walkT shadowed tq.Type.Value
                     | ResolvedType.Conditional c ->
-                        walkT c.Check.Value
-                        walkT c.Extends.Value
-                        walkT c.True.Value
-                        walkT c.False.Value
+                        walkT shadowed c.Check.Value
+                        walkT shadowed c.Extends.Value
+                        walkT shadowed c.True.Value
+                        walkT shadowed c.False.Value
                     | ResolvedType.Substitution s ->
-                        walkT s.Base.Value
+                        walkT shadowed s.Base.Value
                     // Boundary at Interface/Class: their typars are
                     // declared at their own scope, not free in the alias.
                     | ResolvedType.Interface _
                     | ResolvedType.Class _
                     | _ -> ()
-            and walkM (m: Member) =
+            and walkSigLike (shadowed: System.Collections.Generic.HashSet<TypeParameter>) (typeParameters: Lazy<TypeParameter> list) (parameters: Parameter list) (returnType: LazyResolvedType) =
+                // Each signature introduces its own typar scope. Extend
+                // shadowed with the signature's declared typars for the
+                // recursive walks into params/return.
+                let sigShadowed = System.Collections.Generic.HashSet<TypeParameter>(shadowed, HashIdentity.Reference)
+                for tp in typeParameters do
+                    sigShadowed.Add tp.Value |> ignore
+                for param in parameters do walkT sigShadowed param.Type.Value
+                walkT sigShadowed returnType.Value
+            and walkM (shadowed: System.Collections.Generic.HashSet<TypeParameter>) (m: Member) =
                 match m with
-                | Member.Property p -> walkT p.Type.Value
+                | Member.Property p -> walkT shadowed p.Type.Value
                 | Member.Method overloads ->
                     for mt in overloads do
-                        for param in mt.Parameters do walkT param.Type.Value
-                        walkT mt.Type.Value
-                | Member.GetAccessor g -> walkT g.Type.Value
-                | Member.SetAccessor s -> walkT s.ArgumentType.Value
+                        walkSigLike shadowed mt.TypeParameters mt.Parameters mt.Type
+                | Member.GetAccessor g -> walkT shadowed g.Type.Value
+                | Member.SetAccessor s -> walkT shadowed s.ArgumentType.Value
                 | Member.IndexSignature ix ->
-                    for param in ix.Parameters do walkT param.Type.Value
-                    walkT ix.Type.Value
+                    for param in ix.Parameters do walkT shadowed param.Type.Value
+                    walkT shadowed ix.Type.Value
                 | Member.CallSignature sigs ->
                     for sig' in sigs do
-                        for param in sig'.Parameters do walkT param.Type.Value
-                        walkT sig'.Type.Value
+                        walkSigLike shadowed sig'.TypeParameters sig'.Parameters sig'.Type
                 | Member.ConstructSignature sigs ->
                     for sig' in sigs do
-                        for param in sig'.Parameters do walkT param.Type.Value
-                        walkT sig'.Type.Value
-            walkT innerLazyResolved.Value
+                        walkSigLike shadowed sig'.TypeParameters sig'.Parameters sig'.Type
+            walkT (System.Collections.Generic.HashSet<TypeParameter>(HashIdentity.Reference)) innerLazyResolved.Value
             List.ofSeq acc
         // Reconcile the declaration's typar list against what the body
         // actually uses. Drops declared-but-unused (FS0035 prevention,
