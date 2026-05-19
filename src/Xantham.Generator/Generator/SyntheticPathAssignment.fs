@@ -186,93 +186,118 @@ module SyntheticPathAssignment =
         let name = sprintf "_Lit%d" counter |> Name.Pascal.create
         TypePath.createWithName name parentModule
 
-    /// Walk a synthetic's body collecting any `ResolvedType.TypeParameter`
-    /// references in first-appearance order. The `seen` set is keyed by the
-    /// underlying `TypeParameter` record's reference identity
-    /// (`[<ReferenceEquality>]` on the decoder record makes this cheap and
-    /// correct).
+    /// Walk a synthetic's body collecting `ResolvedType.TypeParameter`
+    /// references that are FREE in the synthetic's own scope — i.e. typars
+    /// the synthetic body uses but doesn't declare.
     ///
-    /// Walks transparently through every container including
-    /// Interface/Class/Enum and through TypeReferences' declaration bodies.
-    /// Counterintuitively this is the *correct* behavior: TS interns the
-    /// synthetic at one point in the type graph, and the only typars that
-    /// will be in scope at every reference site are typars from the
-    /// surrounding declaration scopes the encoder threaded through. By
-    /// collecting them all we capture the union of typars any reference
-    /// site might need. A narrower walk (stopping at named-type boundaries)
-    /// captures fewer typars and ends up emitting refs whose typars aren't
-    /// in scope at any of the reference sites — strictly worse.
+    /// Walks transparently through *structural* containers (Union /
+    /// Intersection / TypeLiteral / TemplateLiteral / Tuple / Array /
+    /// Optional / IndexedAccess / Index / TypeQuery / Conditional /
+    /// Substitution). For `TypeReference`, walks ONLY `TypeArguments` (those
+    /// carry typars from the OUTER scope and are bound at the synthetic's
+    /// reference site); does NOT walk `tr.Type.Value` because the target's
+    /// body has its own typar scope (declared on the target's
+    /// Interface/Class/TypeAlias) and its free typars are not free in the
+    /// synthetic's enclosing scope. Likewise stops at `Interface`/`Class`
+    /// boundaries — those declare their own typar scope.
     ///
-    /// Typars are added at first encounter to preserve declaration order:
-    /// `(value: 'T, index: 'U) => 'R` captures `['T; 'U; 'R]` so the emitted
-    /// synthetic declares typars in the same order references at use sites
-    /// will apply them.
+    /// Earlier implementation walked transparently through Interface/Class
+    /// members and through `tr.Type.Value`, on the theory that union-of-all-
+    /// captures would cover any reference site. In practice the over-capture
+    /// produced refs like `_Lit102<'T, 'S, 'This, 'U, 'A, 'D, 'Arr, ...>`
+    /// from typars belonging to deeply-nested target bodies — none in scope
+    /// at any reference site, all rendering as FS0039.
+    ///
+    /// Typars are added at first encounter to preserve declaration order.
+    ///
+    /// **Scope tracking:** a `shadowed` set carries the typars declared at
+    /// inner scopes encountered during the walk — currently the typars
+    /// declared on `Member.Method` / `Member.CallSignature` /
+    /// `Member.ConstructSignature` overloads. When walking into those
+    /// members' parameters and return types, the method's own typars are
+    /// bound at the method scope and are NOT free in the surrounding
+    /// synthetic's scope. Without this shadowing, the walker would capture
+    /// method-level typars (e.g. `reduce<U>(...)`'s `U`) as if they were
+    /// free, hoisting them onto the synthetic's declaration where they
+    /// don't belong — producing FS0033 arity-mismatch errors at use sites
+    /// that don't pass args for those phantom typars.
     let private collectFreeTypars (rootRt: ResolvedType) : TypeParameter list =
         let seen = HashSet<TypeParameter>(HashIdentity.Reference)
         let visited = HashSet<ResolvedType>(HashIdentity.Reference)
         let typars = ResizeArray<TypeParameter>()
-        let rec walkT (rt: ResolvedType) =
+        let rec walkT (shadowed: HashSet<TypeParameter>) (rt: ResolvedType) =
             if visited.Add rt then
                 match rt with
+                | ResolvedType.TypeParameter tp when shadowed.Contains tp ->
+                    ()  // bound at an inner method/sig scope
                 | ResolvedType.TypeParameter tp ->
                     if seen.Add tp then typars.Add tp
                 | ResolvedType.Union union ->
-                    for t in union.Types do walkT t.Value
+                    for t in union.Types do walkT shadowed t.Value
                 | ResolvedType.Intersection intersection ->
-                    for t in intersection.Types do walkT t.Value
+                    for t in intersection.Types do walkT shadowed t.Value
                 | ResolvedType.TypeLiteral typeLiteral ->
-                    for m in typeLiteral.Members do walkM m
+                    for m in typeLiteral.Members do walkM shadowed m
                 | ResolvedType.TemplateLiteral template ->
-                    for t in template.Types do walkT t.Value
-                | ResolvedType.Interface iface ->
-                    for m in iface.Members do walkM m
-                | ResolvedType.Class cls ->
-                    for m in cls.Members do walkM m
+                    for t in template.Types do walkT shadowed t.Value
                 | ResolvedType.TypeReference typeRef ->
-                    walkT typeRef.Type.Value
-                    for arg in typeRef.TypeArguments do walkT arg.Value
-                | ResolvedType.Array inner -> walkT inner
-                | ResolvedType.ReadOnly inner -> walkT inner
+                    // Boundary: do NOT walk `tr.Type.Value` — the target's
+                    // body has its own scope. Walking TypeArguments captures
+                    // typars threaded from the synthetic's outer scope.
+                    for arg in typeRef.TypeArguments do walkT shadowed arg.Value
+                | ResolvedType.Array inner -> walkT shadowed inner
+                | ResolvedType.ReadOnly inner -> walkT shadowed inner
                 | ResolvedType.Tuple tuple ->
-                    for t in tuple.Types do walkT t.Type.Value
+                    for t in tuple.Types do walkT shadowed t.Type.Value
                 | ResolvedType.IndexedAccess indexed ->
-                    walkT indexed.Object.Value
-                    walkT indexed.Index.Value
-                | ResolvedType.Index index -> walkT index.Type.Value
-                | ResolvedType.Optional opt -> walkT opt.Type.Value
-                | ResolvedType.TypeQuery query -> walkT query.Type.Value
+                    walkT shadowed indexed.Object.Value
+                    walkT shadowed indexed.Index.Value
+                | ResolvedType.Index index -> walkT shadowed index.Type.Value
+                | ResolvedType.Optional opt -> walkT shadowed opt.Type.Value
+                | ResolvedType.TypeQuery query -> walkT shadowed query.Type.Value
                 | ResolvedType.Conditional cond ->
-                    walkT cond.Check.Value
-                    walkT cond.Extends.Value
-                    walkT cond.True.Value
-                    walkT cond.False.Value
+                    walkT shadowed cond.Check.Value
+                    walkT shadowed cond.Extends.Value
+                    walkT shadowed cond.True.Value
+                    walkT shadowed cond.False.Value
                 | ResolvedType.Substitution sub ->
-                    walkT sub.Base.Value
+                    walkT shadowed sub.Base.Value
+                // Boundary at Interface/Class — they introduce their own
+                // declared typar scope. Their typars are not free in the
+                // outer synthetic's scope.
+                | ResolvedType.Interface _
+                | ResolvedType.Class _
                 | _ -> ()
-        and walkM (memberRef: Member) =
+        and walkSigLike (shadowed: HashSet<TypeParameter>) (typeParameters: Lazy<TypeParameter> list) (parameters: Parameter list) (returnType: LazyResolvedType) =
+            // Each signature introduces its own typar scope. Extend the
+            // shadowed set with the signature's declared typars before
+            // walking into its parameters and return.
+            let sigShadowed = HashSet<TypeParameter>(shadowed, HashIdentity.Reference)
+            for tp in typeParameters do
+                sigShadowed.Add tp.Value |> ignore
+            for param in parameters do walkT sigShadowed param.Type.Value
+            walkT sigShadowed returnType.Value
+        and walkM (shadowed: HashSet<TypeParameter>) (memberRef: Member) =
             match memberRef with
             | Member.Property prop ->
-                walkT prop.Type.Value
+                walkT shadowed prop.Type.Value
             | Member.Method overloads ->
                 for m in overloads do
-                    for param in m.Parameters do walkT param.Type.Value
-                    walkT m.Type.Value
+                    walkSigLike shadowed m.TypeParameters m.Parameters m.Type
             | Member.GetAccessor get ->
-                walkT get.Type.Value
+                walkT shadowed get.Type.Value
             | Member.SetAccessor set ->
-                walkT set.ArgumentType.Value
+                walkT shadowed set.ArgumentType.Value
             | Member.IndexSignature idx ->
-                for param in idx.Parameters do walkT param.Type.Value
-                walkT idx.Type.Value
+                for param in idx.Parameters do walkT shadowed param.Type.Value
+                walkT shadowed idx.Type.Value
             | Member.CallSignature signatures ->
                 for sig' in signatures do
-                    for param in sig'.Parameters do walkT param.Type.Value
-                    walkT sig'.Type.Value
+                    walkSigLike shadowed sig'.TypeParameters sig'.Parameters sig'.Type
             | Member.ConstructSignature signatures ->
                 for sig' in signatures do
-                    for param in sig'.Parameters do walkT param.Type.Value
-                    walkT sig'.Type.Value
-        walkT rootRt
+                    walkSigLike shadowed sig'.TypeParameters sig'.Parameters sig'.Type
+        walkT (HashSet<TypeParameter>(HashIdentity.Reference)) rootRt
         List.ofSeq typars
 
     let private assignSynthetics

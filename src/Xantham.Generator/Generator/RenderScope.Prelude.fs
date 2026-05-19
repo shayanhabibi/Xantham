@@ -108,7 +108,6 @@ let private createAssignedSyntheticRef
             |> List.map (fun tp ->
                 tp.Name
                 |> Name.Case.valueOrModified
-                |> Ast.LongIdent
                 |> RenderScopeStore.TypeRefRender.create scope resolvedType false)
         RenderScopeStore.TypeRefRender.create scope resolvedType nullable (atom, typarRefs)
     | _ -> atom
@@ -122,8 +121,25 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic Intrinsic.obj
         |> RenderScopeStore.TypeRef.Unsafe.createAtom
         |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+    let collapseCycleBrokenPrefix (ref: TypeRefRender) =
+        // When a `Prefix(head, _)` reference ends up with a head whose
+        // ConcretePath is in `CycleBrokenPaths`, the args can't apply
+        // (e.g. `ZodTypeAny<X, Y, Z>` where `ZodTypeAny = obj`). Drop
+        // the args; keep the head atom. Catches cases that bypass the
+        // `TypeAliasRemap` keyed lookup (different instantiation args
+        // produce a different TypeKey than what was stored in the
+        // remap on alias-render).
+        match ref.Kind with
+        | TypeRefKind.Molecule (TypeRefMolecule.Prefix (head, _)) ->
+            match head.Kind with
+            | TypeRefKind.Atom (TypeRefAtom.ConcretePath p)
+                when ctx.CycleBrokenPaths.Contains p ->
+                head |> TypeRefRender.orNullable ref.Nullable
+            | _ -> ref
+        | _ -> ref
     let remap (ref: TypeRefRender) =
-        if not (ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Raw)) then ref
+        if not (ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Raw)) then
+            collapseCycleBrokenPrefix ref
         else
             // If this lookup's target ref is currently being rendered
             // as an alias body, returning it would emit a recursive
@@ -597,6 +613,21 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 prefix
                 |> RenderScope.createRootless resolvedType
                 |> addOrReplaceScope ctx resolvedType
+            | TypeRefKind.Molecule (TypeRefMolecule.Union _)
+            | TypeRefKind.Molecule (TypeRefMolecule.Tuple _)
+            | TypeRefKind.Molecule (TypeRefMolecule.Function _) ->
+                // The alias's resolved body is a Union/Tuple/Function
+                // molecule. F# has no valid syntax for
+                // `U4<A,B,C,D><obj × N>` etc. — these molecules don't
+                // take type arguments. Instead, substitute the body's
+                // typar atoms with `obj` (the alias's declared typars
+                // aren't in scope at the use site; we have no caller-supplied
+                // args to substitute). This is alias-body substitution
+                // at the render layer.
+                prefix
+                |> TypeRefRender.substituteForHeritage Set.empty
+                |> RenderScope.createRootless resolvedType
+                |> addOrReplaceScope ctx resolvedType
             | _ ->
                 let objArg =
                     LazyContainer.CreateFromValue
@@ -727,6 +758,18 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             prefix
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
+        | TypeRefKind.Molecule (TypeRefMolecule.Union _)
+        | TypeRefKind.Molecule (TypeRefMolecule.Tuple _)
+        | TypeRefKind.Molecule (TypeRefMolecule.Function _) ->
+            // Prefix is a non-Prefix composite (Union/Tuple/Function). F#
+            // has no syntactic form for `U4<A,B,C,D><E,F,G,H>` or
+            // `(A * B)<C>` or `(A -> B)<C>`. Substitute the body's typar
+            // atoms with the supplied args (or `obj` for unmatched typars).
+            // This is alias-body substitution at the render layer.
+            prefix
+            |> TypeRefRender.substituteForHeritage Set.empty
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
         | _ ->
             let postfixArguments =
                 alignedArguments
@@ -770,9 +813,14 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
           TransientChildren = ValueSome scope }
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeParameter typeParameter ->
+        // Render typars as `Intrinsic` atoms (string `'T`) rather than
+        // `Widget` atoms (opaque Fabulous nodes). Same emitted text, but
+        // downstream passes can identify and substitute typar atoms by
+        // matching `Intrinsic_ s when s.StartsWith("'")`. Used by
+        // `substituteForHeritage` and (Phase F) alias-body substitution
+        // at use sites.
         typeParameter.Name
         |> Name.Case.valueOrModified
-        |> Ast.LongIdent
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
@@ -962,7 +1010,10 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 // an alias-with-args application; the remap doesn't model
                 // them. Leave the produced ref alone.
                 ref
-        | Registered ref -> ref
+        | Registered ref ->
+            // Fallback for refs where `TypeAliasRemap` didn't match this
+            // exact instantiation's TypeKey. See `collapseCycleBrokenPrefix`.
+            collapseCycleBrokenPrefix ref
 
 module TestHelper =
     let prerender ctx resolvedType =
@@ -1031,81 +1082,90 @@ module ArenaInterner =
                 let seenTp = HashSet<TypeParameter>(HashIdentity.Reference)
                 let seenRt = HashSet<ResolvedType>(HashIdentity.Reference)
                 let extraNames = HashSet<string>()
-                let rec walkT (rt: ResolvedType) =
+                // **Scope tracking:** shadowed carries method/sig-level
+                // typars from inner scopes. See the parallel comment on
+                // `collectFreeTypars` / `collectBodyTypars`. Without this,
+                // the encoder's Phase H substituted TypeLiterals would
+                // leak their method-level typars into alias-arity
+                // accounting, mismatching use-site arg counts.
+                let rec walkT (shadowed: HashSet<TypeParameter>) (rt: ResolvedType) =
                     if seenRt.Add rt then
                         match rt with
+                        | ResolvedType.TypeParameter tp when shadowed.Contains tp ->
+                            ()  // bound at an inner method/sig scope
                         | ResolvedType.TypeParameter tp ->
                             if seenTp.Add tp then
                                 let nm = Name.Case.valueOrModified tp.Name
                                 if not (Set.contains nm declaredNames) then
                                     extraNames.Add nm |> ignore
                         | ResolvedType.Union u ->
-                            for t in u.Types do walkT t.Value
+                            for t in u.Types do walkT shadowed t.Value
                         | ResolvedType.Intersection i ->
-                            for t in i.Types do walkT t.Value
+                            for t in i.Types do walkT shadowed t.Value
                         | ResolvedType.TypeLiteral tl ->
-                            for m in tl.Members do walkM m
+                            for m in tl.Members do walkM shadowed m
                         | ResolvedType.TemplateLiteral t ->
-                            for t in t.Types do walkT t.Value
-                        | ResolvedType.Interface iface ->
-                            for m in iface.Members do walkM m
-                        | ResolvedType.Class cls ->
-                            for m in cls.Members do walkM m
+                            for t in t.Types do walkT shadowed t.Value
                         | ResolvedType.TypeReference tr ->
-                            // Walk the target body too — synthetic literals
-                            // (Union/Intersection/TypeLiteral/TemplateLiteral
-                            // referenced via TypeReference with empty args
-                            // at the decoder level) carry their typar
-                            // references inside their bodies. Phase B's
-                            // typar capture surfaces these at render time;
-                            // we need to surface them at alias-arity
-                            // precomputation time too so use sites pad
-                            // correctly. seenRt protects against cycles.
-                            walkT tr.Type.Value
-                            for arg in tr.TypeArguments do walkT arg.Value
-                            match tr.ResolvedType with
-                            | Some r -> walkT r.Value
-                            | None -> ()
-                        | ResolvedType.Array inner -> walkT inner
-                        | ResolvedType.ReadOnly inner -> walkT inner
+                            // Boundary at TypeReference: walk only the
+                            // TypeArguments (carrying typars from the outer
+                            // alias's scope). The target's body has its own
+                            // typar scope and its free typars are not free
+                            // here. Symmetric to the boundary-stop applied
+                            // to `collectFreeTypars`/`collectBodyTypars`.
+                            // Also: the decoder's substituted ResolvedType
+                            // can be recursively self-referential by design
+                            // (e.g. `type Foo<T> = { rest: Foo<T> }`);
+                            // walking through it here would recurse
+                            // unboundedly.
+                            for arg in tr.TypeArguments do walkT shadowed arg.Value
+                        | ResolvedType.Array inner -> walkT shadowed inner
+                        | ResolvedType.ReadOnly inner -> walkT shadowed inner
                         | ResolvedType.Tuple t ->
-                            for e in t.Types do walkT e.Type.Value
+                            for e in t.Types do walkT shadowed e.Type.Value
                         | ResolvedType.IndexedAccess ia ->
-                            walkT ia.Object.Value
-                            walkT ia.Index.Value
-                        | ResolvedType.Index ix -> walkT ix.Type.Value
+                            walkT shadowed ia.Object.Value
+                            walkT shadowed ia.Index.Value
+                        | ResolvedType.Index ix -> walkT shadowed ix.Type.Value
                         | ResolvedType.Optional tr ->
-                            walkT (ResolvedType.TypeReference tr)
-                        | ResolvedType.TypeQuery tq -> walkT tq.Type.Value
+                            for arg in tr.TypeArguments do walkT shadowed arg.Value
+                        | ResolvedType.TypeQuery tq -> walkT shadowed tq.Type.Value
                         | ResolvedType.Conditional c ->
-                            walkT c.Check.Value
-                            walkT c.Extends.Value
-                            walkT c.True.Value
-                            walkT c.False.Value
+                            walkT shadowed c.Check.Value
+                            walkT shadowed c.Extends.Value
+                            walkT shadowed c.True.Value
+                            walkT shadowed c.False.Value
                         | ResolvedType.Substitution s ->
-                            walkT s.Base.Value
+                            walkT shadowed s.Base.Value
+                        // Boundary at Interface/Class — their typars are
+                        // declared at their own scope.
+                        | ResolvedType.Interface _
+                        | ResolvedType.Class _
                         | _ -> ()
-                and walkM (m: Member) =
+                and walkSigLike (shadowed: HashSet<TypeParameter>) (typeParameters: Lazy<TypeParameter> list) (parameters: Parameter list) (returnType: LazyResolvedType) =
+                    let sigShadowed = HashSet<TypeParameter>(shadowed, HashIdentity.Reference)
+                    for tp in typeParameters do
+                        sigShadowed.Add tp.Value |> ignore
+                    for param in parameters do walkT sigShadowed param.Type.Value
+                    walkT sigShadowed returnType.Value
+                and walkM (shadowed: HashSet<TypeParameter>) (m: Member) =
                     match m with
-                    | Member.Property p -> walkT p.Type.Value
+                    | Member.Property p -> walkT shadowed p.Type.Value
                     | Member.Method overloads ->
                         for mt in overloads do
-                            for param in mt.Parameters do walkT param.Type.Value
-                            walkT mt.Type.Value
-                    | Member.GetAccessor g -> walkT g.Type.Value
-                    | Member.SetAccessor s -> walkT s.ArgumentType.Value
+                            walkSigLike shadowed mt.TypeParameters mt.Parameters mt.Type
+                    | Member.GetAccessor g -> walkT shadowed g.Type.Value
+                    | Member.SetAccessor s -> walkT shadowed s.ArgumentType.Value
                     | Member.IndexSignature ix ->
-                        for param in ix.Parameters do walkT param.Type.Value
-                        walkT ix.Type.Value
+                        for param in ix.Parameters do walkT shadowed param.Type.Value
+                        walkT shadowed ix.Type.Value
                     | Member.CallSignature sigs ->
                         for sig' in sigs do
-                            for param in sig'.Parameters do walkT param.Type.Value
-                            walkT sig'.Type.Value
+                            walkSigLike shadowed sig'.TypeParameters sig'.Parameters sig'.Type
                     | Member.ConstructSignature sigs ->
                         for sig' in sigs do
-                            for param in sig'.Parameters do walkT param.Type.Value
-                            walkT sig'.Type.Value
-                walkT value.Type.Value
+                            walkSigLike shadowed sig'.TypeParameters sig'.Parameters sig'.Type
+                walkT (HashSet<TypeParameter>(HashIdentity.Reference)) value.Type.Value
                 let arity = declared + extraNames.Count
                 ctx.TypeAliasArity[declTypeKey] <- arity
                 ctx.TypeAliasArity[bodyTypeKey] <- arity

@@ -290,11 +290,36 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
     | TypeNode.TypeReference typeReferenceNode ->
         // Non-generic TypeReferences (no explicit type arguments) forward directly to the resolved
         // type — this avoids a TypeReference entry whose Type == its own TypeStore key (self-ref).
-        // Generic TypeReferences keep their own TypeReference builder (captures type arguments).
+        // Generic TypeReferences with args targeting an ALIAS emit a substituted
+        // TypeLiteral (TS already substitutes; see
+        // `TypeFlagObject.buildSubstitutedMembersFromType`). Generic
+        // TypeReferences targeting Interface/Class keep their own TypeReference
+        // builder so the consumer sees `Foo<X>` with the explicit typar binding.
         let hasTypeArgs = typeReferenceNode.typeArguments |> Option.map (fun a -> a.Count > 0) |> Option.defaultValue false
         if hasTypeArgs then
-            "TypeReference - has type args" |> debugMessage
-            TypeReference.fromNode ctx xanTag typeReferenceNode
+            let instantiated = ctx.checker.getTypeFromTypeNode typeReferenceNode
+            // `aliasSymbol` is set by TS when an instantiated type originated
+            // from a TypeAliasDeclaration application — exactly the case
+            // where the use-site body should be substituted rather than
+            // preserved as a TypeReference + un-substituted body.
+            match instantiated.aliasSymbol with
+            | Some _ when instantiated.flags.HasFlag Ts.TypeFlags.Object ->
+                "TypeReference - alias instantiation, emitting substituted TypeLiteral" |> debugMessage
+                let objType = unbox<Ts.ObjectType> instantiated
+                let members = TypeFlagObject.buildSubstitutedMembersFromType ctx objType
+                { STypeLiteralBuilder.Members = members }
+                |> SType.TypeLiteral
+                |> fun builder -> xanTag.Builder <- builder
+                // Use the tag's generated key (per the same rationale in
+                // `TypeReference.fromNode` line 216-220) so the emitted entry
+                // has its own TypeKey identity rather than aliasing the
+                // instantiated Ts.Type's own key (which would create a
+                // self-referential cache entry during compression).
+                ctx.signalCache[xanTag.IdentityKey].Key
+                |> setTypeKeyForTag xanTag
+            | _ ->
+                "TypeReference - has type args (non-alias target)" |> debugMessage
+                TypeReference.fromNode ctx xanTag typeReferenceNode
         else
             "TypeReference - no type args" |> debugMessage
             routeViaChecker typeReferenceNode

@@ -527,60 +527,155 @@ Key implementation notes:
 ## Current state — verify counts
 
 Raw and distinct (file:line:col-deduplicated) error counts after
-all post-`e65df55` work. Pre-edit baseline column re-measured on
-the current branch. **Cloudflare row dropped** — the bare
+the post-PR3 work landed (parser-bail unmask through encoder-side
+alias instantiation). **Cloudflare row dropped** — the bare
 `cloudflare` package is the management REST client, not a Xantham
 target (see top banner). Target set is **12 runtime SDKs**.
 
-| SDK | Pre-edit raw | Post-fix raw / distinct |
+| SDK | Raw | Distinct |
 |---|---:|---:|
-| Agents | 5 | 2 / 1 |
-| AiChat | 5 | 2 / 1 |
-| Codemode | 197 | 196 / 70 |
-| Containers | 6 | 2 / 1 |
-| DynamicWorkflows | 45 | 44 / 14 |
-| Puppeteer | 34 | 2 / 1 |
-| Sandbox | 6 | 2 / 1 |
-| Shell | 5 | 2 / 1 |
-| Think | 5 | 2 / 1 |
-| Voice | 5 | 2 / 1 |
-| WorkerBundler | 5 | 2 / 1 |
-| WorkersTypes | 292 | 291 / 79 |
-| **Total** | **615** | **549** |
+| Agents | 1,782 | 438 |
+| AiChat | 1,776 | 436 |
+| Codemode | 247 | 49 |
+| Containers | 732 | 141 |
+| DynamicWorkflows | 27 | 5 |
+| Puppeteer | 25 | 10 |
+| Sandbox | 733 | 140 |
+| Shell | 721 | 138 |
+| Think | 1,843 | 435 |
+| Voice | 878 | 159 |
+| WorkerBundler | 724 | 138 |
+| WorkersTypes | 1 | 1 |
+| **Total** | **9,489** | **2,090** |
 
-(Earlier reports of 623 / 556 totals included a spurious
-`Cloudflare` row of 8 / 7. Removing it yields the 615 / 549
-figures above for the actual 12-SDK target set.)
+**Headline:** WorkersTypes effectively at zero (1 distinct,
+FS0037 duplicate-definition). Voice now at 159 distinct (down
+from 482 mid-session). Total **9,489 raw / 2,090 distinct** —
+cumulative reduction vs HEAD baseline (14,437 raw / 2,861 distinct)
+is **−4,948 raw (−34%) / −771 distinct (−27%)**. The recent
+Phases J/K closed the `this`-as-typar bug at its source and
+restored call-signature typar passthrough in the encoder,
+eliminating the dominant FS0033 cohort that Phase H had surfaced.
 
-Net **−66 errors** across the 12 runtime SDKs. The renamer's
-biggest win is on Puppeteer (34 → 2). The big-volume SDKs
-(`Codemode` 197, `WorkersTypes` 292) only dropped by 1 each —
-their remaining errors are unrelated to name-escape and break
-down as:
+The post-PR3 work peeled successive layers in this order:
 
-* FS0033 generic-arity mismatches (`ReadonlyArray<_>` expects 1
-  but given 0, etc.) — encoder dispatcher routing for generic
-  type-references whose arity has been lost or partially-applied;
-  also visible in the substitution-table's name-only mapping
-  losing typar arity. Fixable in encoder dispatch
-  (`src/Xantham.Fable/Reading/Dispatch/TypeFlagObject.fs`) or
-  by making `LibEsDefaults.substitutions` arity-aware.
-* FS0039 undefined-name resolution failures (`NoInfer`,
-  `Types.X`, `Bind`, `LoadRunner`, etc.) — a mix of the
-  `NoInfer` regression flagged in this doc's original
-  "Open questions" §2 (fixable either in encoder dispatch or by
-  adding `(NoInfer, 1) → (T, identity)` to
-  `LibEsDefaults.substitutions`), the `UnknownDeclared`
-  path-qualifier loss flagged in §3 (encoder classifier in
-  `TypeDeclaration.fs`), and synthetic-name references where
-  the synthetic type (`_LitN`) never got emitted (encoder
-  dispatch order).
+1. Parser-bail unmask exposed real downstream errors (Phase B).
+2. Arity reconciliation absorbed most use-site arity noise
+   (Phase E1-E3).
+3. Free-typar walker boundary-stop across all three walkers —
+   `SyntheticPathAssignment.collectFreeTypars`,
+   `Render.TypeAlias.collectBodyTypars`,
+   `prerenderTypeAliases` walkT — eliminated synthetic-typar
+   over-capture (Phase G/G+/G++).
+4. Encoder-side substitution: at the `TypeReferenceNode` dispatch,
+   when the target's instantiated `Ts.Type.aliasSymbol` is set
+   (TS's marker for "this is an alias application"), bypass the
+   un-substituted `TypeReference` emission and produce a
+   `STypeLiteralBuilder` instead, populated via
+   `TypeFlagObject.buildSubstitutedMembersFromType`. That helper
+   uses `ctx.checker.getTypeOfSymbol(propSym)` for each property's
+   type — TS already substitutes typars at that call.
+5. Method/signature typar shadowing across all three free-typar
+   walkers — the walkers thread a `shadowed: HashSet<TypeParameter>`
+   through the recursion; at `Member.Method` /
+   `Member.CallSignature` / `Member.ConstructSignature`, the
+   signature's declared typars extend `shadowed` for the
+   recursive walks into params/return. This prevents method-level
+   typars from leaking into the alias/synthetic's declared typar
+   list when the encoder's Phase H substitution inlines a generic's
+   body as a `TypeLiteral` whose methods carry their own typar
+   scopes.
+6. **`this`-as-typar routing** in
+   `Reading/Dispatch/TypeFlagPrimary.fs`: TS's `this` (in
+   `methodName(): this` etc.) is encoded as a `TypeParameter` with
+   `isThisType = true` and a constraint pointing at the enclosing
+   class. The encoder previously emitted these as F# typars named
+   after the class (`'EventEmitter`, `'Uint8Array`); now detects
+   `isThisType` and routes through to the constraint via
+   `routeToType`, so `this` emits as a reference to the class
+   itself. Eliminates the `'EventEmitter is not defined` cohort.
+7. **Signature typeParameters extraction** in
+   `Reading/Dispatch/TypeFlagObject.fs`:
+   `callSigToMemberSlot`/`constructSigToMemberSlot` previously left
+   `TypeParameters = [||]` (comment claimed TS Signature doesn't
+   expose them as nodes — true, but they ARE exposed at the type
+   level via `signature.getTypeParameters()`). New
+   `getTypeParamSlotsFromSignature` helper builds the
+   `InlinedSTypeParameterBuilder` slots from the type-level
+   `Ts.TypeParameter` array. Without this, Phase H's substituted-
+   method properties (which manifest as function-typed Object types
+   with call signatures) left their method-level typars invisible to
+   the decoder, so the walker shadowing in step 5 had nothing to
+   shadow. Eliminates the bulk of the FS0033 cohort that Phase H
+   surfaced.
 
-These two categories define the bulk of the remaining work. All
-of them are in scope for this fork — see [[feedback_no_fix_scope_limits]]
-in memory. The original "Open questions for review" section above
-is the roadmap; under the corrected scope framing every option in
-it is a live in-scope fix to choose between, not an upstream ask.
+The earlier post-PR3 totals (615 raw / 549 distinct in the table
+that previously occupied this slot) were under parser-bail
+masking — ~6× as much real downstream noise was hidden by an
+upstream parser failure. That table reflected what the F#
+compiler *saw* before bailing, not what was actually wrong.
+
+### Trajectory across the post-PR3 session
+
+| Stage | Raw | Distinct | Notes |
+|---|---:|---:|---|
+| Pre-PR3 baseline | 9,155 | 2,817 | parser-bail masking ~6× downstream errors |
+| After Phase B (synthetic-typar capture, `0ef73ac`) | 2,744 | 141 | still parser-bail masked |
+| After parser-bail unmask + Phase C (`39f0053`) | 17,109 | 3,032 | honest, no masking |
+| After Phase E1–E3 (auto-pad refs) | 13,217 | 2,490 | |
+| After Phase E4 (alias-hoist + arity propagation) | 829 | 207 | |
+| After Phase E5 (parser-wrap masking) | 561 | 51 | |
+| After Phase E6 (unmask via arg-drop) | 13,475 | 2,802 | exposes alias-body substitution gap |
+| After Phase F (Intrinsic atoms + render-layer subst) | ~13,499 | ~2,861 | |
+| After Phase G (boundary-stop synthetic+alias walkers) | 9,851 | 2,758 | largest single-phase drop |
+| After Phase G+ (cycle-broken Prefix-head fallback) | 9,835 | 2,750 | |
+| After Phase G++ (`prerenderTypeAliases` walker boundary; decoder subst tried+reverted) | 9,855 | 2,748 | walker discipline consistent across all three |
+| After Phase H (encoder alias instantiation via `getTypeOfSymbol`) | 11,541 | 2,237 | WorkersTypes 86 → 1; raw rises on new arity-mismatch cohorts |
+| After Phase I (method-scope shadowing) | 11,483 | 2,235 | walker discipline holds across three walkers |
+| After Phase J (`this`-as-typar routing) | 11,119 | 2,111 | eliminates `'EventEmitter` cohort |
+| After Phase K (signature typeParameters extraction) | **9,489** | **2,090** | current |
+
+Test status: 178/178 generator tests pass; 28/29 decoder tests
+pass (one pre-existing fixture failure unrelated to this work).
+See `reference_verify_pipeline.md` in memory for run instructions.
+
+The remaining histogram is dominated by:
+
+* **FS0039 typar-not-defined** (~1,250 in Think; ~1,000 across
+  other big SDKs). The `'Value`, `'S`, `'EventEmitter` cohorts
+  are now ZERO — closed by Phases H and J. Surviving cohorts:
+    - `'T` (296 Think) — class/interface instantiations
+      (`extends ZodType<X, Y, Z>` etc.) where Phase H's alias-only
+      substitution doesn't fire. The TS source's `T` typar at
+      method scope inside the generic class leaks because the
+      non-alias instantiation path doesn't go through the
+      substituted-property emission.
+    - `'Output` (160) — same pattern, ZodType class methods.
+    - `'F` (108) — same pattern, predicate function signatures
+      inside the inherited generic class.
+    - `'Options not defined in ...GenerateKeyPairSyncModule.Invoke`
+      (64) — synthetic submodule path resolution gap; the
+      synthetic exists at a sibling path but the reference
+      doesn't resolve to it.
+* **FS0033 arity mismatches — significantly reduced** by Phases J
+  and K. The previous dominant cohort
+  (`NonSharedBuffer<_,_,_>`/`<_,_>`, `ZodTypeAny<_,_,_,_,_,_>`,
+  `OmitKeys<_,_>`, etc.) traced to method-level typars leaking
+  because TS's call signatures weren't passing their typars
+  through to the decoder. With Phase K populating the call
+  signature's typeParameters, those typars are properly bound at
+  the method scope and the surrounding alias no longer hoists
+  them. FS0033 in Think dropped from ~520 to ~97.
+* **FS0033 cycle-broken arity** (~40 `WorkspaceLike does not
+  expect type arguments, but here is given 1`) — surviving from
+  pre-substitution work; cycle-broken alias target with args at
+  use sites whose TypeKey doesn't match `TypeAliasRemap`.
+* **FS0001 missing constraints** (~298 in Think) — type aliases
+  declaring many typars whose bodies reference synthetics
+  with constrained typars; F# infers the constraints and rejects
+  the alias declaration that lacks them. Downstream of the
+  substitution work — now that more typars are correctly bound,
+  F# can infer more constraint requirements.
 
 For the complete current roadmap including the additional
 generator-side categories (`.node` member names, StringEnum
