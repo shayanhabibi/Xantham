@@ -155,19 +155,16 @@ module TypeAlias =
                 |> List.filter (fun tp ->
                     not (Set.contains (Name.Case.valueOrModified tp.Name) declaredNames))
                 |> List.distinctBy (fun tp -> Name.Case.valueOrModified tp.Name)
-                |> List.map (fun tp ->
-                    {
-                        Prelude.TypeParameterRender.Name = tp.Name
-                        Metadata = {
-                            Path = Path.create TransientTypePath.Anchored
-                            Original = Path.create TransientTypePath.Anchored
-                            Source = ValueNone
-                            FullyQualifiedName = ValueNone
-                        }
-                        Constraint = ValueNone
-                        Default = ValueNone
-                        Documentation = []
-                    })
+                // Use `TypeParameter.render` so the hoisted typars carry
+                // their constraints (and defaults) from the original
+                // `TypeParameter` record. Without this, hoisted typars
+                // declared at the alias level lack the constraints F#
+                // infers from the body's constrained-position usages,
+                // producing FS0001 missing-constraint errors at the
+                // declaration site. The bare-record construction here
+                // previously set `Constraint = ValueNone` which dropped
+                // those bounds.
+                |> List.map (TypeParameter.render ctx scopeStore)
             kept @ extra
         // Backwards-compat alias.
         let pruneUnusedTypars = reconcileTyparList
@@ -328,19 +325,13 @@ module TypeAlias =
                     |> List.filter (fun tp ->
                         not (Set.contains (Name.Case.valueOrModified tp.Name) declaredNames))
                     |> List.distinctBy (fun tp -> Name.Case.valueOrModified tp.Name)
-                    |> List.map (fun tp ->
-                        {
-                            Prelude.TypeParameterRender.Name = tp.Name
-                            Metadata = {
-                                Path = Path.create TransientTypePath.Anchored
-                                Original = Path.create TransientTypePath.Anchored
-                                Source = ValueNone
-                                FullyQualifiedName = ValueNone
-                            }
-                            Constraint = ValueNone
-                            Default = ValueNone
-                            Documentation = []
-                        })
+                    // Use `TypeParameter.render` so hoisted typars carry their
+                    // constraints (and defaults). See the sibling
+                    // reconcileTyparList branch for the same change — without
+                    // this, F# infers constraint requirements from the body's
+                    // use of constrained typars and fires FS0001 at the
+                    // declaration.
+                    |> List.map (TypeParameter.render ctx scopeStore)
                 {
                     TypeLikeRender.Metadata = metadata
                     Name = name

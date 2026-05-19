@@ -534,28 +534,31 @@ target (see top banner). Target set is **12 runtime SDKs**.
 
 | SDK | Raw | Distinct |
 |---|---:|---:|
-| Agents | 1,782 | 438 |
-| AiChat | 1,776 | 436 |
+| Agents | 1,766 | 440 |
+| AiChat | 1,739 | 432 |
 | Codemode | 247 | 49 |
 | Containers | 732 | 141 |
 | DynamicWorkflows | 27 | 5 |
 | Puppeteer | 25 | 10 |
 | Sandbox | 733 | 140 |
 | Shell | 721 | 138 |
-| Think | 1,843 | 435 |
+| Think | 1,842 | 436 |
 | Voice | 878 | 159 |
 | WorkerBundler | 724 | 138 |
 | WorkersTypes | 1 | 1 |
-| **Total** | **9,489** | **2,090** |
+| **Total** | **9,435** | **2,089** |
 
 **Headline:** WorkersTypes effectively at zero (1 distinct,
 FS0037 duplicate-definition). Voice now at 159 distinct (down
-from 482 mid-session). Total **9,489 raw / 2,090 distinct** —
+from 482 mid-session). Total **9,435 raw / 2,089 distinct** —
 cumulative reduction vs HEAD baseline (14,437 raw / 2,861 distinct)
-is **−4,948 raw (−34%) / −771 distinct (−27%)**. The recent
-Phases J/K closed the `this`-as-typar bug at its source and
-restored call-signature typar passthrough in the encoder,
-eliminating the dominant FS0033 cohort that Phase H had surfaced.
+is **−5,002 raw (−35%) / −772 distinct (−27%)**. Phases J/K
+closed the `this`-as-typar bug at its source and restored
+call-signature typar passthrough in the encoder, eliminating
+the dominant FS0033 cohort that Phase H had surfaced; Phase L
+propagates inferred constraints onto hoisted typars at the
+alias/synthetic declaration site so F#'s constraint-inference
+no longer rejects declarations missing bounds the body uses.
 
 The post-PR3 work peeled successive layers in this order:
 
@@ -633,7 +636,8 @@ compiler *saw* before bailing, not what was actually wrong.
 | After Phase H (encoder alias instantiation via `getTypeOfSymbol`) | 11,541 | 2,237 | WorkersTypes 86 → 1; raw rises on new arity-mismatch cohorts |
 | After Phase I (method-scope shadowing) | 11,483 | 2,235 | walker discipline holds across three walkers |
 | After Phase J (`this`-as-typar routing) | 11,119 | 2,111 | eliminates `'EventEmitter` cohort |
-| After Phase K (signature typeParameters extraction) | **9,489** | **2,090** | current |
+| After Phase K (signature typeParameters extraction) | 9,489 | 2,090 | |
+| After Phase L (constraint propagation for hoisted typars) | **9,435** | **2,089** | current |
 
 Test status: 178/178 generator tests pass; 28/29 decoder tests
 pass (one pre-existing fixture failure unrelated to this work).
