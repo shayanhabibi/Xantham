@@ -41,6 +41,7 @@ those concerns meet new TS-source idioms.
 | **Phase E1 — Heritage arity reconciliation** | New `Interface.reconcileHeritageArity` reconciles heritage TypeRefRenders against the parent's declared arity. Walks through nested TypeReferences via `resolvedKindArity`; consults `ctx.TypeAliasArity` for TypeLiteral-bodied alias parents | (Phase E1) |
 | **Phase E2 — `TypeAliasArity` context field** | Records every alias's TS-source declared typar count (keyed by both decl + body TypeKey). Populated by `prerenderTypeAliases`. Drives heritage reconciliation, TypeReference arity logic for non-Interface/Class inner, and final-pass remap Prefix truncation | (Phase E2) |
 | **Phase E3 — Class/Interface ref auto-pad** | Cached `TypeRef` for a generic Interface/Class is now `Prefix(path, [obj × arity])` instead of bare atom. Constraints, heritage clauses, and other paths that bypass the TypeReference arity reconciler get padded args automatically. Reduces verify errors by 22% / 17% in one change | (Phase E3) |
+| **Phase E4 — Alias free-typar hoist + arity propagation** | `Render.TypeAlias.fs reconcileTyparList` walks the alias body's ResolvedType graph and hoists every reachable `ResolvedType.TypeParameter` onto the declaration as a synthetic typar (no constraint/default). `prerenderTypeAliases` precomputes the same hoist-count and stores `declared + hoisted` in `ctx.TypeAliasArity`, so use sites of these aliases arity-pad correctly via the existing reconciler. Eliminates the `'T not defined` cohort and 94% of remaining verify errors in one connected change | (Phase E4) |
 
 ## The principle, restated
 
@@ -355,8 +356,8 @@ fundamentally unclear.
 
 ## Current measurable state (for delta-tracking)
 
-After Phase E (arity reconciliation across reference sites): **13,217 raw
-/ 2,490 distinct** verify errors across 12 runtime SDKs.
+After Phase E4 (alias free-typar hoist + arity propagation):
+**829 raw / 207 distinct** verify errors across 12 runtime SDKs.
 
 Trajectory across the session:
 - Pre-PR3 baseline: 9,155 raw / 2,817 distinct (parser-bail masking
@@ -365,16 +366,31 @@ Trajectory across the session:
   distinct (still parser-bail masked)
 - After parser-bail unmask + Phase C (`39f0053`): 17,109 raw / 3,032
   distinct (honest, no masking)
-- After Phase E (this commit): **13,217 raw / 2,490 distinct**
+- After Phase E1–E3 (auto-pad refs): 13,217 / 2,490 (-3,791 / -517)
+- After Phase E4 (alias-hoist + arity propagation, this commit):
+  **829 / 207** (-12,388 raw / -2,283 distinct from E3, -91% / -90%
+  from full unmasked baseline)
 
-Remaining cohorts (sampled from agents):
-- `ZodTypeAny ... given 3 args` (1,556) — cycle-broken alias still
-  receiving args at use sites; the final-pass remap arity truncation
-  catches *some* but not all sites (order-of-rendering issue)
-- `SomeType ... given 25 args` (318) — non-generic class receiving
-  many args, similar pattern
-- FS0001 / FS0698 / FS0663 — class-inherits-obj constraint mismatches
-  (the FS0001 Zod cohort)
+Per-SDK after Phase E4:
+
+| SDK | Raw | Distinct |
+|---|---:|---:|
+| Agents | 24 | 3 |
+| AiChat | 12 | 3 |
+| Codemode | 304 | 55 |
+| Containers | 3 | 3 |
+| DynamicWorkflows | 38 | 9 |
+| Puppeteer | 30 | 12 |
+| Sandbox | 3 | 3 |
+| Shell | 3 | 3 |
+| Think | 12 | 3 |
+| Voice | 12 | 3 |
+| WorkerBundler | 3 | 3 |
+| WorkersTypes | 387 | 106 |
+
+Most SDKs are essentially at zero. Codemode (304) and WorkersTypes (387)
+hold the remaining bulk — both have distinct error counts indicating
+multiple structural cohorts still to address.
 
 178 generator tests pass; 28/29 decoder tests pass (one pre-existing
 fixture failure unrelated). See `reference_verify_pipeline.md` in memory

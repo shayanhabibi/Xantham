@@ -23,28 +23,123 @@ module TypeAlias =
         let metadata =
             (Path.create path, typ)
             ||> RenderMetadata.createWithPathFromExport
-        // Drop typars from the alias declaration that aren't referenced in
-        // the resolved body. F# rejects type abbreviations with unused
-        // declared typars (FS0035). The cycle-break pass and lib.es
-        // substitutions can both eliminate references to typars from the
-        // body while the declaration still names them. Re-derive the
-        // declaration's typar list by intersecting the original typar
-        // names with the set of typar Intrinsics actually used in the
-        // rendered body.
-        let pruneUnusedTypars (resolvedRef: TypeRefRender) =
-            if List.isEmpty typeParameters then typeParameters
-            else
-                let usedTyparNames =
-                    (Set.empty, resolvedRef)
-                    ||> TypeRefRender.foldAtoms (fun acc atom ->
-                        match atom with
-                        | TypeRefAtom.Intrinsic s when s.StartsWith("'") ->
-                            Set.add s acc
-                        | _ -> acc)
+        // Walk the resolved-type graph (NOT the rendered TypeRefRender —
+        // typar refs there are `Widget` atoms built via `Ast.LongIdent`
+        // that can't be cheaply inspected) collecting every
+        // `ResolvedType.TypeParameter` reachable from the body. Same
+        // shape as Phase B's `collectFreeTypars` for synthetics. Walk
+        // transparently through Interface/Class/TypeReference targets
+        // because in alias bodies the typar references can be threaded
+        // through any nested generic application.
+        let collectBodyTypars (innerLazyResolved: LazyResolvedType) =
+            let seenTp = System.Collections.Generic.HashSet<TypeParameter>(HashIdentity.Reference)
+            let seenRt = System.Collections.Generic.HashSet<ResolvedType>(HashIdentity.Reference)
+            let acc = System.Collections.Generic.List<TypeParameter>()
+            let rec walkT (rt: ResolvedType) =
+                if seenRt.Add rt then
+                    match rt with
+                    | ResolvedType.TypeParameter tp ->
+                        if seenTp.Add tp then acc.Add tp
+                    | ResolvedType.Union u ->
+                        for t in u.Types do walkT t.Value
+                    | ResolvedType.Intersection i ->
+                        for t in i.Types do walkT t.Value
+                    | ResolvedType.TypeLiteral tl ->
+                        for m in tl.Members do walkM m
+                    | ResolvedType.TemplateLiteral t ->
+                        for t in t.Types do walkT t.Value
+                    | ResolvedType.Interface iface ->
+                        for m in iface.Members do walkM m
+                    | ResolvedType.Class cls ->
+                        for m in cls.Members do walkM m
+                    | ResolvedType.TypeReference tr ->
+                        // Walk args (at this scope) and the substituted body.
+                        for arg in tr.TypeArguments do walkT arg.Value
+                        match tr.ResolvedType with
+                        | Some r -> walkT r.Value
+                        | None -> ()
+                    | ResolvedType.Array inner -> walkT inner
+                    | ResolvedType.ReadOnly inner -> walkT inner
+                    | ResolvedType.Tuple t ->
+                        for e in t.Types do walkT e.Type.Value
+                    | ResolvedType.IndexedAccess ia ->
+                        walkT ia.Object.Value
+                        walkT ia.Index.Value
+                    | ResolvedType.Index ix -> walkT ix.Type.Value
+                    | ResolvedType.Optional tr ->
+                        walkT (ResolvedType.TypeReference tr)
+                    | ResolvedType.TypeQuery tq -> walkT tq.Type.Value
+                    | ResolvedType.Conditional c ->
+                        walkT c.Check.Value
+                        walkT c.Extends.Value
+                        walkT c.True.Value
+                        walkT c.False.Value
+                    | ResolvedType.Substitution s ->
+                        walkT s.Base.Value
+                    | _ -> ()
+            and walkM (m: Member) =
+                match m with
+                | Member.Property p -> walkT p.Type.Value
+                | Member.Method overloads ->
+                    for mt in overloads do
+                        for param in mt.Parameters do walkT param.Type.Value
+                        walkT mt.Type.Value
+                | Member.GetAccessor g -> walkT g.Type.Value
+                | Member.SetAccessor s -> walkT s.ArgumentType.Value
+                | Member.IndexSignature ix ->
+                    for param in ix.Parameters do walkT param.Type.Value
+                    walkT ix.Type.Value
+                | Member.CallSignature sigs ->
+                    for sig' in sigs do
+                        for param in sig'.Parameters do walkT param.Type.Value
+                        walkT sig'.Type.Value
+                | Member.ConstructSignature sigs ->
+                    for sig' in sigs do
+                        for param in sig'.Parameters do walkT param.Type.Value
+                        walkT sig'.Type.Value
+            walkT innerLazyResolved.Value
+            List.ofSeq acc
+        // Reconcile the declaration's typar list against what the body
+        // actually uses. Drops declared-but-unused (FS0035 prevention,
+        // original `pruneUnusedTypars` behavior) AND adds used-but-not-declared
+        // typars as synthetic entries (FS0039 prevention for aliases
+        // whose body references free typars from another scope, e.g.
+        // `type MCPTransportOptions = U3<_Lit3<'T, 'S, ...>, ...>`).
+        let reconcileTyparList (_resolvedRef: TypeRefRender) =
+            let bodyTypars = collectBodyTypars innerType
+            let bodyNames =
+                bodyTypars
+                |> List.map (fun tp -> Name.Case.valueOrModified tp.Name)
+                |> Set.ofList
+            let kept =
                 typeParameters
                 |> List.filter (fun tp ->
-                    let typarRef = "'" + (Name.Case.valueOrModified tp.Name)
-                    Set.contains typarRef usedTyparNames)
+                    Set.contains (Name.Case.valueOrModified tp.Name) bodyNames)
+            let declaredNames =
+                typeParameters
+                |> List.map (fun tp -> Name.Case.valueOrModified tp.Name)
+                |> Set.ofList
+            let extra =
+                bodyTypars
+                |> List.filter (fun tp ->
+                    not (Set.contains (Name.Case.valueOrModified tp.Name) declaredNames))
+                |> List.distinctBy (fun tp -> Name.Case.valueOrModified tp.Name)
+                |> List.map (fun tp ->
+                    {
+                        Prelude.TypeParameterRender.Name = tp.Name
+                        Metadata = {
+                            Path = Path.create TransientTypePath.Anchored
+                            Original = Path.create TransientTypePath.Anchored
+                            Source = ValueNone
+                            FullyQualifiedName = ValueNone
+                        }
+                        Constraint = ValueNone
+                        Default = ValueNone
+                        Documentation = []
+                    })
+            kept @ extra
+        // Backwards-compat alias.
+        let pruneUnusedTypars = reconcileTyparList
         // Replace any self-reference to the alias's own target ref inside
         // the resolved molecule with `obj`. The CreateFromValue wrapping
         // used for Union elements zeroes the LazyContainer's Raw, which

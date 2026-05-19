@@ -976,11 +976,91 @@ module ArenaInterner =
                         |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
                 GeneratorContext.Prelude.addTypeAliasRemap ctx declTypeKey ref
                 GeneratorContext.Prelude.addTypeAliasRemap ctx bodyTypeKey ref
-                // Record the alias's declared typar count, keyed by both
-                // TypeKeys (declaration and body) — heritage rendering
-                // uses this to reconcile arg counts against the parent's
-                // actual arity. See Render.TypeShapes.fs Interface.heritageTargetArity.
-                let arity = List.length value.TypeParameters
+                // Record the alias's *effective* typar arity, keyed by both
+                // decl and body TypeKeys. Effective arity = declared typars
+                // + free typars in the body that `Render.TypeAlias.fs
+                // reconcileTyparList` will hoist onto the declaration.
+                // Without including the hoist count here, use sites
+                // arity-reconcile against the bare declared count and end
+                // up with too few args (FS0033 "expects N given M").
+                let declared = List.length value.TypeParameters
+                // Walk the body's resolved graph once to count distinct
+                // free TypeParameter references not already in the declared
+                // list. Match the walk in
+                // `Render.TypeAlias.fs reconcileTyparList`.
+                let declaredNames =
+                    value.TypeParameters
+                    |> List.map (fun tp -> Name.Case.valueOrModified tp.Value.Name)
+                    |> Set.ofList
+                let seenTp = HashSet<TypeParameter>(HashIdentity.Reference)
+                let seenRt = HashSet<ResolvedType>(HashIdentity.Reference)
+                let extraNames = HashSet<string>()
+                let rec walkT (rt: ResolvedType) =
+                    if seenRt.Add rt then
+                        match rt with
+                        | ResolvedType.TypeParameter tp ->
+                            if seenTp.Add tp then
+                                let nm = Name.Case.valueOrModified tp.Name
+                                if not (Set.contains nm declaredNames) then
+                                    extraNames.Add nm |> ignore
+                        | ResolvedType.Union u ->
+                            for t in u.Types do walkT t.Value
+                        | ResolvedType.Intersection i ->
+                            for t in i.Types do walkT t.Value
+                        | ResolvedType.TypeLiteral tl ->
+                            for m in tl.Members do walkM m
+                        | ResolvedType.TemplateLiteral t ->
+                            for t in t.Types do walkT t.Value
+                        | ResolvedType.Interface iface ->
+                            for m in iface.Members do walkM m
+                        | ResolvedType.Class cls ->
+                            for m in cls.Members do walkM m
+                        | ResolvedType.TypeReference tr ->
+                            for arg in tr.TypeArguments do walkT arg.Value
+                            match tr.ResolvedType with
+                            | Some r -> walkT r.Value
+                            | None -> ()
+                        | ResolvedType.Array inner -> walkT inner
+                        | ResolvedType.ReadOnly inner -> walkT inner
+                        | ResolvedType.Tuple t ->
+                            for e in t.Types do walkT e.Type.Value
+                        | ResolvedType.IndexedAccess ia ->
+                            walkT ia.Object.Value
+                            walkT ia.Index.Value
+                        | ResolvedType.Index ix -> walkT ix.Type.Value
+                        | ResolvedType.Optional tr ->
+                            walkT (ResolvedType.TypeReference tr)
+                        | ResolvedType.TypeQuery tq -> walkT tq.Type.Value
+                        | ResolvedType.Conditional c ->
+                            walkT c.Check.Value
+                            walkT c.Extends.Value
+                            walkT c.True.Value
+                            walkT c.False.Value
+                        | ResolvedType.Substitution s ->
+                            walkT s.Base.Value
+                        | _ -> ()
+                and walkM (m: Member) =
+                    match m with
+                    | Member.Property p -> walkT p.Type.Value
+                    | Member.Method overloads ->
+                        for mt in overloads do
+                            for param in mt.Parameters do walkT param.Type.Value
+                            walkT mt.Type.Value
+                    | Member.GetAccessor g -> walkT g.Type.Value
+                    | Member.SetAccessor s -> walkT s.ArgumentType.Value
+                    | Member.IndexSignature ix ->
+                        for param in ix.Parameters do walkT param.Type.Value
+                        walkT ix.Type.Value
+                    | Member.CallSignature sigs ->
+                        for sig' in sigs do
+                            for param in sig'.Parameters do walkT param.Type.Value
+                            walkT sig'.Type.Value
+                    | Member.ConstructSignature sigs ->
+                        for sig' in sigs do
+                            for param in sig'.Parameters do walkT param.Type.Value
+                            walkT sig'.Type.Value
+                walkT value.Type.Value
+                let arity = declared + extraNames.Count
                 ctx.TypeAliasArity[declTypeKey] <- arity
                 ctx.TypeAliasArity[bodyTypeKey] <- arity
             | _ -> ())
