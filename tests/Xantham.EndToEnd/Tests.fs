@@ -106,7 +106,8 @@ let setupDriverTests =
             FileSystem.VirtualThis.setupDirectories.Value
             if [ FileSystem.VirtualThis.driver.``Driver.fsproj``
                  FileSystem.VirtualThis.driver.``Program.fs`` ]
-                |> List.forall (File.exists >> not)
+                |> List.forall File.exists
+                |> not
             then setupDriver.Value
             [
                 [ "restore"; FileSystem.VirtualThis.driver.``Driver.fsproj`` ], FileSystem.VirtualThis.driver.``.``
