@@ -24,15 +24,15 @@ let createTestsForFixture (fixture: TestFixture) =
         testCase "encode" <| fun _ ->
             if not runXantham && File.exists fixture.Json && not buildXantham then skiptest "Skipping encode"
             fixture.TypeDefRoot
-            |> node [ Path.combine RepoRoot.``.`` "index.js"; fixture.TypeDefTarget |> Option.defaultValue fixture.TypeDefinitionFile; "-o"; fixture.Json ]
+            |> node -1 [ Path.combine FileSystem.Repo.``.`` "index.js"; fixture.TypeDefTarget |> Option.defaultValue fixture.TypeDefinitionFile; "-o"; fixture.Json ]
             |> ensureProcessResult (sprintf "Failed encoding: %A")
         testCase "decode" <| fun _ ->
-            dotnet [
+            dotnet -1 [
                 "run"
                 "--no-build"
                 "--"
                 fixture.Json; fixture.FSharp
-            ] Xantham.Driver.``.``
+            ] FileSystem.VirtualThis.driver.``.``
             |> ensureProcessResult (sprintf "Failed decoding: %A")
             File.Move(fixture.FSharp, fixture.VerifyTarget, true)
         testCase "generate" <| fun _ ->
@@ -103,15 +103,20 @@ let setupDriverTests =
     [
         testCase "Build Driver" <| fun _ ->
             if not buildDriver then skiptest "Skipping rebuilding the driver."
-            dotnetx [ "restore"; Xantham.Driver.``Xantham.EndToEnd.Driver.fsproj`` ] Xantham.Driver.``.``
-            dotnet [ "build"; Xantham.Driver.``Xantham.EndToEnd.Driver.fsproj``; "--no-incremental" ] Xantham.Driver.``.``
-            |> fun result ->
-                Expect.equal result.ExitCode 0 $"Failed build: {result}"
-                result.Result
-            |> Flip.Expect.isOk "Received error output"
+            FileSystem.VirtualThis.setupDirectories.Value
+            if [ FileSystem.VirtualThis.driver.``Driver.fsproj``
+                 FileSystem.VirtualThis.driver.``Program.fs`` ]
+                |> List.forall (File.exists >> not)
+            then setupDriver.Value
+            [
+                [ "restore"; FileSystem.VirtualThis.driver.``Driver.fsproj`` ], FileSystem.VirtualThis.driver.``.``
+                [ "build"; FileSystem.VirtualThis.driver.``Driver.fsproj``; "--no-incremental" ], FileSystem.VirtualThis.driver.``.``
+            ]
+            |> List.unzip
+            ||> List.iter2 (dotnetOrThrowAndForget -1)
         testCase "Build Xantham" <| fun _ ->
             if not buildXantham then skiptest "Skipping building Xantham.Fable"
-            Npm.setDir RepoRoot.``.``
+            Npm.setDir FileSystem.Repo.``.``
             |> Npm.run "build"
     ]
 
