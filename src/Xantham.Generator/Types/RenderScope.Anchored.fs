@@ -57,14 +57,25 @@ module TypeRefAtom =
             TypeRefAtom.Widget widgetBuilder
         | Prelude.TypeRefAtom.Intrinsic intrinsic ->
             TypeRefAtom.Intrinsic intrinsic
+    // Localise an atom — produces an output that's either a WidgetBuilder
+    // (for Path/Widget atoms) OR retains the original Intrinsic. The caller
+    // (`TypeRefRender.localise`) is responsible for the wrap: Choice1Of2 is
+    // a Widget, Choice2Of2 is a preserved Intrinsic name.
+    //
+    // Why preserve Intrinsic separately: typar atoms render as `Intrinsic_
+    // "'T"`. `substituteForHeritage` identifies them by the leading-quote
+    // pattern. If localise wraps them in Widget, downstream substitution
+    // can't identify them. Keeping Intrinsic shape post-localise lets the
+    // heritage / member substitution passes see and replace free typars.
     let localise anchorPath (atom: TypeRefAtom) =
         match atom with
         | TypeRefAtom.Path path ->
             Path.getRelativePath path anchorPath
             |> List.map Name.Case.valueOrModified
             |> Ast.LongIdent
-        | TypeRefAtom.Widget widgetBuilder -> widgetBuilder
-        | Intrinsic s -> Ast.LongIdent s
+            |> Choice1Of2
+        | TypeRefAtom.Widget widgetBuilder -> Choice1Of2 widgetBuilder
+        | Intrinsic s -> Choice2Of2 s
 
 module TypeRefRender =
     type SRTPHelper =
@@ -110,10 +121,19 @@ module TypeRefRender =
         let wrap value = { typeRefRender with Kind = value }
         match typeRefRender.Kind with
         | TypeRefKind.Atom atom ->
-            TypeRefAtom.localise anchorPath atom
-            |> TypeRefAtom.Widget
-            |> TypeRefKind.Atom
-            |> wrap
+            match TypeRefAtom.localise anchorPath atom with
+            | Choice1Of2 widget ->
+                widget
+                |> TypeRefAtom.Widget
+                |> TypeRefKind.Atom
+                |> wrap
+            | Choice2Of2 intrinsic ->
+                // Preserve the Intrinsic shape so downstream substitution
+                // (heritage / body) can identify typar atoms by name.
+                intrinsic
+                |> TypeRefAtom.Intrinsic
+                |> TypeRefKind.Atom
+                |> wrap
         | TypeRefKind.Molecule molecule ->
             match molecule with
             | TypeRefMolecule.Tuple typeRefRenders ->
@@ -163,7 +183,6 @@ module TypeRefRender =
                         if Set.contains s inScopeTyparNames then
                             atom
                         else
-                            printfn "Warning: orphan type parameter '%s' in heritage clause, substituting with 'obj'" s
                             TypeRefAtom.Intrinsic "obj"
                     | _ -> atom
                 { render with Kind = TypeRefKind.Atom newAtom }

@@ -186,27 +186,29 @@ module SyntheticPathAssignment =
         let name = sprintf "_Lit%d" counter |> Name.Pascal.create
         TypePath.createWithName name parentModule
 
-    /// Walk a synthetic's body collecting any `ResolvedType.TypeParameter`
-    /// references in first-appearance order. The `seen` set is keyed by the
-    /// underlying `TypeParameter` record's reference identity
-    /// (`[<ReferenceEquality>]` on the decoder record makes this cheap and
-    /// correct).
+    /// Walk a synthetic's body collecting `ResolvedType.TypeParameter`
+    /// references that are FREE in the synthetic's own scope — i.e. typars
+    /// the synthetic body uses but doesn't declare.
     ///
-    /// Walks transparently through every container including
-    /// Interface/Class/Enum and through TypeReferences' declaration bodies.
-    /// Counterintuitively this is the *correct* behavior: TS interns the
-    /// synthetic at one point in the type graph, and the only typars that
-    /// will be in scope at every reference site are typars from the
-    /// surrounding declaration scopes the encoder threaded through. By
-    /// collecting them all we capture the union of typars any reference
-    /// site might need. A narrower walk (stopping at named-type boundaries)
-    /// captures fewer typars and ends up emitting refs whose typars aren't
-    /// in scope at any of the reference sites — strictly worse.
+    /// Walks transparently through *structural* containers (Union /
+    /// Intersection / TypeLiteral / TemplateLiteral / Tuple / Array /
+    /// Optional / IndexedAccess / Index / TypeQuery / Conditional /
+    /// Substitution). For `TypeReference`, walks ONLY `TypeArguments` (those
+    /// carry typars from the OUTER scope and are bound at the synthetic's
+    /// reference site); does NOT walk `tr.Type.Value` because the target's
+    /// body has its own typar scope (declared on the target's
+    /// Interface/Class/TypeAlias) and its free typars are not free in the
+    /// synthetic's enclosing scope. Likewise stops at `Interface`/`Class`
+    /// boundaries — those declare their own typar scope.
     ///
-    /// Typars are added at first encounter to preserve declaration order:
-    /// `(value: 'T, index: 'U) => 'R` captures `['T; 'U; 'R]` so the emitted
-    /// synthetic declares typars in the same order references at use sites
-    /// will apply them.
+    /// Earlier implementation walked transparently through Interface/Class
+    /// members and through `tr.Type.Value`, on the theory that union-of-all-
+    /// captures would cover any reference site. In practice the over-capture
+    /// produced refs like `_Lit102<'T, 'S, 'This, 'U, 'A, 'D, 'Arr, ...>`
+    /// from typars belonging to deeply-nested target bodies — none in scope
+    /// at any reference site, all rendering as FS0039.
+    ///
+    /// Typars are added at first encounter to preserve declaration order.
     let private collectFreeTypars (rootRt: ResolvedType) : TypeParameter list =
         let seen = HashSet<TypeParameter>(HashIdentity.Reference)
         let visited = HashSet<ResolvedType>(HashIdentity.Reference)
@@ -224,12 +226,10 @@ module SyntheticPathAssignment =
                     for m in typeLiteral.Members do walkM m
                 | ResolvedType.TemplateLiteral template ->
                     for t in template.Types do walkT t.Value
-                | ResolvedType.Interface iface ->
-                    for m in iface.Members do walkM m
-                | ResolvedType.Class cls ->
-                    for m in cls.Members do walkM m
                 | ResolvedType.TypeReference typeRef ->
-                    walkT typeRef.Type.Value
+                    // Boundary: do NOT walk `tr.Type.Value` — the target's
+                    // body has its own scope. Walking TypeArguments captures
+                    // typars threaded from the synthetic's outer scope.
                     for arg in typeRef.TypeArguments do walkT arg.Value
                 | ResolvedType.Array inner -> walkT inner
                 | ResolvedType.ReadOnly inner -> walkT inner
@@ -248,6 +248,11 @@ module SyntheticPathAssignment =
                     walkT cond.False.Value
                 | ResolvedType.Substitution sub ->
                     walkT sub.Base.Value
+                // Boundary at Interface/Class — they introduce their own
+                // declared typar scope. Their typars are not free in the
+                // outer synthetic's scope.
+                | ResolvedType.Interface _
+                | ResolvedType.Class _
                 | _ -> ()
         and walkM (memberRef: Member) =
             match memberRef with

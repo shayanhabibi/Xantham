@@ -645,6 +645,7 @@ module TypeLikeRender =
                 emitConstructor
             })
             )
+
     // renders an interface
     let renderInterface (ctx: GeneratorContext) (typeLike: TypeLikeRender) =
         let renderName = Name.Case.valueOrModified typeLike.Name
@@ -662,9 +663,14 @@ module TypeLikeRender =
             typeLike.Functions
             |> List.collect (FunctionLikeRender.renderAbstract ctx)
         let memberCollection = members @ functions
+        // Typar Names are stored with the leading `'` already applied
+        // (see `Name.Typar.create` → `sourceNormalizeForTypeParameter`),
+        // so `valueOrModified` returns `"'T"`. Prepending another `'`
+        // produced `"''T"` which never matched the atom values
+        // `substituteForHeritage` compares against.
         let inScopeTypars =
             typeLike.TypeParameters
-            |> List.map (fun tp -> "'" + Name.Case.valueOrModified tp.Name)
+            |> List.map (fun tp -> Name.Case.valueOrModified tp.Name)
             |> Set.ofList
         let builder =
             if List.isEmpty memberCollection
@@ -714,9 +720,11 @@ module TypeLikeRender =
             typeLike.Functions
             |> List.collect (FunctionLikeRender.renderAbstract ctx)
         let memberCollection = members @ functions
+        // See `renderInterface` — typar Names already include the leading
+        // `'`, so don't double-prefix.
         let inScopeTypars =
             typeLike.TypeParameters
-            |> List.map (fun tp -> "'" + Name.Case.valueOrModified tp.Name)
+            |> List.map (fun tp -> Name.Case.valueOrModified tp.Name)
             |> Set.ofList
         let abstractCtors = renderAbstractConstructors ctx typeLike
         // F# class-body rules:

@@ -23,14 +23,14 @@ module TypeAlias =
         let metadata =
             (Path.create path, typ)
             ||> RenderMetadata.createWithPathFromExport
-        // Walk the resolved-type graph (NOT the rendered TypeRefRender —
-        // typar refs there are `Widget` atoms built via `Ast.LongIdent`
-        // that can't be cheaply inspected) collecting every
-        // `ResolvedType.TypeParameter` reachable from the body. Same
-        // shape as Phase B's `collectFreeTypars` for synthetics. Walk
-        // transparently through Interface/Class/TypeReference targets
-        // because in alias bodies the typar references can be threaded
-        // through any nested generic application.
+        // Walk the resolved-type graph collecting `TypeParameter` references
+        // that are free in the alias body's scope. Boundary-stops at named-
+        // type declarations (Interface/Class) and at TypeReference's
+        // `Type.Value` — typars inside a target's own declaration scope are
+        // not free in the alias's enclosing scope. For TypeReference, only
+        // the type arguments (carrying typars from the OUTER scope) are
+        // walked. Matches the same boundary-stop discipline as Phase B's
+        // `collectFreeTypars` in `SyntheticPathAssignment.fs`.
         let collectBodyTypars (innerLazyResolved: LazyResolvedType) =
             let seenTp = System.Collections.Generic.HashSet<TypeParameter>(HashIdentity.Reference)
             let seenRt = System.Collections.Generic.HashSet<ResolvedType>(HashIdentity.Reference)
@@ -48,22 +48,12 @@ module TypeAlias =
                         for m in tl.Members do walkM m
                     | ResolvedType.TemplateLiteral t ->
                         for t in t.Types do walkT t.Value
-                    | ResolvedType.Interface iface ->
-                        for m in iface.Members do walkM m
-                    | ResolvedType.Class cls ->
-                        for m in cls.Members do walkM m
                     | ResolvedType.TypeReference tr ->
-                        // Walk the target body too — synthetic literals
-                        // referenced via TypeReference with empty args at
-                        // the decoder level carry their typar references
-                        // inside their bodies. Must match the walker in
-                        // `prerenderTypeAliases` so the declaration's
-                        // hoisted typar list matches `ctx.TypeAliasArity`.
-                        walkT tr.Type.Value
+                        // Boundary: do NOT walk `tr.Type.Value` (the
+                        // target's body has its own typar scope). Walk
+                        // `tr.TypeArguments` only — those carry typars
+                        // from the alias body's outer scope.
                         for arg in tr.TypeArguments do walkT arg.Value
-                        match tr.ResolvedType with
-                        | Some r -> walkT r.Value
-                        | None -> ()
                     | ResolvedType.Array inner -> walkT inner
                     | ResolvedType.ReadOnly inner -> walkT inner
                     | ResolvedType.Tuple t ->
@@ -82,6 +72,10 @@ module TypeAlias =
                         walkT c.False.Value
                     | ResolvedType.Substitution s ->
                         walkT s.Base.Value
+                    // Boundary at Interface/Class: their typars are
+                    // declared at their own scope, not free in the alias.
+                    | ResolvedType.Interface _
+                    | ResolvedType.Class _
                     | _ -> ()
             and walkM (m: Member) =
                 match m with
