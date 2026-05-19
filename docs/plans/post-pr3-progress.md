@@ -534,38 +534,40 @@ target (see top banner). Target set is **12 runtime SDKs**.
 
 | SDK | Raw | Distinct |
 |---|---:|---:|
-| Agents | 1,705 | 426 |
-| AiChat | 1,666 | 422 |
-| Codemode | 247 | 49 |
-| Containers | 624 | 130 |
-| DynamicWorkflows | 27 | 5 |
-| Puppeteer | 25 | 10 |
-| Sandbox | 625 | 132 |
-| Shell | 618 | 130 |
-| Think | 1,529 | 421 |
-| Voice | 634 | 145 |
-| WorkerBundler | 615 | 127 |
+| Agents | 1,372 | 343 |
+| AiChat | 1,352 | 343 |
+| Codemode | 225 | 43 |
+| Containers | 423 | 93 |
+| DynamicWorkflows | 26 | 4 |
+| Puppeteer | 21 | 9 |
+| Sandbox | 425 | 96 |
+| Shell | 415 | 94 |
+| Think | 1,236 | 346 |
+| Voice | 425 | 98 |
+| WorkerBundler | 414 | 94 |
 | WorkersTypes | 1 | 1 |
-| **Total** | **8,316** | **1,998** |
+| **Total** | **6,335** | **1,564** |
 
-**Headline:** Distinct error count broke under 2,000 for the
-first time this branch (1,998). WorkersTypes effectively at
-zero (1 distinct, FS0037 duplicate-definition). Voice now at
-145 distinct (down from 482 mid-session). Total **8,316 raw /
-1,998 distinct** — cumulative reduction vs HEAD baseline
-(14,437 raw / 2,861 distinct) is **−6,121 raw (−42%) / −863
-distinct (−30%)**. Phase M (in two batches) adds TS lib.es5
-utility-type aliases (`Omit`/`Pick`/`Partial`/etc.), TS 5.x
-iterator types, lib.dom event-map types, lib.dom iterators
-(`URLSearchParamsIterator`/`HeadersIterator`/`FormDataIterator`),
-and lib.dom messaging globals (`Window`/`MessagePort`/etc.) to
-`LibEsDefaults.substitutions`. Closes the
-`inherit option<Omit<obj, obj>>` heritage cohort
-(~80 errors/SDK across 8 SDKs from one render pattern) and
-the lib.dom-substitution gap across the iterator + event-map
-surfaces. Phases J/K closed the `this`-as-typar bug and
-call-signature typar passthrough; Phase L propagates
-constraints onto hoisted typars.
+**Headline:** Distinct under 1,600 for the first time. Total
+**6,335 raw / 1,564 distinct** — cumulative reduction vs HEAD
+baseline (14,437 raw / 2,861 distinct) is **−8,102 raw (−56%) /
+−1,297 distinct (−45%)**. Phase N collapses Intersection /
+TypeLiteral synthetic-renders that miss `ctx.SyntheticPaths` to
+bare `obj`. Without a canonical home from
+`SyntheticPathAssignment.run`, the fallthrough constructed a
+transient path from the local `scope.PathContext` (e.g.
+`<Owner>.Item.<ParamPascal>` for IndexSignature parameters,
+`<Owner>.Item.Item` for IndexSignature return TypeLiterals)
+that the body never emitted at — producing dangling cohorts
+(`'Item' is not defined in '...Item'`, `'Options' is not
+defined`, `'WorkflowName.Item.Key' is not defined`, etc.)
+across all 8 large SDKs. Phase M (in two batches) added TS
+lib.es5 utility-type aliases (`Omit`/`Pick`/`Partial`/etc.),
+TS 5.x iterator types, lib.dom event-map types, lib.dom
+iterators, and lib.dom messaging globals to
+`LibEsDefaults.substitutions`. Phases J/K closed the
+`this`-as-typar bug and call-signature typar passthrough;
+Phase L propagates constraints onto hoisted typars.
 
 The post-PR3 work peeled successive layers in this order:
 
@@ -646,7 +648,8 @@ compiler *saw* before bailing, not what was actually wrong.
 | After Phase K (signature typeParameters extraction) | 9,489 | 2,090 | |
 | After Phase L (constraint propagation for hoisted typars) | 9,435 | 2,089 | |
 | After Phase M batch 1 (TS utility-type + iterator substitutions) | 8,493 | 2,055 | |
-| After Phase M batch 2 (lib.dom event-map / iterator / messaging substitutions) | **8,316** | **1,998** | distinct under 2,000 |
+| After Phase M batch 2 (lib.dom event-map / iterator / messaging substitutions) | 8,316 | 1,998 | distinct under 2,000 |
+| After Phase N (Intersection / TypeLiteral fallthrough to `obj`) | **6,335** | **1,564** | current; single largest single-pass collapse since Phase G |
 
 Test status: 178/178 generator tests pass; 28/29 decoder tests
 pass (one pre-existing fixture failure unrelated to this work).
