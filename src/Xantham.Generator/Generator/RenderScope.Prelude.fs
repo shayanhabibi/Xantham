@@ -586,6 +586,17 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 prefix
                 |> RenderScope.createRootless resolvedType
                 |> addOrReplaceScope ctx resolvedType
+            | TypeRefKind.Molecule (TypeRefMolecule.Prefix _) ->
+                // The prefix is already a Prefix (e.g. via TypeAliasRemap
+                // molecule-preservation, or via Phase B's
+                // `createAssignedSyntheticRef` producing
+                // `Prefix(syntheticPath, [typar-refs])`). Wrapping it again
+                // produces double-args `Foo<A><B>` which F# rejects (FS0010
+                // "Unexpected symbol '<' in type arguments"). Return the
+                // existing Prefix unchanged.
+                prefix
+                |> RenderScope.createRootless resolvedType
+                |> addOrReplaceScope ctx resolvedType
             | _ ->
                 let objArg =
                     LazyContainer.CreateFromValue
@@ -672,7 +683,32 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         // reference site can't apply — F# rejects `obj<T>` (FS0033).
         // Emit the bare intrinsic; consumers lose the typar refinement
         // but the binding compiles.
+        // Detect a "pre-padded" Prefix: the cached TypeRef for a generic
+        // Interface/Class (from `createConcretePaddedRef`) is
+        // `Prefix(atom, [obj × arity])` — all args are bare `obj`
+        // intrinsics. When a use site supplies real args, swap those in
+        // place of the padded obj args rather than wrapping (which would
+        // produce `Foo<obj, obj, obj><real_args>`, invalid F#).
+        let isPrePaddedPrefix =
+            match prefix.Kind with
+            | TypeRefKind.Molecule (TypeRefMolecule.Prefix (_, args)) ->
+                args
+                |> List.forall (fun a ->
+                    match a.Kind with
+                    | TypeRefKind.Atom (TypeRefAtom.Intrinsic s) -> s = Intrinsic.obj
+                    | _ -> false)
+            | _ -> false
         match prefix.Kind with
+        | TypeRefKind.Molecule (TypeRefMolecule.Prefix (innerHead, _)) when isPrePaddedPrefix ->
+            // Pre-padded prefix; replace args with the user's aligned args
+            // (truncated/padded to declaredParamCount).
+            let postfixArguments =
+                alignedArguments
+                |> List.map (prerender ctx scope)
+            (innerHead, postfixArguments)
+            |> RenderScopeStore.TypeRefRender.create scope resolvedType false
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
         | TypeRefKind.Molecule (TypeRefMolecule.Prefix _) ->
             prefix
             |> RenderScope.createRootless resolvedType
@@ -976,11 +1012,101 @@ module ArenaInterner =
                         |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
                 GeneratorContext.Prelude.addTypeAliasRemap ctx declTypeKey ref
                 GeneratorContext.Prelude.addTypeAliasRemap ctx bodyTypeKey ref
-                // Record the alias's declared typar count, keyed by both
-                // TypeKeys (declaration and body) — heritage rendering
-                // uses this to reconcile arg counts against the parent's
-                // actual arity. See Render.TypeShapes.fs Interface.heritageTargetArity.
-                let arity = List.length value.TypeParameters
+                // Record the alias's *effective* typar arity, keyed by both
+                // decl and body TypeKeys. Effective arity = declared typars
+                // + free typars in the body that `Render.TypeAlias.fs
+                // reconcileTyparList` will hoist onto the declaration.
+                // Without including the hoist count here, use sites
+                // arity-reconcile against the bare declared count and end
+                // up with too few args (FS0033 "expects N given M").
+                let declared = List.length value.TypeParameters
+                // Walk the body's resolved graph once to count distinct
+                // free TypeParameter references not already in the declared
+                // list. Match the walk in
+                // `Render.TypeAlias.fs reconcileTyparList`.
+                let declaredNames =
+                    value.TypeParameters
+                    |> List.map (fun tp -> Name.Case.valueOrModified tp.Value.Name)
+                    |> Set.ofList
+                let seenTp = HashSet<TypeParameter>(HashIdentity.Reference)
+                let seenRt = HashSet<ResolvedType>(HashIdentity.Reference)
+                let extraNames = HashSet<string>()
+                let rec walkT (rt: ResolvedType) =
+                    if seenRt.Add rt then
+                        match rt with
+                        | ResolvedType.TypeParameter tp ->
+                            if seenTp.Add tp then
+                                let nm = Name.Case.valueOrModified tp.Name
+                                if not (Set.contains nm declaredNames) then
+                                    extraNames.Add nm |> ignore
+                        | ResolvedType.Union u ->
+                            for t in u.Types do walkT t.Value
+                        | ResolvedType.Intersection i ->
+                            for t in i.Types do walkT t.Value
+                        | ResolvedType.TypeLiteral tl ->
+                            for m in tl.Members do walkM m
+                        | ResolvedType.TemplateLiteral t ->
+                            for t in t.Types do walkT t.Value
+                        | ResolvedType.Interface iface ->
+                            for m in iface.Members do walkM m
+                        | ResolvedType.Class cls ->
+                            for m in cls.Members do walkM m
+                        | ResolvedType.TypeReference tr ->
+                            // Walk the target body too — synthetic literals
+                            // (Union/Intersection/TypeLiteral/TemplateLiteral
+                            // referenced via TypeReference with empty args
+                            // at the decoder level) carry their typar
+                            // references inside their bodies. Phase B's
+                            // typar capture surfaces these at render time;
+                            // we need to surface them at alias-arity
+                            // precomputation time too so use sites pad
+                            // correctly. seenRt protects against cycles.
+                            walkT tr.Type.Value
+                            for arg in tr.TypeArguments do walkT arg.Value
+                            match tr.ResolvedType with
+                            | Some r -> walkT r.Value
+                            | None -> ()
+                        | ResolvedType.Array inner -> walkT inner
+                        | ResolvedType.ReadOnly inner -> walkT inner
+                        | ResolvedType.Tuple t ->
+                            for e in t.Types do walkT e.Type.Value
+                        | ResolvedType.IndexedAccess ia ->
+                            walkT ia.Object.Value
+                            walkT ia.Index.Value
+                        | ResolvedType.Index ix -> walkT ix.Type.Value
+                        | ResolvedType.Optional tr ->
+                            walkT (ResolvedType.TypeReference tr)
+                        | ResolvedType.TypeQuery tq -> walkT tq.Type.Value
+                        | ResolvedType.Conditional c ->
+                            walkT c.Check.Value
+                            walkT c.Extends.Value
+                            walkT c.True.Value
+                            walkT c.False.Value
+                        | ResolvedType.Substitution s ->
+                            walkT s.Base.Value
+                        | _ -> ()
+                and walkM (m: Member) =
+                    match m with
+                    | Member.Property p -> walkT p.Type.Value
+                    | Member.Method overloads ->
+                        for mt in overloads do
+                            for param in mt.Parameters do walkT param.Type.Value
+                            walkT mt.Type.Value
+                    | Member.GetAccessor g -> walkT g.Type.Value
+                    | Member.SetAccessor s -> walkT s.ArgumentType.Value
+                    | Member.IndexSignature ix ->
+                        for param in ix.Parameters do walkT param.Type.Value
+                        walkT ix.Type.Value
+                    | Member.CallSignature sigs ->
+                        for sig' in sigs do
+                            for param in sig'.Parameters do walkT param.Type.Value
+                            walkT sig'.Type.Value
+                    | Member.ConstructSignature sigs ->
+                        for sig' in sigs do
+                            for param in sig'.Parameters do walkT param.Type.Value
+                            walkT sig'.Type.Value
+                walkT value.Type.Value
+                let arity = declared + extraNames.Count
                 ctx.TypeAliasArity[declTypeKey] <- arity
                 ctx.TypeAliasArity[bodyTypeKey] <- arity
             | _ -> ())

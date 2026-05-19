@@ -41,6 +41,8 @@ those concerns meet new TS-source idioms.
 | **Phase E1 — Heritage arity reconciliation** | New `Interface.reconcileHeritageArity` reconciles heritage TypeRefRenders against the parent's declared arity. Walks through nested TypeReferences via `resolvedKindArity`; consults `ctx.TypeAliasArity` for TypeLiteral-bodied alias parents | (Phase E1) |
 | **Phase E2 — `TypeAliasArity` context field** | Records every alias's TS-source declared typar count (keyed by both decl + body TypeKey). Populated by `prerenderTypeAliases`. Drives heritage reconciliation, TypeReference arity logic for non-Interface/Class inner, and final-pass remap Prefix truncation | (Phase E2) |
 | **Phase E3 — Class/Interface ref auto-pad** | Cached `TypeRef` for a generic Interface/Class is now `Prefix(path, [obj × arity])` instead of bare atom. Constraints, heritage clauses, and other paths that bypass the TypeReference arity reconciler get padded args automatically. Reduces verify errors by 22% / 17% in one change | (Phase E3) |
+| **Phase E4 — Alias free-typar hoist + arity propagation** | `Render.TypeAlias.fs reconcileTyparList` walks the alias body's ResolvedType graph and hoists every reachable `ResolvedType.TypeParameter` onto the declaration as a synthetic typar (no constraint/default). `prerenderTypeAliases` precomputes the same hoist-count and stores `declared + hoisted` in `ctx.TypeAliasArity`, so use sites of these aliases arity-pad correctly via the existing reconciler. Eliminates the `'T not defined` cohort and 94% of remaining verify errors in one connected change | (Phase E4) |
+| **Phase E5 — Walk-through-target + TypeLiteral-bodied hoist + cycle-broken skip + Prefix-no-re-wrap** | Four-part cleanup: (a) collectFreeTypars walks `TypeReference.Type.Value` so typars inside referenced-but-empty-args synthetic bodies are seen; (b) TypeLiteral/Intersection-bodied alias declarations also receive hoisted typars (previously only Alias/Union branches did); (c) cycle-broken aliases (`type X = obj`) skip hoisting — keeping typars would conflict with use-site arg-dropping; (d) empty-args TypeReference branch no longer wraps Prefix-shaped prefix in another Prefix (avoids `Foo<A><B>` parser bail) | (Phase E5) |
 
 ## The principle, restated
 
@@ -355,8 +357,9 @@ fundamentally unclear.
 
 ## Current measurable state (for delta-tracking)
 
-After Phase E (arity reconciliation across reference sites): **13,217 raw
-/ 2,490 distinct** verify errors across 12 runtime SDKs.
+After Phase E5 (walk-through-target + TypeLiteral-bodied hoist +
+cycle-broken skip + Prefix-no-re-wrap): **561 raw / 51 distinct**
+verify errors across 12 runtime SDKs.
 
 Trajectory across the session:
 - Pre-PR3 baseline: 9,155 raw / 2,817 distinct (parser-bail masking
@@ -365,16 +368,34 @@ Trajectory across the session:
   distinct (still parser-bail masked)
 - After parser-bail unmask + Phase C (`39f0053`): 17,109 raw / 3,032
   distinct (honest, no masking)
-- After Phase E (this commit): **13,217 raw / 2,490 distinct**
+- After Phase E1–E3 (auto-pad refs): 13,217 / 2,490 (-3,791 / -517)
+- After Phase E4 (alias-hoist + arity propagation):
+  829 / 207 (-12,388 raw from E3)
+- After Phase E5 (this commit): **561 / 51** (-268 raw / -156 distinct
+  from E4, **-94% raw / -98% distinct from full unmasked baseline**)
 
-Remaining cohorts (sampled from agents):
-- `ZodTypeAny ... given 3 args` (1,556) — cycle-broken alias still
-  receiving args at use sites; the final-pass remap arity truncation
-  catches *some* but not all sites (order-of-rendering issue)
-- `SomeType ... given 25 args` (318) — non-generic class receiving
-  many args, similar pattern
-- FS0001 / FS0698 / FS0663 — class-inherits-obj constraint mismatches
-  (the FS0001 Zod cohort)
+Per-SDK after Phase E5:
+
+| SDK | Raw | Distinct |
+|---|---:|---:|
+| Agents | 84 | 3 |
+| AiChat | 72 | 3 |
+| Codemode | 12 | 2 |
+| Containers | 36 | 3 |
+| DynamicWorkflows | 38 | 9 |
+| Puppeteer | 63 | 12 |
+| Sandbox | 36 | 3 |
+| Shell | 36 | 3 |
+| Think | 72 | 3 |
+| Voice | 72 | 3 |
+| WorkerBundler | 36 | 3 |
+| WorkersTypes | 4 | 2 |
+
+WorkersTypes is at 4 raw. Codemode at 12 raw. Most SDKs cluster at
+36-84 raw with only 3 distinct error patterns — the same handful of
+issues repeated across many sites. The two outliers with more
+distinct codes (DynamicWorkflows 9, Puppeteer 12) are the next
+focus targets.
 
 178 generator tests pass; 28/29 decoder tests pass (one pre-existing
 fixture failure unrelated). See `reference_verify_pipeline.md` in memory
