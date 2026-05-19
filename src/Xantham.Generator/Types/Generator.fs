@@ -304,6 +304,86 @@ module LibEsDefaults =
             // options)`. F# has no equivalent constructor-options pattern;
             // `obj` placeholder.
             "ErrorOptions", { Target = Intrinsic.obj; Arity = 0 }
+            // TS lib.es5 utility-type aliases. These are computed/mapped
+            // type definitions in TS (`type Omit<T, K> = Pick<T, Exclude<keyof T, K>>`
+            // etc.) with no F# equivalent name. Without substitution they
+            // emit as bare `Omit<X, K>` references that F# can't resolve
+            // (FS0039), and at heritage positions the cycle-broken form
+            // `Omit<obj, obj>` survives the bare-`obj`/`exn` filter because
+            // it's a Prefix molecule, not an atom — producing paired
+            // FS0039 `'Omit' is not defined` + FS0887 `'obj' is not an
+            // interface type` errors at every `interface X extends Omit<...>`
+            // site (~40× per SDK; ~80 errors/SDK × 8 SDKs from this single
+            // pattern). Substituting to `obj` arity 0 reduces references
+            // to bare `obj`; the existing heritage filter (`isObjOrExnIntrinsic`
+            // in `TypeRender.Render.fs`) then drops them. Lossy on
+            // structural intent (Partial's optional-member semantics, Pick's
+            // member-subset semantics, ReturnType's signature-extraction,
+            // etc.) but compilation-correct. Phase H's encoder-side alias
+            // substitution catches these at non-heritage TypeNode positions
+            // via `getTypeOfSymbol`; this entry handles the heritage path
+            // where Phase H doesn't fire.
+            "Omit", { Target = Intrinsic.obj; Arity = 0 }
+            "Pick", { Target = Intrinsic.obj; Arity = 0 }
+            "Partial", { Target = Intrinsic.obj; Arity = 0 }
+            "Required", { Target = Intrinsic.obj; Arity = 0 }
+            "Readonly", { Target = Intrinsic.obj; Arity = 0 }
+            "Exclude", { Target = Intrinsic.obj; Arity = 0 }
+            "Extract", { Target = Intrinsic.obj; Arity = 0 }
+            "NonNullable", { Target = Intrinsic.obj; Arity = 0 }
+            "ReturnType", { Target = Intrinsic.obj; Arity = 0 }
+            "Parameters", { Target = Intrinsic.obj; Arity = 0 }
+            "ConstructorParameters", { Target = Intrinsic.obj; Arity = 0 }
+            "InstanceType", { Target = Intrinsic.obj; Arity = 0 }
+            "Awaited", { Target = Intrinsic.obj; Arity = 0 }
+            "ThisParameterType", { Target = Intrinsic.obj; Arity = 0 }
+            "OmitThisParameter", { Target = Intrinsic.obj; Arity = 0 }
+            "ThisType", { Target = Intrinsic.obj; Arity = 0 }
+            "NoInfer", { Target = Intrinsic.obj; Arity = 0 }
+            // String-transform intrinsics (lib.es5). TS computes these at
+            // type level (`Uppercase<"abc">` → `"ABC"`); F# has no equivalent
+            // so emit as `string` — preserves the structural fact that
+            // these are string-valued types.
+            "Uppercase", { Target = Intrinsic.string; Arity = 0 }
+            "Lowercase", { Target = Intrinsic.string; Arity = 0 }
+            "Capitalize", { Target = Intrinsic.string; Arity = 0 }
+            "Uncapitalize", { Target = Intrinsic.string; Arity = 0 }
+            // Iterator / iteration-protocol types that TS lib.es5+ adds
+            // without an F# stdlib equivalent. Map to `IEnumerator<T>` /
+            // `obj` so references at non-heritage and heritage positions
+            // both resolve.
+            //
+            // `SetIterator<T>` / `MapIterator<T>` — lib.es2015.iterable
+            // additions; structurally the same as `IterableIterator<T>`
+            // (which already maps to `IEnumerator<T>`). Same target.
+            "SetIterator", { Target = "System.Collections.Generic.IEnumerator"; Arity = 1 }
+            "MapIterator", { Target = "System.Collections.Generic.IEnumerator"; Arity = 1 }
+            "ArrayIterator", { Target = "System.Collections.Generic.IEnumerator"; Arity = 1 }
+            // `RegExpStringIterator` (TS 5.0+) — the iterator returned by
+            // `String.prototype.matchAll`. Yields `RegExpMatchArray`. F#
+            // has no equivalent typed iterator; obj placeholder.
+            "RegExpStringIterator", { Target = Intrinsic.obj; Arity = 0 }
+            // `RegExpMatchArray` (lib.es5) — a `string[]` with extra `index`
+            // / `input` / `groups` properties. No F# analogue; obj placeholder.
+            "RegExpMatchArray", { Target = Intrinsic.obj; Arity = 0 }
+            "RegExpExecArray", { Target = Intrinsic.obj; Arity = 0 }
+            // `TemplateStringsArray` (lib.es2015.symbol.wellknown) — the
+            // first arg to a tagged template literal. `ReadonlyArray<string>`
+            // with an extra `raw: ReadonlyArray<string>` property. obj
+            // placeholder; consumers cast at use sites.
+            "TemplateStringsArray", { Target = Intrinsic.obj; Arity = 0 }
+            // `ReadonlySetLike<T>` (TS 5.5+, lib.es2025.collection) — the
+            // structural input shape accepted by `Set.prototype.intersection`
+            // / `union` / `difference`. Has `size`, `has(v)`, `keys()`. No
+            // direct F# analogue with the iterator-returning `keys()`
+            // method; obj arity 0 is the safe placeholder (consumers
+            // refine via Fable.Browser.* bindings if needed).
+            "ReadonlySetLike", { Target = Intrinsic.obj; Arity = 0 }
+            // `WeakKey` (TS 5.2+, lib.es2015.weakref) — `object | symbol`.
+            // No F# union analogue; obj placeholder.
+            "WeakKey", { Target = Intrinsic.obj; Arity = 0 }
+            // `PromisifyFn` / similar utility shapes from Node's util types.
+            "PromisifyFn", { Target = Intrinsic.obj; Arity = 0 }
         ]
 
     let private intrinsicRef (name: string) =
