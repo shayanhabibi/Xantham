@@ -46,6 +46,7 @@ those concerns meet new TS-source idioms.
 | **Phase E6 — Union/Tuple/Function: drop args, expose upstream substitution gap** | Both empty-args and args-present `TypeReference` branches now skip wrapping when the prefix is a Union/Tuple/Function molecule (`Foo<A><B>` / `U4<A,B,C,D><E,F,G,H>` / `(A * B)<C>` / `(A -> B)<C>` are all invalid F#). The previous wrapping behavior produced parser-bail errors (FS0010/FS1242) that masked the deeper alias-body substitution gap — `'T not defined`, `'F not defined`, etc. — which is the next principled target. Verify count rises (561 → 13,475) but this is honest unmasking, not regression | (Phase E6) |
 | **Phase F — Typar atoms as `Intrinsic`; render-layer substitution at body and Union/Tuple/Function sites** | Three connected pieces: (a) `ResolvedType.TypeParameter` and Phase B helper render typars as `Intrinsic_ "'T"` atoms instead of opaque `Widget_` atoms — same emitted text but downstream passes can identify and substitute; (b) `Render.TypeAlias.fs` Alias and Union variants now substitute body typars not in the alias's kept-typar list with `obj` via `substituteForHeritage`; (c) empty-args and args-present `TypeReference` branches with Union/Tuple/Function prefix invoke the same substitution with `Set.empty` (no caller scope). Heritage substitution observed firing ~57× per SDK in practice. Remaining cohort (`'T not defined` etc.) comes from member-type emissions (method params/returns, property types) that don't yet route through the substitution layer — that's Phase G | (Phase F) |
 | **Phase G — Boundary-stop free-typar walkers (synthetic + alias)** | Both `SyntheticPathAssignment.collectFreeTypars` and `Render.TypeAlias.collectBodyTypars` were walking transparently through named-type containers and through `TypeReference.Type.Value`, picking up typars from the target's own declaration scope and hoisting them onto synthetic/alias declarations. A synthetic `_Lit102` whose body uses zero typars was being declared as `_Lit102<'T,'S,'This,'U,'A,'D,'Arr,'InnerArr,'Depth,'Array>` because the walker followed `ResizeArray<U2<float,string>>` into `Array<T>`'s body and collected `Array`'s `T` plus typars from its iterator methods. Boundary-stop both walkers at `Interface`/`Class` and at `tr.Type.Value` — walk only `tr.TypeArguments` (carrying typars from the OUTER scope). The earlier "transparent walk is empirically better" hypothesis (Phase B doc) didn't hold once Phase F's render-layer substitution was in place: over-capture was producing constraint-mismatched refs that no use-site scope could satisfy. Verify drops 14,437 → 9,851 raw (−32%) / 2,861 → 2,758 distinct in one change. Per-SDK biggest gains: Agents −884, AiChat −953, Think −1,054, Voice −1,021 | (Phase G) |
+| **Phase H — Encoder-side alias instantiation via TS's `getTypeOfSymbol`** | At the `TypeReferenceNode` dispatch in `src/Xantham.Fable/Reading/Dispatch/TypeNode.fs`, when the target's instantiated `Ts.Type.aliasSymbol` is set (TS's marker for an alias application), bypass `TypeReference.fromNode` (which emits an un-substituted `TypeReference + TypeArguments`) and emit a `STypeLiteralBuilder` populated by `TypeFlagObject.buildSubstitutedMembersFromType`. That helper enumerates properties via `getPropertiesOfType` and reads each property's TYPE via `ctx.checker.getTypeOfSymbol(propSym)` — the TS checker performs the typar substitution at that call, so the captured property types are already substituted at the use site (`Foo<string>`'s `x: T` becomes `x: string`). Lossy on member-shape distinction (method-vs-property is collapsed to property of function type — the substituted type for a method symbol is the signature's function type) but correct on type content. Distinct count drops **2,748 → 2,237 (−19%)**; WorkersTypes goes from 86 distinct to 1 (essentially clean). Raw rises +1,686 because the substitution surfaces new arity-mismatch cohorts (`NonSharedBuffer<_,_,_>`, `ZodTypeAny<_,_,_,_,_,_>`, `OmitKeys<_,_>`, `AnyZodObject<_,_,_,_,_,_,_,_,_,_,_,_,_,_,_>`) at hundreds of use sites apiece — fewer categories, more per-category repetition. Closes the `'Value not defined` and `'S not defined` cohorts at instantiated alias sites; surviving `'T` / `'Output` / `'EventEmitter` cohorts are non-alias `this`-as-typar bugs from `@types/node/events.d.ts` and downstream Zod inheritance | (Phase H) |
 
 ## The principle, restated
 
@@ -378,43 +379,81 @@ Reverted. The one principled holdover kept: boundary-stopping the
 symmetric to the discipline applied to the other two free-typar
 walkers, valid on its own even without substitution.
 
-**Path forward — re-examined** (none is a small change, listed in
-order of architectural fit vs invasiveness):
+**Path forward — landed via Phase H (encoder-side).** The first
+option of three listed below was implemented and landed. The other
+two remain available for future iterations or for the residual
+non-alias cohorts (Interface methods returning `this`, etc.) that
+Phase H does not address.
 
-1. **Encoder-side substitution via TS's compiler API** —
-   `src/Xantham.Fable/Reading/TypeReference.fs` and the property
-   reader in `Reading/Dispatch/TypeFlagObject.fs`. TS's
-   `checker.getPropertiesOfType` on an instantiated `Ts.Type`
-   returns property symbols; `checker.getTypeOfSymbol(sym)` returns
-   the SUBSTITUTED property type. The encoder currently routes
-   property reads via `valueDeclaration` (source declaration —
-   un-substituted). Switching to `getTypeOfSymbol`-based reading at
-   instantiation sites captures TS's own substitution and gives
-   stable encoder-assigned TypeKeys naturally. This is the
-   architecturally cleanest fix but requires a real refactor of
-   `TypeFlagObject`'s property-emission path (not a one-keystroke
-   change as the original Option-3 paragraph suggested).
-2. **Hash-cons substituted ResolvedTypes by structural identity.**
-   Same intent as the cache attempted in this session, but with
-   structural rather than reference identity. F# `ResolvedType` is
-   `[<ReferenceEquality>]`; layering a structural-equality wrapper
+1. **Encoder-side substitution via TS's compiler API — LANDED**
+   in `src/Xantham.Fable/Reading/Dispatch/TypeNode.fs` and
+   `Reading/Dispatch/TypeFlagObject.fs`. The
+   `TypeReferenceNode` dispatch checks
+   `getTypeFromTypeNode(node).aliasSymbol` — TS sets this on
+   instantiated alias applications. When present, the dispatch
+   emits an `STypeLiteralBuilder` via the new
+   `buildSubstitutedMembersFromType` helper, which enumerates
+   properties via `getPropertiesOfType` and reads each property
+   type via `getTypeOfSymbol(propSym)` (TS substitutes typars at
+   that call). The tag's TypeKey is set via the standard
+   `signalCache[xanTag.IdentityKey].Key` pattern (same as
+   `TypeReference.fromNode` uses) — the substituted TypeLiteral
+   gets a stable encoder-assigned TypeKey, the surrounding
+   infrastructure handles it like any other interned literal.
+   **Result:** distinct count −511 (−19%); WorkersTypes from 86
+   to 1 distinct; `'Value` / `'S` typar-cohorts eliminated at
+   instantiated alias sites. Trade-off: lossy on method-vs-property
+   distinction (collapses to property of function type — TS's
+   substituted type for a method symbol IS its function-typed
+   signature, so this is type-accurate but member-shape-lossy) and
+   surfaces a new FS0033 arity-mismatch cohort downstream where
+   generator's arity reconciler doesn't yet know about the typars
+   the encoder substitution introduces.
+2. **Hash-cons substituted ResolvedTypes by structural identity** —
+   not pursued; was the path the reverted decoder attempt would
+   have needed. Layering a structural-equality wrapper
    (`type StructurallyEq = { Inner: ResolvedType }` with custom
-   `Equals`/`GetHashCode` doing deep comparison) lets the cache key
-   on shape, which makes inner-vs-outer substituted refs converge
-   on the same identity. Substantial: needs structural hash/eq on
-   the whole ResolvedType DU including lazies and nested records.
-3. **Change the anchor pass + `prerenderTypeAliases` + path-flatten
-   visited keys to TypeKey** (smallest direct change in principle,
-   most-invasive across the codebase in practice). Substituted
-   bodies need synthetic TypeKeys, which means a decoder-side TypeKey
-   allocator and threading TypeKey through every visited-set site.
+   `Equals`/`GetHashCode` doing deep comparison) would let a
+   decoder-level cache key on shape, making inner-vs-outer
+   substituted refs converge on the same identity. Substantial:
+   needs structural hash/eq on the whole ResolvedType DU including
+   lazies and nested records. **Now redundant** for the alias-
+   instantiation use case (Phase H covers it via TS-managed
+   identity) but could still apply to other substitution-like
+   scenarios that don't go through TS's instantiation path.
+3. **Change anchor pass + `prerenderTypeAliases` + path-flatten
+   visited keys to TypeKey** — not pursued. Substituted bodies
+   would need synthetic TypeKeys, which means a decoder-side
+   TypeKey allocator and threading TypeKey through every
+   visited-set site. **Made irrelevant** by Phase H: the encoder
+   now assigns real TypeKeys to substituted literals via TS's
+   normal interning, so no synthetic allocation needed.
 
-Notes from the reverted attempt are preserved for whoever picks this
-up next. Specifically: the lazy-cache pattern is correct in shape;
-the failures were at the COMPOSITION boundary where one substituted
-body references another substituted body. Whatever path is chosen
-must address that compositional identity, not just identity for one
-substitution in isolation.
+Notes from the reverted decoder attempt are preserved for whoever
+picks up the next layer (the residual non-alias cohorts: `this`-as-
+typar, synthetic submodule paths). The lazy-cache pattern from that
+attempt is correct in shape for cases where TS's instantiation isn't
+the right substitution — its failures were at the COMPOSITION
+boundary where one substituted body references another substituted
+body. Phase H side-steps composition entirely by using TS's own
+substituted property types, which are already self-consistent.
+
+**Phase H downstream cleanup needed.** The new FS0033 cohorts
+(`NonSharedBuffer<_,_,_> expects 3 given 0`, `ZodTypeAny<_,_,_,_,_,_>
+expects 6 given 3`, etc.) come from the generator's arity reconciler
+not knowing that the substituted TypeLiteral's declared typars
+exceed what historical use sites pass. Two paths to address:
+- Extend `ctx.TypeAliasArity` (or an equivalent map) to capture the
+  encoder-substituted body's effective typar count and apply the
+  existing pad/truncate logic to references.
+- At the encoder, when emitting the substituted TypeLiteral, ALSO
+  emit appropriate use-site adjustments — though this loops back
+  into "encoder needs to know about use-site arity rules," which
+  is a generator concern.
+
+The first path is cleaner — keep the encoder dumb-and-correct
+about substitution; let the generator's existing arity machinery
+extend to cover the new typar counts.
 
 ## Notes on metaphor and architecture evolution
 
@@ -509,27 +548,31 @@ Trajectory across the session:
   9,835 / 2,750 (small additional improvement; mostly catches refs
   whose TypeAliasRemap key didn't match this exact instantiation)
 - After Phase G++ (boundary-stop `prerenderTypeAliases` walker;
-  decoder substitution attempted+reverted): **9,855 / 2,748** —
+  decoder substitution attempted+reverted): 9,855 / 2,748 —
   roughly neutral vs prior state; the principled walker discipline
   is now consistent across all three free-typar walkers in the
   codebase
+- After Phase H (encoder-side alias instantiation via TS's
+  `getTypeOfSymbol`): **11,541 / 2,237** — distinct **−511 (−19%)**;
+  raw +1,686 (new FS0033 cohort downstream of encoder-substituted
+  TypeLiterals). WorkersTypes effectively clean (86 → 1 distinct).
 
-Per-SDK after Phase G++ (current state):
+Per-SDK after Phase H (current state):
 
 | SDK | Raw | Distinct |
 |---|---:|---:|
-| Agents | 1,648 | 472 |
-| AiChat | 1,568 | 468 |
-| Codemode | 235 | 60 |
-| Containers | 708 | 170 |
-| DynamicWorkflows | 29 | 7 |
+| Agents | 2,040 | 464 |
+| AiChat | 2,025 | 463 |
+| Codemode | 227 | 47 |
+| Containers | 997 | 153 |
+| DynamicWorkflows | 26 | 4 |
 | Puppeteer | 25 | 10 |
-| Sandbox | 716 | 175 |
-| Shell | 707 | 167 |
-| Think | 1,580 | 486 |
-| Voice | 1,670 | 482 |
-| WorkerBundler | 700 | 165 |
-| WorkersTypes | 269 | 86 |
+| Sandbox | 997 | 153 |
+| Shell | 992 | 151 |
+| Think | 2,088 | 469 |
+| Voice | 1,136 | 172 |
+| WorkerBundler | 987 | 150 |
+| WorkersTypes | 1 | 1 |
 
 The big-SDK SDKs (Agents/AiChat/Think/Voice) all dropped ~1,000 errors
 each — those are the SDKs whose synthetic literals carried 10+ over-

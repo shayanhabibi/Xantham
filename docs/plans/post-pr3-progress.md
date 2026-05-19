@@ -527,77 +527,102 @@ Key implementation notes:
 ## Current state — verify counts
 
 Raw and distinct (file:line:col-deduplicated) error counts after
-the post-PR3 work landed (parser-bail unmask through walker
-boundary-stop). **Cloudflare row dropped** — the bare `cloudflare`
-package is the management REST client, not a Xantham target (see
-top banner). Target set is **12 runtime SDKs**.
+the post-PR3 work landed (parser-bail unmask through encoder-side
+alias instantiation). **Cloudflare row dropped** — the bare
+`cloudflare` package is the management REST client, not a Xantham
+target (see top banner). Target set is **12 runtime SDKs**.
 
 | SDK | Raw | Distinct |
 |---|---:|---:|
-| Agents | 1,648 | 472 |
-| AiChat | 1,568 | 468 |
-| Codemode | 235 | 60 |
-| Containers | 708 | 170 |
-| DynamicWorkflows | 29 | 7 |
+| Agents | 2,040 | 464 |
+| AiChat | 2,025 | 463 |
+| Codemode | 227 | 47 |
+| Containers | 997 | 153 |
+| DynamicWorkflows | 26 | 4 |
 | Puppeteer | 25 | 10 |
-| Sandbox | 716 | 175 |
-| Shell | 707 | 167 |
-| Think | 1,580 | 486 |
-| Voice | 1,670 | 482 |
-| WorkerBundler | 700 | 165 |
-| WorkersTypes | 269 | 86 |
-| **Total** | **9,855** | **2,748** |
+| Sandbox | 997 | 153 |
+| Shell | 992 | 151 |
+| Think | 2,088 | 469 |
+| Voice | 1,136 | 172 |
+| WorkerBundler | 987 | 150 |
+| WorkersTypes | 1 | 1 |
+| **Total** | **11,541** | **2,237** |
 
-The post-PR3 work peeled successive layers of masking and over-
-capture: parser-bail unmask exposed real downstream errors,
-arity reconciliation absorbed most of the use-site noise, and
-boundary-stopping the three free-typar walkers (synthetic in
-`SyntheticPathAssignment`, alias-body in `Render.TypeAlias`,
-arity-precomputation in `prerenderTypeAliases`) eliminated the
-synthetic-typar over-capture cohort. See
-`docs/plans/post-pr3-re-engineering.md` for the principle behind
-each phase.
+**Headline:** WorkersTypes effectively at zero (1 distinct, FS0037
+duplicate-definition). Voice dropped 482 → 172 distinct. Total
+distinct **−511 vs prior state (−19%)**; raw rose +1,686 because
+the encoder substitution surfaced new arity-mismatch cohorts that
+fire at hundreds of use sites apiece — fewer distinct categories,
+more line-level repetition per category. The distinct count is
+the load-bearing metric for "kinds of work remaining."
 
-The early post-PR3 totals (615 raw / 549 distinct in the table
-that previously occupied this slot) were under parser-bail masking
-— ~6× as much real downstream noise was hidden by an upstream
-parser failure. That table reflected what the F# compiler *saw*
-before bailing, not what was actually wrong.
+The post-PR3 work peeled successive layers in this order:
+
+1. Parser-bail unmask exposed real downstream errors (Phase B).
+2. Arity reconciliation absorbed most use-site arity noise
+   (Phase E1-E3).
+3. Free-typar walker boundary-stop across all three walkers —
+   `SyntheticPathAssignment.collectFreeTypars`,
+   `Render.TypeAlias.collectBodyTypars`,
+   `prerenderTypeAliases` walkT — eliminated synthetic-typar
+   over-capture (Phase G/G+/G++).
+4. Encoder-side substitution: at the `TypeReferenceNode` dispatch,
+   when the target's instantiated `Ts.Type.aliasSymbol` is set
+   (TS's marker for "this is an alias application"), bypass the
+   un-substituted `TypeReference` emission and produce a
+   `STypeLiteralBuilder` instead, populated via
+   `TypeFlagObject.buildSubstitutedMembersFromType`. That helper
+   uses `ctx.checker.getTypeOfSymbol(propSym)` for each property's
+   type — TS already substitutes typars at that call.
+
+The earlier post-PR3 totals (615 raw / 549 distinct in the table
+that previously occupied this slot) were under parser-bail
+masking — ~6× as much real downstream noise was hidden by an
+upstream parser failure. That table reflected what the F#
+compiler *saw* before bailing, not what was actually wrong.
 
 The remaining histogram is dominated by:
 
-* **FS0039 typar-not-defined** (~1,100 across SDKs) — the
-  dominant remaining cohort. Manifestations like `'T not defined`,
-  `'Value not defined`, `'Output not defined`, `'EventEmitter
-  not defined`, `'Options not defined in ...GenerateKeyPairSync...`.
-  Root cause: alias-body use-site instantiation gap. When TS
-  source has `type Foo<T> = { x: T }` and the consumer site uses
-  `Foo<string>`, the encoder/decoder doesn't substitute `T → string`
-  in the body — the body is captured as a structural literal with
-  `x: T` and emitted at the use site with orphan `T`. TS's own
-  compiler API does this substitution implicitly via
-  `getTypeOfSymbol` on the substituted property symbol, but the
-  encoder reads property types through `valueDeclaration` (i.e.
-  source declaration), not through the substituted type chain.
-  Closing this requires the encoder's property-reading path to
-  switch from declaration-based to type-based at instantiation
-  sites — a substantial refactor in `TypeFlagObject` dispatch.
-  See post-pr3-re-engineering.md for the three architectural
-  options enumerated; none is a one-keystroke change.
-* **FS0033 arity mismatches** (~165 Think alone) — surviving
-  use sites where a cycle-broken alias target still receives args
-  (e.g. `ZodTypeAny<obj, ZodTypeDef, 'Output>` where `ZodTypeAny`
-  collapsed to `obj`). Phase C / Phase G fallback drops args at
-  remap and at non-remap Prefix sites, but the dominant
-  ZodTypeAny cohort routes through a path where the head-atom's
-  path doesn't match `CycleBrokenPaths` (target-key vs body-key
-  mismatch). The principled fix requires cycle-broken metadata
-  to flow through the TypeAliasRemap chain consistently.
-* **FS0001 missing constraints** (~163 Think) — type aliases
-  with many declared typars whose bodies reference synthetics
+* **FS0039 typar-not-defined** (~1,100 across the big SDKs).
+  The `'Value` and `'S` cohorts (~250 combined in Think
+  pre-substitution) went to zero — those were closed by the
+  encoder substitution at alias use sites. The surviving cohorts
+  are **non-alias** sources:
+    - `'T` (278 Think) — Interface methods declaring
+      `prependListener<K>(...): this` where `this` was encoded
+      as a TypeParameter named after the class.
+    - `'Output` (160) — same `this`-as-typar pattern routed
+      through ZodType inheritance.
+    - `'EventEmitter` (70) — the literal `this`-as-typar bug
+      from `@types/node/events.d.ts`. Use-site method declares
+      `<K>` but return type is `'EventEmitter` (orphan).
+    - `'Options not defined in ...GenerateKeyPairSyncModule.Invoke`
+      (64) — synthetic submodule path resolution gap; the
+      synthetic exists at a sibling path but the reference
+      doesn't resolve to it.
+* **FS0033 arity mismatches — new cohort introduced by encoder
+  substitution** (496× `NonSharedBuffer<_,_,_> expects 3 given 0`,
+  312× `ZodTypeAny<_,_,_,_,_,_> expects 6 given 3`, 188× `OmitKeys<_,_>
+  expects 2 given 0`, 54× `ZodRawShapeCompat<_> expects 1 given 0`,
+  18× `AnyZodObject<_,_,_,_,_,_,_,_,_,_,_,_,_,_,_> expects 15
+  given 5`, etc.). Some types now declare more typars (hoisted from
+  substituted property signatures) than their existing use sites
+  pass. The arity reconciler in `RenderScope.Prelude.fs` doesn't
+  know about these new typar declarations because they didn't
+  exist before the encoder change. Fixable by extending the
+  arity reconciler to consult substituted-body declared arity
+  via `ctx.TypeAliasArity` (already exists) for ALIAS sites and
+  by adding equivalent arity tracking for the encoder-substituted
+  TypeLiterals.
+* **FS0033 cycle-broken arity** (~40 `WorkspaceLike does not
+  expect type arguments, but here is given 1`) — surviving from
+  pre-substitution work; cycle-broken alias target with args at
+  use sites whose TypeKey doesn't match `TypeAliasRemap`.
+* **FS0001 missing constraints** (~240 each in big SDKs) — type
+  aliases declaring many typars whose bodies reference synthetics
   with constrained typars; F# infers the constraints and rejects
   the alias declaration that lacks them. Downstream of the
-  substitution gap above.
+  substitution gap.
 
 For the complete current roadmap including the additional
 generator-side categories (`.node` member names, StringEnum
