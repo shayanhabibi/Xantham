@@ -471,21 +471,22 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             }
             |> addOrReplaceScope ctx resolvedType
         | _ ->
-            let path = TransientTypePath.Anchored
-            let ref = RenderScopeStore.TypeRefRender.create scope resolvedType false path
-            let rootPath =
-                TransientPath.toTransientModulePath scope.PathContext
-                |> TransientTypePath.graft
-            let childScope = RenderScopeStore.create()
-            {
-                Transient.RenderScope.Type = resolvedType
-                Root = TypeLikePath.create rootPath |> ValueSome
-                TypeRef = ref
-                Render =
-                    lazy Intersection.render ctx childScope intersection
-                    |> Render.create ref
-                TransientChildren = ValueSome childScope
-            }
+            // Intersection isn't in SyntheticPaths — it wasn't reached by
+            // any export during `SyntheticPathAssignment.run`. Without a
+            // canonical home, the fallthrough emits the body at a transient
+            // path constructed from the current `scope.PathContext`. When
+            // the same Intersection is referenced from a DIFFERENT scope
+            // (different ResolvedType identity in the decoder, or via a
+            // walker that bypasses SyntheticPathAssignment), the transient
+            // resolution constructs a path that doesn't match where the
+            // body was emitted — producing dangling refs (`Owner.Item.Key`
+            // sites that target a synthetic the decl pass didn't emit at
+            // that path). Collapse unrecognised intersections to `obj`:
+            // compilation-correct, no dangling refs, structurally lossy
+            // but the lossiness is bounded by "intersections that weren't
+            // canonicalised in the path-assignment pass."
+            liftNullable Intrinsic.obj
+            |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Literal (TsLiteral.String "") ->
         // The empty-string literal `""` is structurally just F# `string`.
@@ -893,22 +894,18 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 }
                 |> addOrReplaceScope ctx resolvedType
             | _ ->
-                let rootPath =
-                    TransientPath.toTransientModulePath scope.PathContext
-                    |> TransientTypePath.graft
-                let ref = RenderScopeStore.TypeRefRender.create scope resolvedType false TransientTypePath.Anchored
-                let childScope =
-                    { RenderScopeStore.create() with
-                        PathContext = TransientPath.create rootPath }
-                {
-                    RenderScope.Type = resolvedType
-                    Root = rootPath |> TypeLikePath.create |> ValueSome
-                    TypeRef = ref
-                    Render =
-                        lazy TypeLiteral.render ctx childScope typeLiteral
-                        |> Render.create ref
-                    TransientChildren = ValueSome childScope
-                }
+                // TypeLiteral not in SyntheticPaths — same reasoning as
+                // the Intersection case above. Without a canonical home
+                // from `SyntheticPathAssignment.run`, the transient anchor
+                // is constructed from the local `scope.PathContext` (e.g.
+                // `<Owner>.Item.Item` for IndexSignature return types).
+                // The body never emits at that path, so the ref dangles
+                // (`Item.Item is not defined` cohorts). Collapse to `obj`
+                // — structurally lossy but compilation-correct, and
+                // bounded by the same set of TypeLiterals that escaped
+                // canonicalisation.
+                liftNullable Intrinsic.obj
+                |> RenderScope.createRootless resolvedType
                 |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TemplateLiteral templateLiteral ->
         // Synthetic-reference audit site #4 (TemplateLiteral).
