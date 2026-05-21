@@ -23,7 +23,6 @@ let private commonCompilerOptions = jsOptions<Ts.CompilerOptions>(fun c ->
     c.resolvePackageJsonExports <- Some true
     c.resolvePackageJsonImports <- Some true)
 
-
 let private createProgramForFiles runDirectory (entryFiles: string array) =
     let entryFiles = entryFiles |> Array.map String.normalizePath
     let tempFilePath = Temp.Directory.createXanthamDummyFileWithRefs runDirectory entryFiles
@@ -38,8 +37,6 @@ let private createProgramForFiles runDirectory (entryFiles: string array) =
                 ))
     |}
 
-open System.Runtime.CompilerServices
-open System.Runtime.InteropServices
 [<ReferenceEquality>]
 type TypeScriptReader = {
     Stack: Stack<XanthamTag>

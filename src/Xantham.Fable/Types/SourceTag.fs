@@ -11,6 +11,8 @@ open Xantham.Fable.Types.Tracer
 open Fable.Core.DynamicExtensions
 open Fable.Core.JsInterop
 
+let private logger = Utils.Logging.Log.Default
+
 /// <summary>
 /// LibEs default packages are not tracked further.
 /// The DU serves as the point of identification so that descendant nodes will
@@ -20,6 +22,19 @@ type SourceKind =
     | LibEs
     | Ambient of Ts.SourceFile
     | Package of Ts.Symbol
+    
+[<RequireQualifiedAccess; Fable.Core.Erase>]
+type PackageVersion =
+    | None
+    | Version of string
+    static member inline Create(version: string) =
+        if System.String.IsNullOrWhiteSpace(version) then
+            PackageVersion.None
+        else Version version
+    member inline this.AsVersionIdentifier =
+        match this with
+        | PackageVersion.None -> "0.0.0"
+        | Version version -> version
     
 let inline isModuleFileFast (sourceFile: Ts.SourceFile): bool =
     (sourceFile?externalModuleIndicator && true)
@@ -47,7 +62,7 @@ type SourceTag =
     
 type PackageInfo = {
     Name: string
-    Version: string
+    Version: PackageVersion
     AssociatedTags: SourceTag array
 }
 
@@ -129,10 +144,10 @@ module private SourceGuard =
     let inline seen (node: Ts.SourceFile) = GuardTracer.has node
     let inline fromNode (node: Ts.SourceFile) = GuardTracer.fromNode node :?> SourceGuard
     let inline setSource (node: Ts.SourceFile) (guard: SourceGuard) = guard[nameof guard.Source] <- node
-    let inline setPackageDirectory (packageDirectory: string) (guard: SourceGuard) = guard[nameof guard.PackageDirectory] <- packageDirectory
+    let inline setPackageDirectory (packageDirectory: string<Measures.String.packageDirectory>) (guard: SourceGuard) = guard[nameof guard.PackageDirectory] <- packageDirectory
     let inline setPackageJsonContent (packageJsonContent: PackageJsonPathFields) (guard: SourceGuard) = guard[nameof guard.PackageJsonContent] <- packageJsonContent
     let inline withSource node guard = setSource node |> apply guard
-    let inline withPackageDirectory packageDirectory guard = setPackageDirectory packageDirectory |> apply guard
+    let inline withPackageDirectory (packageDirectory: string<Measures.String.packageDirectory>) guard = setPackageDirectory packageDirectory |> apply guard
     let inline withPackageJsonContent packageJsonContent guard = setPackageJsonContent packageJsonContent |> apply guard
     
     let inline getExports (guard: SourceGuard) =
@@ -235,7 +250,9 @@ module private SourceTag =
     let inline getDeclarations (tag: SourceTag) =
         let program =
             getProgram tag
-            |> ValueOption.defaultWith (fun () -> failwith "Invariant: SourceTag was not initialized with a program")
+            |> ValueOption.defaultWith (fun () ->
+                logger.logfe "[%s{event}] SourceTag was not initialised with a program (missing program field)." "SourceTag"
+                failwith "Invariant: SourceTag was not initialized with a program")
         let getDeclarationsFromSymbolTable (symbolTable: Ts.SymbolTable) =
             symbolTable.values()
             |> Seq.choose _.declarations
@@ -294,7 +311,7 @@ type SourceGuardSRTPCreator =
         match node.packageJsonScope with
         | Some packageJsonScope ->
             guard
-            |> SourceGuard.withPackageDirectory packageJsonScope.packageDirectory
+            |> SourceGuard.withPackageDirectory (Measures.String.add<Measures.String.packageDirectory> packageJsonScope.packageDirectory)
             |> SourceGuard.withPackageJsonContent packageJsonScope.contents.packageJsonContent
         | None -> guard
 
@@ -327,8 +344,10 @@ type SourceTag with
         else
             checker.getSymbolAtLocation sourceFile
             |> Option.defaultWith (fun () ->
-                Log.error "Invariant: source file that is not a default library should have a symbol"
-                Log.traceTo 2 sourceFile
+                logger.logfe "[%s{event}] Non-default library file %s{sourceFile} has no symbol. Available fields: %A{sourceFileFields}"
+                    "SourceTag"
+                    sourceFile.fileName
+                    (Fable.Core.JS.Constructors.Object.keys sourceFile)
                 failwith "Invariant: source file that is not a default library should have a symbol"
                 )
             |> fun symbol -> SourceKind.Package symbol, symbol
@@ -383,14 +402,16 @@ type Ts.Program with
                     |> _.Add(resolvedSourceTag)
                 SymbolTypeKey.set packageInfoKey packageInfo resolvedSourceTag
             | _ ->
-                let packageInfo = { Name = packageName; Version = packageVersion; AssociatedTags = [| resolvedSourceTag |] }
+                let packageInfo = { Name = packageName; Version = PackageVersion.Create packageVersion; AssociatedTags = [| resolvedSourceTag |] }
                 cache[ packageKey ] <- packageInfo
                 SymbolTypeKey.set packageInfoKey packageInfo resolvedSourceTag
         this.forEachResolvedModule(fun resolvedModule moduleName _ sourceFilePath ->
             let sourceFile = this.getSourceFile(sourceFilePath)
             // if we can't find the source file for the source file path then we early exit.
             match sourceFile with
-            | None -> ()
+            | None ->
+                sourceFilePath
+                |> logger.logfe "[%s{event}] Unable to find the source file for %s{sourceFilePath}. Please raise an issue with the required reproduction steps." "SourceTag"
             | Some sourceFile -> 
             let sourceFileTag = SourceTag.CreateValue(this, sourceFile)
             match resolvedModule.resolvedModule with
@@ -399,19 +420,39 @@ type Ts.Program with
                     this.getSourceFile(resolvedModule.resolvedFileName)
                     |> Option.orElseWith(fun () ->
                         let removeExtension (path: string) =
-                            let extension = Node.Api.path.extname path
-                            let extensionless = path.Substring(0, path.Length - extension.Length)
-                            extensionless
+                            Path.extensionless path
                         let extensionless = resolvedModule.resolvedFileName.Substring(0, resolvedModule.resolvedFileName.Length - resolvedModule.extension.Length)
+                        logger.logft "[%s{event}] Failed to find source file using %s{resolvedFilePath}. Looking for a match using %s{extensionlessFilePath} instead."
+                            "SourceTag"
+                            resolvedModule.resolvedFileName
+                            extensionless
                         this.getSourceFiles().AsArray
-                        |> Array.tryFind (_.fileName >> removeExtension >> (=) extensionless)
-                        |> Option.orElseWith(fun () ->
-                            this.getSourceFiles().AsArray
-                            |> Array.tryFind (_.fileName >> removeExtension >> removeExtension >> (=) extensionless)
-                            )
+                        |> Array.tryFind (_.fileName >> removeExtension >> Measures.String.remove >> (=) extensionless)
                         )
                 match resolvedSourceFile with
-                | None -> Log.error $"Invariant: Unable to resolve source file for %A{resolvedModule} {moduleName}"
+                | None ->
+                    let extension = Path.FileExtension.Create resolvedModule.extension
+                    match extension with
+                    | Path.FileExtension.Extension (
+                        Ts.Extension.Js | Ts.Extension.Json
+                      | Ts.Extension.Jsx | Ts.Extension.Cjs
+                      | Ts.Extension.Mjs | Ts.Extension.Json
+                      ) ->
+                        logger.logfd
+                            "[%s{event}] Unable to resolve source file for %s{moduleName} \
+                             (%s{resolvedFilePath}).\nThis is likely benign judging by the \
+                             extension.\nSubmit an issue if you believe downstream errors are caused by this."
+                            "SourceTag"
+                            moduleName
+                            resolvedModule.resolvedFileName
+                    | _ ->
+                        logger.logfe
+                            "[%s{event}] Unable to resolve source file for %s{moduleName} \
+                             (%s{resolvedFilePath}).\n%A{resolvedModuleData}"
+                            "SourceTag"
+                            moduleName
+                            resolvedModule.resolvedFileName
+                            resolvedModule
                 | Some resolvedSourceFile ->
                 let resolvedSourceTag = SourceTag.CreateValue(this, resolvedSourceFile)
                 
@@ -469,10 +510,12 @@ type Ts.Program with
                 |> ValueOption.bind (_.name >> Option.toValueOption)
                 |> ValueOption.defaultWith (fun () ->
                     #if !FABLE_TEST
-                    failwith "Invariant: Ambient source has no associated package name."
-                    #else
-                    Node.Api.path.basename tag.Guard.Source.fileName
+                    logger.logfe "[%s{event}] Ambient source has no associated package name: %s{sourceFilePath}. Available fields: %A{sourceFileFields}"
+                        "SourceTag"
+                        tag.Guard.Source.fileName
+                        (Fable.Core.JS.Constructors.Object.keys tag)
                     #endif
+                    Node.Api.path.basename tag.Guard.Source.fileName
                     )
             let packageVersion =
                 tag.Guard.PackageJsonContent
@@ -585,7 +628,7 @@ type Ts.Program with
                 {
                     Name = info.Name
                     Json = exportData
-                    Version = info.Version
+                    Version = info.Version.AsVersionIdentifier
                     SubModules = subModules
                     Entry = assumedEntries
                 })
