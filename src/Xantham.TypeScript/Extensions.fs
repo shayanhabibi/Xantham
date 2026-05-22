@@ -88,6 +88,11 @@ type ReverseMappedType =
 /// <summary>
 /// Type safe representation of <c>ts.__String</c>
 /// </summary>
+/// <remarks>
+/// <c>op_Implicit</c>/<c>Create</c> partition a raw <c>__String</c> into a plain <c>String</c> or a known
+/// <c>InternalSymbolName</c>. Proof <b>XTK-5</b> (Program.fs) asserts every symbol <c>escapedName</c> in the
+/// corpus maps cleanly, so no symbol name is silently mis-bucketed.
+/// </remarks>
 type SymbolName =
     | String of string
     | InternalSymbol of Ts.InternalSymbolName
@@ -262,6 +267,10 @@ type Ts.SourceFile with
     /// is an external module, then we traverse it's ancestry for the first `package.json`
     /// within scope (traversal stops when we hit `node_modules`).
     /// </summary>
+    /// <remarks>
+    /// Proofs <b>SF-8</b> (external modules) and <b>SF-10</b> (non default-lib scripts) assert this is <c>Some</c>
+    /// across the corpus (Program.fs), which is what makes <c>Source.create</c>'s <c>.Value</c> access sound.
+    /// </remarks>
     member this.packageJsonFields =
         this.packageJsonScope
         |> Option.map _.contents.packageJsonContent
@@ -281,10 +290,17 @@ type Ts.SourceFile with
     /// Like <c>_.packageJsonFields</c>, except if the content doesn't contain a version, then
     /// we search for the first ancestor `package.json` that has a version.
     /// </summary>
+    /// <remarks>Proof <b>SF-9</b> (Program.fs) asserts external modules resolve a versioned <c>package.json</c>.</remarks>
     member this.closestVersionedPackageJsonFields =
         this.packageJsonFields
         |> Option.filter _.version.IsSome
         |> Option.orElseWith (fun () -> Ts.Program.GetClosestAncestorPackageJson _.version.IsSome this.fileName)
+    /// <summary>
+    /// Like <c>_.packageJsonFields</c>, except it requires both a name and a version, searching ancestors
+    /// until it finds a `package.json` that has both.
+    /// </summary>
+    /// <remarks>Proof <b>SF-11</b> (Program.fs) asserts non default-lib scripts resolve a named &amp; versioned
+    /// <c>package.json</c>, which is what <c>Source.create</c>'s <c>.Value</c> on this member relies on.</remarks>
     member this.closestNamedAndVersionedPackageJsonFields =
         let inline condition (p: PackageJsonPathFields) = p.version.IsSome && p.name.IsSome
         this.packageJsonFields
