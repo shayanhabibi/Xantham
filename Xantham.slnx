@@ -85,18 +85,23 @@
   <Folder Name="/src/">
     <Project Path="src/Xantham.Common/Xantham.Common.fsproj" />
     <Project Path="src/Xantham.Decoder/Xantham.Decoder.fsproj" />
-    <Project Path="src/Xantham.Fable.Core/Xantham.Fable.Core.fsproj" />
-    <Project Path="src/Xantham.Fable/Xantham.Fable.fsproj" />
     <Project Path="src/Xantham.Generator/Xantham.Generator.fsproj" />
   </Folder>
+  <Folder Name="/src/fable/">
+    <Project Path="src/Xantham.Fable.Core/Xantham.Fable.Core.fsproj" />
+    <Project Path="src/Xantham.Fable.Utils/Xantham.Fable.Utils.fsproj" />
+    <Project Path="src/Xantham.Fable/Xantham.Fable.fsproj" />
+    <Project Path="src/Xantham.TypeScript/Xantham.TypeScript.fsproj" />
+  </Folder>
   <Folder Name="/tests/">
+    <File Path="tests/Fixtures.Setup.fsx" />
+    <File Path="tests/Fixtures.Teardown.fsx" />
+    <File Path="tests/Logging.test.fsx" />
     <File Path="tests/Signal.test.fsx" />
     <Project Path="tests/Xantham.Decoder.Tests/Xantham.Decoder.Tests.fsproj" />
     <Project Path="tests/Xantham.EndToEnd/Xantham.EndToEnd.fsproj" />
     <Project Path="tests/Xantham.Fable.Tests/Xantham.Fable.Tests.fsproj" />
     <Project Path="tests/Xantham.Generator.Tests/Xantham.Generator.Tests.fsproj" />
-  </Folder>
-  <Folder Name="/tests/spec-tests/">
-    <File Path="tests/Xantham.Generator.Tests/Tests/Name.fs" />
+    <Project Path="tests/Xantham.TypeScript.Tests/Xantham.TypeScript.Tests.fsproj" />
   </Folder>
 </Solution>

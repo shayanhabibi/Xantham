@@ -105,7 +105,7 @@ Target.create Ops.fableBuild <| fun _ ->
 open Fake.Core.TargetOperators
 let (|Stringify|_|) (op: Ops) (comp: string)  = comp = op
 [<EntryPoint>]
-let main argsv =
+let rec main argsv =
     let printHelp () = printfn $"%s{Cli.spec}"
     if argsv |> Array.isEmpty then printHelp (); 0
     else

@@ -18,6 +18,7 @@ node_modules/
 !tests/Xantham.Fable.Tests/TypeFiles/node_modules/
 tests/**/output.json
 tests/**/package-lock.json
+tests/fixtures/**/*
 tests/Xantham.EndToEnd/verify/**.*
 tests/Xantham.EndToEnd/output/**.*
 tests/Xantham.EndToEnd/fixtures/**/*

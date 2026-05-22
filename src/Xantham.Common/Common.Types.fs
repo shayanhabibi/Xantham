@@ -34,6 +34,93 @@ module TypeKey =
     let encode: Encoder<TypeKey> = Encode.int
     let decode: Decoder<TypeKey> = Decode.int
 #endif
+module Identity =
+    // Internal
+    [<Erase>]
+    type Node = Node of int
+    /// <summary>
+    /// Always ensure you resolve a symbol through <c>getMergedSymbol</c> before acquiring the ID.
+    /// </summary>
+    [<Erase>]
+    type Symbol = Symbol of int
+    [<Erase>]
+    type Type = Type of int
+    
+/// <summary>
+/// DU discriminating against internal TypeScript symbol names for anonymous/nameless constructs.
+/// Non-nameless constructs are matched to <c>BindingName.String ...</c>.
+/// </summary>
+/// <remarks>
+/// A focused representation of the <c>Ts.__String</c> type. Runtime expression symbol names are ignored.<br/>
+/// - <c>__object</c> - Runtime value, not a type annotation<br/>
+/// - <c>__jsxAttributes</c> - JSX syntax, not valid in type decl files<br/>
+/// - <c>__class</c> - Unnamed class expressions, not valid in type decls<br/>
+/// - <c>__function</c> - Unnamed function/arrow expressions, not valid in type decls<br/>
+/// - <c>__importAttributes</c> - Import attribute objects<br/>
+/// - <c>__resolving__</c> - Transient cycle detection used internally by checker<br/>
+/// </remarks>
+type BindingName =
+    /// <summary>
+    /// The 'this' Type.
+    /// </summary>
+    /// <remarks>Created by the checker for synthetic <c>this</c> type parameter in classes/interfaces.</remarks>
+    | This
+    /// <summary>
+    /// Call signature
+    /// </summary>
+    | Call
+    /// <summary>
+    /// Constructor implementations (class)
+    /// </summary>
+    | Constructor
+    /// <summary>
+    /// Constructor signatures (interfaces, types et al)
+    /// </summary>
+    | New
+    /// <summary>
+    /// Index signatures
+    /// </summary>
+    | Index
+    /// <summary>
+    /// Module <c>export *</c> declarations
+    /// </summary>
+    | Export
+    /// <summary>
+    /// Global self-reference
+    /// </summary>
+    | Global
+    /// <summary>
+    /// Anonymous type literal.
+    /// </summary>
+    /// <remarks>Assigned by binder for type literals, mapped types, function types, constructor types.</remarks>
+    | Type
+    /// <summary>
+    /// Computed property name with dynamic name
+    /// </summary>
+    /// <remarks>Assigned to any member with a dynamic computed property name such as <c>[Symbol.iterator]()</c></remarks>
+    | Computed
+    /// <summary>
+    /// Default export symbol (<c>export default</c>)
+    /// </summary>
+    | Default
+    /// <summary>
+    /// Export assignment symbol (<c>export =</c>)
+    /// </summary>
+    | ExportEquals
+    /// <summary>
+    /// Instantiation expression as a type: <c>declare const foo: typeof Array&lt;string></c>.
+    /// </summary>
+    | Instantiation
+    // This is ignored unless we can find a situation where our traversal raises this symbol to the output.
+    // /// <summary>
+    // /// Surfaces when checker resolves attributes object of an import with <c>with { ... }</c>:
+    // /// <c>import("mod", { with: { type: "json" } })</c>.
+    // /// </summary>
+    // | ImportAttributes
+    /// <summary>
+    /// Symbol name
+    /// </summary>
+    | String of string
 
 type ConditionalExport =
     | Types of ExportValue

@@ -97,6 +97,7 @@ Usage:
     xantham test (dotnet | fable | signal) [options] [npm]
     xantham tests [options] [npm]
     xantham run <TARGET> [options] [npm]
+    xantham dev
 Npm Options [npm]:
     --ci                    When performing installation of dependencies, use the `ci` command.
     --release               Build with Fable `-c Release`

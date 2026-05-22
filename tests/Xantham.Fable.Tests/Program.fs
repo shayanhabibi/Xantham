@@ -1122,22 +1122,21 @@ let utilityTests =
         testList "Generic utility types preserves semantic information" [
             let genericUtility = result |> findAlias "GenericUtility"
             let genericUtilityType =
-                result
-                |> findType genericUtility.Type
-                |> function
-                    | TsType.TypeReference typeRef -> typeRef
-                    | _ -> failwith "Expected TypeReference"
+                lazy
+                match result |> findType genericUtility.Type with
+                | TsType.TypeReference typeRef -> typeRef
+                | _ -> failwith "Expected TypeReference"
             testCase "Utility type preserves semantic information of type" <| fun _ ->
-                let typ = findExportByKey genericUtilityType.Type result
+                let typ = findExportByKey genericUtilityType.Value.Type result
                 "Expect to keep semantic info of: GenericUtility<T extends keyof IUtilityInterface> = Pick<PartialInterface, T>" |> Expect.isTrue (
                     match typ with
                     | TsExportDeclaration.TypeAlias { Name = "Pick" } -> true
                     | _ -> false
                     )
             testCase "Utility type arguments preserve semantic information" <| fun _ ->
-                "" |> Expect.hasLength genericUtilityType.TypeArguments 2
+                "" |> Expect.hasLength genericUtilityType.Value.TypeArguments 2
                 #nowarn 25
-                let [ taOne; taTwo ] = genericUtilityType.TypeArguments
+                let [ taOne; taTwo ] = genericUtilityType.Value.TypeArguments
                 #warnon 25
                 "First type argument should be a type alias"
                 |> Expect.isTrue (

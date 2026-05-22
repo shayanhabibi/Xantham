@@ -6,6 +6,141 @@ open Xantham.Fable
 open Xantham.Fable.Types
 open Xantham.Fable.Types.Signal
 open Xantham.Fable.Types.Tracer
+/// Create an index-signature member slot from an optional index type.
+let private makeIndexSlot (ctx: TypeScriptReader) (primitiveType: TypeKindPrimitive) (typeMaybe: Ts.Type option) : Signal<SMemberBuilder voption> voption =
+    typeMaybe
+    |> Option.map (fun typ ->
+        {
+            SIndexSignatureBuilder.Parameters =
+                [|
+                    {
+                        SParameterBuilder.Name = "key"
+                        IsOptional = false
+                        IsSpread = false
+                        Type = TypeSignal.ofKey primitiveType.TypeKey
+                        Documentation = []
+                    }
+                    |> ValueSome
+                    |> Signal.source
+                |]
+            Type =
+                match ctx.CreateXanthamTag typ with
+                | _, TagState.Visited guard when ctx.signalCache.ContainsKey(guard.Value) ->
+                    TypeSignal.ofKey ctx.signalCache[guard.Value].Key
+                | tagState, _ -> stackPushAndThen ctx _.TypeSignal tagState
+            IsReadOnly = false
+        }
+        |> SMemberBuilder.IndexSignature
+        |> ValueSome
+        |> Signal.source
+        )
+    |> Option.toValueOption
+/// Build parameter slots from the checker-level parameters of a Ts.Signature.
+let private signatureToParamSlots (ctx: TypeScriptReader) (signature: Ts.Signature) =
+    signature.getParameters().AsArray
+    |> Array.map (fun sym ->
+        match sym.valueDeclaration with
+        | Some decl -> Member.resolveToParameterBuilder ctx (unbox decl)
+        | None ->
+            // Synthesized parameter — build inline from the checker
+            let t =
+                ctx.checker.getTypeOfSymbol sym
+                |> ctx.CreateXanthamTag
+                |> fst
+                |> stackPushAndThen ctx id
+            {
+                SParameterBuilder.Name = sym.name
+                IsOptional = sym.flags.HasFlag Ts.SymbolFlags.Optional
+                IsSpread = false
+                Type = t.TypeSignal
+                Documentation = []
+            }
+            |> ValueSome
+            |> Signal.source)
+
+let private getTypeParamSlotsFromSignature (ctx: TypeScriptReader) (signature: Ts.Signature) =
+    signature.getTypeParameters()
+    |> Option.map _.AsArray
+    |> Option.defaultValue [||]
+    |> Array.map (fun (tp: Ts.TypeParameter) ->
+        ctx.CreateXanthamTag tp
+        |> fst |> stackPushAndThen ctx (fun tag -> tag.TypeSignal, tag.Builder)
+        |> fun signals -> signals ||> Signal.map2 (fun typeKey -> function
+            | ValueSome (SType.TypeParameter tp) ->
+                ValueSome {
+                    Type = typeKey
+                    TypeParameter = tp
+                }
+            | _ -> ValueNone
+            )
+        )
+/// Convert a Ts.Signature to a construct-signature member slot.
+let private constructSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Signature) : Signal<SMemberBuilder voption> =
+    let returnTag =
+        match ctx.CreateXanthamTag (ctx.checker.getReturnTypeOfSignature signature) |> fst with
+        | TagState.Unvisited t -> pushToStack ctx t; t
+        | TagState.Visited t -> t
+    {
+        SConstructSignatureBuilder.Parameters = signatureToParamSlots ctx signature
+        TypeParameters = getTypeParamSlotsFromSignature ctx signature
+        Type = returnTag.TypeSignal
+    }
+    |> SMemberBuilder.ConstructSignature
+    |> ValueSome
+    |> Signal.source
+
+/// Convert a Ts.Signature to a call-signature member slot.
+let private callSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Signature) : Signal<SMemberBuilder voption> =
+    let returnTag =
+        match ctx.CreateXanthamTag (ctx.checker.getReturnTypeOfSignature signature) |> fst with
+        | TagState.Unvisited t -> pushToStack ctx t; t
+        | TagState.Visited t -> t
+    {
+        SCallSignatureBuilder.Parameters = signatureToParamSlots ctx signature
+        TypeParameters = getTypeParamSlotsFromSignature ctx signature
+        Type = returnTag.TypeSignal
+        Documentation = []
+    }
+    |> SMemberBuilder.CallSignature
+    |> ValueSome
+    |> Signal.source
+let private substitutedPropertySymToMemberSlot (ctx: TypeScriptReader) (sym: Ts.Symbol) : Signal<SMemberBuilder voption> =
+    {
+        SPropertyBuilder.Name = sym.name
+        Type =
+            ctx.checker.getTypeOfSymbol sym
+            |> ctx.CreateXanthamTag
+            |> fst
+            |> stackPushAndThen ctx _.TypeSignal
+        IsStatic = false
+        IsOptional = sym.flags.HasFlag Ts.SymbolFlags.Optional
+        IsPrivate = false
+        Accessor = TsAccessor.ReadWrite
+        Documentation = []
+    }
+    |> SMemberBuilder.Property
+    |> ValueSome
+    |> Signal.source
+let buildSubstitutedMembersFromType (ctx: TypeScriptReader) (objType: Ts.ObjectType) =
+    let props =
+        ctx.checker.getPropertiesOfType(objType).AsArray
+        |> Array.map (substitutedPropertySymToMemberSlot ctx)
+    let callSigs =
+        ctx.checker.getSignaturesOfType(objType, Ts.SignatureKind.Call).AsArray
+        |> Array.map (callSigToMemberSlot ctx)
+    let constructSigs =
+        ctx.checker.getSignaturesOfType(objType, Ts.SignatureKind.Construct).AsArray
+        |> Array.map (constructSigToMemberSlot ctx)
+    let numberIndex = makeIndexSlot ctx TypeKindPrimitive.Number (objType.getNumberIndexType())
+    let stringIndex = makeIndexSlot ctx TypeKindPrimitive.String (objType.getStringIndexType())
+    [|
+        yield! callSigs
+        yield! constructSigs
+        yield! props
+        if numberIndex.IsSome then yield numberIndex.Value
+        if stringIndex.IsSome then yield stringIndex.Value
+    |]
+
 
 let private resolveBase (ctx: TypeScriptReader) (_xanTag: XanthamTag) (node: Ts.TypeReferenceNode) =
     let rec getSymbol (name: Ts.EntityName): Ts.Symbol option =
@@ -191,6 +326,20 @@ let fromNode (ctx: TypeScriptReader) (xanTag: XanthamTag) (node: Ts.TypeReferenc
                 typeArguments
             else typeNodeArguments
         ResolvedType =
+            match resolvedType.aliasSymbol with
+            | Some _ when resolvedType.flags.HasFlag Ts.TypeFlags.Object ->
+                ctx.logger.logfd "TypeReference - alias instantiation, emitting substituted type literal for resolved type"
+                let resolvedType = resolvedType :?> Ts.ObjectType
+                let members = buildSubstitutedMembersFromType ctx resolvedType
+                { STypeLiteralBuilder.Members = members }
+                |> SType.TypeLiteral
+                |> Signal.fill
+                |> funApply xanTag.Builder
+                let result = Signal.pending()
+                result
+                |> Signal.fill resolvedType.TypeKey
+                ValueSome result
+            | _ -> 
             // Only emit a ResolvedType when the instantiated type is a distinct identity
             // from the tag itself (avoids self-referential noise).
             match resolvedTypeTag with

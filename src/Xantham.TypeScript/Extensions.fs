@@ -1,79 +1,13 @@
-[<AutoOpen>]
+﻿[<AutoOpen>]
 module TypeScriptExtensions
-
-open System.Collections.Generic
-open Fable.Core
 open TypeScript
+open Fable.Core
 open Fable.Core.JsInterop
-open Xantham
+open FsToolkit.ErrorHandling
+open FsToolkit.ErrorHandling.Operator.Option
 open Xantham.Fable
 
-
-module __String =
-    let toBindingName (value: Ts.__String) =
-        match unbox<Ts.InternalSymbolName> value with
-        | Ts.InternalSymbolName.Call -> BindingName.Call
-        | Ts.InternalSymbolName.Constructor -> BindingName.Constructor
-        | Ts.InternalSymbolName.New -> BindingName.New
-        | Ts.InternalSymbolName.Index -> BindingName.Index 
-        | Ts.InternalSymbolName.ExportStar -> BindingName.Export
-        | Ts.InternalSymbolName.Global -> BindingName.Global 
-        | Ts.InternalSymbolName.Type -> BindingName.Type
-        // Error like - default to object
-        | Ts.InternalSymbolName.Missing 
-        | Ts.InternalSymbolName.Resolving 
-        | Ts.InternalSymbolName.Object -> BindingName.Object 
-        | Ts.InternalSymbolName.JSXAttributes -> BindingName.JsxAttributes
-        | Ts.InternalSymbolName.Class -> BindingName.Class 
-        | Ts.InternalSymbolName.Function -> BindingName.Function 
-        | Ts.InternalSymbolName.Computed -> BindingName.Computed 
-        | Ts.InternalSymbolName.ExportEquals -> BindingName.ExportEquals 
-        | Ts.InternalSymbolName.Default -> BindingName.Default 
-        | Ts.InternalSymbolName.This -> BindingName.This 
-        | Ts.InternalSymbolName.InstantiationExpression -> BindingName.InstantiationExpression 
-        | x when x = Ts.InternalSymbolName.ImportAttributes -> BindingName.ImportAttributes
-        | value -> value |> unbox<string> |> BindingName.String
-    let fromBindingName (value: BindingName) =
-        match value with
-        | BindingName.Call -> Ts.InternalSymbolName.Call
-        | BindingName.This -> Ts.InternalSymbolName.This
-        | BindingName.Constructor -> Ts.InternalSymbolName.Constructor 
-        | BindingName.New -> Ts.InternalSymbolName.New 
-        | BindingName.Index -> Ts.InternalSymbolName.Index 
-        | BindingName.Export -> Ts.InternalSymbolName.ExportStar
-        | BindingName.Global -> Ts.InternalSymbolName.Global 
-        | BindingName.Type -> Ts.InternalSymbolName.Type 
-        | BindingName.Object -> Ts.InternalSymbolName.Object 
-        | BindingName.JsxAttributes -> Ts.InternalSymbolName.JSXAttributes 
-        | BindingName.Class -> Ts.InternalSymbolName.Class 
-        | BindingName.Function -> Ts.InternalSymbolName.Function 
-        | BindingName.Computed -> Ts.InternalSymbolName.Computed 
-        | BindingName.Default -> Ts.InternalSymbolName.Default 
-        | BindingName.ExportEquals -> Ts.InternalSymbolName.ExportEquals 
-        | BindingName.InstantiationExpression -> Ts.InternalSymbolName.InstantiationExpression 
-        | BindingName.ImportAttributes -> Ts.InternalSymbolName.ImportAttributes 
-        | BindingName.String s -> !!s
-        |> unbox<Ts.__String>
-    let inline fromString (value: string) = unbox<Ts.__String> value
-    let inline toString (value: Ts.__String) = unbox<string> value
-
-module BindingName =
-    let inline create (value: Ts.__String) = __String.toBindingName value
-    let inline toTsString value = __String.fromBindingName value
-    let inline toString value = toTsString value |> _.ToString()
-
-type Ts.Program with
-    /// <summary>
-    /// </summary>
-    /// <param name="callback"><br/>
-    /// resolution: ResolvedModuleWithFailedLookupLocations<br/>
-    /// moduleName: string<br/>
-    /// mode: ResolutionMode<br/>
-    /// filePath: Path<br/>
-    /// </param>
-    /// <param name="file"></param>
-    [<EmitMethod "forEachResolvedModule">]
-    member this.forEachResolvedModule(callback: Ts.ResolvedModuleWithFailedLookupLocations -> string -> Ts.ResolutionMode -> string -> unit, ?file: Ts.SourceFile): unit = ()
+#nowarn 3391 1182 44
 
 type PackageJsonPathFields =
     abstract typings: string option
@@ -103,7 +37,13 @@ type Ts.SourceFile with
 
 type Ts.Type with
     [<EmitProperty "id">]
-    member inline this.TypeKey: TypeKey = jsNative
+    member inline this.id: int = jsNative
+type Ts.Node with
+    [<EmitProperty "id">]
+    member inline this.id: int = jsNative
+type Ts.Symbol with
+    [<EmitProperty "id">]
+    member inline this.id: int = jsNative
 
 type TypeMapKind =
     | Simple = 0
@@ -112,6 +52,7 @@ type TypeMapKind =
     | Function = 3
     | Composite = 4
     | Merged = 5
+
 [<TypeScriptTaggedUnion "kind"; RequireQualifiedAccess>]
 type TypeMapper =
     | [<CompiledValue(TypeMapKind.Simple)>] Simple of source: Ts.Type * target: Ts.Type
@@ -126,6 +67,7 @@ type AnonymousType =
     abstract target: AnonymousType option
     abstract mapper: TypeMapper option
     abstract instantiations: JS.Map<string, Ts.Type> option
+    
 type MappedType =
     inherit AnonymousType
     abstract declaration: Ts.MappedTypeNode
@@ -136,243 +78,235 @@ type MappedType =
     abstract modifiersType: Ts.Type option
     abstract resolvedApparentType: Ts.Type option
     abstract containsError: bool option
+
 type ReverseMappedType =
     inherit AnonymousType
     abstract source: Ts.Type
     abstract mappedType: MappedType
     abstract constraintType: Ts.IndexType
 
-type HasTypeArguments =
-    | CallExpression of Ts.CallExpression
-    | NewExpression of Ts.NewExpression
-    | TaggedTemplateExpression of Ts.TaggedTemplateExpression
-    | JsxOpeningElement of Ts.JsxOpeningElement
-    | JsxSelfClosingElement of Ts.JsxSelfClosingElement
+/// <summary>
+/// Type safe representation of <c>ts.__String</c>
+/// </summary>
+type SymbolName =
+    | String of string
+    | InternalSymbol of Ts.InternalSymbolName
+    static member inline op_Implicit(value: Ts.__String): SymbolName =
+        match unbox<Ts.InternalSymbolName> value with
+        | Ts.InternalSymbolName.Call 
+        | Ts.InternalSymbolName.Constructor 
+        | Ts.InternalSymbolName.New 
+        | Ts.InternalSymbolName.Index 
+        | Ts.InternalSymbolName.ExportStar 
+        | Ts.InternalSymbolName.Global 
+        | Ts.InternalSymbolName.Type 
+        // Error like - default to object
+        | Ts.InternalSymbolName.Missing 
+        | Ts.InternalSymbolName.Resolving 
+        | Ts.InternalSymbolName.Object 
+        | Ts.InternalSymbolName.JSXAttributes 
+        | Ts.InternalSymbolName.Class 
+        | Ts.InternalSymbolName.Function 
+        | Ts.InternalSymbolName.Computed 
+        | Ts.InternalSymbolName.ExportEquals 
+        | Ts.InternalSymbolName.Default 
+        | Ts.InternalSymbolName.This 
+        | Ts.InternalSymbolName.InstantiationExpression as value -> InternalSymbol value
+        | x when x = Ts.InternalSymbolName.ImportAttributes -> InternalSymbol x
+        | value -> value |> unbox<string> |> String
+    static member Create(value: Ts.__String): SymbolName = value
+    static member Create(value: string): SymbolName = unbox<Ts.__String> value
+    static member inline op_Implicit(value: SymbolName): string =
+        match value with
+        | String s -> s
+        | InternalSymbol internalSymbolName -> internalSymbolName.ToString()
 
-type HasExpressionInitializer =
-    | VariableDeclaration of Ts.VariableDeclaration
-    | ParameterDeclaration of Ts.ParameterDeclaration
-    | BindingElement of Ts.BindingElement
-    | PropertyDeclaration of Ts.PropertyDeclaration
-    | PropertyAssignment of Ts.PropertyAssignment
-    | EnumMember of Ts.EnumMember
+type Ts.Program with
+    /// <summary>
+    /// </summary>
+    /// <param name="callback"><br/>
+    /// resolution: ResolvedModuleWithFailedLookupLocations<br/>
+    /// moduleName: string<br/>
+    /// mode: ResolutionMode<br/>
+    /// filePath: Path<br/>
+    /// </param>
+    /// <param name="file"></param>
+    [<EmitMethod "forEachResolvedModule">]
+    member this.forEachResolvedModule(callback: Ts.ResolvedModuleWithFailedLookupLocations -> string -> Ts.ResolutionMode -> string -> unit, ?file: Ts.SourceFile): unit = ()
+    [<EmitMethod "getCurrentPackagesMap">]
+    member this.getCurrentPackagesMap(): JS.Map<string, string> option = jsNative
+    [<EmitProperty "getPackageJsonInfoCache">]
+    member this.getPackageJsonInfoCache: (unit -> {| getPackageJsonInfo: string -> PackageJsonInfo option |} option) option = jsNative
+
+[<StringEnum; RequireQualifiedAccess>]
+type ResolvedModuleSpecifierKind =
+    |[<CompiledName "node_modules">] NodeModules
+    | Paths
+    | Redirect
+    | Relative
+    | Ambient
     
-type HasInitializer =
-    | HasExpressionInitializer of HasExpressionInitializer
-    | ForStatement of Ts.ForStatement
-    | ForInStatement of Ts.ForInStatement
-    | ForOfStatement of Ts.ForOfStatement
-    | JsxAttribute of Ts.JsxAttribute
-
-type HasDecorators =
-    | ParameterDeclaration of Ts.ParameterDeclaration
-    | PropertyDeclaration of Ts.PropertyDeclaration
-    | MethodDeclaration of Ts.MethodDeclaration
-    | GetAccessorDeclaration of Ts.GetAccessorDeclaration
-    | SetAccessorDeclaration of Ts.SetAccessorDeclaration
-    | ClassExpression of Ts.ClassExpression
-    | ClassDeclaration of Ts.ClassDeclaration
-
-type AssertionExpression =
-    | TypeAssertion of Ts.TypeAssertion
-    | AsExpression of Ts.AsExpression
-
-type HasType =
-    | SignatureDeclaration of Ts.SignatureDeclaration
-    | VariableDeclaration of Ts.VariableDeclaration
-    | ParameterDeclaration of Ts.ParameterDeclaration
-    | PropertySignature of Ts.PropertySignature
-    | PropertyDeclaration of Ts.PropertyDeclaration
-    | TypePredicateNode of Ts.TypePredicateNode
-    | ParenthesizedTypeNode of Ts.ParenthesizedTypeNode
-    | TypeOperatorNode of Ts.TypeOperatorNode
-    | MappedTypeNode of Ts.MappedTypeNode
-    | AssertionExpression of AssertionExpression
-    | TypeAliasDeclaration of Ts.TypeAliasDeclaration
-    | JSDocTypeExpression of Ts.JSDocTypeExpression
-    | JSDocNonNullableType of Ts.JSDocNonNullableType
-    | JSDocNullableType of Ts.JSDocNullableType
-    | JSDocOptionalType of Ts.JSDocOptionalType
-    | JSDocVariadicType of Ts.JSDocVariadicType
-
-type AccessorDeclaration =
-    | GetAccessorDeclaration of Ts.GetAccessorDeclaration
-    | SetAccessorDeclaration of Ts.SetAccessorDeclaration
-
-type ClassLikeDeclaration =
-    | ClassDeclaration of Ts.ClassDeclaration
-    | ClassExpression of Ts.ClassExpression
-
-type ModifierLike =
-    | Modifier of Ts.Modifier
-    | Decorator of Ts.Decorator
-
-type EntityName =
-    | Identifier of Ts.Identifier
-    | QualifiedName of Ts.QualifiedName
-
-type PropertyName =
-    | Identifier of Ts.Identifier
-    | StringLiteral of Ts.StringLiteral
-    | NoSubtitutionTemplateLiteral of Ts.NoSubstitutionTemplateLiteral
-    | NumericLiteral of Ts.NumericLiteral
-    | ComputedPropertyName of Ts.ComputedPropertyName
-    | PrivateIdentifier of Ts.PrivateIdentifier
-    | BigIntLiteral of Ts.BigIntLiteral
-
-type PropertyNameLiteral =
-    | Identifier of Ts.Identifier
-    | StringLiteral of Ts.StringLiteral
-    | NumericLiteral of Ts.NumericLiteral
-    | JsxNamespacedName of Ts.JsxNamespacedName
-    | BigIntLiteral of Ts.BigIntLiteral
-
-type BooleanLiteral =
-    | TrueLiteral of Ts.TrueLiteral
-    | FalseLiteral of Ts.FalseLiteral
-
-type TypeVariable =
-    | TypeParameter of Ts.TypeParameter
-    | IndexedAccessType of Ts.IndexedAccessType
-
-type BaseType =
-    | ObjectType of Ts.ObjectType
-    | IntersectionType of Ts.IntersectionType
-    | TypeVariable of TypeVariable
-type StructuredType =
-    | ObjectType of Ts.ObjectType
-    | UnionType of Ts.UnionType
-    | IntersectionType of Ts.IntersectionType
-type ObjectTypeDeclaration =
-    | ClassLikeDeclaration of ClassLikeDeclaration
-    | InterfaceDeclaration of Ts.InterfaceDeclaration
-    | TypeLiteralNode of Ts.TypeLiteralNode
-
-type TsModuleName =
-    | Identifier of Ts.Identifier
-    | StringLiteral of Ts.StringLiteral
-
-type JSDocComment =
-    | JSDocText of Ts.JSDocText
-    | JSDocLink of Ts.JSDocLink
-    | JSDocLinkCode of Ts.JSDocLinkCode
-    | JSDocLinkPlain of Ts.JSDocLinkPlain
-
-type MemberName =
-    | Identifier of Ts.Identifier
-    | PrivateIdentifier of Ts.PrivateIdentifier
-
-type JsxAttributeName =
-    | Identifier of Ts.Identifier
-    | JsxNamespacedName of Ts.JsxNamespacedName
-type StringLiteralLike =
-    | StringLiteral of Ts.StringLiteral
-    | NoSubstitutionTemplateLiteral of Ts.NoSubstitutionTemplateLiteral
-type BindingPattern =
-    | ObjectBindingPattern of Ts.ObjectBindingPattern
-    | ArrayBindingPattern of Ts.ArrayBindingPattern
-type BindingName =
-    | Identifier of Ts.Identifier
-    | BindingPattern of BindingPattern
-type ObjectLiteralElementLike =
-    | PropertyAssignment of Ts.PropertyAssignment
-    | ShorthandPropertyAssignment of Ts.ShorthandPropertyAssignment
-    | SpreadAssignment of Ts.SpreadAssignment
-    | MethodDeclaration of Ts.MethodDeclaration
-    | AccessorDeclaration of AccessorDeclaration
-type FunctionLikeDeclaration =
-    | FunctionDeclaration of Ts.FunctionDeclaration
-    | MethodDeclaration of Ts.MethodDeclaration
-    | AccessorDeclaration of AccessorDeclaration
-    | ConstructorDeclaration of Ts.ConstructorDeclaration
-    | FunctionExpression of Ts.FunctionExpression
-    | ArrowFunction of Ts.ArrowFunction
-type FunctionOrConstructorTypeNode =
-    | FunctionTypeNode of Ts.FunctionTypeNode
-    | ConstructorTypeNode of Ts.ConstructorTypeNode
-type TypeReferenceType =
-    | TypeReferenceNode of Ts.TypeReferenceNode
-    | ExpressionWithTypeArguments of Ts.ExpressionWithTypeArguments
-type UnionOrIntersectionTypeNode =
-    | UnionTypeNode of Ts.UnionTypeNode
-    | IntersectionTypeNode of Ts.IntersectionTypeNode
-type EntityNameExpression =
-    | Identifier of Ts.Identifier
-    | PropertyAccessEntityNameExpression of Ts.PropertyAccessEntityNameExpression
-type DeclarationName =
-    | PropertyName of PropertyName
-    | JsxAttributeName of JsxAttributeName
-    | StringLiteralLike of StringLiteralLike
-    | ElementAccessExpression of Ts.ElementAccessExpression
-    | BindingPattern of BindingPattern
-    | EntityNameExpression of EntityNameExpression
-
-type HasJSDoc =
-    | AccessorDeclaration of AccessorDeclaration
-    | ArrowFunction of Ts.ArrowFunction
-    | BinaryExpression of Ts.BinaryExpression
-    | Block of Ts.Block
-    | BreakStatement of Ts.BreakStatement
-    | CallSignatureDeclaration of Ts.CallSignatureDeclaration
-    | CaseClause of Ts.CaseClause
-    | ClassLikeDeclaration of ClassLikeDeclaration
-    | ClassStaticBlockDeclaration of Ts.ClassStaticBlockDeclaration
-    | ConstructorDeclaration of Ts.ConstructorDeclaration
-    | ConstructorTypeNode of Ts.ConstructorTypeNode
-    | ConstructSignatureDeclaration of Ts.ConstructSignatureDeclaration
-    | ContinueStatement of Ts.ContinueStatement
-    | DebuggerStatement of Ts.DebuggerStatement
-    | DoStatement of Ts.DoStatement
-    | ElementAccessExpression of Ts.ElementAccessExpression
-    | EmptyStatement of Ts.EmptyStatement
-    | EndOfFileToken of Ts.EndOfFileToken
-    | EnumDeclaration of Ts.EnumDeclaration
-    | EnumMember of Ts.EnumMember
-    | ExportAssignment of Ts.ExportAssignment
-    | ExportDeclaration of Ts.ExportDeclaration
-    | ExportSpecifier of Ts.ExportSpecifier
-    | ExpressionStatement of Ts.ExpressionStatement
-    | ForInStatement of Ts.ForInStatement
-    | ForOfStatement of Ts.ForOfStatement
-    | ForStatement of Ts.ForStatement
-    | FunctionDeclaration of Ts.FunctionDeclaration
-    | FunctionExpression of Ts.FunctionExpression
-    | FunctionTypeNode of Ts.FunctionTypeNode
-    | Identifier of Ts.Identifier
-    | IfStatement of Ts.IfStatement
-    | ImportDeclaration of Ts.ImportDeclaration
-    | ImportEqualsDeclaration of Ts.ImportEqualsDeclaration
-    | IndexSignatureDeclaration of Ts.IndexSignatureDeclaration
-    | InterfaceDeclaration of Ts.InterfaceDeclaration
-    | JSDocFunctionType of Ts.JSDocFunctionType
-    | JSDocSignature of Ts.JSDocSignature
-    | LabeledStatement of Ts.LabeledStatement
-    | MethodDeclaration of Ts.MethodDeclaration
-    | MethodSignature of Ts.MethodSignature
-    | ModuleDeclaration of Ts.ModuleDeclaration
-    | NamedTupleMember of Ts.NamedTupleMember
-    | NamespaceExportDeclaration of Ts.NamespaceExportDeclaration
-    | ObjectLiteralExpression of Ts.ObjectLiteralExpression
-    | ParameterDeclaration of Ts.ParameterDeclaration
-    | ParenthesizedExpression of Ts.ParenthesizedExpression
-    | PropertyAccessExpression of Ts.PropertyAccessExpression
-    | PropertyAssignment of Ts.PropertyAssignment
-    | PropertyDeclaration of Ts.PropertyDeclaration
-    | PropertySignature of Ts.PropertySignature
-    | ReturnStatement of Ts.ReturnStatement
-    | SemicolonClassElement of Ts.SemicolonClassElement
-    | ShorthandPropertyAssignment of Ts.ShorthandPropertyAssignment
-    | SpreadAssignment of Ts.SpreadAssignment
-    | SwitchStatement of Ts.SwitchStatement
-    | ThrowStatement of Ts.ThrowStatement
-    | TryStatement of Ts.TryStatement
-    | TypeAliasDeclaration of Ts.TypeAliasDeclaration
-    | TypeParameterDeclaration of Ts.TypeParameterDeclaration
-    | VariableDeclaration of Ts.VariableDeclaration
-    | VariableStatement of Ts.VariableStatement
-    | WhileStatement of Ts.WhileStatement
-    | WithStatement of Ts.WithStatement
+type ModuleSpecifierResult =
+    abstract kind: ResolvedModuleSpecifierKind option
+    abstract moduleSpecifiers: string array
+    abstract computedWithoutCache: bool
     
+
+type Ts.IExports with
+    [<Import("moduleSpecifiers.getModuleSpecifiersWithCacheInfo", "typescript")>]
+    static member inline private getModuleSpecifiersWithCacheInfo(moduleSymbol: Ts.Symbol, checker: Ts.TypeChecker, compilerOptions: Ts.CompilerOptions, importingSourceFile: ^T when ^T:(member path: string) and ^T:(member fileName: string), host: Ts.Program, userPreferences: Ts.UserPreferences, options: objnull, forAutoImport: bool): ModuleSpecifierResult = jsNative
+    
+type Ts.CompilerOptions with
+    static member Default = jsOptions<Ts.CompilerOptions> <| fun opt ->
+        opt.moduleResolution <- Some Ts.ModuleResolutionKind.Bundler
+        opt.target <- Some Ts.ScriptTarget.Latest
+        opt.skipLibCheck <- Some true
+        opt.declaration <- Some true
+        opt.resolveJsonModule <- Some true
+        opt.strictNullChecks <- Some true
+        opt.resolvePackageJsonExports <- Some true
+        opt.resolvePackageJsonImports <- Some true
+
+type Ts.CreateProgramOptions with
+    static member Create(files: string list, ?compilerOptions) =
+        let compilerOptions = defaultArg compilerOptions Ts.CompilerOptions.Default
+        jsOptions<Ts.CreateProgramOptions> <| fun opt ->
+            opt.rootNames <- files |> List.toArray |> unbox<ResizeArray<string>>
+            opt.options <- compilerOptions
+
+type Ts.Program with
+    static member Create(files: string list, ?compilerOptions) =
+        ts.createProgram(Ts.CreateProgramOptions.Create(files, ?compilerOptions = compilerOptions))
+
+let private userPreferences = {
+    new Ts.UserPreferences with
+    member this.interactiveInlayHints = None
+    member this.lazyConfiguredProjectsFromExternalProject = None
+    member this.excludeLibrarySymbolsInNavTo = None
+    member this.preferTypeOnlyAutoImports = None
+    member this.organizeImportsAccentCollation = None
+    member this.provideRefactorNotApplicableReason = None
+    member this.organizeImportsLocale = None
+    member this.quotePreference = None
+    member this.allowRenameOfImportPath = Some true
+    member this.autoImportSpecifierExcludeRegexes = None
+    member this.includeInlayFunctionLikeReturnTypeHints = None
+    member this.includeInlayPropertyDeclarationTypeHints = None
+    member this.autoImportFileExcludePatterns = None
+    member this.allowIncompleteCompletions = Some true
+    member this.includeCompletionsForModuleExports = None
+    member this.organizeImportsCollation = None
+    member this.importModuleSpecifierPreference = Some Ts.UserPreferencesImportModuleSpecifierPreference.Shortest
+    member this.includeCompletionsWithSnippetText = None
+    member this.importModuleSpecifierEnding = Some Ts.UserPreferencesImportModuleSpecifierEnding.Minimal
+    member this.includeInlayEnumMemberValueHints = None
+    member this.includeCompletionsForImportStatements = Some true
+    member this.displayPartsForJSDoc = None
+    member this.includePackageJsonAutoImports = Some Ts.UserPreferencesIncludePackageJsonAutoImports.Auto
+    member this.generateReturnInDocTemplate = None
+    member this.includeAutomaticOptionalChainCompletions = None
+    member this.includeInlayFunctionParameterTypeHints = None
+    member this.organizeImportsTypeOrder = None
+    member this.disableLineTextInReferences = None
+    member this.providePrefixAndSuffixTextForRename = None
+    member this.includeInlayParameterNameHintsWhenArgumentMatchesName = None
+    member this.includeCompletionsWithInsertText = None
+    member this.includeCompletionsWithClassMemberSnippets = None
+    member this.includeInlayVariableTypeHintsWhenTypeMatchesName = None
+    member this.allowTextChangesInNewFiles = None
+    member this.includeInlayParameterNameHints = None
+    member this.useLabelDetailsInCompletionEntries = None
+    member this.includeInlayVariableTypeHints = None
+    member this.maximumHoverLength = None
+    member this.includeCompletionsWithObjectLiteralMethodSnippets = None
+    member this.jsxAttributeCompletionStyle = None
+    member this.organizeImportsNumericCollation = None
+    member this.organizeImportsIgnoreCase = None
+    member this.disableSuggestions = None
+    member this.organizeImportsCaseFirst = None
+}
+
+type Ts.Program with
+    member inline this.GetModuleSpecifierFrom sourceFile (moduleSymbol: Ts.Symbol) =
+        Ts.IExports.getModuleSpecifiersWithCacheInfo(moduleSymbol, this.getTypeChecker(), this.getCompilerOptions(), sourceFile, this, userPreferences, {||}, true)
+    member this.GetModuleSpecifierFromSourceFile (sourceFile: Ts.SourceFile) (moduleSymbol: Ts.Symbol) =
+        this.GetModuleSpecifierFrom (unbox<{|fileName: string; path: string|}> sourceFile) moduleSymbol
+    member this.GetModuleSpecifierFromPath (path: string) (moduleSymbol: Ts.Symbol) =
+        let fauxSourceFile =
+            match Node.Api.path.extname path with
+            | Null | "" -> {| fileName = Node.Api.path.join(path, "index.d.ts"); path = path |}
+            | _ -> {| fileName = path; path = Node.Api.path.dirname path |}
+        this.GetModuleSpecifierFrom fauxSourceFile moduleSymbol
+    member this.GetModuleSpecifier(symbol: Ts.Symbol) =
+        this.GetModuleSpecifierFromPath
+            (ts.sys.getCurrentDirectory())
+            symbol
+    static member GetClosestAncestorPackageJson (fn: PackageJsonPathFields -> bool) (path: string) =
+        let parse packageJsonPath =
+            ts.sys.readFile(packageJsonPath)
+            |> Option.map (JS.JSON.parse >> unbox<PackageJsonPathFields>)
+        let rec tryAncestor path =
+            let packageJson = Node.Api.path.join(path, "package.json")
+            if Node.Api.fs.existsSync !^packageJson && (parse packageJson |> Option.exists fn)
+            then parse packageJson
+            elif Node.Api.path.basename path = "node_modules"
+            then None
+            else Node.Api.path.dirname path |> tryAncestor
+        tryAncestor (Node.Api.path.dirname path)
+    member this.GetClosestAncestorPackageJson fn path = Ts.Program.GetClosestAncestorPackageJson fn path
+        
+type Ts.SourceFile with
+    /// <summary>
+    /// If the source file is linked to a <c>packageJsonScope</c> by the compiler, then
+    /// we forward the json content within. If there is no content, but the source file
+    /// is an external module, then we traverse it's ancestry for the first `package.json`
+    /// within scope (traversal stops when we hit `node_modules`).
+    /// </summary>
+    member this.packageJsonFields =
+        this.packageJsonScope
+        |> Option.map _.contents.packageJsonContent
+        |> Option.orElseWith(fun () ->
+            if ts.isExternalModule this
+            then Ts.Program.GetClosestAncestorPackageJson (fun _ -> true) this.fileName
+            else None)
+    /// <summary>
+    /// Like <c>_.packageJsonFields</c>, except if the content doesn't contain a name, then
+    /// we search for the first ancestor `package.json` that has a name.
+    /// </summary>
+    member this.closestNamedPackageJsonFields =
+        this.packageJsonFields
+        |> Option.filter _.name.IsSome
+        |> Option.orElseWith (fun () -> Ts.Program.GetClosestAncestorPackageJson _.name.IsSome this.fileName)
+    /// <summary>
+    /// Like <c>_.packageJsonFields</c>, except if the content doesn't contain a version, then
+    /// we search for the first ancestor `package.json` that has a version.
+    /// </summary>
+    member this.closestVersionedPackageJsonFields =
+        this.packageJsonFields
+        |> Option.filter _.version.IsSome
+        |> Option.orElseWith (fun () -> Ts.Program.GetClosestAncestorPackageJson _.version.IsSome this.fileName)
+    member this.closestNamedAndVersionedPackageJsonFields =
+        let inline condition (p: PackageJsonPathFields) = p.version.IsSome && p.name.IsSome
+        this.packageJsonFields
+        |> Option.filter condition
+        |> Option.orElseWith (fun () -> Ts.Program.GetClosestAncestorPackageJson condition this.fileName)
+        
+[<AutoOpen>]
+type SourceFileHelper =
+    static member getSourceFile (node: Ts.Node) = node.getSourceFile()
+    static member getSourceFile (sym: Ts.Symbol) =
+        sym.getDeclarations()
+        |> Option.map _.AsArray
+        |> Option.orElse (
+            sym.valueDeclaration
+            |> Option.map Array.singleton
+            )
+        >>= (Array.tryPick (_.getSourceFile() >> Option.ofObj))
+    static member getSourceFile (typ: Ts.Type) =
+        typ.getSymbol()
+        |> Option.orElse typ.aliasSymbol
+        >>= getSourceFile
+
 type Ts.SyntaxKind with
     /// String of Enum
     member this.Name =
@@ -852,7 +786,7 @@ type Ts.TypeFlags with
         ]
         |> List.iter (fun (flag, name) ->
             if this.HasFlag flag then
-                printfn "%s" name
+                printfn $"%s{name}"
         )
 type Ts.SymbolFlags with
     member this.ToStringArray() =
@@ -991,7 +925,7 @@ type Ts.SymbolFlags with
         ]
         |> List.iter (fun (flag, name) ->
             if this.HasFlag flag then
-                printfn "%s" name
+                printfn $"%s{name}"
         )
 type Ts.ObjectFlags with
     member this.ToStringArray() =
@@ -2084,437 +2018,4 @@ module Patterns =
         // -----------------------------
         let inline (|SourceFile|_|) token: Ts.SourceFile option = hasFlagTo SK.SourceFile token
         let inline (|Bundle|_|) token: Ts.Bundle option = hasFlagTo SK.Bundle token
-    let (|HasTypeArguments|_|) = function
-        | Node.CallExpression node -> HasTypeArguments.CallExpression node |> Some
-        | Node.NewExpression node -> HasTypeArguments.NewExpression node |> Some
-        | Node.TaggedTemplateExpression node -> HasTypeArguments.TaggedTemplateExpression node |> Some
-        | Node.JsxOpeningElement node -> HasTypeArguments.JsxOpeningElement node |> Some
-        | Node.JsxSelfClosingElement node -> HasTypeArguments.JsxSelfClosingElement node |> Some
-        | _ -> None
-    let (|HasExpressionInitializer|_|) = function
-        | Node.VariableDeclaration node -> HasExpressionInitializer.VariableDeclaration node |> Some
-        | Node.Parameter node -> HasExpressionInitializer.ParameterDeclaration node |> Some
-        | Node.BindingElement node -> HasExpressionInitializer.BindingElement node |> Some
-        | Node.PropertyDeclaration node -> HasExpressionInitializer.PropertyDeclaration node |> Some
-        | Node.PropertyAssignment node -> HasExpressionInitializer.PropertyAssignment node |> Some
-        | Node.EnumMember node -> HasExpressionInitializer.EnumMember node |> Some
-        | _ -> None
-    let (|HasInitializer|_|) = function
-        | HasExpressionInitializer node -> HasInitializer.HasExpressionInitializer node |> Some
-        | Node.ForStatement node -> HasInitializer.ForStatement node |> Some
-        | Node.ForInStatement node -> HasInitializer.ForInStatement node |> Some
-        | Node.ForOfStatement node -> HasInitializer.ForOfStatement node |> Some
-        | Node.JsxAttribute node -> HasInitializer.JsxAttribute node |> Some
-        | _ -> None
-    let (|HasDecorators|_|) = function
-        | Node.Parameter node -> HasDecorators.ParameterDeclaration node |> Some
-        | Node.PropertyDeclaration node -> HasDecorators.PropertyDeclaration node |> Some
-        | Node.MethodDeclaration node -> HasDecorators.MethodDeclaration node |> Some
-        | Node.GetAccessorDeclaration node -> HasDecorators.GetAccessorDeclaration node |> Some
-        | Node.SetAccessorDeclaration node -> HasDecorators.SetAccessorDeclaration node |> Some
-        | Node.ClassExpression node -> HasDecorators.ClassExpression node |> Some
-        | Node.ClassDeclaration node -> HasDecorators.ClassDeclaration node |> Some
-        | _ -> None
-    let (|AssertionExpression|_|) = function
-        | Node.TypeAssertionExpression node -> AssertionExpression.TypeAssertion node |> Some
-        | Node.AsExpression node -> AssertionExpression.AsExpression node |> Some
-        | _ -> None
-    let (|HasType|_|) = function
-        // | Node.Signature node -> HasType.SignatureDeclaration node |> Some
-        | Node.VariableDeclaration node -> HasType.VariableDeclaration node |> Some
-        | Node.Parameter node -> HasType.ParameterDeclaration node |> Some
-        | Node.PropertySignature node -> HasType.PropertySignature node |> Some
-        | Node.PropertyDeclaration node -> HasType.PropertyDeclaration node |> Some
-        | Node.TypePredicateNode node -> HasType.TypePredicateNode node |> Some
-        | Node.ParenthesizedTypeNode node -> HasType.ParenthesizedTypeNode node |> Some
-        | Node.TypeOperatorNode node -> HasType.TypeOperatorNode node |> Some
-        | Node.MappedTypeNode node -> HasType.MappedTypeNode node |> Some
-        | AssertionExpression node -> HasType.AssertionExpression node |> Some
-        | Node.TypeAliasDeclaration node -> HasType.TypeAliasDeclaration node |> Some
-        | Node.JSDocTypeExpression node -> HasType.JSDocTypeExpression node |> Some
-        | Node.JSDocNonNullableType node -> HasType.JSDocNonNullableType node |> Some
-        | Node.JSDocNullableType node -> HasType.JSDocNullableType node |> Some
-        | Node.JSDocOptionalType node -> HasType.JSDocOptionalType node |> Some
-        | Node.JSDocVariadicType node -> HasType.JSDocVariadicType node |> Some
-        | _ -> None
-    let inline (|AccessorDeclaration|_|) value =
-        match value with
-        | Node.GetAccessorDeclaration node -> AccessorDeclaration.GetAccessorDeclaration node |> Some
-        | Node.SetAccessorDeclaration node -> AccessorDeclaration.SetAccessorDeclaration node |> Some
-        | _ -> None
-    let inline (|ClassLikeDeclaration|_|) value =
-        match value with
-        | Node.ClassDeclaration node -> ClassLikeDeclaration.ClassDeclaration node |> Some
-        | Node.ClassExpression node -> ClassLikeDeclaration.ClassExpression node |> Some
-        | _ -> None
-    let inline (|ModifierLike|_|) value =
-        match value with
-        | Node.Decorator node -> ModifierLike.Decorator node |> Some
-        | SyntaxKind.Modifier node -> ModifierLike.Modifier node |> Some
-        | _ -> None
-    let inline (|HasJSDoc|_|) value =
-        match value with
-        | AccessorDeclaration node -> HasJSDoc.AccessorDeclaration node |> Some
-        | Node.ArrowFunction node -> HasJSDoc.ArrowFunction node |> Some
-        | Node.BinaryExpression node -> HasJSDoc.BinaryExpression node |> Some
-        | Node.Block node -> HasJSDoc.Block node |> Some
-        | Node.BreakStatement node -> HasJSDoc.BreakStatement node |> Some
-        | Node.CallSignatureDeclaration node -> HasJSDoc.CallSignatureDeclaration node |> Some
-        | Node.CaseClause node -> HasJSDoc.CaseClause node |> Some
-        | ClassLikeDeclaration node -> HasJSDoc.ClassLikeDeclaration node |> Some
-        | Node.ClassStaticBlockDeclaration node -> HasJSDoc.ClassStaticBlockDeclaration node |> Some
-        | Node.ConstructorDeclaration node -> HasJSDoc.ConstructorDeclaration node |> Some
-        | Node.ConstructorTypeNode node -> HasJSDoc.ConstructorTypeNode node |> Some
-        | Node.ConstructSignatureDeclaration node -> HasJSDoc.ConstructSignatureDeclaration node |> Some
-        | Node.ContinueStatement node -> HasJSDoc.ContinueStatement node |> Some
-        | Node.DebuggerStatement node -> HasJSDoc.DebuggerStatement node |> Some
-        | Node.DoStatement node -> HasJSDoc.DoStatement node |> Some
-        | Node.ElementAccessExpression node -> HasJSDoc.ElementAccessExpression node |> Some
-        | Node.EmptyStatement node -> HasJSDoc.EmptyStatement node |> Some
-        | SyntaxKind.EndOfFileToken node -> HasJSDoc.EndOfFileToken (unbox node) |> Some
-        | Node.EnumDeclaration node -> HasJSDoc.EnumDeclaration node |> Some
-        | Node.EnumMember node -> HasJSDoc.EnumMember node |> Some
-        | Node.ExportAssignment node -> HasJSDoc.ExportAssignment node |> Some
-        | Node.ExportDeclaration node -> HasJSDoc.ExportDeclaration node |> Some
-        | Node.ExportSpecifier node -> HasJSDoc.ExportSpecifier node |> Some
-        | Node.ExpressionStatement node -> HasJSDoc.ExpressionStatement node |> Some
-        | Node.ForInStatement node -> HasJSDoc.ForInStatement node |> Some
-        | Node.ForOfStatement node -> HasJSDoc.ForOfStatement node |> Some
-        | Node.ForStatement node -> HasJSDoc.ForStatement node |> Some
-        | Node.FunctionDeclaration node -> HasJSDoc.FunctionDeclaration node |> Some
-        | Node.FunctionExpression node -> HasJSDoc.FunctionExpression node |> Some
-        | Node.FunctionTypeNode node -> HasJSDoc.FunctionTypeNode node |> Some
-        | Node.Identifier node -> HasJSDoc.Identifier node |> Some
-        | Node.IfStatement node -> HasJSDoc.IfStatement node |> Some
-        | Node.ImportDeclaration node -> HasJSDoc.ImportDeclaration node |> Some
-        | Node.ImportEqualsDeclaration node -> HasJSDoc.ImportEqualsDeclaration node |> Some
-        | Node.IndexSignatureDeclaration node -> HasJSDoc.IndexSignatureDeclaration node |> Some
-        | Node.InterfaceDeclaration node -> HasJSDoc.InterfaceDeclaration node |> Some
-        | Node.JSDocFunctionType node -> HasJSDoc.JSDocFunctionType node |> Some
-        | Node.JSDocSignature node -> HasJSDoc.JSDocSignature node |> Some
-        | Node.LabeledStatement node -> HasJSDoc.LabeledStatement node |> Some
-        | Node.MethodDeclaration node -> HasJSDoc.MethodDeclaration node |> Some
-        | Node.MethodSignature node -> HasJSDoc.MethodSignature node |> Some
-        | Node.ModuleDeclaration node -> HasJSDoc.ModuleDeclaration node |> Some
-        | Node.NamedTupleMember node -> HasJSDoc.NamedTupleMember node |> Some
-        | Node.NamespaceExportDeclaration node -> HasJSDoc.NamespaceExportDeclaration node |> Some
-        | Node.ObjectLiteralExpression node -> HasJSDoc.ObjectLiteralExpression node |> Some
-        | Node.Parameter node -> HasJSDoc.ParameterDeclaration node |> Some
-        | Node.ParenthesizedExpression node -> HasJSDoc.ParenthesizedExpression node |> Some
-        | Node.PropertyAccessExpression node -> HasJSDoc.PropertyAccessExpression node |> Some
-        | Node.PropertyAssignment node -> HasJSDoc.PropertyAssignment node |> Some
-        | Node.PropertyDeclaration node -> HasJSDoc.PropertyDeclaration node |> Some
-        | Node.PropertySignature node -> HasJSDoc.PropertySignature node |> Some
-        | Node.ReturnStatement node -> HasJSDoc.ReturnStatement node |> Some
-        | Node.SemicolonClassElement node -> HasJSDoc.SemicolonClassElement node |> Some
-        | Node.ShorthandPropertyAssignment node -> HasJSDoc.ShorthandPropertyAssignment node |> Some
-        | Node.SpreadAssignment node -> HasJSDoc.SpreadAssignment node |> Some
-        | Node.SwitchStatement node -> HasJSDoc.SwitchStatement node |> Some
-        | Node.ThrowStatement node -> HasJSDoc.ThrowStatement node |> Some
-        | Node.TryStatement node -> HasJSDoc.TryStatement node |> Some
-        | Node.TypeAliasDeclaration node -> HasJSDoc.TypeAliasDeclaration node |> Some
-        | Node.TypeParameterDeclaration node -> HasJSDoc.TypeParameterDeclaration node |> Some
-        | Node.VariableDeclaration node -> HasJSDoc.VariableDeclaration node |> Some
-        | Node.VariableStatement node -> HasJSDoc.VariableStatement node |> Some
-        | Node.WhileStatement node -> HasJSDoc.WhileStatement node |> Some
-        | Node.WithStatement node -> HasJSDoc.WithStatement node |> Some
-        | _ -> None
-    let (|EntityName|_|) = function
-        | Node.Identifier node -> EntityName.Identifier node |> Some
-        | Node.QualifiedName node -> EntityName.QualifiedName node |> Some
-        | _ -> None
-    let (|PropertyName|_|) = function
-        | Node.Identifier node -> PropertyName.Identifier node |> Some
-        | Node.StringLiteral node -> PropertyName.StringLiteral node |> Some
-        | Node.NoSubstitutionTemplateLiteral node -> PropertyName.NoSubtitutionTemplateLiteral node |> Some
-        | Node.NumericLiteral node -> PropertyName.NumericLiteral node |> Some
-        | Node.ComputedPropertyName node -> PropertyName.ComputedPropertyName node |> Some
-        | Node.PrivateIdentifier node -> PropertyName.PrivateIdentifier node |> Some
-        | Node.BigIntLiteral node -> PropertyName.BigIntLiteral node |> Some
-        | _ -> None
-    let (|PropertyNameLiteral|_|) = function
-        | Node.Identifier node -> PropertyNameLiteral.Identifier node |> Some
-        | Node.StringLiteral node -> PropertyNameLiteral.StringLiteral node |> Some
-        | Node.NumericLiteral node -> PropertyNameLiteral.NumericLiteral node |> Some
-        | Node.JsxNamespacedName node -> PropertyNameLiteral.JsxNamespacedName node |> Some
-        | Node.BigIntLiteral node -> PropertyNameLiteral.BigIntLiteral node |> Some
-        | _ -> None
-    let inline (|TypeVariable|_|) node =
-        match node with
-        | TypeFlags.TypeParameter node -> TypeVariable.TypeParameter node |> Some
-        | TypeFlags.IndexedAccess node -> TypeVariable.IndexedAccessType node |> Some
-        | _ -> None
-    let inline (|BaseType|_|) node =
-        match node with
-        | TypeFlags.Object node -> BaseType.ObjectType node |> Some
-        | TypeFlags.Intersection node -> BaseType.IntersectionType node |> Some
-        | TypeVariable node -> BaseType.TypeVariable node |> Some
-        | _ -> None
-    let inline (|StructuredType|_|) node =
-        match node with
-        | TypeFlags.Object node -> StructuredType.ObjectType node |> Some
-        | TypeFlags.Union node -> StructuredType.UnionType node |> Some
-        | TypeFlags.Intersection node -> StructuredType.IntersectionType node |> Some
-        | _ -> None
-    let (|ObjectTypeDeclaration|_|) = function
-        | ClassLikeDeclaration node -> ObjectTypeDeclaration.ClassLikeDeclaration node |> Some
-        | Node.InterfaceDeclaration node -> ObjectTypeDeclaration.InterfaceDeclaration node |> Some
-        | Node.TypeLiteralNode node -> ObjectTypeDeclaration.TypeLiteralNode node |> Some
-        | _ -> None
-    let (|ModuleName|_|) = function
-        | Node.Identifier node -> TsModuleName.Identifier node |> Some
-        | Node.StringLiteral node -> TsModuleName.StringLiteral node |> Some
-        | _ -> None
-    let (|JSDocComment|_|) = function
-        | SyntaxKind.JSDocText node -> JSDocComment.JSDocText node |> Some
-        | Node.JSDocLink node -> JSDocComment.JSDocLink node |> Some
-        | Node.JSDocLinkCode node -> JSDocComment.JSDocLinkCode node |> Some
-        | Node.JSDocLinkPlain node -> JSDocComment.JSDocLinkPlain node |> Some
-        | _ -> None
-    let (|MemberName|_|) = function
-        | Node.Identifier node -> MemberName.Identifier node |> Some
-        | Node.PrivateIdentifier node -> MemberName.PrivateIdentifier node |> Some
-        | _ -> None
-    let (|JsxAttributeName|_|) = function
-        | Node.Identifier node -> JsxAttributeName.Identifier node |> Some
-        | Node.JsxNamespacedName node -> JsxAttributeName.JsxNamespacedName node |> Some
-        | _ -> None
-    let (|StringLiteralLike|_|) = function
-        | Node.StringLiteral node -> StringLiteralLike.StringLiteral  node |> Some
-        | Node.NoSubstitutionTemplateLiteral node -> StringLiteralLike.NoSubstitutionTemplateLiteral  node |> Some
-        | _ -> None
-    let (|BindingPattern|_|) = function
-        | Node.ObjectBindingPattern node -> BindingPattern.ObjectBindingPattern node |> Some
-        | Node.ArrayBindingPattern node -> BindingPattern.ArrayBindingPattern node |> Some
-        | _ -> None
-    let (|BindingName|_|) = function
-        | Node.Identifier node -> BindingName.Identifier node |> Some
-        | BindingPattern node -> BindingName.BindingPattern node |> Some
-        | _ -> None
-    let (|ObjectLiteralElementLike|_|) = function
-        | Node.PropertyAssignment node -> ObjectLiteralElementLike.PropertyAssignment node |> Some
-        | Node.ShorthandPropertyAssignment node -> ObjectLiteralElementLike.ShorthandPropertyAssignment node |> Some
-        | Node.SpreadAssignment node -> ObjectLiteralElementLike.SpreadAssignment node |> Some
-        | Node.MethodDeclaration node -> ObjectLiteralElementLike.MethodDeclaration node |> Some
-        | AccessorDeclaration node -> ObjectLiteralElementLike.AccessorDeclaration node |> Some
-        | _ -> None
-    let (|FunctionLikeDeclaration|_|) = function
-        | Node.FunctionDeclaration node -> FunctionLikeDeclaration.FunctionDeclaration node |> Some
-        | Node.MethodDeclaration node -> FunctionLikeDeclaration.MethodDeclaration node |> Some
-        | AccessorDeclaration node -> FunctionLikeDeclaration.AccessorDeclaration node |> Some
-        | Node.ConstructorDeclaration node -> FunctionLikeDeclaration.ConstructorDeclaration node |> Some
-        | Node.FunctionExpression node -> FunctionLikeDeclaration.FunctionExpression node |> Some
-        | Node.ArrowFunction node -> FunctionLikeDeclaration.ArrowFunction node |> Some
-        | _ -> None
-    let (|FunctionOrConstructorTypeNode|_|) = function
-        | Node.FunctionTypeNode node -> FunctionOrConstructorTypeNode.FunctionTypeNode node |> Some
-        | Node.ConstructorTypeNode node -> FunctionOrConstructorTypeNode.ConstructorTypeNode node |> Some
-        | _ -> None
-    let (|TypeReferenceType|_|) = function
-        | Node.TypeReferenceNode node -> TypeReferenceType.TypeReferenceNode node |> Some
-        | Node.ExpressionWithTypeArguments node -> TypeReferenceType.ExpressionWithTypeArguments node |> Some
-        | _ -> None
-    let (|UnionOrIntersectionTypeNode|_|) = function
-        | Node.UnionTypeNode node -> UnionOrIntersectionTypeNode.UnionTypeNode node |> Some
-        | Node.IntersectionTypeNode node -> UnionOrIntersectionTypeNode.IntersectionTypeNode node |> Some
-        | _ -> None
-    // let (|EntityNameExpression|_|) = function
-        // | Node.Identifier node -> EntityNameExpression.Identifier node |> Some
-        // | Node.PropertyAccessEntityNameExpression node -> EntityNameExpression.PropertyAccessEntityNameExpression node |> Some
-        // | _ -> None
-    let (|DeclarationName|_|) = function
-        | PropertyName node -> DeclarationName.PropertyName node |> Some
-        | JsxAttributeName node -> DeclarationName.JsxAttributeName node |> Some
-        | StringLiteralLike node -> DeclarationName.StringLiteralLike node |> Some
-        | Node.ElementAccessExpression node -> DeclarationName.ElementAccessExpression node |> Some
-        | BindingPattern node -> DeclarationName.BindingPattern node |> Some
-        // | EntityNameExpression node -> DeclarationName.EntityNameExpression node |> Some
-        | _ -> None
-    #nowarn 25
-    module Wrap =
-        let (|EntityNameExpression|): Ts.EntityNameExpression -> _ = unbox >> function
-            | Node.Identifier node -> EntityNameExpression.Identifier node 
-            | node -> EntityNameExpression.PropertyAccessEntityNameExpression (unbox node) 
-        let (|DeclaratinName|): Ts.DeclarationName -> _ = unbox >> function
-            | DeclarationName node -> node
-            | node ->
-                match unbox node with
-                | EntityNameExpression node -> DeclarationName.EntityNameExpression node
-        let (|AssertionExpression|): Ts.AssertionExpression -> _ = unbox >> function
-            | AssertionExpression node -> node
-        let (|AccessorDeclaration|): Ts.AccessorDeclaration -> _ = unbox >> function
-            | AccessorDeclaration node -> node
-        let (|ClassLikeDeclaration|): Ts.ClassLikeDeclaration -> _ = unbox >> function
-            | ClassLikeDeclaration node -> node
-        let (|ModifierLike|):Ts.ModifierLike -> _ = unbox >> function
-            | ModifierLike node -> node
-        let (|EntityName|): Ts.EntityName -> _ = unbox >> function
-            | EntityName node -> node
-        let (|PropertyName|): Ts.PropertyName -> _ = unbox >> function
-            | PropertyName node -> node
-        let (|PropertyNameLiteral|): Ts.PropertyNameLiteral -> _ = unbox >> function
-            | PropertyNameLiteral node -> node
-        let (|TypeVariable|): Ts.TypeVariable -> _ = unbox<Ts.Type> >> function
-            | TypeVariable node -> node
-        let (|BaseType|): Ts.BaseType -> _ = unbox<Ts.Type> >> function
-            | BaseType node -> node
-        let (|StructuredType|): Ts.StructuredType -> _ = unbox<Ts.Type> >> function
-            | StructuredType  node -> node
-        let (|ObjectTypeDeclaration|): Ts.ObjectTypeDeclaration -> _ = unbox >> function
-            | ObjectTypeDeclaration node -> node
-        let (|ModuleName|): Ts.ModuleName -> _ = unbox >> function ModuleName node -> node
-        let (|JSDocComment|): Ts.JSDocComment -> _ = unbox >> function JSDocComment node -> node
-        let (|MemberName|): Ts.MemberName -> _ = unbox >> function MemberName node -> node
-        let (|StringLiteralLike|): Ts.StringLiteralLike -> _ = unbox >> function StringLiteralLike node -> node
-        let (|BindingPattern|): Ts.BindingPattern -> _ = unbox >> function BindingPattern node -> node
-        let (|BindingName|): Ts.BindingName -> _ = unbox >> function BindingName node -> node
-        let (|ObjectLiteralElementLike|): Ts.ObjectLiteralElementLike -> _ = unbox >> function ObjectLiteralElementLike node -> node
-        let (|FunctionLikeDeclaration|): Ts.FunctionLikeDeclaration -> _ = unbox >> function FunctionLikeDeclaration node -> node
-        let (|FunctionOrConstructorTypeNode|): Ts.FunctionOrConstructorTypeNode -> _ = unbox >> function FunctionOrConstructorTypeNode node -> node
-        let (|TypeReferenceType|): Ts.TypeReferenceType -> _ = unbox >> function TypeReferenceType node -> node
-        let (|UnionOrIntersectionTypeNode|): Ts.UnionOrIntersectionTypeNode -> _ = unbox >> function UnionOrIntersectionTypeNode node -> node
-        let (|DeclarationName|): Ts.DeclarationName -> _ = unbox >> function DeclarationName node -> node
-    module Symbol =
-        type SF = Ts.SymbolFlags
-        let inline hasFlag flag: Ts.Symbol -> bool = fun sym -> sym.flags.HasFlag flag
-        let (|None|_|): Ts.Symbol -> bool = _.flags.Equals(SF.None)
-        let (|FunctionScopedVariable|_|): Ts.Symbol -> _ = hasFlag SF.FunctionScopedVariable
-        let (|BlockScopedVariable|_|): Ts.Symbol -> _ = hasFlag SF.BlockScopedVariable
-        let (|Property|_|): Ts.Symbol -> bool = hasFlag SF.Property 
-        let (|EnumMember|_|): Ts.Symbol -> bool = hasFlag SF.EnumMember 
-        let (|Function|_|): Ts.Symbol -> bool = hasFlag SF.Function 
-        let (|Class|_|): Ts.Symbol -> bool = hasFlag SF.Class 
-        let (|Interface|_|): Ts.Symbol -> bool = hasFlag SF.Interface 
-        let (|ConstEnum|_|): Ts.Symbol -> bool = hasFlag SF.ConstEnum 
-        let (|RegularEnum|_|): Ts.Symbol -> bool = hasFlag SF.RegularEnum 
-        let (|ValueModule|_|): Ts.Symbol -> bool = hasFlag SF.ValueModule 
-        let (|NamespaceModule|_|): Ts.Symbol -> bool = hasFlag SF.NamespaceModule 
-        let (|TypeLiteral|_|): Ts.Symbol -> bool = hasFlag SF.TypeLiteral 
-        let (|ObjectLiteral|_|): Ts.Symbol -> bool = hasFlag SF.ObjectLiteral 
-        let (|Method|_|): Ts.Symbol -> bool = hasFlag SF.Method 
-        let (|Constructor|_|): Ts.Symbol -> bool = hasFlag SF.Constructor 
-        let (|GetAccessor|_|): Ts.Symbol -> bool = hasFlag SF.GetAccessor 
-        let (|SetAccessor|_|): Ts.Symbol -> bool = hasFlag SF.SetAccessor 
-        let (|Signature|_|): Ts.Symbol -> bool = hasFlag SF.Signature 
-        let (|TypeParameter|_|): Ts.Symbol -> bool = hasFlag SF.TypeParameter 
-        let (|TypeAlias|_|): Ts.Symbol -> bool = hasFlag SF.TypeAlias 
-        let (|ExportValue|_|): Ts.Symbol -> bool = hasFlag SF.ExportValue 
-        let (|Alias|_|): Ts.Symbol -> bool = hasFlag SF.Alias 
-        let (|Prototype|_|): Ts.Symbol -> bool = hasFlag SF.Prototype 
-        let (|ExportStar|_|): Ts.Symbol -> bool = hasFlag SF.ExportStar 
-        let (|Optional|_|): Ts.Symbol -> bool = hasFlag SF.Optional 
-        let (|Transient|_|): Ts.Symbol -> bool = hasFlag SF.Transient 
-        let (|Assignment|_|): Ts.Symbol -> bool = hasFlag SF.Assignment 
-        let (|ModuleExports|_|): Ts.Symbol -> bool = hasFlag SF.ModuleExports 
-        let (|All|_|): Ts.Symbol -> bool = hasFlag SF.All 
-        let (|Enum|_|): Ts.Symbol -> bool = hasFlag SF.Enum 
-        let (|Variable|_|): Ts.Symbol -> bool = hasFlag SF.Variable 
-        let (|Value|_|): Ts.Symbol -> bool = hasFlag SF.Value 
-        let (|Type|_|): Ts.Symbol -> bool = hasFlag SF.Type 
-        let (|Namespace|_|): Ts.Symbol -> bool = hasFlag SF.Namespace 
-        let (|Module|_|): Ts.Symbol -> bool = hasFlag SF.Module 
-        let (|Accessor|_|): Ts.Symbol -> bool = hasFlag SF.Accessor 
-        let (|FunctionScopedVariableExcludes|_|): Ts.Symbol -> bool = hasFlag SF.FunctionScopedVariableExcludes 
-        let (|BlockScopedVariableExcludes|_|): Ts.Symbol -> bool = hasFlag SF.BlockScopedVariableExcludes 
-        let (|ParameterExcludes|_|): Ts.Symbol -> bool = hasFlag SF.ParameterExcludes 
-        let (|PropertyExcludes|_|): Ts.Symbol -> bool = hasFlag SF.PropertyExcludes 
-        let (|EnumMemberExcludes|_|): Ts.Symbol -> bool = hasFlag SF.EnumMemberExcludes 
-        let (|FunctionExcludes|_|): Ts.Symbol -> bool = hasFlag SF.FunctionExcludes 
-        let (|ClassExcludes|_|): Ts.Symbol -> bool = hasFlag SF.ClassExcludes 
-        let (|InterfaceExcludes|_|): Ts.Symbol -> bool = hasFlag SF.InterfaceExcludes 
-        let (|RegularEnumExcludes|_|): Ts.Symbol -> bool = hasFlag SF.RegularEnumExcludes 
-        let (|ConstEnumExcludes|_|): Ts.Symbol -> bool = hasFlag SF.ConstEnumExcludes 
-        let (|ValueModuleExcludes|_|): Ts.Symbol -> bool = hasFlag SF.ValueModuleExcludes 
-        let (|NamespaceModuleExcludes|_|): Ts.Symbol -> bool = hasFlag SF.NamespaceModuleExcludes 
-        let (|MethodExcludes|_|): Ts.Symbol -> bool = hasFlag SF.MethodExcludes 
-        let (|GetAccessorExcludes|_|): Ts.Symbol -> bool = hasFlag SF.GetAccessorExcludes 
-        let (|SetAccessorExcludes|_|): Ts.Symbol -> bool = hasFlag SF.SetAccessorExcludes 
-        let (|AccessorExcludes|_|): Ts.Symbol -> bool = hasFlag SF.AccessorExcludes 
-        let (|TypeParameterExcludes|_|): Ts.Symbol -> bool = hasFlag SF.TypeParameterExcludes 
-        let (|TypeAliasExcludes|_|): Ts.Symbol -> bool = hasFlag SF.TypeAliasExcludes 
-        let (|AliasExcludes|_|): Ts.Symbol -> bool = hasFlag SF.AliasExcludes 
-        let (|ModuleMember|_|): Ts.Symbol -> bool = hasFlag SF.ModuleMember 
-        let (|ExportHasLocal|_|): Ts.Symbol -> bool = hasFlag SF.ExportHasLocal 
-        let (|BlockScoped|_|): Ts.Symbol -> bool = hasFlag SF.BlockScoped 
-        let (|PropertyOrAccessor|_|): Ts.Symbol -> bool = hasFlag SF.PropertyOrAccessor 
-        let (|ClassMember|_|): Ts.Symbol -> bool = hasFlag SF.ClassMember 
-        
-    #warnon 25
-        
-
-type NameHelpers =
-    static member getName(n: Ts.EntityName) =
-        match n with
-        | Patterns.Node.EntityNamePatterns.Identifier node -> node.text
-        | Patterns.Node.EntityNamePatterns.QualifiedName node -> node.getText()
-
-    static member getName(n: Ts.MemberName) =
-        match n with
-        | Patterns.Node.MemberNamePatterns.Identifier node -> node.text
-        | Patterns.Node.MemberNamePatterns.PrivateIdentifier node -> node.text
-    static member getName(n: Ts.PropertyName) =
-        match n with
-        | Patterns.Node.PropertyNamePatterns.Identifier node -> node.text
-        | Patterns.Node.PropertyNamePatterns.StringLiteral node -> node.text
-        | Patterns.Node.PropertyNamePatterns.NoSubstitutionTemplateLiteral node -> node.text
-        | Patterns.Node.PropertyNamePatterns.NumericLiteral node -> node.text
-        | Patterns.Node.PropertyNamePatterns.ComputedPropertyName node -> node.getText()
-        | Patterns.Node.PropertyNamePatterns.PrivateIdentifier node -> node.text
-        | Patterns.Node.PropertyNamePatterns.BigIntLiteral node -> node.text
-    static member getName(n: Ts.JsxAttributeName) =
-        match n with
-        | Patterns.Node.JsxAttributeNamePatterns.Identifier node -> node.text
-        | Patterns.Node.JsxAttributeNamePatterns.JsxNamespacedName node -> node.name.text
-    static member getName(n: Ts.StringLiteralLike) =
-        match n with
-        | Patterns.Node.StringLiteralLikePatterns.StringLiteral node -> node.text
-        | Patterns.Node.StringLiteralLikePatterns.NoSubstitutionTemplateLiteral node -> node.text
-    static member getName(n: Ts.BindingPattern) =
-        match n with
-        | Patterns.Node.BindingPatternPatterns.ObjectBindingPattern node -> node.getText()
-        | Patterns.Node.BindingPatternPatterns.ArrayBindingPattern node -> node.getText()
-    static member getName(n: Ts.EntityNameExpression) =
-        match n with
-        | Patterns.Node.EntityNameExpressionPatterns.Identifier node -> node.text
-        | Patterns.Node.EntityNameExpressionPatterns.PropertyAccessExpression node -> node.getText()
-
-    static member getName(n: Ts.DeclarationName) =
-        match n with
-        | Patterns.Node.DeclarationNamePatterns.JsxNamespacedName node -> node.name.text
-        | Patterns.Node.DeclarationNamePatterns.ElementAccessExpression node -> node.getText()
-        | Patterns.Node.DeclarationNamePatterns.PropertyName node -> NameHelpers.getName node
-        | Patterns.Node.DeclarationNamePatterns.BindingPattern node -> NameHelpers.getName node
-        | Patterns.Node.DeclarationNamePatterns.EntityNameExpression node -> node.getText()
-    static member getName(n: Ts.ComputedPropertyName) = n.getText()
-    static member getName(n: Ts.Identifier) = n.text
-    static member getName(n: Ts.BindingName) =
-        match n with
-        | Patterns.Node.BindingNamePatterns.Identifier node -> node.text
-        | Patterns.Node.BindingNamePatterns.ObjectBindingPattern node -> node.getText()
-        | Patterns.Node.BindingNamePatterns.ArrayBindingPattern node -> node.getText()
-    static member getName(n: Ts.Identifier option) =
-        match n with
-        | Some v -> NameHelpers.getName v
-        | None -> "$ANONYMOUS$"
-    static member getName(n: Ts.ModuleName) =
-        match n with
-        | Patterns.Node.ModuleNamePatterns.Identifier value ->
-            value.text
-        | Patterns.Node.ModuleNamePatterns.StringLiteral value ->
-            value.text
-            
-[<AutoOpen>]
-type SourceFileHelper =
-    static member getSourceFile (node: Ts.Node) = node.getSourceFile()
-    static member getSourceFile (sym: Ts.Symbol) =
-        sym.getDeclarations()
-        |> Option.map _.AsArray
-        |> Option.orElse (
-            sym.valueDeclaration
-            |> Option.map Array.singleton
-            )
-        |> Option.bind (Array.tryPick (_.getSourceFile() >> Option.ofObj))
-    static member getSourceFile (typ: Ts.Type) =
-        typ.getSymbol()
-        |> Option.orElse typ.aliasSymbol
-        |> Option.bind getSourceFile
+ 
