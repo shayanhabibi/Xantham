@@ -41,6 +41,10 @@ type TestFixtures = AbsoluteFileSystem<This.``..``.fixtures.``.``>
 
 // Helpers
 let makeProgram file = Ts.Program.Create [ file ]
+let inline testIfNodes<'T> (nodeMap: Dictionary<Ts.SyntaxKind, ResizeArray<obj>>) syntaxKind name test =
+    if nodeMap.ContainsKey(syntaxKind) && nodeMap[syntaxKind].AsArray.Length > 0
+    then testCase name (fun () -> nodeMap[syntaxKind].AsArray |> unbox<'T array> |> test)
+    else ptestCase $"SKIPPED: No values to test against | %s{name}" ignore
 let makeTestSeries name file = testList name [
     let program = makeProgram file
     let checker = program.getTypeChecker()
@@ -337,13 +341,8 @@ let makeTestSeries name file = testList name [
             match nodeMap.TryGetValue(syntaxKind) with
             | true, values -> unbox values.AsArray
             | _ -> [||]
-        let inline testIfNodes syntaxKind name test =
-            if nodeMap.ContainsKey(syntaxKind) && nodeMap[syntaxKind].AsArray.Length > 0 then
-                testCase name test
-            else
-                ptestCase $"SKIPPED: No values to test against | %s{name}" test
-        testIfNodes Ts.SyntaxKind.NumericLiteral "Numeric Literals are all parsable" <| fun _ ->
-            (getNodes Ts.SyntaxKind.NumericLiteral : Ts.NumericLiteral array)
+        testIfNodes nodeMap Ts.SyntaxKind.NumericLiteral "Numeric Literals are all parsable" <| fun (literals: Ts.NumericLiteral array) ->
+            literals
             |> Array.iter (
                 _.text
                 >> JS.Constructors.Number.parseFloat
@@ -351,8 +350,8 @@ let makeTestSeries name file = testList name [
                     | value when jsTypeof value = "number" -> ()
                     | value -> failtest $"Unrecognised numeric literal: %A{value}"
                 )
-        testIfNodes Ts.SyntaxKind.BigIntLiteral "BigInt Literals are all parsable" <| fun _ ->
-            (getNodes Ts.SyntaxKind.BigIntLiteral : Ts.BigIntLiteral array)
+        testIfNodes<Ts.BigIntLiteral> nodeMap Ts.SyntaxKind.BigIntLiteral "BigInt Literals are all parsable" <| fun literals ->
+            literals
             |> Array.iter (
                 _.text
                 >> _.TrimEnd('n')
@@ -360,8 +359,8 @@ let makeTestSeries name file = testList name [
                 >> ignore
                 )
             
-        testIfNodes Ts.SyntaxKind.StringLiteral "String Literals all have valid string values" <| fun _ ->
-            (getNodes Ts.SyntaxKind.StringLiteral : Ts.StringLiteral array)
+        testIfNodes<Ts.StringLiteral> nodeMap Ts.SyntaxKind.StringLiteral "String Literals all have valid string values" <| fun literals ->
+            literals
             |> Array.iter (
                 _.text
                 >> function
@@ -369,8 +368,8 @@ let makeTestSeries name file = testList name [
                     | "" -> Expect.passWithMsg "Empty string literals are valid"
                     | _ -> ()
                 )
-        testIfNodes Ts.SyntaxKind.NoSubstitutionTemplateLiteral "NoSubstitutionTemplateLiteral values are valid" <| fun _ ->
-            (getNodes Ts.SyntaxKind.NoSubstitutionTemplateLiteral : Ts.NoSubstitutionTemplateLiteral array)
+        testIfNodes<Ts.NoSubstitutionTemplateLiteral> nodeMap Ts.SyntaxKind.NoSubstitutionTemplateLiteral "NoSubstitutionTemplateLiteral values are valid" <| fun nodes ->
+            nodes
             |> Array.iter (
                 _.text
                 >> function
@@ -378,8 +377,8 @@ let makeTestSeries name file = testList name [
                     | "" -> Expect.passWithMsg "Empty string literals are valid"
                     | _ -> ()
                 )
-        testIfNodes Ts.SyntaxKind.PrefixUnaryExpression "PrefixUnaryExpression Operators values are predictable" <| fun _ ->
-            (getNodes Ts.SyntaxKind.PrefixUnaryExpression : Ts.PrefixUnaryExpression array)
+        testIfNodes<Ts.PrefixUnaryExpression> nodeMap Ts.SyntaxKind.PrefixUnaryExpression "PrefixUnaryExpression Operators values are predictable" <| fun nodes ->
+            nodes
             |> Array.iter (
                 _.operator
                 >> function
@@ -391,16 +390,16 @@ let makeTestSeries name file = testList name [
                     | Ts.PrefixUnaryOperator.ExclamationToken as value -> failtest $"Unexpected PrefixUnaryOperator.{value.Name} in d.ts"
                     | value -> failtest $"Received an invalid/unknown PrefixUnaryOperator kind: {value.Name}" 
                 )
-        testIfNodes Ts.SyntaxKind.PrefixUnaryExpression "PrefixUnaryExpression Operand values are all numeric literals" <| fun _ ->
-            (getNodes Ts.SyntaxKind.PrefixUnaryExpression : Ts.PrefixUnaryExpression array)
+        testIfNodes<Ts.PrefixUnaryExpression> nodeMap Ts.SyntaxKind.PrefixUnaryExpression "PrefixUnaryExpression Operand values are all numeric literals" <| fun nodes ->
+            nodes
             |> Array.iter (
                 _.operand
                 >> function
                     | Patterns.SyntaxKind.NumericLiteral _ -> ()
                     | value -> failtest $"Received an invalid/unknown PostfixUnaryExpression operand kind: %s{value.kind.Name}" 
                 )
-        testIfNodes Ts.SyntaxKind.LiteralType "LiteralTypeNode _.literal values are parsed predictably" <| fun _ ->
-            (getNodes Ts.SyntaxKind.LiteralType : Ts.LiteralTypeNode array)
+        testIfNodes<Ts.LiteralTypeNode> nodeMap Ts.SyntaxKind.LiteralType "LiteralTypeNode _.literal values are parsed predictably" <| fun nodes ->
+            nodes
             |> Array.iter (
                 _.literal
                 >> unbox
@@ -423,6 +422,128 @@ let makeTestSeries name file = testList name [
                 | value when DeclarationFileNodes.IsKnownDeclarationFileNodeSyntaxKind value -> ()
                 | value -> failtest $"Unexpected node kind in a declaration file: %s{value.Name}"
                 )
+        testIfNodes<Ts.ClassDeclaration> nodeMap Ts.SyntaxKind.ClassDeclaration "ClassDeclarations have a limited subset of nodes as members" <| fun nodes ->
+            nodes
+            |> Array.collect _.members.AsArray
+            |> Array.iter (
+                function
+                    | Patterns.Node.PropertyDeclaration _
+                    | Patterns.Node.MethodDeclaration _
+                    | Patterns.Node.GetAccessorDeclaration _
+                    | Patterns.Node.SetAccessorDeclaration _
+                    | Patterns.Node.IndexSignatureDeclaration _
+                    | Patterns.Node.ConstructorDeclaration _ -> ()
+                    | node -> failtest $"Unrecognised member kind for ClassMember: %s{node.kind.Name}"
+                )
+        testIfNodes<Ts.InterfaceDeclaration> nodeMap Ts.SyntaxKind.InterfaceDeclaration "InterfaceDeclarations have a limited subset of nodes as members" <| fun nodes ->
+            nodes
+            |> Array.collect _.members.AsArray
+            |> Array.iter (
+                function
+                    | Patterns.Node.PropertySignature _
+                    | Patterns.Node.MethodSignature _
+                    | Patterns.Node.GetAccessorDeclaration _
+                    | Patterns.Node.SetAccessorDeclaration _
+                    | Patterns.Node.IndexSignatureDeclaration _
+                    | Patterns.Node.CallSignatureDeclaration _
+                    | Patterns.Node.ConstructSignatureDeclaration _ -> ()
+                    | node -> failtest $"Unrecognised member kind for Interfacemember: %s{node.kind.Name}"
+                )
+        testIfNodes<Ts.ClassDeclaration> nodeMap Ts.SyntaxKind.ClassDeclaration "ClassDeclarations resolved by type checker are always Class object types" <| fun nodes ->
+            nodes
+            |> Array.iter (fun node ->
+                if node.name.IsNone then
+                    unbox<Ts.Node> node
+                else unbox<Ts.Node> node.name.Value
+                |> checker.getTypeAtLocation
+                :?> Ts.ObjectType
+                |> _.objectFlags.HasFlag(Ts.ObjectFlags.Class)
+                |> Expect.isTrue
+                |> funApply $"ClassDeclaration {node.name.Value.getText()} should be an object type"
+                )
+        testIfNodes<Ts.InterfaceDeclaration> nodeMap Ts.SyntaxKind.InterfaceDeclaration "InterfaceDeclarations resolved by type checker are always ClassOrInterface object types" <| fun nodes ->
+            nodes
+            |> Array.iter (fun node ->
+                let objectType = node.name |> checker.getTypeAtLocation :?> Ts.ObjectType
+                let result = objectType.objectFlags &&& Ts.ObjectFlags.ClassOrInterface |> (<>) (enum 0)
+                let flags = objectType.objectFlags.ToStringArray()
+                Expect.isTrue result $"InterfaceDeclaration (except Iterator): {node.name.getText()} should be an object type. Has %A{flags}"
+                )
+        testIfNodes<Ts.MethodDeclaration> nodeMap Ts.SyntaxKind.MethodDeclaration "MethodDeclarations that are not optional resolved by type checker are object types" <| fun nodes ->
+            nodes
+            |> Array.filter _.questionToken.IsNone
+            |> Array.iter (fun node ->
+                let typ = checker.getTypeAtLocation node
+                let typString = checker.typeToString typ
+                let flags = typ.flags.ToStringArray()
+                typ
+                |> _.flags.HasFlag(Ts.TypeFlags.Object)
+                |> Expect.isTrue
+                |> funApply $"MethodDeclaration should be a function type, instead got {flags}. {typString}"
+                )
+        testIfNodes<Ts.MethodDeclaration> nodeMap Ts.SyntaxKind.MethodDeclaration "MethodDeclarations that are optional resolved by type checker are union types" <| fun nodes ->
+            nodes
+            |> Array.filter _.questionToken.IsSome
+            |> Array.iter (fun node ->
+                let typ = checker.getTypeAtLocation node
+                let typString = checker.typeToString typ
+                let flags = typ.flags.ToStringArray()
+                typ
+                |> _.flags.HasFlag(Ts.TypeFlags.Union)
+                |> Expect.isTrue
+                |> funApply $"Optional MethodDeclaration should be a union type, instead got {flags}. {typString}"
+                )
+        testIfNodes<Ts.MethodSignature> nodeMap Ts.SyntaxKind.MethodSignature "MethodSignature that are not optional resolved by type checker are object types" <| fun nodes ->
+            nodes
+            |> Array.filter _.questionToken.IsNone
+            |> Array.iter (fun node ->
+                let typ = checker.getTypeAtLocation node
+                let typString = checker.typeToString typ
+                let flags = typ.flags.ToStringArray()
+                typ
+                |> _.flags.HasFlag(Ts.TypeFlags.Object)
+                |> Expect.isTrue
+                |> funApply $"MethodSignature should be a function (object) type, instead got {flags}. {typString}"
+                let flags = typ :?> Ts.ObjectType |> _.objectFlags.ToStringArray()
+                typ :?> Ts.ObjectType
+                |> _.objectFlags.HasFlag(Ts.ObjectFlags.Anonymous)
+                |> Expect.isTrue
+                |> funApply $"MethodSignature objecttype should have anonymous flag, instead got {flags}. {typString}"
+                )
+        testIfNodes<Ts.MethodSignature> nodeMap Ts.SyntaxKind.MethodSignature "MethodSignature that are optional resolved by type checker are union types" <| fun nodes ->
+            nodes
+            |> Array.filter _.questionToken.IsSome
+            |> Array.iter (fun node ->
+                let typ = checker.getTypeAtLocation node
+                let typString = checker.typeToString typ
+                let flags = typ.flags.ToStringArray()
+                typ
+                |> _.flags.HasFlag(Ts.TypeFlags.Union)
+                |> Expect.isTrue
+                |> funApply $"Optional MethodSignature should be a union type, instead got {flags}. {typString}"
+                let types = typ :?> Ts.UnionType |> _.types.AsArray
+                let typesString = types |> Array.map checker.typeToString
+                Expect.hasLength types 2 $"Optional method signature should have only two types, instead got {typesString}"
+                let typOneFlags = types[0].flags |> _.ToStringArray()
+                let typTwoFlags = types[1].flags |> _.ToStringArray()
+                Expect.exists types _.flags.HasFlag(Ts.TypeFlags.Undefined) $"Expected optional method signature to have two types, with one being undefined: Type1 flags {typOneFlags}; Type2 flags {typTwoFlags}"
+                Expect.exists types (fun typ -> typ.flags.HasFlag(Ts.TypeFlags.Object) && (typ :?> Ts.ObjectType |> _.objectFlags.HasFlag(Ts.ObjectFlags.Anonymous))) $"Expected optional method signature to have two types, with one being an object with anonymous flag: Type1 flags {typOneFlags}; Type2 flags {typTwoFlags}"
+                )
+        testIfNodes<Ts.InterfaceDeclaration> nodeMap Ts.SyntaxKind.InterfaceDeclaration "All interfaces have symbols" <| fun nodes ->
+            nodes
+            |> Array.iter (fun iface -> iface.name |> checker.getSymbolAtLocation |> Option.get |> ignore)
+        testIfNodes<Ts.ClassDeclaration> nodeMap Ts.SyntaxKind.ClassDeclaration "All class declarations have symbols" <| fun nodes ->
+            nodes
+            |> Array.iter (fun iface -> (iface.name |> Option.defaultValue !!iface) |> checker.getSymbolAtLocation |> Option.get |> ignore)
+        testIfNodes<Ts.ClassDeclaration> nodeMap Ts.SyntaxKind.ClassDeclaration "All class declaration symbols have value declarations" <| fun nodes ->
+            nodes
+            |> Array.iter (fun iface -> (iface.name |> Option.defaultValue !!iface) |> checker.getSymbolAtLocation |> Option.get |> _.valueDeclaration |> Option.get |> ignore)
+        testCase "No decorators are present on any node" <| fun _ ->
+            nodeMap.Values
+            |> Seq.collect _.AsArray
+            |> Seq.toArray
+            |> Array.iter (unbox >> ts.getDecorators >>  Expect.isNone >> funApply "This had a decorator")
+            
         // testIfNodes Ts.SyntaxKind.ImportSpecifier "ImportSpecifier" <| fun _ ->
         //     (getNodes Ts.SyntaxKind.ImportSpecifier : Ts.ImportSpecifier array)
         //     |> Array.iter (
@@ -430,6 +551,15 @@ let makeTestSeries name file = testList name [
         //         >> Expect.isSome
         //         >> funApply ""
         //         )
+        testList "Node Wrappers" [
+            testIfNodes<Ts.MethodDeclaration> nodeMap Ts.SyntaxKind.MethodDeclaration "MethodDeclaration.getWrappedNode" <| fun nodes ->
+                nodes
+                |> Array.map (MethodDeclaration.Create checker)
+                |> Array.iter (_.Type.objectFlags.HasFlag(Ts.ObjectFlags.Anonymous) >> Expect.isTrue >> funApply "MethodDeclaration.Type should be an object type")
+                nodes
+                |> Array.map (MethodDeclaration.Create checker)
+                |> Array.iter (_.Value.kind.HasFlag(Ts.SyntaxKind.MethodDeclaration) >> Expect.isTrue >> funApply "MethodDeclaration.Type should be an object type")
+        ]
     ]
 ]
 

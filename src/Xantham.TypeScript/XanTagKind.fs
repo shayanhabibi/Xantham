@@ -511,9 +511,9 @@ type DeclarationFileNodes =
     | TypeParameter of Ts.TypeParameterDeclaration
     | TypePredicate of Ts.TypePredicateNode
     | TypeQuery of Ts.TypeQueryNode
-    | TypeReference of Ts.TypeReference
+    | TypeReference of Ts.TypeReferenceNode
     | UndefinedKeyword of Ts.KeywordToken<Ts.SyntaxKind>
-    | UnionType of Ts.UnionType
+    | UnionType of Ts.UnionTypeNode
     | UnknownKeyword of Ts.KeywordToken<Ts.SyntaxKind>
     | VariableDeclaration of Ts.VariableDeclaration
     | VariableDeclarationList of Ts.VariableDeclarationList
@@ -2293,6 +2293,39 @@ type ExternalModule = {
     GlobalExports: ExportSymbolTable voption
     Locals: LocalSymbolTable
 }
+
+module Symbols =
+    let typeCheckerSigil = SymbolTypeKey.create<Ts.TypeChecker> "TypeChecker"
+    let methodSignatureTypeSigil = SymbolTypeKey.create<Ts.ObjectType> "MethodSignatureType"
+
+[<Interface>]
+type IMethod = interface end
+type IMethod with
+    [<Emit "$0">]
+    member inline this.Value<'T, 'U when 'T:(member questionToken: Ts.QuestionToken option) and 'U:(member questionToken: Ts.QuestionToken option)>(): 'T = unbox this
+    member inline this.TypeChecker = SymbolTypeKey.unsafeAccess Symbols.typeCheckerSigil this
+    member inline this.IsOptional = this.Value<Ts.MethodSignature, Ts.MethodDeclaration>().questionToken.IsSome
+    member this.Type =
+        this
+        |> SymbolTypeKey.accessOrInit Symbols.methodSignatureTypeSigil (fun () ->
+            let typ = this.TypeChecker.getTypeAtLocation (this.Value<Ts.MethodSignature, Ts.MethodDeclaration>())
+            if this.IsOptional then
+                typ :?> Ts.UnionType
+                |> _.types.AsArray
+                |> Array.find (_.flags.HasFlag(Ts.TypeFlags.Undefined) >> not)
+            else typ 
+            :?> Ts.ObjectType)
+    static member inline Create<'T, 'U>(checker: Ts.TypeChecker) (node: 'T): 'U =
+        node |> SymbolTypeKey.set Symbols.typeCheckerSigil checker
+        unbox<'U> node
+type MethodSignature = inherit IMethod
+type MethodSignature with
+    static member Create = IMethod.Create<Ts.MethodSignature, MethodSignature>
+    [<Emit "$0">] member inline this.Value = unbox<Ts.MethodSignature> this
+type MethodDeclaration = inherit IMethod
+type MethodDeclaration with
+    static member Create = IMethod.Create<Ts.MethodDeclaration, MethodDeclaration>
+    member inline this.Value = (this :> IMethod).Value<Ts.MethodDeclaration, Ts.MethodSignature>()
 
 
 type Script = {
