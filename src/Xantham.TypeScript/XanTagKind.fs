@@ -8,9 +8,125 @@ open Fable.Core.JsInterop
 open TypeScript
 open FsToolkit.ErrorHandling
 
+
 module private Internal =
     let inline private (>=>) a b = KeyValuePair(a, unbox >> b)
     let inline private (>->) a b = a, (unbox >> b)
+    let declarationFileNodes: Dictionary<Ts.SyntaxKind, obj -> DeclarationFileNodes> =
+        Dictionary [
+            Ts.SyntaxKind.BigIntLiteral >=> DeclarationFileNodes.BigIntLiteral
+            Ts.SyntaxKind.NamespaceExportDeclaration >=> DeclarationFileNodes.NamespaceExportDeclaration
+            Ts.SyntaxKind.PrivateIdentifier >=> DeclarationFileNodes.PrivateIdentifier
+            Ts.SyntaxKind.OptionalType >=> DeclarationFileNodes.OptionalType
+            Ts.SyntaxKind.NoSubstitutionTemplateLiteral >=> DeclarationFileNodes.NoSubstitutionTemplateLiteral
+            Ts.SyntaxKind.ImportEqualsDeclaration >=> DeclarationFileNodes.ImportEqualsDeclaration
+            Ts.SyntaxKind.NamespaceExport >=> DeclarationFileNodes.NamespaceExport
+            Ts.SyntaxKind.OutKeyword >=> DeclarationFileNodes.OutKeyword
+            Ts.SyntaxKind.ExternalModuleReference >=> DeclarationFileNodes.ExternalModuleReference
+            Ts.SyntaxKind.PublicKeyword >=> DeclarationFileNodes.PublicKeyword
+            Ts.SyntaxKind.InKeyword >=> DeclarationFileNodes.InKeyword
+            Ts.SyntaxKind.ObjectBindingPattern >=> DeclarationFileNodes.ObjectBindingPattern
+            Ts.SyntaxKind.ImportType >=> DeclarationFileNodes.ImportType
+            Ts.SyntaxKind.AssertsKeyword >=> DeclarationFileNodes.AssertsKeyword
+            Ts.SyntaxKind.AbstractKeyword >=> DeclarationFileNodes.AbstractKeyword
+            Ts.SyntaxKind.AnyKeyword >=> DeclarationFileNodes.AnyKeyword
+            Ts.SyntaxKind.ArrayBindingPattern >=> DeclarationFileNodes.ArrayBindingPattern
+            Ts.SyntaxKind.ArrayType >=> DeclarationFileNodes.ArrayType
+            Ts.SyntaxKind.BigIntKeyword >=> DeclarationFileNodes.BigIntKeyword
+            Ts.SyntaxKind.BindingElement >=> DeclarationFileNodes.BindingElement
+            Ts.SyntaxKind.BooleanKeyword >=> DeclarationFileNodes.BooleanKeyword
+            Ts.SyntaxKind.CallSignature >=> DeclarationFileNodes.CallSignature
+            Ts.SyntaxKind.ClassDeclaration >=> DeclarationFileNodes.ClassDeclaration
+            Ts.SyntaxKind.ComputedPropertyName >=> DeclarationFileNodes.ComputedPropertyName
+            Ts.SyntaxKind.ConditionalType >=> DeclarationFileNodes.ConditionalType
+            Ts.SyntaxKind.ConstKeyword >=> DeclarationFileNodes.ConstKeyword
+            Ts.SyntaxKind.ConstructSignature >=> DeclarationFileNodes.ConstructSignature
+            Ts.SyntaxKind.Constructor >=> DeclarationFileNodes.Constructor
+            Ts.SyntaxKind.ConstructorType >=> DeclarationFileNodes.ConstructorType
+            Ts.SyntaxKind.DeclareKeyword >=> DeclarationFileNodes.DeclareKeyword
+            Ts.SyntaxKind.DefaultKeyword >=> DeclarationFileNodes.DefaultKeyword
+            Ts.SyntaxKind.DotDotDotToken >=> DeclarationFileNodes.DotDotDotToken
+            Ts.SyntaxKind.EndOfFileToken >=> DeclarationFileNodes.EndOfFileToken
+            Ts.SyntaxKind.EnumDeclaration >=> DeclarationFileNodes.EnumDeclaration
+            Ts.SyntaxKind.EnumMember >=> DeclarationFileNodes.EnumMember
+            Ts.SyntaxKind.ExportAssignment >=> DeclarationFileNodes.ExportAssignment
+            Ts.SyntaxKind.ExportDeclaration >=> DeclarationFileNodes.ExportDeclaration
+            Ts.SyntaxKind.ExportKeyword >=> DeclarationFileNodes.ExportKeyword
+            Ts.SyntaxKind.ExportSpecifier >=> DeclarationFileNodes.ExportSpecifier
+            Ts.SyntaxKind.ExpressionWithTypeArguments >=> DeclarationFileNodes.ExpressionWithTypeArguments
+            Ts.SyntaxKind.FalseKeyword >=> DeclarationFileNodes.FalseKeyword
+            Ts.SyntaxKind.FunctionDeclaration >=> DeclarationFileNodes.FunctionDeclaration
+            Ts.SyntaxKind.FunctionType >=> DeclarationFileNodes.FunctionType
+            Ts.SyntaxKind.GetAccessor >=> DeclarationFileNodes.GetAccessor
+            Ts.SyntaxKind.HeritageClause >=> DeclarationFileNodes.HeritageClause
+            Ts.SyntaxKind.Identifier >=> DeclarationFileNodes.Identifier
+            Ts.SyntaxKind.ImportClause >=> DeclarationFileNodes.ImportClause
+            Ts.SyntaxKind.ImportDeclaration >=> DeclarationFileNodes.ImportDeclaration
+            Ts.SyntaxKind.ImportSpecifier >=> DeclarationFileNodes.ImportSpecifier
+            Ts.SyntaxKind.IndexSignature >=> DeclarationFileNodes.IndexSignature
+            Ts.SyntaxKind.IndexedAccessType >=> DeclarationFileNodes.IndexedAccessType
+            Ts.SyntaxKind.InferType >=> DeclarationFileNodes.InferType
+            Ts.SyntaxKind.InterfaceDeclaration >=> DeclarationFileNodes.InterfaceDeclaration
+            Ts.SyntaxKind.IntersectionType >=> DeclarationFileNodes.IntersectionType
+            Ts.SyntaxKind.IntrinsicKeyword >=> DeclarationFileNodes.IntrinsicKeyword
+            Ts.SyntaxKind.LiteralType >=> DeclarationFileNodes.LiteralType
+            Ts.SyntaxKind.MappedType >=> DeclarationFileNodes.MappedType
+            Ts.SyntaxKind.MethodDeclaration >=> DeclarationFileNodes.MethodDeclaration
+            Ts.SyntaxKind.MethodSignature >=> DeclarationFileNodes.MethodSignature
+            Ts.SyntaxKind.MinusToken >=> DeclarationFileNodes.MinusToken
+            Ts.SyntaxKind.ModuleBlock >=> DeclarationFileNodes.ModuleBlock
+            Ts.SyntaxKind.ModuleDeclaration >=> DeclarationFileNodes.ModuleDeclaration
+            Ts.SyntaxKind.NamedExports >=> DeclarationFileNodes.NamedExports
+            Ts.SyntaxKind.NamedImports >=> DeclarationFileNodes.NamedImports
+            Ts.SyntaxKind.NamedTupleMember >=> DeclarationFileNodes.NamedTupleMember
+            Ts.SyntaxKind.NamespaceImport >=> DeclarationFileNodes.NamespaceImport
+            Ts.SyntaxKind.NeverKeyword >=> DeclarationFileNodes.NeverKeyword
+            Ts.SyntaxKind.NullKeyword >=> DeclarationFileNodes.NullKeyword
+            Ts.SyntaxKind.NumberKeyword >=> DeclarationFileNodes.NumberKeyword
+            Ts.SyntaxKind.NumericLiteral >=> DeclarationFileNodes.NumericLiteral
+            Ts.SyntaxKind.ObjectKeyword >=> DeclarationFileNodes.ObjectKeyword
+            Ts.SyntaxKind.OverrideKeyword >=> DeclarationFileNodes.OverrideKeyword
+            Ts.SyntaxKind.Parameter >=> DeclarationFileNodes.Parameter
+            Ts.SyntaxKind.ParenthesizedType >=> DeclarationFileNodes.ParenthesizedType
+            Ts.SyntaxKind.PrefixUnaryExpression >=> DeclarationFileNodes.PrefixUnaryExpression
+            Ts.SyntaxKind.PrivateKeyword >=> DeclarationFileNodes.PrivateKeyword
+            Ts.SyntaxKind.PropertyAccessExpression >=> DeclarationFileNodes.PropertyAccessExpression
+            Ts.SyntaxKind.PropertyDeclaration >=> DeclarationFileNodes.PropertyDeclaration
+            Ts.SyntaxKind.PropertySignature >=> DeclarationFileNodes.PropertySignature
+            Ts.SyntaxKind.ProtectedKeyword >=> DeclarationFileNodes.ProtectedKeyword
+            Ts.SyntaxKind.QualifiedName >=> DeclarationFileNodes.QualifiedName
+            Ts.SyntaxKind.QuestionToken >=> DeclarationFileNodes.QuestionToken
+            Ts.SyntaxKind.ReadonlyKeyword >=> DeclarationFileNodes.ReadonlyKeyword
+            Ts.SyntaxKind.RestType >=> DeclarationFileNodes.RestType
+            Ts.SyntaxKind.SetAccessor >=> DeclarationFileNodes.SetAccessor
+            Ts.SyntaxKind.StaticKeyword >=> DeclarationFileNodes.StaticKeyword
+            Ts.SyntaxKind.StringKeyword >=> DeclarationFileNodes.StringKeyword
+            Ts.SyntaxKind.StringLiteral >=> DeclarationFileNodes.StringLiteral
+            Ts.SyntaxKind.SymbolKeyword >=> DeclarationFileNodes.SymbolKeyword
+            Ts.SyntaxKind.TemplateHead >=> DeclarationFileNodes.TemplateHead
+            Ts.SyntaxKind.TemplateLiteralType >=> DeclarationFileNodes.TemplateLiteralType
+            Ts.SyntaxKind.TemplateLiteralTypeSpan >=> DeclarationFileNodes.TemplateLiteralTypeSpan
+            Ts.SyntaxKind.TemplateMiddle >=> DeclarationFileNodes.TemplateMiddle
+            Ts.SyntaxKind.TemplateTail >=> DeclarationFileNodes.TemplateTail
+            Ts.SyntaxKind.ThisType >=> DeclarationFileNodes.ThisType
+            Ts.SyntaxKind.TrueKeyword >=> DeclarationFileNodes.TrueKeyword
+            Ts.SyntaxKind.TupleType >=> DeclarationFileNodes.TupleType
+            Ts.SyntaxKind.TypeAliasDeclaration >=> DeclarationFileNodes.TypeAliasDeclaration
+            Ts.SyntaxKind.TypeLiteral >=> DeclarationFileNodes.TypeLiteral
+            Ts.SyntaxKind.TypeOperator >=> DeclarationFileNodes.TypeOperator
+            Ts.SyntaxKind.TypeParameter >=> DeclarationFileNodes.TypeParameter
+            Ts.SyntaxKind.TypePredicate >=> DeclarationFileNodes.TypePredicate
+            Ts.SyntaxKind.TypeQuery >=> DeclarationFileNodes.TypeQuery
+            Ts.SyntaxKind.TypeReference >=> DeclarationFileNodes.TypeReference
+            Ts.SyntaxKind.UndefinedKeyword >=> DeclarationFileNodes.UndefinedKeyword
+            Ts.SyntaxKind.UnionType >=> DeclarationFileNodes.UnionType
+            Ts.SyntaxKind.UnknownKeyword >=> DeclarationFileNodes.UnknownKeyword
+            Ts.SyntaxKind.VariableDeclaration >=> DeclarationFileNodes.VariableDeclaration
+            Ts.SyntaxKind.VariableDeclarationList >=> DeclarationFileNodes.VariableDeclarationList
+            Ts.SyntaxKind.VariableStatement >=> DeclarationFileNodes.VariableStatement
+            Ts.SyntaxKind.VoidKeyword >=> DeclarationFileNodes.VoidKeyword
+            
+        ]
     let memberDeclarationKindSetMap: Dictionary<Ts.SyntaxKind, obj -> MemberDeclaration> =
         Dictionary [
             Ts.SyntaxKind.PropertySignature >=> MemberDeclaration.PropertySignature
@@ -52,12 +168,14 @@ module private Internal =
             Ts.SyntaxKind.ModuleDeclaration >=> TopLevelStatements.Module
             Ts.SyntaxKind.FunctionDeclaration >=> TopLevelStatements.Function
             Ts.SyntaxKind.ExportDeclaration >=> TopLevelStatements.ExportDeclaration
+            Ts.SyntaxKind.NamespaceExportDeclaration >=> TopLevelStatements.NamespaceExportDeclaration
             Ts.SyntaxKind.ImportEqualsDeclaration >=> TopLevelStatements.ImportEqualsDeclaration
             Ts.SyntaxKind.ImportDeclaration >=> TopLevelStatements.ImportDeclaration
             Ts.SyntaxKind.ExportAssignment >=> TopLevelStatements.ExportAssignment
         ]
     let topLevelExportDeclarations: Dictionary<Ts.SyntaxKind, obj -> TopLevelExportSymbolDeclarations> =
         Dictionary [
+            Ts.SyntaxKind.NamespaceExportDeclaration >=> TopLevelExportSymbolDeclarations.NamespaceExportDeclaration
             Ts.SyntaxKind.InterfaceDeclaration >=> TopLevelExportSymbolDeclarations.Interface
             Ts.SyntaxKind.TypeAliasDeclaration >=> TopLevelExportSymbolDeclarations.TypeAlias
             Ts.SyntaxKind.ClassDeclaration >=> TopLevelExportSymbolDeclarations.Class
@@ -303,7 +421,122 @@ module private Internal =
     let isModifier key = modifierSetMap.Keys |> Seq.contains key
     [<EditorBrowsable(EditorBrowsableState.Never)>]
     let isLiteralNode key = literalTokenNodeKindSet.Keys |> Seq.contains key
-
+[<RequireQualifiedAccess>]
+type DeclarationFileNodes =
+    | NoSubstitutionTemplateLiteral of Ts.NoSubstitutionTemplateLiteral
+    | OptionalType of Ts.OptionalTypeNode
+    | OutKeyword of Ts.OutKeyword
+    | PublicKeyword of Ts.PublicKeyword
+    | InKeyword of Ts.InKeyword
+    | ObjectBindingPattern of Ts.ObjectBindingPattern
+    | AssertsKeyword of Ts.AssertsKeyword
+    | AbstractKeyword of Ts.AbstractKeyword
+    | AnyKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | ArrayBindingPattern of Ts.ArrayBindingPattern
+    | ArrayType of Ts.ArrayTypeNode
+    | BigIntKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | BindingElement of Ts.BindingElement
+    | BooleanKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | CallSignature of Ts.CallSignatureDeclaration
+    | ClassDeclaration of Ts.ClassDeclaration
+    | ComputedPropertyName of Ts.ComputedPropertyName
+    | ConditionalType of Ts.ConditionalTypeNode
+    | ConstKeyword of Ts.ConstKeyword
+    | ConstructSignature of Ts.ConstructSignatureDeclaration
+    | Constructor of Ts.ConstructorDeclaration
+    | ConstructorType of Ts.ConstructorTypeNode
+    | DeclareKeyword of Ts.DeclareKeyword
+    | DefaultKeyword of Ts.DefaultKeyword
+    | DotDotDotToken of Ts.DotDotDotToken
+    | EndOfFileToken of Ts.EndOfFileToken
+    | EnumDeclaration of Ts.EnumDeclaration
+    | EnumMember of Ts.EnumMember
+    | ExportAssignment of Ts.ExportAssignment
+    | ExportDeclaration of Ts.ExportDeclaration
+    | ExportKeyword of Ts.ExportKeyword
+    | ExportSpecifier of Ts.ExportSpecifier
+    | ExpressionWithTypeArguments of Ts.ExpressionWithTypeArguments
+    | FalseKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | FunctionDeclaration of Ts.FunctionDeclaration
+    | FunctionType of Ts.FunctionTypeNode
+    | GetAccessor of Ts.GetAccessorDeclaration
+    | HeritageClause of Ts.HeritageClause
+    | IndexSignature of Ts.IndexSignatureDeclaration
+    | IndexedAccessType of Ts.IndexedAccessTypeNode
+    | InferType of Ts.InferTypeNode
+    | InterfaceDeclaration of Ts.InterfaceDeclaration
+    | IntersectionType of Ts.IntersectionTypeNode
+    | IntrinsicKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | LiteralType of Ts.LiteralTypeNode
+    | MappedType of Ts.MappedTypeNode
+    | MethodDeclaration of Ts.MethodDeclaration
+    | MethodSignature of Ts.MethodSignature
+    | MinusToken of Ts.MinusToken
+    | ModuleBlock of Ts.ModuleBlock
+    | ModuleDeclaration of Ts.ModuleDeclaration
+    | NamedTupleMember of Ts.NamedTupleMember
+    | NeverKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | NullKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | NumberKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | NumericLiteral of Ts.NumericLiteral
+    | ObjectKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | OverrideKeyword of Ts.OverrideKeyword
+    | Parameter of Ts.ParameterDeclaration
+    | ParenthesizedType of Ts.ParenthesizedTypeNode
+    | PrefixUnaryExpression of Ts.PrefixUnaryExpression
+    | PrivateKeyword of Ts.PrivateKeyword
+    | PropertyAccessExpression of Ts.PropertyAccessExpression
+    | PropertyDeclaration of Ts.PropertyDeclaration
+    | PropertySignature of Ts.PropertySignature
+    | ProtectedKeyword of Ts.ProtectedKeyword
+    | QuestionToken of Ts.QuestionToken
+    | ReadonlyKeyword of Ts.ReadonlyKeyword
+    | RestType of Ts.RestTypeNode
+    | SetAccessor of Ts.SetAccessorDeclaration
+    | StaticKeyword of Ts.StaticKeyword
+    | StringKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | StringLiteral of Ts.StringLiteral
+    | SymbolKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | TemplateHead of Ts.TemplateHead
+    | TemplateLiteralType of Ts.TemplateLiteralTypeNode
+    | TemplateLiteralTypeSpan of Ts.TemplateLiteralTypeSpan
+    | TemplateMiddle of Ts.TemplateMiddle
+    | TemplateTail of Ts.TemplateTail
+    | ThisType of Ts.ThisTypeNode
+    | TrueKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | TupleType of Ts.TupleTypeNode
+    | TypeAliasDeclaration of Ts.TypeAliasDeclaration
+    | TypeLiteral of Ts.TypeLiteralNode
+    | TypeOperator of Ts.TypeOperatorNode
+    | TypeParameter of Ts.TypeParameterDeclaration
+    | TypePredicate of Ts.TypePredicateNode
+    | TypeQuery of Ts.TypeQueryNode
+    | TypeReference of Ts.TypeReference
+    | UndefinedKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | UnionType of Ts.UnionType
+    | UnknownKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | VariableDeclaration of Ts.VariableDeclaration
+    | VariableDeclarationList of Ts.VariableDeclarationList
+    | VariableStatement of Ts.VariableStatement
+    | VoidKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | BigIntLiteral of Ts.BigIntLiteral
+    
+    | PrivateIdentifier of Ts.PrivateIdentifier
+    | Identifier of Ts.Identifier
+    | QualifiedName of Ts.QualifiedName
+    | ExternalModuleReference of Ts.ExternalModuleReference
+    
+    | NamespaceExportDeclaration of Ts.NamespaceExportDeclaration
+    | ImportClause of Ts.ImportClause
+    | ImportDeclaration of Ts.ImportDeclaration
+    | ImportSpecifier of Ts.ImportSpecifier
+    | NamespaceImport of Ts.NamespaceImport
+    | NamedExports of Ts.NamedExports
+    | NamedImports of Ts.NamedImports
+    | ImportEqualsDeclaration of Ts.ImportEqualsDeclaration
+    | ImportType of Ts.ImportTypeNode
+    | NamespaceExport of Ts.NamespaceExport
+    
 [<RequireQualifiedAccess>]
 type MemberDeclaration =
     /// <summary>
@@ -557,6 +790,7 @@ type TopLevelStatements =
     | VariableDeclaration of Ts.VariableDeclaration
     | Function of Ts.FunctionDeclaration
     | ExportDeclaration of Ts.ExportDeclaration
+    | NamespaceExportDeclaration of Ts.NamespaceExportDeclaration
     | ImportDeclaration of Ts.ImportDeclaration
     | ImportEqualsDeclaration of Ts.ImportEqualsDeclaration
     | ExportAssignment of Ts.ExportAssignment
@@ -564,6 +798,7 @@ type TopLevelStatements =
 
 [<RequireQualifiedAccess>]
 type TopLevelExportSymbolDeclarations =
+    | NamespaceExportDeclaration of Ts.NamespaceExportDeclaration
     | Interface of Ts.InterfaceDeclaration
     | TypeAlias of Ts.TypeAliasDeclaration
     | Class of Ts.ClassDeclaration
@@ -1736,6 +1971,11 @@ type TopLevelLocalSymbolDeclarations with
         this.Value
         |> ModulesAndExports.Create
         |> ValueSome
+type DeclarationFileNodes with
+    member inline this.Value: Ts.Node = emitJsExpr this "$0.fields[0]"
+    static member IsKnownDeclarationFileNodeKind(decl: Ts.Node) = Internal.declarationFileNodes.ContainsKey decl.kind
+    static member IsKnownDeclarationFileNodeSyntaxKind (syntaxKind: Ts.SyntaxKind) = Internal.declarationFileNodes.ContainsKey syntaxKind
+    static member Create(decl: Ts.Node) = Internal.declarationFileNodes[decl.kind] decl
 type TypeNode with
     /// <summary>
     /// Optimised for performance, emits immediate access to the underlying value

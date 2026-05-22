@@ -3,11 +3,13 @@
 
 module Program
 
+open System.Collections.Generic
 open Fable.Mocha
 open EasyBuild.FileSystemProvider
 open TypeScript
 open Fable.Core.JsInterop
 open Xantham.Fable
+open Fable.Core
 
 type This = AbsoluteFileSystem<__SOURCE_DIRECTORY__>
 // If the file system doesn't compile, then it's because the test fixtures haven't
@@ -319,6 +321,116 @@ let makeTestSeries name file = testList name [
                     |> funApply $"Expected a top level statement kind, but got {statement.kind.Name} instead."
                 )
     ]
+    testList "Node invariants" [
+        let nodeMap = Dictionary<Ts.SyntaxKind, ResizeArray<obj>>()
+        let rec crawl = fun node ->
+            ts.forEachChild(node, fun node ->
+            match nodeMap.TryGetValue(node.kind) with
+            | true, nodes -> nodes.Add(node)
+            | _ -> nodeMap[node.kind] <- ResizeArray [ box node ]
+            crawl node
+            JS.undefined
+            ) |> ignore
+        program.getSourceFiles().AsArray
+        |> Array.iter crawl
+        let inline getNodes syntaxKind: 'T array =
+            match nodeMap.TryGetValue(syntaxKind) with
+            | true, values -> unbox values.AsArray
+            | _ -> [||]
+        let inline testIfNodes syntaxKind name test =
+            if nodeMap.ContainsKey(syntaxKind) && nodeMap[syntaxKind].AsArray.Length > 0 then
+                testCase name test
+            else
+                ptestCase $"SKIPPED: No values to test against | %s{name}" test
+        testIfNodes Ts.SyntaxKind.NumericLiteral "Numeric Literals are all parsable" <| fun _ ->
+            (getNodes Ts.SyntaxKind.NumericLiteral : Ts.NumericLiteral array)
+            |> Array.iter (
+                _.text
+                >> JS.Constructors.Number.parseFloat
+                >> function
+                    | value when jsTypeof value = "number" -> ()
+                    | value -> failtest $"Unrecognised numeric literal: %A{value}"
+                )
+        testIfNodes Ts.SyntaxKind.BigIntLiteral "BigInt Literals are all parsable" <| fun _ ->
+            (getNodes Ts.SyntaxKind.BigIntLiteral : Ts.BigIntLiteral array)
+            |> Array.iter (
+                _.text
+                >> _.TrimEnd('n')
+                >> System.Numerics.BigInteger.Parse
+                >> ignore
+                )
+            
+        testIfNodes Ts.SyntaxKind.StringLiteral "String Literals all have valid string values" <| fun _ ->
+            (getNodes Ts.SyntaxKind.StringLiteral : Ts.StringLiteral array)
+            |> Array.iter (
+                _.text
+                >> function
+                    | Null -> failtest "String literal should not be null"
+                    | "" -> Expect.passWithMsg "Empty string literals are valid"
+                    | _ -> ()
+                )
+        testIfNodes Ts.SyntaxKind.NoSubstitutionTemplateLiteral "NoSubstitutionTemplateLiteral values are valid" <| fun _ ->
+            (getNodes Ts.SyntaxKind.NoSubstitutionTemplateLiteral : Ts.NoSubstitutionTemplateLiteral array)
+            |> Array.iter (
+                _.text
+                >> function
+                    | Null -> failtest "String literal should not be null"
+                    | "" -> Expect.passWithMsg "Empty string literals are valid"
+                    | _ -> ()
+                )
+        testIfNodes Ts.SyntaxKind.PrefixUnaryExpression "PrefixUnaryExpression Operators values are predictable" <| fun _ ->
+            (getNodes Ts.SyntaxKind.PrefixUnaryExpression : Ts.PrefixUnaryExpression array)
+            |> Array.iter (
+                _.operator
+                >> function
+                    | Ts.PrefixUnaryOperator.MinusToken -> Expect.passWithMsg "MinusToken is only expected PrefixUnaryOperator in d.ts files"
+                    | Ts.PrefixUnaryOperator.PlusPlusToken 
+                    | Ts.PrefixUnaryOperator.PlusToken 
+                    | Ts.PrefixUnaryOperator.MinusMinusToken 
+                    | Ts.PrefixUnaryOperator.TildeToken 
+                    | Ts.PrefixUnaryOperator.ExclamationToken as value -> failtest $"Unexpected PrefixUnaryOperator.{value.Name} in d.ts"
+                    | value -> failtest $"Received an invalid/unknown PrefixUnaryOperator kind: {value.Name}" 
+                )
+        testIfNodes Ts.SyntaxKind.PrefixUnaryExpression "PrefixUnaryExpression Operand values are all numeric literals" <| fun _ ->
+            (getNodes Ts.SyntaxKind.PrefixUnaryExpression : Ts.PrefixUnaryExpression array)
+            |> Array.iter (
+                _.operand
+                >> function
+                    | Patterns.SyntaxKind.NumericLiteral _ -> ()
+                    | value -> failtest $"Received an invalid/unknown PostfixUnaryExpression operand kind: %s{value.kind.Name}" 
+                )
+        testIfNodes Ts.SyntaxKind.LiteralType "LiteralTypeNode _.literal values are parsed predictably" <| fun _ ->
+            (getNodes Ts.SyntaxKind.LiteralType : Ts.LiteralTypeNode array)
+            |> Array.iter (
+                _.literal
+                >> unbox
+                >> function
+                    | Patterns.SyntaxKind.NullKeyword _
+                    | Patterns.SyntaxKind.FalseKeyword _
+                    | Patterns.SyntaxKind.TrueKeyword _
+                    | Patterns.Node.NumericLiteral _
+                    | Patterns.Node.StringLiteral _
+                    | Patterns.Node.BigIntLiteral _
+                    | Patterns.Node.NoSubstitutionTemplateLiteral _ -> ()
+                    | Patterns.Node.PrefixUnaryExpression _ -> ()
+                    | node -> failtest $"Unrecognised literal for LiteralTypeNode: %s{node.kind.Name}"
+                )
+        testCase "DeclarationFiles have a narrowed subset of valid nodes" <| fun _ ->
+            nodeMap.Keys
+            |> Seq.distinct
+            |> Seq.sortBy _.Name
+            |> Seq.iter (function
+                | value when DeclarationFileNodes.IsKnownDeclarationFileNodeSyntaxKind value -> ()
+                | value -> failtest $"Unexpected node kind in a declaration file: %s{value.Name}"
+                )
+        // testIfNodes Ts.SyntaxKind.ImportSpecifier "ImportSpecifier" <| fun _ ->
+        //     (getNodes Ts.SyntaxKind.ImportSpecifier : Ts.ImportSpecifier array)
+        //     |> Array.iter (
+        //         _.propertyName
+        //         >> Expect.isSome
+        //         >> funApply ""
+        //         )
+    ]
 ]
 
 [
@@ -333,6 +445,14 @@ let makeTestSeries name file = testList name [
     "agents", TestFixtures.agents.node_modules.agents.dist.``index.d.ts``
     "@types/three", TestFixtures.``@types``.three.node_modules.``@types``.three.``index.d.ts``
     "solid-js", TestFixtures.``solid-js``.node_modules.``solid-js``.types.``index.d.ts``
+    "@types/d3", TestFixtures.``@types``.d3.node_modules.``@types``.d3.``index.d.ts``
+    "@types/node", TestFixtures.``@types``.node.node_modules.``@types``.node.``index.d.ts``
+    "@types/semver", TestFixtures.``@types``.semver.node_modules.``@types``.semver.``index.d.ts``
+    "ansi-regex", TestFixtures.``ansi-regex``.node_modules.``ansi-regex``.``index.d.ts``
+    "type-fest", TestFixtures.``type-fest``.node_modules.``type-fest``.``index.d.ts``
+    "@types/lodash", TestFixtures.``@types``.lodash.node_modules.``@types``.lodash.``index.d.ts``
+    "anime", TestFixtures.animejs.node_modules.animejs.dist.modules.``index.d.ts``
+    "typescript", TestFixtures.typescript.node_modules.typescript.lib.``typescript.d.ts``
 ]
 |> List.unzip
 ||> List.map2 makeTestSeries

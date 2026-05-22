@@ -61,10 +61,17 @@ let replaceSymbol fixture = String.replace "_FIXTURE_NAME_" fixture.Name
     let createCloudFlare = sprintf "@cloudflare/%s" >> create
     
     create "agents"
-    
     create "solid-js"
+    create "ansi-regex"
+    create "type-fest"
+    create "animejs"
+    create "typescript"
     
     createTypes "three"
+    createTypes "d3"
+    createTypes "node"
+    createTypes "semver"
+    createTypes "lodash"
     
     createCloudFlare "workers-types"
     createCloudFlare "dynamic-workflows"
