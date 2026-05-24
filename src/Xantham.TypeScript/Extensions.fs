@@ -38,12 +38,6 @@ type Ts.SourceFile with
 type Ts.Type with
     [<EmitProperty "id">]
     member inline this.id: int = jsNative
-type Ts.Node with
-    [<EmitProperty "id">]
-    member inline this.id: int = jsNative
-type Ts.Symbol with
-    [<EmitProperty "id">]
-    member inline this.id: int = jsNative
 
 type TypeMapKind =
     | Simple = 0
@@ -84,6 +78,18 @@ type ReverseMappedType =
     abstract source: Ts.Type
     abstract mappedType: MappedType
     abstract constraintType: Ts.IndexType
+
+type WalkerResult =
+    abstract visitTypes: Ts.Type array
+    abstract visitedSymbols: Ts.Symbol array
+
+type SymbolWalker =
+    abstract walkType: Ts.Type -> WalkerResult
+    abstract walkSymbol: Ts.Symbol -> WalkerResult
+
+type Ts.TypeChecker with
+    member inline this.isLibType(``type``: Ts.Type): bool = JS.undefined
+    member inline this.getSymbolWalker(?accept: Ts.Symbol -> bool): SymbolWalker = JS.undefined
 
 /// <summary>
 /// Type safe representation of <c>ts.__String</c>
@@ -160,6 +166,21 @@ type ModuleSpecifierResult =
 type Ts.IExports with
     [<Import("moduleSpecifiers.getModuleSpecifiersWithCacheInfo", "typescript")>]
     static member inline private getModuleSpecifiersWithCacheInfo(moduleSymbol: Ts.Symbol, checker: Ts.TypeChecker, compilerOptions: Ts.CompilerOptions, importingSourceFile: ^T when ^T:(member path: string) and ^T:(member fileName: string), host: Ts.Program, userPreferences: Ts.UserPreferences, options: objnull, forAutoImport: bool): ModuleSpecifierResult = jsNative
+    /// <summary>
+    /// Retrieve node unique identifier
+    /// </summary>
+    [<EmitMethod "getNodeId">]
+    member inline this.getNodeId(node: Ts.Node): int = jsNative
+    /// <summary>
+    /// Retrieve symbol unique identifier
+    /// </summary>
+    [<EmitMethod "getSymbolId">]
+    member inline this.getSymbolId(symbol: Ts.Symbol): int = jsNative
+    /// <summary>
+    /// Determine if symbol is transient (no declarations would be present)
+    /// </summary>
+    [<EmitMethod "isTransientSymbol">]
+    member inline this.isTransientSymbol(symbol: Ts.Symbol): bool = jsNative
     
 type Ts.CompilerOptions with
     static member Default = jsOptions<Ts.CompilerOptions> <| fun opt ->
@@ -259,7 +280,7 @@ type Ts.Program with
             else Node.Api.path.dirname path |> tryAncestor
         tryAncestor (Node.Api.path.dirname path)
     member this.GetClosestAncestorPackageJson fn path = Ts.Program.GetClosestAncestorPackageJson fn path
-        
+
 type Ts.SourceFile with
     /// <summary>
     /// If the source file is linked to a <c>packageJsonScope</c> by the compiler, then

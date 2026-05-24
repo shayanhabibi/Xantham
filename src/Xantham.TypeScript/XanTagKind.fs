@@ -423,109 +423,115 @@ module private Internal =
     let isLiteralNode key = literalTokenNodeKindSet.Keys |> Seq.contains key
 [<RequireQualifiedAccess>]
 type DeclarationFileNodes =
-    | NoSubstitutionTemplateLiteral of Ts.NoSubstitutionTemplateLiteral
-    | OptionalType of Ts.OptionalTypeNode
-    | OutKeyword of Ts.OutKeyword
-    | PublicKeyword of Ts.PublicKeyword
-    | InKeyword of Ts.InKeyword
-    | ObjectBindingPattern of Ts.ObjectBindingPattern
+    // Keywords
     | AssertsKeyword of Ts.AssertsKeyword
     | AbstractKeyword of Ts.AbstractKeyword
     | AnyKeyword of Ts.KeywordToken<Ts.SyntaxKind>
-    | ArrayBindingPattern of Ts.ArrayBindingPattern
-    | ArrayType of Ts.ArrayTypeNode
+    | OutKeyword of Ts.OutKeyword
+    | PublicKeyword of Ts.PublicKeyword
+    | InKeyword of Ts.InKeyword
     | BigIntKeyword of Ts.KeywordToken<Ts.SyntaxKind>
-    | BindingElement of Ts.BindingElement
     | BooleanKeyword of Ts.KeywordToken<Ts.SyntaxKind>
-    | CallSignature of Ts.CallSignatureDeclaration
-    | ClassDeclaration of Ts.ClassDeclaration
-    | ComputedPropertyName of Ts.ComputedPropertyName
-    | ConditionalType of Ts.ConditionalTypeNode
-    | ConstKeyword of Ts.ConstKeyword
-    | ConstructSignature of Ts.ConstructSignatureDeclaration
-    | Constructor of Ts.ConstructorDeclaration
-    | ConstructorType of Ts.ConstructorTypeNode
     | DeclareKeyword of Ts.DeclareKeyword
     | DefaultKeyword of Ts.DefaultKeyword
-    | DotDotDotToken of Ts.DotDotDotToken
-    | EndOfFileToken of Ts.EndOfFileToken
-    | EnumDeclaration of Ts.EnumDeclaration
-    | EnumMember of Ts.EnumMember
-    | ExportAssignment of Ts.ExportAssignment
-    | ExportDeclaration of Ts.ExportDeclaration
+    | ConstKeyword of Ts.ConstKeyword
     | ExportKeyword of Ts.ExportKeyword
-    | ExportSpecifier of Ts.ExportSpecifier
-    | ExpressionWithTypeArguments of Ts.ExpressionWithTypeArguments
-    | FalseKeyword of Ts.KeywordToken<Ts.SyntaxKind>
-    | FunctionDeclaration of Ts.FunctionDeclaration
-    | FunctionType of Ts.FunctionTypeNode
-    | GetAccessor of Ts.GetAccessorDeclaration
-    | HeritageClause of Ts.HeritageClause
-    | IndexSignature of Ts.IndexSignatureDeclaration
-    | IndexedAccessType of Ts.IndexedAccessTypeNode
-    | InferType of Ts.InferTypeNode
-    | InterfaceDeclaration of Ts.InterfaceDeclaration
-    | IntersectionType of Ts.IntersectionTypeNode
     | IntrinsicKeyword of Ts.KeywordToken<Ts.SyntaxKind>
-    | LiteralType of Ts.LiteralTypeNode
-    | MappedType of Ts.MappedTypeNode
-    | MethodDeclaration of Ts.MethodDeclaration
-    | MethodSignature of Ts.MethodSignature
-    | MinusToken of Ts.MinusToken
-    | ModuleBlock of Ts.ModuleBlock
-    | ModuleDeclaration of Ts.ModuleDeclaration
-    | NamedTupleMember of Ts.NamedTupleMember
+    | TrueKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | ReadonlyKeyword of Ts.ReadonlyKeyword
+    | FalseKeyword of Ts.KeywordToken<Ts.SyntaxKind>
     | NeverKeyword of Ts.KeywordToken<Ts.SyntaxKind>
     | NullKeyword of Ts.KeywordToken<Ts.SyntaxKind>
     | NumberKeyword of Ts.KeywordToken<Ts.SyntaxKind>
-    | NumericLiteral of Ts.NumericLiteral
     | ObjectKeyword of Ts.KeywordToken<Ts.SyntaxKind>
     | OverrideKeyword of Ts.OverrideKeyword
-    | Parameter of Ts.ParameterDeclaration
-    | ParenthesizedType of Ts.ParenthesizedTypeNode
-    | PrefixUnaryExpression of Ts.PrefixUnaryExpression
     | PrivateKeyword of Ts.PrivateKeyword
-    | PropertyAccessExpression of Ts.PropertyAccessExpression
-    | PropertyDeclaration of Ts.PropertyDeclaration
-    | PropertySignature of Ts.PropertySignature
     | ProtectedKeyword of Ts.ProtectedKeyword
-    | QuestionToken of Ts.QuestionToken
-    | ReadonlyKeyword of Ts.ReadonlyKeyword
-    | RestType of Ts.RestTypeNode
-    | SetAccessor of Ts.SetAccessorDeclaration
     | StaticKeyword of Ts.StaticKeyword
     | StringKeyword of Ts.KeywordToken<Ts.SyntaxKind>
-    | StringLiteral of Ts.StringLiteral
     | SymbolKeyword of Ts.KeywordToken<Ts.SyntaxKind>
-    | TemplateHead of Ts.TemplateHead
-    | TemplateLiteralType of Ts.TemplateLiteralTypeNode
-    | TemplateLiteralTypeSpan of Ts.TemplateLiteralTypeSpan
-    | TemplateMiddle of Ts.TemplateMiddle
-    | TemplateTail of Ts.TemplateTail
+    | UndefinedKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | UnknownKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | VoidKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    // Other tokens
+    | DotDotDotToken of Ts.DotDotDotToken
+    | EndOfFileToken of Ts.EndOfFileToken
+    | MinusToken of Ts.MinusToken
+    | QuestionToken of Ts.QuestionToken
+    // Type nodes
+    | OptionalType of Ts.OptionalTypeNode
+    | ArrayType of Ts.ArrayTypeNode
+    | ConditionalType of Ts.ConditionalTypeNode
+    | FunctionType of Ts.FunctionTypeNode
+    | ConstructorType of Ts.ConstructorTypeNode
+    | IndexedAccessType of Ts.IndexedAccessTypeNode
+    | InferType of Ts.InferTypeNode
+    | IntersectionType of Ts.IntersectionTypeNode
+    | LiteralType of Ts.LiteralTypeNode
+    | MappedType of Ts.MappedTypeNode
+    | ParenthesizedType of Ts.ParenthesizedTypeNode
     | ThisType of Ts.ThisTypeNode
-    | TrueKeyword of Ts.KeywordToken<Ts.SyntaxKind>
     | TupleType of Ts.TupleTypeNode
-    | TypeAliasDeclaration of Ts.TypeAliasDeclaration
     | TypeLiteral of Ts.TypeLiteralNode
     | TypeOperator of Ts.TypeOperatorNode
-    | TypeParameter of Ts.TypeParameterDeclaration
     | TypePredicate of Ts.TypePredicateNode
+    | TemplateLiteralType of Ts.TemplateLiteralTypeNode
     | TypeQuery of Ts.TypeQueryNode
     | TypeReference of Ts.TypeReferenceNode
-    | UndefinedKeyword of Ts.KeywordToken<Ts.SyntaxKind>
     | UnionType of Ts.UnionTypeNode
-    | UnknownKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    // Literals
+    | StringLiteral of Ts.StringLiteral
+    | NoSubstitutionTemplateLiteral of Ts.NoSubstitutionTemplateLiteral
+    | ObjectBindingPattern of Ts.ObjectBindingPattern
+    | ArrayBindingPattern of Ts.ArrayBindingPattern
+    | BindingElement of Ts.BindingElement
+    // Top Declarations
+    | ClassDeclaration of Ts.ClassDeclaration
+    | EnumDeclaration of Ts.EnumDeclaration
+    | FunctionDeclaration of Ts.FunctionDeclaration
+    | InterfaceDeclaration of Ts.InterfaceDeclaration
+    | TypeAliasDeclaration of Ts.TypeAliasDeclaration
     | VariableDeclaration of Ts.VariableDeclaration
     | VariableDeclarationList of Ts.VariableDeclarationList
     | VariableStatement of Ts.VariableStatement
-    | VoidKeyword of Ts.KeywordToken<Ts.SyntaxKind>
+    | ModuleDeclaration of Ts.ModuleDeclaration
+    // Members
+    | CallSignature of Ts.CallSignatureDeclaration
+    | ConstructSignature of Ts.ConstructSignatureDeclaration
+    | Constructor of Ts.ConstructorDeclaration
+    | EnumMember of Ts.EnumMember
+    | GetAccessor of Ts.GetAccessorDeclaration
+    | TypeParameter of Ts.TypeParameterDeclaration
+    | IndexSignature of Ts.IndexSignatureDeclaration
+    | MethodDeclaration of Ts.MethodDeclaration
+    | MethodSignature of Ts.MethodSignature
+    | ModuleBlock of Ts.ModuleBlock
+    | NumericLiteral of Ts.NumericLiteral
+    | ComputedPropertyName of Ts.ComputedPropertyName
+    | NamedTupleMember of Ts.NamedTupleMember
+    | Parameter of Ts.ParameterDeclaration
+    | HeritageClause of Ts.HeritageClause
+    | PrefixUnaryExpression of Ts.PrefixUnaryExpression
+    | PropertyAccessExpression of Ts.PropertyAccessExpression
+    | PropertyDeclaration of Ts.PropertyDeclaration
+    | PropertySignature of Ts.PropertySignature
+    | RestType of Ts.RestTypeNode
+    | SetAccessor of Ts.SetAccessorDeclaration
+    | TemplateHead of Ts.TemplateHead
+    | TemplateLiteralTypeSpan of Ts.TemplateLiteralTypeSpan
+    | TemplateMiddle of Ts.TemplateMiddle
+    | TemplateTail of Ts.TemplateTail
     | BigIntLiteral of Ts.BigIntLiteral
+    | ExpressionWithTypeArguments of Ts.ExpressionWithTypeArguments
     
     | PrivateIdentifier of Ts.PrivateIdentifier
     | Identifier of Ts.Identifier
     | QualifiedName of Ts.QualifiedName
-    | ExternalModuleReference of Ts.ExternalModuleReference
     
+    | ExternalModuleReference of Ts.ExternalModuleReference
+    | ExportAssignment of Ts.ExportAssignment
+    | ExportDeclaration of Ts.ExportDeclaration
+    | ExportSpecifier of Ts.ExportSpecifier
     | NamespaceExportDeclaration of Ts.NamespaceExportDeclaration
     | ImportClause of Ts.ImportClause
     | ImportDeclaration of Ts.ImportDeclaration
@@ -2298,6 +2304,10 @@ module Symbols =
     let typeCheckerSigil = SymbolTypeKey.create<Ts.TypeChecker> "TypeChecker"
     let methodSignatureTypeSigil = SymbolTypeKey.create<Ts.ObjectType> "MethodSignatureType"
 
+module SymbolsHelper =
+    let stampChecker (value: Ts.TypeChecker) o  = SymbolTypeKey.set Symbols.typeCheckerSigil value  o
+    let getChecker (value: 'T): Ts.TypeChecker = SymbolTypeKey.unsafeAccess Symbols.typeCheckerSigil value
+
 [<Interface>]
 type IMethod = interface end
 type IMethod with
@@ -2327,6 +2337,53 @@ type MethodDeclaration with
     static member Create = IMethod.Create<Ts.MethodDeclaration, MethodDeclaration>
     member inline this.Value = (this :> IMethod).Value<Ts.MethodDeclaration, Ts.MethodSignature>()
 
+type TypeReferenceNode =
+    {
+        Node: Ts.TypeReferenceNode
+        TargetSymbol: Ts.Symbol
+    }
+    static member Create (typeChecker: Ts.TypeChecker) (typeReferenceNode: Ts.TypeReferenceNode) =
+        {
+            Node = typeReferenceNode
+            TargetSymbol =
+                typeChecker.getSymbolAtLocation !!typeReferenceNode.typeName
+                |> Option.defaultWith(fun () -> failwith "Could not find symbol for type reference node")
+        }
+        
+
+// type KeyOfTypeNode = {
+//     
+// }
+
+type KeyOfTypeNode =
+    | Bounded of string list
+    | Unbounded of string list
+    | Generic
+    | ConstrainedGeneric
+    // static member Create (typeChecker: Ts.TypeChecker) (node: Ts.TypeNode) =
+    //     let targetType = typeChecker.getTypeFromTypeNode node
+    //     let props =
+    //         typeChecker.getPropertiesOfType targetType
+    //         |> _.AsArray
+    //         |> Array.map _.symbolName
+    //         |> Array.choose (function SymbolName.String value -> Some value | _ -> None)
+    //     let isIndexer = typeChecker.getIndexInfosOfType targetType |> _.AsArray |> Array.isEmpty |> not
+
+type TypeOperatorNode =
+    | KeyOf of Ts.TypeNode
+    | Readonly of Ts.TypeNode
+    | Unique of Ts.TypeNode
+    member inline this.TypeChecker = SymbolTypeKey.unsafeAccess Symbols.typeCheckerSigil this
+    member inline this.Value = emitJsExpr this "$0.fields[0]"
+    static member Create typeChecker (typeOperatorNode: Ts.TypeOperatorNode) =
+        SymbolTypeKey.accessOrInit Symbols.typeCheckerSigil (fun () -> typeChecker) typeOperatorNode
+        |> ignore
+        match typeOperatorNode.operator with
+        | Ts.SyntaxKind.KeyOfKeyword -> KeyOf typeOperatorNode.``type``
+        | Ts.SyntaxKind.ReadonlyKeyword -> Readonly typeOperatorNode.``type``
+        | Ts.SyntaxKind.UniqueKeyword -> Unique typeOperatorNode.``type``
+        | _ -> failwithf "Unknown TypeOperatorNode operator %A" typeOperatorNode.operator
+        
 
 type Script = {
     Source: Ts.SourceFile
@@ -2349,10 +2406,10 @@ type Ts.Symbol with
     member this.symbolName = SymbolTypeKey.accessOrInit symbolNameSigil (fun () -> SymbolName.Create this.escapedName) this
 
 type Script with
-    member inline this.Id = this.Source.id
+    member inline this.Id = ts.getNodeId this.Source
 type ExternalModule with
-    member inline this.SymbolId = this.Symbol.id
-    member inline this.Id = this.Source.id
+    member inline this.SymbolId = ts.getSymbolId this.Symbol
+    member inline this.Id = ts.getNodeId this.Source
 
 module NonEmptyArray =
     let inline create (values: 'T array) =

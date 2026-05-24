@@ -81,6 +81,7 @@
     <File Path="package.json" />
     <File Path="README.md" />
   </Folder>
+  <Folder Name="/scripts/" />
 <!--    ===================    -->
   <Folder Name="/src/">
     <Project Path="src/Xantham.Common/Xantham.Common.fsproj" />
@@ -91,6 +92,7 @@
     <Project Path="src/Xantham.Fable.Core/Xantham.Fable.Core.fsproj" />
     <Project Path="src/Xantham.Fable.Utils/Xantham.Fable.Utils.fsproj" />
     <Project Path="src/Xantham.Fable/Xantham.Fable.fsproj" />
+    <Project Path="src/Xantham.Mocha/Xantham.Mocha.fsproj" />
     <Project Path="src/Xantham.TypeScript/Xantham.TypeScript.fsproj" />
   </Folder>
   <Folder Name="/tests/">
