@@ -143,26 +143,39 @@ module Runtime =
 
 [<AutoOpen>]
 module Test =
-    let inline testSuite name f: Suite = Mocha.describe name f 
-    let inline ptestSuite name f: Suite = Mocha.describeSkip name f 
-    let inline ftestSuite name f: Suite = Mocha.describeOnly name f 
+    let inline testSuite name f = Mocha.describe name f |> ignore
+    let inline ptestSuite name f = Mocha.describeSkip name f |> ignore
+    let inline ftestSuite name f = Mocha.describeOnly name f |> ignore
     let inline beforeTests name f: unit = Mocha.before name f |> ignore
     let inline beforeEachTests name f: unit = Mocha.beforeEach name f |> ignore
     let inline afterTests name f: unit = Mocha.after name f |> ignore
     let inline afterEachTests name f : unit = Mocha.afterEach name f |> ignore
-    let inline testCase name f: Test = Mocha.it name f 
-    let inline ptestCase name f: Test = Mocha.itSkip name f 
-    let inline ftestCase name f: Test = Mocha.itOnly name f 
+    let inline testCase name f = Mocha.it name f |> ignore
+    let inline ptestCase name f = Mocha.itSkip name f |> ignore
+    let inline ftestCase name f = Mocha.itOnly name f |> ignore
     let inline failtest msg = failwith msg
     let inline failtestf fmt msg = failwithf fmt msg
-    let inline testList name (tests: Test list): Test =
-        testSuite name <| fun suite ->
-            for test in tests do
-                if test.``type`` |> Option.ofObj |> Option.exists ((=) "test") then
-                    suite.addTest(test)
-                else suite.addSuite(unbox test)
-                |> ignore
-        |> unbox<Test>
+    module Expecto =
+        let inline testSuite name f: Suite = Mocha.describe name f 
+        let inline ptestSuite name f: Suite = Mocha.describeSkip name f 
+        let inline ftestSuite name f: Suite = Mocha.describeOnly name f 
+        let inline beforeTests name f: unit = Mocha.before name f |> ignore
+        let inline beforeEachTests name f: unit = Mocha.beforeEach name f |> ignore
+        let inline afterTests name f: unit = Mocha.after name f |> ignore
+        let inline afterEachTests name f : unit = Mocha.afterEach name f |> ignore
+        let inline testCase name f: Test = Mocha.it name f 
+        let inline ptestCase name f: Test = Mocha.itSkip name f 
+        let inline ftestCase name f: Test = Mocha.itOnly name f 
+        let inline failtest msg = failwith msg
+        let inline failtestf fmt msg = failwithf fmt msg
+        let inline testList name (tests: Test list): Test =
+            testSuite name <| fun suite ->
+                for test in tests do
+                    if test.``type`` |> Option.ofObj |> Option.exists ((=) "test") then
+                        suite.addTest(test)
+                    else suite.addSuite(unbox test)
+                    |> ignore
+            |> unbox<Test>
 
 [<RequireQualifiedAccess>]
 module Env =

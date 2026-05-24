@@ -10,7 +10,8 @@
 
     <ItemGroup>
         <Compile Include="Spec.fs" />
-        <Compile Include="Program.fs"/>
+        <Compile Include="Program.test.fs" />
+        <Compile Include="Structural.test.fs" />
         <Content Include="output\Program.fs.js" />
     </ItemGroup>
 

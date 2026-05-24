@@ -9,7 +9,8 @@ open TypeScript
 open FsToolkit.ErrorHandling
 
 
-module private Internal =
+[<System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)>]
+module Internal =
     let inline private (>=>) a b = KeyValuePair(a, unbox >> b)
     let inline private (>->) a b = a, (unbox >> b)
     let declarationFileNodes: Dictionary<Ts.SyntaxKind, obj -> DeclarationFileNodes> =

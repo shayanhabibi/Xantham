@@ -66,6 +66,9 @@ Spec.RunnerContext.make "Fable.TypeScript" [
         "anime", TestFixtures.animejs.node_modules.animejs.dist.modules.``index.d.ts``
         "typescript", TestFixtures.typescript.node_modules.typescript.lib.``typescript.d.ts``
 ] <| fun suite runner ->
+    // ----------------------------------------------------------------------------------------------
+    //                                  SF | SOURCE FILES
+    // ----------------------------------------------------------------------------------------------
     runner.testSuite "SF · Source File Model" <| fun _ ->
         // SF-1 — corpus is non-empty, so every proof below quantifies over real declarations.
         runner.testCase "SF-1 · program contains source files" <| fun _ ctx ->
@@ -170,6 +173,9 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 sf.closestNamedAndVersionedPackageJsonFields
                 |> Flip.Expect.isSome $"None-External modules should have a package.json, but {sf.fileName} did not"
                 )
+    // ----------------------------------------------------------------------------------------------
+    //                                  XTK - WRAPPER TOTALITY
+    // ----------------------------------------------------------------------------------------------
     runner.testSuite "XTK · Wrapper Totality" <| fun _ ->
         // XTK-1 — `Source.create` never throws on real input; this exercises every SF-* guard end to end.
         runner.testCase "XTK-1 · Source.create succeeds for every source file" <| fun _ ctx ->
@@ -331,8 +337,11 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     |> Expect.isTrue
                     |> funApply $"Expected a top level statement kind, but got {statement.kind.Name} instead."
                 )
-    runner.testSuite "Node invariants" <| fun _ ->
-        runner.testSyntaxKind Ts.SyntaxKind.NumericLiteral "Numeric Literals are all parsable" <| fun _ _ (literals: Ts.NumericLiteral array) ->
+    // ----------------------------------------------------------------------------------------------
+    //                                  ND - NODE DECLARATION
+    // ----------------------------------------------------------------------------------------------
+    runner.testSuite "ND · Node Declaration" <| fun _ ->
+        runner.testSyntaxKind Ts.SyntaxKind.NumericLiteral "ND-1 · Numeric Literals are all parsable" <| fun _ _ (literals: Ts.NumericLiteral array) ->
             literals
             |> Array.iter (
                 _.text
@@ -341,7 +350,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     | value when jsTypeof value = "number" -> ()
                     | value -> failtest $"Unrecognised numeric literal: %A{value}"
                 )
-        runner.testSyntaxKind<Ts.BigIntLiteral> Ts.SyntaxKind.BigIntLiteral "BigInt Literals are all parsable" <| fun _ _ literals ->
+        runner.testSyntaxKind<Ts.BigIntLiteral> Ts.SyntaxKind.BigIntLiteral "ND-2 · BigInt Literals are all parsable" <| fun _ _ literals ->
             literals
             |> Array.iter (
                 _.text
@@ -350,7 +359,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 >> ignore
                 )
             
-        runner.testSyntaxKind<Ts.StringLiteral> Ts.SyntaxKind.StringLiteral "String Literals all have valid string values" <| fun _ _ literals ->
+        runner.testSyntaxKind<Ts.StringLiteral> Ts.SyntaxKind.StringLiteral "ND-3 · String Literals all have valid string values" <| fun _ _ literals ->
             literals
             |> Array.iter (
                 _.text
@@ -359,7 +368,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     | "" -> Expect.passWithMsg "Empty string literals are valid"
                     | _ -> ()
                 )
-        runner.testSyntaxKind<Ts.NoSubstitutionTemplateLiteral> Ts.SyntaxKind.NoSubstitutionTemplateLiteral "NoSubstitutionTemplateLiteral values are valid" <| fun _ _ nodes ->
+        runner.testSyntaxKind<Ts.NoSubstitutionTemplateLiteral> Ts.SyntaxKind.NoSubstitutionTemplateLiteral "ND-4 · NoSubstitutionTemplateLiteral values are valid" <| fun _ _ nodes ->
             nodes
             |> Array.iter (
                 _.text
@@ -368,7 +377,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     | "" -> Expect.passWithMsg "Empty string literals are valid"
                     | _ -> ()
                 )
-        runner.testSyntaxKind<Ts.PrefixUnaryExpression> Ts.SyntaxKind.PrefixUnaryExpression "PrefixUnaryExpression Operators values are predictable" <| fun _ _ nodes ->
+        runner.testSyntaxKind<Ts.PrefixUnaryExpression> Ts.SyntaxKind.PrefixUnaryExpression "ND-5 · PrefixUnaryExpression Operators values are predictable" <| fun _ _ nodes ->
             nodes
             |> Array.iter (
                 _.operator
@@ -381,7 +390,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     | Ts.PrefixUnaryOperator.ExclamationToken as value -> failtest $"Unexpected PrefixUnaryOperator.{value.Name} in d.ts"
                     | value -> failtest $"Received an invalid/unknown PrefixUnaryOperator kind: {value.Name}" 
                 )
-        runner.testSyntaxKind<Ts.PrefixUnaryExpression> Ts.SyntaxKind.PrefixUnaryExpression "PrefixUnaryExpression Operand values are all numeric literals" <| fun _ _ nodes ->
+        runner.testSyntaxKind<Ts.PrefixUnaryExpression> Ts.SyntaxKind.PrefixUnaryExpression "ND-6 · PrefixUnaryExpression Operand values are all numeric literals" <| fun _ _ nodes ->
             nodes
             |> Array.iter (
                 _.operand
@@ -389,7 +398,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     | Patterns.SyntaxKind.NumericLiteral _ -> ()
                     | value -> failtest $"Received an invalid/unknown PostfixUnaryExpression operand kind: %s{value.kind.Name}" 
                 )
-        runner.testSyntaxKind<Ts.LiteralTypeNode> Ts.SyntaxKind.LiteralType "LiteralTypeNode _.literal values are parsed predictably" <| fun _ _ nodes ->
+        runner.testSyntaxKind<Ts.LiteralTypeNode> Ts.SyntaxKind.LiteralType "ND-7 · LiteralTypeNode _.literal values are parsed predictably" <| fun _ _ nodes ->
             nodes
             |> Array.iter (
                 _.literal
@@ -405,7 +414,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     | Patterns.Node.PrefixUnaryExpression _ -> ()
                     | node -> failtest $"Unrecognised literal for LiteralTypeNode: %s{node.kind.Name}"
                 )
-        runner.testCase "DeclarationFiles have a narrowed subset of valid nodes" <| fun _ ctx ->
+        runner.testCase "ND-8 · DeclarationFiles have a narrowed subset of valid nodes" <| fun _ ctx ->
             ctx.NodeMap.Keys
             |> Seq.distinct
             |> Seq.sortBy _.Name
@@ -413,7 +422,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 | value when DeclarationFileNodes.IsKnownDeclarationFileNodeSyntaxKind value -> ()
                 | value -> failtest $"Unexpected node kind in a declaration file: %s{value.Name}"
                 )
-        runner.testSyntaxKind<Ts.ClassDeclaration> Ts.SyntaxKind.ClassDeclaration "ClassDeclarations have a limited subset of nodes as members" <| fun _ _ nodes ->
+        runner.testSyntaxKind<Ts.ClassDeclaration> Ts.SyntaxKind.ClassDeclaration "ND-9 · ClassDeclarations have a limited subset of nodes as members" <| fun _ _ nodes ->
             nodes
             |> Array.collect _.members.AsArray
             |> Array.iter (
@@ -426,7 +435,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     | Patterns.Node.ConstructorDeclaration _ -> ()
                     | node -> failtest $"Unrecognised member kind for ClassMember: %s{node.kind.Name}"
                 )
-        runner.testSyntaxKind<Ts.InterfaceDeclaration> Ts.SyntaxKind.InterfaceDeclaration "InterfaceDeclarations have a limited subset of nodes as members" <| fun _ _ nodes ->
+        runner.testSyntaxKind<Ts.InterfaceDeclaration> Ts.SyntaxKind.InterfaceDeclaration "ND-10 · InterfaceDeclarations have a limited subset of nodes as members" <| fun _ _ nodes ->
             nodes
             |> Array.collect _.members.AsArray
             |> Array.iter (
@@ -440,7 +449,31 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     | Patterns.Node.ConstructSignatureDeclaration _ -> ()
                     | node -> failtest $"Unrecognised member kind for Interfacemember: %s{node.kind.Name}"
                 )
-        runner.testSyntaxKind<Ts.ClassDeclaration> Ts.SyntaxKind.ClassDeclaration "ClassDeclarations resolved by type checker are always Class object types" <| fun ctx _ nodes ->
+        runner.testCase "ND-11 · No decorators are present on any node" <| fun _ ctx ->
+            ctx.NodeMap.Values
+            |> Seq.collect _.AsArray
+            |> Seq.toArray
+            |> Array.iter (unbox >> ts.getDecorators >>  Expect.isNone >> funApply "This had a decorator")
+        runner.testSyntaxKind<Ts.TypeOperatorNode> Ts.SyntaxKind.TypeOperator "ND-12 · TypeOperators are predictable" <| fun ctx _ nodes ->
+            nodes
+            |> Array.choose (
+                _.operator
+                >> function
+                    | Ts.SyntaxKind.KeyOfKeyword 
+                    | Ts.SyntaxKind.ReadonlyKeyword 
+                    | Ts.SyntaxKind.UniqueKeyword -> None
+                    | value -> Some value.Name
+                )
+            |> Expect.isEmpty
+            |> funApply "Expected only KeyOf, Readonly and Unique operators."
+        runner.testSyntaxKind<Ts.TypeOperatorNode> Ts.SyntaxKind.TypeOperator "ND-13 · TypeOperators type nodes are predictable" <| fun ctx _ nodes ->
+            nodes
+            |> Array.map _.``type``
+            |> Array.filter ( TypeNode.IsTypeNodeKind >> not )
+            |> Expect.isEmpty
+            |> funApply "Expected all TypeOperator type nodes to be parsed into XanTagKind.TypeNode"
+    runner.testSuite "TC · Type Checker Resolution" <| fun _ ->
+        runner.testSyntaxKind<Ts.ClassDeclaration> Ts.SyntaxKind.ClassDeclaration "TC-1 · ClassDeclarations resolved by type checker are always Class object types" <| fun ctx _ nodes ->
             nodes
             |> Array.iter (fun node ->
                 if node.name.IsNone then
@@ -452,7 +485,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 |> Expect.isTrue
                 |> funApply $"ClassDeclaration {node.name.Value.getText()} should be an object type"
                 )
-        runner.testSyntaxKind<Ts.InterfaceDeclaration> Ts.SyntaxKind.InterfaceDeclaration "InterfaceDeclarations resolved by type checker are always ClassOrInterface object types" <| fun ctx _ nodes ->
+        runner.testSyntaxKind<Ts.InterfaceDeclaration> Ts.SyntaxKind.InterfaceDeclaration "TC-2 · InterfaceDeclarations resolved by type checker are always ClassOrInterface object types" <| fun ctx _ nodes ->
             nodes
             |> Array.iter (fun node ->
                 let objectType = node.name |> ctx.Checker.getTypeAtLocation :?> Ts.ObjectType
@@ -460,7 +493,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 let flags = objectType.objectFlags.ToStringArray()
                 Expect.isTrue result $"InterfaceDeclaration (except Iterator): {node.name.getText()} should be an object type. Has %A{flags}"
                 )
-        runner.testSyntaxKind<Ts.MethodDeclaration> Ts.SyntaxKind.MethodDeclaration "MethodDeclarations that are not optional resolved by type checker are object types" <| fun ctx _ nodes ->
+        runner.testSyntaxKind<Ts.MethodDeclaration> Ts.SyntaxKind.MethodDeclaration "TC-3 · MethodDeclarations that are not optional resolved by type checker are object types" <| fun ctx _ nodes ->
             let checker = ctx.Checker
             nodes
             |> Array.filter _.questionToken.IsNone
@@ -473,7 +506,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 |> Expect.isTrue
                 |> funApply $"MethodDeclaration should be a function type, instead got {flags}. {typString}"
                 )
-        runner.testSyntaxKind<Ts.MethodDeclaration> Ts.SyntaxKind.MethodDeclaration "MethodDeclarations that are optional resolved by type checker are union types" <| fun ctx _ nodes ->
+        runner.testSyntaxKind<Ts.MethodDeclaration> Ts.SyntaxKind.MethodDeclaration "TC-4 · MethodDeclarations that are optional resolved by type checker are union types" <| fun ctx _ nodes ->
             let checker = ctx.Checker
             nodes
             |> Array.filter _.questionToken.IsSome
@@ -486,7 +519,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 |> Expect.isTrue
                 |> funApply $"Optional MethodDeclaration should be a union type, instead got {flags}. {typString}"
                 )
-        runner.testSyntaxKind<Ts.MethodSignature> Ts.SyntaxKind.MethodSignature "MethodSignature that are not optional resolved by type checker are object types" <| fun ctx _ nodes ->
+        runner.testSyntaxKind<Ts.MethodSignature> Ts.SyntaxKind.MethodSignature "TC-5 · MethodSignature that are not optional resolved by type checker are object types" <| fun ctx _ nodes ->
             let checker = ctx.Checker
             nodes
             |> Array.filter _.questionToken.IsNone
@@ -504,7 +537,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 |> Expect.isTrue
                 |> funApply $"MethodSignature objecttype should have anonymous flag, instead got {flags}. {typString}"
                 )
-        runner.testSyntaxKind<Ts.MethodSignature> Ts.SyntaxKind.MethodSignature "MethodSignature that are optional resolved by type checker are union types" <| fun ctx _ nodes ->
+        runner.testSyntaxKind<Ts.MethodSignature> Ts.SyntaxKind.MethodSignature "TC-6 · MethodSignature that are optional resolved by type checker are union types" <| fun ctx _ nodes ->
             let checker = ctx.Checker
             nodes
             |> Array.filter _.questionToken.IsSome
@@ -524,46 +557,11 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 Expect.exists types _.flags.HasFlag(Ts.TypeFlags.Undefined) $"Expected optional method signature to have two types, with one being undefined: Type1 flags {typOneFlags}; Type2 flags {typTwoFlags}"
                 Expect.exists types (fun typ -> typ.flags.HasFlag(Ts.TypeFlags.Object) && (typ :?> Ts.ObjectType |> _.objectFlags.HasFlag(Ts.ObjectFlags.Anonymous))) $"Expected optional method signature to have two types, with one being an object with anonymous flag: Type1 flags {typOneFlags}; Type2 flags {typTwoFlags}"
                 )
-        runner.testSyntaxKind<Ts.InterfaceDeclaration> Ts.SyntaxKind.InterfaceDeclaration "All interfaces have symbols" <| fun ctx _ nodes ->
-            let checker = ctx.Checker
-            nodes
-            |> Array.iter (fun iface -> iface.name |> checker.getSymbolAtLocation |> Option.get |> ignore)
-        runner.testSyntaxKind<Ts.ClassDeclaration> Ts.SyntaxKind.ClassDeclaration "All class declarations have symbols" <| fun ctx _ nodes ->
-            let checker = ctx.Checker
-            nodes
-            |> Array.iter (fun iface -> (iface.name |> Option.defaultValue !!iface) |> checker.getSymbolAtLocation |> Option.get |> ignore)
-        runner.testSyntaxKind<Ts.ClassDeclaration> Ts.SyntaxKind.ClassDeclaration "All class declaration symbols have value declarations" <| fun ctx _ nodes ->
-            let checker = ctx.Checker
-            nodes
-            |> Array.iter (fun iface -> (iface.name |> Option.defaultValue !!iface) |> checker.getSymbolAtLocation |> Option.get |> _.valueDeclaration |> Option.get |> ignore)
-        runner.testCase "No decorators are present on any node" <| fun _ ctx ->
-            ctx.NodeMap.Values
-            |> Seq.collect _.AsArray
-            |> Seq.toArray
-            |> Array.iter (unbox >> ts.getDecorators >>  Expect.isNone >> funApply "This had a decorator")
-        runner.testSyntaxKind<Ts.TypeOperatorNode> Ts.SyntaxKind.TypeOperator "TypeOperators are predictable" <| fun ctx _ nodes ->
-            nodes
-            |> Array.choose (
-                _.operator
-                >> function
-                    | Ts.SyntaxKind.KeyOfKeyword 
-                    | Ts.SyntaxKind.ReadonlyKeyword 
-                    | Ts.SyntaxKind.UniqueKeyword -> None
-                    | value -> Some value.Name
-                )
-            |> Expect.isEmpty
-            |> funApply "Expected only KeyOf, Readonly and Unique operators."
-        runner.testSyntaxKind<Ts.TypeOperatorNode> Ts.SyntaxKind.TypeOperator "TypeOperators have no symbol" <| fun ctx _ nodes ->
+        runner.testSyntaxKind<Ts.TypeOperatorNode> Ts.SyntaxKind.TypeOperator "TC-7 · TypeOperators have no symbol" <| fun ctx _ nodes ->
             nodes |> Array.choose ctx.Checker.getSymbolAtLocation
             |> Expect.isEmpty
             |> funApply "Expected no symbols for TypeOperators"
-        runner.testSyntaxKind<Ts.TypeOperatorNode> Ts.SyntaxKind.TypeOperator "TypeOperators type nodes are predictable" <| fun ctx _ nodes ->
-            nodes
-            |> Array.map _.``type``
-            |> Array.filter ( TypeNode.IsTypeNodeKind >> not )
-            |> Expect.isEmpty
-            |> funApply "Expected all TypeOperator type nodes to be parsed into XanTagKind.TypeNode"
-        runner.testSyntaxKind<Ts.TypeOperatorNode> Ts.SyntaxKind.TypeOperator "TypeOperators have types associated; (=) inner type if operator is readonly" <| fun ctx _ nodes ->
+        runner.testSyntaxKind<Ts.TypeOperatorNode> Ts.SyntaxKind.TypeOperator "TC-8 · TypeOperators have types associated; (=) inner type if operator is readonly" <| fun ctx _ nodes ->
             let nodes = nodes |> Array.filter (_.operator >> function Ts.SyntaxKind.ReadonlyKeyword -> true | _ -> false)
             (nodes |> Array.map ctx.Checker.getTypeFromTypeNode
             ,nodes |> Array.map (_.``type`` >> ctx.Checker.getTypeFromTypeNode))
@@ -571,7 +569,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 let aString = ctx.Checker.typeToString a
                 let bString = ctx.Checker.typeToString b
                 if a <> b then Testing.Assert.NotEqual(aString, bString))
-        runner.testSyntaxKind<Ts.TypeOperatorNode> Ts.SyntaxKind.TypeOperator "TypeOperators have types associated; <> inner type if operator <> readonly" <| fun ctx _ nodes ->
+        runner.testSyntaxKind<Ts.TypeOperatorNode> Ts.SyntaxKind.TypeOperator "TC-9 · TypeOperators have types associated; <> inner type if operator <> readonly" <| fun ctx _ nodes ->
             let nodes = nodes |> Array.filter (_.operator >> function Ts.SyntaxKind.ReadonlyKeyword -> false | _ -> true)
             (nodes |> Array.map ctx.Checker.getTypeFromTypeNode
             ,nodes |> Array.map (_.``type`` >> ctx.Checker.getTypeFromTypeNode))
@@ -579,32 +577,33 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 let aString = ctx.Checker.typeToString a
                 let bString = ctx.Checker.typeToString b
                 if a = b then Testing.Assert.AreEqual(aString, bString))
-        runner.testCase "All nodes have ids via ts.getNodeId" <| fun _ ctx ->
+    runner.testSuite "SY · Symbols & Identity" <| fun _ ->
+        runner.testSyntaxKind<Ts.InterfaceDeclaration> Ts.SyntaxKind.InterfaceDeclaration "SY-1 · All interfaces have symbols" <| fun ctx _ nodes ->
+            let checker = ctx.Checker
+            nodes
+            |> Array.iter (fun iface -> iface.name |> checker.getSymbolAtLocation |> Option.get |> ignore)
+        runner.testSyntaxKind<Ts.ClassDeclaration> Ts.SyntaxKind.ClassDeclaration "SY-2 · All class declarations have symbols" <| fun ctx _ nodes ->
+            let checker = ctx.Checker
+            nodes
+            |> Array.iter (fun iface -> (iface.name |> Option.defaultValue !!iface) |> checker.getSymbolAtLocation |> Option.get |> ignore)
+        runner.testSyntaxKind<Ts.ClassDeclaration> Ts.SyntaxKind.ClassDeclaration "SY-3 · All class declaration symbols have value declarations" <| fun ctx _ nodes ->
+            let checker = ctx.Checker
+            nodes
+            |> Array.iter (fun iface -> (iface.name |> Option.defaultValue !!iface) |> checker.getSymbolAtLocation |> Option.get |> _.valueDeclaration |> Option.get |> ignore)
+        runner.testCase "SY-4 · All nodes have ids via ts.getNodeId" <| fun _ ctx ->
             ctx.NodeMap.Values
             |> Seq.collect _.AsArray
             |> Seq.toArray
             |> unbox<Ts.Node array>
             |> Array.iter (ts.getNodeId >> (<) 0 >> Expect.isTrue >> funApply "Expected a positive id number")
-        runner.testCase "All symbols have ids via ts.getSymbolId" <| fun _ ctx ->
+        runner.testCase "SY-5 · All symbols have ids via ts.getSymbolId" <| fun _ ctx ->
             ctx.NodeMap.Values
             |> Seq.collect _.AsArray
             |> Seq.toArray
             |> unbox<Ts.Node array>
             |> Array.choose ctx.Checker.getSymbolAtLocation
             |> Array.iter (ts.getSymbolId >> (<) 0 >> Expect.isTrue >> funApply "Expected a positive id number")
-        runner.testSyntaxKind<Ts.TypeReferenceNode> Ts.SyntaxKind.TypeReference "TypeReferences _.typeName always resolves to a symbol" <| fun ctx _ nodes ->
-            nodes
-            |> Array.iter (
-                _.typeName
-                >> unbox
-                >> ctx.Checker.getSymbolAtLocation
-                >> Flip.Expect.isSome "Expected type reference entity name to resolve to a symbol"
-                )
-        runner.testSyntaxKind<Ts.TypeReferenceNode> Ts.SyntaxKind.TypeReference "TypeReferences type arguments are either None or NonEmpty" <| fun ctx _ nodes ->
-            nodes
-            |> Array.choose _.typeArguments
-            |> Array.iter (Flip.Expect.isNonEmpty "Expected at least one entry in type arguments if not null")
-        runner.testCase "All symbols that are non-transient have declarations" <| fun _ ctx ->
+        runner.testCase "SY-6 · All symbols that are non-transient have declarations" <| fun _ ctx ->
             ctx.NodeMap.Values
             |> Seq.collect _.AsArray
             |> Seq.toArray
@@ -618,6 +617,19 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     |> Option.defaultValue [||]
                     |> Flip.Expect.isNonEmpty "Expected at least one declaration for a non-transient symbol"
                     )
+    runner.testSuite "TR · Type References" <| fun _ ->
+        runner.testSyntaxKind<Ts.TypeReferenceNode> Ts.SyntaxKind.TypeReference "TR-1 · TypeReferences _.typeName always resolves to a symbol" <| fun ctx _ nodes ->
+            nodes
+            |> Array.iter (
+                _.typeName
+                >> unbox
+                >> ctx.Checker.getSymbolAtLocation
+                >> Flip.Expect.isSome "Expected type reference entity name to resolve to a symbol"
+                )
+        runner.testSyntaxKind<Ts.TypeReferenceNode> Ts.SyntaxKind.TypeReference "TR-2 · TypeReferences type arguments are either None or NonEmpty" <| fun ctx _ nodes ->
+            nodes
+            |> Array.choose _.typeArguments
+            |> Array.iter (Flip.Expect.isNonEmpty "Expected at least one entry in type arguments if not null")
         (*
         Symbols that are transient can still have declarations.
         Would have to check against internal CheckFlags to disambiguate.
@@ -641,7 +653,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
         //             |> Option.map _.AsArray
         //             |> Option.defaultValue [||]
         //             |> Flip.Expect.isNotEmpty "Expected declarations for non-transient symbols")
-        runner.testSyntaxKind<Ts.TypeReferenceNode> Ts.SyntaxKind.TypeReference "TypeReferences _.typeName that resolve to a NON-TRANSIENT symbol have declarations" <| fun ctx _ nodes ->
+        runner.testSyntaxKind<Ts.TypeReferenceNode> Ts.SyntaxKind.TypeReference "TR-3 · TypeReferences _.typeName that resolve to a NON-TRANSIENT symbol have declarations" <| fun ctx _ nodes ->
             let getSymbolFlags idx = nodes[idx].typeName |> unbox |> ctx.Checker.getSymbolAtLocation |> Option.get |> _.flags.ToStringArray()
             nodes
             |> Array.iteri (fun idx ->
@@ -657,7 +669,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     |> Flip.Expect.isNonEmpty $"Expected at least one declaration for type reference entity name: {nodes[idx].getText()} | Flags: {getSymbolFlags idx}"
                     )
                 )
-        runner.testSyntaxKind<Ts.TypeReferenceNode> Ts.SyntaxKind.TypeReference "TypeReferences type arguments do not necessarily match the arity of the target" <| fun ctx _ nodes ->
+        runner.testSyntaxKind<Ts.TypeReferenceNode> Ts.SyntaxKind.TypeReference "TR-4 · TypeReferences type arguments do not necessarily match the arity of the target" <| fun ctx _ nodes ->
             nodes
             |> Array.filter (_.typeName >> unbox >> ctx.Checker.getSymbolAtLocation >> Option.get >> ctx.Checker.getMergedSymbol >> ts.isTransientSymbol >> not)
             |> Array.choose (fun node ->
@@ -688,11 +700,13 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 )
             |> function
                 | [||] -> Expect.skip()
+                | arr when Array.forall String.IsNullOrEmpty arr ->
+                    Expect.pass()
                 | arr ->
                     arr
                     |> Array.filter (String.IsNullOrEmpty >> not)
                     |> Array.iter (printfn "%s")
-                    Expect.pass()
+                    failtest "Type arguments exceeded expected type parameters"
             
         // runner.ftestSyntaxKind<Ts.TypeOperatorNode> Ts.SyntaxKind.TypeOperator "KeyOf type operators can be bounded, unbounded, generic, constrained generic" <| fun ctx _ nodes ->
         //     nodes
@@ -730,12 +744,12 @@ Spec.RunnerContext.make "Fable.TypeScript" [
         //             |> Option.map (ctx.Checker.typeToString >> printf "Constraint: %s ")
         //             printfn ""
         //         )
-        runner.testSuite "Node Wrappers" <| fun _ ->
-            runner.testSyntaxKind<Ts.TypeOperatorNode> Ts.SyntaxKind.TypeOperator "TypeOperators are wrapped in a TypeNode" <| fun ctx _ nodes ->
+        runner.testSuite "NW · Node Wrappers" <| fun _ ->
+            runner.testSyntaxKind<Ts.TypeOperatorNode> Ts.SyntaxKind.TypeOperator "NW-1 · TypeOperators are wrapped in a TypeNode" <| fun ctx _ nodes ->
                 nodes
                 |> Array.iter (TypeOperatorNode.Create ctx.Checker >> Option.ofObj >> Flip.Expect.isSome "Unexpected")
                 
-            runner.testSyntaxKind<Ts.MethodDeclaration> Ts.SyntaxKind.MethodDeclaration "MethodDeclaration.getWrappedNode" <| fun ctx _ nodes ->
+            runner.testSyntaxKind<Ts.MethodDeclaration> Ts.SyntaxKind.MethodDeclaration "NW-2 · MethodDeclaration.getWrappedNode" <| fun ctx _ nodes ->
                 let checker = ctx.Checker
                 let methodWrappers = nodes |> Array.map (MethodDeclaration.Create checker)
                 fun () ->

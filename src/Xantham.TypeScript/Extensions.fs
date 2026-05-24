@@ -1040,7 +1040,15 @@ type Ts.NodeFlags with
     member this.Debug() =
         this.ToStringArray()
         |> Array.iter System.Console.WriteLine
-        
+
+type SRTPFlagToStringArray =
+    static member inline ToStringArray(node: Ts.NodeFlags) = node.ToStringArray()
+    static member inline ToStringArray(node: Ts.ObjectFlags) = node.ToStringArray()
+    static member inline ToStringArray(node: Ts.SymbolFlags) = node.ToStringArray()
+    static member inline ToStringArray(node: Ts.TypeFlags) = node.ToStringArray()
+type SRTPKindToString =
+    static member inline ToString(kind: Ts.SyntaxKind) = kind.Name
+
 /// Pattern matching helpers
 module Patterns =
     /// <summary>
