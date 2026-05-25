@@ -1859,12 +1859,12 @@ type MemberDeclaration with
     /// <summary>Maps a class/interface member <c>Ts.Node</c> to its <c>MemberDeclaration</c> case.</summary>
     /// <remarks>
     /// Partial: indexes <c>memberDeclarationKindSetMap</c> and throws on an unmapped <c>kind</c>.
-    /// Totality over real class &amp; interface members is proven by <b>XTK-4</b> (Program.fs); guard
+    /// Totality over real class &amp; interface members is proven by <b>XTK-4</b> (Program.test.fs); guard
     /// with <see cref="M:TypeScript.MemberDeclaration.IsMemberDeclarationKind(TypeScript.Ts.Node)"/> first.
     /// </remarks>
     static member Create(decl: Ts.Node) = Internal.memberDeclarationKindSetMap[decl.kind] decl
     /// <summary>True when <paramref name="decl"/> is a member kind that <c>MemberDeclaration.Create</c> can map.</summary>
-    /// <remarks>Proof <b>XTK-4</b> (Program.fs) asserts this returns <c>true</c> for every class &amp; interface member in the corpus.</remarks>
+    /// <remarks>Proof <b>XTK-4</b> (Program.test.fs) asserts this returns <c>true</c> for every class &amp; interface member in the corpus.</remarks>
     static member IsMemberDeclarationKind(decl: Ts.Node) = Internal.memberDeclarationKindSetMap.ContainsKey decl.kind
 
 type TypeDeclaration with
@@ -1901,12 +1901,12 @@ type TopLevelStatements with
     /// <summary>Maps a source-file top-level statement <c>Ts.Node</c> to its <c>TopLevelStatements</c> case.</summary>
     /// <remarks>
     /// Partial: throws on an unmapped <c>kind</c>. Totality over real top-level statements is proven by
-    /// <b>XTK-7</b> (Program.fs); guard with
+    /// <b>XTK-7</b> (Program.test.fs); guard with
     /// <see cref="M:TypeScript.TopLevelStatements.IsTopLevelStatementKind(TypeScript.Ts.Node)"/> first.
     /// </remarks>
     static member Create(decl: Ts.Node) = Internal.topLevelStatements[decl.kind] decl
     /// <summary>True when <paramref name="decl"/> is a top-level statement kind that <c>TopLevelStatements.Create</c> can map.</summary>
-    /// <remarks>Proof <b>XTK-7</b> (Program.fs) asserts this returns <c>true</c> for every top-level statement in the corpus.</remarks>
+    /// <remarks>Proof <b>XTK-7</b> (Program.test.fs) asserts this returns <c>true</c> for every top-level statement in the corpus.</remarks>
     static member IsTopLevelStatementKind(decl: Ts.Node) = Internal.topLevelStatements.ContainsKey decl.kind
     member inline this.AsXanTagKind = XanTagKind.Create this.Value
     static member Create(xanTagKind: XanTagKind) =
@@ -1932,12 +1932,12 @@ type TopLevelExportSymbolDeclarations with
     /// <summary>Maps an exported-symbol declaration <c>Ts.Node</c> to its <c>TopLevelExportSymbolDeclarations</c> case.</summary>
     /// <remarks>
     /// Partial: throws on an unmapped <c>kind</c>. Totality over real exported-symbol declarations is proven by
-    /// <b>XTK-8</b> (Program.fs); guard with
+    /// <b>XTK-8</b> (Program.test.fs); guard with
     /// <see cref="M:TypeScript.TopLevelExportSymbolDeclarations.IsTopLevelExportDeclarationKind(TypeScript.Ts.Node)"/> first.
     /// </remarks>
     static member Create(decl: Ts.Node) = Internal.topLevelExportDeclarations[decl.kind] decl
     /// <summary>True when <paramref name="decl"/> is an export declaration kind that <c>TopLevelExportSymbolDeclarations.Create</c> can map.</summary>
-    /// <remarks>Proof <b>XTK-8</b> (Program.fs) asserts this returns <c>true</c> for every exported-symbol declaration in the corpus.</remarks>
+    /// <remarks>Proof <b>XTK-8</b> (Program.test.fs) asserts this returns <c>true</c> for every exported-symbol declaration in the corpus.</remarks>
     static member IsTopLevelExportDeclarationKind(decl: Ts.Node) = Internal.topLevelExportDeclarations.ContainsKey decl.kind
     member inline this.AsXanTagKind = XanTagKind.Create this.Value
     static member Create(xanTagKind: XanTagKind) =
@@ -1962,12 +1962,12 @@ type TopLevelLocalSymbolDeclarations with
     /// <summary>Maps a local-symbol declaration <c>Ts.Node</c> to its <c>TopLevelLocalSymbolDeclarations</c> case.</summary>
     /// <remarks>
     /// Partial: throws on an unmapped <c>kind</c>. Totality over real local-symbol declarations is proven by
-    /// <b>XTK-9</b> (Program.fs); guard with
+    /// <b>XTK-9</b> (Program.test.fs); guard with
     /// <see cref="M:TypeScript.TopLevelLocalSymbolDeclarations.IsTopLevelLocalDeclarationKind(TypeScript.Ts.Node)"/> first.
     /// </remarks>
     static member Create(decl: Ts.Node) = Internal.topLevelLocalDeclarations[decl.kind] decl
     /// <summary>True when <paramref name="decl"/> is a local declaration kind that <c>TopLevelLocalSymbolDeclarations.Create</c> can map.</summary>
-    /// <remarks>Proof <b>XTK-9</b> (Program.fs) asserts this returns <c>true</c> for every local-symbol declaration in the corpus.</remarks>
+    /// <remarks>Proof <b>XTK-9</b> (Program.test.fs) asserts this returns <c>true</c> for every local-symbol declaration in the corpus.</remarks>
     static member IsTopLevelLocalDeclarationKind(decl: Ts.Node) = Internal.topLevelLocalDeclarations.ContainsKey decl.kind
     member inline this.AsXanTagKind = XanTagKind.Create this.Value
     static member Create(xanTagKind: XanTagKind) =
@@ -2176,7 +2176,7 @@ type XanTagKind with
     /// case that downstream <c>.Value</c> access cannot read. The proofs assert that this fall-through is
     /// <i>unreachable</i> for the positions we actually call it from:
     /// <b>XTK-2</b> (external-module exports), <b>XTK-3</b> (script statements), and <b>XTK-6</b>
-    /// (symbol-table value declarations) all hold across the corpus (Program.fs). Calling on a node from an
+    /// (symbol-table value declarations) all hold across the corpus (Program.test.fs). Calling on a node from an
     /// unproven position (e.g. a deep expression child) may legitimately return <c>Ignore</c>.
     /// </remarks>
     static member Create(node: Ts.Node) =
@@ -2261,6 +2261,68 @@ module Patterns =
 type Ts.Type with
     [<EmitProperty "checker">]
     member inline this.checker: Ts.TypeChecker = jsNative
+    member this.unsafeGetCanonicalSymbol() =
+        let checker = this.checker
+        if this.symbol.flags.HasFlag Ts.SymbolFlags.Alias then
+            checker.getAliasedSymbol this.symbol
+        else checker.getMergedSymbol this.symbol
+    member this.getCanonicalSymbol() =
+        if this.getSymbol().IsSome
+        then this.unsafeGetCanonicalSymbol() |> Some
+        else None
+
+type EnumMember = {
+    Symbol: Ts.Symbol
+    Node: Ts.EnumMember
+    Type: Ts.LiteralType
+    Value: Choice<string, int, float>
+} with
+    static member inline private getValue(typ: Ts.Type) =
+        if typ.flags.HasFlag Ts.TypeFlags.NumberLiteral then
+            let typ = typ :?> Ts.NumberLiteralType
+            if JS.Constructors.Number.isSafeInteger typ.value then
+                Choice2Of3 (int typ.value)
+            else
+                Choice3Of3 typ.value
+        else
+            let typ = typ :?> Ts.StringLiteralType
+            Choice1Of3 typ.value
+    static member Create(typ: Ts.Type) =
+        let value = EnumMember.getValue typ
+        let symbol = typ.unsafeGetCanonicalSymbol()
+        let declaration = symbol.valueDeclaration.Value :?> Ts.EnumMember
+        {
+            Symbol = symbol
+            Node = declaration
+            Type = typ :?> Ts.LiteralType
+            Value = value
+        }
+    static member TryCreate(typ: Ts.Type) =
+        match typ.flags with
+        | flags when
+            flags.HasFlag Ts.TypeFlags.EnumLiteral
+            && not(flags.HasFlag Ts.TypeFlags.Union || flags.HasFlag Ts.TypeFlags.Enum) ->
+            EnumMember.Create typ
+            |> Some
+        | _ -> None
+    static member Create(node: Ts.EnumMember, checker: Ts.TypeChecker) =
+        let typ = checker.getTypeAtLocation node
+        let value = EnumMember.getValue typ
+        let symbol = typ.unsafeGetCanonicalSymbol()
+        let node = symbol.valueDeclaration.Value
+        {
+            Symbol = symbol
+            Node = node :?> Ts.EnumMember
+            Type = typ :?> Ts.LiteralType
+            Value = value
+        }
+    static member TryCreate(node: Ts.Node, checker: Ts.TypeChecker) =
+        match node with
+        | Patterns.Node.EnumMember node -> EnumMember.Create(node,checker) |> Some
+        | _ -> None
+        
+    
+
 and [<RequireQualifiedAccess>] PrimitiveSingleton =
     | Any
     | Unknown
@@ -2597,7 +2659,7 @@ module ExternalModule =
     /// <summary>Builds an <c>ExternalModule</c> from a source file, or <c>ValueNone</c> if it is not a module.</summary>
     /// <remarks>
     /// This constructor asserts several compiler invariants by <c>failwith</c>/<c>.Value</c> rather than threading
-    /// options, and is sound only because each is proven over the corpus (Program.fs):
+    /// options, and is sound only because each is proven over the corpus (Program.test.fs):
     /// <b>SF-2</b> (<c>sourceSymbol</c> — module ⇒ symbol), <b>SF-3</b> (<c>moduleSpecifierInvariant</c> — symbol ⇒
     /// kind + non-empty specifiers), <b>SF-6</b> (<c>symbolExports</c> — module ⇒ exports map), and <b>SF-7</b>
     /// (<c>sourceFileLocals</c> — module ⇒ locals map). The whole path is exercised end to end by <b>XTK-1</b>.
@@ -2619,7 +2681,7 @@ module ExternalModule =
 
 module SourceKind =
     /// <summary>Classifies a source file as an <c>ExternalModule</c> kind, or <c>ValueNone</c> for a script.</summary>
-    /// <remarks>Delegates to <c>ExternalModule.create</c>; inherits its proof obligations <b>SF-2/3/6/7</b> (Program.fs).</remarks>
+    /// <remarks>Delegates to <c>ExternalModule.create</c>; inherits its proof obligations <b>SF-2/3/6/7</b> (Program.test.fs).</remarks>
     let create (program: Ts.Program) (sourceFile: Ts.SourceFile) =
         ExternalModule.create program sourceFile
         |> ValueOption.map SourceKind.ExternalModule
@@ -2629,7 +2691,7 @@ module Source =
     /// <summary>Builds the full <c>Source</c> wrapper (module or script) for a source file.</summary>
     /// <remarks>
     /// Reads <c>package.json</c> metadata via <c>.Value</c> on option-typed fields, sound only because the corpus
-    /// proofs (Program.fs) guarantee the fields are present: <b>SF-8</b> (module has a package.json — self or
+    /// proofs (Program.test.fs) guarantee the fields are present: <b>SF-8</b> (module has a package.json — self or
     /// ancestor), <b>SF-9</b> (it is versioned), and for scripts <b>SF-10</b> (non default-lib script has a
     /// package.json) and <b>SF-11</b> (it is named &amp; versioned, via
     /// <c>closestNamedAndVersionedPackageJsonFields</c>). For modules it also inherits <c>ExternalModule.create</c>'s

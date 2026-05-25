@@ -1,8 +1,12 @@
 # Proof Backlog — Xantham.TypeScript × Xantham.Fable
 
-> Status: **proposals**. These are stress/invariant proofs worth adding to `Program.fs`. None are implemented yet.
+> Status: **proposals**. These are stress/invariant proofs worth adding to `Program.test.fs`. Most are not
+> implemented yet — **exception:** the type/object-flag *exclusivity & structure* and *enum resolution* proofs
+> have since landed and are catalogued in the README as `OF-*`, `TF-*`, `EN-*` (and `RS-1` landed as `TC-10`).
+> What remains below for category B is the complementary *totality* obligation (renamed `TFT-*` to avoid
+> colliding with the README's now-implemented `TF-*`).
 > The catalogue of *implemented* proofs lives in [`src/Xantham.TypeScript/README.md`](../../src/Xantham.TypeScript/README.md)
-> (`SF-*`, `XTK-*`, `ND-*`, `TC-*`, `SY-*`, `TR-*`, `NW-*`).
+> (`SF-*`, `XTK-*`, `ND-*`, `TC-*`, `OF-*`, `TF-*`, `EN-*`, `SY-*`, `TR-*`, `NW-*`).
 
 ## Why this document exists
 
@@ -66,7 +70,12 @@ its map row (or vice versa).
 
 ---
 
-## B · Type-flag resolution totality (`TF-*`)  — **P0**
+## B · Type-flag resolution totality (`TFT-*`)  — **P0**
+
+> Renamed from `TF-*` to `TFT-*`: the README catalogue now owns `TF-*`/`OF-*` for the *exclusivity & structure*
+> half of these proofs, which has landed. What remains here is the **totality** half (every reachable type/flag
+> combo finds a row). `TFT-4` below is already satisfied by the implemented README `TF-5` (primary) and `OF-3`
+> (object) mutual-exclusivity proofs.
 
 Unlike the `SyntaxKind` maps (which use a `ContainsKey`/`Ignore` fall-through), the type-flag tables in
 `XanTagKind.fs` (`typeFlagPrimaryKindSet`, `typeFlagLiteralKindSet`, `typeFlagObjectKindSet`, ~lines 344–411)
@@ -78,11 +87,11 @@ over the types the engine can actually reach.
 
 | ID | What the test does | What it proves |
 |----|--------------------|----------------|
-| TF-1 | Walk every export/declaration the engine would feed the checker (mirror `getDeclarations`), call `getTypeAtLocation`, and assert `typeFlagPrimaryKindSet` finds a matching row for **every** resolved type — no `Array.find` throw. | The primary type-flag table is total over the corpus; the `Type` arm of `dispatch` cannot abort the read on an unclassifiable `TypeFlags`. |
-| TF-2 | For every type that carries `TypeFlags.Object`, assert `typeFlagObjectKindSet` finds a row for its `ObjectFlags`. | The object sub-classifier covers every `ObjectFlags` combo real `.d.ts` types produce (anonymous, interface, reference, mapped, instantiated…), so object-type dispatch never throws. |
-| TF-3 | For every type that carries a literal flag (`StringLiteral`/`NumberLiteral`/`BigIntLiteral`/`BooleanLiteral`/etc.), assert `typeFlagLiteralKindSet` finds a row. | The literal sub-classifier is total over the literal `TypeFlags` the corpus yields; rules out a freshly-added literal flag (e.g. a TS-version bump) silently throwing. |
-| TF-4 | Assert the flag predicates are **mutually exclusive** for every corpus type — exactly one row matches each type (count matches, not just ≥1). | `Array.find` returning the *first* match is unambiguous: no type is classified by accident of row order. A type matching two rows would mean the table's meaning depends on ordering, which is fragile under edits. |
-| TF-5 | Cross-check that union/intersection types (`TypeFlags.Union`/`Intersection`) resolve to the primary row the engine expects, then assert each constituent (`type.types`) itself resolves through TF-1. | The recursive descent the engine does into union members stays total — a union whose *member* is unclassifiable throws just as hard as a top-level one, and only descending catches it. |
+| TFT-1 | Walk every export/declaration the engine would feed the checker (mirror `getDeclarations`), call `getTypeAtLocation`, and assert `typeFlagPrimaryKindSet` finds a matching row for **every** resolved type — no `Array.find` throw. | The primary type-flag table is total over the corpus; the `Type` arm of `dispatch` cannot abort the read on an unclassifiable `TypeFlags`. |
+| TFT-2 | For every type that carries `TypeFlags.Object`, assert `typeFlagObjectKindSet` finds a row for its `ObjectFlags`. | The object sub-classifier covers every `ObjectFlags` combo real `.d.ts` types produce (anonymous, interface, reference, mapped, instantiated…), so object-type dispatch never throws. |
+| TFT-3 | For every type that carries a literal flag (`StringLiteral`/`NumberLiteral`/`BigIntLiteral`/`BooleanLiteral`/etc.), assert `typeFlagLiteralKindSet` finds a row. | The literal sub-classifier is total over the literal `TypeFlags` the corpus yields; rules out a freshly-added literal flag (e.g. a TS-version bump) silently throwing. |
+| TFT-4 | ✅ **Implemented** as README `TF-5` (primary `TypeFlags`) and `OF-3` (`ObjectFlags`): the flag predicates are **mutually exclusive** for every corpus type — at most one row matches. | `Array.find` returning the *first* match is unambiguous: no type is classified by accident of row order. A type matching two rows would mean the table's meaning depends on ordering, which is fragile under edits. |
+| TFT-5 | Cross-check that union/intersection types (`TypeFlags.Union`/`Intersection`) resolve to the primary row the engine expects, then assert each constituent (`type.types`) itself resolves through TFT-1. | The recursive descent the engine does into union members stays total — a union whose *member* is unclassifiable throws just as hard as a top-level one, and only descending catches it. |
 
 ---
 
@@ -134,7 +143,7 @@ proofs pin the semantic answers the engine consumes.
 
 | ID | What the test does | What it proves |
 |----|--------------------|----------------|
-| RS-1 | For every `TypeNode` in the corpus, call `getTypeAtLocation` and assert it returns a type (never `undefined`/throw). | The syntax→type crossing the engine does everywhere is total; no `TypeNode` shape leaves `resolveTypeBase` without a type to key on. |
+| RS-1 | ✅ **Implemented** as README `TC-10`. For every `TypeNode` in the corpus, call `getTypeFromTypeNode` and assert it returns a type (never `undefined`/throw). | The syntax→type crossing the engine does everywhere is total; no `TypeNode` shape leaves `resolveTypeBase` without a type to key on. |
 | RS-2 | Find corpus `TypeReferenceNode`s and assert at least some resolve to a `TypeKind` that is **not** `TypeReference` (e.g. resolve to an object/literal/union), demonstrating the syntactic≠semantic divergence is real and handled. | The wrappers must not assume `TypeReference` syntax ⇒ reference semantics; this exhibits the divergence `fable.md` warns about on real input so a wrapper that conflates them is caught. |
 | RS-3 | Enumerate pairs of distinct `Ts.Type` objects that share an underlying symbol (generic instantiations vs their generic), and assert `resolveTypeBase`'s guard condition (`guard <> xanTag.Guard` and `signalCache.ContainsKey(guard.Value)`) distinguishes them. | The shared-symbol hazard is exercised with concrete corpus types, proving the cache guard does not treat an instantiation as a cached entry for its generic (the permanent-stall bug `fable.md` documents). |
 | RS-4 | For every symbol reached via an **alias** (`export { X as Y }`, re-exports), assert `getAliasedSymbol`/alias resolution yields a symbol and that its `IdentityKey` is `AliasSymbol`-priority, distinct from a direct `Symbol`. | Alias resolution — priority 2 in the identity ordering — produces a usable symbol, so re-exported declarations are keyed correctly rather than collapsing onto the direct export. |
@@ -170,7 +179,7 @@ assert actually happens.
 | ID | What the test does | What it proves |
 |----|--------------------|----------------|
 | FB-1 | Read the numeric value of representative `Ts.SyntaxKind`/`TypeFlags`/`ObjectFlags` enum members in the Fable build and assert they equal the TypeScript compiler's runtime numbers. | The F# enum mirrors compile to the *same* integers the live `typescript` module emits — a lookup map keyed on `SyntaxKind.ClassDeclaration` actually matches the compiler's node. |
-| FB-2 | Combine two flag values, then assert `HasFlag` answers by **bitwise** math in JS (e.g. `(Object ||| Anonymous).HasFlag Anonymous = true`, and a non-set flag is `false`). | Flag-enum `HasFlag`, used throughout the type-flag tables, lowers to bitwise-and in JS rather than reference/structural comparison — the predicates in TF-* mean what they read. |
+| FB-2 | Combine two flag values, then assert `HasFlag` answers by **bitwise** math in JS (e.g. `(Object ||| Anonymous).HasFlag Anonymous = true`, and a non-set flag is `false`). | Flag-enum `HasFlag`, used throughout the type-flag tables, lowers to bitwise-and in JS rather than reference/structural comparison — the predicates in TFT-* (and the implemented README `TF-*`/`OF-*`) mean what they read. |
 | FB-3 | Construct a single-payload DU case (e.g. `XanTagKind.Type t`) and assert reading `.Value` returns the payload, confirming the `fields[0]` layout the accessors assume. | The DU `.Value` accessors (`XanTagKind.Value`, `TypeNode.Value`, …) read the right slot post-lowering — the invariant the README flags as Fable-internal rather than corpus-proven. |
 | FB-4 | Round-trip `option` against JS `undefined` and `null`: assert `Some null`/`Some undefined` vs `None` behave as the wrappers expect when reading optional compiler fields (`symbol.valueDeclaration`, package.json fields). | `option`-typed reads still track JS abs/null correctly after lowering, so `.Value`/`Option.get` on optional compiler fields don't surface `undefined` as a spurious `Some`. |
 | FB-5 | Take a node of one kind, `unbox` it to the wrong wrapper, and assert the mis-tag is **not** caught at the `unbox` site but **is** caught at first field read (returns `undefined`). | Documents the `unbox` no-op hazard concretely: it proves *why* LM-5/CT-4 matter — a transposed map row cannot be caught by type-checking, only by a field-shape proof. |
@@ -188,7 +197,7 @@ interaction the unit-level proofs each pass individually.
 
 | ID | What the test does | What it proves |
 |----|--------------------|----------------|
-| PL-1 | Drive every fixture through a harness that mirrors `getDeclarations` + `XanTagKind.Create` + type-flag resolution (TF-*) end to end, asserting **no exception** escapes for any node/type. | The composed read path is total over the corpus — the `failwith`/`Array.find`/`.Value` sites that each proof guards in isolation also never fire *in combination*. |
+| PL-1 | Drive every fixture through a harness that mirrors `getDeclarations` + `XanTagKind.Create` + type-flag resolution (TFT-*) end to end, asserting **no exception** escapes for any node/type. | The composed read path is total over the corpus — the `failwith`/`Array.find`/`.Value` sites that each proof guards in isolation also never fire *in combination*. |
 | PL-2 | During the PL-1 walk, count nodes classified to `Ignore` and assert the count equals the deliberately-ignorable set (with each unexpected `Ignore` reported by kind + location). | No node is silently dropped by `Dispatcher.dispatch` — the integration-level restatement of CT-5, catching drops that only appear when feeders interact. |
 | PL-3 | Build the type-reference graph the engine traverses and assert `healthCheckType` (TypeKey-based circular-ref detection) terminates and flags only genuine cycles — run with the corpus's deepest generics (`type-fest`, `@types/three`). | Stack traversal (no TCO in JS) stays bounded on real deep/recursive types; the circular-ref guard does not false-positive on legitimate deep nesting nor miss an actual cycle. |
 | PL-4 | Extract JSDoc comments/tags for every node carrying them (`jsDocKindSetMap` path) across the corpus and assert extraction is total and non-throwing. | The JSDoc arm of dispatch handles every JSDoc kind the corpus contains — comment/tag emission into the 3-tier representation never aborts on an unlisted JSDoc node. |
@@ -198,7 +207,7 @@ interaction the unit-level proofs each pass individually.
 
 ## Suggested implementation order
 
-1. **B (TF-*)** and **C (CT-*)** — these guard paths that throw / silently corrupt **today** with no proof (P0).
+1. **B (TFT-*)** and **C (CT-*)** — these guard paths that throw / silently corrupt **today** with no proof (P0).
 2. **F (MR-*)** and **D (ID-*)** — strengthen the resolution + keying assumptions the pipeline is built on (P1).
 3. **G (FB-*)** — the Fable-lowering proofs; cheap to write, and they explain *why* A/C must exist (P1).
 4. **E (RS-*)** — semantic-divergence and shared-symbol proofs (P1/P2).

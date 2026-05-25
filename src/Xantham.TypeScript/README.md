@@ -15,13 +15,13 @@ Several wrappers in this project perform operations the F# type system cannot ma
 
 Each of these is sound only because of an *invariant* that holds for real-world TypeScript declarations. Those
 invariants are not assumed — they are **proven** as executable tests in
-[`tests/Xantham.TypeScript.Tests/Program.fs`](../../tests/Xantham.TypeScript.Tests/Program.fs), run with:
+[`tests/Xantham.TypeScript.Tests/Program.test.fs`](../../tests/Xantham.TypeScript.Tests/Program.test.fs), run with:
 
 ```bash
 npm run test:typescript
 ```
 
-Every proof carries a **stable ID** (`SF-n`, `XTK-n`, `ND-n`, `TC-n`, `SY-n`, `TR-n`, `NW-n`) embedded in its test
+Every proof carries a **stable ID** (`SF-n`, `XTK-n`, `ND-n`, `TC-n`, `OF-n`, `TF-n`, `EN-n`, `SY-n`, `TR-n`, `NW-n`) embedded in its test
 name. Wrapper XML docs cite these IDs, so when a proof fails you can jump straight from the broken invariant to the
 wrapper that relied on it (and vice versa).
 
@@ -80,7 +80,7 @@ Invariants that the classifier wrappers are *total* over real input — they nev
 
 ---
 
-The proofs below (suite **"Node invariants"** in `Program.fs`) sit one level lower than SF/XTK: rather than the
+The proofs below (suite **"Node invariants"** in `Program.test.fs`) sit one level lower than SF/XTK: rather than the
 `Source` model or the classifier wrappers, they pin down the **shape of the parsed AST and the answers the
 `TypeChecker` gives** for the narrow dialect that appears in real `.d.ts` files. Many run via `testSyntaxKind`,
 which **auto-skips** a fixture that contains no node of the relevant `SyntaxKind` — so a green run means "held
@@ -123,6 +123,47 @@ into checked types.
 | TC-7 | A `TypeOperator` node has no symbol. | `TypeOperatorNode` (symbol-free) |
 | TC-8 | A `readonly` `TypeOperator` resolves to the **same** type as its inner `.type`. | `readonly` operator transparency |
 | TC-9 | A non-`readonly` `TypeOperator` resolves to a **different** type than its inner `.type`. | `keyof`/`unique` operator effect |
+| TC-10 | Every `TypeNode` in the corpus resolves to a `Ts.Type` via the checker (`getTypeFromTypeNode` is `Some`). | `resolveTypeBase` syntax→type totality |
+
+### OF · Object Flags
+
+The type classifier in `XanTagKind.fs` resolves an object type's `ObjectFlags` through `typeFlagObjectKindSet`
+via a **throwing `Array.find`**. These proofs pin that the flags are mutually exclusive (so the first matching
+row is unambiguous) and that the `Reference`-keyed shape access is sound.
+
+| ID | Invariant | Backs |
+|----|-----------|-------|
+| OF-1 | A `Class`/`Interface` object type carrying `Reference` exposes type parameters or a `thisType`. | `InterfaceType` `typeParameters`/`thisType` access |
+| OF-2 | A `Class`/`Interface` object type **without** `Reference` has no type parameters and no `thisType`. | generic-vs-instantiated discrimination |
+| OF-3 | An object type's `ObjectFlags` are mutually exclusive — at most one of the classifier's primary object kinds is set. | `typeFlagObjectKindSet` first-match is unambiguous |
+| OF-4 | An object type carrying the `Tuple` flag always also carries `Reference`. | tuple sub-classification (`Tuple` ⇒ tuple reference) |
+| OF-5 | The curated `ObjectFlags` exclusive/inclusive map holds for every object type in the corpus. | `typeFlagObjectKindSet` row disjointness |
+
+### TF · Type Flags
+
+`typeFlagPrimaryKindSet`/`typeFlagLiteralKindSet` likewise classify a `Ts.Type`'s `TypeFlags` by a **throwing
+`Array.find`** with no `Ignore` fall-through. These proofs pin the flag algebra those tables assume.
+
+| ID | Invariant | Backs |
+|----|-----------|-------|
+| TF-1 | A `Union`+`Boolean` type's members are exactly the `true` and `false` literal types. | boolean type modelling |
+| TF-2 | A `Union`+`Boolean` type has exactly 2 union members. | boolean type modelling |
+| TF-3 | A `Literal` flag can occur without `EnumLiteral` (the corpus exercises non-enum literals). | literal sub-classifier coverage |
+| TF-4 | The curated `TypeFlags` exclusive/inclusive map holds for every type in the corpus. | `typeFlagPrimaryKindSet` row disjointness |
+| TF-5 | A type's primary-kind `TypeFlags` are mutually exclusive — at most one is set. | `typeFlagPrimaryKindSet` first-match is unambiguous |
+
+### EN · Enum Resolution
+
+How `Enum`/`EnumLiteral`-flagged types resolve to a symbol and value declaration — what lets the classifier route
+the whole-enum vs enum-member cases and read their declarations safely.
+
+| ID | Invariant | Backs |
+|----|-----------|-------|
+| EN-1 | A type with the `Enum` flag always also carries `EnumLiteral` and `NumberLiteral`. | enum type classification |
+| EN-2 | An `EnumLiteral` type does **not** always carry the `Enum` flag (observed) — separates whole-enum from enum-member. | `EnumLiteral` vs `Enum` discrimination |
+| EN-3 | A type with the `Enum` flag resolves to a symbol whose `valueDeclaration` is an `EnumDeclaration`. | enum symbol value-declaration access |
+| EN-4 | An `EnumLiteral` type also carrying `Enum`/`Union` resolves to a symbol with an `EnumDeclaration` `valueDeclaration`. | whole-enum literal resolution |
+| EN-5 | An `EnumLiteral` type **without** `Enum`/`Union` resolves to a symbol whose `valueDeclaration` is an `EnumMember`. | enum-member literal resolution |
 
 ### SY · Symbols & Identity
 
@@ -137,6 +178,7 @@ symbol lookups and treat node/symbol ids as keys.
 | SY-4 | Every node has a positive id (`ts.getNodeId`). | node identity / keying |
 | SY-5 | Every symbol has a positive id (`ts.getSymbolId`). | symbol identity / keying |
 | SY-6 | Every **non-transient** symbol has ≥1 declaration. | declaration enumeration |
+| SY-7 | A **transient** symbol may still carry declarations (observed) — transience alone does not imply zero declarations. | complement to SY-6: the declaration-presence guard keys on transience, not the converse |
 
 ### TR · Type References
 

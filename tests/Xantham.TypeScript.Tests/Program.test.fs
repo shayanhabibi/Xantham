@@ -32,7 +32,7 @@ type TestFixtures = AbsoluteFileSystem<This.``..``.fixtures.``.``>
 // has an unsound path; the proof ID in the test name says which one.
 //
 // Proofs carry a stable ID so wrapper XML docs can cite them precisely
-// (e.g. `<remarks>Totality proven by XTK-6 (Program.fs).</remarks>`). Two groups:
+// (e.g. `<remarks>Totality proven by XTK-6 (Program.test.fs).</remarks>`). Two groups:
 //
 //   SF  · Source File Model — invariants the TypeScript compiler guarantees about
 //                             source files, which the `Source` / `ExternalModule`
@@ -577,7 +577,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 let aString = ctx.Checker.typeToString a
                 let bString = ctx.Checker.typeToString b
                 if a = b then Testing.Assert.AreEqual(aString, bString))
-        runner.testCase "All TypeNodes can be resolved to a Type by the checker" <| fun _ ctx ->
+        runner.testCase "TC-10 · All TypeNodes resolve to a Type via the checker" <| fun _ ctx ->
             ctx.NodeMap.Values
             |> Seq.collect _.AsArray
             |> Seq.toArray
@@ -585,7 +585,11 @@ Spec.RunnerContext.make "Fable.TypeScript" [
             |> Array.filter ts.isTypeNode
             |> Array.map (unbox<Ts.TypeNode> >> ctx.Checker.getTypeFromTypeNode >> Option.ofObj)
             |> Array.iter (Flip.Expect.isSome "Types are some")
-        runner.testCase "Object Types with both Class/Interface and Reference flags have typars or a thisType" <| fun _ ctx ->
+    // ----------------------------------------------------------------------------------------------
+    //                                  OF - OBJECT FLAGS
+    // ----------------------------------------------------------------------------------------------
+    runner.testSuite "OF · Object Flags" <| fun _ ->
+        runner.testCase "OF-1 · Class/Interface object types with Reference have typars or thisType" <| fun _ ctx ->
             ctx.Types.Value
             |> Array.filter _.flags.HasFlag(Ts.TypeFlags.Object)
             |> unbox<Ts.ObjectType array>
@@ -601,7 +605,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     |> Flip.Expect.isTrue $"{ctx.Checker.typeToString typ}"
                 | _ -> ()
                 )
-        runner.testCase "Object Types that have Class/Interface but no Reference flags have no typars or thisType" <| fun test ctx ->
+        runner.testCase "OF-2 · Class/Interface object types without Reference have no typars or thisType" <| fun test ctx ->
             ctx.Types.Value
             |> Array.filter _.flags.HasFlag(Ts.TypeFlags.Object)
             |> unbox<Ts.ObjectType array>
@@ -617,7 +621,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                         |> (&&) (typ :?> Ts.InterfaceType |> _.thisType.IsNone)
                         |> Flip.Expect.isTrue "If not a reference but is a class/interface, then has no typars"
                         )
-        runner.testCase "Object Types have flags that are mutually exclusive" <| fun _ ctx ->
+        runner.testCase "OF-3 · ObjectFlags are mutually exclusive" <| fun _ ctx ->
             let exclusiveFlags = [
                 Ts.ObjectFlags.Class
                 Ts.ObjectFlags.Interface
@@ -645,14 +649,80 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     | [] | [ _ ] -> ()
                     | l -> failtest $"Expected no conflicting exclusive flags for ObjectTypes, but got %A{l}"
                 )
-        runner.testCase "ObjectTypes with Tuple Flag do not occur without the Reference flag" <| fun _ ctx ->
+        runner.testCase "OF-4 · Tuple object types never occur without the Reference flag" <| fun _ ctx ->
             ctx.Types.Value
             |> Array.filter _.flags.HasFlag(Ts.TypeFlags.Object)
             |> unbox<Ts.ObjectType array>
             |> Array.filter (_.objectFlags.HasFlag(Ts.ObjectFlags.Reference) >> not)
             |> Array.filter _.objectFlags.HasFlag(Ts.ObjectFlags.Tuple)
             |> Flip.Expect.isEmpty "Expected no Tuple Types without Reference flag"
-        runner.testCase "TypeFlags with the Union and Boolean flags set contain both true and false literals" <| fun _ ctx ->
+        runner.testCase "OF-5 · ObjectFlags exclusive/inclusive map holds over the corpus" <| fun _ ctx ->
+            let flags = [
+                Ts.ObjectFlags.Class, "Class"
+                Ts.ObjectFlags.Interface, "Interface"
+                Ts.ObjectFlags.Reference, "Reference"
+                Ts.ObjectFlags.Tuple, "Tuple"
+                Ts.ObjectFlags.Anonymous, "Anonymous"
+                Ts.ObjectFlags.Mapped, "Mapped"
+                Ts.ObjectFlags.Instantiated, "Instantiated"
+                Ts.ObjectFlags.ObjectLiteral, "ObjectLiteral"
+                Ts.ObjectFlags.EvolvingArray, "EvolvingArray"
+                Ts.ObjectFlags.ObjectLiteralPatternWithComputedProperties, "ObjectLiteralPatternWithComputedProperties"
+                Ts.ObjectFlags.ReverseMapped, "ReverseMapped"
+                Ts.ObjectFlags.JsxAttributes, "JsxAttributes"
+                Ts.ObjectFlags.JSLiteral, "JSLiteral"
+                Ts.ObjectFlags.FreshLiteral, "FreshLiteral"
+                Ts.ObjectFlags.ArrayLiteral, "ArrayLiteral"
+                Ts.ObjectFlags.SingleSignatureType, "SingleSignatureType"
+                Ts.ObjectFlags.ClassOrInterface, "ClassOrInterface"
+                Ts.ObjectFlags.ContainsSpread, "ContainsSpread"
+                Ts.ObjectFlags.ObjectRestType, "ObjectRestType"
+                Ts.ObjectFlags.InstantiationExpressionType, "InstantiationExpressionType"
+            ]
+            let flagTracker = flags |> List.map (fun (flag, _) -> KeyValuePair(flag, enum<Ts.ObjectFlags> 0)) |> Dictionary
+            let registerFlags (input: Ts.ObjectFlags) =
+                for flag, _ in flags do
+                    if input.HasFlag(flag) then
+                        flagTracker[flag] <- flagTracker[flag] ||| input
+            let getName flag = flags |> List.find (fst >> (=) flag) |> snd
+            ctx.Types.Value
+            |> Array.filter _.flags.HasFlag(Ts.TypeFlags.Object)
+            |> unbox<Ts.ObjectType array>
+            |> Array.iter (_.objectFlags >> registerFlags)
+            let flagMap = Map [
+                    for kv in flagTracker do
+                        let flagName = getName kv.Key
+                        kv.Key,
+                        flags
+                        |> List.filter (fst >> kv.Value.HasFlag >> not)
+                        |> List.map (snd >> sprintf "    Ts.ObjectFlags.%s")
+                        |> String.concat "\n"
+                        |> sprintf "Ts.ObjectFlags.%s, [\n%s\n]" flagName
+            ]
+            ctx.Types.Value
+            |> Array.filter _.flags.HasFlag(Ts.TypeFlags.Object)
+            |> unbox<Ts.ObjectType array>
+            |> Array.iter (fun typ ->
+                let objectFlags = typ.objectFlags
+                flags
+                |> List.filter (fst >> objectFlags.HasFlag)
+                |> List.filter (fst >> Map.find >> funApply Spec.ObjectFlags.exclusiveMasks >> (&&&) objectFlags >> (<>) (enum 0))
+                |> List.map (fst >> fun key -> flagMap[key])
+                |> function
+                    | [] -> ()
+                    | incorrectMaskMaps ->
+                    let typeFlags =
+                        flags
+                        |> List.filter (fst >> objectFlags.HasFlag)
+                        |> List.map snd
+                    incorrectMaskMaps
+                    |> Flip.Expect.isEmpty (String.concat "\n" incorrectMaskMaps |> sprintf "%A got a different exclusive objectflag map:\n%s" typeFlags)
+                )
+    // ----------------------------------------------------------------------------------------------
+    //                                  TF - TYPE FLAGS
+    // ----------------------------------------------------------------------------------------------
+    runner.testSuite "TF · Type Flags" <| fun _ ->
+        runner.testCase "TF-1 · Union+Boolean types contain both true and false literals" <| fun _ ctx ->
             ctx.Types.Value
             |> Array.filter _.flags.HasFlag(Ts.TypeFlags.Union)
             |> Array.filter _.flags.HasFlag(Ts.TypeFlags.Boolean)
@@ -661,7 +731,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 |> _.types.AsArray
                 |> Flip.Expect.containsAll [ ctx.Checker.getTrueType(); ctx.Checker.getFalseType() ] ""
                 )
-        runner.testCase "TypeFlags with the Union and Boolean flags always have 2 types in the union" <| fun _ ctx ->
+        runner.testCase "TF-2 · Union+Boolean types have exactly 2 union members" <| fun _ ctx ->
             ctx.Types.Value
             |> Array.filter _.flags.HasFlag(Ts.TypeFlags.Union)
             |> Array.filter _.flags.HasFlag(Ts.TypeFlags.Boolean)
@@ -670,12 +740,12 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 |> _.types.AsArray
                 |> Flip.Expect.hasLength 2 "Do not expect any less or more than 2 types if both union and boolean flags are set"
                 )
-        runner.testCase "Literal flags can occur without the EnumLiteral flag" <| fun _ ctx ->
+        runner.testCase "TF-3 · Literal flag can occur without the EnumLiteral flag" <| fun _ ctx ->
             ctx.Types.Value
             |> Array.filter _.flags.HasFlag(Ts.TypeFlags.Literal)
             |> Array.filter (_.flags.HasFlag(Ts.TypeFlags.EnumLiteral) >> not)
             |> Flip.Expect.isNonEmpty ""
-        runner.testCase "Check known exclusive/inclusive typeflag map" <| fun _ ctx ->
+        runner.testCase "TF-4 · TypeFlags exclusive/inclusive map holds over the corpus" <| fun _ ctx ->
             let flags = [
                 Ts.TypeFlags.Boolean, "Boolean"
                 Ts.TypeFlags.Enum, "Enum"
@@ -756,7 +826,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     incorrectMaskMaps
                     |> Flip.Expect.isEmpty (String.concat "\n" incorrectMaskMaps |> sprintf "%A got a different exclusive typemap:\n%s" typeFlags)
                 )
-        runner.testCase "TypeFlags have mutually exclusive flags" <| fun _ ctx ->
+        runner.testCase "TF-5 · TypeFlags are mutually exclusive" <| fun _ ctx ->
             let exclusiveFlags = List.distinct [
                 Ts.TypeFlags.Any, "Any"
                 Ts.TypeFlags.Unknown, "Unknown"
@@ -794,69 +864,11 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     | [] | [ _ ] -> ()
                     | l -> failtest $"Expected no conflicting exclusive flags for TypeFlags, but got %A{l |> List.map snd}"
                 )
-        runner.testCase "Check known inclusive/exclusive ObjectFlags maps" <| fun _ ctx ->
-            let flags = [
-                Ts.ObjectFlags.Class, "Class"
-                Ts.ObjectFlags.Interface, "Interface"
-                Ts.ObjectFlags.Reference, "Reference"
-                Ts.ObjectFlags.Tuple, "Tuple"
-                Ts.ObjectFlags.Anonymous, "Anonymous"
-                Ts.ObjectFlags.Mapped, "Mapped"
-                Ts.ObjectFlags.Instantiated, "Instantiated"
-                Ts.ObjectFlags.ObjectLiteral, "ObjectLiteral"
-                Ts.ObjectFlags.EvolvingArray, "EvolvingArray"
-                Ts.ObjectFlags.ObjectLiteralPatternWithComputedProperties, "ObjectLiteralPatternWithComputedProperties"
-                Ts.ObjectFlags.ReverseMapped, "ReverseMapped"
-                Ts.ObjectFlags.JsxAttributes, "JsxAttributes"
-                Ts.ObjectFlags.JSLiteral, "JSLiteral"
-                Ts.ObjectFlags.FreshLiteral, "FreshLiteral"
-                Ts.ObjectFlags.ArrayLiteral, "ArrayLiteral"
-                Ts.ObjectFlags.SingleSignatureType, "SingleSignatureType"
-                Ts.ObjectFlags.ClassOrInterface, "ClassOrInterface"
-                Ts.ObjectFlags.ContainsSpread, "ContainsSpread"
-                Ts.ObjectFlags.ObjectRestType, "ObjectRestType"
-                Ts.ObjectFlags.InstantiationExpressionType, "InstantiationExpressionType"
-            ]
-            let flagTracker = flags |> List.map (fun (flag, _) -> KeyValuePair(flag, enum<Ts.ObjectFlags> 0)) |> Dictionary
-            let registerFlags (input: Ts.ObjectFlags) =
-                for flag, _ in flags do
-                    if input.HasFlag(flag) then
-                        flagTracker[flag] <- flagTracker[flag] ||| input
-            let getName flag = flags |> List.find (fst >> (=) flag) |> snd
-            ctx.Types.Value
-            |> Array.filter _.flags.HasFlag(Ts.TypeFlags.Object)
-            |> unbox<Ts.ObjectType array>
-            |> Array.iter (_.objectFlags >> registerFlags)
-            let flagMap = Map [
-                    for kv in flagTracker do
-                        let flagName = getName kv.Key
-                        kv.Key,
-                        flags
-                        |> List.filter (fst >> kv.Value.HasFlag >> not)
-                        |> List.map (snd >> sprintf "    Ts.ObjectFlags.%s")
-                        |> String.concat "\n"
-                        |> sprintf "Ts.ObjectFlags.%s, [\n%s\n]" flagName
-            ]
-            ctx.Types.Value
-            |> Array.filter _.flags.HasFlag(Ts.TypeFlags.Object)
-            |> unbox<Ts.ObjectType array>
-            |> Array.iter (fun typ ->
-                let objectFlags = typ.objectFlags
-                flags
-                |> List.filter (fst >> objectFlags.HasFlag)
-                |> List.filter (fst >> Map.find >> funApply Spec.ObjectFlags.exclusiveMasks >> (&&&) objectFlags >> (<>) (enum 0))
-                |> List.map (fst >> fun key -> flagMap[key])
-                |> function
-                    | [] -> ()
-                    | incorrectMaskMaps ->
-                    let typeFlags =
-                        flags
-                        |> List.filter (fst >> objectFlags.HasFlag)
-                        |> List.map snd
-                    incorrectMaskMaps
-                    |> Flip.Expect.isEmpty (String.concat "\n" incorrectMaskMaps |> sprintf "%A got a different exclusive objectflag map:\n%s" typeFlags)
-                )
-        runner.testCase "Enum flag always exists with EnumLiteral and NumberLiteral" <| fun _ ctx ->
+    // ----------------------------------------------------------------------------------------------
+    //                                  EN - ENUM RESOLUTION
+    // ----------------------------------------------------------------------------------------------
+    runner.testSuite "EN · Enum Resolution" <| fun _ ->
+        runner.testCase "EN-1 · Enum flag always co-occurs with EnumLiteral and NumberLiteral" <| fun _ ctx ->
             ctx.Types.Value
             |> Array.filter _.flags.HasFlag(Ts.TypeFlags.Enum)
             |> Array.iter (fun typ ->
@@ -865,18 +877,18 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 typ.flags.HasFlag(Ts.TypeFlags.NumberLiteral)
                 |> Flip.Expect.isTrue $"Enum did not have NumberLiteral flag: {ctx.Checker.typeToString typ}"
                 )
-        runner.testCase "EnumLiteral flag does not always exist with Enum flag" <| fun test ctx ->
+        runner.testCase "EN-2 · EnumLiteral does not always co-occur with the Enum flag (observed)" <| fun test ctx ->
             ctx.Types.Value
             |> Array.filter _.flags.HasFlag(Ts.TypeFlags.EnumLiteral)
             |> Array.filter (_.flags.HasFlag(Ts.TypeFlags.Enum) >> not)
             |> function
                 | [||] -> test.skip()
                 | _ -> Expect.pass()
-        runner.testCase "Enum flag always resolves to a symbol with a value declaration that is a enum declaration" <| fun _ ctx ->
+        runner.testCase "EN-3 · Enum flag resolves to a symbol with an EnumDeclaration value declaration" <| fun _ ctx ->
             ctx.Types.Value
             |> Array.filter _.flags.HasFlag(Ts.TypeFlags.Enum)
             |> Array.iter (_.symbol.valueDeclaration >> Flip.Expect.wantSome "" >> _.kind >> (=) Ts.SyntaxKind.EnumDeclaration >> Flip.Expect.isTrue "" )
-        runner.testCase "EnumLiterals with Enum or Union flag always resolve to a symbol with a EnumDeclaration value declaration" <| fun _ ctx ->
+        runner.testCase "EN-4 · EnumLiterals with Enum or Union resolve to an EnumDeclaration value declaration" <| fun _ ctx ->
             ctx.Types.Value
             |> Array.filter _.flags.HasFlag(Ts.TypeFlags.EnumLiteral)
             |> fun enumLiterals ->
@@ -893,7 +905,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     )
                 check Ts.TypeFlags.Enum
                 check Ts.TypeFlags.Union
-        runner.testCase "EnumLiterals without Enum or Union flag always resolve to their symbol which has a value declaration which is an EnumMember" <| fun _ ctx ->
+        runner.testCase "EN-5 · EnumLiterals without Enum or Union resolve to an EnumMember value declaration" <| fun _ ctx ->
             ctx.Types.Value
             |> Array.filter _.flags.HasFlag(Ts.TypeFlags.EnumLiteral)
             |> Array.filter (_.flags.HasFlag(Ts.TypeFlags.Enum) >> not)
@@ -905,6 +917,53 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                     | Patterns.Node.EnumMember _ -> ()
                     | node -> failtest $"Expected value declaration to be an enum member, but got {node.kind.Name} instead. SymbolName: {symbol.symbolName}; NodeText: {node.getText()}; TypeText: {ctx.Checker.typeToString typ}"
                 )
+        let inline makeEnumLiteralCheck checkKind name idx =
+            runner.testSyntaxKind<Ts.EnumMember> Ts.SyntaxKind.EnumMember $"EN-%i{idx} - EnumLiterals can have the %s{name} flag" <| fun ctx test nodes ->
+                nodes
+                |> Array.map ctx.Checker.getTypeAtLocation
+                |> Array.filter _.flags.HasFlag(checkKind)
+                |> function
+                    | arr when Array.isEmpty arr |> not -> Expect.pass()
+                    | _ ->
+                    ctx.Types.Value
+                    |> Array.filter _.flags.HasFlag(Ts.TypeFlags.EnumLiteral)
+                    |> Array.filter (_.flags.HasFlag(Ts.TypeFlags.Enum) >> not)
+                    |> Array.filter (_.flags.HasFlag(Ts.TypeFlags.Union) >> not)
+                    |> Array.filter _.flags.HasFlag(checkKind)
+                    |> function
+                        | [| |] -> test.skip()
+                        | _ -> Expect.pass()
+        makeEnumLiteralCheck Ts.TypeFlags.StringLiteral "StringLiteral" 6
+        makeEnumLiteralCheck Ts.TypeFlags.NumberLiteral "NumberLiteral" 7
+        makeEnumLiteralCheck Ts.TypeFlags.BigIntLiteral "BigIntLiteral" 8
+        makeEnumLiteralCheck Ts.TypeFlags.BooleanLiteral "BooleanLiteral" 9
+        makeEnumLiteralCheck Ts.TypeFlags.Null "Null" 10
+        runner.testCase "All enum member types can be parsed into a EnumMember" <| fun _ ctx ->
+            ctx.Types.Value
+            |> Array.filter _.flags.HasFlag(Ts.TypeFlags.EnumLiteral)
+            |> Array.filter (_.flags.HasFlag(Ts.TypeFlags.Enum) >> not)
+            |> Array.filter (_.flags.HasFlag(Ts.TypeFlags.Union) >> not)
+            |> Array.map EnumMember.TryCreate
+            |> Flip.Expect.all _.IsSome ""
+        runner.testSyntaxKind<Ts.EnumMember> Ts.SyntaxKind.EnumMember "All enum member nodes can be parsed into a EnumMember" <| fun ctx _ nodes ->
+            nodes
+            |> Array.map(fun node -> EnumMember.TryCreate(node, ctx.Checker))
+            |> Flip.Expect.all _.IsSome ""
+            
+        // This actually shows why we should resolve all declarations that contribute to an enum declaration, because
+        // we otherwise gloss over any aliases existing within the declarations
+        runner.testSyntaxKind<Ts.EnumMember> Ts.SyntaxKind.EnumMember "Not all EnumMember declarations are the canonical symbol-value-declarations" <| fun ctx test nodes ->
+            failtest "DANGER - Recheck this, as a value declaration may be different because an enum points to another enum value declaration but as an alias."
+            let nodeIds = nodes |> Array.map ts.getNodeId
+            nodes
+            |> Array.map (ctx.Checker.getTypeAtLocation >> _.unsafeGetCanonicalSymbol() >> _.valueDeclaration.Value >> ts.getNodeId)
+            |> fun compIds ->
+                if compIds = nodeIds then
+                    test.skip()
+                else
+                    printfn "%A\n%A" nodeIds compIds
+                    Expect.pass()
+            
     runner.testSuite "SY · Symbols & Identity" <| fun _ ->
         runner.testSyntaxKind<Ts.InterfaceDeclaration> Ts.SyntaxKind.InterfaceDeclaration "SY-1 · All interfaces have symbols" <| fun ctx _ nodes ->
             let checker = ctx.Checker
@@ -949,7 +1008,7 @@ Spec.RunnerContext.make "Fable.TypeScript" [
         Symbols that are transient can still have declarations.
         Would have to check against internal CheckFlags to disambiguate.
         *)
-        runner.testCase "Symbols that are transient do not necessarily have no declarations" <| fun test ctx ->
+        runner.testCase "SY-7 · Transient symbols may still carry declarations (observed)" <| fun test ctx ->
             ctx.NodeMap.Values
             |> Seq.collect _.AsArray
             |> Seq.toArray
