@@ -402,5 +402,7 @@ module Chain =
         let inline stringContains subString msg subject = Expect.stringContains subject subString msg; subject
         let inline isError msg x = Expect.isError x msg; x
         let inline isSome msg x = Flip.Expect.isSome msg x; x
+        let inline wantSome msg x = Flip.Expect.wantSome msg x
+        let inline wantOk msg x = Flip.Expect.wantOk msg x
         let inline isNone msg x = Flip.Expect.isNone msg x; x
         let inline containsAll expected msg actual = Flip.Expect.containsAll  expected msg actual ; actual

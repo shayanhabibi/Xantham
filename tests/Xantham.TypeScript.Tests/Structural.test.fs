@@ -5,7 +5,7 @@ open Xantham.Mocha
 open Xantham.Fable
 open TypeScript
 
-ftestSuite "LM - Lookup Map" <| fun _ ->
+testSuite "LM - Lookup Map" <| fun _ ->
     testSuite "LM1 - Each DU case has a constructor value" <| fun _ ->
         let inline makeArrTestCase (name: string) (arr: (_ * (obj -> 'T)) array) =
             testCase name <| fun _ ->

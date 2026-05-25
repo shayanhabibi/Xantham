@@ -341,6 +341,15 @@ module Internal =
             Ts.SyntaxKind.PrefixUnaryExpression >=> LiteralTokenNodes.PrefixUnaryExpression 
             Ts.SyntaxKind.NoSubstitutionTemplateLiteral >=> LiteralTokenNodes.NoSubstitutionTemplateLiteral
         ]
+    let typeFlagLiteralSet: (Ts.TypeFlags * (obj -> LiteralType))[] =
+        [|
+            Ts.TypeFlags.UniqueESSymbol >-> LiteralType.UniqueESSymbol
+            Ts.TypeFlags.EnumLiteral >-> LiteralType.Enum
+            Ts.TypeFlags.BooleanLiteral >-> LiteralType.Boolean
+            Ts.TypeFlags.BigIntLiteral >-> LiteralType.BigInt
+            Ts.TypeFlags.NumberLiteral >-> LiteralType.Number
+            Ts.TypeFlags.StringLiteral >-> LiteralType.String
+        |]
 
     let typeFlagLiteralKindSet: (Ts.TypeFlags * (obj -> TypeFlagLiteral))[] =
         [|
@@ -2248,6 +2257,88 @@ module Patterns =
         let (|CanBeType|_|): _ -> bool = function
             | IsType _ | IsExportedType _ -> true
             | _ -> false
+
+type Ts.Type with
+    [<EmitProperty "checker">]
+    member inline this.checker: Ts.TypeChecker = jsNative
+and [<RequireQualifiedAccess>] PrimitiveSingleton =
+    | Any
+    | Unknown
+    | String
+    | Number
+    | Boolean
+    | BigInt
+    | ESSymbol
+    | Void
+    | Undefined
+    | Null
+    | Never
+    | NonPrimitive
+and BooleanLiteral = bool
+and [<RequireQualifiedAccess>] NumberLiteral =
+    | Float of float
+    | Int of int
+and [<RequireQualifiedAccess>] EnumMemberType =
+    | String of Ts.StringLiteral
+    | BigInt of Ts.BigIntLiteral
+    | Boolean of BooleanLiteral
+    | Number of NumberLiteral
+and [<RequireQualifiedAccess>] EnumType = EnumType of Ts.EnumDeclaration
+and [<RequireQualifiedAccess>] LiteralType =
+    | Number of NumberLiteral
+    | BigInt of Ts.BigIntLiteralType
+    | Boolean of BooleanLiteral
+    | String of Ts.StringLiteral
+    | UniqueESSymbol of Ts.UniqueESSymbolType
+    | Enum of EnumType
+    | EnumMember of EnumMemberType
+    static member inline TryCreate(typ: Ts.Type) =
+        match typ.flags with
+        | flags when flags.HasFlag Ts.TypeFlags.UniqueESSymbol ->
+            typ :?> Ts.UniqueESSymbolType
+            |> LiteralType.UniqueESSymbol
+        | flags when flags.HasFlag Ts.TypeFlags.EnumLiteral && (flags.HasFlag Ts.TypeFlags.Enum || flags.HasFlag Ts.TypeFlags.Union) ->
+            // resolves to a enumdeclaration
+            typ.symbol.valueDeclaration.Value :?> Ts.EnumDeclaration
+            |> EnumType.EnumType
+            |> LiteralType.Enum
+        | flags when flags.HasFlag Ts.TypeFlags.EnumLiteral && not(flags.HasFlag Ts.TypeFlags.Enum || flags.HasFlag Ts.TypeFlags.Union) ->
+            typ.symbol.valueDeclaration.Value :?> Ts.EnumMember
+            |> failwith ""
+        | flags when flags.HasFlag Ts.TypeFlags.Enum ->
+            let value =
+                typ :?> Ts.NumberLiteralType
+                |> _.value
+            match JS.Constructors.Number.isSafeInteger value with
+            | true -> int value |> NumberLiteral.Int |> LiteralType.Number
+            | false -> value |> NumberLiteral.Float |> LiteralType.Number
+        // | flags when flags.HasFlag Ts.TypeFlags.EnumLiteral 
+and [<RequireQualifiedAccess>] InstantiablePrimitiveType =
+    | Index
+    | StringMapping
+    | TemplateLiteral
+and [<RequireQualifiedAccess>] StructuralType =
+    | Object
+    | Union
+    | Intersection
+and [<RequireQualifiedAccess>] TypeVariable =
+    | TypeParameter
+    | IndexedAccess
+and [<RequireQualifiedAccess>] InstantiableNonPrimitive =
+    | TypeVariable of TypeVariable
+    | Conditional
+    | Substitution
+
+and [<RequireQualifiedAccess>] ClassType =
+    // reference type flag
+    | Generic
+    // We'll discount 'thisType' as being reference
+    | Concrete
+and [<RequireQualifiedAccess>] InterfaceType =
+    // reference type flag
+    | Generic
+    // We'll discount 'thisType' as being reference
+    | Concrete
 
 type ISymbol = interface end
     
