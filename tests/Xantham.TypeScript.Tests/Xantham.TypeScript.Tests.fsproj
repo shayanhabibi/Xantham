@@ -12,7 +12,7 @@
         <Compile Include="Spec.fs" />
         <Compile Include="Program.test.fs" />
         <Compile Include="Structural.test.fs" />
-        <Content Include="output\Program.fs.js" />
+        <Folder Include="output\" />
     </ItemGroup>
 
     <ItemGroup>

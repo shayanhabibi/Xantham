@@ -2271,9 +2271,15 @@ type Ts.Type with
         then this.unsafeGetCanonicalSymbol() |> Some
         else None
 
+
 type EnumMember = {
+    SymbolKey: int
+    NodeKey: int
+    AliasKeys: int array
+    TypeKey: int
     Symbol: Ts.Symbol
     Node: Ts.EnumMember
+    Aliases: Ts.EnumMember array
     Type: Ts.LiteralType
     Value: Choice<string, int, float>
 } with
@@ -2290,12 +2296,20 @@ type EnumMember = {
     static member Create(typ: Ts.Type) =
         let value = EnumMember.getValue typ
         let symbol = typ.unsafeGetCanonicalSymbol()
-        let declaration = symbol.valueDeclaration.Value :?> Ts.EnumMember
+        let canonicalDeclaration = symbol.valueDeclaration.Value :?> Ts.EnumMember
+        let decls =
+            symbol.declarations.Value.AsArray
+            |> Array.filter (ts.getNodeId >> (<>) (ts.getNodeId canonicalDeclaration))
         {
             Symbol = symbol
-            Node = declaration
+            Node = canonicalDeclaration
             Type = typ :?> Ts.LiteralType
+            Aliases = unbox<Ts.EnumMember array> decls
             Value = value
+            SymbolKey = ts.getSymbolId symbol
+            NodeKey = ts.getNodeId canonicalDeclaration
+            TypeKey = typ.id
+            AliasKeys = decls |> Array.map ts.getNodeId
         }
     static member TryCreate(typ: Ts.Type) =
         match typ.flags with
@@ -2309,19 +2323,100 @@ type EnumMember = {
         let typ = checker.getTypeAtLocation node
         let value = EnumMember.getValue typ
         let symbol = typ.unsafeGetCanonicalSymbol()
-        let node = symbol.valueDeclaration.Value
+        let canonicalDeclaration = symbol.valueDeclaration.Value
+        let decls =
+            symbol.declarations.Value.AsArray
+            |> Array.filter (ts.getNodeId >> (<>) (ts.getNodeId canonicalDeclaration))
         {
             Symbol = symbol
-            Node = node :?> Ts.EnumMember
+            Node = canonicalDeclaration :?> Ts.EnumMember
             Type = typ :?> Ts.LiteralType
+            Aliases = unbox<Ts.EnumMember array> decls
             Value = value
+            SymbolKey = ts.getSymbolId symbol
+            NodeKey = ts.getNodeId canonicalDeclaration
+            TypeKey = typ.id
+            AliasKeys = decls |> Array.map ts.getNodeId
         }
     static member TryCreate(node: Ts.Node, checker: Ts.TypeChecker) =
         match node with
         | Patterns.Node.EnumMember node -> EnumMember.Create(node,checker) |> Some
         | _ -> None
+    static member Create(symbol: Ts.Symbol, checker: Ts.TypeChecker) =
+        let canonicalDeclaration = symbol.valueDeclaration.Value
+        let decls =
+            symbol.declarations.Value.AsArray
+            |> Array.filter (ts.getNodeId >> (<>) (ts.getNodeId canonicalDeclaration))
+        let typ = checker.getTypeOfSymbolAtLocation(symbol, canonicalDeclaration)
+        let value = EnumMember.getValue typ
+        {
+            Symbol = symbol
+            Node = canonicalDeclaration :?> Ts.EnumMember
+            Type = typ :?> Ts.LiteralType
+            Aliases = unbox<Ts.EnumMember array> decls
+            Value = value
+            SymbolKey = ts.getSymbolId symbol
+            NodeKey = ts.getNodeId canonicalDeclaration
+            TypeKey = typ.id
+            AliasKeys = decls |> Array.map ts.getNodeId
+        }
+    static member TryCreate(symbol: Ts.Symbol, checker: Ts.TypeChecker) =
+        let canonicalSymbol =
+            if symbol.flags.HasFlag Ts.SymbolFlags.Alias then
+                checker.getAliasedSymbol symbol
+            else checker.getMergedSymbol symbol
+        if canonicalSymbol.flags.HasFlag(Ts.SymbolFlags.EnumMember) then
+            EnumMember.Create(canonicalSymbol, checker) |> Some
+        else None
         
-    
+type EnumDeclaration = {
+    SymbolKey: int
+    NodeKey: int
+    TypeKey: int
+    Name: string
+    Symbol: Ts.Symbol
+    Node: Ts.EnumDeclaration
+    Type: Ts.EnumType
+    Members: EnumMember array
+} with
+    static member inline private getMembers (checker: Ts.TypeChecker) (enumDecl: Ts.EnumDeclaration) =
+        enumDecl.members.AsArray
+        |> Array.map (fun node -> EnumMember.Create(node, checker))
+    static member inline private getCanonicalSymbol (checker: Ts.TypeChecker) (symbol: Ts.Symbol) =
+        if symbol.flags.HasFlag(Ts.SymbolFlags.Alias) then
+            checker.getAliasedSymbol symbol
+        else checker.getMergedSymbol symbol
+    static member Create(symbol: Ts.Symbol, checker: Ts.TypeChecker) =
+        let symbol = EnumDeclaration.getCanonicalSymbol checker symbol
+        let node = symbol.valueDeclaration.Value :?> Ts.EnumDeclaration
+        let typ = checker.getTypeAtLocation node
+        {
+            SymbolKey = ts.getSymbolId symbol
+            NodeKey = ts.getNodeId node
+            TypeKey = typ.id
+            Name = symbol.name
+            Symbol = symbol
+            Node = node
+            Type = typ :?> Ts.EnumType
+            Members = EnumDeclaration.getMembers checker node
+        }
+    static member Create(node: Ts.EnumDeclaration, checker: Ts.TypeChecker) =
+        node.name
+        |> checker.getSymbolAtLocation
+        |> Option.get
+        |> fun symbol -> EnumDeclaration.Create(symbol, checker)
+    static member Create(typ: Ts.EnumType) = EnumDeclaration.Create(typ.symbol, typ.checker)
+    static member TryCreate(node: Ts.Node, checker: Ts.TypeChecker) =
+        match node with
+        | Patterns.Node.EnumDeclaration enumDecl ->
+            EnumDeclaration.Create(enumDecl, checker)
+            |> Some
+        | _ -> None
+    static member TryCreate(typ: Ts.Type) =
+        if typ.flags.HasFlag(Ts.TypeFlags.Enum) then
+            EnumDeclaration.Create(typ.symbol, typ.checker)
+            |> Some
+        else None
 
 and [<RequireQualifiedAccess>] PrimitiveSingleton =
     | Any

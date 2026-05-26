@@ -383,6 +383,8 @@ module Flip =
 module Chain =
     [<RequireQualifiedAccess>]
     module Expect =
+        let inline skipIfEmpty (collection: 'a when 'a :> 'b seq) = if collection :> 'b seq |> Seq.isEmpty then Expect.skip(); None else Some collection
+        let inline skipIf (condition: 'a -> bool) (input: 'a) = if condition input then Expect.skip(); None else Some input
         let inline equal expected msg actual = Expect.equal actual expected msg; actual
         let inline notEqual expected msg actual = Expect.notEqual actual expected msg; actual
         let inline isNull msg actual = Flip.Expect.isNull msg actual; actual

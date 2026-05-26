@@ -944,16 +944,23 @@ Spec.RunnerContext.make "Fable.TypeScript" [
             |> Array.filter (_.flags.HasFlag(Ts.TypeFlags.Enum) >> not)
             |> Array.filter (_.flags.HasFlag(Ts.TypeFlags.Union) >> not)
             |> Array.map EnumMember.TryCreate
-            |> Flip.Expect.all _.IsSome ""
+            |> Chain.Expect.skipIfEmpty
+            |> Option.iter (Flip.Expect.all _.IsSome "")
         runner.testSyntaxKind<Ts.EnumMember> Ts.SyntaxKind.EnumMember "All enum member nodes can be parsed into a EnumMember" <| fun ctx _ nodes ->
             nodes
             |> Array.map(fun node -> EnumMember.TryCreate(node, ctx.Checker))
-            |> Flip.Expect.all _.IsSome ""
+            |> Chain.Expect.skipIfEmpty
+            |> Option.iter (Flip.Expect.all _.IsSome "")
+        runner.testCase "All enum member symbols can be parsed into a EnumMember" <| fun _ ctx ->
+            ctx.Symbols.Value
+            |> Array.filter _.flags.HasFlag(Ts.SymbolFlags.EnumMember)
+            |> Array.map (fun symbol -> EnumMember.TryCreate(symbol, ctx.Checker))
+            |> Chain.Expect.skipIfEmpty
+            |> Option.iter (Flip.Expect.all _.IsSome "")
             
         // This actually shows why we should resolve all declarations that contribute to an enum declaration, because
         // we otherwise gloss over any aliases existing within the declarations
         runner.testSyntaxKind<Ts.EnumMember> Ts.SyntaxKind.EnumMember "Not all EnumMember declarations are the canonical symbol-value-declarations" <| fun ctx test nodes ->
-            failtest "DANGER - Recheck this, as a value declaration may be different because an enum points to another enum value declaration but as an alias."
             let nodeIds = nodes |> Array.map ts.getNodeId
             nodes
             |> Array.map (ctx.Checker.getTypeAtLocation >> _.unsafeGetCanonicalSymbol() >> _.valueDeclaration.Value >> ts.getNodeId)
@@ -963,7 +970,109 @@ Spec.RunnerContext.make "Fable.TypeScript" [
                 else
                     printfn "%A\n%A" nodeIds compIds
                     Expect.pass()
-            
+        runner.testSyntaxKind<Ts.EnumDeclaration> Ts.SyntaxKind.EnumDeclaration "Ts.EnumMembers can resolve to a subset of EnumMembers (due to aliases)" <| fun ctx _ nodes ->
+            nodes
+            |> Array.map _.members.AsArray
+            |> Array.filter (fun arr ->
+                arr
+                |> Array.map (fun node -> EnumMember.Create(node, ctx.Checker))
+                |> Array.distinctBy _.SymbolKey
+                |> function
+                    | carr when Array.length carr = Array.length arr -> false
+                    | carr when Array.length arr > Array.length carr -> true
+                    | _ -> failtest "Enum declaration should not have more members than declared"
+                )
+            |> Chain.Expect.skipIfEmpty
+            |> Option.iter ignore
+        runner.testSyntaxKind<Ts.EnumDeclaration> Ts.SyntaxKind.EnumDeclaration "All Enum declarations resolve to a symbol which has a value declaration, one declaration, and a Enum flag" <| fun ctx _ nodes ->
+            nodes
+            |> Array.map (_.name >> ctx.Checker.getSymbolAtLocation)
+            |> Chain.Expect.all _.IsSome ""
+            |> Chain.Expect.all _.Value.valueDeclaration.IsSome ""
+            |> Chain.Expect.all (_.Value.declarations >> Option.exists _.Count.Equals(1)) ""
+            |> Flip.Expect.all _.Value.flags.HasFlag(Ts.SymbolFlags.Enum) ""
+        runner.testSyntaxKind<Ts.PropertySignature> Ts.SyntaxKind.PropertySignature "All PropertySignatures resolve to a symbol which has a value declaration" <| fun ctx _ nodes ->
+            nodes
+            |> Array.map (_.name >> unbox >> ctx.Checker.getSymbolAtLocation)
+            |> Array.iter (Chain.Expect.wantSome "PropertySignature should have a symbol associated with the name" >> fun symbol ->
+                symbol.valueDeclaration
+                |> Flip.Expect.isSome "PropertySignature should have a value declaration value"
+                symbol.flags.HasFlag(Ts.SymbolFlags.Property)
+                |> Flip.Expect.isTrue "PropertySignature symbol should have the Property symbol flag"
+                )
+        runner.testSyntaxKind<Ts.PropertyDeclaration> Ts.SyntaxKind.PropertyDeclaration  "All PropertyDeclarations resolve to a symbol which has a value declaratiton" <| fun ctx _ nodes ->
+            nodes
+            |> Array.map (_.name >> unbox >> ctx.Checker.getSymbolAtLocation)
+            |> Array.iter (Chain.Expect.wantSome "PropertyDeclaration should have a symbol associated with the name" >> fun symbol ->
+                symbol.valueDeclaration
+                |> Flip.Expect.isSome "PropertyDeclaration should have a value declaration value"
+                symbol.flags.HasFlag(Ts.SymbolFlags.Property)
+                |> Flip.Expect.isTrue "PropertyDeclaration symbol should have the Property symbol flag"
+                )
+        runner.testSyntaxKind<Ts.MethodSignature> Ts.SyntaxKind.MethodSignature "All MethodSignatures resolve to a symbol which has a value declaration" <| fun ctx _ nodes ->
+            nodes
+            |> Array.map (_.name >> unbox >> ctx.Checker.getSymbolAtLocation)
+            |> Array.iter (Chain.Expect.wantSome "MethodSignature should have a symbol associated with the name" >> fun symbol ->
+                symbol.valueDeclaration
+                |> Flip.Expect.isSome "MethodSignature should have a value declaration value"
+                symbol.flags.HasFlag(Ts.SymbolFlags.Method)
+                |> Flip.Expect.isTrue "MethodSignature symbol should have the Method symbol flag"
+                )
+        runner.testSyntaxKind<Ts.MethodDeclaration> Ts.SyntaxKind.MethodDeclaration "All MethodDeclarations resolve to a symbol which has a value declaration" <| fun ctx _ nodes ->
+            nodes
+            |> Array.map (_.name >> unbox >> ctx.Checker.getSymbolAtLocation)
+            |> Array.iter (Chain.Expect.wantSome "MethodDeclarations should have a symbol associated with the name" >> fun symbol ->
+                symbol.valueDeclaration
+                |> Flip.Expect.isSome "MethodDeclarations should have a value declaration value"
+                symbol.flags.HasFlag(Ts.SymbolFlags.Method)
+                |> Flip.Expect.isTrue "MethodDeclarations symbol should have the Method symbol flag"
+                )
+        runner.testSyntaxKind<Ts.CallSignatureDeclaration> Ts.SyntaxKind.CallSignature "All CallSignatures resolve to a symbol which does not have a value declaration" <| fun _ _ nodes ->
+            // Call signatures do not resolve as a value declaration.
+            nodes
+            |> Array.map (_.getSymbol() >> Chain.Expect.wantSome "CallSignatures should have a symbol attached")
+            |> Array.iter (fun symbol ->
+                match symbol.symbolName with
+                | SymbolName.InternalSymbol Ts.InternalSymbolName.Call -> ()
+                | name -> failtest $"Expected CallSignature to have a symbol name of '__call', got %A{name} instead"
+                symbol.valueDeclaration
+                |> Flip.Expect.isNone "CallSignatures shouldn't have a value declaration"
+                symbol.flags.HasFlag(Ts.SymbolFlags.Signature)
+                |> Flip.Expect.isTrue "CallSignature symbols should have the Signature flag"
+                )
+        runner.testSyntaxKind<Ts.CallSignatureDeclaration> Ts.SyntaxKind.CallSignature "CallSignature symbols can exist with multiple declarations (overloads)" <| fun _ _ nodes ->
+            // If call signatures collect overloads into their symbols, then we would expect some
+            // call signature symbols to have more than one declaration.
+            nodes
+            |> Array.map (_.getSymbol() >> Chain.Expect.wantSome "CallSignatures should have a symbol attached")
+            |> Array.filter (fun symbol ->
+                symbol.declarations
+                |> Chain.Expect.wantSome "CallSignature should have at least one declaration"
+                |> _.AsArray
+                |> Chain.Expect.isNotEmpty "CallSignature should have at least one declaration"
+                |> _.Length |> (<>) 1
+                )
+            |> Chain.Expect.skipIfEmpty
+            |> ignore
+        runner.testSyntaxKind<Ts.InterfaceDeclaration> Ts.SyntaxKind.InterfaceDeclaration "Interface declaration can resolve to fewer unique call signature symbols than members" <| fun _ _ nodes ->
+            // If call signatures collect overloads into their symbols, then we would expect resolution of an interfaces symbols to
+            // result in fewer symbols than declarations of a call signature.
+            nodes
+            |> Array.map (_.members.AsArray >> Array.choose (function Patterns.Node.CallSignatureDeclaration node -> Some node | _ -> None))
+            |> Array.filter (Array.isEmpty >> not)
+            |> Array.filter (fun callSignatures ->
+                callSignatures
+                |> Array.map _.symbol
+                |> Array.distinctBy ts.getSymbolId
+                |> _.Length |> (<>) callSignatures.Length
+                )
+            |> Chain.Expect.skipIfEmpty
+            |> ignore
+        runner.testSyntaxKind<Ts.CallSignatureDeclaration> Ts.SyntaxKind.CallSignature "CallSignatures can have type parameters" <| fun _ _ nodes ->
+            nodes
+            |> Array.filter _.typeParameters.IsSome
+            |> Chain.Expect.skipIfEmpty
+            |> ignore
     runner.testSuite "SY · Symbols & Identity" <| fun _ ->
         runner.testSyntaxKind<Ts.InterfaceDeclaration> Ts.SyntaxKind.InterfaceDeclaration "SY-1 · All interfaces have symbols" <| fun ctx _ nodes ->
             let checker = ctx.Checker

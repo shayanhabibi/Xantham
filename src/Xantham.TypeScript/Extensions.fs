@@ -38,6 +38,13 @@ type Ts.SourceFile with
 type Ts.Type with
     [<EmitProperty "id">]
     member inline this.id: int = jsNative
+    [<EmitProperty "checker">]
+    member inline this.checker: Ts.TypeChecker = jsNative
+
+type Ts.CallSignatureDeclaration with
+    [<EmitProperty "symbol">]
+    member inline this.symbol: Ts.Symbol = jsNative
+    member inline this.getSymbol() = Option.ofObj this.symbol
 
 type TypeMapKind =
     | Simple = 0
