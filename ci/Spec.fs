@@ -1,10 +1,13 @@
 ﻿module Spec
 
 open EasyBuild.FileSystemProvider
+open FSharp.SystemCommandLine
 open Fake.Core
 open Fake.Core.Context
 open Fake.DotNet.Testing
 open Fake.JavaScript
+open Microsoft.FSharp.Reflection
+open FsToolkit.ErrorHandling.Operator.Option
 
 [<Literal>]
 let __REPOSITORY_DIRECTORY__ = __SOURCE_DIRECTORY__ + "/.."
@@ -12,6 +15,22 @@ type Root = AbsoluteFileSystem<__REPOSITORY_DIRECTORY__>
 
 let inline funApply value fn = fn value
 
+let mutable context: ActionContext option = None
+let mutable project: string option = None
+let mutable dependencyBuilder: unit -> unit = ignore
+let inline runTarget target =
+    fun ctx ->
+        context <- Some ctx
+        dependencyBuilder()
+        Target.runOrDefaultWithArguments target
+let inline runTargetWithProj target proj =
+    fun ctx ->
+        context <- Some ctx
+        project <- Some proj
+        dependencyBuilder()
+        Target.runOrDefaultWithArguments target
+let setDependencies fn = dependencyBuilder <- fn
+        
 [<AutoOpen>]
 module DirectoryManagement =
     open Fake.IO.Globbing.Operators
@@ -40,9 +59,11 @@ module DirectoryManagement =
             type Tests = Root.tests
             type Fable = Root.tests.``Xantham.Fable.Tests``
             type Generator = Root.tests.``Xantham.Generator.Tests``
+            type TypeScript = Root.tests.``Xantham.TypeScript.Tests``
         module FsProj =
             let [<Literal>] Fable = Directory.Fable.``Xantham.Fable.Tests.fsproj``
             let [<Literal>] Generator = Directory.Generator.``Xantham.Generator.Tests.fsproj``
+            let [<Literal>] TypeScript = Directory.Tests.``Xantham.TypeScript.Tests``.``Xantham.TypeScript.Tests.fsproj``
 
     module Solutions =
         let [<Literal>] Xantham = Root.``Xantham.slnx``
@@ -59,75 +80,251 @@ module GitManagement =
         "-c"
         $"user.email=\"{githubEmail}\""
     ]
+#nowarn 3391
 [<AutoOpen>]
 module CliApiManagement =
-#nowarn 3391
+    let inline private parseTarget<'T> (input: string) =
+        let token =
+            String.split '-' input
+            |> List.last
+        Reflection.constructors<'T>
+        |> Array.pick (fun (unionName, unionBuilder) ->
+            if unionName = token then
+                unionBuilder [||]
+                |> unbox<'T>
+                |> Some
+            else None)
     [<RequireQualifiedAccess>]
-    type Ops =
+    type HouseKeeping =
         | clean
         | fableClean
-        | watchDocs
+        | format
+    [<RequireQualifiedAccess>]
+    type ProjectManagement =
+        | restore
         | build
         | pack
-        | push
-        | setupFableTest
-        | setupTest
-        | fableTest
+        | publish
+        | compile
+        | publishNpm
+    [<RequireQualifiedAccess>]
+    type DotNetTestManagement =
+        | setup
         | test
-        | fableTestSignal
-        | postFableTest
         | postTest
-        | runAllTests
-        | tests
-        | restore
-        | format
-        | fableTestWatch
-        | fableBuild
+    [<RequireQualifiedAccess>]
+    type FableTestManagement =
+        | setup
+        | test
+        | postTest
+    [<RequireQualifiedAccess>]
+    type AuxiliaryTests =
+        | signalSetup
+        | signalTest
+        | signalPost
+        | loggingSetup
+        | loggingTest
+        | loggingPost
+    [<RequireQualifiedAccess>]
+    type DocManagement =
+        | build
         | watch
-        static member inline op_Implicit (op: Ops): string = op.ToString()
-#onwarn 3391
-    
-    module Cli =
-        let spec = """
-Usage:
-    xantham [options]
-    xantham build [options]
-    xantham format [options]
-    xantham watch (fable | docs) [options] [npm]
-    xantham test (dotnet | fable | signal) [options] [npm]
-    xantham tests [options] [npm]
-    xantham run <TARGET> [options] [npm]
-    xantham dev
-Npm Options [npm]:
-    --ci                    When performing installation of dependencies, use the `ci` command.
-    --release               Build with Fable `-c Release`
-Options [options]:
-    -h, --help              Show this help message.
-    -q, --quick             Skip setup steps, such as installing dependencies (for local environments).
-    --format                Format the code before committing, pushing, or at the end of other operations..
-    --skip-tests            Skip running tests.
-    --nuget-key <API-KEY>   The NuGet API key to use when pushing packages.
-    --gh-key <PAT>          The GitHub API key to use when pushing commits et al.
-    --dry-debug             Shows the dependency list for the command and args.
-"""
-        let parser = Docopt(spec)
+        
+    type HouseKeeping with
+        static member formatAction =
+            Input.option<bool> "--format"
+            |> Input.description "Run fantomas before any build/compile actions"
+            |> Input.arity Arity.Zero
+            |> Input.recursive
+        static member ghKey =
+            Input.optionMaybe<string> "--gh-key"
+            |> Input.helpName "API-KEY"
+            |> Input.arity Arity.ExactlyOne
+            |> Input.desc "GH-Key for pushing to GitHub."
+        static member nugetKey =
+            Input.optionMaybe<string> "--nuget-key"
+            |> Input.arity Arity.ExactlyOne
+            |> Input.helpName "API-KEY"
+            |> Input.desc "Nuget API key for pushing packages to nuget.org."
+        member this.targetName = $"housekeeping-{this}"
+        static member parseTarget = parseTarget<HouseKeeping>
+        static member inline op_Implicit(this: HouseKeeping) = this.targetName
+        member this.commandName = this.ToString()
+        member inline private this.commandImpl nameFn =
+            let inline commandWithDescription desc =
+                command (nameFn this) {
+                    description desc
+                    inputs Input.context
+                    setAction (runTarget this)
+                }
+            match this with
+            | HouseKeeping.clean -> "Clean dotnet build artifacts" |> commandWithDescription
+            | HouseKeeping.fableClean -> "Clean fable build/run artifacts" |> commandWithDescription
+            | HouseKeeping.format -> "Format the code" |> commandWithDescription
+        member this.action =
+            match this with
+            | HouseKeeping.format -> HouseKeeping.formatAction |> Some
+            | _ -> None
+        member this.command = this.commandImpl _.commandName
+        member this.runCommand = this.commandImpl _.targetName
+    type ProjectManagement with
+        member this.targetName = $"project-{this}"
+        static member inline op_Implicit(this: ProjectManagement) = this.targetName
+        static member parseTarget = parseTarget<ProjectManagement>
+        member this.commandName = this.ToString()
+        member inline private this.commandImpl nameFn =
+            let inline commandWithDescription desc =
+                command (nameFn this) {
+                    description desc
+                    inputs Input.context
+                    setAction (runTarget this)
+                }
+            match this with
+            | ProjectManagement.restore -> "Restore dotnet dependencies" |> commandWithDescription
+            | ProjectManagement.build -> "Build dotnet projects" |> commandWithDescription
+            | ProjectManagement.compile -> "Compile fable projects" |> commandWithDescription
+            | ProjectManagement.pack -> "Pack dotnet projects" |> commandWithDescription
+            | ProjectManagement.publish -> "Publish dotnet projects" |> commandWithDescription
+            | ProjectManagement.publishNpm -> "Publish xantham npm packages" |> commandWithDescription
+        member this.command = this.commandImpl _.commandName
+        member this.runCommand = this.commandImpl _.targetName
+        
+    type DotNetTestManagement with
+        member this.targetName = $"dotnet-test-{this}"
+        static member parseTarget = parseTarget<DotNetTestManagement>
+        static member inline op_Implicit(this: DotNetTestManagement) = this.targetName
+        member this.commandName = this.ToString()
+        member inline private this.commandImpl nameFn =
+            let inline commandWithDescription desc =
+                command (nameFn this) {
+                    description desc
+                    inputs Input.context
+                    setAction (runTarget this)
+                }
+            match this with
+            | DotNetTestManagement.setup -> "Setup dotnet test dependencies" |> commandWithDescription
+            | DotNetTestManagement.test -> "Run dotnet tests" |> commandWithDescription
+            | DotNetTestManagement.postTest -> "Run dotnet post-test actions" |> commandWithDescription
+        member this.command = this.commandImpl _.commandName
+        member this.runCommand = this.commandImpl _.targetName
+    type FableTestManagement with
+        member this.targetName = $"fable-test-{this}"
+        static member inline op_Implicit(this: FableTestManagement) = this.targetName
+        static member parseTarget = parseTarget<FableTestManagement>
+        member this.commandName = this.ToString()
+        member inline private this.commandImpl nameFn =
+            let inline commandWithDescription desc =
+                command (nameFn this) {
+                    description desc
+                    inputs Input.context
+                    setAction (runTarget this)
+                }
+            match this with
+            | FableTestManagement.setup -> "Setup fable test dependencies" |> commandWithDescription
+            | FableTestManagement.test -> "Run fable tests" |> commandWithDescription
+            | FableTestManagement.postTest -> "Run fable post-test actions" |> commandWithDescription
+        member this.command = this.commandImpl _.commandName
+        member this.runCommand = this.commandImpl _.targetName
+        static member quickOption =
+            Input.option<bool> "--quick"
+            |> Input.arity Arity.Zero
+            |> Input.alias "-q"
+            |> Input.description "Skip setup steps, such as installing dependencies"
+            |> Input.recursive
+        static member cleanInstallOption =
+            Input.option<bool> "--clean-install"
+            |> Input.arity Arity.Zero
+            |> Input.alias "--ci"
+            |> Input.description "Run npm operations with --ci"
+    type AuxiliaryTests with
+        member this.targetName = $"aux-test-{this}"
+        static member inline op_Implicit(this: AuxiliaryTests) = this.targetName
+        static member parseTarget = parseTarget<AuxiliaryTests>
+        member this.commandName = this.ToString()
+        member inline private this.commandImpl nameFn =
+            let inline commandWithDescription desc =
+                command (nameFn this) {
+                    description desc
+                    inputs Input.context
+                    setAction (runTarget this)
+                }
+            match this with
+            | AuxiliaryTests.loggingSetup -> "Setup fable logging test dependencies" |> commandWithDescription
+            | AuxiliaryTests.loggingTest -> "Run fable logging tests" |> commandWithDescription
+            | AuxiliaryTests.loggingPost -> "Run fable logging post-test actions" |> commandWithDescription
+            | AuxiliaryTests.signalSetup -> "Setup fable signal test dependencies" |> commandWithDescription
+            | AuxiliaryTests.signalTest -> "Run fable signal tests" |> commandWithDescription
+            | AuxiliaryTests.signalPost -> "Run fable signal post-test actions" |> commandWithDescription
+        member this.command = this.commandImpl _.commandName
+        member this.runCommand = this.commandImpl _.targetName
+    type DocManagement with
+        member this.targetName = $"doc-{this}"
+        static member inline op_Implicit(this: DocManagement) = this.targetName
+        static member parseTarget = parseTarget<DocManagement>
+        member this.commandName = this.ToString()
+        member inline private this.commandImpl nameFn =
+            let inline commandWithDescription desc =
+                command (nameFn this) {
+                    description desc
+                    inputs Input.context
+                    setAction (runTarget this)
+                }
+            match this with
+            | DocManagement.build -> "Build documentation" |> commandWithDescription
+            | DocManagement.watch -> "Watch documentation" |> commandWithDescription
+        member this.command = this.commandImpl _.commandName
+        member this.runCommand = this.commandImpl _.targetName
+        
 
+    module Options =
+        let nugetKey = HouseKeeping.nugetKey
+        let ghKey = HouseKeeping.ghKey
+        let format = HouseKeeping.formatAction
+        let quick = FableTestManagement.quickOption
+        let cleanInstall = FableTestManagement.cleanInstallOption
+        let skipTests = 
+            Input.option<bool> "--skip-tests"
+            |> Input.arity Arity.Zero
+            |> Input.description "Skip running tests"
+        let watch =
+            Input.option<bool> "--watch"
+            |> Input.arity Arity.Zero
+            |> Input.description "Run in watch mode."
     type Args =
-        static let mutable args = None
-        static let hasFlag value =
-            args |> Option.exists (DocoptResult.hasFlag $"--{value}")
-        static let getFlag value =
-            args |> Option.bind (DocoptResult.tryGetArgument value)
-        static member setArgs argsv =
-            args <- (Cli.parser: Docopt).Parse(argsv) |> Some
-        static member npmCi = hasFlag "ci"
-        static member skipTests = hasFlag "skip-tests"
-        static member nugetKey = getFlag "nuget-key"
-        static member ghKey = getFlag "gh-key"
-        static member dryDebug = hasFlag "dry-debug"
-        static member quick = hasFlag "quick"
-        static member format = hasFlag "format"
-        static member help = hasFlag "help"
+        static let hasFlag (input: ActionInput<'T>) = context |> Option.map (_.ParseResult >> input.GetValue)
+        static let hasFlagDef (input: ActionInput<'T>) value = hasFlag input |> Option.defaultValue value
+        static let hasFlagOpt (input: ActionInput<'T option>) = context >>= (_.ParseResult >> input.GetValue)
+        static let hasCommand (commandString: string) = context |> Option.exists (_.ParseResult.Tokens >> Seq.exists (fun token ->
+            token.Type = System.CommandLine.Parsing.TokenType.Command && token.Value = commandString
+            ))
+        static member npmCi = hasFlagDef Options.cleanInstall false
+        static member nugetKey = hasFlagOpt Options.nugetKey
+        static member ghKey = hasFlagOpt Options.ghKey
+        static member quick = hasFlagDef Options.quick false
+        static member format = hasFlagDef Options.format false
+        static member skipTests = hasFlagDef Options.skipTests false
+        static member watch = hasFlagDef Options.watch false || hasCommand "watch"
+        
+    let publishingOptions: ActionInput list = [
+        Options.nugetKey
+        Options.ghKey
+    ]
+    let npmOptions: ActionInput list = [
+        Options.cleanInstall
+    ]
+    let testOptions: ActionInput list = [
+        Options.quick
+        Options.skipTests
+        Options.cleanInstall
+        Options.watch
+    ]
+    let globalOptions: ActionInput list = [
+        Options.quick 
+        Options.format 
+    ]
+    
+        
+
 
 [<AutoOpen>]
 module FakeInitializationAndUtilities =

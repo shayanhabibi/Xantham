@@ -12,10 +12,19 @@ type listOrArray<'T> = 'T array
 /// </summary>
 [<Erase>]
 type TypeKey = TypeKey of int
+[<Erase>]
+type NodeKey = NodeKey of int
+[<Erase>]
+type SymbolKey = SymbolKey of int
+
 module TypeKey =
     let inline createWith (i: int) = TypeKey i
     let encode: Encoder<TypeKey> = unbox >> Encode.int
     let decode: Decoder<TypeKey> = Decode.int >> unbox
+module NodeKey =
+    let inline createWith (i: int) = NodeKey i
+module SymbolKey =
+    let inline createWith (i: int) = SymbolKey i
 #else
 open Thoth.Json.Net
 [<AutoOpen>]
@@ -28,24 +37,23 @@ type listOrArray<'T> = 'T list
 /// <summary>
 /// A unique identifier for a type.
 /// </summary>
-type TypeKey = System.Int32
+[<Struct>]
+type TypeKey = TypeKey of int with
+    member inline this.Value = let (TypeKey value) = this in value
+[<Struct>]
+type NodeKey = NodeKey of int with
+    member inline this.Value = let (NodeKey value) = this in value
+[<Struct>]
+type SymbolKey = SymbolKey of int with
+    member inline this.Value = let (SymbolKey value) = this in value
 module TypeKey =
-    let inline createWith (i: int) = i
+    let inline createWith (i: int) = TypeKey i
     let encode: Encoder<TypeKey> = Encode.int
     let decode: Decoder<TypeKey> = Decode.int
+module NodeKey =
+    let inline createWith (i: int) = NodeKey i
 #endif
-module Identity =
-    // Internal
-    [<Erase>]
-    type Node = Node of int
-    /// <summary>
-    /// Always ensure you resolve a symbol through <c>getMergedSymbol</c> before acquiring the ID.
-    /// </summary>
-    [<Erase>]
-    type Symbol = Symbol of int
-    [<Erase>]
-    type Type = Type of int
-    
+
 /// <summary>
 /// DU discriminating against internal TypeScript symbol names for anonymous/nameless constructs.
 /// Non-nameless constructs are matched to <c>BindingName.String ...</c>.

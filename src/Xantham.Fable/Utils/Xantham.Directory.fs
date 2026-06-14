@@ -103,7 +103,7 @@ let createXanthamLogWriter prependLevel logLevel (runDirectory: string) =
         then path.dirname runDirectory
         else runDirectory
     let fileName = path.join(dir, mkTempLogName())
-    Utils.Logging.TextWriterLogger(fileName, prependLevel, logLevel)
+    Logging.TextWriterLogger(fileName, prependLevel, logLevel)
     |> Ok
 
 let createXanthamDummyFileWithRefs (runDirectory: string) (paths: string seq) =

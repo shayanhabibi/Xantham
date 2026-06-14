@@ -11,7 +11,8 @@ open TypeScript
 open Fable.Core
 open Xantham
 open Xantham.Fable.Types.Tracer
-open Xantham.Fable.Types
+open Xantham.Fable.Tracer
+open Xantham.TypeScript
 
 /// <summary>
 /// SRTP creator for <see cref="T:Xantham.Fable.Types.Tracer.GuardTracer"/> — each overload
@@ -93,10 +94,10 @@ type XanthamTag with
             // see if there is already a tag for this node
             Tracer.get<XanTagKind> node
             |> ValueOption.defaultWith(fun () ->
-                Tracer.set<XanTagKind>
-                    ((^T or XanTagKind):(static member Create: ^T -> XanTagKind) node)
-                    node
-                let result = Tracer.unsafeGet<XanTagKind> node
+                let result =
+                    Tracer.unsafeCreate<XanTagKind>
+                        ((^T or XanTagKind):(static member Create: ^T -> XanTagKind) node)
+                        node
                 result.Imprint
                 result
                 )

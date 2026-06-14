@@ -11,6 +11,7 @@
 
     <ItemGroup>
       <PackageReference Include="Fable.Core" Version="5.0.0" />
+      <PackageReference Include="Scriptorium.Nib" Version="0.2.2" />
     </ItemGroup>
 
 </Project>

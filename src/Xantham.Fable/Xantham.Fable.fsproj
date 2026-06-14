@@ -11,19 +11,12 @@
     <ItemGroup>
         <Compile Include="..\Xantham.Common\Common.Types.fs" />
         <Compile Include="Measures.fs" />
-        <Compile Include="TypeScript.fs" />
         <Compile Include="Utils\String.fs" />
         <Compile Include="Utils\Array.fs" />
-        <Compile Include="Utils\Utils.fs" />
         <Compile Include="Utils\Path.fs" />
-        <Compile Include="Utils\Logging.fs" />
-        <Compile Include="Utils\TypeScript.Extensions.fs" />
         <Compile Include="Utils\Xantham.Directory.fs" />
         <Compile Include="Types\TypeKeyExtensions.fs" />
-        <Compile Include="Types\Signal.fs" />
-        <Compile Include="Types\Symbol.fs" />
         <Compile Include="Types\Tracer.fs" />
-        <Compile Include="Types\XanTagKind.fs" />
         <Compile Include="Types\SourceTag.fs" />
         <Compile Include="Types\XanTag.fs" />
         <Compile Include="Types\ReactiveBuilders.fs" />
@@ -31,6 +24,7 @@
         <Compile Include="Types\Reader.fs" />
         <Compile Include="Types\Reader.Extensions.fs" />
         <Compile Include="Types\XanTag.Extensions.fs" />
+        <Compile Include="Types\Reaver.fs" />
         <Compile Include="Reading\Prelude.fs" />
         <Compile Include="Reading\JSDocTags.fs" />
         <Compile Include="Reading\TupleTypeMember.fs" />
@@ -60,6 +54,10 @@
 
     <ItemGroup>
       <Content Remove="..\..\..\..\.nuget\packages\fable.core\5.0.0-beta.3\contentFiles\any\netstandard2.0\CHANGELOG.md" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Xantham.TypeScript\Xantham.TypeScript.fsproj" />
     </ItemGroup>
 
 </Project>

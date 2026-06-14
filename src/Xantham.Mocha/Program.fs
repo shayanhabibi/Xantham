@@ -143,29 +143,29 @@ module Runtime =
 
 [<AutoOpen>]
 module Test =
-    let inline testSuite name f = Mocha.describe name f |> ignore
-    let inline ptestSuite name f = Mocha.describeSkip name f |> ignore
-    let inline ftestSuite name f = Mocha.describeOnly name f |> ignore
-    let inline beforeTests name f: unit = Mocha.before name f |> ignore
-    let inline beforeEachTests name f: unit = Mocha.beforeEach name f |> ignore
-    let inline afterTests name f: unit = Mocha.after name f |> ignore
-    let inline afterEachTests name f : unit = Mocha.afterEach name f |> ignore
-    let inline testCase name f = Mocha.it name f |> ignore
-    let inline ptestCase name f = Mocha.itSkip name f |> ignore
-    let inline ftestCase name f = Mocha.itOnly name f |> ignore
+    let inline testSuite name ([<InlineIfLambda>] f: Suite -> unit) = Mocha.describe name f |> ignore
+    let inline ptestSuite name ([<InlineIfLambda>] f: _ -> unit) = Mocha.describeSkip name f |> ignore
+    let inline ftestSuite name ([<InlineIfLambda>] f: _ -> unit) = Mocha.describeOnly name f |> ignore
+    let inline beforeTests name ([<InlineIfLambda>] f: _ -> unit): unit = Mocha.before name f |> ignore
+    let inline beforeEachTests name ([<InlineIfLambda>] f: _ -> unit): unit = Mocha.beforeEach name f |> ignore
+    let inline afterTests name ([<InlineIfLambda>] f: _ -> unit): unit = Mocha.after name f |> ignore
+    let inline afterEachTests name ([<InlineIfLambda>] f: _ -> unit) : unit = Mocha.afterEach name f |> ignore
+    let inline testCase name ([<InlineIfLambda>] f: _ -> unit) = Mocha.it name f |> ignore
+    let inline ptestCase name ([<InlineIfLambda>] f: _ -> unit) = Mocha.itSkip name f |> ignore
+    let inline ftestCase name ([<InlineIfLambda>] f: _ -> unit) = Mocha.itOnly name f |> ignore
     let inline failtest msg = failwith msg
     let inline failtestf fmt msg = failwithf fmt msg
     module Expecto =
-        let inline testSuite name f: Suite = Mocha.describe name f 
-        let inline ptestSuite name f: Suite = Mocha.describeSkip name f 
-        let inline ftestSuite name f: Suite = Mocha.describeOnly name f 
-        let inline beforeTests name f: unit = Mocha.before name f |> ignore
-        let inline beforeEachTests name f: unit = Mocha.beforeEach name f |> ignore
-        let inline afterTests name f: unit = Mocha.after name f |> ignore
-        let inline afterEachTests name f : unit = Mocha.afterEach name f |> ignore
-        let inline testCase name f: Test = Mocha.it name f 
-        let inline ptestCase name f: Test = Mocha.itSkip name f 
-        let inline ftestCase name f: Test = Mocha.itOnly name f 
+        let inline testSuite name ([<InlineIfLambda>] f: _ -> unit): Suite = Mocha.describe name f 
+        let inline ptestSuite name ([<InlineIfLambda>] f: _ -> unit): Suite = Mocha.describeSkip name f 
+        let inline ftestSuite name ([<InlineIfLambda>] f: _ -> unit): Suite = Mocha.describeOnly name f 
+        let inline beforeTests name ([<InlineIfLambda>] f: _ -> unit): unit = Mocha.before name f |> ignore
+        let inline beforeEachTests name ([<InlineIfLambda>] f: _ -> unit): unit = Mocha.beforeEach name f |> ignore
+        let inline afterTests name ([<InlineIfLambda>] f: _ -> unit): unit = Mocha.after name f |> ignore
+        let inline afterEachTests name ([<InlineIfLambda>] f: _ -> unit) : unit = Mocha.afterEach name f |> ignore
+        let inline testCase name ([<InlineIfLambda>] f: _ -> unit): Test = Mocha.it name f 
+        let inline ptestCase name ([<InlineIfLambda>] f: _ -> unit): Test = Mocha.itSkip name f 
+        let inline ftestCase name ([<InlineIfLambda>] f: _ -> unit): Test = Mocha.itOnly name f 
         let inline failtest msg = failwith msg
         let inline failtestf fmt msg = failwithf fmt msg
         let inline testList name (tests: Test list): Test =
@@ -185,6 +185,305 @@ module Env =
     [<Emit("typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope")>]
     let insideWorker :  bool = jsNative
 
+module Nib =
+    open Scriptorium.Nib.Assertion
+    let inline stopPrn assertion: Assertion<_, _> = fun state -> if state.Stopped then state else assertion state
+    let assertForEach (inner: Assertion<_, _>): Assertion<_, _> =
+        stopPrn <| fun state ->
+            let initialSubject = state.Subject
+            let mutable counter = -1
+            let finalState =
+                initialSubject
+                |> Seq.fold (fun state x ->
+                    counter <- counter + 1
+                    let initialTags = state.Tags
+                    let nextState =
+                        {
+                            Subject = x
+                            Errors = state.Errors
+                            Tags = initialTags @ [ $"[%i{counter}]" ]
+                            Stopped = state.Stopped
+                        }
+                        |> inner
+                    { nextState with Tags = initialTags }
+                    ) (unbox state)
+            {
+                Subject = initialSubject
+                Errors = finalState.Errors
+                Tags = finalState.Tags
+                Stopped = finalState.Stopped
+            }
+    type SRTPHelper =
+        static member inline forEach(inner: Assertion<_, _>, state: AssertionState<_>) = assertForEach inner <| state
+        static member inline forEach(inner: Assertion<_, _>, subject: 'a when 'a :> 'b seq) = assertThat subject (assertForEach inner)
+    let popTag: Assertion<_, _> = fun state -> { state with Tags = state.Tags |> List.tail }
+    let withTag tagName assertion =
+        tag tagName >> assertion >> popTag
+    let projectedAssertion projection test printer =
+        assertion (projection >> test) (fun orig -> projection orig |> printer orig)
+    let insideTuple projection assertion =
+        inside (fun x -> (x, projection x)) assertion
+    let inline projectedInside projection assertion = insideTuple projection assertion
+    let focusTuple projection =
+        focus (fun x -> (x, projection x))
+    let inline assertThat assertion subject =
+        assertThat subject assertion
+    let inline foreach<^T, ^Result, ^A, ^B when (^T or SRTPHelper):(static member forEach: Assertion<^A, ^B> * ^T -> ^Result)> (inner: Assertion<^A, ^B>) (subject: ^T) =
+        ((^T or SRTPHelper):(static member forEach: Assertion<^A, ^B> * ^T -> ^Result) (inner, subject))
+    let inline projectedForEach projection inner subject =
+        foreach (insideTuple projection inner) subject
+    let inline all predicate = foreach (satisfy predicate)
+    let inline exists predicate = assertion (Seq.exists predicate) (sprintf "Expected collection to contain at least one element satisfying the predicate, but got none.\n\n%A")
+    let inline hasLength length =
+        projectedAssertion Seq.length _.Equals(length) (fun collection length -> sprintf "Expected collection to have length %i, but got %i.\n\n%A" length (Seq.length collection) collection)
+    let inline withSome<'T>: Assertion<'T option,'T> = Option.value
+    let equal expected = isEqualTo expected
+    let notEqual expected = isNotEqualTo expected
+    let isNotNaN = satisfy (not << Double.IsNaN)
+    let isNaN = satisfy Double.IsNaN
+    let isZero = isEqualTo 0
+    let isNonZero = isNotEqualTo 0
+    let inline skipIfError<'T>: Assertion<'T> = fun state ->
+        if state.Errors.Length > 0
+        then
+            Runtime.getTestCase().skip()
+            { state with Stopped = true }
+        else state
+    let isNotEmpty<'a, 'b when 'a :> 'b seq>: Assertion<'a> = satisfy (Seq.isEmpty >> not)
+    let isEmpty<'a, 'b when 'a :> 'b seq>: Assertion<'a> = satisfy Seq.isEmpty
+    let hasLengthGreaterThan length = inside Seq.length (tag "length" >> isGreaterThan length)
+    let hasLengthGreaterOrEqual length = inside Seq.length (tag "length" >> isGreaterOrEqual length)
+    let hasLengthLessThan length = inside Seq.length (tag "length" >> isLessThan length)
+    let hasLengthLessOrEqual length = inside Seq.length (tag "length" >> isLessOrEqual length)
+    let ifTrueThen predicate assertion =
+        fun state ->
+            if predicate state.Subject then
+                let nextState =
+                    state
+                    |> assertion
+                { state with Errors = nextState.Errors; Stopped = nextState.Stopped }
+            else state
+    let ifTrueThenOrElse predicate trueBranch falseBranch: Assertion<_, _> =
+        fun state ->
+            if predicate state.Subject then
+                let nextState =
+                    state
+                    |> trueBranch
+                { state with Errors = nextState.Errors; Stopped = nextState.Stopped }
+            else
+                let nextState =
+                    state
+                    |> falseBranch
+                { state with Errors = nextState.Errors; Stopped = nextState.Stopped }
+    let apply (f: 'a -> unit): Assertion<'a> = fun state -> f state.Subject; state
+    let branchInsideResult (ifOk: Assertion<'a, 'b>) (ifError: Assertion<'c, 'd>): Assertion<Result<'a, 'c>> =
+        stopPrn <| fun state ->
+            match state.Subject with
+            | Ok x ->
+                let next =
+                    {
+                        Subject = x
+                        Errors = state.Errors
+                        Stopped = state.Stopped
+                        Tags = state.Tags
+                    }
+                    |> withTag "ok" ifOk
+                { state with Errors = next.Errors; Stopped = next.Stopped }
+            | Error x ->
+                let next =
+                    {
+                        Subject = x
+                        Errors = state.Errors
+                        Stopped = state.Stopped
+                        Tags = state.Tags
+                    }
+                    |> withTag "error" ifError
+                { state with Errors = next.Errors; Stopped = next.Stopped }
+    let inline private ingestState (subject: AssertionState<'a>) (state: AssertionState<'b>) =
+        { subject with Errors = state.Errors; Stopped = state.Stopped }
+    let inline private injectSubjectAssertAndIngest (subject: 'a) (assertion: Assertion<'a, 'b>) (state: AssertionState<'c>) =
+        {
+            Subject = subject
+            Errors = state.Errors
+            Stopped = state.Stopped
+            Tags = state.Tags
+        }
+        |> assertion
+        |> ingestState state
+    let inline private mapAssertionAndIngest (mapping: 'c -> 'a) (assertion: Assertion<'a, 'b>) (state: AssertionState<'c>) =
+        state
+        |> injectSubjectAssertAndIngest (mapping state.Subject) assertion
+    let branchInside
+        (projection: 'a -> Choice<'b, 'c>)
+        (assertion: Assertion<'b, _>)
+        (assertion2: Assertion<'c, _>): Assertion<'a> =
+        stopPrn <| fun state ->
+            match projection state.Subject with
+            | Choice1Of2 x -> injectSubjectAssertAndIngest x (withTag "choice1" assertion) state
+            | Choice2Of2 x -> injectSubjectAssertAndIngest x (withTag "choice2" assertion2) state
+    let branchInsideOption
+        (projection: 'a -> 'b option)
+        (assertion: Assertion<'b, _>): Assertion<'a> =
+        stopPrn <| fun state ->
+            projection state.Subject
+            |> Option.map (injectSubjectAssertAndIngest >> fun fn -> fn (withTag "some" assertion) state)
+            |> Option.defaultValue state
+    let projectedBranchInside
+        (branchProjection: 'a -> Choice<'b, 'c>)
+        (assertion: Assertion<'a * 'b, _>)
+        (assertion2: Assertion<'a * 'c, _>): Assertion<'a> =
+        stopPrn <| fun state ->
+            match branchProjection state.Subject with
+            | Choice1Of2 x -> injectSubjectAssertAndIngest (state.Subject,x) (withTag "choice1" assertion) state
+            | Choice2Of2 x -> injectSubjectAssertAndIngest (state.Subject,x) (withTag "choice2" assertion2) state
+        
+    let branchInside3
+        (projection: 'a -> Choice<'ca, 'cb, 'cc>)
+        (assertion: Assertion<'ca, _>)
+        (assertion2: Assertion<'cb, _>)
+        (assertion3: Assertion<'cc, _>): Assertion<'a> =
+        stopPrn <| fun state ->
+            match projection state.Subject with
+            | Choice1Of3 x -> injectSubjectAssertAndIngest x (withTag "choice1" assertion) state
+            | Choice2Of3 x -> injectSubjectAssertAndIngest x (withTag "choice2" assertion2) state
+            | Choice3Of3 x -> injectSubjectAssertAndIngest x (withTag "choice3" assertion3) state
+    let projectedBranchInside3
+        (projection: 'a -> Choice<'ca, 'cb, 'cc>)
+        (assertion: Assertion<'a * 'ca, _>)
+        (assertion2: Assertion<'a * 'cb, _>)
+        (assertion3: Assertion<'a * 'cc, _>): Assertion<'a> =
+        stopPrn <| fun state ->
+            match projection state.Subject with
+            | Choice1Of3 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice1" assertion) state
+            | Choice2Of3 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice2" assertion2) state
+            | Choice3Of3 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice3" assertion3) state
+    let branchInside4
+        (projection: 'a -> Choice<'ca, 'cb, 'cc, 'cd>)
+        (assertion: Assertion<'ca, _>)
+        (assertion2: Assertion<'cb, _>)
+        (assertion3: Assertion<'cc, _>)
+        (assertion4: Assertion<'cd, _>): Assertion<'a> =
+        stopPrn <| fun state ->
+            match projection state.Subject with
+            | Choice1Of4 x -> injectSubjectAssertAndIngest x (withTag "choice1" assertion) state
+            | Choice2Of4 x -> injectSubjectAssertAndIngest x (withTag "choice2" assertion2) state
+            | Choice3Of4 x -> injectSubjectAssertAndIngest x (withTag "choice3" assertion3) state
+            | Choice4Of4 x -> injectSubjectAssertAndIngest x (withTag "choice4" assertion4) state
+    let projectedBranchInside4
+        (projection: 'a -> Choice<'ca, 'cb, 'cc, 'cd>)
+        (assertion: Assertion<'a * 'ca, _>)
+        (assertion2: Assertion<'a * 'cb, _>)
+        (assertion3: Assertion<'a * 'cc, _>)
+        (assertion4: Assertion<'a * 'cd, _>): Assertion<'a> =
+        stopPrn <| fun state ->
+            match projection state.Subject with
+            | Choice1Of4 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice1" assertion) state
+            | Choice2Of4 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice2" assertion2) state
+            | Choice3Of4 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice3" assertion3) state
+            | Choice4Of4 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice4" assertion4) state
+    let branchInside5
+        (projection: 'a -> Choice<'ca, 'cb, 'cc, 'cd, 'ce>)
+        (assertion: Assertion<'ca, _>)
+        (assertion2: Assertion<'cb, _>)
+        (assertion3: Assertion<'cc, _>)
+        (assertion4: Assertion<'cd, _>)
+        (assertion5: Assertion<'ce, _>): Assertion<'a> =
+        stopPrn <| fun state ->
+            match projection state.Subject with
+            | Choice1Of5 x -> injectSubjectAssertAndIngest x (withTag "choice1" assertion) state
+            | Choice2Of5 x -> injectSubjectAssertAndIngest x (withTag "choice2" assertion2) state
+            | Choice3Of5 x -> injectSubjectAssertAndIngest x (withTag "choice3" assertion3) state
+            | Choice4Of5 x -> injectSubjectAssertAndIngest x (withTag "choice4" assertion4) state
+            | Choice5Of5 x -> injectSubjectAssertAndIngest x (withTag "choice5" assertion5) state
+    let projectedBranchInside5
+        (projection: 'a -> Choice<'ca, 'cb, 'cc, 'cd, 'ce>)
+        (assertion: Assertion<'a * 'ca, _>)
+        (assertion2: Assertion<'a * 'cb, _>)
+        (assertion3: Assertion<'a * 'cc, _>)
+        (assertion4: Assertion<'a * 'cd, _>)
+        (assertion5: Assertion<'a * 'ce, _>): Assertion<'a> =
+        stopPrn <| fun state ->
+            match projection state.Subject with
+            | Choice1Of5 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice1" assertion) state
+            | Choice2Of5 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice2" assertion2) state
+            | Choice3Of5 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice3" assertion3) state
+            | Choice4Of5 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice4" assertion4) state
+            | Choice5Of5 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice5" assertion5) state
+    let branchInside6
+        (projection: 'a -> Choice<'ca, 'cb, 'cc, 'cd, 'ce, 'cf>)
+        (assertion: Assertion<'ca, _>)
+        (assertion2: Assertion<'cb, _>)
+        (assertion3: Assertion<'cc, _>)
+        (assertion4: Assertion<'cd, _>)
+        (assertion5: Assertion<'ce, _>)
+        (assertion6: Assertion<'cf,_>): Assertion<'a> =
+        stopPrn <| fun state ->
+            match projection state.Subject with
+            | Choice1Of6 x -> injectSubjectAssertAndIngest x (withTag "choice1" assertion) state
+            | Choice2Of6 x -> injectSubjectAssertAndIngest x (withTag "choice2" assertion2) state
+            | Choice3Of6 x -> injectSubjectAssertAndIngest x (withTag "choice3" assertion3) state
+            | Choice4Of6 x -> injectSubjectAssertAndIngest x (withTag "choice4" assertion4) state
+            | Choice5Of6 x -> injectSubjectAssertAndIngest x (withTag "choice5" assertion5) state
+            | Choice6Of6 x -> injectSubjectAssertAndIngest x (withTag "choice6" assertion6) state
+    let projectedBranchInside6
+        (projection: 'a -> Choice<'ca, 'cb, 'cc, 'cd, 'ce, 'cf>)
+        (assertion: Assertion<'a * 'ca, _>)
+        (assertion2: Assertion<'a * 'cb, _>)
+        (assertion3: Assertion<'a * 'cc, _>)
+        (assertion4: Assertion<'a * 'cd, _>)
+        (assertion5: Assertion<'a * 'ce, _>)
+        (assertion6: Assertion<'a * 'cf,_>): Assertion<'a> =
+        stopPrn <| fun state ->
+            match projection state.Subject with
+            | Choice1Of6 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice1" assertion) state
+            | Choice2Of6 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice2" assertion2) state
+            | Choice3Of6 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice3" assertion3) state
+            | Choice4Of6 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice4" assertion4) state
+            | Choice5Of6 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice5" assertion5) state
+            | Choice6Of6 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice6" assertion6) state
+    let branchInside7
+        (projection: 'a -> Choice<'ca, 'cb, 'cc, 'cd, 'ce, 'cf, 'cg>)
+        (assertion: Assertion<'ca, _>)
+        (assertion2: Assertion<'cb, _>)
+        (assertion3: Assertion<'cc, _>)
+        (assertion4: Assertion<'cd, _>)
+        (assertion5: Assertion<'ce, _>)
+        (assertion6: Assertion<'cf,_>)
+        (assertion7: Assertion<'cg, _>): Assertion<'a> =
+        stopPrn <| fun state ->
+            match projection state.Subject with
+            | Choice1Of7 x -> injectSubjectAssertAndIngest x (withTag "choice1" assertion) state
+            | Choice2Of7 x -> injectSubjectAssertAndIngest x (withTag "choice2" assertion2) state
+            | Choice3Of7 x -> injectSubjectAssertAndIngest x (withTag "choice3" assertion3) state
+            | Choice4Of7 x -> injectSubjectAssertAndIngest x (withTag "choice4" assertion4) state
+            | Choice5Of7 x -> injectSubjectAssertAndIngest x (withTag "choice5" assertion5) state
+            | Choice6Of7 x -> injectSubjectAssertAndIngest x (withTag "choice6" assertion6) state
+            | Choice7Of7 x -> injectSubjectAssertAndIngest x (withTag "choice7" assertion7) state
+    let projectedBranchInside7
+        (projection: 'a -> Choice<'ca, 'cb, 'cc, 'cd, 'ce, 'cf, 'cg>)
+        (assertion: Assertion<'a * 'ca, _>)
+        (assertion2: Assertion<'a * 'cb, _>)
+        (assertion3: Assertion<'a * 'cc, _>)
+        (assertion4: Assertion<'a * 'cd, _>)
+        (assertion5: Assertion<'a * 'ce, _>)
+        (assertion6: Assertion<'a * 'cf,_>)
+        (assertion7: Assertion<'a * 'cg, _>): Assertion<'a> =
+        stopPrn <| fun state ->
+            match projection state.Subject with
+            | Choice1Of7 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice1" assertion) state
+            | Choice2Of7 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice2" assertion2) state
+            | Choice3Of7 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice3" assertion3) state
+            | Choice4Of7 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice4" assertion4) state
+            | Choice5Of7 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice5" assertion5) state
+            | Choice6Of7 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice6" assertion6) state
+            | Choice7Of7 x -> injectSubjectAssertAndIngest (state.Subject, x) (withTag "choice7" assertion7) state
+    let branchInsideFor projection assertion assertion2 =
+        stopPrn <| fun state ->
+            match projection state.Subject with
+            | Some (Choice1Of2 x) -> injectSubjectAssertAndIngest x (withTag "choice1" assertion) state
+            | Some (Choice2Of2 x) -> injectSubjectAssertAndIngest x (withTag "choice2" assertion2) state
+            | None -> state
+
 [<RequireQualifiedAccess>]
 module Expect =
     let inline skipWithMsg msg =
@@ -192,7 +491,6 @@ module Expect =
         let runnable = ctx.runnable()
         runnable.title <- runnable.title + " || [SKIPPED] " + msg
         ctx.skip()
-        
     let inline skip () = Runtime.getTestCase().skip()
     let inline equal (actual: 'a) (expected: 'a) msg : unit =
         if actual = expected || not (Env.isBrowser()) then
@@ -210,7 +508,7 @@ module Expect =
     let notEqual actual expected msg : unit =
         Assert.NotEqual(actual, expected, msg)
     let private isNull' cond =
-        match cond with
+        match box cond with
         | null -> true
         | _ -> false
     let isNull cond = equal (isNull' cond) true
@@ -350,6 +648,8 @@ module Expect =
 module Flip =
     [<RequireQualifiedAccess>]
     module Expect =
+        let inline skipIfEmpty (collection: 'a when 'a :> 'b seq) = if collection :> 'b seq |> Seq.isEmpty then Expect.skip()
+        let inline skipIf (condition: 'a -> bool) (input: 'a) = if condition input then Expect.skip()
         let inline equal expected msg actual = Expect.equal actual expected msg
         let inline notEqual expected msg actual = Expect.notEqual actual expected msg
         let inline isNull msg cond = Expect.isNull cond msg

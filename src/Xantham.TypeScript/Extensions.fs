@@ -41,10 +41,15 @@ type Ts.Type with
     [<EmitProperty "checker">]
     member inline this.checker: Ts.TypeChecker = jsNative
 
-type Ts.CallSignatureDeclaration with
+type Ts.SignatureDeclarationBase with
     [<EmitProperty "symbol">]
     member inline this.symbol: Ts.Symbol = jsNative
     member inline this.getSymbol() = Option.ofObj this.symbol
+type Ts.ParameterDeclaration with
+    [<EmitProperty "symbol">]
+    member inline this.symbol: Ts.Symbol = jsNative
+    member inline this.getSymbol() = Option.ofObj this.symbol
+
 
 type TypeMapKind =
     | Simple = 0
@@ -260,7 +265,7 @@ let private userPreferences = {
 }
 
 type Ts.Program with
-    member inline this.GetModuleSpecifierFrom sourceFile (moduleSymbol: Ts.Symbol) =
+    member this.GetModuleSpecifierFrom sourceFile (moduleSymbol: Ts.Symbol) =
         Ts.IExports.getModuleSpecifiersWithCacheInfo(moduleSymbol, this.getTypeChecker(), this.getCompilerOptions(), sourceFile, this, userPreferences, {||}, true)
     member this.GetModuleSpecifierFromSourceFile (sourceFile: Ts.SourceFile) (moduleSymbol: Ts.Symbol) =
         this.GetModuleSpecifierFrom (unbox<{|fileName: string; path: string|}> sourceFile) moduleSymbol
@@ -719,6 +724,57 @@ type Ts.SyntaxKind with
         | unknown -> $"Unknown {unknown}"
 
 type Ts.TypeFlags with
+    member this.Name =
+        match this with
+        | Ts.TypeFlags.Any -> "Any"
+        | Ts.TypeFlags.Unknown -> "Unknown"
+        | Ts.TypeFlags.String -> "String"
+        | Ts.TypeFlags.Number -> "Number"
+        | Ts.TypeFlags.Boolean -> "Boolean"
+        | Ts.TypeFlags.Enum -> "Enum"
+        | Ts.TypeFlags.BigInt -> "BigInt"
+        | Ts.TypeFlags.StringLiteral -> "StringLiteral"
+        | Ts.TypeFlags.NumberLiteral -> "NumberLiteral"
+        | Ts.TypeFlags.BooleanLiteral -> "BooleanLiteral"
+        | Ts.TypeFlags.EnumLiteral -> "EnumLiteral"
+        | Ts.TypeFlags.BigIntLiteral -> "BigIntLiteral"
+        | Ts.TypeFlags.ESSymbol -> "ESSymbol"
+        | Ts.TypeFlags.UniqueESSymbol -> "UniqueESSymbol"
+        | Ts.TypeFlags.Void -> "Void"
+        | Ts.TypeFlags.Undefined -> "Undefined"
+        | Ts.TypeFlags.Null -> "Null"
+        | Ts.TypeFlags.Never -> "Never"
+        | Ts.TypeFlags.TypeParameter -> "TypeParameter"
+        | Ts.TypeFlags.Object -> "Object"
+        | Ts.TypeFlags.Union -> "Union"
+        | Ts.TypeFlags.Intersection -> "Intersection"
+        | Ts.TypeFlags.Index -> "Index"
+        | Ts.TypeFlags.IndexedAccess -> "IndexedAccess"
+        | Ts.TypeFlags.Conditional -> "Conditional"
+        | Ts.TypeFlags.Substitution -> "Substitution"
+        | Ts.TypeFlags.NonPrimitive -> "NonPrimitive"
+        | Ts.TypeFlags.TemplateLiteral -> "TemplateLiteral"
+        | Ts.TypeFlags.StringMapping -> "StringMapping"
+        | Ts.TypeFlags.Literal -> "Literal"
+        | Ts.TypeFlags.Unit -> "Unit"
+        | Ts.TypeFlags.Freshable -> "Freshable"
+        | Ts.TypeFlags.StringOrNumberLiteral -> "StringOrNumberLiteral"
+        | Ts.TypeFlags.PossiblyFalsy -> "PossiblyFalsy"
+        | Ts.TypeFlags.StringLike -> "StringLike"
+        | Ts.TypeFlags.NumberLike -> "NumberLike"
+        | Ts.TypeFlags.BigIntLike -> "BigIntLike"
+        | Ts.TypeFlags.BooleanLike -> "BooleanLike"
+        | Ts.TypeFlags.EnumLike -> "EnumLike"
+        | Ts.TypeFlags.ESSymbolLike -> "ESSymbolLike"
+        | Ts.TypeFlags.VoidLike -> "VoidLike"
+        | Ts.TypeFlags.UnionOrIntersection -> "UnionOrIntersection"
+        | Ts.TypeFlags.StructuredType -> "StructuredType"
+        | Ts.TypeFlags.TypeVariable -> "TypeVariable"
+        | Ts.TypeFlags.InstantiableNonPrimitive -> "InstantiableNonPrimitive"
+        | Ts.TypeFlags.InstantiablePrimitive -> "InstantiablePrimitive"
+        | Ts.TypeFlags.Instantiable -> "Instantiable"
+        | unknown -> $"Unknown {unknown}"
+        
     member this.ToStringArray() =
         [|
             Ts.TypeFlags.Any, "Any"
@@ -1453,6 +1509,56 @@ module Patterns =
                 | Intersection typ -> Intersection typ
                 | Object typ -> Object typ
                 | _ -> Instantiable (unbox<Ts.InstantiableType> token)
+        type OF = Ts.ObjectFlags
+        let (|AlwaysSymbol|NeverSymbol|MaybeSymbol|) (token: Ts.Type) =
+            let inline hasFlag flag = token.flags.HasFlag flag
+            let inline hasFlagFrom flags = flags |> List.exists hasFlag
+            match token.flags with
+            | _ when hasFlagFrom [
+                    TF.StringMapping
+                    TF.UniqueESSymbol
+                    TF.EnumLiteral
+                    TF.Enum
+                    TF.TypeParameter
+                ] -> AlwaysSymbol()
+            | _ when hasFlag TF.Object ->
+                let inline hasFlag flag = token :?> Ts.ObjectType |> _.objectFlags |> _.HasFlag(flag)
+                let inline hasFlagFrom flags = flags |> List.exists hasFlag
+                match token with
+                | _ when hasFlagFrom [
+                        OF.Class
+                        OF.Interface
+                        OF.Anonymous
+                        OF.Mapped
+                        OF.Instantiated
+                        OF.ObjectRestType
+                        OF.InstantiationExpressionType
+                    ] -> AlwaysSymbol()
+                | _ when hasFlag OF.Tuple -> NeverSymbol()
+                | _ -> MaybeSymbol()
+            | _ when hasFlag TF.BooleanLiteral -> MaybeSymbol()
+            | _ when hasFlagFrom [
+                    TF.Any
+                    TF.Unknown
+                    TF.String
+                    TF.Number
+                    TF.Boolean
+                    TF.BigInt
+                    TF.ESSymbol
+                    TF.Void
+                    TF.Undefined
+                    TF.Null
+                    TF.Never
+                    TF.Intersection
+                    TF.Index
+                    TF.IndexedAccess
+                    TF.Conditional
+                    TF.Substitution
+                    TF.NonPrimitive
+                    TF.TemplateLiteral
+                ] -> NeverSymbol()
+            | _ -> MaybeSymbol()
+            
     /// <summary>
     /// Pattern match helpers to type cast <c>Ts.ObjectType</c> based on the <c>Ts.ObjectFlags</c>
     /// </summary>
@@ -1807,6 +1913,7 @@ module Patterns =
         let inline (|NeverKeyword|_|) token: Ts.Token<SK> option = hasFlagTo SK.NeverKeyword token
         let inline (|ObjectKeyword|_|) token: Ts.Token<SK> option = hasFlagTo SK.ObjectKeyword token
         let inline (|InKeyword|_|) token: Ts.Token<SK> option = hasFlagTo SK.InKeyword token
+        let inline (|OutKeyword|_|) token: Ts.Token<SK> option = hasFlagTo SK.OutKeyword token
         let inline (|InstanceOfKeyword|_|) token: Ts.Token<SK> option = hasFlagTo SK.InstanceOfKeyword token
         let inline (|TypeOfKeyword|_|) token: Ts.Token<SK> option = hasFlagTo SK.TypeOfKeyword token
         let inline (|NewKeyword|_|) token: Ts.Token<SK> option = hasFlagTo SK.NewKeyword token
@@ -2070,4 +2177,3 @@ module Patterns =
         // -----------------------------
         let inline (|SourceFile|_|) token: Ts.SourceFile option = hasFlagTo SK.SourceFile token
         let inline (|Bundle|_|) token: Ts.Bundle option = hasFlagTo SK.Bundle token
- 

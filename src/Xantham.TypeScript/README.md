@@ -21,9 +21,14 @@ invariants are not assumed — they are **proven** as executable tests in
 npm run test:typescript
 ```
 
-Every proof carries a **stable ID** (`SF-n`, `XTK-n`, `ND-n`, `TC-n`, `OF-n`, `TF-n`, `EN-n`, `SY-n`, `TR-n`, `NW-n`) embedded in its test
-name. Wrapper XML docs cite these IDs, so when a proof fails you can jump straight from the broken invariant to the
-wrapper that relied on it (and vice versa).
+Every proof carries a **stable ID** (`SF-n`, `XTK-n`, `ND-n`, `TC-n`, `OF-n`, `TF-n`, `EN-n`, `MS-n`, `SY-n`,
+`TR-n`, `NW-n`, `LM-n`) embedded in its test name. Wrapper XML docs cite these IDs, so when a proof fails you can
+jump straight from the broken invariant to the wrapper that relied on it (and vice versa).
+
+Most proofs live in [`tests/Xantham.TypeScript.Tests/Program.test.fs`](../../tests/Xantham.TypeScript.Tests/Program.test.fs)
+and run over the corpus below. The `LM-*` proofs are the exception: they are *corpus-independent* structural checks
+on the classifier's lookup tables and live in
+[`tests/Xantham.TypeScript.Tests/Structural.test.fs`](../../tests/Xantham.TypeScript.Tests/Structural.test.fs).
 
 ### Corpus
 
@@ -164,6 +169,34 @@ the whole-enum vs enum-member cases and read their declarations safely.
 | EN-3 | A type with the `Enum` flag resolves to a symbol whose `valueDeclaration` is an `EnumDeclaration`. | enum symbol value-declaration access |
 | EN-4 | An `EnumLiteral` type also carrying `Enum`/`Union` resolves to a symbol with an `EnumDeclaration` `valueDeclaration`. | whole-enum literal resolution |
 | EN-5 | An `EnumLiteral` type **without** `Enum`/`Union` resolves to a symbol whose `valueDeclaration` is an `EnumMember`. | enum-member literal resolution |
+| EN-6 | An enum-member literal type may carry the `StringLiteral` flag (auto-skips if the corpus has none). | enum-member literal sub-classification |
+| EN-7 | An enum-member literal type may carry the `NumberLiteral` flag (auto-skips if absent). | enum-member literal sub-classification |
+| EN-8 | An enum-member literal type may carry the `BigIntLiteral` flag (auto-skips if absent). | enum-member literal sub-classification |
+| EN-9 | An enum-member literal type may carry the `BooleanLiteral` flag (auto-skips if absent). | enum-member literal sub-classification |
+| EN-10 | An enum-member literal type may carry the `Null` flag (auto-skips if absent). | enum-member literal sub-classification |
+| EN-11 | Every enum-member literal type (`EnumLiteral` minus `Enum`/`Union`) builds via `EnumMember.TryCreate`. | `EnumMember.TryCreate` (type path) |
+| EN-12 | Every `EnumMember` node builds via `EnumMember.TryCreate`. | `EnumMember.TryCreate` (node path) |
+| EN-13 | Every enum-member symbol builds via `EnumMember.TryCreate`. | `EnumMember.TryCreate` (symbol path) |
+| EN-14 | Not every `EnumMember` declaration is its symbol's canonical `valueDeclaration` (aliases exist). | `EnumMember` value-declaration handling |
+| EN-15 | An `EnumDeclaration`'s members may resolve to a **subset** of distinct `EnumMember` symbols (aliasing collapses some). | enum-member symbol dedup |
+| EN-16 | Every `EnumDeclaration` resolves to a single-declaration symbol carrying the `Enum` flag. | whole-enum symbol access |
+
+### MS · Member Symbols
+
+How a class/interface member's name resolves to a symbol, whether that symbol carries a `valueDeclaration`, and
+which `SymbolFlags` it bears — what lets the wrappers read a member's symbol/value-declaration when projecting
+members into the 3-tier representation.
+
+| ID | Invariant | Backs |
+|----|-----------|-------|
+| MS-1 | Every `PropertySignature` name resolves to a symbol with the `Property` flag and a `valueDeclaration`. | property-signature symbol access |
+| MS-2 | Every `PropertyDeclaration` name resolves to a symbol with the `Property` flag and a `valueDeclaration`. | property-declaration symbol access |
+| MS-3 | Every `MethodSignature` name resolves to a symbol with the `Method` flag and a `valueDeclaration`. | method-signature symbol access |
+| MS-4 | Every `MethodDeclaration` name resolves to a symbol with the `Method` flag and a `valueDeclaration`. | method-declaration symbol access |
+| MS-5 | A `CallSignature` resolves to a symbol that has **no** `valueDeclaration`. | call-signature symbol handling |
+| MS-6 | A `CallSignature` symbol may carry **multiple** declarations (overload sets). | overload enumeration |
+| MS-7 | An interface may resolve to **fewer** unique call-signature symbols than it has call-signature members (overloads share a symbol). | call-signature symbol dedup |
+| MS-8 | A `CallSignature` may carry type parameters. | generic call-signature handling |
 
 ### SY · Symbols & Identity
 
@@ -199,3 +232,23 @@ The wrapper constructors produce the expected wrapped shape over real input.
 |----|-----------|-------|
 | NW-1 | `TypeOperatorNode.Create` wraps every `TypeOperator` node (non-null result). | `TypeOperatorNode.Create` |
 | NW-2 | `MethodDeclaration.Create` exposes an anonymous-object `.Type` and a `.Value` of kind `MethodDeclaration`. | `MethodDeclaration.Create` |
+
+---
+
+The `LM-*` proofs below differ from everything above: they do **not** quantify over the corpus. The classifier in
+`XanTagKind.fs`'s `Internal` module is a set of `Dictionary<Ts.SyntaxKind, obj -> 'DU>` maps (plus the
+`Array.find`-based `typeFlag*KindSet` tables), and these proofs hold *by construction* — they fail fast and
+pinpoint a drift the moment a DU case is added without its map row, a `SyntaxKind` is mapped twice, or a sub-map
+escapes the master node set. They live in
+[`Structural.test.fs`](../../tests/Xantham.TypeScript.Tests/Structural.test.fs).
+
+### LM · Lookup-Map ↔ DU Structure
+
+Structural invariants of the classifier's lookup tables, independent of any input.
+
+| ID | Invariant | Backs |
+|----|-----------|-------|
+| LM-1 | Every DU case appears as a value-constructor in its map — no case is unreachable from `Create`. | `declarationFileNodes`, `memberDeclarationKindSetMap`, `typeDeclarationKindSetMap`, `topLevelStatements`, `topLevelExportDeclarations`, `topLevelLocalDeclarations`, `typeNodeKindSetMap`, `jsDocKindSetMap`, `moduleExportSetMap`, `modifierSetMap`, `literalTokenNodeKindSet`, `typeFlagLiteralKindSet`, `typeFlagObjectKindSet`, `typeFlagPrimaryKindSet` |
+| LM-2 | Every map's keys are **distinct** — a `SyntaxKind`/flag resolves to exactly one DU case. | all classifier maps (rules out copy-paste double-entry) |
+| LM-3 | *Reserved* — backlog walk cross-check (`PROOF-BACKLOG.md` LM-3); not yet implemented. | — |
+| LM-4 | Every sub-map's keys are a subset of `declarationFileNodes` — the master node vocabulary `ND-8` keys on stays the widest. | `DeclarationFileNodes.IsKnownDeclarationFileNodeSyntaxKind` |

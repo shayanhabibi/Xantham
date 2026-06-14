@@ -45,11 +45,14 @@ module Xantham.Fable.Types.Tracer
 
 open Fable.Core
 open Fable.Core.DynamicExtensions
-open Fable.Core.JsInterop
 open TypeScript
 open Xantham
 open Xantham.Fable
 open FSharp.Core
+open Xantham.Fable.Tracer
+
+[<Global>]
+let private Symbol (_: string): Symbol = jsNative
 
 [<RequireQualifiedAccess>]
 type IdentityKey =
@@ -69,7 +72,7 @@ type IdentityKey =
         typ.aliasSymbol
         |> Option.map AliasSymbol
         |> Option.orElse (typ.getSymbol() |> Option.map Symbol)
-        |> Option.defaultValue (Id typ.TypeKey)
+        |> Option.defaultValue (unbox typ.id |> Id)
     static member Create(typ: Ts.Symbol) = Symbol typ
     override this.ToString() =
         match this with
@@ -77,191 +80,11 @@ type IdentityKey =
         | AliasSymbol sym -> $"AliasSymbol ({sym.name})"
         | Id typ -> $"Id ({typ})"
         | DeclarationPosition(file, pos, endPos) -> $"DeclarationPosition ({file}, {pos}, {endPos})"
-    
-let TRACER_TAG = Symbol "XanTracer"
-let TRACER_PROXY = SymbolTypeKey.create<string> "XanTracerProxy"
-
-type Tracer<'T> =
-    abstract Value: 'T with get
 
 type GuardTracer =
     inherit Tracer<IdentityKey>
 
 let TRACER_GUARD = SymbolTypeKey.create<GuardTracer> "XanGuard"
-let mutable DebugIdCounter = 0
-let getDebugId() =
-    DebugIdCounter <- DebugIdCounter + 1
-    DebugIdCounter
-
-type Tracer<'T> with
-    #if DEBUG
-    /// <summary>
-    /// Only compiled in Debug builds
-    /// </summary>
-    member inline this.TraceId with get() =
-        this["DebugId"] :?> int option
-        |> Option.defaultWith (fun () ->
-            this["DebugId"] <- getDebugId()
-            this["DebugId"] :?> int
-            )
-    #endif
-    member inline this.DebugId with get() = this["DebugId"] :?> int option |> Option.defaultValue -1
-    member inline this.Debug
-        with inline get() = this["Debug"] :?> bool option |> Option.defaultValue false
-        and inline set(value: bool) =
-            #if DEBUG
-            if value && not this.Debug && (this["DebugId"] :?> int option).IsNone then
-            #else
-            if value && not this.Debug then
-            #endif
-                this["DebugId"] <- getDebugId()
-            this["Debug"] <- value
-        
-    member inline this.TYPE_Valid = TRACER_PROXY.Invoke(this).IsSome && TRACER_PROXY.UnsafeInvoke(this) = typeof<'T>.Name
-    member inline this.TYPE_Invalid = this.TYPE_Valid |> not
-    member inline this.Imprint =
-        if TRACER_PROXY.Invoke(this).IsNone then
-            TRACER_PROXY.Set(this, typeof<'T>.Name)
-        elif this.TYPE_Invalid then  failwith "Attempted to imprint a tracer twice, second imprint was different"
-
-[<StringEnum>]
-type TracerCreateError =
-    | AlreadyExists
-    | ExistsWithDifferentValue
-    | DifferentTypeTag
-
-module Tracer =
-    let inline get<'T> (target: obj) =
-        (unbox<SymbolTypeKey<Tracer<'T>>> TRACER_TAG).Invoke(target)
-    let inline unsafeGet<'T> (target: obj) =
-        (unbox<SymbolTypeKey<Tracer<'T>>> TRACER_TAG).UnsafeInvoke(target)
-    let inline withDebug<'T> (fn: Tracer<'T> -> unit) (target: Tracer<'T>)=
-        #if DEBUG
-        if target.Debug then fn target
-        #endif
-        target
-    let inline withTracerDebug<'T, 'a> (fn: 'a -> Tracer<'T> -> unit) (target: 'a): 'a =
-        #if DEBUG
-        get<'T> target
-        |> ValueOption.iter (withDebug (fn target) >> ignore)
-        #endif
-        target
-    let inline setDebug<'T> (target: Tracer<'T>) =
-        target.Debug <- true
-        target
-    let inline setDebugTracer<'T> (target: obj) =
-        match get<'T> target with
-        | ValueSome tracer ->
-            tracer.Debug <- true
-            true
-        | ValueNone -> false
-    let inline set<'T> (value: 'T) (target: obj) =
-        target.Item(unbox<string> TRACER_TAG) <- {| Value = value |}
-    let inline unsafeCreate<'T> (value: 'T) (target: obj) =
-        target.Item(unbox<string> TRACER_TAG) <- {| Value = value |}
-        (unsafeGet<'T> target).Imprint
-        unsafeGet<'T> target
-    let inline create<'T> (value: 'T) (target: obj) =
-        if (get<'T> target).IsNone then
-            unsafeCreate<'T> value target
-        else unsafeGet<'T> target
-    let inline safeCreate<'T when 'T:equality> (value: 'T) (target: obj) =
-        if (get<'T> target).IsNone then
-            unsafeCreate<'T> value target
-            |> Ok
-        elif (unsafeGet<'T> target).Value <> value then
-            Error ExistsWithDifferentValue
-        else
-            Error AlreadyExists
-    let inline imprintedCreate<'T when 'T:equality> (value: 'T) (target: obj) =
-        let result = create<'T> value target
-        result.Imprint
-        result
-    let inline safeImprintedCreate<'T when 'T:equality> (value: 'T) (target: obj) =
-        match safeCreate<'T> value target with
-        | Ok tracer ->
-            tracer.Imprint
-            Ok tracer
-        | Error AlreadyExists as error ->
-            if unsafeGet<'T> target |> _.TYPE_Valid then
-                error
-            else Error DifferentTypeTag
-        | error -> error 
-    let inline has<'T> (target: obj) = (get<'T> target).IsSome
-    
-    module Data =
-        let inline get<'T> (propName: string) (target: Tracer<_>) =
-            target.Item(propName)
-            |> unbox<'T voption>
-        let inline unsafeGet<'T> (propName: string) (target: Tracer<_>) =
-            target.Item(propName) |> unbox<'T>
-        let inline set<'T> (propName: string) (value: 'T) (target: Tracer<_>) =
-            target.Item propName <- value
-        let inline getOrDefault<'T> (propName: string) (defaultValue: 'T) (target: Tracer<_>) =
-            get<'T> propName target
-            |> ValueOption.defaultValue defaultValue
-        let inline getOrSet<'T> (propName: string) (value: 'T) (target: Tracer<_>) =
-            if get<'T> propName target |> ValueOption.isNone then
-                set<'T> propName value target
-                unsafeGet<'T> propName target
-            else unsafeGet<'T> propName target
-        let inline getOrSetWith<'T> propName (value: unit -> 'T) (target: Tracer<_>) =
-            if get<'T> propName target |> ValueOption.isNone then
-                set<'T> propName (value()) target
-                unsafeGet<'T> propName target
-            else unsafeGet<'T> propName target
-        let inline clear<'T> propName (target: Tracer<_>) =
-            set<'T> propName JS.undefined target
-        module Generic =
-            let inline get<'T> (target: Tracer<_>) =
-                get<'T> typeof<'T>.Name target
-            let inline unsafeGet<'T> (target: Tracer<_>) =
-                unsafeGet<'T> typeof<'T>.Name target
-            let inline set<'T> (value: 'T) (target: Tracer<_>) =
-                set<'T> typeof<'T>.Name value target
-            let inline getOrDefault<'T> (defaultValue: 'T) (target: Tracer<_>) =
-                getOrDefault<'T> typeof<'T>.Name defaultValue target
-            let inline getOrSet<'T> (value: 'T) (target: Tracer<_>) =
-                getOrSet<'T> typeof<'T>.Name value target
-            let inline getOrSetWith<'T> (value: unit -> 'T) (target: Tracer<_>) =
-                getOrSetWith<'T> typeof<'T>.Name value target
-            let inline clear<'T> (target: Tracer<_>) =
-                clear typeof<'T>.Name target
-
-type CyclicTracer<'T> =
-    inherit Tracer<'T>
-
-module CyclicTracer =
-    let inline has (target: 'T) =
-        Tracer.has<'T> target
-    let inline get (target: 'T) =
-        Tracer.get<'T> target |> unbox<CyclicTracer<'T> voption>
-    let inline unsafeGet (target: 'T) =
-        Tracer.unsafeGet<'T> target :?> CyclicTracer<'T>
-    let inline unsafeCreate<'T> (target: 'T) = Tracer.unsafeCreate<'T> target target :?> CyclicTracer<'T>
-    let inline create<'T> (target: 'T) =
-        Tracer.create<'T> target target :?> CyclicTracer<'T>
-    let inline safeCreate<'T> (target: 'T) =
-        if (get target).IsSome then
-            Error AlreadyExists
-        else
-            let result = unsafeCreate target
-            result.Imprint
-            Ok result
-    let inline imprintedCreate<'T> (target: 'T) =
-        let result = create target
-        result.Imprint
-        result
-    let inline safeGet (target: 'T) =
-        if
-            get target
-            |> ValueOption.exists _.TYPE_Valid
-        then
-            unsafeGet target
-            |> Ok
-        else
-            Tracer.get target 
-            |> Error
 
 module GuardTracer =
     let inline get (target: obj) : GuardTracer voption =
@@ -410,55 +233,3 @@ type GuardedTracer<'T, 'U> with
     member inline this.KeyedSet<'Data>(value: 'Data) =
         this.Guard.Item typeof<'Data>.Name <- value
     member inline this.KeyedClear<'Data>() = this.Guard.Item typeof<'Data>.Name <- JS.undefined
-
-[<RequireQualifiedAccess>]
-type TagState<'T> =
-    | Visited of 'T
-    | Unvisited of 'T
-    /// <summary>
-    /// Optimised for performance, emits immediate access to the underlying value
-    /// </summary>
-    member inline this.Value: 'T =
-        emitJsExpr this "$0.fields[0]"
-
-module TagState =
-    let createVisited (value: 'T) = TagState.Visited value
-    let createUnvisited (value: 'T) = TagState.Unvisited value
-    let inline isVisited (state: TagState<'T>) = state.IsVisited
-    let inline isUnvisited (state: TagState<'T>) = state.IsUnvisited
-    let inline value (state: TagState<'T>) = state.Value
-    let inline mapUnvisited (f: 'T -> 'T) (state: TagState<'T>) =
-        match state with
-        | TagState.Unvisited v -> TagState.Unvisited (f v)
-        | v -> v
-    let inline mapVisited (f: 'T -> 'T) (state: TagState<'T>) =
-        match state with
-        | TagState.Visited v -> TagState.Visited (f v)
-        | v -> v
-    let inline applyUnvisited (f: 'T -> 'U) (state: TagState<'T>) =
-        match state with
-        | TagState.Unvisited v -> f v |> ValueSome
-        | _ -> ValueNone
-    let inline applyVisited (f: 'T -> 'U) (state: TagState<'T>) =
-        match state with
-        | TagState.Visited v -> f v |> ValueSome
-        | _ -> ValueNone
-    /// <param name="fn">First parameter is true when the state has been seen for the first time.</param>
-    /// <param name="state"></param>
-    let inline map (fn: bool -> 'T -> 'U) (state: TagState<'T>) =
-        match state with
-        | TagState.Unvisited v -> TagState.Unvisited (fn true v)
-        | TagState.Visited v -> TagState.Visited (fn false v)
-    let inline bindUnvisited (fn: 'T -> 'T) (state: TagState<'T>) =
-        match state with
-        | TagState.Unvisited v -> TagState.Visited (fn v)
-        | _ -> state
-    let inline bind (fn: 'T -> 'T) (state: TagState<'T>) =
-        match state with
-        | TagState.Visited v -> TagState.Visited (fn v)
-        | TagState.Unvisited v -> TagState.Visited (fn v)
-    let inline apply (fn: bool -> 'T -> unit) (state: TagState<'T>) =
-        match state with
-        | TagState.Unvisited v -> fn true v
-        | TagState.Visited v -> fn false v
-        state

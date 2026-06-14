@@ -28,8 +28,10 @@
         "test:logging": "dotnet fable tests/Logging.test.fsx --noCache && node tests/Logging.test.fs.js",
         "prebuild": "dotnet fable --cwd src/Xantham.Fable -c Release --noCache -o output -e .fs.js",
         "build": "",
-        "test:typescript": "dotnet fable -s --cwd tests/Xantham.TypeScript.Tests/ -e .fs.js -o output --noCache && mocha tests/Xantham.TypeScript.Tests/output/",
-        "watch:test:typescript": "dotnet fable -s --cwd tests/Xantham.TypeScript.Tests/ -e .fs.js -o output --noCache --watch --runWatch mocha ./output/"
+        "test:typescript": "dotnet fable -s --cwd tests/Xantham.TypeScript.Tests/ -e .fs.js -o output --noCache && mocha tests/Xantham.TypeScript.Tests/output/ --enable-source-maps",
+        "watch:test:typescript": "dotnet fable -s --cwd tests/Xantham.TypeScript.Tests/ -e .fs.js -o output --noCache --watch --runWatch mocha ./output/ --enable-source-maps",
+        "test:parallel:typescript": "dotnet fable -s --cwd tests/Xantham.TypeScript.Tests/ -e .fs.js -o output --noCache && mocha tests/Xantham.TypeScript.Tests/output/**/*.test.fs.js --parallel --enable-source-maps",
+        "watch:test:parallel:typescript": "dotnet fable -s --cwd tests/Xantham.TypeScript.Tests/ -e .fs.js -o output --noCache --watch --runWatch mocha ./output/ --parallel --enable-source-maps"
     },
     "devDependencies": {
         "mocha": "^11.7.5"

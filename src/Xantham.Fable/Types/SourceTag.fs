@@ -11,7 +11,7 @@ open Xantham.Fable.Types.Tracer
 open Fable.Core.DynamicExtensions
 open Fable.Core.JsInterop
 
-let private logger = Utils.Logging.Log.Default
+let private logger = Logging.Log.Default
 
 /// <summary>
 /// LibEs default packages are not tracked further.

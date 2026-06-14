@@ -1,6 +1,7 @@
 ﻿[<AutoOpen>]
-module rec Xantham.Fable.AutoOpenXanTagKind
+module rec Xantham.TypeScript.AutoOpenXanTagKind
 
+open Xantham.Fable
 open System.Collections.Generic
 open System.ComponentModel
 open Fable.Core
@@ -11,10 +12,110 @@ open FsToolkit.ErrorHandling
 
 [<System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)>]
 module Internal =
-    let inline private (>=>) a b = KeyValuePair(a, unbox >> b)
-    let inline private (>->) a b = a, (unbox >> b)
+    let knownSymbolNodeCombinations =
+        let inline (>=>) a b = a |> List.map (fun a -> KeyValuePair(a, Set b))
+        List.collect id [
+            [ Ts.SymbolFlags.Function ||| Ts.SymbolFlags.Interface ] >=> [
+                Ts.SyntaxKind.FunctionDeclaration
+                Ts.SyntaxKind.InterfaceDeclaration
+            ]
+            [ Ts.SymbolFlags.FunctionScopedVariable ||| Ts.SymbolFlags.TypeParameter ] >=> [
+                Ts.SyntaxKind.Parameter
+                Ts.SyntaxKind.TypeParameter
+            ]
+            [ Ts.SymbolFlags.GetAccessor ||| Ts.SymbolFlags.SetAccessor ] >=> [
+                Ts.SyntaxKind.GetAccessor
+                Ts.SyntaxKind.SetAccessor
+            ]
+            [ Ts.SymbolFlags.Method ||| Ts.SymbolFlags.Transient ] >=> [
+                Ts.SyntaxKind.MethodDeclaration
+                Ts.SyntaxKind.MethodSignature
+            ]
+            [ Ts.SymbolFlags.Property ||| Ts.SymbolFlags.Transient ] >=> [
+                Ts.SyntaxKind.PropertyDeclaration
+                Ts.SyntaxKind.PropertySignature
+            ]
+            [ Ts.SymbolFlags.BlockScopedVariable ||| Ts.SymbolFlags.Interface ||| Ts.SymbolFlags.NamespaceModule ] >=> [
+                Ts.SyntaxKind.InterfaceDeclaration
+                Ts.SyntaxKind.ModuleDeclaration
+                Ts.SyntaxKind.VariableDeclaration
+            ]
+            [ Ts.SymbolFlags.Class ||| Ts.SymbolFlags.Interface ||| Ts.SymbolFlags.ValueModule ] >=> [
+                Ts.SyntaxKind.ClassDeclaration
+                Ts.SyntaxKind.InterfaceDeclaration
+                Ts.SyntaxKind.ModuleDeclaration
+            ]
+            [ Ts.SymbolFlags.NamespaceModule ||| Ts.SymbolFlags.Transient ||| Ts.SymbolFlags.ValueModule ] >=> [
+                Ts.SyntaxKind.ModuleDeclaration
+                Ts.SyntaxKind.SourceFile
+            ]
+            [
+                Ts.SymbolFlags.BlockScopedVariable ||| Ts.SymbolFlags.TypeAlias
+                Ts.SymbolFlags.FunctionScopedVariable ||| Ts.SymbolFlags.TypeAlias
+            ] >=> [
+                Ts.SyntaxKind.TypeAliasDeclaration
+                Ts.SyntaxKind.VariableDeclaration
+            ]
+            [
+                Ts.SymbolFlags.Class ||| Ts.SymbolFlags.Interface
+                Ts.SymbolFlags.Class ||| Ts.SymbolFlags.Interface ||| Ts.SymbolFlags.Transient
+            ] >=> [
+                Ts.SyntaxKind.ClassDeclaration
+                Ts.SyntaxKind.InterfaceDeclaration
+            ]
+            [
+                Ts.SymbolFlags.Class ||| Ts.SymbolFlags.NamespaceModule
+                Ts.SymbolFlags.Class ||| Ts.SymbolFlags.ValueModule
+            ] >=> [
+                Ts.SyntaxKind.ClassDeclaration
+                Ts.SyntaxKind.ModuleDeclaration
+            ]
+            [
+                Ts.SymbolFlags.Interface ||| Ts.SymbolFlags.NamespaceModule
+                Ts.SymbolFlags.Interface ||| Ts.SymbolFlags.ValueModule
+            ] >=> [
+                Ts.SyntaxKind.InterfaceDeclaration
+                Ts.SyntaxKind.ModuleDeclaration
+            ]
+            [
+                Ts.SymbolFlags.NamespaceModule ||| Ts.SymbolFlags.TypeAlias
+                Ts.SymbolFlags.TypeAlias ||| Ts.SymbolFlags.ValueModule
+            ] >=> [
+                Ts.SyntaxKind.ModuleDeclaration
+                Ts.SyntaxKind.TypeAliasDeclaration
+            ]
+            [
+                Ts.SymbolFlags.Function ||| Ts.SymbolFlags.NamespaceModule
+                Ts.SymbolFlags.Function ||| Ts.SymbolFlags.ValueModule
+                Ts.SymbolFlags.Function ||| Ts.SymbolFlags.Transient ||| Ts.SymbolFlags.ValueModule
+            ] >=> [
+                Ts.SyntaxKind.FunctionDeclaration
+                Ts.SyntaxKind.ModuleDeclaration
+            ]
+            [
+                Ts.SymbolFlags.BlockScopedVariable ||| Ts.SymbolFlags.Interface
+                Ts.SymbolFlags.ExportValue ||| Ts.SymbolFlags.Interface
+                Ts.SymbolFlags.FunctionScopedVariable ||| Ts.SymbolFlags.Interface
+                Ts.SymbolFlags.FunctionScopedVariable ||| Ts.SymbolFlags.Transient ||| Ts.SymbolFlags.Interface
+            ] >=> [
+                Ts.SyntaxKind.InterfaceDeclaration
+                Ts.SyntaxKind.VariableDeclaration
+            ]
+            [
+                Ts.SymbolFlags.BlockScopedVariable ||| Ts.SymbolFlags.NamespaceModule
+                Ts.SymbolFlags.FunctionScopedVariable ||| Ts.SymbolFlags.NamespaceModule
+                Ts.SymbolFlags.BlockScopedVariable ||| Ts.SymbolFlags.NamespaceModule ||| Ts.SymbolFlags.Transient
+                Ts.SymbolFlags.FunctionScopedVariable ||| Ts.SymbolFlags.NamespaceModule ||| Ts.SymbolFlags.Transient
+            ] >=> [
+                Ts.SyntaxKind.ModuleDeclaration
+                Ts.SyntaxKind.VariableDeclaration
+            ]
+        ]
+        |> List.distinct
+        |> Dictionary
     let declarationFileNodes: Dictionary<Ts.SyntaxKind, obj -> DeclarationFileNodes> =
         Dictionary [
+            let inline (>=>) a b = KeyValuePair(a, unbox >> b)
             Ts.SyntaxKind.BigIntLiteral >=> DeclarationFileNodes.BigIntLiteral
             Ts.SyntaxKind.NamespaceExportDeclaration >=> DeclarationFileNodes.NamespaceExportDeclaration
             Ts.SyntaxKind.PrivateIdentifier >=> DeclarationFileNodes.PrivateIdentifier
@@ -126,10 +227,12 @@ module Internal =
             Ts.SyntaxKind.VariableDeclarationList >=> DeclarationFileNodes.VariableDeclarationList
             Ts.SyntaxKind.VariableStatement >=> DeclarationFileNodes.VariableStatement
             Ts.SyntaxKind.VoidKeyword >=> DeclarationFileNodes.VoidKeyword
-            
+            Ts.SyntaxKind.SourceFile >=> DeclarationFileNodes.SourceFile
         ]
     let memberDeclarationKindSetMap: Dictionary<Ts.SyntaxKind, obj -> MemberDeclaration> =
         Dictionary [
+            let inline (>=>) a b = KeyValuePair(a, unbox >> b)
+            let inline (>->) a b = a, (unbox >> b)
             Ts.SyntaxKind.PropertySignature >=> MemberDeclaration.PropertySignature
             Ts.SyntaxKind.MethodSignature >=> MemberDeclaration.MethodSignature
             Ts.SyntaxKind.IndexSignature >=> MemberDeclaration.IndexSignature
@@ -144,6 +247,8 @@ module Internal =
         ]
     let typeDeclarationKindSetMap: Dictionary<Ts.SyntaxKind, obj -> TypeDeclaration> =
         Dictionary [
+            let inline (>=>) a b = KeyValuePair(a, unbox >> b)
+            let inline (>->) a b = a, (unbox >> b)
             Ts.SyntaxKind.TypeParameter >=> TypeDeclaration.TypeParameter
             Ts.SyntaxKind.InterfaceDeclaration >=> TypeDeclaration.Interface
             Ts.SyntaxKind.TypeAliasDeclaration >=> TypeDeclaration.TypeAlias
@@ -160,6 +265,8 @@ module Internal =
         ]
     let topLevelStatements: Dictionary<Ts.SyntaxKind, obj -> TopLevelStatements> =
         Dictionary [
+            let inline (>=>) a b = KeyValuePair(a, unbox >> b)
+            let inline (>->) a b = a, (unbox >> b)
             Ts.SyntaxKind.InterfaceDeclaration >=> TopLevelStatements.Interface
             Ts.SyntaxKind.TypeAliasDeclaration >=> TopLevelStatements.TypeAlias
             Ts.SyntaxKind.ClassDeclaration >=> TopLevelStatements.Class
@@ -176,6 +283,8 @@ module Internal =
         ]
     let topLevelExportDeclarations: Dictionary<Ts.SyntaxKind, obj -> TopLevelExportSymbolDeclarations> =
         Dictionary [
+            let inline (>=>) a b = KeyValuePair(a, unbox >> b)
+            let inline (>->) a b = a, (unbox >> b)
             Ts.SyntaxKind.NamespaceExportDeclaration >=> TopLevelExportSymbolDeclarations.NamespaceExportDeclaration
             Ts.SyntaxKind.InterfaceDeclaration >=> TopLevelExportSymbolDeclarations.Interface
             Ts.SyntaxKind.TypeAliasDeclaration >=> TopLevelExportSymbolDeclarations.TypeAlias
@@ -193,6 +302,8 @@ module Internal =
         ]
     let topLevelLocalDeclarations: Dictionary<Ts.SyntaxKind, obj -> TopLevelLocalSymbolDeclarations> =
         Dictionary [
+            let inline (>=>) a b = KeyValuePair(a, unbox >> b)
+            let inline (>->) a b = a, (unbox >> b)
             Ts.SyntaxKind.InterfaceDeclaration >=> TopLevelLocalSymbolDeclarations.Interface
             Ts.SyntaxKind.TypeAliasDeclaration >=> TopLevelLocalSymbolDeclarations.TypeAlias
             Ts.SyntaxKind.ClassDeclaration >=> TopLevelLocalSymbolDeclarations.Class
@@ -212,6 +323,8 @@ module Internal =
         ]
     let typeNodeKindSetMap: Dictionary<Ts.SyntaxKind,obj -> TypeNode> =
         Dictionary [
+            let inline (>=>) a b = KeyValuePair(a, unbox >> b)
+            let inline (>->) a b = a, (unbox >> b)
             Ts.SyntaxKind.StringKeyword >=> TypeNode.StringKeyword
             Ts.SyntaxKind.NumberKeyword  >=> TypeNode.NumberKeyword
             Ts.SyntaxKind.BooleanKeyword  >=> TypeNode.BooleanKeyword
@@ -256,6 +369,8 @@ module Internal =
         ]
     let jsDocKindSetMap: Dictionary<Ts.SyntaxKind, obj -> JSDocTags> =
         Dictionary [
+            let inline (>=>) a b = KeyValuePair(a, unbox >> b)
+            let inline (>->) a b = a, (unbox >> b)
             Ts.SyntaxKind.JSDocParameterTag >=> JSDocTags.ParameterTag
             Ts.SyntaxKind.JSDocReturnTag >=> JSDocTags.ReturnTag
             Ts.SyntaxKind.JSDocDeprecatedTag >=> JSDocTags.DeprecatedTag
@@ -302,6 +417,8 @@ module Internal =
         ]
     let moduleExportSetMap: Dictionary<Ts.SyntaxKind, obj -> ModulesAndExports> =
         Dictionary [
+            let inline (>=>) a b = KeyValuePair(a, unbox >> b)
+            let inline (>->) a b = a, (unbox >> b)
             Ts.SyntaxKind.ImportDeclaration >=> ModulesAndExports.ImportDeclaration
             Ts.SyntaxKind.ImportClause >=> ModulesAndExports.ImportClause
             Ts.SyntaxKind.NamespaceImport >=> ModulesAndExports.NamespaceImport
@@ -318,6 +435,8 @@ module Internal =
         ]
     let modifierSetMap: Dictionary<Ts.SyntaxKind, obj -> Modifiers> =
         Dictionary [
+            let inline (>=>) a b = KeyValuePair(a, unbox >> b)
+            let inline (>->) a b = a, (unbox >> b)
             Ts.SyntaxKind.ExportKeyword >=> Modifiers.Export
             Ts.SyntaxKind.DeclareKeyword >=> Modifiers.Declare
             Ts.SyntaxKind.DefaultKeyword >=> Modifiers.Default
@@ -332,6 +451,8 @@ module Internal =
         ]
     let literalTokenNodeKindSet: Dictionary<Ts.SyntaxKind, obj -> LiteralTokenNodes> =
         Dictionary [
+            let inline (>=>) a b = KeyValuePair(a, unbox >> b)
+            let inline (>->) a b = a, (unbox >> b)
             Ts.SyntaxKind.StringLiteral >=> LiteralTokenNodes.StringLiteral 
             Ts.SyntaxKind.NumericLiteral >=> LiteralTokenNodes.NumericLiteral 
             Ts.SyntaxKind.BigIntLiteral >=> LiteralTokenNodes.BigIntLiteral 
@@ -341,18 +462,22 @@ module Internal =
             Ts.SyntaxKind.PrefixUnaryExpression >=> LiteralTokenNodes.PrefixUnaryExpression 
             Ts.SyntaxKind.NoSubstitutionTemplateLiteral >=> LiteralTokenNodes.NoSubstitutionTemplateLiteral
         ]
-    let typeFlagLiteralSet: (Ts.TypeFlags * (obj -> LiteralType))[] =
+    let typeFlagLiteralSet: (Ts.TypeFlags * (obj -> TypeFlagLiteral))[] =
         [|
-            Ts.TypeFlags.UniqueESSymbol >-> LiteralType.UniqueESSymbol
-            Ts.TypeFlags.EnumLiteral >-> LiteralType.Enum
-            Ts.TypeFlags.BooleanLiteral >-> LiteralType.Boolean
-            Ts.TypeFlags.BigIntLiteral >-> LiteralType.BigInt
-            Ts.TypeFlags.NumberLiteral >-> LiteralType.Number
-            Ts.TypeFlags.StringLiteral >-> LiteralType.String
+            let inline (>=>) a b = KeyValuePair(a, unbox >> b)
+            let inline (>->) a b = a, (unbox >> b)
+            Ts.TypeFlags.UniqueESSymbol >-> TypeFlagLiteral.UniqueESSymbol
+            // Ts.TypeFlags.EnumLiteral >-> TypeFlagLiteral.Enum
+            Ts.TypeFlags.BooleanLiteral >-> TypeFlagLiteral.Boolean
+            Ts.TypeFlags.BigIntLiteral >-> TypeFlagLiteral.BigInt
+            Ts.TypeFlags.NumberLiteral >-> TypeFlagLiteral.Number
+            Ts.TypeFlags.StringLiteral >-> TypeFlagLiteral.String
         |]
 
     let typeFlagLiteralKindSet: (Ts.TypeFlags * (obj -> TypeFlagLiteral))[] =
         [|
+            let inline (>=>) a b = KeyValuePair(a, unbox >> b)
+            let inline (>->) a b = a, (unbox >> b)
             Ts.TypeFlags.UniqueESSymbol >-> TypeFlagLiteral.UniqueESSymbol 
             Ts.TypeFlags.EnumLiteral >-> TypeFlagLiteral.EnumLiteral
             Ts.TypeFlags.BooleanLiteral >-> TypeFlagLiteral.Boolean
@@ -367,6 +492,8 @@ module Internal =
     /// </summary>
     let typeFlagObjectKindSet: (Ts.ObjectFlags * (obj -> TypeFlagObject))[] =
         [|
+            let inline (>=>) a b = KeyValuePair(a, unbox >> b)
+            let inline (>->) a b = a, (unbox >> b)
             Ts.ObjectFlags.Class >-> TypeFlagObject.Class
             Ts.ObjectFlags.Interface >-> TypeFlagObject.Interface
             Ts.ObjectFlags.Tuple >-> TypeFlagObject.Tuple
@@ -387,6 +514,8 @@ module Internal =
             |> Array.find (fst >> (unbox<Ts.ObjectType> o).objectFlags.HasFlag)
             |> snd |> funApply o |> TypeFlagPrimary.Object
         [|
+            let inline (>=>) a b = KeyValuePair(a, unbox >> b)
+            let inline (>->) a b = a, (unbox >> b)
             Ts.TypeFlags.Any >-> TypeFlagPrimary.Any 
             Ts.TypeFlags.Unknown >-> TypeFlagPrimary.Unknown 
             Ts.TypeFlags.UniqueESSymbol >-> TypeFlagPrimary.UniqueESSymbol 
@@ -552,6 +681,7 @@ type DeclarationFileNodes =
     | ImportEqualsDeclaration of Ts.ImportEqualsDeclaration
     | ImportType of Ts.ImportTypeNode
     | NamespaceExport of Ts.NamespaceExport
+    | SourceFile of Ts.SourceFile
     
 [<RequireQualifiedAccess>]
 type MemberDeclaration =
@@ -2263,554 +2393,16 @@ type Ts.Type with
     member inline this.checker: Ts.TypeChecker = jsNative
     member this.unsafeGetCanonicalSymbol() =
         let checker = this.checker
-        if this.symbol.flags.HasFlag Ts.SymbolFlags.Alias then
-            checker.getAliasedSymbol this.symbol
-        else checker.getMergedSymbol this.symbol
+        let symbol =
+            this.getSymbol()
+            |> Option.orElse this.aliasSymbol
+            |> Option.get
+        if symbol.flags.HasFlag Ts.SymbolFlags.Alias then
+            checker.getAliasedSymbol symbol
+        else symbol
+        |> checker.getMergedSymbol
     member this.getCanonicalSymbol() =
-        if this.getSymbol().IsSome
+        if this.getSymbol().IsSome || this.aliasSymbol.IsSome
         then this.unsafeGetCanonicalSymbol() |> Some
         else None
 
-
-type EnumMember = {
-    SymbolKey: int
-    NodeKey: int
-    AliasKeys: int array
-    TypeKey: int
-    Symbol: Ts.Symbol
-    Node: Ts.EnumMember
-    Aliases: Ts.EnumMember array
-    Type: Ts.LiteralType
-    Value: Choice<string, int, float>
-} with
-    static member inline private getValue(typ: Ts.Type) =
-        if typ.flags.HasFlag Ts.TypeFlags.NumberLiteral then
-            let typ = typ :?> Ts.NumberLiteralType
-            if JS.Constructors.Number.isSafeInteger typ.value then
-                Choice2Of3 (int typ.value)
-            else
-                Choice3Of3 typ.value
-        else
-            let typ = typ :?> Ts.StringLiteralType
-            Choice1Of3 typ.value
-    static member Create(typ: Ts.Type) =
-        let value = EnumMember.getValue typ
-        let symbol = typ.unsafeGetCanonicalSymbol()
-        let canonicalDeclaration = symbol.valueDeclaration.Value :?> Ts.EnumMember
-        let decls =
-            symbol.declarations.Value.AsArray
-            |> Array.filter (ts.getNodeId >> (<>) (ts.getNodeId canonicalDeclaration))
-        {
-            Symbol = symbol
-            Node = canonicalDeclaration
-            Type = typ :?> Ts.LiteralType
-            Aliases = unbox<Ts.EnumMember array> decls
-            Value = value
-            SymbolKey = ts.getSymbolId symbol
-            NodeKey = ts.getNodeId canonicalDeclaration
-            TypeKey = typ.id
-            AliasKeys = decls |> Array.map ts.getNodeId
-        }
-    static member TryCreate(typ: Ts.Type) =
-        match typ.flags with
-        | flags when
-            flags.HasFlag Ts.TypeFlags.EnumLiteral
-            && not(flags.HasFlag Ts.TypeFlags.Union || flags.HasFlag Ts.TypeFlags.Enum) ->
-            EnumMember.Create typ
-            |> Some
-        | _ -> None
-    static member Create(node: Ts.EnumMember, checker: Ts.TypeChecker) =
-        let typ = checker.getTypeAtLocation node
-        let value = EnumMember.getValue typ
-        let symbol = typ.unsafeGetCanonicalSymbol()
-        let canonicalDeclaration = symbol.valueDeclaration.Value
-        let decls =
-            symbol.declarations.Value.AsArray
-            |> Array.filter (ts.getNodeId >> (<>) (ts.getNodeId canonicalDeclaration))
-        {
-            Symbol = symbol
-            Node = canonicalDeclaration :?> Ts.EnumMember
-            Type = typ :?> Ts.LiteralType
-            Aliases = unbox<Ts.EnumMember array> decls
-            Value = value
-            SymbolKey = ts.getSymbolId symbol
-            NodeKey = ts.getNodeId canonicalDeclaration
-            TypeKey = typ.id
-            AliasKeys = decls |> Array.map ts.getNodeId
-        }
-    static member TryCreate(node: Ts.Node, checker: Ts.TypeChecker) =
-        match node with
-        | Patterns.Node.EnumMember node -> EnumMember.Create(node,checker) |> Some
-        | _ -> None
-    static member Create(symbol: Ts.Symbol, checker: Ts.TypeChecker) =
-        let canonicalDeclaration = symbol.valueDeclaration.Value
-        let decls =
-            symbol.declarations.Value.AsArray
-            |> Array.filter (ts.getNodeId >> (<>) (ts.getNodeId canonicalDeclaration))
-        let typ = checker.getTypeOfSymbolAtLocation(symbol, canonicalDeclaration)
-        let value = EnumMember.getValue typ
-        {
-            Symbol = symbol
-            Node = canonicalDeclaration :?> Ts.EnumMember
-            Type = typ :?> Ts.LiteralType
-            Aliases = unbox<Ts.EnumMember array> decls
-            Value = value
-            SymbolKey = ts.getSymbolId symbol
-            NodeKey = ts.getNodeId canonicalDeclaration
-            TypeKey = typ.id
-            AliasKeys = decls |> Array.map ts.getNodeId
-        }
-    static member TryCreate(symbol: Ts.Symbol, checker: Ts.TypeChecker) =
-        let canonicalSymbol =
-            if symbol.flags.HasFlag Ts.SymbolFlags.Alias then
-                checker.getAliasedSymbol symbol
-            else checker.getMergedSymbol symbol
-        if canonicalSymbol.flags.HasFlag(Ts.SymbolFlags.EnumMember) then
-            EnumMember.Create(canonicalSymbol, checker) |> Some
-        else None
-        
-type EnumDeclaration = {
-    SymbolKey: int
-    NodeKey: int
-    TypeKey: int
-    Name: string
-    Symbol: Ts.Symbol
-    Node: Ts.EnumDeclaration
-    Type: Ts.EnumType
-    Members: EnumMember array
-} with
-    static member inline private getMembers (checker: Ts.TypeChecker) (enumDecl: Ts.EnumDeclaration) =
-        enumDecl.members.AsArray
-        |> Array.map (fun node -> EnumMember.Create(node, checker))
-    static member inline private getCanonicalSymbol (checker: Ts.TypeChecker) (symbol: Ts.Symbol) =
-        if symbol.flags.HasFlag(Ts.SymbolFlags.Alias) then
-            checker.getAliasedSymbol symbol
-        else checker.getMergedSymbol symbol
-    static member Create(symbol: Ts.Symbol, checker: Ts.TypeChecker) =
-        let symbol = EnumDeclaration.getCanonicalSymbol checker symbol
-        let node = symbol.valueDeclaration.Value :?> Ts.EnumDeclaration
-        let typ = checker.getTypeAtLocation node
-        {
-            SymbolKey = ts.getSymbolId symbol
-            NodeKey = ts.getNodeId node
-            TypeKey = typ.id
-            Name = symbol.name
-            Symbol = symbol
-            Node = node
-            Type = typ :?> Ts.EnumType
-            Members = EnumDeclaration.getMembers checker node
-        }
-    static member Create(node: Ts.EnumDeclaration, checker: Ts.TypeChecker) =
-        node.name
-        |> checker.getSymbolAtLocation
-        |> Option.get
-        |> fun symbol -> EnumDeclaration.Create(symbol, checker)
-    static member Create(typ: Ts.EnumType) = EnumDeclaration.Create(typ.symbol, typ.checker)
-    static member TryCreate(node: Ts.Node, checker: Ts.TypeChecker) =
-        match node with
-        | Patterns.Node.EnumDeclaration enumDecl ->
-            EnumDeclaration.Create(enumDecl, checker)
-            |> Some
-        | _ -> None
-    static member TryCreate(typ: Ts.Type) =
-        if typ.flags.HasFlag(Ts.TypeFlags.Enum) then
-            EnumDeclaration.Create(typ.symbol, typ.checker)
-            |> Some
-        else None
-
-and [<RequireQualifiedAccess>] PrimitiveSingleton =
-    | Any
-    | Unknown
-    | String
-    | Number
-    | Boolean
-    | BigInt
-    | ESSymbol
-    | Void
-    | Undefined
-    | Null
-    | Never
-    | NonPrimitive
-and BooleanLiteral = bool
-and [<RequireQualifiedAccess>] NumberLiteral =
-    | Float of float
-    | Int of int
-and [<RequireQualifiedAccess>] EnumMemberType =
-    | String of Ts.StringLiteral
-    | BigInt of Ts.BigIntLiteral
-    | Boolean of BooleanLiteral
-    | Number of NumberLiteral
-and [<RequireQualifiedAccess>] EnumType = EnumType of Ts.EnumDeclaration
-and [<RequireQualifiedAccess>] LiteralType =
-    | Number of NumberLiteral
-    | BigInt of Ts.BigIntLiteralType
-    | Boolean of BooleanLiteral
-    | String of Ts.StringLiteral
-    | UniqueESSymbol of Ts.UniqueESSymbolType
-    | Enum of EnumType
-    | EnumMember of EnumMemberType
-    static member inline TryCreate(typ: Ts.Type) =
-        match typ.flags with
-        | flags when flags.HasFlag Ts.TypeFlags.UniqueESSymbol ->
-            typ :?> Ts.UniqueESSymbolType
-            |> LiteralType.UniqueESSymbol
-        | flags when flags.HasFlag Ts.TypeFlags.EnumLiteral && (flags.HasFlag Ts.TypeFlags.Enum || flags.HasFlag Ts.TypeFlags.Union) ->
-            // resolves to a enumdeclaration
-            typ.symbol.valueDeclaration.Value :?> Ts.EnumDeclaration
-            |> EnumType.EnumType
-            |> LiteralType.Enum
-        | flags when flags.HasFlag Ts.TypeFlags.EnumLiteral && not(flags.HasFlag Ts.TypeFlags.Enum || flags.HasFlag Ts.TypeFlags.Union) ->
-            typ.symbol.valueDeclaration.Value :?> Ts.EnumMember
-            |> failwith ""
-        | flags when flags.HasFlag Ts.TypeFlags.Enum ->
-            let value =
-                typ :?> Ts.NumberLiteralType
-                |> _.value
-            match JS.Constructors.Number.isSafeInteger value with
-            | true -> int value |> NumberLiteral.Int |> LiteralType.Number
-            | false -> value |> NumberLiteral.Float |> LiteralType.Number
-        // | flags when flags.HasFlag Ts.TypeFlags.EnumLiteral 
-and [<RequireQualifiedAccess>] InstantiablePrimitiveType =
-    | Index
-    | StringMapping
-    | TemplateLiteral
-and [<RequireQualifiedAccess>] StructuralType =
-    | Object
-    | Union
-    | Intersection
-and [<RequireQualifiedAccess>] TypeVariable =
-    | TypeParameter
-    | IndexedAccess
-and [<RequireQualifiedAccess>] InstantiableNonPrimitive =
-    | TypeVariable of TypeVariable
-    | Conditional
-    | Substitution
-
-and [<RequireQualifiedAccess>] ClassType =
-    // reference type flag
-    | Generic
-    // We'll discount 'thisType' as being reference
-    | Concrete
-and [<RequireQualifiedAccess>] InterfaceType =
-    // reference type flag
-    | Generic
-    // We'll discount 'thisType' as being reference
-    | Concrete
-
-type ISymbol = interface end
-    
-[<AutoOpen; System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)>]
-module ISymbolExtensions =
-    type ISymbol with
-        [<Emit "$0">]
-        member inline this.Value: Ts.Symbol = jsNative
-        member inline this.Name = this.Value.symbolName
-
-[<Erase>]
-type NonEmptyArray<'T> = private NonEmptyArray of obj array with
-    [<Emit "$0">]
-    member inline this.Values = unbox<'T array> this
-    member inline this.Value = Array.head this.Values
-    member inline this.Length = this.Values.Length
-    static member inline op_Implicit(this: NonEmptyArray<'T>): 'T array = this.Values
-
-[<Erase>]
-type LocalTableSymbol = LocalTableSymbol of Ts.Symbol with
-    interface ISymbol
-    member inline this.ISymbol: ISymbol = this
-    member inline this.Value = this.ISymbol.Value
-    member inline this.Name = this.ISymbol.Name
-    member inline this.Declarations =
-        this.Value.declarations.Value.AsArray
-        |> Array.map TopLevelLocalSymbolDeclarations.Create
-    
-[<Erase>]
-type ExportTableSymbol = ExportTableSymbol of Ts.Symbol with
-    interface ISymbol
-    member inline this.ISymbol: ISymbol = this
-    member inline this.Value = this.ISymbol.Value
-    member inline this.Name = this.ISymbol.Name
-    member inline this.Declarations =
-        this.Value.declarations.Value.AsArray
-        |> Array.map TopLevelExportSymbolDeclarations.Create
-
-type SymbolTable = Map<SymbolName, Ts.Symbol>
-type ExportSymbolTable = Map<SymbolName, ExportTableSymbol>
-type LocalSymbolTable = Map<SymbolName, LocalTableSymbol>
-
-type ExternalModule = {
-    Source: Ts.SourceFile
-    Symbol: Ts.Symbol
-    ModuleSpecifierKind: ResolvedModuleSpecifierKind
-    ModuleSpecifiers: NonEmptyArray<string>
-    Exports: ExportSymbolTable
-    /// Only present for UMD exports
-    GlobalExports: ExportSymbolTable voption
-    Locals: LocalSymbolTable
-}
-
-module Symbols =
-    let typeCheckerSigil = SymbolTypeKey.create<Ts.TypeChecker> "TypeChecker"
-    let methodSignatureTypeSigil = SymbolTypeKey.create<Ts.ObjectType> "MethodSignatureType"
-
-module SymbolsHelper =
-    let stampChecker (value: Ts.TypeChecker) o  = SymbolTypeKey.set Symbols.typeCheckerSigil value  o
-    let getChecker (value: 'T): Ts.TypeChecker = SymbolTypeKey.unsafeAccess Symbols.typeCheckerSigil value
-
-[<Interface>]
-type IMethod = interface end
-type IMethod with
-    [<Emit "$0">]
-    member inline this.Value<'T, 'U when 'T:(member questionToken: Ts.QuestionToken option) and 'U:(member questionToken: Ts.QuestionToken option)>(): 'T = unbox this
-    member inline this.TypeChecker = SymbolTypeKey.unsafeAccess Symbols.typeCheckerSigil this
-    member inline this.IsOptional = this.Value<Ts.MethodSignature, Ts.MethodDeclaration>().questionToken.IsSome
-    member this.Type =
-        this
-        |> SymbolTypeKey.accessOrInit Symbols.methodSignatureTypeSigil (fun () ->
-            let typ = this.TypeChecker.getTypeAtLocation (this.Value<Ts.MethodSignature, Ts.MethodDeclaration>())
-            if this.IsOptional then
-                typ :?> Ts.UnionType
-                |> _.types.AsArray
-                |> Array.find (_.flags.HasFlag(Ts.TypeFlags.Undefined) >> not)
-            else typ 
-            :?> Ts.ObjectType)
-    static member inline Create<'T, 'U>(checker: Ts.TypeChecker) (node: 'T): 'U =
-        node |> SymbolTypeKey.set Symbols.typeCheckerSigil checker
-        unbox<'U> node
-type MethodSignature = inherit IMethod
-type MethodSignature with
-    static member Create = IMethod.Create<Ts.MethodSignature, MethodSignature>
-    [<Emit "$0">] member inline this.Value = unbox<Ts.MethodSignature> this
-type MethodDeclaration = inherit IMethod
-type MethodDeclaration with
-    static member Create = IMethod.Create<Ts.MethodDeclaration, MethodDeclaration>
-    member inline this.Value = (this :> IMethod).Value<Ts.MethodDeclaration, Ts.MethodSignature>()
-
-type TypeReferenceNode =
-    {
-        Node: Ts.TypeReferenceNode
-        TargetSymbol: Ts.Symbol
-    }
-    static member Create (typeChecker: Ts.TypeChecker) (typeReferenceNode: Ts.TypeReferenceNode) =
-        {
-            Node = typeReferenceNode
-            TargetSymbol =
-                typeChecker.getSymbolAtLocation !!typeReferenceNode.typeName
-                |> Option.defaultWith(fun () -> failwith "Could not find symbol for type reference node")
-        }
-        
-
-// type KeyOfTypeNode = {
-//     
-// }
-
-type KeyOfTypeNode =
-    | Bounded of string list
-    | Unbounded of string list
-    | Generic
-    | ConstrainedGeneric
-    // static member Create (typeChecker: Ts.TypeChecker) (node: Ts.TypeNode) =
-    //     let targetType = typeChecker.getTypeFromTypeNode node
-    //     let props =
-    //         typeChecker.getPropertiesOfType targetType
-    //         |> _.AsArray
-    //         |> Array.map _.symbolName
-    //         |> Array.choose (function SymbolName.String value -> Some value | _ -> None)
-    //     let isIndexer = typeChecker.getIndexInfosOfType targetType |> _.AsArray |> Array.isEmpty |> not
-
-type TypeOperatorNode =
-    | KeyOf of Ts.TypeNode
-    | Readonly of Ts.TypeNode
-    | Unique of Ts.TypeNode
-    member inline this.TypeChecker = SymbolTypeKey.unsafeAccess Symbols.typeCheckerSigil this
-    member inline this.Value = emitJsExpr this "$0.fields[0]"
-    static member Create typeChecker (typeOperatorNode: Ts.TypeOperatorNode) =
-        SymbolTypeKey.accessOrInit Symbols.typeCheckerSigil (fun () -> typeChecker) typeOperatorNode
-        |> ignore
-        match typeOperatorNode.operator with
-        | Ts.SyntaxKind.KeyOfKeyword -> KeyOf typeOperatorNode.``type``
-        | Ts.SyntaxKind.ReadonlyKeyword -> Readonly typeOperatorNode.``type``
-        | Ts.SyntaxKind.UniqueKeyword -> Unique typeOperatorNode.``type``
-        | _ -> failwithf "Unknown TypeOperatorNode operator %A" typeOperatorNode.operator
-        
-
-type Script = {
-    Source: Ts.SourceFile
-    Locals: LocalSymbolTable
-}
-
-[<RequireQualifiedAccess>]
-type SourceKind =
-    | ExternalModule of ExternalModule
-    | Script of Script
-    
-[<RequireQualifiedAccess>]
-type Source =
-    | External of source: SourceKind * localPackage: PackageJsonPathFields * versionedPackage: PackageJsonPathFields * version: string * name: string
-    | Default of source: SourceKind * fileName: string
-
-let private symbolNameSigil = SymbolTypeKey.create<SymbolName> "symbolName"
-
-type Ts.Symbol with
-    member this.symbolName = SymbolTypeKey.accessOrInit symbolNameSigil (fun () -> SymbolName.Create this.escapedName) this
-
-type Script with
-    member inline this.Id = ts.getNodeId this.Source
-type ExternalModule with
-    member inline this.SymbolId = ts.getSymbolId this.Symbol
-    member inline this.Id = ts.getNodeId this.Source
-
-module NonEmptyArray =
-    let inline create (values: 'T array) =
-        match values with
-        | [||] -> ValueNone
-        | arr -> unbox<NonEmptyArray<'T>> arr |> ValueSome
-module SymbolTable =
-    let inline create (symbolTable: Ts.SymbolTable) =
-        symbolTable.entries()
-        |> Seq.map (fun (symbolName, symbol) ->
-            SymbolName.Create symbolName, symbol
-            )
-        |> Map
-    let fromOption (symbolTable: Ts.SymbolTable option) =
-        symbolTable
-        |> Option.defaultWith (fun () ->
-            Logging.Log.Default.logfe "SymbolTable.fromOption: unexpected failure to find symbol table. Please raise an issue."
-            failwith "SymbolTable.fromOption: unexpected failure to find symbol table. Please raise an issue."
-            )
-        |> create
-    let inline createExportTable (symbolTable: Ts.SymbolTable) =
-        create symbolTable
-        |> unbox<ExportSymbolTable>
-    let inline createLocalTable (symbolTable: Ts.SymbolTable) =
-        create symbolTable
-        |> unbox<LocalSymbolTable>
-    let inline exportTableFromOption symbolTable =
-        fromOption symbolTable
-        |> unbox<ExportSymbolTable>
-    let inline localTableFromOption symbolTable =
-        fromOption symbolTable
-        |> unbox<LocalSymbolTable>
-    let inline fromExportSymbolTable (exportTable: ExportSymbolTable) =
-        unbox<SymbolTable> exportTable
-    let inline fromLocalSymbolTable (localTable: LocalSymbolTable) =
-        unbox<SymbolTable> localTable
-
-module private SourceHelpers =
-    let inline sourceFileLocals (sourceFile: Ts.SourceFile) =
-        sourceFile?locals
-        |> Option.ofObj
-        |> SymbolTable.localTableFromOption
-        
-module Script =
-    let forceCreate program sourceFile =
-         {
-             Source = sourceFile
-             Locals = SourceHelpers.sourceFileLocals sourceFile
-         }
-
-    let create program sourceFile =
-        if not <| ts.isExternalModule sourceFile then ValueNone else
-        forceCreate program sourceFile
-        |> ValueSome
-
-module ExternalModule =
-    let inline value (externalModule: ExternalModule): Ts.SourceFile = externalModule.Source
-    let inline sourceFile externalModule = value externalModule
-    
-    let inline private sourceSymbol (program: Ts.Program) (externalModule: Ts.SourceFile) =
-        let checker = program.getTypeChecker()
-        externalModule
-        |> checker.getSymbolAtLocation
-        |> Option.defaultWith (fun () ->
-            Logging.Log.Default.logfe "SourceFile marked as external module had no symbol associated: %s{fileName}" externalModule.fileName
-            failwith "SourceFile marked as external module had no symbol associated"
-            )
-    let inline private symbolExports (symbol: Ts.Symbol) =
-        symbol.exports
-        |> Option.defaultWith (fun () ->
-            Logging.Log.Default.logfe "SourceFile marked as external module symbol had no exports associated: %s{fileName}" symbol.name
-            failwith "SourceFile marked as external module symbol had no exports associated"
-            )
-        |> SymbolTable.createExportTable
-        
-    let inline private symbolGlobalExports (symbol: Ts.Symbol) =
-        symbol.globalExports
-        |> Option.map SymbolTable.createExportTable
-        |> Option.toValueOption
-        
-    let inline private moduleSpecifierInvariant (program: Ts.Program) symbol =
-        let moduleSpecifier = program.GetModuleSpecifier symbol
-        moduleSpecifier.kind |> Option.defaultWith(fun () ->
-            Logging.Log.Default.logfe "SourceFile marked as external module symbol had no module specifier kind associated: %s{fileName}" symbol.name
-            failwith $"SourceFile marked as external module symbol had no module specifier kind associated: {symbol.name}"
-            ),
-        moduleSpecifier.moduleSpecifiers
-        |> NonEmptyArray.create
-        |> ValueOption.defaultWith(fun () ->
-            Logging.Log.Default.logfe "SourceFile marked as external module symbol had no module specifiers associated: %s{fileName}" symbol.name
-            failwith $"SourceFile marked as external module symbol had no module specifiers associated: {symbol.name}"
-            )
-    /// <summary>Builds an <c>ExternalModule</c> from a source file, or <c>ValueNone</c> if it is not a module.</summary>
-    /// <remarks>
-    /// This constructor asserts several compiler invariants by <c>failwith</c>/<c>.Value</c> rather than threading
-    /// options, and is sound only because each is proven over the corpus (Program.test.fs):
-    /// <b>SF-2</b> (<c>sourceSymbol</c> — module ⇒ symbol), <b>SF-3</b> (<c>moduleSpecifierInvariant</c> — symbol ⇒
-    /// kind + non-empty specifiers), <b>SF-6</b> (<c>symbolExports</c> — module ⇒ exports map), and <b>SF-7</b>
-    /// (<c>sourceFileLocals</c> — module ⇒ locals map). The whole path is exercised end to end by <b>XTK-1</b>.
-    /// </remarks>
-    let create (program: Ts.Program) sourceFile =
-        if not <| ts.isExternalModule sourceFile then ValueNone else
-        let symbol = sourceSymbol program sourceFile
-        let moduleSpecifierKind, moduleSpecifiers = moduleSpecifierInvariant program symbol
-        {
-            Source = sourceFile
-            Symbol = symbol
-            ModuleSpecifierKind = moduleSpecifierKind
-            ModuleSpecifiers = moduleSpecifiers
-            Exports = symbolExports symbol
-            GlobalExports = symbolGlobalExports symbol
-            Locals = SourceHelpers.sourceFileLocals sourceFile
-        }
-        |> ValueSome
-
-module SourceKind =
-    /// <summary>Classifies a source file as an <c>ExternalModule</c> kind, or <c>ValueNone</c> for a script.</summary>
-    /// <remarks>Delegates to <c>ExternalModule.create</c>; inherits its proof obligations <b>SF-2/3/6/7</b> (Program.test.fs).</remarks>
-    let create (program: Ts.Program) (sourceFile: Ts.SourceFile) =
-        ExternalModule.create program sourceFile
-        |> ValueOption.map SourceKind.ExternalModule
-        |> ValueOption.defaultValue (SourceKind.Script <| Script.forceCreate program sourceFile)
-
-module Source =
-    /// <summary>Builds the full <c>Source</c> wrapper (module or script) for a source file.</summary>
-    /// <remarks>
-    /// Reads <c>package.json</c> metadata via <c>.Value</c> on option-typed fields, sound only because the corpus
-    /// proofs (Program.test.fs) guarantee the fields are present: <b>SF-8</b> (module has a package.json — self or
-    /// ancestor), <b>SF-9</b> (it is versioned), and for scripts <b>SF-10</b> (non default-lib script has a
-    /// package.json) and <b>SF-11</b> (it is named &amp; versioned, via
-    /// <c>closestNamedAndVersionedPackageJsonFields</c>). For modules it also inherits <c>ExternalModule.create</c>'s
-    /// <b>SF-2/3/6/7</b>. <b>XTK-1</b> proves this constructor never throws across the whole corpus.
-    /// </remarks>
-    let create (program: Ts.Program) (sourceFile: Ts.SourceFile) =
-        let wrapInSource =
-            if program.isSourceFileDefaultLibrary sourceFile then
-                fun result ->
-                    Source.Default(result, Node.Api.path.basename sourceFile.fileName)
-            else
-                fun result ->
-                    let localPackageJson = sourceFile.packageJsonFields.Value
-                    let versionedPackageJson =
-                        if localPackageJson.version.IsSome && localPackageJson.name.IsSome then localPackageJson else
-                        sourceFile.closestNamedAndVersionedPackageJsonFields.Value
-                    Source.External(result, localPackageJson, versionedPackageJson, versionedPackageJson.version.Value, versionedPackageJson.name.Value)
-        ExternalModule.create program sourceFile
-        |> ValueOption.map SourceKind.ExternalModule
-        |> ValueOption.defaultValue (SourceKind.Script <| Script.forceCreate program sourceFile)
-        |> wrapInSource
-    let getStatements (source: Source) =
-        match source with
-        | Source.Default(source = SourceKind.Script { Source = sourceFile } | SourceKind.ExternalModule { Source = sourceFile })
-        | Source.External(source = SourceKind.Script { Source = sourceFile } | SourceKind.ExternalModule { Source = sourceFile }) ->
-            sourceFile.statements.AsArray
-            |> Array.map TopLevelStatements.Create

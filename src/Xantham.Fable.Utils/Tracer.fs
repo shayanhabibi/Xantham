@@ -41,17 +41,19 @@
 /// allocating a separate dictionary.
 /// </para>
 /// </remarks>
-module Xantham.Fable.Types.Tracer
+module Xantham.Fable.Tracer
 
 open Fable.Core
 open Fable.Core.DynamicExtensions
 open Fable.Core.JsInterop
 open Xantham.Fable
 open FSharp.Core
+open System.ComponentModel
 
-    
-let private TRACER_TAG = Symbol "XanTracer"
-let private TRACER_PROXY = SymbolTypeKey.create<string> "XanTracerProxy"
+[<EditorBrowsable(EditorBrowsableState.Never)>]
+let TRACER_TAG: obj = emitJsExpr "XanTracer" "Symbol($0)"
+[<EditorBrowsable(EditorBrowsableState.Never)>]
+let TRACER_PROXY = SymbolTypeKey.create<string> "XanTracerProxy"
 
 type Tracer<'T> =
     abstract Value: 'T with get

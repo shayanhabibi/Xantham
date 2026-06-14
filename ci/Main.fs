@@ -15,163 +15,337 @@ initializeContext()
 
 let private root = Root.``.``
 
-// Dummy targets
-Target.create Ops.runAllTests ignore
+let inline create (target: ^T when ^T:(member targetName: string)) (fn: _ -> unit) =
+    Target.create target.targetName fn
+let inline createAnchor (target: ^T when ^T:(member targetName: string)) = Target.create target.targetName ignore
 
-Target.create Ops.watchDocs <| fun _ ->
-    dotnet [ "fsdocs"; "watch"; "--eval" ] root
+type HouseKeeping with
+    member this.buildTarget =
+        let inline create fn = create this fn
+        let inline createAnchor() = createAnchor this
+        match this with
+        | HouseKeeping.clean -> create <| fun _ ->
+            !!"**/**/bin"
+            --"bin"
+            |> Shell.cleanDirs
+        | HouseKeeping.fableClean -> create <| fun _ ->
+            let func = fable [ "clean"; "-e"; ".fs.js"; "--yes" ]
+            [|
+                Projects.Directory.Fable.``.``
+                Projects.Directory.FableCore.``.``
+                Projects.Directory.Common.``.``
+                Tests.Directory.Tests.``.``
+            |]
+            |> Array.Parallel.iter func
+        | HouseKeeping.format -> create <| fun _ ->
+            sourceFiles
+            |> Seq.map (sprintf "\"%s\"")
+            |> String.concat " "
+            |> DotNet.exec id "fantomas"
+            |> function
+                | { ExitCode = 0 } -> ()
+                | result -> Trace.log $"Errors while formatting all files: %A{result.Messages}"
 
-Target.create Ops.restore <| fun _ ->
-    dotnet [ "restore"; Solutions.Xantham; "--verbosity"; "q" ] root
-    dotnet [ "tool"; "restore"; "--verbosity"; "q" ] root
-Target.create Ops.clean <| fun _ -> !!"**/**/bin" -- "bin" |> Shell.cleanDirs
+type ProjectManagement with
+    member this.buildTarget =
+        let inline create fn = create this fn
+        let inline createAnchor() = createAnchor this
+        match this with
+        | ProjectManagement.build -> create <| fun _ ->
+            Projects.FsProj.Generator
+            |> DotNet.build (fun p -> {
+                p with
+                    Configuration = DotNet.BuildConfiguration.Release
+                    DotNet.BuildOptions.MSBuildParams.DisableInternalBinLog = true
+                    DotNet.BuildOptions.MSBuildParams.Verbosity = Some MSBuildVerbosity.Quiet
+            })
+        | ProjectManagement.pack -> createAnchor()
+        | ProjectManagement.restore -> create <| fun _ ->
+            dotnet [ "restore"; Solutions.Xantham; "--verbosity"; "q" ] root
+            dotnet [ "tool"; "restore"; "--verbosity"; "q" ] root
+        | ProjectManagement.compile -> create <| fun _ ->
+            if not Args.watch then
+                fable [
+                    "-e"; ".fs.js"
+                    "-c"; "Release"
+                    "--noCache"
+                    "-o"; "output"
+                ] Projects.Directory.Fable.``.``
+            else
+                fable [
+                    "-e"; ".fs.js"
+                    "-o"; "output"
+                    "-s"; "--optimize"
+                    "--watch"
+                ] Tests.Directory.TypeScript.``.``
+        | ProjectManagement.publish -> createAnchor()
+        | ProjectManagement.publishNpm -> createAnchor()
 
-Target.create Ops.fableClean <| fun _ ->
-    let func = fable [ "clean"; "-e"; ".fs.js"; "--yes" ]
-    [|
-        Projects.Directory.Fable.``.``
-        Projects.Directory.FableCore.``.``
-        Projects.Directory.Common.``.``
-        Tests.Directory.Tests.``.``
-    |]
-    |> Array.Parallel.iter func
+type DotNetTestManagement with
+    member this.buildTarget =
+        let inline create fn = create this fn
+        let inline createAnchor() = createAnchor this
+        match this with
+        | DotNetTestManagement.setup -> createAnchor()
+        | DotNetTestManagement.test -> createAnchor()
+        | DotNetTestManagement.postTest -> createAnchor()
 
-Target.create Ops.setupTest ignore
+type FableTestManagement with
+    member this.buildTarget =
+        let inline create fn = create this fn
+        let inline createAnchor() = createAnchor this
+        match this with
+        | FableTestManagement.postTest -> createAnchor()
+        | FableTestManagement.setup -> createAnchor()
+        | FableTestManagement.test -> createAnchor()
 
-Target.create Ops.build <| fun _ ->
-    Projects.FsProj.Generator
-    |> DotNet.build (fun p -> {
-        p with
-            Configuration = DotNet.BuildConfiguration.Release
-            DotNet.BuildOptions.MSBuildParams.DisableInternalBinLog = true
-            DotNet.BuildOptions.MSBuildParams.Verbosity = Some MSBuildVerbosity.Quiet
-    })
-Target.create Ops.format <| fun _ ->
-    sourceFiles
-    |> Seq.map (sprintf "\"%s\"")
-    |> String.concat " "
-    |> DotNet.exec id "fantomas"
-    |> function
-        | { ExitCode = 0 } -> ()
-        | result -> Trace.log $"Errors while formatting all files: %A{result.Messages}"
-Target.create Ops.pack ignore
+type AuxiliaryTests with
+    member this.buildTarget =
+        let inline create fn = create this fn
+        let inline createAnchor() = createAnchor this
+        match this with
+        | AuxiliaryTests.signalSetup 
+        | AuxiliaryTests.signalTest 
+        | AuxiliaryTests.signalPost 
+        | AuxiliaryTests.loggingSetup 
+        | AuxiliaryTests.loggingTest 
+        | AuxiliaryTests.loggingPost -> createAnchor()
 
-Target.create Ops.setupFableTest <| fun _ ->
-    root |> if Args.npmCi then Npm.cleanInstall else Npm.install
-    fable [ "-c"; "Debug"; "-o"; "dist/tests"; "-e"; ".fs.js" ] Tests.Directory.Fable.``.``
+type DocManagement with
+    member this.buildTarget =
+        let inline create fn = create this fn
+        let inline createAnchor() = createAnchor this
+        match this with
+        | DocManagement.build -> createAnchor()
+        | DocManagement.watch -> create <| fun _ ->
+            dotnet [ "fsdocs"; "watch"; "--eval" ] root
 
-Target.create Ops.fableTest <| fun _ ->
-    mocha [ Path.combine Tests.Directory.Fable.``.`` "dist/tests" ] root
-    
-Target.create Ops.postFableTest <| fun _ ->
-    Trace.log "Running fable clean..."
-    Target.runSimple Ops.fableClean []
-    |> _.Error |> Option.iter raise
-    
-Target.create Ops.test <| fun _ ->
-    dotnet [ "run" ] Tests.Directory.Generator.``.``
-Target.create Ops.postTest <| fun _ ->
-    Trace.log "Running clean..."
-    Target.runSimple Ops.clean []
-    |> _.Error |> Option.iter raise
 
-Target.create Ops.fableTestWatch <| fun _ ->
-    fable [
-        "-e"; ".fs.js"
-        "-c"; "Debug"
-        "--noCache"
-        "-o"; "output"
-        "--watch"
-        "--run"; "node"; "--watch"; "output/Program.fs.js"
-    ] Projects.Directory.Fable.``.``
-    Target.activateFinal Ops.postFableTest
+Reflection.buildTargets<HouseKeeping> _.buildTarget
+Reflection.buildTargets<ProjectManagement> _.buildTarget
+Reflection.buildTargets<DotNetTestManagement> _.buildTarget
+Reflection.buildTargets<FableTestManagement> _.buildTarget
+Reflection.buildTargets<AuxiliaryTests> _.buildTarget
+Reflection.buildTargets<DocManagement> _.buildTarget
 
-Target.create Ops.fableTestSignal <| fun _ ->
-    fable [
-        "--noCache"
-        Tests.Directory.Tests.``Signal.test.fsx``
-        "--run"; "node"; "tests/Signal.test.fs.js"
-    ] root
-    Target.activateFinal Ops.postFableTest
+//             
+//
+// /// <summary>
+// /// Ops are targets for FAKE dependency graph.
+// /// Try to partition them into composing actions
+// /// </summary>
+// let buildOps (op: Ops) =
+//     let inline create fn = Target.create op fn
+//     let inline createAnchor () = Target.create op <| fun _ -> ()
+//     match op with
+//     | Ops.restore -> create <| fun _ ->
+//         dotnet [ "restore"; Solutions.Xantham; "--verbosity"; "q" ] root
+//         dotnet [ "tool"; "restore"; "--verbosity"; "q" ] root
+//     | Ops.watchDocs -> create <| fun _ ->
+//         dotnet [ "fsdocs"; "watch"; "--eval" ] root
+//     | Ops.build -> create <| fun _ ->
+//     | Ops.pack -> createAnchor()
+//     | Ops.push -> failwith "todo"
+//     | Ops.setupFableTest -> create <| fun _ ->
+//         root |> if Args.npmCi then Npm.cleanInstall else Npm.install
+//         fable [ "-c"; "Debug"; "-o"; "dist/tests"; "-e"; ".fs.js" ] Tests.Directory.Fable.``.``
+//     | Ops.setupTest -> createAnchor()
+//     | Ops.fableTest -> create <| fun _ ->
+//         mocha [ Path.combine Tests.Directory.Fable.``.`` "dist/tests" ] root
+//     | Ops.test -> create <| fun _ ->
+//         dotnet [ "run" ] Tests.Directory.Generator.``.``
+//     | Ops.fableTestSignal -> create <| fun _ ->
+//         fable [
+//             "--noCache"
+//             Tests.Directory.Tests.``Signal.test.fsx``
+//             "--run"; "node"; "tests/Signal.test.fs.js"
+//         ] root
+//         Target.activateFinal Ops.postFableTest
+//     | Ops.postFableTest -> create <| fun _ ->
+//         Trace.log "Running fable clean..."
+//         Target.runSimple Ops.fableClean []
+//         |> _.Error |> Option.iter raise
+//     | Ops.postTest -> create <| fun _ ->
+//         Trace.log "Running clean..."
+//         Target.runSimple Ops.clean []
+//         |> _.Error |> Option.iter raise
+//     | Ops.runAllTests -> createAnchor()
+//     | Ops.tests -> failwith "todo"
+//     | Ops.format -> create <| fun _ ->
+//         sourceFiles
+//         |> Seq.map (sprintf "\"%s\"")
+//         |> String.concat " "
+//         |> DotNet.exec id "fantomas"
+//         |> function
+//             | { ExitCode = 0 } -> ()
+//             | result -> Trace.log $"Errors while formatting all files: %A{result.Messages}"
+//     | Ops.fableTestWatch -> create <| fun _ ->
+//     | Ops.fableBuild -> create <| fun _ ->
+//         fable [
+//             "-e"; ".fs.js"
+//             "-c"; "Release"
+//             "--noCache"
+//             "-o"; "output"
+//         ] Projects.Directory.Fable.``.``
+//     | Ops.watch -> createAnchor()
 
-Target.create Ops.fableBuild <| fun _ ->
-    fable [
-        "-e"; ".fs.js"
-        "-c"; "Release"
-        "--noCache"
-        "-o"; "output"
-    ] Projects.Directory.Fable.``.``
+
+open FSharp.SystemCommandLine
+
+
+[<RequireQualifiedAccess>]
+type TestTargets =
+    | dotnet
+    | typescript
+    | ``aux:signal``
+    | ``aux:logging``
+    member this.commandName = this.ToString()
+    member this.command =
+        match this with
+        | TestTargets.``aux:logging`` -> None
+        | TestTargets.``aux:signal`` -> None
+        | TestTargets.dotnet -> None
+        | TestTargets.typescript ->
+            command this.commandName {
+                description "Xantham.TypeScript test suites"
+                inputs Input.context
+                setAction (runTarget FableTestManagement.postTest)
+                addInputs testOptions
+            } |> Some
+
+[<RequireQualifiedAccess>]
+type WatchCommands =
+    | compile
+    | test
+    | run
+    member this.commandName = this.ToString()
+    member this.command =
+        let command = command this.commandName
+        match this with
+        | WatchCommands.compile ->
+            command {
+                description "Monitor fable projects and recompile them when changes are detected."
+                inputs Input.context
+                setAction (runTarget ProjectManagement.compile)
+            }
+        | WatchCommands.test ->
+            command {
+                description "Run tests in watch mode, automatically rebuilding/recompiling and running when changes are detected."
+                inputs Input.context
+                helpAction
+            }
+        | WatchCommands.run ->
+            command {
+                description "Run projects in watch mode, automatically rebuilding/recompiling and running when changes are detected."
+                inputs Input.context
+                helpAction
+            }
+
+[<RequireQualifiedAccess>]
+type RootCommands =
+    | run
+    | test
+    | watch
+    static member inline op_Implicit(this: RootCommands) = this.ToString()
+    member this.command =
+        let command = command this
+        match this with
+        | RootCommands.run ->
+            command {
+                description "Run a FAKE target in isolation (for development)"
+                inputs Input.context
+                helpAction
+                addCommands (Reflection.commandsFrom<HouseKeeping> _.runCommand)
+                addCommands (Reflection.commandsFrom<ProjectManagement> _.runCommand)
+                addCommands (Reflection.commandsFrom<DotNetTestManagement> _.runCommand)
+                addCommands (Reflection.commandsFrom<AuxiliaryTests> _.runCommand)
+                addCommands (Reflection.commandsFrom<DocManagement> _.runCommand)
+                addInputs (
+                    List.concat [
+                        publishingOptions
+                        npmOptions
+                        testOptions
+                        globalOptions
+                    ]
+                    |> List.distinct
+                    )
+                
+            }
+        | RootCommands.test ->
+            command {
+                description "Run a test suite for xantham."
+                inputs Input.context
+                helpAction
+                addCommands Reflection.commands<TestTargets>
+            }
+        | RootCommands.watch ->
+            command {
+                description "Commands for Xantham in watch mode."
+                inputs Input.context
+                helpAction
+                addCommands Reflection.commands<WatchCommands>
+            }
 
 open Fake.Core.TargetOperators
-let (|Stringify|_|) (op: Ops) (comp: string)  = comp = op
+open FSharp.SystemCommandLine
 [<EntryPoint>]
 let rec main argsv =
-    let printHelp () = printfn $"%s{Cli.spec}"
-    if argsv |> Array.isEmpty then printHelp (); 0
-    else
-    argsv |> Args.setArgs
-    let dependencyMapping =
-        Ops.restore ===> [
-            Ops.clean ==> Ops.fableClean
-            Ops.fableClean
-            Ops.test
-            Ops.fableTest
-            Ops.setupTest
-            Ops.setupFableTest
-            Ops.format
-            Ops.watchDocs
+    let generalDependencyMapping = fun () ->
+        ProjectManagement.restore ===> [
+            HouseKeeping.clean
+            ==> HouseKeeping.fableClean
+            
+            HouseKeeping.clean
+            
+            DotNetTestManagement.setup
+            DotNetTestManagement.test
+            DotNetTestManagement.postTest
+            
+            FableTestManagement.setup
+            FableTestManagement.test
+            FableTestManagement.postTest
+            
+            HouseKeeping.format
+            DocManagement.watch
+            DocManagement.build
+            
+            AuxiliaryTests.signalSetup
+            AuxiliaryTests.signalTest
+            AuxiliaryTests.signalPost
+            
+            AuxiliaryTests.loggingSetup
+            AuxiliaryTests.loggingTest
+            AuxiliaryTests.loggingPost
         ]
-        // Running tests requires both test and fable test to be run
-        Ops.runAllTests <== [
-            Ops.postTest
-            Ops.postFableTest <==? [
-                Ops.fableTestSignal
-            ]
-            // Ops.fableTestSignal
+        
+        
+        FableTestManagement.setup <==? [
+            AuxiliaryTests.signalPost
+            AuxiliaryTests.loggingPost
         ]
-        [
-            // post test dep of packing/pushing unless skipping tests
-            Ops.postTest
-            =?> (Ops.pack, not Args.skipTests)
-            
-            Ops.postFableTest
-            =?> (Ops.pack, not Args.skipTests)
-            
-            // setup test dep of test unless running in quick mode
-            Ops.setupTest
-            =?> (Ops.test, not Args.quick)
-            ==> Ops.postTest
-            
-            Ops.setupFableTest
-            ?=?> [
-                Ops.fableTestWatch, not Args.quick
-                Ops.fableTestSignal, not Args.quick
-            ]
-            =?> (Ops.fableTest, not Args.quick)
-            ==> Ops.postFableTest
-            
-            Ops.setupFableTest
-            ==> Ops.fableTestWatch
-        ]
-    let run =
-        if Args.dryDebug
-        then Target.printDependencyGraph true
-        else Target.runOrDefaultWithArguments
-    match argsv[0] with
-    | _ when Args.help -> printHelp()
-    | "run" -> run argsv[1]
-    | Stringify Ops.tests -> run Ops.runAllTests
-    | Stringify Ops.watch ->
-        match argsv[1] with
-        | "fable" -> run Ops.fableTestWatch
-        | "docs" -> run Ops.watchDocs
-        | _ -> printHelp()
-    | Stringify Ops.test ->
-        match argsv[1] with
-        | "dotnet" -> run Ops.postTest
-        | "fable" -> run Ops.postFableTest
-        | "signal" -> run Ops.fableTestSignal
-        | _ -> run Ops.runAllTests
-    | Stringify Ops.fableTest -> run Ops.postFableTest
-    | maybeTarget -> run maybeTarget
-    0
+        =?> (HouseKeeping.format, Args.format)
+        =?> (FableTestManagement.test, not Args.skipTests)
+        ?=> FableTestManagement.test
+        ==> FableTestManagement.postTest
+        =?> (ProjectManagement.pack, not Args.skipTests)
+        ?=> DocManagement.build
+        |> ignore
+        
+        DotNetTestManagement.setup
+        =?> (HouseKeeping.format, Args.format)
+        =?> (DotNetTestManagement.test, not Args.skipTests)
+        ?=> DotNetTestManagement.test
+        ==> DotNetTestManagement.postTest
+        =?> (ProjectManagement.pack, not Args.skipTests)
+        ?=> DocManagement.build
+        |> ignore
+        
+    setDependencies generalDependencyMapping
+
+    rootCommand argsv {
+        description "Xantham"
+        inputs Input.context
+        helpAction
+        addInputs globalOptions
+        addCommands Reflection.commands<RootCommands>
+    }

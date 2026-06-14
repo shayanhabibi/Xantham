@@ -11,6 +11,7 @@
         <Compile Include="TypeScript.fs" />
         <Compile Include="Extensions.fs" />
         <Compile Include="XanTagKind.fs" />
+        <Compile Include="Types.fs" />
     </ItemGroup>
 
     <ItemGroup>

@@ -6,8 +6,9 @@
         <NoWarn>NU1608;NU1901;NU1904</NoWarn>
     </PropertyGroup>
     <ItemGroup>
-        <Compile Include="ci\Spec.fs" />
+        <Compile Include="ci\Utils.fs" />
         <Compile Include="ci\TargetOperators.fs" />
+        <Compile Include="ci\Spec.fs" />
         <Compile Include="ci\Main.fs" />
     </ItemGroup>
     <ItemGroup>
@@ -25,6 +26,8 @@
       <PackageReference Include="Fake.DotNet.Testing.Expecto" Version="6.1.4" />
       <PackageReference Include="Fake.JavaScript.Npm" Version="6.1.4" />
       <PackageReference Include="Fake.Tools.Git" Version="6.1.4" />
+      <PackageReference Include="FSharp.SystemCommandLine" Version="2.1.0" />
+      <PackageReference Include="FsToolkit.ErrorHandling" Version="5.2.0" />
       <PackageReference Include="Partas.GitNet" Version="3.0.0" />
     </ItemGroup>
     <ItemGroup>
