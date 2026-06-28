@@ -52,7 +52,10 @@ module UnionBuilder =
     /// It tracks the lengths of the unions it builds to ensure that we have all erased unions defined in the base set,
     /// otherwise we can generate our own.
     /// </summary>
-    let erasedUnion = UnionBuilder(8)
+    // Fable.Core ships U2..U9; record only lengths beyond that (U10+) so the
+    // generator emits definitions for the higher-arity unions the surface needs
+    // without colliding with the Fable.Core-provided ones.
+    let erasedUnion = UnionBuilder(9)
 [<AutoOpen>]
 module WidgetTypes =
     module Intrinsic =
@@ -66,7 +69,10 @@ module WidgetTypes =
         let obj = "obj"
         let char = "char"
         let objNull = "objnull"
-        let array = "Array"
+        // A JS/TS array (`T[]` / `Array<T>`) is a mutable, growable array; the
+        // faithful Fable mapping is `ResizeArray<'T>` (System.Collections.Generic.List).
+        // A bare `Array` would bind to the non-generic `System.Array` under `open System`.
+        let array = "ResizeArray"
         let option = "option"
         let proptypekey = "proptypekey"
         let keyof = "keyof"
