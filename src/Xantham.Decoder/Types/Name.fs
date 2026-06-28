@@ -114,7 +114,13 @@ module Name =
         /// identifier fragment before backtick-normalization. Drops the offending
         /// characters and whitespace runs; falls back to "arg" if nothing remains.
         let private sanitizeIdentifierSource (text: string) =
-            if illegalInBackticks.IsMatch text then
+            // An empty/whitespace-only source (e.g. the TS `""` string-literal
+            // union member) would be wrapped by NormalizeIdentifierBackticks into
+            // an invalid empty backtick identifier (FS3563). Substitute a valid
+            // placeholder; any CompiledName/EmitProperty attribute still carries
+            // the real (empty) value.
+            if System.String.IsNullOrWhiteSpace text then "Empty"
+            elif illegalInBackticks.IsMatch text then
                 let stripped =
                     illegalInBackticks.Replace(text, " ")
                     |> fun s -> Regex.Replace(s, @"\s+", " ")

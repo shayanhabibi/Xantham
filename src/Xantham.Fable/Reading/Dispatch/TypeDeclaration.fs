@@ -287,12 +287,26 @@ module FunctionDecl =
         xanTag.ExportBuilder <- STsExportDeclaration.Function fnBuilder // fill the export builder
 module Class =
     let private exprWithTypeArgsToRefSlot (ctx: TypeScriptReader) (expr: Ts.ExpressionWithTypeArguments) =
+        // Resolve the base type by its *definition symbol*, not via
+        // `getTypeAtLocation expr` which returns the fully-instantiated base type.
+        // The instantiated type carries the deriving class's implicit self
+        // type-parameter and is already a pre-applied generic; combining it with
+        // the syntactic `typeArgs` below double-applies the arguments and leaks
+        // the self-param (`inherit Foo<A,'Self><A>`). Resolving the bare
+        // definition (mirrors TypeReference.resolveBase's `| Some symbol ->`
+        // branch) makes `typeArgs` apply exactly once: `inherit Foo<A>`.
         let typeSignal =
-            expr
-            |> ctx.checker.getTypeAtLocation
-            |> ctx.CreateXanthamTag
-            |> fst
-            |> stackPushAndThen ctx _.TypeSignal
+            ctx.checker.getSymbolAtLocation (unbox<Ts.Node> expr.expression)
+            |> Option.bind (fun symbol ->
+                symbol.valueDeclaration
+                |> Option.orElse (symbol.declarations |> Option.bind (_.AsArray >> Array.tryHead)))
+            |> Option.map (ctx.CreateXanthamTag >> fst >> stackPushAndThen ctx _.TypeSignal)
+            |> Option.defaultWith (fun () ->
+                expr
+                |> ctx.checker.getTypeAtLocation
+                |> ctx.CreateXanthamTag
+                |> fst
+                |> stackPushAndThen ctx _.TypeSignal)
         // Type arguments from the expression (syntactic) since checker.getTypeArguments needs a TypeReference
         let typeArgs =
             expr.typeArguments
