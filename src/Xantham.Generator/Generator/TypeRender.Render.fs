@@ -298,7 +298,11 @@ module TypedNameRender =
         | false, false ->
             Ast.AbstractMember(name, typeWidget)
         |> Attributes.renderAttributesForAbstractMember (attributes {
-            compiledName typedName.Name
+            // `CompiledName` is rejected by F# on abstract members (FS0755). Use
+            // Fable's `EmitProperty`, which is valid here, to map a member whose
+            // F# name was modified (e.g. the reserved word `type`) back to its JS
+            // property name. Only emitted when the name actually differs.
+            emitProperty typedName.Name
         })
         |> if typedName.Traits.Contains(RenderTraits.Static) then _.toStatic() else id
         |> Documentation.renderForAbstractMember typedName
