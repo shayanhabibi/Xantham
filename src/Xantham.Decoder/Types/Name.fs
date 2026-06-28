@@ -105,15 +105,32 @@ module Name =
             | Custom of (string -> string)
             static member inline Default = Setting.Backticks
         let mutable private setting = Setting.Default
-        let mutable private normalize_ = NormalizeIdentifierBackticks
+        /// Characters that cannot appear in an F# identifier even when wrapped in
+        /// double-backticks (newlines, braces, backtick). These leak in from e.g.
+        /// destructured object-binding parameter names like `{ type, payload }`,
+        /// whose source text Fantomas' NormalizeIdentifierBackticks cannot make valid.
+        let private illegalInBackticks = Regex(@"[`\r\n{}]", RegexOptions.Compiled)
+        /// Collapse a destructuring-pattern / multiline source name to a single safe
+        /// identifier fragment before backtick-normalization. Drops the offending
+        /// characters and whitespace runs; falls back to "arg" if nothing remains.
+        let private sanitizeIdentifierSource (text: string) =
+            if illegalInBackticks.IsMatch text then
+                let stripped =
+                    illegalInBackticks.Replace(text, " ")
+                    |> fun s -> Regex.Replace(s, @"\s+", " ")
+                    |> fun s -> s.Trim().Replace(",", "")
+                    |> fun s -> Regex.Replace(s, @"\s", "")
+                if System.String.IsNullOrWhiteSpace stripped then "arg" else stripped
+            else text
+        let mutable private normalize_ = sanitizeIdentifierSource >> NormalizeIdentifierBackticks
         let normalize text = normalize_ text
         let setNormalizeSetting (newSetting: Setting) =
             setting <- newSetting
             match newSetting with
             | Backticks ->
-                normalize_ <- NormalizeIdentifierBackticks
+                normalize_ <- sanitizeIdentifierSource >> NormalizeIdentifierBackticks
             | SafeCustom stringFunc ->
-                normalize_ <- stringFunc >> NormalizeIdentifierBackticks
+                normalize_ <- sanitizeIdentifierSource >> stringFunc >> NormalizeIdentifierBackticks
             | Custom stringFunc ->
                 normalize_ <- stringFunc
     /// Creates a Name from a string. Will automatically normalize the name with backticks if required..
