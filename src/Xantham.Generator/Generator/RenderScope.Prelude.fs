@@ -456,9 +456,22 @@ type GeneratorContext with
     
 module ArenaInterner =
     let prerenderTypeAliases (ctx: GeneratorContext) (arena: ArenaInterner) =
+        // The TypeAliasRemap is keyed by the alias's *resolved underlying type*, and
+        // consulted by every `prerender` to substitute the alias name for that type.
+        // Primitives/literals/globalThis are memoised by the interner to a single
+        // shared instance, so registering an alias whose body is one of those (e.g.
+        // `type D1SessionBookmark = string`, `type Mode = "primary-only"`) would make
+        // *every* occurrence of that primitive/literal render as the alias name across
+        // the entire surface. Only remap aliases over nominal/structural bodies.
+        let isShareableBody =
+            function
+            | ResolvedType.Primitive _
+            | ResolvedType.Literal _
+            | ResolvedType.GlobalThis -> true
+            | _ -> false
         arena.ExportMap
         |> Map.iter (fun _ -> List.iter (function
-            | ResolvedExport.TypeAlias value ->
+            | ResolvedExport.TypeAlias value when not (isShareableBody value.Type.Value) ->
                 let resolvedType = value.Type.Value
                 let path = Path.Interceptors.pipeTypeAlias ctx value
                 RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
