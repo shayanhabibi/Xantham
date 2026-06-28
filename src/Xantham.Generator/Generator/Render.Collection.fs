@@ -386,6 +386,10 @@ let renderRoot (ctx: GeneratorContext) (root: RootModule) =
                 LiteralUnionRender.renderEnum ctx literalUnionRender
             | _ -> ()
         for module' in root.Modules.Values do
-            renderModuleInterface ctx module'
+            // Skip module-interfaces with no direct members: a bodyless `type X =`
+            // is rejected by the F# compiler (FS0547). Their content still renders
+            // via the nested modules below. Mirrors the guard in `renderModule`.
+            if module'.Members.Count > 0 then
+                renderModuleInterface ctx module'
         yield! nextModules
     }
