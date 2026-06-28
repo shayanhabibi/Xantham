@@ -52,6 +52,45 @@ let caseTests =
     ]
 
 [<Tests>]
+let identifierSanitizationTests =
+    // Regression: destructured object-binding parameter names (e.g. `{ type, payload }`)
+    // arrive as multiline source text. They must not survive into the modified name as
+    // raw braces/newlines/commas, which are illegal even inside double-backticks and
+    // produce un-parseable F#. Name.create runs the normalization pipeline.
+    let stripBackticks (s: string) =
+        if s.StartsWith "``" && s.EndsWith "``" then s.Substring(2, s.Length - 4) else s
+    let hasIllegal (s: string) =
+        s |> Seq.exists (fun c -> c = '{' || c = '}' || c = ',' || c = '\n' || c = '\r' || c = '`')
+    testList "Name.create identifier sanitization" [
+        testTheory "strips characters illegal even in backticks" [
+            "{ type, payload }"
+            "{\n    type,\n    payload\n  }"
+            "{ a, b, c }"
+        ] <| fun source ->
+            (Name.create source).ValueOrModified
+            |> hasIllegal
+            |> Flip.Expect.isFalse "sanitized name still contains an illegal char"
+
+        testTheory "produces the expected identifier body" [
+            "{ type, payload }", "typepayload"
+            "{ a, b, c }", "abc"
+        ] <| fun (source, expected) ->
+            (Name.create source).ValueOrModified
+            |> stripBackticks
+            |> Flip.Expect.equal "sanitized identifier body" expected
+
+        testCase "empty-after-strip falls back to a token" <| fun () ->
+            let modified = (Name.create "{\n}").ValueOrModified
+            Expect.isFalse (System.String.IsNullOrWhiteSpace modified) "must not be blank"
+            modified |> hasIllegal |> Flip.Expect.isFalse "fallback still has illegal chars"
+
+        testTheory "leaves already-valid names untouched" [
+            "foo"; "fooBar"; "_x"; "Name123"
+        ] <| fun source ->
+            (Name.create source).ValueOrModified |> Flip.Expect.equal "valid name unchanged" source
+    ]
+
+[<Tests>]
 let sourceCaseTests =
     testList "Name.Case.sourceMap" [
         testTheory "Case.pascal" [
