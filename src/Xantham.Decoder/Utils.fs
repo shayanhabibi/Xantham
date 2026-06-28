@@ -370,6 +370,13 @@ let private compressResult (types: Map<TypeKey, TsType>) (protectedKeys: TypeKey
     |> Map.iter addTypeToDupes
     types
     |> Map.iter addTypeToDupes
+    // Export keys must never become the representative that *other* keys in a
+    // shape-group collapse onto: an export key also lives in the type map, so if
+    // an alias's own (internal) body key is remapped onto the alias's export key,
+    // the alias's `Type` field is rewritten to point at itself — a self-referential
+    // declaration that renders as `type X = U2<X, X>`. Choosing a non-export
+    // representative keeps distinct internal bodies distinct while still deduping.
+    let protectedSet = System.Collections.Generic.HashSet<TypeKey>(protectedKeys)
     dupeCollections
     |> Seq.collect (fun (KeyValue(key, dupes)) ->
         let key =
@@ -377,7 +384,12 @@ let private compressResult (types: Map<TypeKey, TsType>) (protectedKeys: TypeKey
                 primitives
                 |> Seq.find (fun (KeyValue(_, value)) -> key = value)
                 |> _.Key
-            else dupes |> Seq.max
+            else
+                // Prefer the largest non-protected key as representative; only fall
+                // back to a protected key when every key in the group is protected.
+                let unprotected = dupes |> Seq.filter (protectedSet.Contains >> not)
+                if Seq.isEmpty unprotected then dupes |> Seq.max
+                else unprotected |> Seq.max
         dupes
         |> Seq.map (fun dupe -> KeyValuePair(dupe, key))
         )
