@@ -455,23 +455,24 @@ type GeneratorContext with
     static member EmptyWithCustomisation customisation = GeneratorContext.Create(prerender, Customisation.Create customisation)
     
 module ArenaInterner =
+    /// True when a resolved type is memoised by the interner to a single shared
+    /// instance (primitives, literals, globalThis). Such a type must NOT be used
+    /// as a `TypeAliasRemap` key: the remap substitutes the alias name wherever
+    /// that resolved type occurs, so aliasing a shared instance (e.g.
+    /// `type D1SessionBookmark = string`, `type Mode = "primary-only"`) would make
+    /// *every* occurrence of that primitive/literal render as the alias name across
+    /// the entire surface. Only nominal/structural alias bodies are safe to remap.
+    let isShareableAliasBody =
+        function
+        | ResolvedType.Primitive _
+        | ResolvedType.Literal _
+        | ResolvedType.GlobalThis -> true
+        | _ -> false
+
     let prerenderTypeAliases (ctx: GeneratorContext) (arena: ArenaInterner) =
-        // The TypeAliasRemap is keyed by the alias's *resolved underlying type*, and
-        // consulted by every `prerender` to substitute the alias name for that type.
-        // Primitives/literals/globalThis are memoised by the interner to a single
-        // shared instance, so registering an alias whose body is one of those (e.g.
-        // `type D1SessionBookmark = string`, `type Mode = "primary-only"`) would make
-        // *every* occurrence of that primitive/literal render as the alias name across
-        // the entire surface. Only remap aliases over nominal/structural bodies.
-        let isShareableBody =
-            function
-            | ResolvedType.Primitive _
-            | ResolvedType.Literal _
-            | ResolvedType.GlobalThis -> true
-            | _ -> false
         arena.ExportMap
         |> Map.iter (fun _ -> List.iter (function
-            | ResolvedExport.TypeAlias value when not (isShareableBody value.Type.Value) ->
+            | ResolvedExport.TypeAlias value when not (isShareableAliasBody value.Type.Value) ->
                 let resolvedType = value.Type.Value
                 let path = Path.Interceptors.pipeTypeAlias ctx value
                 RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
