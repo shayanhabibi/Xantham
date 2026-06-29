@@ -17,10 +17,8 @@ let private mappings = [
     "Iterator",             Some "seq"
     "AsyncIterableIterator", Some "seq"
     "Iterable",             Some "seq"
-    "HTMLCollectionOf",     Some "seq"
     "ReadonlyArray",        Some "System.Collections.Generic.IReadOnlyList"
     "Function",             Some "obj"
-    "Attr",                 Some "obj"
 ]
 
 // Names that are the surface's OWN types (or otherwise not stdlib) — must NOT be rewritten,
@@ -28,6 +26,9 @@ let private mappings = [
 let private untouched = [
     "Response"; "Request"; "WebSocket"; "ReadableStream"; "Headers"
     "MyCustomInterface"; "AbortSignal"; ""
+    // lib.dom types: no longer in scope (encoder restricts lib to esnext), so they were
+    // removed from the map and must NOT be substituted.
+    "HTMLCollectionOf"; "Attr"
 ]
 
 [<Tests>]
