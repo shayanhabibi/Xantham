@@ -9,6 +9,8 @@
     <ItemGroup>
         <Compile Include="DispatchClassification.fs"/>
         <Compile Include="EncoderMergeDedup.fs"/>
+        <Compile Include="ReactiveBuildersTests.fs"/>
+        <Compile Include="DispatchKeyingPolicy.fs"/>
         <Compile Include="Program.fs"/>
         <TypeScriptCompile Include="TypeFiles\basic.d.ts" />
         <TypeScriptCompile Include="TypeFiles\merge.d.ts" />

@@ -2297,6 +2297,8 @@ let tests =
     testList "Xantham.Fable Tests" [
         DispatchClassification.dispatchClassificationTests
         EncoderMergeDedup.encoderMergeDedupTests
+        ReactiveBuildersTests.reactiveBuildersTests
+        DispatchKeyingPolicy.dispatchKeyingPolicyTests
         basicTests
         mergeTests
         heritageTests

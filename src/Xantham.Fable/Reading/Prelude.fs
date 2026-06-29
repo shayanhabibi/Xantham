@@ -39,7 +39,9 @@ module TypeStore =
     /// TypeAlias nodes: getTypeAtLocation returns the aliased type's TypeKey, which is
     /// the same value that SAliasBuilder.Type resolves to → self-referential entry.
     /// (The old Reader.fs used TypeKey.create() for TypeAlias for this reason.)
-    let private usesGeneratedKey (tag: XanthamTag) =
+    // Exposed as `internal` (was `private`) so the isolation test project can call it
+    // directly to characterize the identity-keying policy. Behavior is unchanged.
+    let internal usesGeneratedKey (tag: XanthamTag) =
         match tag.Value with
         | XanTagKind.TypeDeclaration decl ->
             match decl with
