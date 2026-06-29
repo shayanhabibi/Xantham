@@ -9,6 +9,7 @@
     <ItemGroup>
         <Compile Include="Sample.fs"/>
         <Compile Include="Mocking\Arena.Interner.Types.fs" />
+        <Compile Include="Tests\LibEsSubstitution.fs" />
         <Compile Include="Tests\TypeRefRender.fs" />
         <Compile Include="Tests\TypeRefRenderExtra.fs" />
         <Compile Include="Tests\TypeAliasRender.fs" />

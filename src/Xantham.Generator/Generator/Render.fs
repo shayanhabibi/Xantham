@@ -22,22 +22,9 @@ let main argv =
          {
              customiser with
                  Customisation.Interceptors.ResolvedTypePrelude = fun _ ->
-                     // Faithful TS-stdlib (lib.es / lib.dom) -> F#/Fable mappings. These
-                     // names have no F# definition in the emitted surface, so a by-name
-                     // RefOnly reference dangles. Substitute the real Fable equivalent
-                     // (the prefix only — any type arguments are applied by the caller, so
-                     // `PromiseLike<T>` -> `Promise<'T>` is preserved). `obj` is used ONLY
-                     // for genuinely-dynamic `Function`; every other entry is a real type.
-                     let libEsSubstitution (name: string) =
-                         match name with
-                         | "Array" -> Some "ResizeArray"                  // JS array -> mutable F# ResizeArray (prefix-swap keeps the element arg)
-                         | "Error" -> Some "exn"
-                         | "PromiseLike" -> Some "Promise"               // Fable.Core.JS.Promise (open Fable.Core.JS)
-                         | "IterableIterator" | "Iterator"
-                         | "ArrayIterator" | "AsyncIterableIterator" -> Some "seq"
-                         | "ReadonlyArray" -> Some "System.Collections.Generic.IReadOnlyList"
-                         | "Function" | "CallableFunction" | "NewableFunction" -> Some "obj"
-                         | _ -> None
+                     // Faithful TS-stdlib (lib.es / lib.dom) -> F#/Fable name mappings live
+                     // in LibEsSubstitution (single source of truth, unit-tested).
+                     let libEsSubstitution = LibEsSubstitution.substitute
                      // `Array`/`Error`/... are stdlib types the TS checker attributes to a
                      // `typescript` source (not flagged IsLibEs). The substitution map is the
                      // safety gate: workers-types' own `typescript`-sourced types (Response,
