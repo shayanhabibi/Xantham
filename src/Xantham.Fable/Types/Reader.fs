@@ -17,6 +17,12 @@ let private commonCompilerOptions = jsOptions<Ts.CompilerOptions>(fun c ->
     // Without this, unions with null and undefined are reduced out when resolving
     // a type node to a type. This increases workaround logic.
     c.strictNullChecks <- Some true
+    // The Cloudflare Workers runtime has NO DOM. Default `lib` (with target=Latest) pulls in
+    // lib.dom.d.ts, so workers-types' own globals (AbortSignal, Headers, ReadableStream, ...)
+    // collide with phantom lib.dom declarations and references bind to the DOM ones. Restrict
+    // to the ES libs (matching Cloudflare's own `lib: ["esnext"]`) so the only declarations in
+    // scope are the workers-types ones.
+    c.lib <- Some (ResizeArray [ "lib.esnext.d.ts" ])
     )
 
 let private createProgram (entryFile: string): Ts.Program =
