@@ -328,7 +328,31 @@ module Name =
     /// <para>Backticks are removed prior to applying casing. Normalization is reapplied
     /// after casing is applied.</para>
     /// </remarks>
-    let normalizeForTypeParameter = map (Internal.stripBackticks >> sprintf "'%s")
+    // A type parameter CANNOT be backtick-escaped (the leading quote forbids it), so the body
+    // must be a bare identifier. Collapse separators like `-`/`_` (e.g. "key-of" -> "keyOf")
+    // that would otherwise emit the un-parseable `'key-of` (FS0010), while leaving already-valid
+    // bodies ("T", "key") untouched. Lowercase only the leading char of a multi-segment result
+    // so a separatored source camelCases; a single-segment body keeps its case.
+    let private sanitizeTyparBody (s: string) =
+        let body = Internal.stripBackticks s
+        let isIdentChar c = System.Char.IsLetterOrDigit c || c = '_'
+        if body |> Seq.forall isIdentChar && body.Length > 0 && not (System.Char.IsDigit body.[0]) then body
+        else
+            // Collapse `-`/`_` separators via PascalCase, then STRIP any remaining char that is
+            // illegal in a bare identifier (dot, space, slash, quote, ...) — a typar body must
+            // be a bare ident (it cannot be backtick-escaped). Lowercase the lead letter so a
+            // separatored source camelCases; drop a leading digit.
+            let stripped =
+                Internal.toPascalCase body
+                |> Seq.filter isIdentChar
+                |> Seq.toArray
+                |> System.String
+            let trimmed = stripped.TrimStart([| '0'..'9' |])
+            let p = if trimmed.Length = 0 then "T" else trimmed
+            if System.Char.IsLetter p.[0]
+            then string (System.Char.ToLowerInvariant p.[0]) + p.Substring(1)
+            else "T" + p
+    let normalizeForTypeParameter = map (sanitizeTyparBody >> sprintf "'%s")
     /// <summary>
     /// Pascal cases the source name, and prefixes with a single quote.
     /// </summary>
@@ -337,7 +361,7 @@ module Name =
     /// after casing is applied.</para>
     /// <para>The function is applied to the source string, even if the name is modified</para>
     /// </remarks>
-    let sourceNormalizeForTypeParameter = mapSource (Internal.stripBackticks >> sprintf "'%s")
+    let sourceNormalizeForTypeParameter = mapSource (sanitizeTyparBody >> sprintf "'%s")
     /// <summary>
     /// Pascal cases the name, and prefixes with <c>I</c>.
     /// </summary>
@@ -345,15 +369,19 @@ module Name =
     /// <para>Backticks are removed prior to applying casing. Normalization is reapplied
     /// after casing is applied.</para>
     /// </remarks>
+    // Prepend "I" to the cased body. Must operate on the BARE (un-backticked) body and
+    // re-normalize once — otherwise prepending to an already-backticked result (e.g.
+    // ``With space``) glues the "I" OUTSIDE the fence => two tokens => invalid F#.
+    let private prefixIModule (name: Name) =
+        name
+        |> map (fun s -> s.TrimStart('_'))
+        |> capitalize
+        |> map (Internal.stripBackticks >> sprintf "I%s" >> Internal.normalizeString)
     let mapToModuleName (name: Name) =
         let p = pascalCase name
         match name with
         | Modified(original = s) | Source s when s.StartsWith "``" -> p
-        | _ -> 
-            p 
-            |> map (fun s -> s.TrimStart('_')) 
-            |> capitalize
-            |> map (sprintf "I%s")
+        | _ -> prefixIModule p
     /// <summary>
     /// Pascal cases the source name, and then prefixes with <c>I</c>.
     /// </summary>
@@ -366,11 +394,7 @@ module Name =
         let p = sourcePascalCase name
         match name with
         | Modified(original = s) | Source s when s.StartsWith "``" -> p
-        | _ -> 
-            p 
-            |> map (fun s -> s.TrimStart('_')) 
-            |> capitalize
-            |> map (sprintf "I%s")
+        | _ -> prefixIModule p
  
     /// <summary>
     /// Provides some equivalency functions for working with Names that have measures.

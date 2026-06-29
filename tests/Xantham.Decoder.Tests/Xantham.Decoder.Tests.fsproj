@@ -8,6 +8,8 @@
 
     <ItemGroup>
         <Compile Include="Sample.fs"/>
+        <Compile Include="Tests/ArenaInternerResolve.fs"/>
+        <Compile Include="Tests/NameAndCodeKey.fs"/>
         <Compile Include="Main.fs"/>
     </ItemGroup>
 

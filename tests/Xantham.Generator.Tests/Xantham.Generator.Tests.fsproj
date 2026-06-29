@@ -24,6 +24,8 @@
         <Compile Include="Tests\PrerenderTypeMapping.fs" />
         <Compile Include="Tests\AnchoringPlacement.fs" />
         <Compile Include="Tests\PathModel.fs" />
+        <Compile Include="Tests\Collection.fs" />
+        <Compile Include="Tests\AliasRemapAndPaths.fs" />
         <Compile Include="Main.fs"/>
     </ItemGroup>
 

@@ -35,21 +35,19 @@ let conditionalTests = testList "Conditional" [
         |> testRender "U2<string, int>"
         ||> Flip.Expect.equal ""
     // PENDING — the Conditional arm builds a RAW erased union of [True; False] directly,
-    // bypassing the Union categorisation/simplification pass. So identical branches do NOT
-    // dedupe: `A extends B ? string : string` currently renders `U2<string, string>` rather
-    // than collapsing to the single inhabited type `string`. A faithful erasure of a
-    // conditional whose two branches are the same type is just that type.
-    ptestCase "identical branches collapse to a single type" <| fun _ ->
+    // The Conditional arm now routes both branches through the Union categorisation/simplify
+    // pass. Identical branches dedupe: `A extends B ? string : string` collapses to `string`
+    // (a faithful erasure of a conditional whose two branches are the same type).
+    testCase "identical branches collapse to a single type" <| fun _ ->
         Conditional.create
             (primitive TypeKindPrimitive.String)
             (primitive TypeKindPrimitive.String)
         |> Conditional.wrap
         |> testRender "string"
         ||> Flip.Expect.equal ""
-    // PENDING — same root cause: the raw union skips nullability lifting, so a `null`
-    // branch renders as a `unit` union case (`U2<string, unit>`) instead of being lifted
-    // to `option<string>` the way the Union pass treats a nullable member.
-    ptestCase "nullable branch lifts to option over the union" <| fun _ ->
+    // Routing through the Union pass also lifts nullability: a `null` branch becomes
+    // `option<string>` instead of a `unit` union case (`U2<string, unit>`).
+    testCase "nullable branch lifts to option over the union" <| fun _ ->
         Conditional.create
             (primitive TypeKindPrimitive.String)
             (primitive TypeKindPrimitive.Null)

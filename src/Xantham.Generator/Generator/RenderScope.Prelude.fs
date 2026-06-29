@@ -106,12 +106,15 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
         else
-        [
-            conditionalType.True
-            conditionalType.False
-        ]
-        |> List.map (prerender ctx scope)
-        |> RenderScopeStore.TypeRefRender.create scope resolvedType false
+        // `T extends U ? X : Y` resolves to the union `X | Y`. Route the two branches through
+        // the SAME Union categorization/simplify path (below) — which dedupes identical members
+        // (so `X | X` collapses to `X`) and lifts nullability (so `X | null` becomes `option<X>`)
+        // — rather than building a raw erased union that keeps `U2<X,X>` / `U2<X,unit>`.
+        ResolvedType.Union {
+            Types = [ conditionalType.True; conditionalType.False ]
+        }
+        |> LazyContainer.CreateFromValue
+        |> prerender ctx scope
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
         
