@@ -30,6 +30,7 @@ let main argv =
                      // for genuinely-dynamic `Function`; every other entry is a real type.
                      let libEsSubstitution (name: string) =
                          match name with
+                         | "Array" -> Some "ResizeArray"                  // JS array -> mutable F# ResizeArray (prefix-swap keeps the element arg)
                          | "Error" -> Some "exn"
                          | "PromiseLike" -> Some "Promise"               // Fable.Core.JS.Promise (open Fable.Core.JS)
                          | "IterableIterator" | "Iterator"
@@ -37,6 +38,15 @@ let main argv =
                          | "ReadonlyArray" -> Some "System.Collections.Generic.IReadOnlyList"
                          | "Function" | "CallableFunction" | "NewableFunction" -> Some "obj"
                          | _ -> None
+                     // `Array`/`Error`/... are stdlib types the TS checker attributes to a
+                     // `typescript` source (not flagged IsLibEs). The substitution map is the
+                     // safety gate: workers-types' own `typescript`-sourced types (Response,
+                     // Request, ...) are NOT in the map, so they fall through untouched.
+                     let isStdlibSourced (source: QualifiedNamePart option) =
+                         match source with
+                         | Some (QualifiedNamePart.Normal s | QualifiedNamePart.Abnormal(s, _)) ->
+                             s.Contains("typescript", StringComparison.OrdinalIgnoreCase)
+                         | None -> false
                      let substituteLibEs (libEsName: Name<Case.pascal>) renderScope =
                          match libEsSubstitution (Name.Case.valueOrSource libEsName) with
                          | Some target ->
@@ -52,6 +62,12 @@ let main argv =
                      | ResolvedType.Class { IsLibEs = true; Name = name } -> substituteLibEs name
                      | ResolvedType.Enum { IsLibEs = true } -> fun renderScope ->
                          { renderScope with Render = Render.RefOnly renderScope.TypeRef }
+                     // Stdlib types attributed to a `typescript` source but not IsLibEs-flagged
+                     // (Array, the typed arrays, ...) — substitute only when the name is in the map.
+                     | ResolvedType.Interface { Source = src; Name = name } when isStdlibSourced src && (libEsSubstitution (Name.Case.valueOrSource name)).IsSome ->
+                         substituteLibEs name
+                     | ResolvedType.Class { Source = src; Name = name } when isStdlibSourced src && (libEsSubstitution (Name.Case.valueOrSource name)).IsSome ->
+                         substituteLibEs name
                      | _ -> id
                  Customisation.Interceptors.IgnorePathRender.Source = function
                      | QualifiedNamePart.Normal(text)
