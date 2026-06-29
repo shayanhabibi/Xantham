@@ -256,6 +256,22 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> prerender ctx scope
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
+    | ResolvedType.TypeReference { TypeArguments = (_ :: _) as typeArguments; Type = innerResolvedType }
+        when (match innerResolvedType.Value with
+              | ResolvedType.TypeReference { TypeArguments = (_ :: _) } -> true
+              | _ -> false) ->
+        // The inner `Type` is ITSELF an already-instantiated generic application
+        // (e.g. `Type` = `ReadableStream<Uint8Array<ArrayBuffer>>`), and this outer
+        // reference *also* carries TypeArguments — a redundant re-instantiation the
+        // encoder emitted. Applying the outer args again would double-wrap the
+        // prefix (`ReadableStream<..><..>`, invalid F#). Render the inner type alone;
+        // it already includes the instantiation. (Contrast: a legitimate generic ref
+        // like `Promise<X>` has a bare `Interface`/`Class` as its `Type`, handled below.)
+        ignore typeArguments
+        innerResolvedType
+        |> prerender ctx scope
+        |> RenderScope.createRootless resolvedType
+        |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeReference { TypeArguments = typeArguments; Type = innerResolvedType } ->
         let innerResolvedTypeValue = innerResolvedType.Value
         let declaredParamCount =

@@ -21,9 +21,35 @@ let main argv =
          GeneratorContext.EmptyWithCustomisation (fun customiser ->
          {
              customiser with
-                 Customisation.Interceptors.ResolvedTypePrelude = fun _ -> function
-                     | ResolvedType.Interface { IsLibEs = true }
-                     | ResolvedType.Class { IsLibEs = true }
+                 Customisation.Interceptors.ResolvedTypePrelude = fun _ ->
+                     // Faithful TS-stdlib (lib.es / lib.dom) -> F#/Fable mappings. These
+                     // names have no F# definition in the emitted surface, so a by-name
+                     // RefOnly reference dangles. Substitute the real Fable equivalent
+                     // (the prefix only — any type arguments are applied by the caller, so
+                     // `PromiseLike<T>` -> `Promise<'T>` is preserved). `obj` is used ONLY
+                     // for genuinely-dynamic `Function`; every other entry is a real type.
+                     let libEsSubstitution (name: string) =
+                         match name with
+                         | "Error" -> Some "exn"
+                         | "PromiseLike" -> Some "Promise"               // Fable.Core.JS.Promise (open Fable.Core.JS)
+                         | "IterableIterator" | "Iterator"
+                         | "ArrayIterator" | "AsyncIterableIterator" -> Some "seq"
+                         | "ReadonlyArray" -> Some "System.Collections.Generic.IReadOnlyList"
+                         | "Function" | "CallableFunction" | "NewableFunction" -> Some "obj"
+                         | _ -> None
+                     let substituteLibEs (libEsName: Name<Case.pascal>) renderScope =
+                         match libEsSubstitution (Name.Case.valueOrSource libEsName) with
+                         | Some target ->
+                             let ref =
+                                 RenderScopeStore.TypeRefAtom.Unsafe.createWidget (Ast.LongIdent target)
+                                 |> RenderScopeStore.TypeRef.Unsafe.createAtom
+                                 |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind renderScope.TypeRef.Nullable
+                             { renderScope with TypeRef = ref; Render = Render.RefOnly ref }
+                         | None ->
+                             { renderScope with Render = Render.RefOnly renderScope.TypeRef }
+                     function
+                     | ResolvedType.Interface { IsLibEs = true; Name = name } -> substituteLibEs name
+                     | ResolvedType.Class { IsLibEs = true; Name = name } -> substituteLibEs name
                      | ResolvedType.Enum { IsLibEs = true } -> fun renderScope ->
                          { renderScope with Render = Render.RefOnly renderScope.TypeRef }
                      | _ -> id
