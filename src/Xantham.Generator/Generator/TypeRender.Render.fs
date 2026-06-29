@@ -529,11 +529,28 @@ module TypeLikeRender =
             |> Documentation.renderForMember typeLike
             )
     let renderInheritance (ctx: GeneratorContext) (inScopeTyparNames: Set<string>) (typeRefRender: TypeRefRender) =
-        typeRefRender
-        |> TypeRefRender.substituteForHeritage inScopeTyparNames
-        |> TypeRefRender.nonNullable
-        |> TypeRefRender.render
-        |> Ast.Inherit
+        let substituted = TypeRefRender.substituteForHeritage inScopeTyparNames typeRefRender
+        // An F# interface can only inherit other interfaces. A heritage base that
+        // resolves to a non-interface — a scalar/intrinsic (`obj`, `exn`, `seq`,
+        // primitives), e.g. TS `interface X extends Error` (Error -> exn via the
+        // lib.es substitution) — cannot be an `inherit` clause (FS0887). Drop it;
+        // the type's own members carry the surface. Interface bases are path atoms
+        // (Concrete/Transient) or generic `Prefix` molecules, which are kept.
+        // `r` is an Anchored TypeRefRender: an interface base is a `Path` atom or a
+        // generic `Prefix` molecule; a substituted scalar (`obj`/`exn`/`seq` via the
+        // lib.es map) is a `Widget`/`Intrinsic` atom — not a valid F# inherit base.
+        let isInterfaceBase (r: TypeRefRender) =
+            match r.Kind with
+            | TypeRefKind.Atom (TypeRefAtom.Path _) -> true
+            | TypeRefKind.Molecule (TypeRefMolecule.Prefix _) -> true
+            | _ -> false
+        if isInterfaceBase substituted then
+            substituted
+            |> TypeRefRender.nonNullable
+            |> TypeRefRender.render
+            |> Ast.Inherit
+            |> Some
+        else None
     let renderConstructors (ctx: GeneratorContext) (typeLike: TypeLikeRender) =
         typeLike.Constructors
         |> List.map (fun parameters ->
@@ -577,7 +594,7 @@ module TypeLikeRender =
             yield! renderAbstractConstructors ctx typeLike
             yield!
                 typeLike.Inheritance
-                |> List.map (renderInheritance ctx inScopeTypars)
+                |> List.choose (renderInheritance ctx inScopeTypars)
             yield! memberCollection
         }
         |> Documentation.renderForTypeDefn typeLike
