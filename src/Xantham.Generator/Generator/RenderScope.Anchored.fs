@@ -460,6 +460,24 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
         transientChildren.TypeStore.Keys
         |> Seq.filter (anchors.ContainsKey >> not)
         |> Seq.iter (anchor ctx anchors anchorPath)
+    | { Root = ValueSome (TypeLikePath.Anchored path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren } ->
+        // Canonical hoisted enum (LiteralUnions.<name>): anchored at its OWN absolute path, NOT
+        // re-anchored against any referencing owner. Registered directly so collectModules emits
+        // it once; addResolvedType is idempotent by ResolvedType so repeated drives are harmless.
+        let selfAnchor = AnchorPath.create path
+        let render = Render.Transient.anchor ctx selfAnchor renderTuple
+        {
+            RenderScope.Type = renderScope.Type
+            Root = Choice1Of2 path
+            TypeRef = renderScope.TypeRef |> TypeRefRender.anchor selfAnchor
+            Render = render
+            Anchors = Dictionary<ResolvedType, TypePath * Render>()
+        }
+        |> Choice2Of2
+        |> GeneratorContext.Anchored.addResolvedType ctx renderScope.Type
+        transientChildren.TypeStore.Keys
+        |> Seq.filter (anchors.ContainsKey >> not)
+        |> Seq.iter (anchor ctx anchors selfAnchor)
     | { Root = ValueSome (TypeLikePath.Transient path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren } ->
         let path = TransientTypePath.anchor anchorPath path
         let render = Render.Transient.anchor ctx anchorPath renderTuple
@@ -720,3 +738,17 @@ module ArenaInterner =
         ctx.TopLevelExports.UnionWith interner.TopLevelExports
         interner.ExportMap
         |> Map.iter (fun _ -> registerExportsForAnchoring ctx)
+        // Emit canonical hoisted types (e.g. literal-union enums at LiteralUnions.<name>) once.
+        // They are owner-INDEPENDENT (anchored at their own absolute path), so the owner-driven
+        // emission above never registers them. Drive them directly from the prelude cache:
+        // each anchored-root prelude scope is registered into AnchorRenders by its self-anchor.
+        ctx.PreludeRenders.Values
+        |> Array.ofSeq
+        |> Array.iter (fun renderScope ->
+            match renderScope.Root, renderScope.Render with
+            // ONLY the canonical hoisted literal-union scopes (Anchored root + Transient render).
+            // Interface/Class scopes also have anchored roots but Concrete renders and are emitted
+            // through the export pass — they must NOT be re-driven here.
+            | ValueSome (TypeLikePath.Anchored path), Render.Transient _ ->
+                anchorPreludeAnchorScope ctx None (AnchorPath.create path) renderScope
+            | _ -> ())

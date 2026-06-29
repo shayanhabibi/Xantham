@@ -19,6 +19,35 @@ let private createConcreteTypeRef (path: TypePath) =
     |> RenderScopeStore.TypeRef.Unsafe.createAtom
     |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
 
+// Canonical home for hoisted literal-union enums: a fixed top-level module, named from the
+// union's literal VALUES (its identity), NOT from whichever owner references it. Rooting the
+// enum here (absolute ConcretePath) means structurally-identical unions — which share one
+// ResolvedType — resolve to ONE name and ONE emission, and every reference is the same
+// re-anchor-invariant ConcretePath. Name and emission cannot diverge (the decoupling that
+// made per-owner hoisting dangle). The emission itself is driven by `emitCanonicalUnions`.
+let literalUnionModule = ModulePath.init "LiteralUnions"
+
+let literalUnionName (literals: ResolvedTypeLiteralLike list) : Name<Case.pascal> =
+    let token =
+        function
+        | ResolvedTypeLiteralLike.Literal (TsLiteral.String v) -> v
+        | ResolvedTypeLiteralLike.Literal (TsLiteral.Int v) -> $"i{v}"
+        | ResolvedTypeLiteralLike.Literal (TsLiteral.Float v) -> $"f{v}"
+        | ResolvedTypeLiteralLike.Literal (TsLiteral.Bool v) -> (if v then "true" else "false")
+        | ResolvedTypeLiteralLike.Literal (TsLiteral.BigInt v) -> $"n{v}"
+        | ResolvedTypeLiteralLike.Literal TsLiteral.Null -> "null"
+        | ResolvedTypeLiteralLike.EnumCase ec -> Name.Case.valueOrSource ec.Name
+        | ResolvedTypeLiteralLike.TypeQuery tq ->
+            tq.FullyQualifiedName |> List.tryLast |> Option.map (fun p -> p.Value) |> Option.defaultValue "Q"
+    literals
+    |> List.map token
+    |> List.sort
+    |> String.concat "_"
+    |> Name.Pascal.create
+
+let literalUnionTypePath (literals: ResolvedTypeLiteralLike list) : TypePath =
+    literalUnionModule |> TypePath.createWithName (literalUnionName literals)
+
 [<Struct>]
 type private Registered = Registered of TypeRefRender
 let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolvedType: LazyResolvedType): TypeRefRender =
@@ -166,13 +195,9 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
         // direct type render of literals union
-        | { LiteralLike = literals; Others = []; EnumLike = []; Primitives = []; Nullable = nullable } ->
-            let path =
-                if lazyResolvedType.Raw = LazyContainer<_, _>.DummyTypeKey then
-                    Name.Pascal.create "Literals"
-                    |> TransientTypePath.AnchoredAndMoored 
-                else
-                    TransientTypePath.Anchored
+        | { LiteralLike = literals; Others = []; EnumLike = []; Primitives = []; Nullable = nullable } when lazyResolvedType.Raw = LazyContainer<_, _>.DummyTypeKey ->
+            // Dummy-key unions are inline children of a larger union molecule — keep transient.
+            let path = Name.Pascal.create "Literals" |> TransientTypePath.AnchoredAndMoored
             let ref = RenderScopeStore.TypeRefRender.create scope resolvedType nullable path
             {
                 Transient.RenderScope.Type = resolvedType
@@ -182,6 +207,23 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                     lazy Union.renderLiterals ctx scope literals
                     |> Render.create ref
                 TransientChildren = ValueSome <| RenderScopeStore.create()
+            }
+            |> addOrReplaceScope ctx resolvedType
+        | { LiteralLike = literals; Others = []; EnumLike = []; Primitives = []; Nullable = nullable } ->
+            // Canonical hoisted enum at LiteralUnions.<identity-name>. Absolute ConcretePath ref
+            // (identity-invariant) for references; Anchored root + Transient render emitted once
+            // by emitCanonicalUnions (anchorPreludeAnchorScope's Anchored+Transient branch).
+            let typePath = literalUnionTypePath literals
+            let ref = createConcreteTypeRef typePath |> TypeRefRender.orNullable nullable
+            let scope = RenderScopeStore.create()
+            {
+                RenderScope.Type = resolvedType
+                Root = TypeLikePath.create typePath |> ValueSome
+                TypeRef = ref
+                Render =
+                    (lazy Union.renderLiterals ctx scope literals)
+                    |> Render.createFromTransientLazy ref
+                TransientChildren = ValueSome scope
             }
             |> addOrReplaceScope ctx resolvedType
         | { Others = others; LiteralLike = literals; EnumLike = enumLike; Primitives = primitives; Nullable = nullable } ->
