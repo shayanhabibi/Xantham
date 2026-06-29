@@ -183,11 +183,34 @@ module TypeAlias =
             ctx.CreateXanthamTag node.``type``
             |> fst
             |> stackPushAndThen ctx (XanthamTag.chainDebug xanTag >> fun tag -> tag.TypeSignal, tag.Builder)
+        // TypeStore.Key is a generated (negative) TypeKey (see Prelude.usesGeneratedKey). Its
+        // TypeStore.Builder is *this* tag's AstNodeBuilder, which below is fulfilled with the
+        // body's builder — so the generated key is a distinct, content-equivalent entry for the
+        // alias body.
+        let generatedKey = ctx.signalCache[xanTag.IdentityKey].Key
+        // The alias export's RefKey is getTypeAtLocation(aliasNode).TypeKey (ExportStore.create
+        // does not use a generated key for TypeAlias). For an INLINE STRUCTURAL body
+        // ({...}, A|B, A&B, conditional) the body's TypeSignal (innerTypeSignal) resolves to the
+        // SAME semantic key, producing alias.Type === exportKey (FS0953 'type X = U2<X, X>').
+        // Detect that collision and route SAliasBuilder.Type to the alias's OWN generated key
+        // instead — a content-equivalent, distinct entry that breaks the self-abbreviation.
+        // Named refs ('type X = Y') keep innerTypeSignal unchanged.
+        let aliasExportKey = (ctx.checker.getTypeAtLocation (unbox<Ts.Node> node)).TypeKey
+        let aliasTypeSignal =
+            Signal.computed
+                (fun () ->
+                    if innerTypeSignal.Value = aliasExportKey then generatedKey
+                    else innerTypeSignal.Value)
+                [ innerTypeSignal.Invalidated ]
+        // Keep the alias TAG's TypeSignal on the semantic key (via routeTypeTo) so
+        // TypeReferences TO the alias still resolve to a real export key; only the
+        // builder's Type field is the (possibly generated) body key.
+        ctx.routeTypeTo xanTag innerTypeSignal |> ignore
         let builder = {
             SAliasBuilder.Source = trySetSourceForTag xanTag source
             FullyQualifiedName = getFullyQualifiedName ctx xanTag
             Name = NameHelpers.getName node.name
-            Type = innerTypeSignal |> ctx.routeTypeTo xanTag
+            Type = aliasTypeSignal
             TypeParameters = getTypeParamSlots ctx node.typeParameters
             Documentation = JSDocTags.resolveDocsForTag ctx xanTag
         }
@@ -196,7 +219,7 @@ module TypeAlias =
         xanTag.ExportBuilder <- STsExportDeclaration.TypeAlias builder
         // TypeStore.Key is a generated TypeKey (see Prelude.usesGeneratedKey). Use that same key
         // for the TypeSignal so TypeStore.Key == TypeSignal.Value and downstream refs are consistent.
-        ctx.signalCache[xanTag.IdentityKey].Key
+        generatedKey
         |> setTypeKeyForTag xanTag
 
 

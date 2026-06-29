@@ -470,17 +470,35 @@ module ArenaInterner =
         | _ -> false
 
     let prerenderTypeAliases (ctx: GeneratorContext) (arena: ArenaInterner) =
-        arena.ExportMap
-        |> Map.iter (fun _ -> List.iter (function
+        // Iterate the export-key-keyed resolved exports (populated eagerly when the arena is
+        // built) rather than ExportMap, so each alias's EXPORT key is in hand.
+        arena.ResolvedExports
+        |> Seq.iter (fun (KeyValue(exportKey, export)) ->
+            match export with
             | ResolvedExport.TypeAlias value when not (isShareableAliasBody value.Type.Value) ->
-                let resolvedType = value.Type.Value
                 let path = Path.Interceptors.pipeTypeAlias ctx value
-                RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
-                |> RenderScopeStore.TypeRef.Unsafe.createAtom
-                |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
-                |> GeneratorContext.Prelude.addTypeAliasRemap ctx resolvedType
-            | _ -> ()
-            ))
+                let aliasRef =
+                    RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
+                    |> RenderScopeStore.TypeRef.Unsafe.createAtom
+                    |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+                // (1) Remap the alias BODY instance (`value.Type.Value`) — this is the instance
+                //     produced when the body's structural type is rendered directly.
+                GeneratorContext.Prelude.addTypeAliasRemap ctx value.Type.Value aliasRef
+                // (2) After the extractor's self-reference decoupling, the alias body lives at a
+                //     distinct (generated) key, so a union member that references the alias by its
+                //     EXPORT key resolves (via `ResolveType exportKey`) to an instance that the
+                //     body-keyed remap above does NOT catch. Register that instance too, so members
+                //     referencing the alias by export key render as the alias name
+                //     (e.g. `U2<ResponseInputText, ResponseInputImage>`) instead of re-emitting the
+                //     raw structural body. The alias's OWN definition is protected from self-remap
+                //     by Render.TypeAlias.resolveInnerRef, which replaces the remapped name back
+                //     with the real body render. Skip shareable (primitive/literal) export-key
+                //     instances. ResolveType is the plain (memoised) resolver — no deep structural
+                //     forcing — so this cannot stall on recursive graphs.
+                let exportKeyType = arena.ResolveType exportKey
+                if not (isShareableAliasBody exportKeyType) then
+                    GeneratorContext.Prelude.addTypeAliasRemap ctx exportKeyType aliasRef
+            | _ -> ())
     let private getTopologicalSort (_: ArenaInterner) (graph: Graph) =
         let degrees = ConcurrentDictionary graph.Degrees
         let dependencies =

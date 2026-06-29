@@ -13,3 +13,8 @@ riderModule.iml
 *.fs.js
 /fable_modules/
 /node_modules/
+# node_modules at any depth (e.g. per-fixture installs under tests/.../fixtures/)
+**/node_modules/
+# Generated extractor/test-fixture artifacts (regenerated, not source)
+tests/**/fixtures/**/output.json
+tests/**/fixtures/**/package-lock.json
