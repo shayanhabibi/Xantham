@@ -215,18 +215,22 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         }
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Literal tsLiteral ->
-        let path = TransientTypePath.Anchored
-        let ref = RenderScopeStore.TypeRefRender.create scope resolvedType false path
-        let scope = RenderScopeStore.create()
-        {
-            RenderScope.Type = resolvedType
-            Root = path |> TypeLikePath.create |> ValueSome
-            TypeRef = ref
-            Render =
-                lazy Literal.render ctx scope tsLiteral
-                |> Render.create ref
-            TransientChildren = ValueSome scope
-        }
+        // A single-value literal type (e.g. `""`, `"0"`, `0`, `false`) is a TS compile-time
+        // refinement with no distinct runtime representation in an erased binding. Render it
+        // as its BASE PRIMITIVE inline (mirroring the Primitive case) rather than hoisting a
+        // per-property named nested type. Hoisting named these per-property (certIssuerDN ->
+        // CertIssuerDN) but deduped by ResolvedType — so N properties sharing one literal
+        // value (16 share `""`) collapsed to one emitted type and the other N-1 references
+        // dangled (FS0039). Erasing to the primitive removes the hoist, the dedup, and the
+        // dangle entirely. Primitives/named-interface refs are unaffected (different branches).
+        match tsLiteral with
+        | TsLiteral.String _ -> lift Intrinsic.string
+        | TsLiteral.Int _ -> lift Intrinsic.int
+        | TsLiteral.Float _ -> lift Intrinsic.float
+        | TsLiteral.Bool _ -> lift Intrinsic.bool
+        | TsLiteral.BigInt _ -> lift Intrinsic.bigint
+        | TsLiteral.Null -> lift Intrinsic.unit
+        |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.IndexedAccess indexAccessType ->
         let suffixes =

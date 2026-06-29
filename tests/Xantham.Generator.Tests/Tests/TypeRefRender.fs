@@ -64,6 +64,34 @@ let primitiveTests =
          )
      |> testList "Primitives"
 
+// A single-value literal type (`""`, `"0"`, `0`, `false`, `null`) is a TS compile-time
+// refinement with no distinct runtime representation in an erased binding — it must render
+// as its BASE PRIMITIVE inline, NOT as a hoisted per-property named nested type.
+// Regression guard: hoisting named these per-property and deduped them by ResolvedType, so
+// multiple properties sharing one literal value collapsed to a single emitted type and the
+// other references dangled (FS0039). If hoisting is ever reintroduced here, the rendered
+// type would be a named DU rather than the primitive, and these cases fail.
+let singleLiteral : (TsLiteral * string) list = [
+    TsLiteral.String "",   "string"
+    TsLiteral.String "0",  "string"
+    TsLiteral.Int 0,       "int"
+    TsLiteral.Int 32777,   "int"
+    TsLiteral.Float 1.5,   "float"
+    TsLiteral.Bool false,  "bool"
+    TsLiteral.BigInt 0I,   "bigint"
+    TsLiteral.Null,        "unit"
+]
+
+let singleLiteralTests =
+     singleLiteral
+     |> List.map (fun (literal, expectedTypeText) ->
+         testCase $"Literal %A{literal} erases to %s{expectedTypeText}" <| fun _ ->
+             ResolvedType.Literal literal
+             |> testRender expectedTypeText
+             ||> Flip.Expect.equal ""
+         )
+     |> testList "Single-value literals erase to primitive"
+
 let primitiveTuples =
     let clamp (i: int) = System.Int32.Clamp(i, 0, 12)
     let random = System.Random(0)
@@ -444,6 +472,7 @@ let contextPersistanceTests = testList "Context memoization" [
 let tests = testList "TypeRef" [
     contextPersistanceTests
     primitiveTests
+    singleLiteralTests
     primitiveTuples
     primitiveArrays
     erasedUnionTests
