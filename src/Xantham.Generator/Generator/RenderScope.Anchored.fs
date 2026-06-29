@@ -499,9 +499,21 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
         let render = Render.Transient.anchor ctx anchorPath renderTuple
         anchors
         |> Dictionary.tryAdd renderScope.Type (path, render)
-        transientChildren.TypeStore.Keys
-        |> Seq.filter (anchors.ContainsKey >> not)
-        |> Seq.iter (anchor ctx anchors (AnchorPath.create path))
+        // Recurse into this hoisted literal's OWN nested literals (the two-deep case).
+        // Each grandchild's NAMED transient (carrying its leaf, e.g. `Moored(_,"TimeRange")`)
+        // is held here as the TypeStore VALUE — the same value that rendered its reference.
+        // Anchor each grandchild against THAT stored transient (mirroring
+        // `anchorPreludeExportScope`), NOT against the grandchild's own NAMELESS `Anchored`
+        // root: re-deriving from the nameless root collapses the grandchild onto THIS node's
+        // path (dropping the leaf), so its definition is misplaced/merged into the parent and
+        // its `Parent.Leaf` reference dangles. Threading the stored transient lands the def at
+        // `<thisPath>.<Leaf>`, restoring emission/reference symmetry.
+        let childAnchorPath = AnchorPath.create path
+        transientChildren.TypeStore
+        |> Seq.filter (fun (KeyValue(key, _)) -> not (anchors.ContainsKey key))
+        |> Seq.iter (fun (KeyValue(key, storedTransient)) ->
+            let grandchildPath = TransientPath.anchor childAnchorPath (TransientPath.create storedTransient)
+            anchor ctx anchors grandchildPath key)
     | { Root = ValueNone; Render = Render.RefOnly typeRef } ->
         typeRef
         |> TypeRefRender.anchor anchorPath

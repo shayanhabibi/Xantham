@@ -32,6 +32,7 @@
         <Compile Include="Tests\EnumRender.fs" />
         <Compile Include="Tests\TypeShapeRender.fs" />
         <Compile Include="Tests\MemberRender.fs" />
+        <Compile Include="Tests\NestedUnderTypePlacement.fs" />
         <Compile Include="Main.fs"/>
     </ItemGroup>
 
