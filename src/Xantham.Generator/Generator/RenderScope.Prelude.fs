@@ -80,7 +80,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
     // We protect against stack overflows by registering resolved types that have been
     // created on the first pass into the 'InFlight' set. This prevents infinite recursion.
     elif valueIsCreated && not(GeneratorContext.Prelude.canFlight ctx lazyResolvedType.Value) then
-        printfn $"Stack overflow would be caused by rendering the type ref for {lazyResolvedType.Raw}"
+        eprintfn $"Stack overflow would be caused by rendering the type ref for {lazyResolvedType.Raw}"
         let (Registered ref) =
             RenderScopeStore.TypeRefRender.create scope lazyResolvedType.Value true Intrinsic.obj
             |> RenderScope.createRootless lazyResolvedType.Value

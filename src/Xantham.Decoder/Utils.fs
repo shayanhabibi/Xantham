@@ -527,7 +527,7 @@ let private compressExports (exports: Map<TypeKey, TsExportDeclaration>) (compre
 /// <para>This will not remove/change keys which are export keys.</para>
 /// </summary>
 let compress (result: Schema.EncodedResult) =
-    printfn "Compressing..."
+    eprintfn "Compressing..."
     // for diagnostics
     let initialCount = result.Types.Count
     let mutable cycle = 0
@@ -544,12 +544,12 @@ let compress (result: Schema.EncodedResult) =
         types <- newTypes
         exports <- compressExports exports compressions
         cycle <- cycle + 1
-    printfn $"Compressed typemap from %i{initialCount} to %i{types.Count} types over %i{cycle} cycles."
+    eprintfn $"Compressed typemap from %i{initialCount} to %i{types.Count} types over %i{cycle} cycles."
     { result with Types = types; ExportedDeclarations = exports }
 
 module private Sanitize =
     let santizeTypes (result: Schema.EncodedResult) =
-        printfn "Sanitizing types..."
+        eprintfn "Sanitizing types..."
         let mutable count = 0
         let inline fixKey key input =
             if input = key then
@@ -629,7 +629,7 @@ module private Sanitize =
             | value -> value
             )
         if count > 0 then
-            printfn $"Sanitized %i{count} types."
+            eprintfn $"Sanitized %i{count} types."
         { result with Types = sanitizedTypes }
 
 let sanitize (result: Schema.EncodedResult) =

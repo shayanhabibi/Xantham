@@ -33,6 +33,7 @@
         <Compile Include="Tests\TypeShapeRender.fs" />
         <Compile Include="Tests\MemberRender.fs" />
         <Compile Include="Tests\NestedUnderTypePlacement.fs" />
+        <Compile Include="Tests\AliasBodyLiteralPlacement.fs" />
         <Compile Include="Tests\WithoutArgDrop.fs" />
         <Compile Include="Main.fs"/>
     </ItemGroup>

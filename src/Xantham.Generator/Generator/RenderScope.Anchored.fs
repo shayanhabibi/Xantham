@@ -520,7 +520,7 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
         |> Choice1Of2
         |> GeneratorContext.Anchored.addResolvedType ctx renderScope.Type
     | badScope ->
-        printfn $"Bad scope: %A{badScope}"
+        eprintfn $"Bad scope: %A{badScope}"
 and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: RenderScopeStore) =
     let anchors = Dictionary<ResolvedType, TypePath * Render>()
     let anchorPath = Interceptors.pipeExport ctx export

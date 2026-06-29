@@ -56,8 +56,8 @@ module private Diagnostics =
                 "   Generation using this type-set may cause errors."
             ]
             |> String.concat "\n"
-        |> System.Console.WriteLine
-        
+        |> eprintfn "%s"
+
 
 module Decoder =
     /// <summary>
