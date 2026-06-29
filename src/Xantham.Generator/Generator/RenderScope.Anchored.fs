@@ -166,8 +166,16 @@ module Render =
                     typeDefn.TypeParameters
                     |> List.map (anchorTypeParameters ctx anchorPath)
                 Inheritance =
+                    // An F# interface can only inherit other interfaces. Decide which bases
+                    // are interface-shaped (Path atom / generic Prefix) versus scalars
+                    // (Widget/Intrinsic from the lib.es substitution, e.g. Error->exn) BEFORE
+                    // localising — localise rewrites every atom to a Widget, erasing the
+                    // distinction (which silently dropped legitimate NON-generic interface
+                    // bases). Keep interface bases, drop scalars, then localise the survivors.
                     typeDefn.Inheritance
-                    |> List.map (TypeRefRender.anchorAndLocalise anchorPath)
+                    |> List.map (TypeRefRender.anchor anchorPath)
+                    |> List.filter TypeRefRender.isInterfaceBase
+                    |> List.map (TypeRefRender.localise anchorPath)
                 Members =
                     typeDefn.Members
                     |> List.map (anchorTypedNameRender ctx anchorPath)
@@ -344,8 +352,16 @@ module Render =
                     typeDefn.TypeParameters
                     |> List.map (anchorTypeParameters ctx anchorPath)
                 Inheritance =
+                    // An F# interface can only inherit other interfaces. Decide which bases
+                    // are interface-shaped (Path atom / generic Prefix) versus scalars
+                    // (Widget/Intrinsic from the lib.es substitution, e.g. Error->exn) BEFORE
+                    // localising — localise rewrites every atom to a Widget, erasing the
+                    // distinction (which silently dropped legitimate NON-generic interface
+                    // bases). Keep interface bases, drop scalars, then localise the survivors.
                     typeDefn.Inheritance
-                    |> List.map (TypeRefRender.anchorAndLocalise anchorPath)
+                    |> List.map (TypeRefRender.anchor anchorPath)
+                    |> List.filter TypeRefRender.isInterfaceBase
+                    |> List.map (TypeRefRender.localise anchorPath)
                 Members =
                     typeDefn.Members
                     |> List.map (anchorTypedNameRender ctx anchorPath)

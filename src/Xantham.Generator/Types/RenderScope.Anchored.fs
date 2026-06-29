@@ -151,6 +151,17 @@ module TypeRefRender =
     let nullable typeRefRender = setNullable true typeRefRender
     let nonNullable typeRefRender = setNullable false typeRefRender
 
+    // An F# interface can only inherit other interfaces. On an ANCHORED (post-anchor,
+    // pre-localise) render, an interface base is a `Path` atom or a generic `Prefix`
+    // molecule; a substituted scalar (`obj`/`exn`/`seq` via the lib.es heritage map, or a
+    // primitive `Intrinsic`/bare `Widget`) is NOT a valid inherit base. Must be checked
+    // BEFORE localise, which collapses every atom to a `Widget` and erases this distinction.
+    let isInterfaceBase (render: TypeRefRender) =
+        match render.Kind with
+        | TypeRefKind.Atom (TypeRefAtom.Path _) -> true
+        | TypeRefKind.Molecule (TypeRefMolecule.Prefix _) -> true
+        | _ -> false
+
     let substituteForHeritage (inScopeTyparNames: Set<string>) (render: TypeRefRender) : TypeRefRender =
         let rec walk (render: TypeRefRender) : TypeRefRender =
             match render.Kind with
