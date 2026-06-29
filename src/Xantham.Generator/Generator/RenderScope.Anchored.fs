@@ -499,7 +499,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
     | ResolvedExport.Class value ->
         let path = Interceptors.pipeClass ctx value
         let ref = TypeRefRender.create false path
-        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value && not (ctx.TopLevelExports.Contains export) then
             ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
         else
         let render =
@@ -522,7 +522,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
             value.Type
             |> prerender ctx scope
             |> TypeRefRender.anchorAndLocalise anchorPath
-        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value && not (ctx.TopLevelExports.Contains export) then
             typeRef |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
         else
         let render =
@@ -552,7 +552,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
     | ResolvedExport.Interface value ->
         let path = Interceptors.pipeInterface ctx value
         let ref = TypeRefRender.create false path
-        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value && not (ctx.TopLevelExports.Contains export) then
             ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
         else
         let render =
@@ -571,7 +571,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
     | ResolvedExport.TypeAlias value ->
         let path = Interceptors.pipeTypeAlias ctx value
         let ref = TypeRefRender.create false path
-        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value && not (ctx.TopLevelExports.Contains export) then
             ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
         else
         let render =
@@ -590,7 +590,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
     | ResolvedExport.Enum value ->
         let path = Interceptors.pipeEnum ctx value
         let ref = TypeRefRender.create false path
-        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value && not (ctx.TopLevelExports.Contains export) then
             ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
         else
         let render =
@@ -623,7 +623,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
             |> LazyContainer.CreateTypeKeyDummy<ResolvedType>
             |> prerender ctx scope
             |> TypeRefRender.anchor anchorPath
-        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors headFunc then
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors headFunc && not (ctx.TopLevelExports.Contains export) then
             ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
         else
         let render =
@@ -714,5 +714,9 @@ let private registerExportsForAnchoring (ctx: GeneratorContext) = List.iter (reg
 
 module ArenaInterner =
     let processExports (ctx: GeneratorContext) (interner: ArenaInterner) =
+        // Make the surface's own top-level globals visible to the source-ignore gate
+        // (registerAnchorFromExport) so a `typescript`-sourced top-level export emits its
+        // full definition at the global root rather than being dropped to a bare ref.
+        ctx.TopLevelExports.UnionWith interner.TopLevelExports
         interner.ExportMap
         |> Map.iter (fun _ -> registerExportsForAnchoring ctx)

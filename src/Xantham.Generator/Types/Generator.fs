@@ -66,8 +66,12 @@ and GeneratorContext =
         PreludeRenders: PreludeScopeStore
         AnchorRenders: AnchorScopeStore
         InFlight: HashSet<ResolvedType>
+        /// The surface's own top-level globals (excludes lib.es internals). Used to keep
+        /// a `typescript`-sourced top-level export from being dropped by the source-ignore
+        /// gate, so its definition is emitted at the global root where references resolve.
+        TopLevelExports: HashSet<ResolvedExport>
         Customisation: Customisation
-        
+
     }
     override this.ToString() = $"GeneratorContext(%d{this.PreludeRenders.Count})"
     static member internal Create(preludeGetTypeRefFunc, ?customisation) = {
@@ -75,6 +79,7 @@ and GeneratorContext =
         AnchorRenders = DictionaryImpl()
         PreludeGetTypeRef = preludeGetTypeRefFunc
         InFlight = HashSet()
+        TopLevelExports = HashSet()
         TypeAliasRemap = DictionaryImpl()
         Customisation = defaultArg customisation Customisation.Default
     }

@@ -34,8 +34,9 @@ The surface went from **not compiling at all** (≈102 syntax errors → fully p
 
 | Class | ~count | What it is | Tractability |
 |:------|-------:|:-----------|:-------------|
-| **`Response`/`Request`/`RequestInit`/`WebSocket`/`QueuingStrategy` undefined** | ~340 | workers-types' OWN globals (source `typescript`) referenced unqualified from nested scopes | **path/placement subsystem** — deferred |
-| **`Type`/`Format`/`ToolCalls`/`Role`/`FunctionCall`/… undefined** | large share of FS0039 | dropped/duplicate hoisted nested types (#3) | **path/placement subsystem** — 4 attempts, double-grafts/crashes; needs deeper work |
+| **`Response`/`Request`/`RequestInit`/`WebSocket`/`QueuingStrategy` undefined** | ~340 | workers-types' OWN globals (source `typescript`) dropped to ref-only by the source-ignore gate | **FIXED (Fix A, staged)** — globals now emitted at top level; see path-system-pass-findings.md. Payoff masked by B + dup-members below. |
+| **`Type`/`Format`/`ToolCalls`/`Role`/`FunctionCall`/… undefined** | large share of FS0039 | hoisted nested types deduped by `ResolvedType`; references named per-property dangle | **root cause PINNED, not surgical** — TypeStore + render cache both keyed by ResolvedType; heterogeneous sharing (pop≡length) makes redirect wrong (+1046). Needs encoder-side distinct keys. See path-system-pass-findings.md. |
+| **duplicate members from declaration merging** | ~60+ | `Response` etc. emit `url`/`type`/`status` 2× (merged lib + workers decls) → FS0035x/FS0663 | new — surfaced by Fix A; dedup members by name at render |
 | **FS0033 typed arrays** (`Uint8Array<X>`, `ArrayBufferView<X>`, `Float32Array<X>`) | ~130 | generic in TS, non-generic in Fable.Core.JS — needs the spurious arg dropped | attempted: dropping the arg traded ~300 FS0033 for ~140 FS0039 (the element type is load-bearing somewhere) + `%A` debug spam → reverted. Not yet clean. |
 | **FS0953 cyclic aliases** | 170 | `type X = U2<X,X>` residual; splits encoder-corrupt (`Array<spurious>` bodies) + anonymous-union limitation | Step-2, deferred-documented (see alias-self-reference-followup.md) |
 | FS0663/0883/0698/0660/0035 | ~230 | bogus typar constraints / structural-construct issues from the above families | mostly downstream of the path/alias work |

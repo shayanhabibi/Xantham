@@ -424,6 +424,12 @@ type ArenaInterner = {
     /// dictionaries to handle dependencies correctly.
     /// </summary>
     Graph: Lazy<Graph>
+    /// The package's top-level exported declarations (resolved), EXCLUDING lib.es/lib.dom
+    /// internals. These are the surface's own globals (e.g. workers-types' Response, Request,
+    /// WebSocket) which the render layer must emit at the global root even when their TS
+    /// checker source attributes them to "typescript" — references already resolve to the
+    /// bare top-level name, so the definitions must land there too.
+    TopLevelExports: HashSet<ResolvedExport>
 } with
     override this.ToString() = $"ArenaInterner(%d{this.ExportMap.Count})"
 
@@ -826,6 +832,16 @@ module ArenaInterner =
                 )
             |> Map
         
+        // The surface's own top-level globals, resolved through the SAME resolveExport
+        // cache the export map uses (so instances are reference-identical to what the
+        // render layer later sees). lib.es/lib.dom internals are excluded — those stay
+        // ignored / substituted via the lib.es map.
+        let topLevelExports =
+            decodedResult.TopLevelExports
+            |> List.filter (isLibEs >> not)
+            |> List.choose (resolveExport >> Result.toOption)
+            |> HashSet
+
         {
             ResolveType = resolve
             ResolveExport = resolveExport
@@ -833,6 +849,7 @@ module ArenaInterner =
             Graph = lazy Graph.create false decodedResult
             ResolvedTypes = Dictionary resolved
             ResolvedExports = Dictionary resolvedExports
+            TopLevelExports = topLevelExports
         }
 
 /// <summary>

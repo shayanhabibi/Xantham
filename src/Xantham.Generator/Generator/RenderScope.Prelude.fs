@@ -292,12 +292,15 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             if typeArguments.Length = declaredParamCount then
                 typeArguments
             elif typeArguments.Length > declaredParamCount then
-                printfn "Warning: TypeReference application has %d arguments but %A declares %d type parameters; truncating to declared arity"
-                    typeArguments.Length innerResolvedTypeValue declaredParamCount
+                // Diagnostics go to stderr (stdout carries the generated F#) and identify the
+                // type by its bounded Name — NEVER %A the ResolvedType, whose graph is cyclic
+                // and overflows the stack via ResolvedType.ToString().
+                eprintfn "Warning: TypeReference application (type key %A) has %d arguments but declares %d type parameters; truncating to declared arity"
+                    innerResolvedType.Raw typeArguments.Length declaredParamCount
                 typeArguments |> List.truncate declaredParamCount
             else
-                printfn "Warning: TypeReference application has %d arguments but %A declares %d type parameters; padding with obj to declared arity"
-                    typeArguments.Length innerResolvedTypeValue declaredParamCount
+                eprintfn "Warning: TypeReference application (type key %A) has %d arguments but declares %d type parameters; padding with obj to declared arity"
+                    innerResolvedType.Raw typeArguments.Length declaredParamCount
                 let padCount = declaredParamCount - typeArguments.Length
                 let objArg =
                     LazyContainer.CreateFromValue
