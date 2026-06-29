@@ -93,7 +93,11 @@ module Internal =
         | IdentityKey.AliasSymbol _         -> 2
         | IdentityKey.Id _                  -> 3
         
-    let private finaliseAssembly (results: IRResult<'T> array) =
+    // NOTE: non-private (was `private`) only so the encoder identity/dedup
+    // isolation suite (tests/Xantham.Fable.Tests/EncoderMergeDedup.fs) can drive
+    // it on CONSTRUCTED IRResult values without a live ts-morph reader. Behaviour
+    // is unchanged.
+    let finaliseAssembly (results: IRResult<'T> array) =
         let duplicates, nonDuplicates =
             results
             |> Array.groupBy _.Key

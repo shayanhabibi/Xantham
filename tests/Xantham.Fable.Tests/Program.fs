@@ -2296,6 +2296,7 @@ let cloudFlareExportTests = testList "cloudflare-export.d.ts" [
 let tests =
     testList "Xantham.Fable Tests" [
         DispatchClassification.dispatchClassificationTests
+        EncoderMergeDedup.encoderMergeDedupTests
         basicTests
         mergeTests
         heritageTests
