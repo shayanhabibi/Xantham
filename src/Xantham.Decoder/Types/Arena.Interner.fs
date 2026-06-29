@@ -468,6 +468,12 @@ module ArenaInterner =
         let resolvedExports = ConcurrentDictionary<TypeKey, ResolvedExport>()
         let libEsSet = decodedResult.LibEsExports.ToFrozenSet()
         let isLibEs = libEsSet.Contains
+        // The encoder mints a separate TypeKey per occurrence of a synthesized union, so
+        // structurally-identical unions become distinct `Union` records (Union is
+        // [<ReferenceEquality>]). Intern by the member-key signature so identical unions
+        // share ONE instance — giving them the single identity the generator's
+        // ResolvedType-keyed dedup expects.
+        let internedUnions = ConcurrentDictionary<TypeKey list, Union>()
         
         let rec resolve (typeKey: TypeKey): ResolvedType =
             match resolvedExports.TryGetValue(typeKey) with
@@ -682,7 +688,12 @@ module ArenaInterner =
                     Value = tsEnumCase.Value
                     Documentation = tsEnumCase.Documentation
                 }
-            | TsType.Union tsTypeUnion -> ResolvedType.Union { Types = tsTypeUnion.Types |> List.map lazyResolve }
+            | TsType.Union tsTypeUnion ->
+                // Intern by the (sorted) member-key signature so structurally-identical unions
+                // resolve to ONE shared Union instance (see internedUnions).
+                let signature = tsTypeUnion.Types |> List.sort
+                internedUnions.GetOrAdd(signature, fun _ -> { Union.Types = tsTypeUnion.Types |> List.map lazyResolve })
+                |> ResolvedType.Union
             | TsType.Intersection tsTypeIntersection -> ResolvedType.Intersection { Types = tsTypeIntersection.Types |> List.map lazyResolve }
             | TsType.Literal tsLiteral -> ResolvedType.Literal tsLiteral
             | TsType.IndexedAccess tsIndexAccessType -> ResolvedType.IndexedAccess {

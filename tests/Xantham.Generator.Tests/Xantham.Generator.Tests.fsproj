@@ -26,6 +26,8 @@
         <Compile Include="Tests\PathModel.fs" />
         <Compile Include="Tests\Collection.fs" />
         <Compile Include="Tests\AliasRemapAndPaths.fs" />
+        <Compile Include="Tests\AnchoringHoisted.fs" />
+        <Compile Include="Tests\AnchoringInvariance.fs" />
         <Compile Include="Main.fs"/>
     </ItemGroup>
 

@@ -692,11 +692,11 @@ let exportMapTests =
 // =========================================================================
 [<Tests>]
 let unionOverMintingTests =
-    testList "ArenaInterner union over-minting (characterization)" [
-        // This SANITY case documents current behavior and PASSES: distinct keys
-        // currently mint distinct, reference-unequal Union instances.
-        testCase "(current) structurally-identical unions at distinct keys mint distinct instances" <| fun _ ->
-            // key 0 and key 3 are both `string | number` but with separate keys.
+    testList "ArenaInterner union interning" [
+        // Unions are now interned by member-key signature. A shared instance must still
+        // carry the correctly-resolved members (interning must not lose/scramble them).
+        testCase "interned shared union resolves its members correctly" <| fun _ ->
+            // key 0 and key 3 are both `string | number` at separate keys -> one instance.
             let arena =
                 empty
                 |> withTypes [
@@ -706,18 +706,20 @@ let unionOverMintingTests =
                     2, TsType.Primitive TypeKindPrimitive.Number
                 ]
                 |> create
-            match arena.ResolveType(key 0), arena.ResolveType(key 3) with
-            | ResolvedType.Union a, ResolvedType.Union b ->
-                Flip.Expect.isFalse
-                    "current behavior: distinct keys => distinct, non-shareable Union instances"
-                    (System.Object.ReferenceEquals(a, b))
-            | _ -> failtest "expected two Unions"
+            match arena.ResolveType(key 0) with
+            | ResolvedType.Union u ->
+                u.Types
+                |> List.map (fun t -> force t)
+                |> Flip.Expect.equal "members resolve to string|number"
+                    [ ResolvedType.Primitive TypeKindPrimitive.String
+                      ResolvedType.Primitive TypeKindPrimitive.Number ]
+            | _ -> failtest "expected a Union"
 
         // CORRECT behavior — pending until the over-minting is fixed.
         // Two unions over the same member set SHOULD be the same shareable
         // instance (or at minimum structurally equal). Currently they are
         // distinct reference-equal records, so this fails => ptest.
-        ptestCase "structurally-identical unions SHOULD resolve to one shared instance" <| fun _ ->
+        testCase "structurally-identical unions resolve to one shared instance" <| fun _ ->
             let arena =
                 empty
                 |> withTypes [
