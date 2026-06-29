@@ -474,7 +474,16 @@ module ArenaInterner =
         // share ONE instance — giving them the single identity the generator's
         // ResolvedType-keyed dedup expects.
         let internedUnions = ConcurrentDictionary<TypeKey list, Union>()
-        
+        // NOTE: TypeLiterals are deliberately NOT interned by structure (unlike unions). A
+        // union (`U2<A,B>`) is location-independent — the same structure means the same type
+        // anywhere — so sharing one identity is safe. A TypeLiteral is hoisted to a NAMED
+        // nested type under a specific owner module, so two structurally-identical literals
+        // under DIFFERENT owners are DISTINCT types with distinct paths. Interning them by
+        // structure collapses them to one identity, the generator anchors it under ONE owner,
+        // and references from the other owner dangle (verified: regressed FS0033/FS0039 on the
+        // cloudflare surface). The object-literal over-minting is a path-anchoring concern
+        // (see the generator's localise/anchor layer), NOT a decoder-canonicalization one.
+
         let rec resolve (typeKey: TypeKey): ResolvedType =
             match resolvedExports.TryGetValue(typeKey) with
             | true, ResolvedExport.Class cls -> ResolvedType.Class cls

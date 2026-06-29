@@ -1461,3 +1461,198 @@ let nestingAndExportMapTests =
             (arena.ExportMap.["x.d.ts"] |> List.length, arena.ExportMap.["y.d.ts"] |> List.length)
             |> Flip.Expect.equal "grouped counts per path" (1, 2)
     ]
+
+// =========================================================================
+// 32. DECODER UNION INTERNING IDENTITY — the load-bearing question.
+//
+// The encoder over-mints union TypeKeys: structurally-identical synthesized
+// unions get DISTINCT keys (measured: 1579 union entries collapse to 866
+// distinct member-signatures => 713 redundant duplicate keys). Commit 1d4d826
+// added decoder-side interning (Arena.Interner.fs ~695):
+//   internedUnions.GetOrAdd(tsTypeUnion.Types |> List.sort, fun _ -> { Union.Types = ... })
+// which interns the resolved Union INSTANCE by its sorted member-key signature.
+//
+// These tests pin down EXACTLY what that interning does to identity, and —
+// critically — what the GENERATOR's ResolvedType-keyed caches will see. The
+// generator keys its dedup dictionaries (TypeAliasRemap / PreludeRenders /
+// AnchorRenders / InFlight / TopLevelExports — Xantham.Generator/Types/Generator.fs
+// lines 24-25, 62-84) by `ResolvedType`. The `ResolvedType` DU itself carries
+// only [<RequireQualifiedAccess>] (Arena.Interner.fs:91) => DEFAULT STRUCTURAL
+// EQUALITY, but its `Union` payload is [<ReferenceEquality>] (Arena.Interner.fs:210).
+// Therefore `ResolvedType.Union a = ResolvedType.Union b` IFF the underlying
+// `Union` records are REFERENCE-equal. So whether two distinct encoder keys
+// collapse to one generator cache entry is decided entirely by whether interning
+// makes them resolve to the SAME `Union` instance.
+//
+// We therefore assert:
+//   (a) two distinct keys with the SAME signature -> reference-equal Union
+//       (=> structurally equal ResolvedType => ONE generator-cache key);
+//   (b) two distinct keys with DIFFERENT signatures -> NOT interned together
+//       (guard against over-collapse);
+//   (c) a Dictionary<ResolvedType, _> (mirroring the generator caches) collapses
+//       the same-signature pair to ONE entry and keeps the different-signature
+//       pair as TWO — proving the decoder fix is sufficient for generator dedup.
+// =========================================================================
+[<Tests>]
+let unionInterningIdentityTests =
+    testList "ArenaInterner union interning identity (generator-cache implications)" [
+        // (a) SAME signature, two distinct keys -> one shared Union instance.
+        //     Reports BOTH reference- and structural-equality (they coincide here
+        //     precisely because Union is [<ReferenceEquality>]).
+        testCase "same-signature unions at distinct keys are reference-equal AND structurally-equal" <| fun _ ->
+            // key 0 = string|number ; key 3 = string|number ; key 10 = number|string
+            // (member order permuted, same set) — all three share ONE Union instance
+            // because interning keys by the SORTED member signature.
+            let arena =
+                empty
+                |> withTypes [
+                    0,  TsType.Union (TsTypeUnion [ key 1; key 2 ])
+                    3,  TsType.Union (TsTypeUnion [ key 1; key 2 ])
+                    10, TsType.Union (TsTypeUnion [ key 2; key 1 ])   // permuted order
+                    1,  TsType.Primitive TypeKindPrimitive.String
+                    2,  TsType.Primitive TypeKindPrimitive.Number
+                ]
+                |> create
+            let a = arena.ResolveType(key 0)
+            let b = arena.ResolveType(key 3)
+            let c = arena.ResolveType(key 10)
+            match a, b, c with
+            | ResolvedType.Union ua, ResolvedType.Union ub, ResolvedType.Union uc ->
+                // REFERENCE equality of the underlying Union record.
+                Flip.Expect.isTrue "ua/ub reference-equal (interned to one instance)"
+                    (System.Object.ReferenceEquals(ua, ub))
+                Flip.Expect.isTrue "ua/uc reference-equal despite permuted member order"
+                    (System.Object.ReferenceEquals(ua, uc))
+                // STRUCTURAL equality of the wrapping ResolvedType. Because the DU has
+                // default structural equality but Union is [<ReferenceEquality>], this
+                // holds ONLY because the payloads are the same reference.
+                Flip.Expect.isTrue "ResolvedType.Union a = ResolvedType.Union b structurally" (a = b)
+                Flip.Expect.isTrue "ResolvedType.Union a = ResolvedType.Union c structurally" (a = c)
+            | _ -> failtest "expected three Unions"
+
+        // (b) DIFFERENT signature -> NOT interned together (no over-collapse).
+        testCase "different-signature unions at distinct keys are NOT interned together" <| fun _ ->
+            // key 0 = string|number ; key 3 = string|boolean — distinct signatures.
+            let arena =
+                empty
+                |> withTypes [
+                    0, TsType.Union (TsTypeUnion [ key 1; key 2 ])
+                    3, TsType.Union (TsTypeUnion [ key 1; key 4 ])
+                    1, TsType.Primitive TypeKindPrimitive.String
+                    2, TsType.Primitive TypeKindPrimitive.Number
+                    4, TsType.Primitive TypeKindPrimitive.Boolean
+                ]
+                |> create
+            let a = arena.ResolveType(key 0)
+            let b = arena.ResolveType(key 3)
+            match a, b with
+            | ResolvedType.Union ua, ResolvedType.Union ub ->
+                Flip.Expect.isFalse "different signatures must NOT be one instance"
+                    (System.Object.ReferenceEquals(ua, ub))
+                Flip.Expect.isFalse "different signatures must NOT be structurally equal" (a = b)
+            | _ -> failtest "expected two Unions"
+
+        // (c) The actual generator-cache behaviour, modelled directly: a plain
+        //     Dictionary<ResolvedType, int> (the same key type the generator's
+        //     TypeAliasRemap / PreludeRenders / AnchorRenders use) collapses the
+        //     same-signature pair to ONE entry and keeps a different-signature
+        //     pair as TWO. This is the verdict-deciding assertion: it shows the
+        //     decoder interning is SUFFICIENT for generator dedup — no generator
+        //     change is needed to collapse same-signature unions, and no
+        //     over-collapse of genuinely-different unions occurs.
+        testCase "a ResolvedType-keyed Dictionary collapses same-signature unions and keeps different ones distinct" <| fun _ ->
+            let arena =
+                empty
+                |> withTypes [
+                    0, TsType.Union (TsTypeUnion [ key 1; key 2 ])   // string|number
+                    3, TsType.Union (TsTypeUnion [ key 1; key 2 ])   // string|number  (dup)
+                    5, TsType.Union (TsTypeUnion [ key 1; key 4 ])   // string|boolean (distinct)
+                    1, TsType.Primitive TypeKindPrimitive.String
+                    2, TsType.Primitive TypeKindPrimitive.Number
+                    4, TsType.Primitive TypeKindPrimitive.Boolean
+                ]
+                |> create
+            // Mirror the generator's cache key type exactly.
+            let cache = System.Collections.Generic.Dictionary<ResolvedType, int>()
+            cache[arena.ResolveType(key 0)] <- 0
+            cache[arena.ResolveType(key 3)] <- 3   // same signature -> overwrites key-0 entry
+            cache[arena.ResolveType(key 5)] <- 5   // distinct signature -> separate entry
+            Flip.Expect.equal "same-signature unions collapse to ONE cache entry; different stays separate"
+                2 cache.Count
+
+        // Sanity: a Dictionary keyed by a non-interned [<ReferenceEquality>] payload
+        // would NOT collapse. Two interfaces at distinct keys (no structural interning)
+        // remain two cache entries — confirming interning is what does the work for
+        // unions, not some incidental structural equality of ResolvedType.
+        testCase "control: distinct-key interfaces (not interned) stay as two cache entries" <| fun _ ->
+            let arena =
+                empty
+                |> withTypes [
+                    0, TsType.Interface (iface "Same" [] [])
+                    1, TsType.Interface (iface "Same" [] [])
+                ]
+                |> create
+            let cache = System.Collections.Generic.Dictionary<ResolvedType, int>()
+            cache[arena.ResolveType(key 0)] <- 0
+            cache[arena.ResolveType(key 1)] <- 1
+            Flip.Expect.equal "structurally-identical interfaces at distinct keys do NOT collapse" 2 cache.Count
+    ]
+
+// =========================================================================
+// TypeLiteral is DELIBERATELY NOT interned by structure (unlike unions).
+//
+// These tests pin the decision and document WHY. A union (`U2<A,B>`) is
+// location-independent: the same structure is the same type anywhere, so
+// `internedUnions` safely collapses same-signature unions to one identity.
+// A TypeLiteral is DIFFERENT: it is hoisted to a NAMED nested type under a
+// specific owner module, so two structurally-identical literals under different
+// owners are DISTINCT types with distinct paths. Interning them by structure was
+// tried and REGRESSED the cloudflare surface (it collapsed two different-owner
+// `{...}` literals to one identity, the generator anchored it under one owner,
+// and refs from the other owner dangled — FS0033/FS0039 went UP). So a TypeLiteral
+// minted at a distinct TypeKey must resolve to a DISTINCT (non-reference-equal)
+// instance, even when its members are identical. The object-literal over-minting
+// is therefore a PATH-ANCHORING problem (the generator's localise/anchor layer),
+// NOT a decoder-canonicalization one.
+// =========================================================================
+[<Tests>]
+let typeLiteralNotInternedTests =
+    testList "ArenaInterner type-literal NOT interned (location-dependent hoisting)" [
+        // Same members, distinct keys -> DISTINCT instances (NOT interned). This is the
+        // load-bearing assertion: it guards against re-introducing structural interning
+        // for TypeLiterals, which would break different-owner hoisting.
+        testCase "same-members type literals at distinct keys are DISTINCT (not interned)" <| fun _ ->
+            let arena =
+                empty
+                |> withTypes [
+                    0, TsType.TypeLiteral { Members = [ prop "x" 1 ] }
+                    3, TsType.TypeLiteral { Members = [ prop "x" 1 ] }
+                    1, TsType.Primitive TypeKindPrimitive.String
+                ]
+                |> create
+            let a = arena.ResolveType(key 0)
+            let b = arena.ResolveType(key 3)
+            match a, b with
+            | ResolvedType.TypeLiteral ta, ResolvedType.TypeLiteral tb ->
+                Flip.Expect.isFalse "distinct-key TypeLiterals must NOT share one instance"
+                    (System.Object.ReferenceEquals(ta, tb))
+            | _ -> failtest "expected two TypeLiterals"
+
+        // Consequently a ResolvedType-keyed Dictionary (the generator cache key type) keeps
+        // them as SEPARATE entries — each distinct-key literal gets its own placement, which
+        // is correct because each is hoisted under its own owner.
+        testCase "a ResolvedType-keyed Dictionary keeps same-members type literals as distinct entries" <| fun _ ->
+            let arena =
+                empty
+                |> withTypes [
+                    0, TsType.TypeLiteral { Members = [ prop "x" 1 ] }   // { x: string }
+                    3, TsType.TypeLiteral { Members = [ prop "x" 1 ] }   // { x: string }  (same members, distinct key)
+                    1, TsType.Primitive TypeKindPrimitive.String
+                ]
+                |> create
+            let cache = System.Collections.Generic.Dictionary<ResolvedType, int>()
+            cache[arena.ResolveType(key 0)] <- 0
+            cache[arena.ResolveType(key 3)] <- 3
+            Flip.Expect.equal "same-members type literals at distinct keys stay as TWO cache entries"
+                2 cache.Count
+    ]
