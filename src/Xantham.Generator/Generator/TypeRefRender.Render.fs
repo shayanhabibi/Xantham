@@ -77,6 +77,11 @@ module private Implementation =
         let renderAtom (atom: Anchored.TypeRefAtom) =
             match atom with
             | Anchored.TypeRefAtom.Widget widget -> widget
+            | Anchored.TypeRefAtom.Intrinsic s ->
+                // An intrinsic survives anchoring unchanged (e.g. a `string`/`bool` element of
+                // a ResizeArray). Mirror the Prelude renderer; without this the anchored render
+                // path throws MatchFailureException on any intrinsic-bearing type.
+                Ast.LongIdent [ s ]
             | Anchored.TypeRefAtom.Path path ->
                 TypePath.flatten path
                 |> List.map Name.Case.valueOrModified

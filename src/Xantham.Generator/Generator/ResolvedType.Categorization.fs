@@ -86,6 +86,10 @@ module ResolvedTypeCategories =
             | ResolvedType.Primitive resolvedType -> PrimitiveLike (ResolvedTypePrimitiveLike.Primitive resolvedType)
             | ResolvedType.Enum resolvedType -> EnumLike (ResolvedTypeEnumLike.Enum resolvedType)
             | ResolvedType.Index resolvedType -> EnumLike (ResolvedTypeEnumLike.Index resolvedType)
+            // A boolean literal (`true`/`false`) is not enum-like: the two booleans ARE the
+            // inhabitants of `bool`, so a `true | false` union is just `bool`. Categorize it as
+            // the bool primitive rather than a hoisted string-enum case.
+            | ResolvedType.Literal (TsLiteral.Bool _) -> PrimitiveLike (ResolvedTypePrimitiveLike.Primitive TypeKindPrimitive.Boolean)
             | ResolvedType.Literal resolvedType -> LiteralLike (ResolvedTypeLiteralLike.Literal resolvedType)
             | ResolvedType.EnumCase resolvedType -> LiteralLike (ResolvedTypeLiteralLike.EnumCase resolvedType)
             | ResolvedType.TypeQuery ({ Type = Resolve (ResolvedType.Literal _) } as resolvedType) -> LiteralLike (ResolvedTypeLiteralLike.TypeQuery resolvedType)

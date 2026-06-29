@@ -20,6 +20,10 @@
         <Compile Include="Tests\TypeRefRender.SubstituteForHeritage.fs" />
         <Compile Include="Tests\RenderScopeAnchored.fs" />
         <Compile Include="Tests\AliasRemap.fs" />
+        <Compile Include="Tests\Categorization.fs" />
+        <Compile Include="Tests\PrerenderTypeMapping.fs" />
+        <Compile Include="Tests\AnchoringPlacement.fs" />
+        <Compile Include="Tests\PathModel.fs" />
         <Compile Include="Main.fs"/>
     </ItemGroup>
 

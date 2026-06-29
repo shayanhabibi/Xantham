@@ -238,6 +238,21 @@ let typeReferenceTests = testList "TypeReference" [
 ]
 
 let unionTests = testList "Unions" [
+    // Categorization-layer behaviour, vetted in isolation through prerender: a `true | false`
+    // literal union has the two inhabitants of `bool`, so it must categorize to the bool
+    // primitive — NOT a hoisted string-enum. This is the layer that decides type mapping.
+    testCase "boolean literal union collapses to bool" <| fun _ ->
+        [
+            Literal.wrap (Literal.create true)
+            Literal.wrap (Literal.create false)
+        ]
+        |> Union.create
+        |> testRender "bool"
+        ||> Flip.Expect.equal "true | false is bool, not a hoisted enum"
+    testCase "single boolean literal is bool" <| fun _ ->
+        Literal.wrap (Literal.create true)
+        |> testRender "bool"
+        ||> Flip.Expect.equal ""
     testCase "primitives with stacking intents" <| fun _ ->
         [
             primitive TypeKindPrimitive.String
