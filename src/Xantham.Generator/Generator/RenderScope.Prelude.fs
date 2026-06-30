@@ -299,6 +299,81 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
+    | ResolvedType.TypeReference { ResolvedType = Some innerResolvedType; TypeArguments = (_ :: _) as typeArguments }
+        when (match innerResolvedType.Value with
+              // CASE 1 — the resolved body is a genuinely GENERIC NAMED head: an Interface/Class
+              // declaring >=1 type parameter (e.g. a generic class instantiation). Apply the args.
+              | ResolvedType.Interface i when i.TypeParameters.Length > 0 -> true
+              | ResolvedType.Class c when c.TypeParameters.Length > 0 -> true
+              // An already-instantiated `TypeReference<..>` carries its own args; re-applying the
+              // outer args would double-wrap (`Foo<A><B>`, invalid F#). Render the body alone.
+              | ResolvedType.TypeReference { TypeArguments = (_ :: _) } -> false
+              // CASE 2 — a generic TYPE ALIAS reference (`Without<U,T>`, `Params<P>`,
+              // `CfProperties<C>`): the encoder records the alias BODY (a TypeLiteral/Union/
+              // Intersection/...) as `ResolvedType` and the alias-application args as
+              // `TypeArguments`. The alias body is a key in `ctx.TypeAliasRemap`, so rendering it
+              // resolves to the alias NAME (not the inlined structure). Apply the args so the
+              // reference emits `Without<A,B>` instead of bare `Without` (the FS0033 arg-drop).
+              // An INLINE structural type (anonymous union/object with a phantom arg) is NOT in
+              // the remap, so it correctly falls through and renders alone (no double-wrap).
+              | bodyValue -> ctx.TypeAliasRemap.ContainsKey bodyValue) ->
+        // The encoder attached BOTH a resolved instantiation body (`ResolvedType = Some`) AND
+        // the original `TypeArguments`. The resolved body alone is the correct NAMED head
+        // (e.g. `Without`, `Params`, `CfProperties`) — rendering it is cycle-safe because it
+        // short-circuits to the body's own named scope. But rendering it ALONE drops the args,
+        // emitting a bare generic name -> FS0033 "expects N args but is given 0".
+        //
+        // The fix builds the `Prefix (head, args)` application using that resolved body as the
+        // head, mirroring the args-carrying arm below — but with one essential difference for
+        // CYCLE SAFETY: this node's RenderScope is REGISTERED in PreludeRenders (carrying the
+        // head ref) BEFORE the args are prerendered. A self-referential mapped-type
+        // instantiation (e.g. `Without<U,T>` whose arg transitively references this same node)
+        // re-enters `prerender` for this key while prerendering the args; with the scope already
+        // registered, the re-entry hits the cache-hit arm (lines 67-76) and returns the head ref
+        // instead of recursing forever. (Prior attempts that eagerly prerendered the args BEFORE
+        // registration stack-overflowed on exactly this cycle.)
+        let prefix =
+            innerResolvedType
+            |> prerender ctx scope
+        // Register the scope NOW (head-only ref) so a cyclic arg re-entering this key resolves
+        // to the head via the cache rather than recursing. The full Prefix scope replaces this
+        // below once the args are safely prerendered.
+        prefix
+        |> RenderScope.createRootless resolvedType
+        |> addOrReplaceScope ctx resolvedType
+        |> ignore
+        // Align args to the resolved body's declared arity (truncate excess / pad with obj),
+        // matching the args-carrying arm's well-formedness contract.
+        let declaredParamCount =
+            match innerResolvedType.Value with
+            | ResolvedType.Interface i -> i.TypeParameters.Length
+            | ResolvedType.Class c -> c.TypeParameters.Length
+            | _ -> typeArguments.Length
+        let alignedArguments =
+            if typeArguments.Length = declaredParamCount then
+                typeArguments
+            elif typeArguments.Length > declaredParamCount then
+                typeArguments |> List.truncate declaredParamCount
+            else
+                let padCount = declaredParamCount - typeArguments.Length
+                let objArg =
+                    LazyContainer.CreateFromValue
+                        (ResolvedType.Primitive TypeKindPrimitive.NonPrimitive)
+                typeArguments @ List.replicate padCount objArg
+        if List.isEmpty alignedArguments then
+            // Declared arity is 0 (the resolved body is non-generic) — emit the head alone;
+            // the placeholder scope already registered above is the final form.
+            Registered (remap prefix)
+        else
+        let postfixArguments =
+            alignedArguments
+            |> List.map (prerender ctx scope)
+        // Replace the placeholder with the full Prefix application (head + args). The args were
+        // prerendered AFTER the placeholder registration, so any cyclic arg was cycle-broken.
+        (prefix, postfixArguments)
+        |> RenderScopeStore.TypeRefRender.create scope resolvedType false
+        |> RenderScope.createRootless resolvedType
+        |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeReference { ResolvedType = Some innerResolvedType }
     | ResolvedType.TypeReference { Type = innerResolvedType; TypeArguments = [] } ->
         innerResolvedType

@@ -39,7 +39,16 @@ open Mocking.ArenaInterner.ResolvedType
 // reference with non-empty TypeArguments builds the Prefix application regardless of
 // whether ResolvedType is populated.
 
-let private testRender = Xantham.Generator.Tests.Tests.TypeRefRender.testRender
+// Render against a FRESH context PER CALL. The shared module-level context in TypeRefRender is
+// a single mutable PreludeRenders cache; these two cases share the same generic interface
+// instance (`genericFoo`) and arg primitives, and Expecto runs the cases in PARALLEL — so a
+// shared context lets the two renders race on the `genericFoo` key (the InFlight/`obj` recursion
+// guard can fire for one while the other registers it), caching `Foo` as `obj` and surfacing as
+// `option<obj<...>>`. A per-call context isolates each render (matching the real generator, which
+// prerenders this key once on a single thread).
+let private testRender (expectedTypeText: string) (ref: ResolvedType) =
+    TestHelper.prerender GeneratorContext.Empty ref
+    |> Xantham.Generator.Tests.Tests.TypeRefRender.testTypeRef expectedTypeText
 
 // A generic interface `Foo<'T, 'U>` (2 declared type parameters) at module path Pkg.
 let private genericFoo =
@@ -103,7 +112,17 @@ let tests =
         // arm. ACCEPTANCE TEST for any fix MUST be a real cf regen WITHOUT stack overflow, not
         // this isolated render (which is acyclic and would pass a wrong fix). See memory
         // xantham-mapped-type-argdrop.
-        ptestCase "generic reference WITH populated ResolvedType must NOT drop its arguments" <| fun _ ->
+        // FIXED 2026-06-30. The `ResolvedType = Some innerResolvedType; TypeArguments = (_::_)`
+        // arm in RenderScope.Prelude.fs now builds the `Prefix (head, args)` application when the
+        // resolved body is a generic Interface/Class (CASE 1 here — `Foo<'T,'U>`) or a generic
+        // type-alias body registered in `ctx.TypeAliasRemap` (CASE 2 — the Without/UnstubifyAll
+        // surface). The head is the resolved body's NAMED identity (cycle-safe); the scope is
+        // REGISTERED before the args are prerendered, so a self-referential arg cycle-breaks via
+        // the cache-hit arm rather than overflowing. An already-instantiated `TypeReference<..>`
+        // body or an inline (non-remapped) structural body still falls through and renders alone
+        // (no double-wrap). Acceptance was a real cf regen WITHOUT stack overflow (FS0033
+        // 704 -> 534; the "given 0" arg-drop subclass 436 -> 236).
+        testCase "generic reference WITH populated ResolvedType must NOT drop its arguments" <| fun _ ->
             referenceWithResolvedAndArgs
             |> testRender "Pkg.Foo<string, int>"
             ||> Flip.Expect.equal "ResolvedType-populated generic ref must still carry its type arguments"

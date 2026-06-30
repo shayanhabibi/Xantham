@@ -159,28 +159,70 @@ module ResolvedTypeCategories =
         }
             
     let create (resolvedType: ResolvedType) =
+        // Cycle guard: the follow-through arms below (Substitution/Conditional/Union/Optional/
+        // ReadOnly and the `TypeReference { ResolvedType = Some _ }` / constraint arms) recurse
+        // into a NESTED resolved type. A self-referential structure — e.g. a mapped-type alias
+        // body that reaches back to its own TypeReference through a union member — has no
+        // structural base case, so unguarded recursion stack-overflows.
+        //
+        // `onPath` tracks the nodes on the CURRENT ANCESTOR PATH (not the whole traversal): each
+        // recursion-following arm Adds its node before descending and Removes it after, so a node
+        // legitimately reached on two SIBLING branches of a DAG is NOT mistaken for a cycle (that
+        // distinction is essential — a flat `visited` set wrongly shelled DAG-shared nodes and
+        // collapsed valid structures to `obj`). Only a node already on its own ancestor path is a
+        // true cycle. Every ResolvedType case wraps a [<ReferenceEquality>] record, so the
+        // HashSet hashes/compares by reference (O(1), itself cycle-safe).
+        let onPath = System.Collections.Generic.HashSet<ResolvedType>(HashIdentity.Reference)
         let rec categorize (categories: ResolvedTypeCategories) (resolved: ResolvedType) =
+            // Descend into `next` while marking `resolved` as on-path; restore on the way out.
+            let inline guarded next =
+                let added = onPath.Add resolved
+                let result = next ()
+                if added then onPath.Remove resolved |> ignore
+                result
             match resolved with
+            | ResolvedType.TypeReference _
+            | ResolvedType.TypeParameter _ when onPath.Contains resolved ->
+                // A TypeReference/TypeParameter already on the current ancestor path — break the
+                // cycle by categorizing it as a plain cross-reference (its non-recursive shell)
+                // rather than following its resolved body again.
+                addOthers categories (
+                    match resolved with
+                    | ResolvedType.TypeReference tr -> ResolvedTypeOther.TypeReference tr
+                    | ResolvedType.TypeParameter tp -> ResolvedTypeOther.TypeParameter tp
+                    | _ -> failwith "Unreachable: guarded to TypeReference/TypeParameter")
+            | ResolvedType.Substitution _
+            | ResolvedType.Conditional _
+            | ResolvedType.Union _
+            | ResolvedType.Optional _
+            | ResolvedType.ReadOnly _ when onPath.Contains resolved ->
+                // A container node (Union/Conditional/...) already on the current ancestor path:
+                // its members are being categorized higher on the live recursion, so re-following
+                // it adds nothing and would loop. Skip it (these container kinds have no OtherLike
+                // shell — the categorize active pattern rejects them).
+                categories
             | ResolvedType.Substitution substitutionType ->
-                categorize categories substitutionType.Base.Value
+                guarded (fun () -> categorize categories substitutionType.Base.Value)
             | ResolvedType.Conditional conditionalType ->
-                [
-                    conditionalType.True.Value
-                    conditionalType.False.Value
-                ]
-                |> List.fold categorize categories
+                guarded (fun () ->
+                    [
+                        conditionalType.True.Value
+                        conditionalType.False.Value
+                    ]
+                    |> List.fold categorize categories)
             | ResolvedType.Union union ->
-                union.Types
-                |> List.map _.Value
-                |> List.fold categorize categories
-            | ResolvedType.Optional { ResolvedType = Some (Resolve value) } 
+                guarded (fun () ->
+                    union.Types
+                    |> List.map _.Value
+                    |> List.fold categorize categories)
+            | ResolvedType.Optional { ResolvedType = Some (Resolve value) }
             | ResolvedType.Optional { Type = Resolve value } ->
-                categorize (nullable categories) value
-            | ResolvedType.TypeReference { ResolvedType = Some (Resolve value) } 
-            | ResolvedType.TypeParameter { Constraint = Some (Resolve value) } 
+                guarded (fun () -> categorize (nullable categories) value)
+            | ResolvedType.TypeReference { ResolvedType = Some (Resolve value) }
+            | ResolvedType.TypeParameter { Constraint = Some (Resolve value) }
             | ResolvedType.ReadOnly value
             | ResolvedType.TypeReference { Type = Resolve value; TypeArguments = [] } ->
-                categorize categories value
+                guarded (fun () -> categorize categories value)
             // we ignore these and just make the entire structure nullable
             | ResolvedType.Primitive (
                 TypeKindPrimitive.Never
