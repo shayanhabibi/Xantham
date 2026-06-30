@@ -401,6 +401,121 @@ let private selectWinnersTests =
     ]
 
 // ---------------------------------------------------------------------------
+// internStructuralUnions — STRUCTURAL UNION INTERNING (the encoder identity root
+// fix). Two structurally-identical synthesized unions (same member-key set) get
+// minted DISTINCT keys by TypeKey.create (allocation, not structure). This pass
+// derives identity from STRUCTURE: it keeps ONE canonical entry per sorted-member
+// signature, drops the redundant entries, and rewrites EVERY reference to a dropped
+// key onto the canonical key. UNIONS ONLY (location-independent); TypeLiterals are
+// intentionally NOT interned (location-dependent — would collapse distinct owners).
+// ---------------------------------------------------------------------------
+let private union (members: int list) : TsType =
+    members |> List.map tk |> TsTypeUnion |> TsType.Union
+
+let private internTests =
+    testList "internStructuralUnions" [
+
+        testCase "two structurally-identical unions collapse to ONE canonical key" <| fun _ ->
+            // union(string,number) minted at two keys (-20, -21) -> one survives.
+            let result =
+                { emptyResult with
+                    Types = Map [ tk -20, union [ -1; -3 ]; tk -21, union [ -1; -3 ] ] }
+            let interned = Internal.internStructuralUnions result
+            let unionKeys =
+                interned.Types
+                |> Map.toList
+                |> List.choose (function k, TsType.Union _ -> Some k | _ -> None)
+            Expect.equal unionKeys.Length 1 "one union entry remains after interning"
+            // canonical = minimum key = -21 (more negative); -20 is the redundant drop.
+            Expect.equal unionKeys.[0] (tk -21) "canonical is the minimum (most-negative) key"
+            Expect.isFalse (interned.Types.ContainsKey (tk -20)) "redundant union key dropped"
+
+        testCase "member ORDER does not matter (signature is sorted)" <| fun _ ->
+            // [string;number] and [number;string] are the SAME union.
+            let result =
+                { emptyResult with
+                    Types = Map [ tk -20, union [ -1; -3 ]; tk -21, union [ -3; -1 ] ] }
+            let interned = Internal.internStructuralUnions result
+            let unionKeys =
+                interned.Types |> Map.toList |> List.choose (function k, TsType.Union _ -> Some k | _ -> None)
+            Expect.equal unionKeys.Length 1 "order-permuted unions share one identity"
+
+        testCase "STRUCTURALLY DISTINCT unions keep DIFFERENT keys (no false collision)" <| fun _ ->
+            let result =
+                { emptyResult with
+                    Types = Map [ tk -20, union [ -1; -3 ]; tk -21, union [ -1; -4 ] ] }
+            let interned = Internal.internStructuralUnions result
+            let unionKeys =
+                interned.Types |> Map.toList |> List.choose (function k, TsType.Union _ -> Some k | _ -> None)
+            Expect.equal unionKeys.Length 2 "distinct unions are NOT merged"
+            Expect.isTrue (interned.Types.ContainsKey (tk -20)) "first distinct union kept"
+            Expect.isTrue (interned.Types.ContainsKey (tk -21)) "second distinct union kept"
+
+        testCase "references to a dropped union key are REWRITTEN to the canonical key" <| fun _ ->
+            // A property whose Type points at the redundant union (-20) must, after
+            // interning, point at the canonical (-21) so nothing dangles.
+            let referer =
+                TsType.Interface
+                    (emptyInterface "Holder"
+                        [ TsMember.Property { Name = "x"; Type = tk -20; IsStatic = false; IsOptional = false; IsPrivate = false; Accessor = TsAccessor.ReadWrite; Documentation = [] } ])
+            let result =
+                { emptyResult with
+                    Types = Map [ tk -20, union [ -1; -3 ]; tk -21, union [ -1; -3 ]; tk 1, referer ] }
+            let interned = Internal.internStructuralUnions result
+            match interned.Types.[tk 1] with
+            | TsType.Interface iface ->
+                match iface.Members.[0] with
+                | TsMember.Property p -> Expect.equal p.Type (tk -21) "reference redirected to canonical key"
+                | other -> failwithf "expected Property, got %A" other
+            | other -> failwithf "expected Interface, got %A" other
+
+        testCase "TopLevelExports / LibEsExports key lists are rewritten too" <| fun _ ->
+            let result =
+                { emptyResult with
+                    Types = Map [ tk -20, union [ -1; -3 ]; tk -21, union [ -1; -3 ] ]
+                    TopLevelExports = [ tk -20 ]
+                    LibEsExports = [ tk -20 ] }
+            let interned = Internal.internStructuralUnions result
+            Expect.equal interned.TopLevelExports [ tk -21 ] "TopLevelExports remapped to canonical"
+            Expect.equal interned.LibEsExports [ tk -21 ] "LibEsExports remapped to canonical"
+
+        testCase "FIXPOINT: remapping members can create a NEW collision that is then collapsed" <| fun _ ->
+            // -20 and -21 are identical (string|number) -> -21 canonical, -20 dropped.
+            // -30 = union(-20, -4) and -31 = union(-21, -4): DISTINCT before remap (members
+            // -20 vs -21), but once -20 -> -21 they become identical -> must collapse too.
+            let result =
+                { emptyResult with
+                    Types =
+                        Map [
+                            tk -20, union [ -1; -3 ]
+                            tk -21, union [ -1; -3 ]
+                            tk -30, union [ -20; -4 ]
+                            tk -31, union [ -21; -4 ]
+                        ] }
+            let interned = Internal.internStructuralUnions result
+            let unionKeys =
+                interned.Types |> Map.toList |> List.choose (function k, TsType.Union _ -> Some k | _ -> None)
+            // expect 2 survivors: the {string,number} canonical and the {that,bool} canonical.
+            Expect.equal unionKeys.Length 2 "fixpoint collapses the collision induced by member remap"
+
+        testCase "TypeLiterals are NOT interned (only unions)" <| fun _ ->
+            // Two structurally-identical type literals must BOTH survive (location-dependent).
+            let lit = TsType.TypeLiteral { Members = [ prop "a" ] }
+            let result = { emptyResult with Types = Map [ tk -20, lit; tk -21, lit ] }
+            let interned = Internal.internStructuralUnions result
+            Expect.isTrue (interned.Types.ContainsKey (tk -20)) "first type literal kept"
+            Expect.isTrue (interned.Types.ContainsKey (tk -21)) "second type literal kept (NOT interned)"
+
+        testCase "idempotent — interning an already-interned result is a no-op" <| fun _ ->
+            let result =
+                { emptyResult with
+                    Types = Map [ tk -20, union [ -1; -3 ]; tk -21, union [ -1; -3 ] ] }
+            let once = Internal.internStructuralUnions result
+            let twice = Internal.internStructuralUnions once
+            Expect.equal (twice.Types |> Map.toList) (once.Types |> Map.toList) "second pass changes nothing"
+    ]
+
+// ---------------------------------------------------------------------------
 // Aggregated suite — registered in Program.fs and Xantham.Fable.Tests.fsproj.
 // ---------------------------------------------------------------------------
 let encoderMergeDedupTests =
@@ -411,4 +526,5 @@ let encoderMergeDedupTests =
         mergeTypesTests
         mergeExportsTests
         selectWinnersTests
+        internTests
     ]

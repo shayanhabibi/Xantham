@@ -355,6 +355,184 @@ module Internal =
         { result with
             Types = mergeWinnersInto result.DuplicateTypes result.Types
             ExportedDeclarations = mergeWinnersInto result.DuplicateExports result.ExportedDeclarations }
+
+    // ── Structural union interning (encoder identity, derived not minted) ─────────
+    //
+    // ROOT FIX. TypeKey.create() mints union identity by ALLOCATION (a monotonic
+    // decrement counter), so every occurrence of a structurally-identical synthesized
+    // union (e.g. `string | number`) gets a BRAND-NEW key — the IR is a multiset of
+    // identities, not a set of types (measured: 781 of 1583 union keys redundant, 49%).
+    //
+    // Union member identities are NOT available at mint time (TypeKey.create runs in
+    // tryGetOrRegisterStore, before the union body is dispatched) nor at union dispatch
+    // (instrumented: members read -14/Unknown there; they settle reactively AFTER, as
+    // the stack drains). The first point ALL union member keys are settled is assembly
+    // (STypeUnionBuilder.Build reads each member signal's final .Value). So the
+    // structural interning is DEFERRED to here — still encoder-side, still identity-
+    // rooted (it rewrites which keys exist in the IR the decoder receives), NOT a
+    // downstream generator bandaid.
+    //
+    // SCOPE: UNIONS ONLY. Unions are location-independent (`string|number` is the same
+    // type anywhere → safe to share one identity; the decoder's internedUnions already
+    // interns them by this exact sorted-member signature, so this COMPOSES with it).
+    // TypeLiterals are deliberately NOT interned (location-dependent: hoisted under a
+    // named owner; interning them collapses distinct-owner literals — tried & reverted).
+    let internStructuralUnions (result: EncodedResult) =
+        // Signature of a union = its sorted member-key list (mirrors decoder internedUnions).
+        let unionSignature (TsTypeUnion members) = List.sort members
+        // ── reference rewriter ─────────────────────────────────────────────────────
+        // Build the closures that rewrite EVERY TypeKey-bearing position for a given
+        // remap. Enumerated against Common.Types.fs (every field typed TypeKey /
+        // TypeKey list / TypeKey option). Returned as a record so the fixpoint driver
+        // can apply successive remaps.
+        let applyRemap (remap: Map<TypeKey, TypeKey>) (result: EncodedResult) =
+            let remapKey (key: TypeKey) =
+                match Map.tryFind key remap with
+                | Some canonical -> canonical
+                | None -> key
+            let remapInlinedTypeParam ((key, tp): InlinedTsTypeParameter) : InlinedTsTypeParameter =
+                remapKey key,
+                { tp with
+                    Constraint = tp.Constraint |> Option.map remapKey
+                    Default = tp.Default |> Option.map remapKey }
+            let remapTypeRef (r: TsTypeReference) =
+                { r with
+                    Type = remapKey r.Type
+                    TypeArguments = r.TypeArguments |> List.map remapKey
+                    ResolvedType = r.ResolvedType |> Option.map remapKey }
+            let remapParam (p: TsParameter) = { p with Type = remapKey p.Type }
+            let remapTupleElemType (e: TsTupleElementType) = { e with Type = remapKey e.Type }
+            let remapMember = function
+                | TsMember.Method m ->
+                    m.ToList()
+                    |> List.map (fun v -> { v with TsMethod.Type = remapKey v.Type; Parameters = v.Parameters |> List.map remapParam })
+                    |> TsOverloadableConstruct.Create
+                    |> TsMember.Method
+                | TsMember.Property p -> TsMember.Property { p with Type = remapKey p.Type }
+                | TsMember.GetAccessor g -> TsMember.GetAccessor { g with Type = remapKey g.Type }
+                | TsMember.SetAccessor s -> TsMember.SetAccessor { s with ArgumentType = remapKey s.ArgumentType }
+                | TsMember.CallSignature c ->
+                    c.ToList()
+                    |> List.map (fun v -> { v with TsCallSignature.Type = remapKey v.Type; Parameters = v.Parameters |> List.map remapParam })
+                    |> TsOverloadableConstruct.Create
+                    |> TsMember.CallSignature
+                | TsMember.IndexSignature i ->
+                    TsMember.IndexSignature { i with Type = remapKey i.Type; Parameters = i.Parameters |> List.map remapParam }
+                | TsMember.ConstructSignature c ->
+                    c.ToList()
+                    |> List.map (fun v -> { v with TsConstructSignature.Type = remapKey v.Type; Parameters = v.Parameters |> List.map remapParam })
+                    |> TsOverloadableConstruct.Create
+                    |> TsMember.ConstructSignature
+            let rec remapType (typ: TsType) : TsType =
+                match typ with
+                | TsType.GlobalThis
+                | TsType.Primitive _
+                | TsType.Literal _ -> typ
+                | TsType.Union (TsTypeUnion members) -> members |> List.map remapKey |> TsTypeUnion |> TsType.Union
+                | TsType.Intersection (TsTypeIntersection members) -> members |> List.map remapKey |> TsTypeIntersection |> TsType.Intersection
+                | TsType.Conditional c -> TsType.Conditional { Check = remapKey c.Check; Extends = remapKey c.Extends; True = remapKey c.True; False = remapKey c.False }
+                | TsType.Interface i -> TsType.Interface { i with Members = i.Members |> List.map remapMember; TypeParameters = i.TypeParameters |> List.map remapInlinedTypeParam; Heritage = { Extends = i.Heritage.Extends |> List.map remapTypeRef } }
+                | TsType.Class c -> TsType.Class { c with Members = c.Members |> List.map remapMember; TypeParameters = c.TypeParameters |> List.map remapInlinedTypeParam; Constructors = c.Constructors |> List.map (fun ctor -> { ctor with Parameters = ctor.Parameters |> List.map remapParam }); Heritage = { Implements = c.Heritage.Implements |> Option.map remapTypeRef; Extends = c.Heritage.Extends |> List.map remapTypeRef } }
+                | TsType.Enum e -> TsType.Enum { e with Members = e.Members |> List.map (fun m -> { m with Parent = remapKey m.Parent }) }
+                | TsType.EnumCase ec -> TsType.EnumCase { ec with Parent = remapKey ec.Parent }
+                | TsType.IndexedAccess ia -> TsType.IndexedAccess { Object = remapKey ia.Object; Index = remapKey ia.Index }
+                | TsType.TypeReference r -> TsType.TypeReference (remapTypeRef r)
+                | TsType.Array t -> TsType.Array (remapType t)
+                | TsType.ReadOnly t -> TsType.ReadOnly (remapType t)
+                | TsType.TypeParameter tp -> TsType.TypeParameter { tp with Constraint = tp.Constraint |> Option.map remapKey; Default = tp.Default |> Option.map remapKey }
+                | TsType.Tuple t -> TsType.Tuple { t with Types = t.Types |> List.map (function TsTupleElement.FixedLabeled(l, e) -> TsTupleElement.FixedLabeled(l, remapTupleElemType e) | TsTupleElement.Variadic k -> TsTupleElement.Variadic (remapKey k) | TsTupleElement.Fixed e -> TsTupleElement.Fixed (remapTupleElemType e)) }
+                | TsType.Index i -> TsType.Index { i with Type = remapKey i.Type }
+                | TsType.Predicate p -> TsType.Predicate { p with Type = remapKey p.Type }
+                | TsType.TypeLiteral tl -> TsType.TypeLiteral { tl with Members = tl.Members |> List.map remapMember }
+                | TsType.TemplateLiteral t -> TsType.TemplateLiteral { t with Types = t.Types |> List.map remapKey }
+                | TsType.Optional r -> TsType.Optional (remapTypeRef r)
+                | TsType.Substitution s -> TsType.Substitution { Base = remapKey s.Base; Constraint = remapKey s.Constraint }
+                | TsType.TypeQuery q -> TsType.TypeQuery { q with Type = remapKey q.Type }
+            let rec remapExport (export: TsExportDeclaration) : TsExportDeclaration =
+                match export with
+                | TsExportDeclaration.Variable v -> TsExportDeclaration.Variable { v with Type = remapKey v.Type }
+                | TsExportDeclaration.Interface i -> TsExportDeclaration.Interface { i with Members = i.Members |> List.map remapMember; TypeParameters = i.TypeParameters |> List.map remapInlinedTypeParam; Heritage = { Extends = i.Heritage.Extends |> List.map remapTypeRef } }
+                | TsExportDeclaration.TypeAlias a -> TsExportDeclaration.TypeAlias { a with Type = remapKey a.Type; TypeParameters = a.TypeParameters |> List.map remapInlinedTypeParam }
+                | TsExportDeclaration.Class c -> TsExportDeclaration.Class { c with Members = c.Members |> List.map remapMember; TypeParameters = c.TypeParameters |> List.map remapInlinedTypeParam; Constructors = c.Constructors |> List.map (fun ctor -> { ctor with Parameters = ctor.Parameters |> List.map remapParam }); Heritage = { Implements = c.Heritage.Implements |> Option.map remapTypeRef; Extends = c.Heritage.Extends |> List.map remapTypeRef } }
+                | TsExportDeclaration.Enum e -> TsExportDeclaration.Enum { e with Members = e.Members |> List.map (fun m -> { m with Parent = remapKey m.Parent }) }
+                | TsExportDeclaration.Module m -> TsExportDeclaration.Module { m with Exports = m.Exports |> List.map remapExport }
+                | TsExportDeclaration.Function f ->
+                    f.ToList()
+                    |> List.map (fun v -> { v with TsFunction.Type = remapKey v.Type; Parameters = v.Parameters |> List.map remapParam; TypeParameters = v.TypeParameters |> List.map remapInlinedTypeParam; SignatureKey = remapKey v.SignatureKey })
+                    |> TsOverloadableConstruct.Create
+                    |> TsExportDeclaration.Function
+            let remapDuplicates remapNode (dups: Map<TypeKey, DuplicateEncoding<'a> list>) =
+                // Drop redundant keys (entry now lives at the canonical key), and rewrite
+                // both the surviving group keys and the bodies. The decoder ignores the
+                // duplicate maps, but keeping them self-consistent avoids dangling references
+                // and keeps the IR honestly free of the redundant union identities.
+                dups
+                |> Map.toList
+                |> List.choose (fun (key, group) ->
+                    if Map.containsKey key remap then None
+                    else Some(key, group |> List.map (fun d -> { d with Value = remapNode d.Value })))
+                |> Map.ofList
+            {
+                result with
+                    Types =
+                        result.Types
+                        |> Map.toList
+                        |> List.choose (fun (key, typ) ->
+                            if Map.containsKey key remap then None     // redundant union — dropped (key now canonical)
+                            else Some(key, remapType typ))
+                        |> Map.ofList
+                    ExportedDeclarations = result.ExportedDeclarations |> Map.map (fun _ -> remapExport)
+                    DuplicateTypes = result.DuplicateTypes |> remapDuplicates remapType
+                    DuplicateExports = result.DuplicateExports |> remapDuplicates remapExport
+                    TopLevelExports = result.TopLevelExports |> List.map remapKey
+                    LibEsExports = result.LibEsExports |> List.map remapKey
+            }
+        // ── fixpoint driver ────────────────────────────────────────────────────────
+        // Compute the union remap from the CURRENT Types map, apply it, and repeat.
+        // Remapping a union's member keys can make two previously-distinct unions become
+        // structurally identical (a new collision), so iterate until no remap is produced.
+        // Terminates: each pass strictly shrinks the droppable-union count.
+        //
+        // EXPORT-KEY PROTECTION (correctness, not optimisation): a union key can ALSO be
+        // an ExportedDeclarations key — a NAMED type alias whose body is a union, e.g.
+        // `type ResponseFormatTextConfig = A | B | C` lives at key 4086 in BOTH Types
+        // (the union body) and ExportedDeclarations (the alias). prerenderTypeAliases
+        // resolves the alias via `ResolveType exportKey` → typeMap[exportKey], so dropping
+        // such a key from Types makes the export resolution dangle (KeyNotFoundException).
+        // So an export-keyed union is NEVER droppable; it stays as its own entry. It is
+        // PREFERRED as the canonical for its signature, so anonymous synthesized twins
+        // fold onto the named declaration rather than the reverse.
+        let exportKeys = result.ExportedDeclarations.Keys |> Set.ofSeq
+        let computeRemap (result: EncodedResult) =
+            let unionEntries =
+                result.Types
+                |> Map.toList
+                |> List.choose (function key, TsType.Union u -> Some(key, u) | _ -> None)
+            // canonical per signature: prefer an export-keyed member (named declaration);
+            // otherwise the minimum key. Deterministic (unique ints, stable min).
+            let canonicalOf =
+                unionEntries
+                |> List.groupBy (fun (_, u) -> unionSignature u)
+                |> List.map (fun (signature, group) ->
+                    let keys = group |> List.map fst
+                    let canonical =
+                        match keys |> List.filter exportKeys.Contains with
+                        | [] -> List.min keys
+                        | exported -> List.min exported
+                    signature, canonical)
+                |> Map.ofList
+            unionEntries
+            |> List.choose (fun (key, u) ->
+                let canonical = canonicalOf[unionSignature u]
+                // Never drop a key that is itself an export key (must keep its Types entry),
+                // and never remap a key onto itself.
+                if key = canonical || exportKeys.Contains key then None else Some(key, canonical))
+            |> Map.ofList
+        let rec loop (result: EncodedResult) =
+            let remap = computeRemap result
+            if Map.isEmpty remap then result
+            else loop (applyRemap remap result)
+        loop result
 open Schema
 let read (reader: TypeScriptReader) =
     let exportTags =
@@ -445,6 +623,7 @@ let read (reader: TypeScriptReader) =
     |> Internal.trimTypeReferenceArrayTupleDuplicates
     |> Internal.mergeExports
     |> Internal.selectAndMergeWinnersInDuplicates
+    |> Internal.internStructuralUnions
 let write (outputDestination: string) (result: EncodedResult) =
     Internal.writeOutput outputDestination result
 let readAndWrite (outputDestination: string) (reader: TypeScriptReader) =
