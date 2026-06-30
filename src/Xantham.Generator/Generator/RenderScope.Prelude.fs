@@ -48,6 +48,30 @@ let literalUnionName (literals: ResolvedTypeLiteralLike list) : Name<Case.pascal
 let literalUnionTypePath (literals: ResolvedTypeLiteralLike list) : TypePath =
     literalUnionModule |> TypePath.createWithName (literalUnionName literals)
 
+// The numeric typed arrays + ArrayBufferView are GENERIC in recent TS (`Uint8Array<ArrayBufferLike>`)
+// but NON-generic in Fable.Core.JS (their Fable name equals their TS name, so they are NOT
+// name-substituted). A `TypeReference` to one carries the TS type argument, and arg-alignment uses
+// the TS interface's declared arity (1), emitting `Uint8Array<X>` -> FS0033 "the non-generic type
+// ... does not expect any type arguments, but here is given 1". `fableDeclaredArity` reports their
+// Fable arity (0) so arg-alignment truncates the spurious arg away, emitting bare `Uint8Array`.
+// (Contrast `ArrayLike`/`ConcatArray`/`ReadonlyArray`, which ARE generic in Fable and keep their arg.)
+// NB: the BigInt64Array/BigUint64Array variants are deliberately EXCLUDED — they are NOT valid
+// bare names in this Fable.Core.JS version, so stripping their arg dangles the name (FS0039).
+// They render fine as-is at HEAD; only the listed arrays have a Fable-non-generic bare equivalent.
+let private nonGenericTypedArrays =
+    set [
+        "Int8Array"; "Uint8Array"; "Uint8ClampedArray"
+        "Int16Array"; "Uint16Array"
+        "Int32Array"; "Uint32Array"
+        "Float32Array"; "Float64Array"
+        "ArrayBufferView"
+    ]
+
+/// The Fable-side declared arity for a named type whose Fable equivalent is non-generic while its TS
+/// declaration is generic (the numeric typed arrays / ArrayBufferView). `None` => use the TS arity.
+let private fableDeclaredArity (name: string) : int option =
+    if nonGenericTypedArrays.Contains name then Some 0 else None
+
 [<Struct>]
 type private Registered = Registered of TypeRefRender
 let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolvedType: LazyResolvedType): TypeRefRender =
@@ -358,11 +382,17 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> addOrReplaceScope ctx resolvedType
         |> ignore
         // Align args to the resolved body's declared arity (truncate excess / pad with obj),
-        // matching the args-carrying arm's well-formedness contract.
+        // matching the args-carrying arm's well-formedness contract. A stdlib type whose Fable
+        // equivalent is non-generic (the numeric typed arrays / ArrayBufferView) reports a Fable
+        // arity override of 0 so its spurious TS type argument is truncated away (FS0033 fix).
         let declaredParamCount =
             match innerResolvedType.Value with
-            | ResolvedType.Interface i -> i.TypeParameters.Length
-            | ResolvedType.Class c -> c.TypeParameters.Length
+            | ResolvedType.Interface i ->
+                fableDeclaredArity (Name.Case.valueOrSource i.Name)
+                |> Option.defaultValue i.TypeParameters.Length
+            | ResolvedType.Class c ->
+                fableDeclaredArity (Name.Case.valueOrSource c.Name)
+                |> Option.defaultValue c.TypeParameters.Length
             | _ -> typeArguments.Length
         let alignedArguments =
             if typeArguments.Length = declaredParamCount then
@@ -415,8 +445,12 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         let innerResolvedTypeValue = innerResolvedType.Value
         let declaredParamCount =
             match innerResolvedTypeValue with
-            | ResolvedType.Interface i -> i.TypeParameters.Length
-            | ResolvedType.Class c -> c.TypeParameters.Length
+            | ResolvedType.Interface i ->
+                fableDeclaredArity (Name.Case.valueOrSource i.Name)
+                |> Option.defaultValue i.TypeParameters.Length
+            | ResolvedType.Class c ->
+                fableDeclaredArity (Name.Case.valueOrSource c.Name)
+                |> Option.defaultValue c.TypeParameters.Length
             | _ -> typeArguments.Length
         // Encoder/TS may produce a TypeReference whose argument count doesn't
         // match the inner type's declared type parameter count — happens with

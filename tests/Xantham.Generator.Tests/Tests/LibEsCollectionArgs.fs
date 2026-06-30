@@ -65,4 +65,21 @@ let tests =
             |> TypeReference.wrap
             |> testRender "ResizeArray<string>"
             ||> Flip.Expect.equal "Array<string> must render ResizeArray<string> with the real element arg"
+
+        // TYPED-ARRAY ARITY STRIP: the numeric typed arrays are GENERIC in recent TS
+        // (`Uint8Array<ArrayBufferLike>`) but NON-generic in Fable.Core.JS. A `TypeReference`
+        // carrying the TS arg must render BARE `Uint8Array` (arg truncated by the Fable-arity
+        // override) — NOT `Uint8Array<string>`, which is FS0033 "the non-generic type ... does
+        // not expect any type arguments, but here is given 1".
+        testCase "Uint8Array<elem> application renders bare Uint8Array (spurious arg dropped)" <| fun _ ->
+            Interface.create "Uint8Array"
+            |> Interface.withTypeParameters [ TypeParameter.create "T" ]
+            |> Interface.wrap
+            |> TypeReference.create
+            |> TypeReference.withTypeArguments [ primitive TypeKindPrimitive.String ]
+            |> TypeReference.wrap
+            // The mock interface has no path, so the isolated render qualifies it `Global.Uint8Array`;
+            // the load-bearing assertion is that there is NO `<string>` — the spurious arg is dropped.
+            |> testRender "Global.Uint8Array"
+            ||> Flip.Expect.equal "Uint8Array is non-generic in Fable; its TS type arg must be dropped"
     ]
