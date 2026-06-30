@@ -34,6 +34,33 @@ module TypeAlias =
                     |> TypeRefRender.orNullable oldRef.Nullable
                 | _ -> newRef.TypeRef
             | false, _ -> oldRef
+        // ── Single-call-signature function-abbreviation guard ──────────────────────────────
+        // A function-type abbreviation has NO companion module. A nested anonymous structural type in
+        // the body (an Intersection / real object TypeLiteral / TemplateLiteral) prerenders to a
+        // NAMELESS `TransientTypePath.Anchored` transient; with no companion module that nameless root
+        // anchors onto — and collapses to — the alias's OWN name, emitting a self-cyclic abbreviation
+        // (`type X = Request<C, X>`, X used at 0 of its declared args → FS0033). Detect this by
+        // inspecting the ACTUAL prerendered molecule for a nameless `Anchored` transient atom: it is
+        // remap-aware (a nested type aliased to a NAME via TypeAliasRemap renders as a ConcretePath,
+        // never a nameless transient), so it neither misses a real collapse nor over-excludes a clean
+        // handler whose args resolve through named aliases (`Without<..>`, `EventContext<..>`).
+        let moleculeCollapsesOntoAlias (typeRef: Prelude.TypeRefRender) =
+            let rec walkAtom (atom: Prelude.TypeRefAtom) =
+                match atom with
+                | Prelude.TypeRefAtom.TransientPath TransientTypePath.Anchored -> true
+                | _ -> false
+            and walk (tr: Prelude.TypeRefRender) =
+                match tr.Kind with
+                | Prelude.TypeRefKind.Atom atom -> walkAtom atom
+                | Prelude.TypeRefKind.Molecule molecule ->
+                    match molecule with
+                    | Prelude.TypeRefMolecule.Tuple parts
+                    | Prelude.TypeRefMolecule.Union parts -> parts |> List.exists walk
+                    | Prelude.TypeRefMolecule.Function (parameters, returnType) ->
+                        (parameters |> List.exists walk) || walk returnType
+                    | Prelude.TypeRefMolecule.Prefix (prefix, args) ->
+                        walk prefix || (args |> List.exists walk)
+            walk typeRef
         // ── Anonymous-literal alias-body placement (FS0953 fix) ────────────────────────────
         // An anonymous object literal (`{ ... }`) that is the body — or a union/array member of
         // the body — of a type alias prerenders to a NAMELESS `TransientTypePath.Anchored` root.
@@ -142,7 +169,33 @@ module TypeAlias =
                     Type = resolveInnerRef ()
                 }
                 |> TypeAliasRender.Alias
-            | ResolvedType.Intersection _ 
+            // A named alias whose body is a TypeLiteral with EXACTLY ONE call signature and NOTHING
+            // else is a FUNCTION TYPE — render it as an F# function-type abbreviation
+            // (`type Name<tps> = a -> b -> r`) so an F# lambda satisfies it, NOT a nominal interface
+            // with an `abstract Invoke:` member (which an F# callback lambda cannot be passed into).
+            // The body's prerender (the single-call-signature TypeLiteral arm in prerender) already
+            // produces the function-type molecule; `resolveInnerRef ()` returns that molecule, so the
+            // alias just abbreviates to it. Anything else (>=2 call sigs / any non-call-sig member /
+            // an intersection) falls through to the nominal TypeDefn arm below — an F# function-type
+            // abbreviation cannot carry overloads or extra members.
+            //
+            // GUARD — `moleculeCollapsesOntoAlias`: a body that hoists a nameless `Anchored` transient
+            // (a nested Intersection / object literal / template literal) would collapse onto the
+            // alias's own name as a bare abbreviation (FS0033 self-cycle; `ExportedHandlerFetchHandler`
+            // is the one handler with such an embedded literal). Keep those NOMINAL — converting trades
+            // a usable nominal interface for a dangling self-cyclic abbreviation. Only bodies whose
+            // molecule has no nameless transient convert (the ~13 clean callback handlers).
+            | ResolvedType.TypeLiteral { Members = [ Member.CallSignature [ _ ] ] }
+                when not (moleculeCollapsesOntoAlias (resolveInnerRef ())) ->
+                {
+                    TypeAliasRenderRef.Documentation = documentation
+                    Metadata = metadata
+                    Name = name
+                    TypeParameters = typeParameters
+                    Type = resolveInnerRef ()
+                }
+                |> TypeAliasRender.Alias
+            | ResolvedType.Intersection _
             | ResolvedType.TypeLiteral _ ->
                 let members, functions =
                     Member.collectAllRecursively innerType.Value

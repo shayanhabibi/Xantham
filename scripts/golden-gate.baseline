@@ -2,9 +2,14 @@
 # Lower each as fixes land; the gate FAILS if any metric regresses above these.
 # 2026-06-30: callbacks-as-function-types fix (all single-call-sig literals inline,
 # incl 3+ params and spread) — callbacks 67->44, Lit<N> 106->3, synth-public 616->518.
-BL_CALLBACK_IFACE=44
+# 2026-06-30: NAMED single-call-signature alias bodies (the canonical Cloudflare handler
+# callbacks: ExportedHandler*Handler, PagesFunction, EventListener, TailEventHandler, ...)
+# now render as F# function-type ABBREVIATIONS instead of nominal `abstract Invoke:`
+# interfaces — callbacks 44->31 (13 handlers converted; ExportedHandlerFetchHandler stays
+# nominal, its embedded object literal would self-collapse the abbreviation). FS-errors 824->808.
+BL_CALLBACK_IFACE=31
 BL_PROTOTYPE=3
 BL_LIT_NUMBERED=3
 BL_SMASH=101
 BL_SYNTH_PUBLIC=518
-BL_LINES=21184
+BL_LINES=23651
