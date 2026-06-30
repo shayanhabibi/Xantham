@@ -29,9 +29,23 @@ module TypeAlias =
             | true, newRef ->
                 match ctx.TypeAliasRemap.TryGetValue(innerType.Value) with
                 | true, value ->
-                    let stripped = { oldRef with Nullable = false }
+                    // `oldRef` is the remapped alias NAME. For a GENERIC mapped/utility alias whose
+                    // application args were dropped upstream, `padAliasNameToArity` wraps that name as
+                    // `name<obj,...>` (a `Prefix` headed by the name) so member-position references are
+                    // well-formed. But HERE we are rendering the alias's OWN definition body: the
+                    // `replace` below substitutes occurrences of the bare `value` (the name) with the
+                    // real body render. If `oldRef` is the padded Prefix, its HEAD is `value`, so the
+                    // replace would yield `body<obj,...>` (invalid — appending args to a function/union
+                    // body). Peel the arity padding back to the bare name first so the replace operates
+                    // on the name atom directly and yields the clean body.
+                    let unpadded =
+                        match oldRef.Kind with
+                        | Prelude.TypeRefKind.Molecule (Prelude.TypeRefMolecule.Prefix (head, _)) when head = value ->
+                            { head with Nullable = oldRef.Nullable }
+                        | _ -> oldRef
+                    let stripped = { unpadded with Nullable = false }
                     TypeRefRender.replace value newRef.TypeRef stripped
-                    |> TypeRefRender.orNullable oldRef.Nullable
+                    |> TypeRefRender.orNullable unpadded.Nullable
                 | _ -> newRef.TypeRef
             | false, _ -> oldRef
         // ── Single-call-signature function-abbreviation guard ──────────────────────────────

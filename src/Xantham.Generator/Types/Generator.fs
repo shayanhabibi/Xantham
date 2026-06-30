@@ -62,6 +62,16 @@ and Customisation = {
 and GeneratorContext =
     {
         TypeAliasRemap: DictionaryImpl<ResolvedType, TypeRefRender>
+        /// Declared type-parameter arity for each `TypeAliasRemap` key (the alias body / export-key
+        /// instances). A generic mapped/utility alias (`Without<U,T>`, `Params<P>`) is referenced in
+        /// member/union/heritage positions whose IR has ALREADY been resolved to the alias's bare
+        /// structural BODY — the encoder dropped the application's `TypeArguments`. The remap then
+        /// renders the body as the bare alias NAME, but the alias is emitted as `type Without<'U,'T>`,
+        /// so the bare name is FS0033 ("expects N type argument(s) but is given 0"). The args are
+        /// unrecoverable at these sites (gone from the IR), so the remap pads the name to this declared
+        /// arity with `obj` placeholders (`Without<obj,obj>`). Populated alongside `TypeAliasRemap` in
+        /// `prerenderTypeAliases`. Arity 0 (non-generic alias) needs no padding.
+        TypeAliasArity: DictionaryImpl<ResolvedType, int>
         PreludeGetTypeRef: PreludeGetTypeRefFunc
         PreludeRenders: PreludeScopeStore
         AnchorRenders: AnchorScopeStore
@@ -120,6 +130,7 @@ and GeneratorContext =
         InFlight = HashSet()
         TopLevelExports = HashSet()
         TypeAliasRemap = DictionaryImpl()
+        TypeAliasArity = DictionaryImpl()
         Customisation = defaultArg customisation Customisation.Default
     }
     
@@ -173,6 +184,12 @@ module GeneratorContext =
         let addTypeAliasRemap ctx key value =
             ctx.TypeAliasRemap
             |> Operation.addOrReplace key value
+        let addTypeAliasArity ctx key (arity: int) =
+            ctx.TypeAliasArity
+            |> Operation.addOrReplace key arity
+        let tryGetTypeAliasArity ctx key =
+            ctx.TypeAliasArity
+            |> Operation.tryGet key
         let canFlight ctx key =
             #if CONCURRENT_DICT
             lock ctx.InFlight (fun () ->

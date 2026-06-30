@@ -73,8 +73,7 @@ let private referenceWithResolvedAndArgs =
     |> TypeReference.withResolvedType genericFoo
     |> TypeReference.wrap
 
-[<Tests>]
-let tests =
+let argDropTests =
     testList "TypeReference arg-drop (Without / UnstubifyAll class)" [
         // CONTROL: same reference WITHOUT a populated ResolvedType renders its args correctly
         // (proves the args-carrying Prefix arm works — the defect is solely arm ordering).
@@ -126,4 +125,70 @@ let tests =
             referenceWithResolvedAndArgs
             |> testRender "Pkg.Foo<string, int>"
             ||> Flip.Expect.equal "ResolvedType-populated generic ref must still carry its type arguments"
+    ]
+
+// ── Alias-arity padding of a remapped mapped-type-alias body (the Without given-0 root) ──────
+//
+// ROOT (re-localised at HEAD 480828a, instrumented): the 88 "given 0" Without FS0033 cases do NOT
+// reach the cdc0108 arm as `TypeReference{ResolvedType=Some; TypeArguments=(_::_)}`. The encoder
+// resolves a `Without<A,B>` reference in a member/union/heritage position to the alias's bare
+// structural BODY (a `TypeLiteral`) with the application's `TypeArguments` DROPPED ENTIRELY — every
+// such site reaches the `remap` helper as the bare body, no surrounding TypeReference, no args
+// recoverable. `remap` substitutes the body with the bare alias NAME (`ctx.TypeAliasRemap[body]`),
+// but the alias is emitted as `type Without<'U,'T>`, so the bare name is FS0033 "expects 2 but given
+// 0". Since the real args are unrecoverable, the fix pads the remapped name to the alias's DECLARED
+// arity with `obj` placeholders (`Without<obj,obj>`) — recorded per remap key in `TypeAliasArity`
+// during `prerenderTypeAliases`, applied by `padAliasNameToArity`. `obj` is a trivial intrinsic atom
+// (cycle-safe to build, never re-enters prerender), preserving the remap cycle-break.
+//
+// A constrained alias (`type EventListener<'T when 'T :> Event> = ...`) is deliberately NOT padded:
+// `EventListener<obj>` is FS0001 ("obj not compatible with Event"), so its arity is left unrecorded
+// and the bare name passes through as the pre-existing FS0033 it was at HEAD (no NEW error class).
+
+// The `Without` body: a TypeLiteral reduced to a string index signature. The exact shape is
+// immaterial here — what matters is that it is a NOMINAL/structural body registered in the remap.
+let private withoutBody : ResolvedType =
+    TypeLiteral.empty |> TypeLiteral.wrap
+
+// The alias NAME ref (`Without`), built exactly as prerenderTypeAliases does: a ConcretePath atom
+// for the alias's path. Reuse the prerender of an Interface named "Without" to obtain a clean
+// ConcretePath name ref (the remap target's identity).
+let private aliasNameRef (ctx: GeneratorContext) =
+    Interface.create "Without"
+    |> Interface.withPath [ "Pkg" ]
+    |> Interface.wrap
+    |> TestHelper.prerender ctx
+
+[<Tests>]
+let aliasArityPadTests =
+    testList "Remapped mapped-type-alias body pads to declared arity" [
+        // THE FIX: a reference whose resolved body is a remapped mapped-type-alias body, carrying
+        // NO args (they were dropped upstream), renders the alias name PADDED to its declared arity
+        // (`Without<obj, obj>`), NOT the bare `Without` (which would be FS0033 "given 0").
+        testCase "remapped body with recorded arity 2 renders Without<obj, obj>" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let nameRef = aliasNameRef ctx
+            // Simulate prerenderTypeAliases for a generic UNCONSTRAINED alias `Without<'U,'T>`:
+            // body -> name in TypeAliasRemap, and arity 2 in TypeAliasArity.
+            GeneratorContext.Prelude.addTypeAliasRemap ctx withoutBody nameRef
+            GeneratorContext.Prelude.addTypeAliasArity ctx withoutBody 2
+            // An empty TypeLiteral body prerenders nullable, so the reference is `option<...>` —
+            // the load-bearing assertion is the `Without<obj, obj>` payload (padded to arity 2),
+            // never a bare `Without`.
+            TestHelper.prerender ctx withoutBody
+            |> Xantham.Generator.Tests.Tests.TypeRefRender.testTypeRef "option<Pkg.Without<obj, obj>>"
+            ||> Flip.Expect.equal "remapped alias body must pad to declared arity (Without<obj, obj>)"
+
+        // CONTROL: the SAME remapped body WITHOUT a recorded arity (the path taken for a
+        // CONSTRAINED alias, whose arity is deliberately not recorded to avoid `Foo<obj>` FS0001)
+        // renders the bare alias name — unaffected by the padding. Proves padding is gated on the
+        // arity entry, not applied to every remapped body.
+        testCase "control: remapped body WITHOUT recorded arity renders the bare name" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let nameRef = aliasNameRef ctx
+            GeneratorContext.Prelude.addTypeAliasRemap ctx withoutBody nameRef
+            // No addTypeAliasArity — mirrors a constrained alias (arity left unrecorded).
+            TestHelper.prerender ctx withoutBody
+            |> Xantham.Generator.Tests.Tests.TypeRefRender.testTypeRef "option<Pkg.Without>"
+            ||> Flip.Expect.equal "remapped body without recorded arity must render the bare name"
     ]

@@ -208,11 +208,46 @@ let private fableDeclaredArity (name: string) : int option =
 
 [<Struct>]
 type private Registered = Registered of TypeRefRender
+
+/// A reference to a generic mapped/utility TYPE ALIAS (`Without<U,T>`, `Params<P>`) in a
+/// member/union/heritage position is resolved by the encoder to the alias's bare structural BODY
+/// with the application's `TypeArguments` DROPPED — they are unrecoverable at the render site
+/// (gone from the IR; confirmed by instrumentation: every such site reaches the remap as the bare
+/// body, no `TypeReference` wrapper, no args). The remap renders the body as the bare alias NAME,
+/// but the alias is emitted as `type Without<'U,'T>`, so the bare name is FS0033 ("expects N type
+/// argument(s) but is given 0"). When the remap target is a bare NAME atom and the alias declares
+/// `arity > 0` type parameters, pad it to `name<obj, ...>` (one `obj` per declared parameter) so
+/// the reference is well-formed. `obj` is a trivial intrinsic atom — building it eagerly is
+/// cycle-safe (it never re-enters `prerender`), so this preserves the remap cycle-break. A target
+/// that is ALREADY a generic application (`Prefix`) carries real args (the cdc0108 arm built it)
+/// and is left untouched — no double-wrap.
+let private padAliasNameToArity (ctx: GeneratorContext) (key: ResolvedType) (ref: TypeRefRender) : TypeRefRender =
+    // Pad ONLY a bare NAME atom (the remapped alias name — a `ConcretePath`). Any molecule —
+    // a `Prefix` already carrying real args (cdc0108), or a Function/Tuple/Union that is the
+    // alias's OWN structural body re-substituted by `Render.TypeAlias.resolveInnerRef` at its
+    // definition site — must pass through untouched (appending `<obj,..>` to a function type or a
+    // union is invalid F#).
+    match ref.Kind with
+    | TypeRefKind.Atom (TypeRefAtom.ConcretePath _) ->
+        match GeneratorContext.Prelude.tryGetTypeAliasArity ctx key with
+        | ValueSome arity when arity > 0 ->
+            let objArg =
+                RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic Intrinsic.obj
+                |> RenderScopeStore.TypeRef.Unsafe.createAtom
+                |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+            let nameOnly = { ref with Nullable = false }
+            RenderScopeStore.TypeRefMolecule.Unsafe.createPrefix nameOnly (List.replicate arity objArg)
+            |> RenderScopeStore.TypeRef.Unsafe.createMolecule
+            |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind ref.Nullable
+        | _ -> ref
+    | _ -> ref
+
 let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolvedType: LazyResolvedType): TypeRefRender =
     let remap = function
             | { Nullable = nullable } when ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Value) ->
                 ctx.TypeAliasRemap[lazyResolvedType.Value]
                 |> TypeRefRender.orNullable nullable
+                |> padAliasNameToArity ctx lazyResolvedType.Value
             | ref -> ref
     let inline addOrReplaceScope ctx resolvedType renderScope =
         let renderScope = ctx.Customisation.Interceptors.ResolvedTypePrelude ctx resolvedType renderScope
@@ -527,7 +562,14 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             | ResolvedType.Class c ->
                 fableDeclaredArity (Name.Case.valueOrSource c.Name)
                 |> Option.defaultValue c.TypeParameters.Length
-            | _ -> typeArguments.Length
+            // CASE 2 — the resolved body is a generic TYPE ALIAS body (a TypeLiteral/Union/...
+            // registered in TypeAliasRemap). Its declared arity lives on the ALIAS, not the body
+            // structure, so honour the recorded `TypeAliasArity`. Without this, a `Without<'P>`
+            // reference carrying only 1 of the alias's 2 declared parameters would pass through
+            // unpadded (declaredParamCount=typeArguments.Length) and emit FS0033 "given 1".
+            | bodyValue ->
+                GeneratorContext.Prelude.tryGetTypeAliasArity ctx bodyValue
+                |> ValueOption.defaultValue typeArguments.Length
         let alignedArguments =
             if typeArguments.Length = declaredParamCount then
                 typeArguments
@@ -842,6 +884,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         | Registered { Nullable = nullable } when ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Value) ->
             ctx.TypeAliasRemap[lazyResolvedType.Value]
             |> TypeRefRender.orNullable nullable
+            |> padAliasNameToArity ctx lazyResolvedType.Value
         | Registered ref -> ref
 
 module TestHelper =
@@ -880,9 +923,33 @@ module ArenaInterner =
                     RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
                     |> RenderScopeStore.TypeRef.Unsafe.createAtom
                     |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+                // Record the alias's DECLARED arity alongside each remap key. A reference to a
+                // generic mapped/utility alias (`Without<U,T>`) in a member/union/heritage position
+                // is resolved by the encoder to the alias's bare structural BODY with the
+                // application's `TypeArguments` DROPPED (verified: every such site reaches the remap
+                // as the bare body with no args anywhere in the IR). The remap renders the body as
+                // the bare alias name, but the alias is emitted as `type Without<'U,'T>`, so the
+                // bare name is FS0033. The args are unrecoverable here, so the remap pads the name
+                // to this arity with `obj` placeholders.
+                //
+                // Record arity ONLY when EVERY declared type parameter is UNCONSTRAINED. A
+                // constrained parameter (`type EventListener<'T when 'T :> Event> = ...`) cannot accept
+                // the `obj` placeholder — `EventListener<obj>` is FS0001 ("obj not compatible with
+                // Event"). Leaving the arity UNRECORDED for such aliases means (a) the remap padding
+                // skips them (the bare name stays as the pre-existing FS0033/FS0887 it was at HEAD — no
+                // NEW error class), and (b) the cdc0108 arm falls back to `typeArguments.Length` so a
+                // constrained alias that DOES carry real args is unaffected. `.Constraint` is an
+                // `option` over a lazy, so `.IsNone` does NOT force resolution.
+                let allParamsUnconstrained =
+                    value.TypeParameters
+                    |> List.forall (fun tp -> tp.Value.Constraint.IsNone)
+                let recordArity key =
+                    if allParamsUnconstrained && value.TypeParameters.Length > 0 then
+                        GeneratorContext.Prelude.addTypeAliasArity ctx key value.TypeParameters.Length
                 // (1) Remap the alias BODY instance (`value.Type.Value`) — this is the instance
                 //     produced when the body's structural type is rendered directly.
                 GeneratorContext.Prelude.addTypeAliasRemap ctx value.Type.Value aliasRef
+                recordArity value.Type.Value
                 // (2) After the extractor's self-reference decoupling, the alias body lives at a
                 //     distinct (generated) key, so a union member that references the alias by its
                 //     EXPORT key resolves (via `ResolveType exportKey`) to an instance that the
@@ -897,6 +964,7 @@ module ArenaInterner =
                 let exportKeyType = arena.ResolveType exportKey
                 if not (isShareableAliasBody exportKeyType) then
                     GeneratorContext.Prelude.addTypeAliasRemap ctx exportKeyType aliasRef
+                    recordArity exportKeyType
             | _ -> ())
     let private getTopologicalSort (_: ArenaInterner) (graph: Graph) =
         let degrees = ConcurrentDictionary graph.Degrees
