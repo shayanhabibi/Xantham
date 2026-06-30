@@ -91,6 +91,21 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
     let inline lift value = RenderScopeStore.TypeRefRender.create scope resolvedType false value
     let inline liftNullable value = RenderScopeStore.TypeRefRender.create scope resolvedType true value
     let inline liftWithNullable nullable value = if nullable then liftNullable value else lift value
+    // Build the `Prefix (head, realArgs)` generic application from a prerendered prefix head and
+    // the real type arguments. A bare reference to a GENERIC lib.es collection (`Array<'T>`,
+    // `ReadonlyArray<'T>`) is substituted (in the ResolvedTypePrelude interceptor) to a Prefix
+    // carrying the collection's OWN declared type params as PLACEHOLDER args
+    // (`ResizeArray<'T>`) — so a bare reference renders with its element arg. When that same
+    // substituted head is consumed HERE as the head of a real generic application
+    // (`TypeReference{Array,[elem]}`), wrapping it again would double-apply
+    // (`ResizeArray<'T><elem>`, invalid F#). Collapse the placeholder by reusing the
+    // substituted head's OWN head and applying the real args instead: `ResizeArray<elem>`.
+    let applyArgsToCollectionHead (prefix: TypeRefRender) (realArgs: TypeRefRender list) =
+        match prefix.Kind with
+        | TypeRefKind.Molecule (TypeRefMolecule.Prefix(innerHead, _placeholderArgs)) ->
+            (innerHead, realArgs)
+        | _ ->
+            (prefix, realArgs)
     match resolvedType with
     | ResolvedType.GlobalThis ->
         lift Intrinsic.globalThis
@@ -370,7 +385,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> List.map (prerender ctx scope)
         // Replace the placeholder with the full Prefix application (head + args). The args were
         // prerendered AFTER the placeholder registration, so any cyclic arg was cycle-broken.
-        (prefix, postfixArguments)
+        applyArgsToCollectionHead prefix postfixArguments
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
@@ -442,7 +457,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         let postfixArguments =
             alignedArguments
             |> List.map (prerender ctx scope)
-        (prefix, postfixArguments)
+        applyArgsToCollectionHead prefix postfixArguments
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType

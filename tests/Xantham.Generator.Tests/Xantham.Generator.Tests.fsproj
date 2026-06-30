@@ -35,6 +35,7 @@
         <Compile Include="Tests\NestedUnderTypePlacement.fs" />
         <Compile Include="Tests\AliasBodyLiteralPlacement.fs" />
         <Compile Include="Tests\WithoutArgDrop.fs" />
+        <Compile Include="Tests\LibEsCollectionArgs.fs" />
         <Compile Include="Main.fs"/>
     </ItemGroup>
 

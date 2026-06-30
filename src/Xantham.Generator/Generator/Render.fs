@@ -21,41 +21,11 @@ let main argv =
          GeneratorContext.EmptyWithCustomisation (fun customiser ->
          {
              customiser with
-                 Customisation.Interceptors.ResolvedTypePrelude = fun _ ->
-                     // Faithful TS-stdlib (lib.es / lib.dom) -> F#/Fable name mappings live
-                     // in LibEsSubstitution (single source of truth, unit-tested).
-                     let libEsSubstitution = LibEsSubstitution.substitute
-                     // `Array`/`Error`/... are stdlib types the TS checker attributes to a
-                     // `typescript` source (not flagged IsLibEs). The substitution map is the
-                     // safety gate: workers-types' own `typescript`-sourced types (Response,
-                     // Request, ...) are NOT in the map, so they fall through untouched.
-                     let isStdlibSourced (source: QualifiedNamePart option) =
-                         match source with
-                         | Some (QualifiedNamePart.Normal s | QualifiedNamePart.Abnormal(s, _)) ->
-                             s.Contains("typescript", StringComparison.OrdinalIgnoreCase)
-                         | None -> false
-                     let substituteLibEs (libEsName: Name<Case.pascal>) renderScope =
-                         match libEsSubstitution (Name.Case.valueOrSource libEsName) with
-                         | Some target ->
-                             let ref =
-                                 RenderScopeStore.TypeRefAtom.Unsafe.createWidget (Ast.LongIdent target)
-                                 |> RenderScopeStore.TypeRef.Unsafe.createAtom
-                                 |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind renderScope.TypeRef.Nullable
-                             { renderScope with TypeRef = ref; Render = Render.RefOnly ref }
-                         | None ->
-                             { renderScope with Render = Render.RefOnly renderScope.TypeRef }
-                     function
-                     | ResolvedType.Interface { IsLibEs = true; Name = name } -> substituteLibEs name
-                     | ResolvedType.Class { IsLibEs = true; Name = name } -> substituteLibEs name
-                     | ResolvedType.Enum { IsLibEs = true } -> fun renderScope ->
-                         { renderScope with Render = Render.RefOnly renderScope.TypeRef }
-                     // Stdlib types attributed to a `typescript` source but not IsLibEs-flagged
-                     // (Array, the typed arrays, ...) — substitute only when the name is in the map.
-                     | ResolvedType.Interface { Source = src; Name = name } when isStdlibSourced src && (libEsSubstitution (Name.Case.valueOrSource name)).IsSome ->
-                         substituteLibEs name
-                     | ResolvedType.Class { Source = src; Name = name } when isStdlibSourced src && (libEsSubstitution (Name.Case.valueOrSource name)).IsSome ->
-                         substituteLibEs name
-                     | _ -> id
+                 // Faithful TS-stdlib (lib.es) -> F#/Fable name + arg substitution. The single
+                 // source of truth lives in LibEsSubstitution (unit-tested in isolation): it maps
+                 // each stdlib name to its Fable equivalent and recovers element args for bare
+                 // generic-collection references (`Array<'T>` -> `ResizeArray<'T>`).
+                 Customisation.Interceptors.ResolvedTypePrelude = fun _ -> LibEsSubstitution.prelude
                  Customisation.Interceptors.IgnorePathRender.Source = function
                      | QualifiedNamePart.Normal(text)
                      | QualifiedNamePart.Abnormal(text,_) ->
