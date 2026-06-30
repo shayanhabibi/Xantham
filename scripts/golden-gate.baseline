@@ -1,8 +1,10 @@
 # Xantham semantic golden baseline — the ratchet for the semantic gate.
 # Lower each as fixes land; the gate FAILS if any metric regresses above these.
-BL_CALLBACK_IFACE=67
+# 2026-06-30: callbacks-as-function-types fix (all single-call-sig literals inline,
+# incl 3+ params and spread) — callbacks 67->44, Lit<N> 106->3, synth-public 616->518.
+BL_CALLBACK_IFACE=44
 BL_PROTOTYPE=3
-BL_LIT_NUMBERED=106
+BL_LIT_NUMBERED=3
 BL_SMASH=101
-BL_SYNTH_PUBLIC=616
-BL_LINES=21326
+BL_SYNTH_PUBLIC=518
+BL_LINES=21184

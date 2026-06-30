@@ -98,11 +98,13 @@ let isHoistableObjectLiteral (typeLiteral: TypeLiteral) : bool =
                 | Member.CallSignature callSignature -> callSignature
                 | _ -> failwith "Unreachable guaranteed by guard in partition")
             , rest
-    let shouldInlineCallSignature (cs: CallSignature) =
-        List.length cs.Parameters < 3 && not (cs.Parameters |> List.exists _.IsSpread)
+    // MUST mirror the TypeLiteral render arm below: a literal whose ONLY member is a single call
+    // signature inlines as an F# function type (any arity, incl. spread — the param Type is already
+    // the array) and is therefore NOT a hoisted object-literal. Lockstep keeps the SharedLiterals
+    // counting pre-pass consistent with what actually gets hoisted.
     match callSignatures, rest with
     | [], [] -> false
-    | [ [ singleSig ] ], [] when shouldInlineCallSignature singleSig -> false
+    | [ [ _singleSig ] ], [] -> false
     | _ -> true
 
 /// During the counting pre-pass, walk a top-level owner's ResolvedType graph (rooted at `rootRt`)
@@ -741,18 +743,23 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                     | _ -> failwith "Unreachable guaranteed by guard in partition"
                     )
                 , rest
-        let shouldInlineCallSignature (callSignature: CallSignature) =
-            List.length callSignature.Parameters < 3
-            &&
-            callSignature.Parameters
-            |> List.exists _.IsSpread
-            |> not
+        // A literal whose ONLY member is a single call signature IS a function type — render it
+        // as an F# function type `(a -> b -> r)` (below), NOT as a hoisted nominal interface with
+        // an `abstract Invoke:` member. A nominal `Invoke` interface is the single most usability-
+        // breaking output: an F# CALLBACK lambda cannot be passed where the binding demands it.
+        // F# function types curry any arity (Ast.Funs handles N params), and a SPREAD/rest param's
+        // `.Type` is ALREADY the array (`(...args: T[])` -> the param Type is `T[]`), so it renders
+        // as a normal `(ResizeArray<T> -> r)` param — the `IsSpread` flag only matters for the
+        // nominal `[<ParamArray>]` form. So EVERY single-call-signature literal inlines as a
+        // function type. (The prior `< 3 params && no-spread` cap was artificial and forced common
+        // multi-arg / variadic callbacks — ExportedHandlerQueueHandler, `(...args) => any` — to
+        // nominal interfaces an F# lambda can't satisfy.)
         match callSignature, rest with
         | [], [] ->
             liftNullable Intrinsic.obj
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
-        | [ [ singleSig ] ], [] when shouldInlineCallSignature singleSig ->
+        | [ [ singleSig ] ], [] ->
             let parameters =
                 singleSig.Parameters
                 |> List.mapi (fun idx ->

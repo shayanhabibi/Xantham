@@ -451,6 +451,43 @@ let callSignatureTests = testList "Call Signatures" [
         ||> Flip.Expect.equal " \
 The intent behind a signature such as `int -> bool -> int -> string` is inherently different from
 `int -> (bool -> int) -> string`. The latter prescribes a function that takes a function as an argument."
+    // A single-call-signature literal with 3+ PARAMETERS must render as an F# FUNCTION TYPE, NOT a
+    // hoisted nominal interface with `abstract Invoke:`. A nominal Invoke interface is unusable —
+    // an F# callback lambda cannot be passed where the binding demands it. (The prior `< 3 params`
+    // cap forced common 3-arg handler callbacks to interfaces; the cap was removed.)
+    testCase "three-parameter call signature renders as a function type, not Invoke interface" <| fun _ ->
+        primitive TypeKindPrimitive.String
+        |> CallSignature.create
+        |> CallSignature.withParameters [
+            primitive TypeKindPrimitive.Integer |> Parameter.create "a"
+            primitive TypeKindPrimitive.Boolean |> Parameter.create "b"
+            primitive TypeKindPrimitive.Number  |> Parameter.create "c"
+        ]
+        |> List.singleton
+        |> CallSignature.wrap
+        |> TypeLiteral.addMember
+        |> funApply TypeLiteral.empty
+        |> TypeLiteral.wrap
+        |> testRender "int -> bool -> float -> string"
+        ||> Flip.Expect.equal "3-param callback must be a function type, not a nominal Invoke interface"
+    // A SPREAD/rest param's `.Type` is already the array, so a variadic call signature
+    // `(...args: T[]) => R` also inlines as a function type `(ResizeArray<T> -> R)` — the IsSpread
+    // flag only matters for the nominal `[<ParamArray>]` form, which we no longer fall back to.
+    testCase "variadic (spread) call signature renders as a function type, not Invoke interface" <| fun _ ->
+        primitive TypeKindPrimitive.Boolean
+        |> CallSignature.create
+        |> CallSignature.withParameters [
+            (Array.create (primitive TypeKindPrimitive.String))
+            |> Parameter.create "args"
+            |> Parameter.spread
+        ]
+        |> List.singleton
+        |> CallSignature.wrap
+        |> TypeLiteral.addMember
+        |> funApply TypeLiteral.empty
+        |> TypeLiteral.wrap
+        |> testRender "ResizeArray<string> -> bool"
+        ||> Flip.Expect.equal "variadic callback must be a function type over the rest array, not Invoke"
 ]
 
 let contextPersistanceTests = testList "Context memoization" [
