@@ -205,4 +205,37 @@ let tests =
                     "    end"
                 ])
 
+        // A TS `extends string` (or any SEALED type) type-parameter constraint must be DROPPED:
+        // F# `'T :> string` is invalid (string is sealed -> FS0698 + FS0663). The parameter is
+        // emitted UNCONSTRAINED. (For erased Fable bindings the constraint is non-load-bearing.)
+        testCase "type parameter constrained to a sealed type (string) drops the constraint" <| fun _ ->
+            let iface =
+                Interface.create "Keyed"
+                |> Interface.withTypeParameters [
+                    TypeParameter.create "Key"
+                    |> TypeParameter.withConstraint (primitive TypeKindPrimitive.String) ]
+            let out =
+                ({ iface with Members = [ Property.create "k" (primitive TypeKindPrimitive.String) |> Property.wrap ] }
+                 |> Interface.wrap)
+                |> render
+            Flip.Expect.isFalse "must not emit an invalid `:> string` subtype constraint"
+                (out.Contains(":> string"))
+            Flip.Expect.isTrue "the type parameter 'Key is still declared"
+                (out.Contains("'Key"))
+
+        // A TS `extends <interface>` constraint is VALID F# (`'T :> Event`) and must be KEPT.
+        testCase "type parameter constrained to an interface keeps the :> constraint" <| fun _ ->
+            let eventBase = Interface.create "Event" |> Interface.wrap
+            let iface =
+                Interface.create "Listener"
+                |> Interface.withTypeParameters [
+                    TypeParameter.create "EventType"
+                    |> TypeParameter.withConstraint eventBase ]
+            let out =
+                ({ iface with Members = [ Property.create "ev" (primitive TypeKindPrimitive.String) |> Property.wrap ] }
+                 |> Interface.wrap)
+                |> render
+            Flip.Expect.isTrue "interface constraint must be kept as a valid `:> Event` subtype constraint"
+                (out.Contains(":> Event"))
+
     ]
