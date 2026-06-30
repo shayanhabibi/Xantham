@@ -27,6 +27,15 @@ let private createConcreteTypeRef (path: TypePath) =
 // made per-owner hoisting dangle). The emission itself is driven by `emitCanonicalUnions`.
 let literalUnionModule = ModulePath.init "LiteralUnions"
 
+/// A content-STABLE short hash (not `.GetHashCode`, which is per-process randomized and would
+/// break regen determinism). FNV-1a over the UTF-8 bytes -> 8 lowercase hex chars. Deterministic
+/// by content, so the same value-set always yields the same suffix across runs and processes.
+let private stableShortHash (s: string) : string =
+    let mutable h = 2166136261u
+    for b in System.Text.Encoding.UTF8.GetBytes s do
+        h <- (h ^^^ uint32 b) * 16777619u
+    h.ToString("x8")
+
 let literalUnionName (literals: ResolvedTypeLiteralLike list) : Name<Case.pascal> =
     let token =
         function
@@ -39,11 +48,28 @@ let literalUnionName (literals: ResolvedTypeLiteralLike list) : Name<Case.pascal
         | ResolvedTypeLiteralLike.EnumCase ec -> Name.Case.valueOrSource ec.Name
         | ResolvedTypeLiteralLike.TypeQuery tq ->
             tq.FullyQualifiedName |> List.tryLast |> Option.map (fun p -> p.Value) |> Option.defaultValue "Q"
-    literals
-    |> List.map token
-    |> List.sort
-    |> String.concat "_"
-    |> Name.Pascal.create
+    // The canonical name is the union's IDENTITY (the dedup key): same SORTED value-set -> same
+    // name -> one emission -> all references resolve there. Concatenating EVERY member value works
+    // but a many-member union (e.g. a 30-string-literal enum, or the WebSocket readyState constants)
+    // produces an unbounded, unusable public name (200-335 chars). BOUND it: when the full name
+    // exceeds the threshold, keep the first few tokens for READABILITY and append a content-stable
+    // hash of the FULL sorted token list for UNIQUENESS — still deterministic and collision-safe
+    // (two distinct value-sets differ in the hash), just bounded.
+    let sortedTokens = literals |> List.map token |> List.sort
+    let full = sortedTokens |> String.concat "_"
+    let bounded =
+        // Pascal-casing roughly preserves length; bound the raw token string so the final type name
+        // stays a legible identifier. 40 keeps short enums verbatim while taming the long ones.
+        if full.Length <= 40 then full
+        else
+            let prefix =
+                sortedTokens
+                |> List.truncate 3
+                |> String.concat "_"
+                // Cap the readable prefix too (a single very long literal value can blow the budget).
+                |> fun p -> if p.Length > 28 then p.Substring(0, 28) else p
+            $"{prefix}_{stableShortHash full}"
+    bounded |> Name.Pascal.create
 
 let literalUnionTypePath (literals: ResolvedTypeLiteralLike list) : TypePath =
     literalUnionModule |> TypePath.createWithName (literalUnionName literals)

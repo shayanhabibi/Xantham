@@ -15,9 +15,16 @@
 # synth-public (518->522). This is invalid->valid (net progress); the smash-name REDUCTION is the
 # separate, deeper FQN-naming root (smash 103 is the next semantic target). Callbacks 31->32 = the
 # same reclassification. Baselines ratcheted UP by exactly the converted count, justified here.
+# 2026-06-30: literalUnionName BOUNDING (RenderScope.Prelude.fs) — the canonical literal-union enum
+# name was the full sorted concatenation of EVERY member value (200-335 char public names for many-
+# member unions: the moon-names/error-string/AI-provider enums). Now a long name = readable prefix +
+# content-stable FNV-1a hash of the full sorted token list (deterministic + collision-safe, dedup
+# contract preserved — verified 0 new LiteralUnions dangles). smash 103->80; total FS unchanged (488),
+# determinism preserved. The residual 80 smash are mostly FAITHFUL long AI-model names (AiCfMetaLlama...
+# = the real source type names, correctly untouched).
 BL_CALLBACK_IFACE=32
 BL_PROTOTYPE=3
 BL_LIT_NUMBERED=3
-BL_SMASH=103
+BL_SMASH=80
 BL_SYNTH_PUBLIC=522
 BL_LINES=21154

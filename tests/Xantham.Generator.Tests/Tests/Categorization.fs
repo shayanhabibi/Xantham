@@ -125,6 +125,34 @@ let literalUnionsHoist = testList "Literal unions -> hoisted enum reference" [
         ||> Flip.Expect.equal ""
 ]
 
+// `literalUnionName` is the union's canonical IDENTITY (the dedup key): same sorted value-set ->
+// same name -> one emission -> all refs resolve. Concatenating EVERY member value gives an
+// unbounded, unusable public name for a many-member union (200-335 chars on the real surface).
+// It is BOUNDED: a long name keeps a readable prefix + a content-stable hash of the FULL sorted
+// token list. These tests pin the three contract properties: BOUNDED, DETERMINISTIC, COLLISION-SAFE.
+let literalUnionNameBounding =
+    let manyTokens prefix n =
+        [ for i in 1..n -> ResolvedTypeLiteralLike.Literal (TsLiteral.String $"{prefix}LongLiteralValueNumber{i}") ]
+    let nameOf literals : string =
+        (literalUnionName literals |> Xantham.Decoder.Case.withoutMeasure).ValueOrModified
+    testList "literalUnionName bounding (canonical-enum identity)" [
+        testCase "a short union keeps its verbatim concatenated name" <| fun _ ->
+            let n = nameOf [ ResolvedTypeLiteralLike.Literal (TsLiteral.String "a"); ResolvedTypeLiteralLike.Literal (TsLiteral.String "b") ]
+            Flip.Expect.equal "short union name is the verbatim pascal-cased concatenation" "AB" n
+        testCase "a many-member union name is BOUNDED (not the full smash)" <| fun _ ->
+            let n = nameOf (manyTokens "x" 30)
+            Flip.Expect.isTrue $"bounded name must be short, got {n.Length} chars: {n}" (n.Length <= 48)
+        testCase "the bounded name is DETERMINISTIC (same value-set -> same name)" <| fun _ ->
+            Flip.Expect.equal "same union must yield the same bounded name across calls"
+                (nameOf (manyTokens "x" 30)) (nameOf (manyTokens "x" 30))
+        testCase "DETERMINISTIC regardless of input order (sorted by value)" <| fun _ ->
+            Flip.Expect.equal "member order must not change the canonical name"
+                (nameOf (manyTokens "x" 30)) (nameOf (manyTokens "x" 30 |> List.rev))
+        testCase "distinct many-member unions get DISTINCT bounded names (no collision)" <| fun _ ->
+            Flip.Expect.notEqual "two different value-sets must not collapse to one canonical name"
+                (nameOf (manyTokens "x" 30)) (nameOf (manyTokens "y" 30))
+    ]
+
 // Mixed buckets: LiteralLike + Primitive -> the literals collapse to ONE inner literal-union
 // molecule member, unioned with the primitive (an Un over [literalUnion; primitive]).
 let mixedBuckets = testList "Mixed literal + primitive union" [
@@ -291,6 +319,7 @@ let tests = testList "Categorization" [
     nullability
     singleCollapse
     literalUnionsHoist
+    literalUnionNameBounding
     mixedBuckets
     enumLike
     unwrapping
