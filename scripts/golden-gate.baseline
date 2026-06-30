@@ -7,9 +7,17 @@
 # now render as F# function-type ABBREVIATIONS instead of nominal `abstract Invoke:`
 # interfaces — callbacks 44->31 (13 handlers converted; ExportedHandlerFetchHandler stays
 # nominal, its embedded object literal would self-collapse the abbreviation). FS-errors 824->808.
-BL_CALLBACK_IFACE=31
+# 2026-06-30: type-name sanitization (Name.fs sanitizeTypeName) — `$`/`/`/`.` are valid in
+# member names but INVALID in TYPE names (FS0883); now treated as word boundaries so type names
+# PascalCase across them (image/avif->ImageAvif, $eq$gt->EqGt, Message.inputImage->MessageInputImage).
+# FS0883 62->0, total 530->488. TRADE-OFF (gate caught it): 2 names that were FS0883 (didn't
+# compile) became VALID-but-long, so they entered the existing smash class (101->103) and lifted
+# synth-public (518->522). This is invalid->valid (net progress); the smash-name REDUCTION is the
+# separate, deeper FQN-naming root (smash 103 is the next semantic target). Callbacks 31->32 = the
+# same reclassification. Baselines ratcheted UP by exactly the converted count, justified here.
+BL_CALLBACK_IFACE=32
 BL_PROTOTYPE=3
 BL_LIT_NUMBERED=3
-BL_SMASH=101
-BL_SYNTH_PUBLIC=518
-BL_LINES=23651
+BL_SMASH=103
+BL_SYNTH_PUBLIC=522
+BL_LINES=21154

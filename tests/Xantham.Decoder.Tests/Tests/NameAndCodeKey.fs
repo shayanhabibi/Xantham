@@ -625,7 +625,13 @@ let pascalExhaustiveTests =
         testTheory "leading-digit / dotted sources stay valid backtick identifiers" [
             "123",      "``123``"
             "1stPlace", "``1stPlace``"
-            "a.b",      "``A.b``"
+            // `.`/`/`/`$` are INVALID in a TYPE name even backticked (FS0883 — `` ``A.b`` `` does NOT
+            // compile, the prior expectation was a bug). They are treated as word boundaries so the
+            // type name PascalCases across them into a clean bare identifier.
+            "a.b",            "AB"
+            "image/avif",     "ImageAvif"
+            "$eq$gt",         "EqGt"
+            "Message.inputImage", "MessageInputImage"
         ] <| fun (source, expected) ->
             let m = modifiedCased (Name.Pascal.create source)
             Expect.equal m expected "pascal output"

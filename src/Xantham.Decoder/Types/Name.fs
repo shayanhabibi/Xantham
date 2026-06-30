@@ -211,6 +211,24 @@ module Name =
             else
                 pascalCaseRegex.Replace(s, fun m -> m.Groups.[1].Value.ToUpperInvariant())
 
+        /// `$`, `/`, and `.` are valid in a backtick-quoted MEMBER name (`` ``a/b`` ``,
+        /// `` ``c.d`` ``) but INVALID in a TYPE / module / union / namespace name even when
+        /// backticked (FS0883). They leak in from literal VALUES used as type-name fragments:
+        /// MongoDB-style query operators (`$eq`/`$in`/... and the smashed literal-union enum names
+        /// built from them), MIME-type literals (`image/avif`), and FQN-derived nested-literal
+        /// names joined with `.` (`Message.inputImage.imageUrl`). Treat each as a WORD boundary so
+        /// the name PascalCases across it (`$eq$gt` -> `EqGt`, `image/avif` -> `ImageAvif`,
+        /// `Message.inputImage` -> `MessageInputImage`) — readable, not just stripped — then drop
+        /// any residual occurrence. Applied ONLY on the Pascal (type-level) path, so valid
+        /// backtick-escaped member names are untouched.
+        let private typeNameSeparators = Regex(@"[$/.]+(.)?", RegexOptions.Compiled)
+        let sanitizeTypeName (s: string) =
+            let cased =
+                typeNameSeparators.Replace(s, fun m ->
+                    if m.Groups.[1].Success then m.Groups.[1].Value.ToUpperInvariant() else "")
+            // Drop any leading separator that produced no following char, and any stragglers.
+            cased.Replace("$", "").Replace("/", "").Replace(".", "")
+
         let toCamelCase (s: string) =
             if isUpperSnakeCase s then s
             else
@@ -233,7 +251,9 @@ module Name =
     let normalize (name: Name) = name |> map Normalization.normalize
     /// Removes backticks, applies casing, and then reapplies backticks if necessary.
     let private _pascalCase (fn: (string -> string) -> Name -> Name) name =
-        name |> fn (Internal.stripBackticks >> Internal.toPascalCase >> Internal.normalizeString)
+        // `sanitizeTypeName` drops `$`/`/`/`.` (valid in member names, INVALID in type names —
+        // FS0883) — Pascal path ONLY, so backtick-escaped member names keep them.
+        name |> fn (Internal.stripBackticks >> Internal.toPascalCase >> Internal.sanitizeTypeName >> Internal.normalizeString)
     /// Removes backticks, applies casing, and then reapplies backticks if necessary.
     let private _capitalize (fn: (string -> string) -> Name -> Name) name =
         name |> fn (
