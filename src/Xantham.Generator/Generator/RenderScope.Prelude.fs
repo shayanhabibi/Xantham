@@ -102,10 +102,22 @@ let private nonGenericTypedArrays =
         "ArrayBufferView"
     ]
 
-/// The Fable-side declared arity for a named type whose Fable equivalent is non-generic while its TS
-/// declaration is generic (the numeric typed arrays / ArrayBufferView). `None` => use the TS arity.
+// The iterator interfaces are 3-parameter in recent TS (`Iterator<T, TReturn, TNext>`,
+// `IterableIterator<T, TReturn, TNext>`, ...) but substitute (LibEsSubstitution) to F#/Fable `seq`,
+// which is SINGLE-parameter (`seq<'T>`). Applying all 3 TS args emits `seq<T, TReturn, TNext>` ->
+// FS0033 "the type 'seq<_>' expects 1 type argument(s) but is given 3". Their Fable arity is 1, so
+// arg-alignment keeps only the first (element) arg and truncates `TReturn`/`TNext`. (`ArrayIterator`
+// is already 1-parameter in the IR, so it needs no override.)
+let private singleParamIterators =
+    set [ "Iterator"; "Iterable"; "IterableIterator"; "AsyncIterableIterator" ]
+
+/// The Fable-side declared arity for a named type whose Fable equivalent's arity differs from its TS
+/// declaration: 0 for the numeric typed arrays / ArrayBufferView (non-generic in Fable), 1 for the
+/// iterator interfaces (3-param in TS but map to single-param `seq`). `None` => use the TS arity.
 let private fableDeclaredArity (name: string) : int option =
-    if nonGenericTypedArrays.Contains name then Some 0 else None
+    if nonGenericTypedArrays.Contains name then Some 0
+    elif singleParamIterators.Contains name then Some 1
+    else None
 
 [<Struct>]
 type private Registered = Registered of TypeRefRender

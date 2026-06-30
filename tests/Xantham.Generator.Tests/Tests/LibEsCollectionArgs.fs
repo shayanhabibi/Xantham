@@ -82,4 +82,28 @@ let tests =
             // the load-bearing assertion is that there is NO `<string>` — the spurious arg is dropped.
             |> testRender "Global.Uint8Array"
             ||> Flip.Expect.equal "Uint8Array is non-generic in Fable; its TS type arg must be dropped"
+
+        // ITERATOR ARITY TRUNCATION: the iterator interfaces are 3-parameter in recent TS
+        // (`IterableIterator<T, TReturn, TNext>`) but substitute to single-parameter `seq<'T>`.
+        // Applying all 3 args emits `seq<T, TReturn, TNext>` -> FS0033 "expects 1 ... but is given 3".
+        // The Fable-arity override (1) keeps only the first (element) arg, truncating TReturn/TNext.
+        testCase "IterableIterator<T, TReturn, TNext> renders seq<T> (extra iterator args dropped)" <| fun _ ->
+            Interface.create "IterableIterator"
+            |> Interface.esLib
+            |> Interface.withTypeParameters [
+                TypeParameter.create "T"
+                TypeParameter.create "TReturn"
+                TypeParameter.create "TNext"
+            ]
+            |> Interface.wrap
+            |> TypeReference.create
+            |> TypeReference.withTypeArguments [
+                primitive TypeKindPrimitive.String
+                primitive TypeKindPrimitive.NonPrimitive
+                primitive TypeKindPrimitive.NonPrimitive
+            ]
+            |> TypeReference.wrap
+            // The load-bearing assertion: a SINGLE arg `seq<string>`, NOT `seq<string, obj, obj>`.
+            |> testRender "seq<string>"
+            ||> Flip.Expect.equal "iterator's 3 TS args must truncate to seq's single element arg"
     ]
