@@ -34,19 +34,16 @@ module Xantham.Generator.Tests.Tests.AliasBodyLiteralPlacement
 // identity, so the alias body references distinct nested names (not the alias name) and
 // the abbreviation is NOT self-cyclic.
 //
-// STATUS — PENDING (ptestCase). A confined generator fix (positional `CaseN`/`Element`
-// PathContext on the Union/Array member prerender + re-deriving the member ref from the
-// grafted TypeStore path) makes BOTH cases below pass in isolation and cuts FS0953 on the
-// real cloudflare surface from 218 -> 20. BUT it net-regresses the real surface
-// (total 1772 -> 1894; FS0039 554 -> 862) because alias bodies are frequently reached
-// FIRST through a DEEP property context (e.g. some interface has `attachments:
-// Array<EmailAttachment>`, so the union body is prerendered/cached at
-// `...Attachments.Element` before the alias's own top-level prerender). The member literals
-// then get DEEP names (`EmailAttachment.Attachments.Element.Case0`) that the placement
-// machinery (anchorPreludeExportScope) cannot emit at that depth, so the references dangle
-// (FS0039). The clean fix lives upstream (prerender-cache identity / union over-minting,
-// encoder-side), not in a generator path patch — see the project memory notes
-// (union-overminting, hoist-dedup-rootcause). Marked pending until that root is addressed.
+// STATUS — FIXED (active testCase). The fix lives in `Render.TypeAlias.caseLiteralRef`
+// (positional `Case{i}`/`Element` identity grafted into the alias scope's TypeStore + the
+// member ref re-derived from that grafted path) and, for template-literal members, in
+// `Render.Transient.TemplateLiteral.render` (nameless `Anchored` path + `Name = ValueNone` so
+// the def is the path-derived abbreviation `type Case{i} = string` rather than the old
+// hard-named `TemplateLiteral`). On the real cloudflare surface this cut FS0953 from 218 -> 8
+// (object-literal + template-literal-union families both gone) with zero new own-`Case{i}`
+// dangles. The deeper over-minting/duplicate-emission root (a few aliases emitted in two
+// scopes) is still tracked upstream — see the project memory notes (union-overminting,
+// hoist-dedup-rootcause) — but it no longer blocks these alias-body literal cases.
 
 open Expecto
 open Fabulous.AST
@@ -109,10 +106,26 @@ let private arrayAlias =
     let element = objLit [ "label"; "score"; "index" ]
     TypeAlias.create (Array.create element) "AiImageClassificationOutput"
 
+// type WorkflowRetentionDuration = number | `${number} second` | `${number} minute` | ...
+// The body is a union mixing a PRIMITIVE (number -> float) with several distinct TEMPLATE LITERAL
+// members. Each template literal prerenders to a nameless `TransientTypePath.Anchored` root that —
+// like an anonymous object literal — collapses onto the owner alias name when anchored, so the
+// alias renders the illegal self-cyclic `U<n><X, X, ...>` (FS0953). Each template-literal member
+// must instead receive a positional `Case{i}` identity (erased to `string`), and the `float`
+// primitive must be preserved as a bare union member (NOT dropped — the union arity must stay U3).
+let private templateLiteralUnionAlias =
+    let secondTpl = TemplateLiteral.create [ ""; " second" ] [ primitive TypeKindPrimitive.Number ] |> TemplateLiteral.wrap
+    let minuteTpl = TemplateLiteral.create [ ""; " minute" ] [ primitive TypeKindPrimitive.Number ] |> TemplateLiteral.wrap
+    Union.create [ primitive TypeKindPrimitive.Number; secondTpl; minuteTpl ]
+    |> fun body -> TypeAlias.create body "WorkflowRetentionDuration"
+
 let aliasBodyLiteralTests = testList "alias body of anonymous literals" [
-    // PENDING — fails today: the union alias collapses to `U2<X, X>` (FS0953). Asserts the
-    // CORRECT (non-cyclic) emission; goes green once the upstream root (see header) is fixed.
-    ptestCase "union of distinct anonymous literals does not render as self-cyclic U2<X, X>" <| fun _ ->
+    // The union alias of two distinct anonymous object literals must render the non-cyclic
+    // `U2<EmailAttachment.Case0, EmailAttachment.Case1>` with two distinct nested defs, NOT the
+    // illegal self-cyclic `U2<EmailAttachment, EmailAttachment>` (FS0953). Fixed in
+    // Render.TypeAlias by giving each anonymous-literal union member a positional `Case{i}`
+    // identity rooted under the alias's companion module.
+    testCase "union of distinct anonymous literals does not render as self-cyclic U2<X, X>" <| fun _ ->
         let out = renderTypeAliasSurface unionAlias
         let abbrevLine =
             out.Split('\n')
@@ -129,8 +142,10 @@ let aliasBodyLiteralTests = testList "alias body of anonymous literals" [
             // No abbreviation line: the alias is emitted as a TypeDefn (also acceptable).
             ()
 
-    // PENDING — fails today: the array alias collapses to `ResizeArray<X>` referencing itself.
-    ptestCase "array of an anonymous literal does not render as self-cyclic ResizeArray<X>" <| fun _ ->
+    // The array alias of an anonymous object literal must render `ResizeArray<X.Element>` with a
+    // nested `X.Element` def, NOT the self-cyclic `ResizeArray<X>`. Fixed in Render.TypeAlias by
+    // giving the array element an `Element` identity rooted under the alias's companion module.
+    testCase "array of an anonymous literal does not render as self-cyclic ResizeArray<X>" <| fun _ ->
         let out = renderTypeAliasSurface arrayAlias
         let abbrevLine =
             out.Split('\n')
@@ -142,6 +157,63 @@ let aliasBodyLiteralTests = testList "alias body of anonymous literals" [
                 (line.Contains("ResizeArray<AiImageClassificationOutput>"))
                 (sprintf "alias must not be a self-cyclic abbreviation; got: %s" line)
         | None -> ()
+
+    // PROOF of the positive shape: the union alias references the two POSITIONAL case names and
+    // emits a DISTINCT nested def for each (the members are structurally distinct, so they must NOT
+    // be deduped). This is the emission/reference symmetry the fix establishes.
+    testCase "union of distinct anonymous literals emits distinct Case0/Case1 nested defs" <| fun _ ->
+        let out = renderTypeAliasSurface unionAlias
+        Expect.isTrue
+            (out.Contains("EmailAttachment.Case0") && out.Contains("EmailAttachment.Case1"))
+            (sprintf "alias must reference EmailAttachment.Case0 and .Case1; got:\n%s" out)
+        // Each distinct member literal must be emitted as its own nested type def.
+        Expect.isTrue (out.Contains("type Case0")) (sprintf "missing nested 'type Case0' def:\n%s" out)
+        Expect.isTrue (out.Contains("type Case1")) (sprintf "missing nested 'type Case1' def:\n%s" out)
+        // The two members are distinct (memberA has `contentId`/`filename`; memberB has `cid`/`name`),
+        // so both distinguishing property sets must survive — i.e. the members were NOT deduped.
+        Expect.isTrue (out.Contains("contentId") && out.Contains("cid"))
+            (sprintf "distinct member properties must both be present (no dedup); got:\n%s" out)
+
+    // A union body mixing a PRIMITIVE with TEMPLATE-LITERAL members must NOT render the self-cyclic
+    // `U3<WorkflowRetentionDuration, WorkflowRetentionDuration, ...>`. Each template literal gets a
+    // positional `Case{i}` identity (erased to `string`); the primitive stays a bare member.
+    testCase "union of number + template literals does not render as self-cyclic U<n><X, X, ...>" <| fun _ ->
+        let out = renderTypeAliasSurface templateLiteralUnionAlias
+        let abbrevLine =
+            out.Split('\n')
+            |> Array.map _.Trim()
+            |> Array.tryFind (_.StartsWith("U3<"))
+            |> Option.orElse (
+                out.Split('\n') |> Array.map _.Trim()
+                |> Array.tryFind (_.StartsWith("type WorkflowRetentionDuration =")))
+        match abbrevLine with
+        | Some _ ->
+            // The cyclic shape repeats the alias name as a bare (non-dotted) type argument.
+            Expect.isFalse
+                (out.Contains("WorkflowRetentionDuration,\n") && out.Contains("U3<\n"))
+                "template-literal union alias must not be a self-cyclic abbreviation"
+            // No bare self-reference as a union arg.
+            Expect.isFalse
+                (out.Replace(" ", "").Replace("\n", "").Contains("U3<WorkflowRetentionDuration,WorkflowRetentionDuration"))
+                (sprintf "alias must not be self-cyclic; got:\n%s" out)
+        | None -> ()
+
+    // PROOF of the positive shape: each template-literal member receives a distinct positional
+    // `Case{i}` identity erased to `string`, the references are `.Case{i}`-qualified (not the bare
+    // alias name), and the `number` primitive member is preserved (arity not reduced).
+    testCase "union of number + template literals emits distinct Case{i} = string defs and keeps the primitive" <| fun _ ->
+        let out = renderTypeAliasSurface templateLiteralUnionAlias
+        // Two template-literal members -> two positional case identities, each erased to string.
+        Expect.isTrue
+            (out.Contains("WorkflowRetentionDuration.Case0") && out.Contains("WorkflowRetentionDuration.Case1"))
+            (sprintf "alias must reference WorkflowRetentionDuration.Case0 and .Case1; got:\n%s" out)
+        Expect.isTrue
+            (out.Contains("type Case0 = string") && out.Contains("type Case1 = string"))
+            (sprintf "each template-literal member must emit a nested 'type Case{i} = string' def; got:\n%s" out)
+        // The `number` primitive member must survive (float), so the union is NOT reduced to only
+        // the template-literal cases.
+        Expect.isTrue (out.Contains("float"))
+            (sprintf "the number primitive union member must be preserved as float; got:\n%s" out)
 ]
 
 [<Tests>]

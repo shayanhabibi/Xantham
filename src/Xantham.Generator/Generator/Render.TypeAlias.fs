@@ -34,9 +34,91 @@ module TypeAlias =
                     |> TypeRefRender.orNullable oldRef.Nullable
                 | _ -> newRef.TypeRef
             | false, _ -> oldRef
+        // ── Anonymous-literal alias-body placement (FS0953 fix) ────────────────────────────
+        // An anonymous object literal (`{ ... }`) that is the body — or a union/array member of
+        // the body — of a type alias prerenders to a NAMELESS `TransientTypePath.Anchored` root.
+        // When that ref is anchored against the ALIAS's OWN path (the alias is the owner), the
+        // nameless root collapses onto the alias name, so e.g. `type X = { ... } | { ... }` emits
+        // the ILLEGAL self-cyclic abbreviation `type X = U2<X, X>` and `type X = Array<{...}>`
+        // emits `type X = ResizeArray<X>` (FS0953) even though the IR is NOT cyclic. Give each
+        // such literal a distinct positional `<label>` identity rooted DIRECTLY under the alias's
+        // companion module: register it in the alias's OWN scope TypeStore (so
+        // `anchorPreludeExportScope` emits a nested `X.<label>` def at depth-1) AND reference it
+        // by that same `<label>` path (emission/reference symmetry).
+        let memberHasTransientDef (memberType: ResolvedType) =
+            // A literal that ACTUALLY prerenders to a hoisted transient def (Root = Transient) is
+            // both collapse-prone AND emittable as a nested def. A `TypeLiteral` that is purely a
+            // call signature renders INLINE as a function molecule (Root = ValueNone) — it has no
+            // def to emit, so naming it would dangle.
+            match GeneratorContext.Prelude.tryGet ctx memberType with
+            | ValueSome { Root = ValueSome (TypeLikePath.Transient _) } -> true
+            | _ -> false
+        // Returns (ref, isCaseNamed). For a TypeLiteral member with a real transient def, force the
+        // alias scope's TypeStore entry to `<alias>.<label>` (a plain `TryAdd` would not overwrite a
+        // nameless `Anchored` entry left by an earlier visit/cache-hit, leaving the def to collapse)
+        // and build the molecule atom from that SAME path. Anything else keeps its normal ref so it
+        // never dangles. ONLY a plain object literal qualifies: a template literal's def is
+        // hard-named `TemplateLiteral`, an intersection nets new member-merge errors when relocated,
+        // and a tuple/array/named-ref carries its own ref shape (never an `Anchored` root).
+        let caseLiteralRef (label: string) (memberOther: ResolvedTypeOther) =
+            let memberType = memberOther.AsResolvedType
+            let lazyMember = LazyContainer.CreateFromValue memberType
+            match memberOther with
+            // A `TemplateLiteral` member collapses onto the alias name in exactly the same way as
+            // an object literal: its prerender roots at a nameless `TransientTypePath.Anchored`, so
+            // anchoring it against the alias yields the cyclic self-ref (`U15<X, X, ...>`, FS0953).
+            // Give it the same positional `Case{i}` identity. Its def now renders as a path-derived
+            // abbreviation `type Case{i} = string` (see TemplateLiteral.render in Render.Transient),
+            // so the grafted `Case{i}` reference and def name match — no dangle.
+            | ResolvedTypeOther.TypeLiteral _
+            | ResolvedTypeOther.TemplateLiteral _ ->
+                let caseScope = RenderScopeStore.appendStringToPathContext scopeStore label
+                let prerendered = ctx.PreludeGetTypeRef ctx caseScope lazyMember
+                if memberHasTransientDef memberType then
+                    let casePath =
+                        Name.Pascal.create label
+                        |> fun n ->
+                            TransientPath.toTransientModulePath scopeStore.PathContext
+                            |> TransientTypePath.createOnTransientModuleWithName n
+                    scopeStore.TypeStore[memberType] <- casePath
+                    let caseRef =
+                        casePath
+                        |> RenderScopeStore.TypeRefAtom.Unsafe.createTransientPath
+                        |> RenderScopeStore.TypeRef.Unsafe.createAtom
+                        |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+                    caseRef, true
+                else
+                    prerendered, false
+            | _ ->
+                ctx.PreludeGetTypeRef ctx scopeStore lazyMember, false
         let rec matchImpl = function
             | ResolvedType.TypeQuery { Type = Resolve typ } ->
                 matchImpl typ
+            // `type X = Array<{ ... }>` whose element is an anonymous object literal collapses to
+            // `ResizeArray<X>` (FS0953) for the same reason a union member does. Give the element a
+            // single `Element` nested identity so it renders `ResizeArray<X.Element>` with a real
+            // `X.Element` def. Falls through to the plain alias-ref when the element is not a
+            // collapse-prone object literal (caseLiteralRef returns isCaseNamed = false).
+            | ResolvedType.Array elementType when
+                (match ResolvedTypeCategories.create elementType with
+                 | { Others = [ ResolvedTypeOther.TypeLiteral _ as other ] } -> snd (caseLiteralRef "Element" other)
+                 | _ -> false) ->
+                let elementRef =
+                    match ResolvedTypeCategories.create elementType with
+                    | { Others = [ other ] } -> caseLiteralRef "Element" other |> fst
+                    | _ -> ctx.PreludeGetTypeRef ctx scopeStore (LazyContainer.CreateFromValue elementType)
+                {
+                    TypeAliasRenderRef.Documentation = documentation
+                    Metadata = metadata
+                    Name = name
+                    TypeParameters = typeParameters
+                    Type =
+                        let arrayPrefix =
+                            RenderScopeStore.TypeRefRender.create scopeStore innerType.Value false Intrinsic.array
+                        (arrayPrefix, [ elementRef ])
+                        |> RenderScopeStore.TypeRefRender.create scopeStore innerType.Value false
+                }
+                |> TypeAliasRender.Alias
             | ResolvedType.Interface _
             | ResolvedType.Class _
             | ResolvedType.Primitive _
@@ -89,6 +171,60 @@ module TypeAlias =
                         Type = resolveInnerRef ()
                     }
                     |> TypeAliasRender.Alias
+                // Each `Other` union member gets a positional `Case{i}` identity (see
+                // `caseLiteralRef`). The index is global across the WHOLE union (others come first,
+                // matching the prelude member order) so `Case{i}` is stable/unique.
+                let renderCaseMember idx (other: ResolvedTypeOther) =
+                    caseLiteralRef $"Case{idx}" other
+                // Rebuild the FULL union molecule — NOT just the `others`. A union body frequently
+                // mixes the collapse-prone structural members with primitives/enums/literals (e.g.
+                // `WorkflowRetentionDuration = number | \`${number} second\` | ...`). Anchoring the
+                // existing alias-ref collapses the structural members onto the alias name; we instead
+                // route each structural member through `caseLiteralRef` (positional `Case{i}` def)
+                // while keeping primitives/enums/the literal-union member as their normal prerendered
+                // refs, preserving the same member SET and ORDER the prelude emits
+                // (others, primitives, enums, then the literal sub-union). Dropping any of these
+                // (the prior `others`-only build) would silently change the union arity.
+                let prerenderMember (resolvedType: ResolvedType) =
+                    ctx.PreludeGetTypeRef ctx scopeStore (LazyContainer.CreateFromValue resolvedType)
+                let renderNamedCaseAlias (categories: ResolvedTypeCategories) =
+                    let others = categories.Others
+                    let memberRefs =
+                        [
+                            yield!
+                                others
+                                |> List.mapi (fun idx other -> renderCaseMember idx other |> fst)
+                            for primitive in categories.Primitives do
+                                prerenderMember primitive.AsResolvedType
+                            for enum in categories.EnumLike do
+                                prerenderMember enum.AsResolvedType
+                            if not (List.isEmpty categories.LiteralLike) then
+                                { Union.Types =
+                                    categories.LiteralLike
+                                    |> List.map (_.AsResolvedType >> LazyContainer.CreateTypeKeyDummy<ResolvedType>) }
+                                |> ResolvedType.Union
+                                |> prerenderMember
+                        ]
+                    {
+                        TypeAliasRenderRef.Documentation = documentation
+                        Metadata = metadata
+                        Name = name
+                        TypeParameters = typeParameters
+                        Type =
+                            match memberRefs with
+                            | [ single ] -> single |> TypeRefRender.orNullable categories.Nullable
+                            | _ ->
+                                memberRefs
+                                |> RenderScopeStore.TypeRefRender.create scopeStore innerType.Value categories.Nullable
+                    }
+                    |> TypeAliasRender.Alias
+                // True only when at least one member will actually receive a `Case{i}` def — so we
+                // never divert to the named-case path (losing the existing alias-ref) unless the
+                // fix genuinely applies.
+                let anyCaseNameable (others: ResolvedTypeOther list) =
+                    others
+                    |> List.mapi renderCaseMember
+                    |> List.exists snd
                 match ResolvedTypeCategories.create innerType.Value with
                 // no literals, and no 'others' that require a transient type
                 | { LiteralLike = literals; Others = []; Nullable = nullable; Primitives = []; EnumLike = [] } ->
@@ -126,6 +262,12 @@ module TypeAlias =
                         }
                         |> TypeAliasRender.StringUnion
                     | _ -> typeRefRender
+                // The alias body is a union containing 'Others' (structural) members. If ANY of them
+                // is an anonymous object literal with a real hoisted def it would collapse to the
+                // alias name when anchored — emit positional `Case{i}` nested defs instead of the
+                // cyclic ref. Other shapes keep the existing alias-ref behaviour.
+                | { Others = others } as categories when anyCaseNameable others ->
+                    renderNamedCaseAlias categories
                 | _ -> typeRefRender
             | ResolvedType.Literal tsLiteral ->
                 {

@@ -164,88 +164,48 @@ module Union =
             renderUnionLiterals ctx scopeStore literals
             |> Transient.TypeRender.StringUnion
 module TemplateLiteral =
-    let render (ctx: GeneratorContext) (scopeStore: RenderScopeStore) (templateLiteral: TemplateLiteral) =
-            let path =
-                Name.Pascal.create "TemplateLiteral"
-                |> TransientTypePath.AnchoredAndMoored
-                |> Path.create
+    // A TS template-literal type (e.g. `` `${number} second` ``) is a compile-time string
+    // refinement with no distinct runtime representation in an erased binding — it erases to
+    // `string`. Render it as a PATH-DERIVED type abbreviation (`type <name> = string`) with
+    // `Name = ValueNone`, so the emitted def takes whatever name the anchor path supplies. This
+    // is what lets a template-literal that is a UNION MEMBER of a type-alias body receive a
+    // distinct positional `Case{i}` identity (grafted into the alias scope's TypeStore by
+    // `caseLiteralRef` in Render.TypeAlias): the abbreviation def is emitted as `type Case{i} =
+    // string` matching the union-member reference, instead of the old hard-named `TemplateLiteral`
+    // TypeDefn (Value/Create) which — because its name was fixed — collapsed every member onto the
+    // owner alias name and produced the illegal self-cyclic `U15<X, X, ...>` (FS0953).
+    let render (_ctx: GeneratorContext) (scopeStore: RenderScopeStore) (_templateLiteral: TemplateLiteral) =
+            // Nameless `Anchored` metadata path (matching the prelude's nameless template-literal
+            // ref) so the def name is supplied entirely by the ANCHOR path. When this template
+            // literal is grafted into a type-alias scope as a positional union member
+            // (`caseLiteralRef` in Render.TypeAlias sets `TypeStore[member] <- ...Case{i}`), the
+            // anchor path is `Case{i}` and the def emits as `type Case{i} = string` matching the
+            // union-member reference. The old hard-coded `TemplateLiteral` Moored leaf overrode that
+            // anchor, so every member collapsed onto the owner alias name and produced the illegal
+            // self-cyclic `U15<X, X, ...>` (FS0953).
+            let path = Path.create TransientTypePath.Anchored
             {
-                TypeLikeRender.Metadata = {
+                TypeAliasRenderRef.Metadata = {
                     Path = path
                     Original = path
                     Source = ValueNone
                     FullyQualifiedName = ValueNone
                 }
-                Name = Name.Pascal.create "TemplateLiteral" |> ValueSome
+                Name = ValueNone
                 TypeParameters = []
-                Members = [
-                    {
-                        TypedNameRender.Metadata = {
-                            Path = Path.create TransientMemberPath.Anchored
-                            Original = Path.create TransientMemberPath.Anchored
-                            Source = ValueNone
-                            FullyQualifiedName = ValueNone
-                        }
-                        Name = Name.create "Value" |> Case.addCamelMeasure
-                        Type =
-                            RenderScopeStore.TypeRefRender.create
-                                scopeStore
-                                (ResolvedType.Primitive TypeKindPrimitive.String)
-                                false
-                                Intrinsic.string 
-                        Traits = Set [ RenderTraits.EmitSelf ]
-                        TypeParameters = []
-                        Documentation = []
-                    }
-                ]
-                Functions = [
-                    {
-                        FunctionLikeRender.Metadata = { Path = Path.create TransientMemberPath.Anchored; Original = Path.create TransientMemberPath.Anchored
-                                                        Source = ValueNone; FullyQualifiedName = ValueNone }
-                        Name = Name.create "Create" |> Case.addCamelMeasure
-                        Signatures = [
-                            {
-                                FunctionLikeSignature.Metadata = { Path = Path.create TransientMemberPath.Anchored; Original = Path.create TransientMemberPath.Anchored
-                                                                   Source = ValueNone; FullyQualifiedName = ValueNone }
-                                Parameters =
-                                    templateLiteral.Types
-                                    |> List.mapi (fun i typeRef ->
-                                        {
-                                            TypedNameRender.Metadata = { Path = Path.create TransientParameterPath.Anchored; Original = Path.create TransientParameterPath.Anchored
-                                                                         Source = ValueNone; FullyQualifiedName = ValueNone }
-                                            Name = Name.Camel.create $"v{i}"
-                                            Type = ctx.PreludeGetTypeRef ctx scopeStore typeRef
-                                            Traits = Set.empty
-                                            TypeParameters = []
-                                            Documentation = []
-                                        }
-                                        )
-                                ReturnType =
-                                    Ast.Anon("TemplateLiteral")
-                                    |> RenderScopeStore.TypeRefAtom.Unsafe.createWidget
-                                    |> RenderScopeStore.TypeRef.Unsafe.createAtom
-                                    |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
-                                Traits = Set [
-                                    RenderTraits.Inline
-                                    RenderTraits.StringBuilder
-                                ]
-                                TypeParameters = []
-                                Documentation = []
-                            }
-                        ]
-                        Traits = Set [
-                            RenderTraits.Inline
-                            RenderTraits.StringBuilder
-                        ]
-                        TypeParameters = []
-                        Documentation = []
-                    }
-                ]
-                Inheritance = []
-                Constructors = []
                 Documentation = []
+                // A TS template-literal type (e.g. `` `${number} second` ``) is a compile-time
+                // string refinement with no distinct runtime representation in an erased binding —
+                // it erases to `string`. Emit the path-derived abbreviation `type <name> = string`.
+                Type =
+                    RenderScopeStore.TypeRefRender.create
+                        scopeStore
+                        (ResolvedType.Primitive TypeKindPrimitive.String)
+                        false
+                        Intrinsic.string
             }
-            |> TypeDefn
+            |> Transient.TypeAliasRender.Alias
+            |> TypeAlias
 module Members =
     let renderFromMembersAndFunctions (ctx: GeneratorContext) (scopeStore: RenderScopeStore) members functions =
         {

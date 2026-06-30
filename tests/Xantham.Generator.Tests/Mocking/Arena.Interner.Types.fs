@@ -66,6 +66,12 @@ module ResolvedType =
         let create = ResolvedType.Array
     module Union =
         let create types = ResolvedType.Union { Types = types |> List.map LazyContainer.CreateFromValue }
+    module TemplateLiteral =
+        let wrap = ResolvedType.TemplateLiteral
+        // A TS template-literal type, e.g. `` `${number} second` `` = { Text = ["";" second"]; Types = [number] }.
+        let create (text: string list) (types: ResolvedType list) =
+            { TemplateLiteral.Text = text
+              Types = types |> List.map LazyContainer.CreateFromValue }
     module Interface =
         let wrap = ResolvedType.Interface
         let create name =
