@@ -65,6 +65,22 @@ and GeneratorContext =
         PreludeGetTypeRef: PreludeGetTypeRefFunc
         PreludeRenders: PreludeScopeStore
         AnchorRenders: AnchorScopeStore
+        /// Canonical owner-independent home for a hoisted object-LITERAL that is reached
+        /// through MORE THAN ONE distinct owner context (a shared `ResolvedType.TypeLiteral`
+        /// the decoder's structural compression interned into one node). Populated by a
+        /// counting pre-pass (`markSharedLiterals`). When present for a literal's ResolvedType,
+        /// `prerender` roots that literal at this absolute `TypePath` (under `SharedLiterals`)
+        /// instead of a per-owner transient — so every reference resolves to the same
+        /// re-anchor-invariant ConcretePath and the single def is emitted once. This mirrors the
+        /// proven `LiteralUnions` canonical-home mechanism, gated to genuinely-shared literals so
+        /// single-owner depth-2 literals keep nesting under their owner.
+        SharedLiteralHomes: DictionaryImpl<ResolvedType, TypePath>
+        /// Phase-1 collector for the shared-literal counting pre-pass. When `ValueSome`, the
+        /// anchoring walk records, per hoisted object-literal ResolvedType, the set of distinct
+        /// anchored def-home paths it is visited under. A literal with >1 distinct home is shared
+        /// across owners and is assigned a canonical `SharedLiteralHomes` entry. `ValueNone` in
+        /// the real (phase-2) pass so the counting is a no-op there.
+        SharedLiteralVisits: voption<Dictionary<ResolvedType, HashSet<TypePath>>>
         InFlight: HashSet<ResolvedType>
         /// The surface's own top-level globals (excludes lib.es internals). Used to keep
         /// a `typescript`-sourced top-level export from being dropped by the source-ignore
@@ -77,6 +93,8 @@ and GeneratorContext =
     static member internal Create(preludeGetTypeRefFunc, ?customisation) = {
         PreludeRenders = DictionaryImpl()
         AnchorRenders = DictionaryImpl()
+        SharedLiteralHomes = DictionaryImpl()
+        SharedLiteralVisits = ValueNone
         PreludeGetTypeRef = preludeGetTypeRefFunc
         InFlight = HashSet()
         TopLevelExports = HashSet()
@@ -107,6 +125,15 @@ module GeneratorContext =
         let inline addOrReplace key value (dict: DictionaryImpl<'Key, 'Value>) =
             dict[key] <- value
     
+    module SharedLiterals =
+        /// The canonical owner-independent home (if any) for a shared hoisted object-literal.
+        let tryGetHome ctx (key: ResolvedType) =
+            ctx.SharedLiteralHomes
+            |> Operation.tryGet key
+        let addHome ctx (key: ResolvedType) (home: TypePath) =
+            ctx.SharedLiteralHomes
+            |> Operation.addOrReplace key home
+
     module Prelude =
         let addTypeAliasRemap ctx key value =
             ctx.TypeAliasRemap

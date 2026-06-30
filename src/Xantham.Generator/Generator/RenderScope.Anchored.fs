@@ -497,6 +497,22 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
     | { Root = ValueSome (TypeLikePath.Transient path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren } ->
         let path = TransientTypePath.anchor anchorPath path
         let render = Render.Transient.anchor ctx anchorPath renderTuple
+        // SHARED-LITERAL COUNTING (phase 1 only): record EVERY def-home VISIT for a hoisted
+        // object-LITERAL, BEFORE the first-write-wins `tryAdd` below. A literal visited under
+        // >1 distinct anchored path is reached through multiple owner contexts — its single def
+        // lands under only the first, dangling the rest (the shared deep-nested FS0039 class).
+        // `markSharedLiterals` consumes this to assign canonical `SharedLiterals.X` homes.
+        ctx.SharedLiteralVisits
+        |> ValueOption.iter (fun visits ->
+            match renderScope.Type with
+            | ResolvedType.TypeLiteral _ ->
+                match visits.TryGetValue renderScope.Type with
+                | true, homes -> homes.Add path |> ignore
+                | _ ->
+                    let homes = HashSet<TypePath>()
+                    homes.Add path |> ignore
+                    visits[renderScope.Type] <- homes
+            | _ -> ())
         anchors
         |> Dictionary.tryAdd renderScope.Type (path, render)
         // Recurse into this hoisted literal's OWN nested literals (the two-deep case).
@@ -758,6 +774,93 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
 
 let private registerExportsForAnchoring (ctx: GeneratorContext) = List.iter (registerAnchorFromExport ctx)
 
+/// Assign canonical `SharedLiterals.<name>` homes to genuinely-shared hoisted object-literals.
+///
+/// `countingCtx` is a throwaway context that has already run `processExports` with
+/// `SharedLiteralVisits = ValueSome _`, so it holds, per literal ResolvedType, the set of distinct
+/// anchored def-home paths the literal was visited under. A literal with >1 distinct home is
+/// reached through multiple owner contexts (its single def lands under only the first, dangling the
+/// rest — the shared deep-nested FS0039 class). Each such literal is given a canonical absolute
+/// home in `realCtx.SharedLiteralHomes`, which `prerender` then roots it at (mirroring LiteralUnions).
+///
+/// Naming is DETERMINISTIC and COLLISION-FREE: the human-readable stem comes from the literal's
+/// member names, but distinct ResolvedTypes that share a stem (same property names, different
+/// property types) are disambiguated by a stable suffix derived from sorting on the literal's
+/// smallest def-home path (proven run-to-run stable). Keyed by ResolvedType identity so the SAME
+/// shared literal always maps to ONE name and DISTINCT shared literals never collapse together.
+let markSharedLiterals (countingCtx: GeneratorContext) (realCtx: GeneratorContext) =
+    countingCtx.SharedLiteralVisits
+    |> ValueOption.iter (fun visits ->
+        let pathKey (p: TypePath) =
+            TypePath.flatten p |> List.map Name.Case.valueOrModified |> String.concat "."
+        // Names already assigned (idempotent across calls) — never reassign an rt (keeps the
+        // canonical name STABLE) and never reuse a name (keeps DISTINCT literals distinct).
+        let usedNames =
+            realCtx.SharedLiteralHomes.Values
+            |> Seq.map (fun p -> Name.Case.valueOrModified p.Name)
+            |> System.Collections.Generic.HashSet
+        // Genuinely-shared literals NOT YET assigned: visited under >1 distinct def-home path.
+        let shared =
+            visits
+            |> Seq.choose (fun (KeyValue(rt, homes)) ->
+                if homes.Count > 1 && (GeneratorContext.SharedLiterals.tryGetHome realCtx rt |> ValueOption.isNone) then
+                    let stem =
+                        match rt with
+                        | ResolvedType.TypeLiteral tl -> sharedLiteralNameStem tl
+                        | _ -> "Lit"
+                    // Deterministic representative: the lexicographically-smallest def-home path.
+                    let rep = homes |> Seq.map pathKey |> Seq.sort |> Seq.head
+                    Some (stem, rep, rt)
+                else None)
+            // Stable order independent of dictionary enumeration: by stem, then representative path.
+            |> Seq.sortBy (fun (stem, rep, _) -> stem, rep)
+            |> Seq.toList
+        // Assign names, disambiguating against names already in use (this round and prior rounds)
+        // by appending the smallest free numeric suffix — deterministic given the stable order.
+        for (stem, _rep, rt) in shared do
+            let name =
+                if usedNames.Add stem then stem
+                else
+                    let mutable n = 2
+                    while not (usedNames.Add $"{stem}_{n}") do n <- n + 1
+                    $"{stem}_{n}"
+            let typePath = sharedLiteralModule |> TypePath.createWithName (Name.Pascal.create name)
+            GeneratorContext.SharedLiterals.addHome realCtx rt typePath)
+
+/// Run the shared-literal counting pass over an explicit export LIST (no interner) and mark the
+/// genuinely-shared literals on `ctx`. Drives a throwaway counting context whose
+/// `SharedLiteralVisits` collector records every literal def-home VISIT, then assigns canonical
+/// `SharedLiterals.<name>` homes to literals visited under >1 distinct home. Used by the
+/// interner-driven entry point AND directly by tests that build exports via mocks.
+let markSharedLiteralsFromExportList (ctx: GeneratorContext) (exports: ResolvedExport list) =
+    let countingCtx =
+        { GeneratorContext.Create(ctx.PreludeGetTypeRef, ctx.Customisation) with
+            SharedLiteralVisits = ValueSome (Dictionary<ResolvedType, HashSet<TypePath>>()) }
+    exports |> List.iter (registerAnchorFromExport countingCtx)
+    markSharedLiterals countingCtx ctx
+
+/// Emit the canonical OWNER-INDEPENDENT hoisted types once: literal-union enums at
+/// `LiteralUnions.<name>` and shared object-literals at `SharedLiterals.<name>`. They are anchored
+/// at their own absolute path, so the owner-driven export pass never registers them. Drive them
+/// directly from the prelude cache — each anchored-root + Transient-render prelude scope is
+/// registered into AnchorRenders by its self-anchor, so `collectModules` emits it. Interface/Class
+/// scopes also have anchored roots but Concrete renders and are emitted through the export pass —
+/// they must NOT be re-driven here. Shared by the interner-driven pipeline and the test harness.
+let emitCanonicalPreludeScopes (ctx: GeneratorContext) =
+    ctx.PreludeRenders.Values
+    |> Seq.choose (fun renderScope ->
+        match renderScope.Root, renderScope.Render with
+        | ValueSome (TypeLikePath.Anchored path), Render.Transient _ -> Some (path, renderScope)
+        | _ -> None)
+    // Sort by the canonical absolute path so emission order is DETERMINISTIC: `PreludeRenders` is a
+    // ResolvedType-keyed dictionary whose iteration order is hash-dependent (and the shared-literal
+    // counting pre-pass forces interner lazies that perturb it run-to-run). Anchoring these
+    // canonical scopes in path order makes `collectModules` lay out the LiteralUnions/SharedLiterals
+    // members identically every run.
+    |> Seq.sortBy (fun (path, _) -> TypePath.flatten path |> List.map Name.Case.valueOrModified)
+    |> Seq.iter (fun (path, renderScope) ->
+        anchorPreludeAnchorScope ctx None (AnchorPath.create path) renderScope)
+
 module ArenaInterner =
     let processExports (ctx: GeneratorContext) (interner: ArenaInterner) =
         // Make the surface's own top-level globals visible to the source-ignore gate
@@ -766,17 +869,17 @@ module ArenaInterner =
         ctx.TopLevelExports.UnionWith interner.TopLevelExports
         interner.ExportMap
         |> Map.iter (fun _ -> registerExportsForAnchoring ctx)
-        // Emit canonical hoisted types (e.g. literal-union enums at LiteralUnions.<name>) once.
-        // They are owner-INDEPENDENT (anchored at their own absolute path), so the owner-driven
-        // emission above never registers them. Drive them directly from the prelude cache:
-        // each anchored-root prelude scope is registered into AnchorRenders by its self-anchor.
-        ctx.PreludeRenders.Values
-        |> Array.ofSeq
-        |> Array.iter (fun renderScope ->
-            match renderScope.Root, renderScope.Render with
-            // ONLY the canonical hoisted literal-union scopes (Anchored root + Transient render).
-            // Interface/Class scopes also have anchored roots but Concrete renders and are emitted
-            // through the export pass — they must NOT be re-driven here.
-            | ValueSome (TypeLikePath.Anchored path), Render.Transient _ ->
-                anchorPreludeAnchorScope ctx None (AnchorPath.create path) renderScope
-            | _ -> ())
+        emitCanonicalPreludeScopes ctx
+
+    /// Phase 1: drive the full anchoring once on a throwaway context whose `SharedLiteralVisits`
+    /// collector records every literal def-home VISIT, then mark the genuinely-shared literals on
+    /// the real context. Must run BEFORE the real `processExports`/prerender so `prerender` roots
+    /// shared literals at their canonical home on the real pass. The throwaway context is fully
+    /// independent (its own prelude/anchor caches) so the count never pollutes the real output.
+    let markSharedLiteralsFromExports (ctx: GeneratorContext) (interner: ArenaInterner) =
+        let countingCtx =
+            { GeneratorContext.Create(ctx.PreludeGetTypeRef, ctx.Customisation) with
+                SharedLiteralVisits = ValueSome (Dictionary<ResolvedType, HashSet<TypePath>>()) }
+        RenderScope_Prelude.ArenaInterner.prerenderTypeAliases countingCtx interner
+        processExports countingCtx interner
+        markSharedLiterals countingCtx ctx

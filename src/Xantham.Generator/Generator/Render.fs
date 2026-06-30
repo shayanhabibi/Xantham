@@ -45,6 +45,10 @@ let main argv =
                      MemberPath.pruneParent (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") s
                      
          })
+    // Phase 1: count shared object-literals (those reached through >1 owner) on a throwaway
+    // context and assign each a canonical SharedLiterals home, so the real prerender below roots
+    // them there (every reference resolves to one absolute path; the single def is emitted once).
+    ArenaInterner.markSharedLiteralsFromExports generatorContext interner
     ArenaInterner.prerenderTypeAliases generatorContext interner
     // ArenaInterner.prerenderFromGraph generatorContext interner
     ArenaInterner.processExports generatorContext interner

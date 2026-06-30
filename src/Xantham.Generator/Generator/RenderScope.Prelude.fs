@@ -48,6 +48,41 @@ let literalUnionName (literals: ResolvedTypeLiteralLike list) : Name<Case.pascal
 let literalUnionTypePath (literals: ResolvedTypeLiteralLike list) : TypePath =
     literalUnionModule |> TypePath.createWithName (literalUnionName literals)
 
+// Canonical home for hoisted object-LITERALS that are SHARED across more than one owner
+// context. Mirrors `literalUnionModule`: a fixed top-level module whose member type is named
+// from the literal's STRUCTURAL identity (computed by the counting pre-pass), NOT from any
+// referencing owner. A shared literal is ONE `ResolvedType.TypeLiteral` (the decoder interned
+// the structurally-identical TS literals into one node) reached through N>1 owners; rooting it
+// here (absolute ConcretePath) makes every reference the same re-anchor-invariant ConcretePath
+// and lets the single def be emitted once. The per-literal name is assigned into
+// `ctx.SharedLiteralHomes` by `markSharedLiterals`; emission is driven by the same
+// PreludeRenders/(Anchored+Transient) driver in `processExports` that emits LiteralUnions.
+let sharedLiteralModule = ModulePath.init "SharedLiterals"
+
+/// A readable base token for a shared object-literal's canonical name, derived from its member
+/// NAMES (properties/methods/accessors), like `literalUnionName` derives from a union's values.
+/// Member names alone do NOT uniquely identify a literal (two literals with identical property
+/// names but different property TYPES are distinct ResolvedTypes), so `markSharedLiterals`
+/// disambiguates collisions deterministically — this only supplies the human-readable stem.
+let sharedLiteralNameStem (typeLiteral: TypeLiteral) : string =
+    let memberName =
+        function
+        | Member.Property p -> ValueSome (Name.Case.valueOrSource p.Name)
+        | Member.Method (m :: _) -> ValueSome (Name.Case.valueOrSource m.Name)
+        | Member.GetAccessor g -> ValueSome (Name.Case.valueOrSource g.Name)
+        | Member.SetAccessor s -> ValueSome (Name.Case.valueOrSource s.Name)
+        | Member.Method []
+        | Member.CallSignature _
+        | Member.IndexSignature _
+        | Member.ConstructSignature _ -> ValueNone
+    let names =
+        typeLiteral.Members
+        |> List.choose (memberName >> ValueOption.toOption)
+        |> List.sort
+    match names with
+    | [] -> "Lit"
+    | _ -> names |> String.concat "_"
+
 // The numeric typed arrays + ArrayBufferView are GENERIC in recent TS (`Uint8Array<ArrayBufferLike>`)
 // but NON-generic in Fable.Core.JS (their Fable name equals their TS name, so they are NOT
 // name-substituted). A `TypeReference` to one carries the TS type argument, and arg-alignment uses
@@ -588,6 +623,29 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
         | _, _ ->
+            match GeneratorContext.SharedLiterals.tryGetHome ctx resolvedType with
+            | ValueSome typePath ->
+                // SHARED across >1 owner (gated by the counting pre-pass): root this literal at
+                // its canonical absolute home `SharedLiterals.<structural-name>`, mirroring the
+                // LiteralUnions arm above. The ConcretePath ref (identity-invariant) makes every
+                // reference resolve here regardless of owner; the Anchored root + Transient render
+                // is emitted ONCE by the PreludeRenders driver in processExports (the same driver
+                // that emits canonical literal-unions). Without the canonical home the per-owner
+                // transient root below would place the single def under only the first owner and
+                // dangle every other owner's reference (the deep-nested shared-literal FS0039 class).
+                let ref = createConcreteTypeRef typePath
+                let scope = RenderScopeStore.create()
+                {
+                    RenderScope.Type = resolvedType
+                    Root = TypeLikePath.create typePath |> ValueSome
+                    TypeRef = ref
+                    Render =
+                        (lazy TypeLiteral.render ctx scope typeLiteral)
+                        |> Render.createFromTransientLazy ref
+                    TransientChildren = ValueSome scope
+                }
+                |> addOrReplaceScope ctx resolvedType
+            | ValueNone ->
             let path = TransientTypePath.Anchored
             let ref = RenderScopeStore.TypeRefRender.create scope resolvedType false path
             let scope = RenderScopeStore.create()
