@@ -83,6 +83,91 @@ let sharedLiteralNameStem (typeLiteral: TypeLiteral) : string =
     | [] -> "Lit"
     | _ -> names |> String.concat "_"
 
+/// True when a `TypeLiteral` renders as a HOISTED named object-type (the `_, _` arm of the
+/// TypeLiteral prerender below) rather than inlining to `obj` (empty) or a bare function signature
+/// (single inline call-signature). Only such literals are placed under a per-owner transient and
+/// can therefore become owner-dependent shared-literal dangles — so only these are candidates for
+/// the union-member reference-owner counting.
+let isHoistableObjectLiteral (typeLiteral: TypeLiteral) : bool =
+    let callSignatures, rest =
+        typeLiteral.Members
+        |> List.partition _.IsCallSignature
+        ||> fun sigs rest ->
+            sigs
+            |> List.map (function
+                | Member.CallSignature callSignature -> callSignature
+                | _ -> failwith "Unreachable guaranteed by guard in partition")
+            , rest
+    let shouldInlineCallSignature (cs: CallSignature) =
+        List.length cs.Parameters < 3 && not (cs.Parameters |> List.exists _.IsSpread)
+    match callSignatures, rest with
+    | [], [] -> false
+    | [ [ singleSig ] ], [] when shouldInlineCallSignature singleSig -> false
+    | _ -> true
+
+/// During the counting pre-pass, walk a top-level owner's ResolvedType graph (rooted at `rootRt`)
+/// and record — against the current owner (`ctx.CurrentRefOwner`) — every hoistable object-literal
+/// it REFERENCES (in any position: direct property/array element, union member, etc). This is a
+/// STRUCTURAL walk over the ResolvedType graph, deliberately independent of `prerender`'s cache: a
+/// shared literal's whole reference subtree (`ResizeArray<Lit>`, `option<ResizeArray<U2<Lit,Lit>>>`)
+/// is interned and shared across owners, so `prerender`/anchoring only descend into it under the
+/// FIRST owner (every later owner hits the cache and never sees the literal as a def-home). That is
+/// exactly why the def-VISIT gate misses these — both the union-wrapped literals AND direct
+/// array-element shared literals whose subtree is interned. Walking the resolved graph per owner
+/// instead captures the FULL set of distinct referencing owners; `markSharedLiterals` canonicalizes
+/// any literal referenced through >1 distinct owner (a single-owner literal stays nested — the
+/// control case). Cycle-safe via a per-walk visited set (the graph is cyclic). No-op outside the
+/// counting pass.
+let recordUnionMemberRefOwners (ctx: GeneratorContext) (rootRt: ResolvedType) =
+    match ctx.SharedLiteralRefOwners with
+    | ValueNone -> ()
+    | ValueSome _ ->
+        let visited = System.Collections.Generic.HashSet<ResolvedType>(HashIdentity.Reference)
+        // A reference's STRUCTURAL (anonymous) inner head — Union/Array/Intersection/Tuple/etc — IS
+        // part of THIS owner's territory and must be descended (the union frequently sits behind a
+        // thin `TypeReference{Type=Union; ResolvedType=None}` wrapper). A NOMINAL head (Interface/
+        // Class/Enum/another named reference) belongs to a DIFFERENT owner and must NOT be entered.
+        let isStructuralHead =
+            function
+            | ResolvedType.Union _ | ResolvedType.Array _ | ResolvedType.Intersection _
+            | ResolvedType.Tuple _ | ResolvedType.TypeLiteral _ | ResolvedType.Optional _
+            | ResolvedType.ReadOnly _ -> true
+            | _ -> false
+        let rec walk (rt: ResolvedType) =
+            if visited.Add rt then
+                // Record THIS literal (if hoistable) against the current owner — a literal reached in
+                // ANY position is referenced by this owner; the >1-distinct-owner gate decides sharing.
+                (match rt with
+                 | ResolvedType.TypeLiteral tl when isHoistableObjectLiteral tl ->
+                    GeneratorContext.SharedLiterals.recordRefOwner ctx rt
+                 | _ -> ())
+                match rt with
+                | ResolvedType.Union union ->
+                    for lz in union.Types do walk lz.Value
+                | ResolvedType.Array inner -> walk inner
+                | ResolvedType.ReadOnly inner -> walk inner
+                | ResolvedType.Optional typeRef -> walk (ResolvedType.TypeReference typeRef)
+                | ResolvedType.TypeReference tr ->
+                    tr.TypeArguments |> List.iter (fun a -> walk a.Value)
+                    tr.ResolvedType |> Option.iter (fun r -> walk r.Value)
+                    // Descend the head ONLY if it is a structural/anonymous wrapper (the literal/union
+                    // often hides here); skip nominal named heads (another owner's body).
+                    if isStructuralHead tr.Type.Value then walk tr.Type.Value
+                | ResolvedType.Intersection intersection ->
+                    intersection.Types |> List.iter (fun t -> walk t.Value)
+                | ResolvedType.Tuple tuple ->
+                    tuple.Types |> List.iter (fun t -> walk t.Type.Value)
+                | ResolvedType.TypeLiteral typeLiteral ->
+                    // Descend a literal's MEMBER types (e.g. the per-owner outer literal whose
+                    // property is the shared inner literal/union) so they are reached per owner.
+                    for m in typeLiteral.Members do
+                        match m with
+                        | Member.Property p -> walk p.Type.Value
+                        | Member.GetAccessor g -> walk g.Type.Value
+                        | _ -> ()
+                | _ -> ()
+        walk rootRt
+
 // The numeric typed arrays + ArrayBufferView are GENERIC in recent TS (`Uint8Array<ArrayBufferLike>`)
 // but NON-generic in Fable.Core.JS (their Fable name equals their TS name, so they are NOT
 // name-substituted). A `TypeReference` to one carries the TS type argument, and arg-alignment uses

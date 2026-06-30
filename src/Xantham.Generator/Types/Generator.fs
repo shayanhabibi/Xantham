@@ -81,6 +81,25 @@ and GeneratorContext =
         /// across owners and is assigned a canonical `SharedLiteralHomes` entry. `ValueNone` in
         /// the real (phase-2) pass so the counting is a no-op there.
         SharedLiteralVisits: voption<Dictionary<ResolvedType, HashSet<TypePath>>>
+        /// Phase-1 collector for UNION-WRAPPED shared object-literals — the def-VISIT gate
+        /// (`SharedLiteralVisits`) cannot see these. A multi-member object-literal reached only
+        /// inside a union molecule (`U2<Owner.Lit, Owner.Lit>`) is never visited as a def-home: the
+        /// cached union molecule carries its reference, so no owner scope holds it as an anchoring
+        /// recursion child. Its single def lands under one owner and every other owner's `Owner.Lit`
+        /// reference dangles (FS0039). When `ValueSome`, `prerender` records — keyed by the
+        /// union-member literal's ResolvedType — the set of distinct REFERENCING-OWNER paths (the
+        /// top-level export currently being rendered, threaded via `CurrentRefOwner`). A literal
+        /// referenced through >1 distinct owner is shared and is given a canonical `SharedLiterals`
+        /// home by `markSharedLiterals`, exactly like the def-VISIT-gated literals. `ValueNone` in
+        /// the real (phase-2) pass. The owner is keyed by `AnchorPath` (covers Variable/Function
+        /// member-owners as well as type owners uniformly); only the COUNT of distinct owners is
+        /// load-bearing for the >1 shared-gate.
+        SharedLiteralRefOwners: voption<Dictionary<ResolvedType, HashSet<AnchorPath>>>
+        /// The top-level export's canonical anchor currently being rendered during the counting
+        /// pre-pass, threaded so `prerender`'s union-member recording knows the referencing owner.
+        /// A mutable cell (the surrounding record is otherwise immutable); `ValueNone` outside the
+        /// counting pass and between exports.
+        CurrentRefOwner: AnchorPath voption ref
         InFlight: HashSet<ResolvedType>
         /// The surface's own top-level globals (excludes lib.es internals). Used to keep
         /// a `typescript`-sourced top-level export from being dropped by the source-ignore
@@ -95,6 +114,8 @@ and GeneratorContext =
         AnchorRenders = DictionaryImpl()
         SharedLiteralHomes = DictionaryImpl()
         SharedLiteralVisits = ValueNone
+        SharedLiteralRefOwners = ValueNone
+        CurrentRefOwner = ref ValueNone
         PreludeGetTypeRef = preludeGetTypeRefFunc
         InFlight = HashSet()
         TopLevelExports = HashSet()
@@ -133,6 +154,20 @@ module GeneratorContext =
         let addHome ctx (key: ResolvedType) (home: TypePath) =
             ctx.SharedLiteralHomes
             |> Operation.addOrReplace key home
+        /// Record (during the counting pre-pass) that the union-member object-literal `key` is
+        /// referenced by the current top-level owner. A `key` with >1 distinct referencing owner is
+        /// shared and is canonicalized into `SharedLiterals` alongside the def-VISIT-gated literals.
+        /// No-op outside the counting pass (`SharedLiteralRefOwners`/`CurrentRefOwner` unset).
+        let recordRefOwner (ctx: GeneratorContext) (key: ResolvedType) =
+            match ctx.SharedLiteralRefOwners, ctx.CurrentRefOwner.Value with
+            | ValueSome owners, ValueSome ownerPath ->
+                match owners.TryGetValue key with
+                | true, set -> set.Add ownerPath |> ignore
+                | _ ->
+                    let set = HashSet<AnchorPath>()
+                    set.Add ownerPath |> ignore
+                    owners[key] <- set
+            | _ -> ()
 
     module Prelude =
         let addTypeAliasRemap ctx key value =

@@ -557,6 +557,25 @@ and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: R
 
 let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport): unit =
     let scope = RenderScopeStore.create()
+    // COUNTING PRE-PASS ONLY: attribute every union-wrapped hoistable object-literal reachable from
+    // THIS top-level export to it as a referencing owner (a STRUCTURAL ResolvedType walk that, unlike
+    // prerender, is not defeated by the interned/cached union subtree shared across owners). A
+    // `Module` is a container with no body of its own — its children are walked when recursed below.
+    // No-op in the real pass (`SharedLiteralRefOwners` unset).
+    if ctx.SharedLiteralRefOwners.IsSome then
+        match export with
+        | ResolvedExport.Module _ -> ()
+        | _ ->
+            ctx.CurrentRefOwner.Value <- ValueSome (Interceptors.pipeExport ctx export)
+            let bodyRts =
+                match export with
+                | ResolvedExport.Interface i -> i.Members |> List.choose (function Member.Property p -> Some p.Type.Value | Member.GetAccessor g -> Some g.Type.Value | _ -> None)
+                | ResolvedExport.Class c -> c.Members |> List.choose (function Member.Property p -> Some p.Type.Value | Member.GetAccessor g -> Some g.Type.Value | _ -> None)
+                | ResolvedExport.TypeAlias a -> [ a.Type.Value ]
+                | ResolvedExport.Variable v -> [ v.Type.Value ]
+                | ResolvedExport.Function fns -> fns |> List.map (fun f -> f.Type.Value)
+                | ResolvedExport.Enum _ | ResolvedExport.Module _ -> []
+            bodyRts |> List.iter (RenderScope_Prelude.recordUnionMemberRefOwners ctx)
     match export with
     | ResolvedExport.Class value ->
         let path = Interceptors.pipeClass ctx value
@@ -793,23 +812,60 @@ let markSharedLiterals (countingCtx: GeneratorContext) (realCtx: GeneratorContex
     |> ValueOption.iter (fun visits ->
         let pathKey (p: TypePath) =
             TypePath.flatten p |> List.map Name.Case.valueOrModified |> String.concat "."
+        let anchorKey (a: AnchorPath) =
+            match a with
+            | AnchorPath.Type tp -> pathKey tp
+            // Member/Parameter/Module owners are rare for hoistable literals; a stable string form is
+            // sufficient — `anchorKey` only feeds the deterministic representative tie-break.
+            | other -> string other
+        // Reference-owner counts for UNION-WRAPPED literals (empty dict when the ref-owner collector
+        // was not enabled). A literal referenced through >1 distinct owner is shared even though the
+        // def-VISIT gate (`visits`) never saw it as a def-home (it lives only in a cached union
+        // molecule). Combined gate below: shared iff >1 def-home OR >1 distinct referencing owner.
+        let refOwners =
+            countingCtx.SharedLiteralRefOwners
+            |> ValueOption.defaultValue (Dictionary<ResolvedType, HashSet<AnchorPath>>())
         // Names already assigned (idempotent across calls) — never reassign an rt (keeps the
         // canonical name STABLE) and never reuse a name (keeps DISTINCT literals distinct).
         let usedNames =
             realCtx.SharedLiteralHomes.Values
             |> Seq.map (fun p -> Name.Case.valueOrModified p.Name)
             |> System.Collections.Generic.HashSet
-        // Genuinely-shared literals NOT YET assigned: visited under >1 distinct def-home path.
+        // Candidate RTs = the union of def-VISIT keys and reference-owner keys. A literal reached
+        // ONLY inside a union (never as a def-home) appears solely in `refOwners`.
+        let candidateRts =
+            seq {
+                for KeyValue(rt, _) in visits do rt
+                for KeyValue(rt, _) in refOwners do rt
+            }
+            |> Seq.distinct
+        // Genuinely-shared literals NOT YET assigned: visited under >1 distinct def-home path OR
+        // referenced through >1 distinct owner (the union-wrapped case). A literal reached through
+        // exactly ONE owner (1 def-home and ≤1 ref-owner) stays nested under it (control preserved).
         let shared =
-            visits
-            |> Seq.choose (fun (KeyValue(rt, homes)) ->
-                if homes.Count > 1 && (GeneratorContext.SharedLiterals.tryGetHome realCtx rt |> ValueOption.isNone) then
+            candidateRts
+            |> Seq.choose (fun rt ->
+                let defHomes =
+                    match visits.TryGetValue rt with
+                    | true, h -> h
+                    | _ -> HashSet<TypePath>()
+                let owners =
+                    match refOwners.TryGetValue rt with
+                    | true, o -> o
+                    | _ -> HashSet<AnchorPath>()
+                let isShared = defHomes.Count > 1 || owners.Count > 1
+                if isShared && (GeneratorContext.SharedLiterals.tryGetHome realCtx rt |> ValueOption.isNone) then
                     let stem =
                         match rt with
                         | ResolvedType.TypeLiteral tl -> sharedLiteralNameStem tl
                         | _ -> "Lit"
-                    // Deterministic representative: the lexicographically-smallest def-home path.
-                    let rep = homes |> Seq.map pathKey |> Seq.sort |> Seq.head
+                    // Deterministic representative: lexicographically-smallest of all the owner/home
+                    // discriminators (def-home paths AND referencing-owner anchors), so the tie-break
+                    // ordering is stable run-to-run regardless of which collector saw the literal.
+                    let rep =
+                        Seq.append (defHomes |> Seq.map pathKey) (owners |> Seq.map anchorKey)
+                        |> Seq.sort
+                        |> Seq.head
                     Some (stem, rep, rt)
                 else None)
             // Stable order independent of dictionary enumeration: by stem, then representative path.
@@ -835,7 +891,8 @@ let markSharedLiterals (countingCtx: GeneratorContext) (realCtx: GeneratorContex
 let markSharedLiteralsFromExportList (ctx: GeneratorContext) (exports: ResolvedExport list) =
     let countingCtx =
         { GeneratorContext.Create(ctx.PreludeGetTypeRef, ctx.Customisation) with
-            SharedLiteralVisits = ValueSome (Dictionary<ResolvedType, HashSet<TypePath>>()) }
+            SharedLiteralVisits = ValueSome (Dictionary<ResolvedType, HashSet<TypePath>>())
+            SharedLiteralRefOwners = ValueSome (Dictionary<ResolvedType, HashSet<AnchorPath>>()) }
     exports |> List.iter (registerAnchorFromExport countingCtx)
     markSharedLiterals countingCtx ctx
 
@@ -879,7 +936,8 @@ module ArenaInterner =
     let markSharedLiteralsFromExports (ctx: GeneratorContext) (interner: ArenaInterner) =
         let countingCtx =
             { GeneratorContext.Create(ctx.PreludeGetTypeRef, ctx.Customisation) with
-                SharedLiteralVisits = ValueSome (Dictionary<ResolvedType, HashSet<TypePath>>()) }
+                SharedLiteralVisits = ValueSome (Dictionary<ResolvedType, HashSet<TypePath>>())
+                SharedLiteralRefOwners = ValueSome (Dictionary<ResolvedType, HashSet<AnchorPath>>()) }
         RenderScope_Prelude.ArenaInterner.prerenderTypeAliases countingCtx interner
         processExports countingCtx interner
         markSharedLiterals countingCtx ctx

@@ -192,6 +192,66 @@ let sharedDeepNestedLiteralTests = testList "shared deep-nested literal placemen
         Expect.stringContains out "Place.Origin" "single-owner inner ref stays localised under its owner"
         Expect.isFalse (out.Contains "module SharedLiterals")
             (sprintf "single-owner literal must NOT be canonicalized into SharedLiterals.\n%s" out)
+
+    // UNION-WRAPPED shared literal (the real-surface `Tools`/`ToolCalls`/`Messages` class): the
+    // shared literal is reached ONLY inside a union member position (`U2<Owner.Lit, Owner.Lit>`),
+    // NEVER as a direct property def-home. The def-VISIT counting gate never sees it as a def-home
+    // (the cached union molecule carries its reference, so no owner scope holds it as a recursion
+    // child), so at HEAD its single def lands under the first owner and the other owner's reference
+    // dangles (FS0039). The reference-count gate — distinct REFERENCING owners from the structural
+    // ResolvedType walk — catches it: >1 owner references the union member, so it is canonicalized.
+    testCase "union-member shared literal (U2<Lit,...>) resolves from BOTH owners via SharedLiterals" <| fun _ ->
+        // ONE shared literal wrapped in ONE shared union (`U2<sharedTool, sharedTool>` — the
+        // self-duplicated shape the decoder compression produces), referenced by two owners ONLY
+        // inside that union-member position. Crucially BOTH owners reference the SAME `[<Reference
+        // Equality>]` union instance — mirroring the decoder's structural INTERNING. That interning
+        // is precisely what hides the literal from the def-VISIT gate: anchoring descends into the
+        // shared union subtree under only the FIRST owner, so the literal is visited as a def-home
+        // exactly once; the second owner's `Owner.Tool` reference dangles. The reference-count gate
+        // (distinct referencing owners from the structural walk) is what recovers it.
+        let sharedTool = objLit [ "description"; "name"; "parameters" ]
+        let sharedToolUnion = Union.create [ sharedTool; sharedTool ]
+        let sharedToolArray = Array.create sharedToolUnion
+        let ownerWithUnionMember name =
+            { (Interface.create name |> Interface.withPath [ "Mod" ]) with
+                Members = [ Property.create "tools" sharedToolArray |> Property.wrap ] }
+        let out =
+            renderInterfaceSurfaces [
+                ownerWithUnionMember "AlphaUnionOwner"
+                ownerWithUnionMember "BetaUnionOwner"
+            ]
+        // The union-wrapped shared literal gets a canonical owner-independent home.
+        Expect.stringContains out "module SharedLiterals"
+            (sprintf "union-member shared literal must be canonicalized into SharedLiterals.\n%s" out)
+        // BOTH owners' union members reference the canonical home (`U2<SharedLiterals.*, ...>`),
+        // NOT a per-owner `AlphaUnionOwner.*` / `BetaUnionOwner.*` def that dangles the other side.
+        Expect.stringContains out "SharedLiterals.DescriptionNameParameters"
+            "union-member shared literal referenced at its canonical SharedLiterals home"
+        // Exactly ONE canonical def for the shared literal (member-name stem, pascal-cased), not one
+        // per owner.
+        let sharedDefs =
+            out.Split('\n')
+            |> Array.filter (fun l -> l.Trim().StartsWith("type DescriptionNameParameters"))
+            |> Array.length
+        Expect.equal sharedDefs 1
+            (sprintf "expected exactly ONE canonical def for the union-member shared literal; got %d.\n%s" sharedDefs out)
+
+    // Control for the union-member case: a literal reached through union-member position under
+    // EXACTLY ONE owner is NOT canonicalized — it stays nested under that owner (mirrors the
+    // direct-property single-owner control). Only ONE owner references the union, so the
+    // reference-count gate sees one distinct owner and leaves it nested.
+    testCase "single-owner union-member literal stays under its owner (not canonicalized)" <| fun _ ->
+        let soleTool = objLit [ "kindd"; "labell"; "valuee" ]
+        let onlyOwner =
+            { (Interface.create "SoleUnionOwner" |> Interface.withPath [ "Mod" ]) with
+                Members = [
+                    Property.create "options"
+                        (Array.create (Union.create [ soleTool; soleTool ]))
+                    |> Property.wrap
+                ] }
+        let out = renderInterfaceSurfaces [ onlyOwner ]
+        Expect.isFalse (out.Contains "module SharedLiterals")
+            (sprintf "single-owner union-member literal must NOT be canonicalized into SharedLiterals.\n%s" out)
 ]
 
 [<Tests>]
