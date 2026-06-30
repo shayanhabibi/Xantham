@@ -152,4 +152,57 @@ let tests =
                     "    end"
                 ])
 
+        // BUG (heritage default-arg drop, FS0033) — the real-CF `inherit EventTarget` regression.
+        //
+        // A TS base type whose SOLE type parameter carries a DEFAULT
+        // (`class EventTarget<EventMap extends Record<string,Event> = Record<string,Event>>`)
+        // may be extended in TS WITHOUT supplying the argument — `class AbortSignal extends
+        // EventTarget` is valid because the omitted arg defaults. The encoder faithfully records
+        // that omission: the heritage `TsTypeReference` has `TypeArguments = []`, `ResolvedType =
+        // None`, `Type = EventTarget(tp=1, default present)` (confirmed by live instrumentation
+        // over the real CF IR — AbortSignal/EventSource/MessagePort all show
+        // `TypeArguments.Length=0`, while WebSocket/WorkerGlobalScope which DO write the arg show
+        // `TypeArguments.Length=1`). So nothing is "dropped" upstream; the args are LEGITIMATELY
+        // absent because TS permits omitting a defaulted type argument.
+        //
+        // F# has NO default type parameters, so emitting the base name bare yields
+        // `inherit EventTarget` against a generic `EventTarget<'EventMap>` ->
+        // FS0033 "the type 'EventTarget<_>' expects 1 type argument(s) but is given 0".
+        //
+        // Path: the no-arg heritage ref (`ResolvedType=None`, `TypeArguments=[]`) hits the
+        // no-args TypeReference arm at src/Xantham.Generator/Generator/RenderScope.Prelude.fs:
+        // 469-470, which prerenders the inner generic base ALONE — emitting a bare generic name
+        // with no application. The base's declared type parameter (and its `Default`, available
+        // on the resolved `(Interface|Class).TypeParameters[i].Default`) is never consulted.
+        //
+        // This test models that exactly: a base `EventTarget` declaring one type parameter WITH
+        // a default, extended WITHOUT a type argument (the bug reproduces identically whether the
+        // base is an Interface or a Class — both flow through the same no-args arm; the real CF
+        // EventTarget is a Class, an Interface base is used here for the available mock builders).
+        // It SHOULD render the defaulted arg (`inherit EventTarget<EventMap>` — F# materialising
+        // the TS default) so the inherit clause is well-formed; at HEAD it renders bare
+        // `inherit EventTarget` (FS0033).
+        testCase "interface extending a defaulted generic base materialises the default arg" <| fun _ ->
+            let eventMapDefault = Interface.create "EventMap" |> Interface.wrap
+            let eventTargetBase =
+                Interface.create "EventTarget"
+                |> Interface.withTypeParameters [
+                    TypeParameter.create "EventMap"
+                    |> TypeParameter.withDefault eventMapDefault ]
+                |> Interface.wrap
+            ({ (Interface.create "Derived") with
+                Heritage = {
+                    Extends = [
+                        // No `withTypeArguments` — the TS `extends EventTarget` (bare) form.
+                        TypeReference.create eventTargetBase ] } }
+             |> Interface.wrap)
+            |> render
+            |> Flip.Expect.equal "defaulted-generic-base inheritance TypeDefn"
+                (String.concat "\n" [
+                    "type Derived ="
+                    "    interface"
+                    "        inherit EventTarget<EventMap>"
+                    "    end"
+                ])
+
     ]

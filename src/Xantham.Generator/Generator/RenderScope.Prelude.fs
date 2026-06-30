@@ -466,6 +466,51 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
+    | ResolvedType.TypeReference { Type = innerResolvedType; TypeArguments = []; ResolvedType = None }
+        when (let typeParams =
+                match innerResolvedType.Value with
+                | ResolvedType.Interface i -> i.TypeParameters
+                | ResolvedType.Class c -> c.TypeParameters
+                | _ -> []
+              // A BARE reference (no args) to a GENERIC Interface/Class. TypeScript permits this
+              // when EVERY type parameter has a DEFAULT (`EventTarget<EventMap = Record<...>>` then
+              // `extends EventTarget`). F# has NO default type parameters, so the bare reference
+              // emits `inherit EventTarget` against `type EventTarget<'EventMap>` -> FS0033 "expects
+              // 1 type argument(s) but is given 0". Fire ONLY when the head is generic AND a Fable
+              // arity override doesn't make it non-generic (typed arrays stay bare via the no-args
+              // arm below). Synthesize the defaults below.
+              not (List.isEmpty typeParams)
+              && (match innerResolvedType.Value with
+                  | ResolvedType.Interface i -> fableDeclaredArity (Name.Case.valueOrSource i.Name) |> Option.isNone
+                  | ResolvedType.Class c -> fableDeclaredArity (Name.Case.valueOrSource c.Name) |> Option.isNone
+                  | _ -> false)) ->
+        // Materialise each type parameter's TS DEFAULT as the application argument (the encoder +
+        // decoder preserve it: TypeParameter.Default, Arena.Interner.fs:262/720). A parameter
+        // lacking a default falls back to `obj` (NonPrimitive). Build `head<default...>` with the
+        // SAME cycle-safe discipline as the cdc0108 arm: register the head-only scope BEFORE
+        // prerendering the (possibly self-referential) default args, so a cyclic default re-enters
+        // via the cache-hit arm instead of recursing.
+        let typeParams =
+            match innerResolvedType.Value with
+            | ResolvedType.Interface i -> i.TypeParameters
+            | ResolvedType.Class c -> c.TypeParameters
+            | _ -> []
+        let prefix = innerResolvedType |> prerender ctx scope
+        prefix
+        |> RenderScope.createRootless resolvedType
+        |> addOrReplaceScope ctx resolvedType
+        |> ignore
+        let defaultArgs =
+            typeParams
+            |> List.map (fun tp ->
+                match tp.Value.Default with
+                | Some d -> d
+                | None -> LazyContainer.CreateFromValue (ResolvedType.Primitive TypeKindPrimitive.NonPrimitive))
+        let postfixArguments = defaultArgs |> List.map (prerender ctx scope)
+        applyArgsToCollectionHead prefix postfixArguments
+        |> RenderScopeStore.TypeRefRender.create scope resolvedType false
+        |> RenderScope.createRootless resolvedType
+        |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeReference { ResolvedType = Some innerResolvedType }
     | ResolvedType.TypeReference { Type = innerResolvedType; TypeArguments = [] } ->
         innerResolvedType
