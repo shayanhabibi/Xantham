@@ -30,7 +30,10 @@ module CallSignature =
             Parameters = parameters
             ReturnType = returnType
             Traits = Set [ ]
-            TypeParameters = []
+            // Generic call signatures (`{ <'T>(x: 'T): 'T }`) carry their own type parameters.
+            TypeParameters =
+                callSignature.TypeParameters
+                |> List.map (_.Value >> TypeParameter.render ctx scopeStore)
             Documentation = callSignature.Documentation
         }
         
@@ -82,7 +85,12 @@ module Method =
                      |> List.map (Parameter.render ctx scopeStore)
                  ReturnType = ctx.PreludeGetTypeRef ctx scopeStore method.Type
                  Traits = Set []
-                 TypeParameters = []
+                 // Method-level generics (`runWorkflow<'P>`): render the method's OWN type parameters
+                 // onto the signature so the body's `'P` references bind. Dropping them left `'P`
+                 // unbound (FS0010/FS0039). Emitted as the member's postfix typar list downstream.
+                 TypeParameters =
+                     method.TypeParameters
+                     |> List.map (_.Value >> TypeParameter.render ctx scopeStore)
                  Documentation = []
              }]
             Traits = Set [

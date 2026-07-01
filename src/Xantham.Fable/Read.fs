@@ -405,7 +405,7 @@ module Internal =
             let remapMember = function
                 | TsMember.Method m ->
                     m.ToList()
-                    |> List.map (fun v -> { v with TsMethod.Type = remapKey v.Type; Parameters = v.Parameters |> List.map remapParam })
+                    |> List.map (fun v -> { v with TsMethod.Type = remapKey v.Type; Parameters = v.Parameters |> List.map remapParam; TypeParameters = v.TypeParameters |> List.map remapInlinedTypeParam })
                     |> TsOverloadableConstruct.Create
                     |> TsMember.Method
                 | TsMember.Property p -> TsMember.Property { p with Type = remapKey p.Type }
@@ -413,14 +413,14 @@ module Internal =
                 | TsMember.SetAccessor s -> TsMember.SetAccessor { s with ArgumentType = remapKey s.ArgumentType }
                 | TsMember.CallSignature c ->
                     c.ToList()
-                    |> List.map (fun v -> { v with TsCallSignature.Type = remapKey v.Type; Parameters = v.Parameters |> List.map remapParam })
+                    |> List.map (fun v -> { v with TsCallSignature.Type = remapKey v.Type; Parameters = v.Parameters |> List.map remapParam; TypeParameters = v.TypeParameters |> List.map remapInlinedTypeParam })
                     |> TsOverloadableConstruct.Create
                     |> TsMember.CallSignature
                 | TsMember.IndexSignature i ->
                     TsMember.IndexSignature { i with Type = remapKey i.Type; Parameters = i.Parameters |> List.map remapParam }
                 | TsMember.ConstructSignature c ->
                     c.ToList()
-                    |> List.map (fun v -> { v with TsConstructSignature.Type = remapKey v.Type; Parameters = v.Parameters |> List.map remapParam })
+                    |> List.map (fun v -> { v with TsConstructSignature.Type = remapKey v.Type; Parameters = v.Parameters |> List.map remapParam; TypeParameters = v.TypeParameters |> List.map remapInlinedTypeParam })
                     |> TsOverloadableConstruct.Create
                     |> TsMember.ConstructSignature
             let rec remapType (typ: TsType) : TsType =

@@ -116,6 +116,7 @@ let private agentWithDeepNestedLiteral =
     let getSchedules : Method = {
         Name = Name.Camel.create "getSchedules"
         Parameters = [ primitive TypeKindPrimitive.String |> Parameter.create "criteria" ]
+        TypeParameters = []
         Type = LazyContainer.CreateFromValue criteria
         Documentation = []
         IsOptional = false

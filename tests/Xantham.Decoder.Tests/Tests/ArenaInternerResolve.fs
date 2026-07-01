@@ -1085,6 +1085,7 @@ let interfaceHeritageTests =
             let method: TsMethod = {
                 Name = "compute"
                 Parameters = [ { Name = "n"; IsOptional = false; IsSpread = false; Type = key 1; Documentation = [] } ]
+                TypeParameters = []
                 Type = key 2
                 Documentation = []
                 IsOptional = false

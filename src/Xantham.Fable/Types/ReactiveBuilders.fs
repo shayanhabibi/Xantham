@@ -189,6 +189,8 @@ type SMethodBuilder = {
     Name: string
     /// Reactive parameter slots — filled when each parameter is processed.
     Parameters: Signal<SParameterBuilder voption> array
+    /// Reactive method-level type-parameter slots (`method<T>(...)`). Mirrors SFunctionBuilder.
+    TypeParameters: Signal<InlinedSTypeParameterBuilder voption> array
     Type: TypeSignal
     IsOptional: bool
     IsStatic: bool
@@ -199,6 +201,10 @@ type SMethodBuilder = {
         { Name = this.Name
           Parameters =
               this.Parameters
+              |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
+              |> Array.toList
+          TypeParameters =
+              this.TypeParameters
               |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
               |> Array.toList
           Type = this.Type.Value
@@ -237,6 +243,8 @@ type SFunctionBuilder = {
 /// Signal-based equivalent of <c>TsCallSignatureBuilder</c>, builds to <see cref="T:Xantham.TsCallSignature"/>.
 type SCallSignatureBuilder = {
     Parameters: Signal<SParameterBuilder voption> array
+    /// Call-signature type-parameter slots (`{ <T>(x: T): T }`). Mirrors SFunctionBuilder.
+    TypeParameters: Signal<InlinedSTypeParameterBuilder voption> array
     Type: TypeSignal
     Documentation: TsComment list
 } with
@@ -246,6 +254,10 @@ type SCallSignatureBuilder = {
               this.Parameters
               |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
               |> Array.toList
+          TypeParameters =
+              this.TypeParameters
+              |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
+              |> Array.toList
           Type = this.Type.Value
           Documentation = this.Documentation }
 
@@ -253,12 +265,18 @@ type SCallSignatureBuilder = {
 type SConstructSignatureBuilder = {
     Type: TypeSignal
     Parameters: Signal<SParameterBuilder voption> array
+    /// Construct-signature type-parameter slots (`{ new <T>(x: T): C<T> }`). Mirrors SFunctionBuilder.
+    TypeParameters: Signal<InlinedSTypeParameterBuilder voption> array
 } with
     interface IOverloadable
     member this.Build() : TsConstructSignature =
         { Type = this.Type.Value
           Parameters =
               this.Parameters
+              |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
+              |> Array.toList
+          TypeParameters =
+              this.TypeParameters
               |> Array.choose (_.Value >> ValueOption.toOption >> Option.map _.Build())
               |> Array.toList }
 

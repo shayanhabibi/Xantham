@@ -100,7 +100,11 @@ let private callSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Signature
         | TagState.Unvisited t -> pushToStack ctx t; t
         | TagState.Visited t -> t
     {
+        // Type-checker-level signature: its type parameters are Ts.Type-level (not declaration
+        // nodes), which this slot reader does not resolve — leave empty. Declaration-node methods /
+        // call-signatures (the runWorkflow<P> case) capture their type params in MemberDeclaration.
         SCallSignatureBuilder.Parameters = signatureToParamSlots ctx signature
+        TypeParameters = [||]
         Type = returnTag.TypeSignal
         Documentation = []
     }
@@ -119,7 +123,9 @@ let private constructSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Sign
         | TagState.Unvisited t -> pushToStack ctx t; t
         | TagState.Visited t -> t
     {
+        // Type-checker-level signature — type params are Ts.Type-level, not resolved here (empty).
         SConstructSignatureBuilder.Parameters = signatureToParamSlots ctx signature
+        TypeParameters = [||]
         Type = returnTag.TypeSignal
     }
     |> SMemberBuilder.ConstructSignature

@@ -350,11 +350,15 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
         routeViaChecker importTypeNode
     | TypeNode.FunctionType funcTypeNode ->
         XanthamTag.debugLocationAndForget "TypeNode.dispatch | FunctionType" xanTag
-        // (x: T) => R — emit as a CallSignature (type params not captured; schema has no slot)
+        // (x: T) => R — emit as a CallSignature. An ANONYMOUS function type rarely declares its own
+        // generics (`<T>(x: T) => R`); the schema now carries a TypeParameters slot but this inline
+        // node path does not have the type-param reader in scope, so it stays empty (named methods /
+        // call-signatures in interfaces — the runWorkflow<P> case — ARE captured in MemberDeclaration).
         {
             Members = [|
                 {
                     SCallSignatureBuilder.Parameters = getParamSlots funcTypeNode.parameters
+                    TypeParameters = [||]
                     Type = getTypeSignalFromNode funcTypeNode.``type``
                     Documentation = []
                 }
@@ -373,6 +377,7 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeNode) =
             Members = [|
                 {
                     SConstructSignatureBuilder.Parameters = getParamSlots ctorTypeNode.parameters
+                    TypeParameters = [||]
                     Type = getTypeSignalFromNode ctorTypeNode.``type``
                 }
                 |> SMemberBuilder.ConstructSignature

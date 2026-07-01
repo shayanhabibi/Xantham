@@ -9,6 +9,29 @@ open Xantham.Generator.NamePath
 open Xantham.Generator.Types
 open Xantham.Generator.Types.Prelude
 
+// A heritage base (`extends`/`implements`) is emitted as an F# `inherit` clause. F# can only
+// inherit a NOMINAL named type — never `option<...>` (a nullable/erased base), never `obj` or a
+// bogus `obj<'A,'B>` (an unresolved base that fell back to `obj` but kept its type args), never a
+// bare intrinsic. Such a base breaks the parser (`inherit option<obj<'Env,'Props>>`, FS0010, which
+// cascades). Like the sealed type-parameter constraint fix, an un-inheritable base is NOT load-
+// bearing for erased Fable bindings — drop it. Keep only a base whose head atom is a named path
+// (ConcretePath/TransientPath), not nullable, not an intrinsic-headed molecule.
+let private isInheritableBase (ref: Prelude.TypeRefRender) : bool =
+    if ref.Nullable then false
+    else
+        let headAtomIsNominal (atom: Prelude.TypeRefAtom) =
+            match atom with
+            | Prelude.TypeRefAtom.ConcretePath _ | Prelude.TypeRefAtom.TransientPath _ -> true
+            | Prelude.TypeRefAtom.Intrinsic _ | Prelude.TypeRefAtom.Widget _ -> false
+        match ref.Kind with
+        | Prelude.TypeRefKind.Atom atom -> headAtomIsNominal atom
+        | Prelude.TypeRefKind.Molecule (Prelude.TypeRefMolecule.Prefix (head, _)) ->
+            match head.Kind with
+            | Prelude.TypeRefKind.Atom atom -> headAtomIsNominal atom
+            | _ -> false
+        // Tuple / Union / Function bases are never valid F# inherit targets.
+        | Prelude.TypeRefKind.Molecule _ -> false
+
 module Interface =
     let render (ctx: GeneratorContext) scopeStore (shape: Interface) =
         let path = Interceptors.pipeInterface ctx shape |> Path.create
@@ -38,6 +61,7 @@ module Interface =
                     >> LazyContainer.CreateFromValue
                     >> ctx.PreludeGetTypeRef ctx scopeStore
                     )
+                |> List.filter isInheritableBase
             Constructors = []
             Documentation = shape.Documentation
         }
@@ -72,6 +96,7 @@ module Class =
                     >> LazyContainer.CreateFromValue
                     >> ctx.PreludeGetTypeRef ctx scopeStore
                     )
+                |> List.filter isInheritableBase
             Constructors =
                 shape.Constructors
                 |> List.map (

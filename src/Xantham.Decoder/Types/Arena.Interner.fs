@@ -265,6 +265,8 @@ and [<ReferenceEquality>] TypeParameter = {
 and [<ReferenceEquality>] Method = {
     Name: Name<Case.camel>
     Parameters: Parameter list
+    /// Method-level type parameters (`method<T>(...)`). Mirrors Function.TypeParameters.
+    TypeParameters: Lazy<TypeParameter> list
     Type: LazyResolvedType
     Documentation: TsComment list
     IsOptional: bool
@@ -274,12 +276,16 @@ and [<ReferenceEquality>] Method = {
 and [<ReferenceEquality>] CallSignature = {
     Documentation: TsComment list
     Parameters: Parameter list
+    /// Call-signature type parameters (`{ <T>(x: T): T }`). Mirrors Function.TypeParameters.
+    TypeParameters: Lazy<TypeParameter> list
     Type: LazyResolvedType
 } with interface IOverloadable
 
 and [<ReferenceEquality>] ConstructSignature = {
     Type: LazyResolvedType
     Parameters: Parameter list
+    /// Construct-signature type parameters (`{ new <T>(x: T): C<T> }`). Mirrors Function.TypeParameters.
+    TypeParameters: Lazy<TypeParameter> list
 } with interface IOverloadable
 
 and [<ReferenceEquality>] Constructor = {
@@ -770,6 +776,16 @@ module ArenaInterner =
             match resolve key with
             | ResolvedType.TypeParameter typ -> typ
             | _ -> failwith "Inlining a type parameter returned a non type parameter."
+        // Member-level (method / call-sig / construct-sig) type parameters can, unlike a
+        // declaration's own type parameters, resolve through the checker to a NON-TypeParameter
+        // (e.g. `method<P = unknown>` whose key resolves to the `unknown` default reference) or to a
+        // key whose transitive graph is incomplete. Keep only those that genuinely resolve to a
+        // TypeParameter — a spurious one would crash the strict `buildFromTypeParameter` or emit an
+        // unbound typar. (Declaration type params always resolve cleanly, so they keep the strict path.)
+        and tryBuildMemberTypeParameter ((key, _): InlinedTsTypeParameter) : Lazy<TypeParameter> option =
+            match (try resolve key |> ValueSome with :? System.Collections.Generic.KeyNotFoundException -> ValueNone) with
+            | ValueSome (ResolvedType.TypeParameter _) -> Some (lazy (match resolve key with ResolvedType.TypeParameter typ -> typ | _ -> failwith "unreachable"))
+            | _ -> None
         and buildFromTypeReference (typ: TsTypeReference) =
             {
                 TypeReference.Type = { Data = typ.Type; Result = lazy resolve typ.Type }
@@ -782,6 +798,7 @@ module ArenaInterner =
                 |> List.map (fun method -> {
                     Method.Name = Name.Camel.create method.Name
                     Parameters = method.Parameters |> List.map buildFromParameter
+                    TypeParameters = method.TypeParameters |> List.choose tryBuildMemberTypeParameter
                     Type = { Data = method.Type; Result = lazy resolve method.Type }
                     Documentation = method.Documentation
                     IsOptional = method.IsOptional
@@ -815,6 +832,7 @@ module ArenaInterner =
                 |> List.map (fun value -> {
                     CallSignature.Documentation = value.Documentation
                     Parameters = value.Parameters |> List.map buildFromParameter
+                    TypeParameters = value.TypeParameters |> List.choose tryBuildMemberTypeParameter
                     Type = { Data = value.Type; Result = lazy resolve value.Type }
                 })
                 |> Member.CallSignature
@@ -829,6 +847,7 @@ module ArenaInterner =
                 |> List.map (fun value -> {
                     ConstructSignature.Type = { Data = value.Type; Result = lazy resolve value.Type }
                     Parameters = value.Parameters |> List.map buildFromParameter
+                    TypeParameters = value.TypeParameters |> List.choose tryBuildMemberTypeParameter
                 })
                 |> Member.ConstructSignature
 

@@ -411,6 +411,11 @@ module FunctionLikeSignature =
         let returnType = functionLike.ReturnType |> TypeRefRender.render
         Ast.AbstractMember(renderName, [ parameters ], returnType)
         |> if functionLike.Traits.Contains(RenderTraits.Static) then _.toStatic() else id
+        // Attach the member's OWN type parameters (`abstract runWorkflow<'P>: ...`) so the body's
+        // `'P` binds. Without this a generic method's `'P` is unbound (FS0010/FS0039).
+        |> match functionLike.TypeParameters with
+           | [] -> id
+           | typars -> _.typeParams(TypeParameterRender.renderTypeParametersIntoPostfixList ctx typars)
         |> Documentation.renderForAbstractMember functionLike
 
     let renderMember (ctx: GeneratorContext) (name: Name<_>) (functionLike: FunctionLikeSignature) =
@@ -426,6 +431,9 @@ module FunctionLikeSignature =
         let returnType = functionLike.ReturnType |> TypeRefRender.render
         Ast.Member(renderName, parameters, Exprs.jsUndefined, returnType)
         |> if functionLike.Traits.Contains(RenderTraits.Static) then _.toStatic() else id
+        |> match functionLike.TypeParameters with
+           | [] -> id
+           | typars -> _.typeParams(TypeParameterRender.renderTypeParametersIntoPostfixList ctx typars)
         |> Documentation.renderForMember functionLike
     
     let renderBinding (ctx: GeneratorContext) (name: Name<_>) (functionLike: FunctionLikeSignature) =

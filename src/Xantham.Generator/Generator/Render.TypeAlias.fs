@@ -48,6 +48,33 @@ module TypeAlias =
                     |> TypeRefRender.orNullable unpadded.Nullable
                 | _ -> newRef.TypeRef
             | false, _ -> oldRef
+        // ── Self-referential utility-alias guard (FS0010) ──────────────────────────────────
+        // A NON-generic alias whose body is a TS utility/conditional application (`type X =
+        // Extract<A,B>`, `type X = Record<K,V>`) can resolve, in the encoder, to a `TypeReference`
+        // whose `ResolvedType` is the ALIAS'S OWN key (and whose args may include it too). The body
+        // then renders with the alias's OWN ConcretePath as the head — emitting the illegal
+        // self-abbreviation `type X = X<...>` (FS0010, `X` given args it doesn't declare). The alias
+        // carries ZERO declared type parameters, so this is never a legitimate recursive type (those
+        // recurse in a MEMBER position under a generic alias, not as the head equal to a 0-param
+        // alias's own name). Detect a body whose head ConcretePath is the alias's own path and emit
+        // `obj` — the faithful erased form of an unmodelled utility/conditional result.
+        let bodyHeadIsAliasSelf (typeRef: Prelude.TypeRefRender) =
+            let headAtomIsSelf (atom: Prelude.TypeRefAtom) =
+                match atom with
+                | Prelude.TypeRefAtom.ConcretePath tp -> tp = path
+                | _ -> false
+            match typeRef.Kind with
+            | Prelude.TypeRefKind.Atom atom -> headAtomIsSelf atom
+            | Prelude.TypeRefKind.Molecule (Prelude.TypeRefMolecule.Prefix (head, _)) ->
+                match head.Kind with
+                | Prelude.TypeRefKind.Atom atom -> headAtomIsSelf atom
+                | _ -> false
+            | _ -> false
+        let resolveInnerRef () =
+            let rendered = resolveInnerRef ()
+            if List.isEmpty typeParameters && bodyHeadIsAliasSelf rendered then
+                RenderScopeStore.TypeRefRender.create scopeStore innerType.Value false Intrinsic.obj
+            else rendered
         // ── Single-call-signature function-abbreviation guard ──────────────────────────────
         // A function-type abbreviation has NO companion module. A nested anonymous structural type in
         // the body (an Intersection / real object TypeLiteral / TemplateLiteral) prerenders to a

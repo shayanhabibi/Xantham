@@ -51,6 +51,7 @@ let private method' name optional parameters returnType : Member =
     Member.Method [
         { Name = Name.Camel.create name
           Parameters = parameters
+          TypeParameters = []
           Type = LazyContainer.CreateFromValue returnType
           Documentation = []
           IsOptional = optional
@@ -84,7 +85,8 @@ let private indexSig parameters typ isReadOnly : Member =
 let private constructSig parameters typ : Member =
     Member.ConstructSignature [
         { Type = LazyContainer.CreateFromValue typ
-          Parameters = parameters }
+          Parameters = parameters
+          TypeParameters = [] }
     ]
 
 [<Tests>]

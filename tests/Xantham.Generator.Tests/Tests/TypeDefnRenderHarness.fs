@@ -95,6 +95,7 @@ let private interfaceWithMethod =
     let greet : Method = {
         Name = Name.Camel.create "greet"
         Parameters = [ primitive TypeKindPrimitive.String |> Parameter.create "name" ]
+        TypeParameters = []
         Type = LazyContainer.CreateFromValue (primitive TypeKindPrimitive.String)
         Documentation = []
         IsOptional = false
