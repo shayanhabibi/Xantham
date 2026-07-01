@@ -5,6 +5,16 @@ paths:
 
 ### Xantham.Generator
 
+#### Toolchain pin — DO NOT bump Fantomas naively (see `docs/toolchain-fantomas-fabulous-ast.md`)
+Output is formatted via **Fabulous.AST 2.0.0-pre06 -> Fantomas.Core 7.0.1** (transitive, and every
+Fabulous.AST release incl. pre07/pre08 hard-pins `Fantomas.Core [7.0.1]`). Fantomas 7.0.1 has an
+offside/doc-comment layout bug (multi-line generic tupled params; `<deprecated>`/`<br/>` blocks in a
+large `module rec`) fixed only in **Fantomas 8.0.0-alpha** — which is **unreachable**: overriding
+Fantomas ABI-crashes (`BindingNode..ctor`), and pre08 crashes on `FSharp.Core` resolution. This
+accounts for a residual ~34 FS errors (~24 strict-indentation-only, ~10 doc-comment parser cascades)
+that do NOT isolate. `<br/>` is load-bearing (do not strip). Revisit only when a Fabulous.AST release
+ships against Fantomas ≥ 8. Full breadcrumb + verified dead-ends: `docs/toolchain-fantomas-fabulous-ast.md`.
+
 #### Path System (`Types/NamePath.fs`)
 
 Three-level hierarchy: **anchored** (absolute) → **transient** (relative) → **path** (umbrella).
