@@ -172,6 +172,29 @@ let boundNameHelper =
                 (boundName long) (boundName (long + "_extra"))
     ]
 
+// `sharedLiteralNameStem` names an object-literal from its members. A call/construct-signature-only
+// literal (an overloaded callback — genuinely nominal since F# function types can't carry overloads)
+// has no member NAME, so it must be named from its call-signature PARAMETER names, NOT fall back to
+// the machine name `Lit`. This pins that the `Lit` fallback only fires for a truly nameless literal.
+let sharedLiteralNameStemFromCallSig =
+    let callSigLiteral (paramNames: string list) : TypeLiteral =
+        let parameters =
+            paramNames |> List.map (fun n -> primitive TypeKindPrimitive.String |> Parameter.create n)
+        let callSig : CallSignature =
+            { Documentation = []
+              Parameters = parameters
+              TypeParameters = []
+              Type = LazyContainer.CreateFromValue (primitive TypeKindPrimitive.String) }
+        { TypeLiteral.Members = [ Member.CallSignature [ callSig ] ] }
+    testList "sharedLiteralNameStem from call-signature params" [
+        testCase "call-signature literal names from its parameter names (not Lit)" <| fun _ ->
+            let stem = sharedLiteralNameStem (callSigLiteral [ "that"; "locales"; "options" ])
+            Flip.Expect.notEqual "must not fall back to the machine name" "Lit" stem
+            Flip.Expect.isTrue $"stem should derive from params, got {stem}" (stem.Contains "That" || stem.Contains "that" || stem.Contains "Locales" || stem.Contains "locales")
+        testCase "a genuinely nameless literal still falls back to Lit" <| fun _ ->
+            Flip.Expect.equal "empty literal stem is Lit" "Lit" (sharedLiteralNameStem { TypeLiteral.Members = [] })
+    ]
+
 // Mixed buckets: LiteralLike + Primitive -> the literals collapse to ONE inner literal-union
 // molecule member, unioned with the primitive (an Un over [literalUnion; primitive]).
 let mixedBuckets = testList "Mixed literal + primitive union" [
@@ -340,6 +363,7 @@ let tests = testList "Categorization" [
     literalUnionsHoist
     literalUnionNameBounding
     boundNameHelper
+    sharedLiteralNameStemFromCallSig
     mixedBuckets
     enumLike
     unwrapping

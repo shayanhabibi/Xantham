@@ -97,19 +97,28 @@ let sharedLiteralModule = ModulePath.init "SharedLiterals"
 /// names but different property TYPES are distinct ResolvedTypes), so `markSharedLiterals`
 /// disambiguates collisions deterministically — this only supplies the human-readable stem.
 let sharedLiteralNameStem (typeLiteral: TypeLiteral) : string =
+    // A call/construct signature has no member NAME, so name it from its PARAMETER names instead —
+    // a callback's params are its most meaningful identifier (`that/locales/options` for a
+    // localeCompare overload). Without this an overloaded-call-signature literal (which is genuinely
+    // nominal — F# function types cannot carry overloads) falls back to the machine name `Lit<N>`.
+    let paramNames (parameters: Parameter list) =
+        parameters |> List.map (fun p -> Name.Case.valueOrSource p.Name) |> String.concat "_"
     let memberName =
         function
         | Member.Property p -> ValueSome (Name.Case.valueOrSource p.Name)
         | Member.Method (m :: _) -> ValueSome (Name.Case.valueOrSource m.Name)
         | Member.GetAccessor g -> ValueSome (Name.Case.valueOrSource g.Name)
         | Member.SetAccessor s -> ValueSome (Name.Case.valueOrSource s.Name)
+        | Member.CallSignature (c :: _) -> ValueSome (paramNames c.Parameters)
+        | Member.ConstructSignature (c :: _) -> ValueSome (paramNames c.Parameters)
         | Member.Method []
-        | Member.CallSignature _
+        | Member.CallSignature []
         | Member.IndexSignature _
-        | Member.ConstructSignature _ -> ValueNone
+        | Member.ConstructSignature [] -> ValueNone
     let names =
         typeLiteral.Members
         |> List.choose (memberName >> ValueOption.toOption)
+        |> List.filter (fun s -> s <> "")
         |> List.sort
     match names with
     | [] -> "Lit"
@@ -134,11 +143,13 @@ let isHoistableObjectLiteral (typeLiteral: TypeLiteral) : bool =
             , rest
     // MUST mirror the TypeLiteral render arm below: a literal whose ONLY member is a single call
     // signature inlines as an F# function type (any arity, incl. spread — the param Type is already
-    // the array) and is therefore NOT a hoisted object-literal. Lockstep keeps the SharedLiterals
-    // counting pre-pass consistent with what actually gets hoisted.
+    // the array), and an index-signature-ONLY literal inlines as an `IDictionary<K,V>` map — both are
+    // therefore NOT hoisted object-literals. Lockstep keeps the SharedLiterals counting pre-pass
+    // consistent with what actually gets hoisted.
     match callSignatures, rest with
     | [], [] -> false
     | [ [ _singleSig ] ], [] -> false
+    | [], [ Member.IndexSignature _ ] -> false
     | _ -> true
 
 /// During the counting pre-pass, walk a top-level owner's ResolvedType graph (rooted at `rootRt`)
@@ -852,6 +863,27 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             let returnValue = prerender ctx scope singleSig.Type
             (parameters, returnValue)
             |> RenderScopeStore.TypeRefRender.create scope resolvedType false
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
+        // An index-signature-ONLY literal (`{ [k: K]: V }`) is a MAP, not an object with named
+        // members. Hoisting it as a nominal interface produces an unnameable `SharedLiterals.Lit<N>`
+        // (the stem finds no property/method members) that leaks a machine name into the public
+        // surface. Render it INLINE as `IDictionary<K, V>` — the faithful F#/Fable map, keeping both
+        // key and value types. (A read-only index sig maps the same; F# has no distinct interface.)
+        | [], [ Member.IndexSignature idx ] ->
+            let keyRef =
+                match idx.Parameters with
+                | keyParam :: _ -> prerender ctx scope keyParam.Type
+                | [] -> lift Intrinsic.string
+            let valueRef = prerender ctx scope idx.Type
+            let head =
+                Ast.LongIdent "System.Collections.Generic.IDictionary"
+                |> RenderScopeStore.TypeRefAtom.Unsafe.createWidget
+                |> RenderScopeStore.TypeRef.Unsafe.createAtom
+                |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+            RenderScopeStore.TypeRefMolecule.Unsafe.createPrefix head [ keyRef; valueRef ]
+            |> RenderScopeStore.TypeRef.Unsafe.createMolecule
+            |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
             |> RenderScope.createRootless resolvedType
             |> addOrReplaceScope ctx resolvedType
         | _, _ ->

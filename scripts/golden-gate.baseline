@@ -22,9 +22,21 @@
 # contract preserved — verified 0 new LiteralUnions dangles). smash 103->80; total FS unchanged (488),
 # determinism preserved. The residual 80 smash are mostly FAITHFUL long AI-model names (AiCfMetaLlama...
 # = the real source type names, correctly untouched).
-BL_CALLBACK_IFACE=32
-BL_PROTOTYPE=3
-BL_LIT_NUMBERED=3
-BL_SMASH=80
-BL_SYNTH_PUBLIC=522
-BL_LINES=21154
+# 2026-07-01: RECALIBRATED to the fresh agents@0.17.1 surface (the committed output.json; the prior
+# baseline was calibrated on the STALE 33055-type surface). Two wrong-tier fixes landed:
+#  (1) index-signature-only literal `{ [k]: V }` now renders INLINE as `IDictionary<K,V>` (a map),
+#      not a hoisted nominal `SharedLiterals.Lit<N>` interface.
+#  (2) overloaded-call-signature literals (genuinely nominal — F# fn-types can't carry overloads)
+#      now name from their call-signature PARAMETER names, not the machine name `Lit<N>`.
+# Combined: Lit<N> machine names 34->0; synth-public 671->664; callbacks 32->23; Prototype 3->0;
+# smash 0. RATCHETED the improved metrics down to their true current values. SYNTH_PUBLIC is REBASED
+# to the fresh surface's true count (664): it is a DIFFERENT, richer surface than the old baseline's
+# (agents@0.17.1 with zod/mcp families), not a regression — the next semantic target is reducing it
+# by handling more literals inline / at the right tier. FS-error count is Fantomas-7-floored at 10
+# (see docs/toolchain-fantomas-fabulous-ast.md); judge generator progress by THESE metrics.
+BL_CALLBACK_IFACE=23
+BL_PROTOTYPE=0
+BL_LIT_NUMBERED=0
+BL_SMASH=0
+BL_SYNTH_PUBLIC=664
+BL_LINES=17777

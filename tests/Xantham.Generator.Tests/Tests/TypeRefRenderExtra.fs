@@ -233,6 +233,29 @@ let extraCallSignatureTests = testList "Extra Call Signatures" [
         ||> Flip.Expect.equal ""
 ]
 
+// An index-signature-ONLY literal (`{ [k: K]: V }`) is a MAP, not an object with named members.
+// It must render INLINE as `IDictionary<K, V>` (keeping key + value types), NOT be hoisted as a
+// nominal `SharedLiterals.Lit<N>` interface (which leaks an unnameable machine name into the surface).
+let indexSignatureMapTests = testList "Index-signature literal renders as a map" [
+    let indexSigLiteral keyType valueType =
+        Member.IndexSignature {
+            IndexSignature.Parameters = [ Parameter.create "key" keyType ]
+            Type = LazyContainer.CreateFromValue valueType
+            IsReadOnly = false
+        }
+        |> TypeLiteral.addMember
+        |> funApply TypeLiteral.empty
+        |> TypeLiteral.wrap
+    testCase "{ [key: string]: string } -> IDictionary<string, string>" <| fun _ ->
+        indexSigLiteral (primitive TypeKindPrimitive.String) (primitive TypeKindPrimitive.String)
+        |> testRender "System.Collections.Generic.IDictionary<string, string>"
+        ||> Flip.Expect.equal ""
+    testCase "key + value types are both preserved (int -> bool)" <| fun _ ->
+        indexSigLiteral (primitive TypeKindPrimitive.Integer) (primitive TypeKindPrimitive.Boolean)
+        |> testRender "System.Collections.Generic.IDictionary<int, bool>"
+        ||> Flip.Expect.equal ""
+]
+
 [<Tests>]
 let tests = testList "TypeRef Extra" [
     nestedArrayTests
@@ -240,4 +263,5 @@ let tests = testList "TypeRef Extra" [
     extraTypeReferenceTests
     extraUnionTests
     extraCallSignatureTests
+    indexSignatureMapTests
 ]

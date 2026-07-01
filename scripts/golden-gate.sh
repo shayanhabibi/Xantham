@@ -22,11 +22,13 @@
 set -uo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SCRATCH="/tmp/claude-1000/-home-hhh-repos-Xantham/5d1a71b4-6f0c-46d9-8a78-0499b468a44e/scratchpad"
-IR="${1:-$SCRATCH/cf-staged.json}"
+GEN_INPUT="$REPO/src/Xantham.Fable/output.json"
+# Default IR = the committed production IR (the fresh agents@0.17.1 surface). Pass a path to gate a
+# different staged IR. (Previously defaulted to a session-scratch cf-staged.json that no longer
+# exists — harmless but produced noisy `cp: cannot stat`.)
+IR="${1:-$GEN_INPUT}"
 WORK="$(mktemp -d)"
 GOLDEN="$REPO/scripts/golden-gate.baseline"   # committed baseline of the metrics
-GEN_INPUT="$REPO/src/Xantham.Fable/output.json"
 
 fail=0
 note() { printf '%-52s %s\n' "$1" "$2"; }
@@ -45,7 +47,7 @@ dotnet build "$REPO/src/Xantham.Generator/Xantham.Generator.fsproj" -c Debug >/d
 
 # ── 1. regenerate TWICE (determinism is a hard requirement) ──────────────────
 gen() { # $1 = out file
-  cp "$IR" "$GEN_INPUT"
+  [ "$IR" -ef "$GEN_INPUT" ] || cp "$IR" "$GEN_INPUT"   # skip self-copy when IR is the committed IR
   dotnet run --no-build --project "$REPO/src/Xantham.Generator" -c Debug 1>"$1" 2>/dev/null
 }
 gen "$WORK/run1.fs"
