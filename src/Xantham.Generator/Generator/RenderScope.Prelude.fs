@@ -1021,14 +1021,29 @@ module ArenaInterner =
                 // application args, emitting the unparseable double-generic `Identity<obj><realArgs>`.
                 // With NO recorded arity the name is left unpadded, so a reference `Identity<X>` applies
                 // its real args to the bare name -> a well-formed `Identity<X>` (`type Identity<'T>='T`).
+                // An IDENTITY alias (`type Identity<T> = T`, body is a bare type parameter) is
+                // TRANSPARENT — `Identity<X>` IS `X` (the encoder already resolves applications to the
+                // argument). Its body is `'T`; remapping that body to the nominal name `Identity` makes
+                // every reference to the body render as a BARE `Identity` (no type argument) —
+                // `type Identity<'T>='T` given 0 args is FS0033. The .NET `module rec` resolver masked
+                // this but Fable's transpiler surfaces it (637 errors). Remap the identity body to
+                // `obj` (the erased form) instead of the nominal name: a bare reference to the alias
+                // body becomes `obj` (always valid); an APPLICATION `Identity<X>` resolves to `X` via
+                // the encoder's own resolution and does not hit this remap. Skipping the remap outright
+                // instead lets the raw `'T` body leak (unbound-typar) — `obj` is the safe erasure.
                 let isIdentityAlias =
                     match value.Type.Value with ResolvedType.TypeParameter _ -> true | _ -> false
+                let objRef =
+                    RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic Intrinsic.obj
+                    |> RenderScopeStore.TypeRef.Unsafe.createAtom
+                    |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+                let bodyRef = if isIdentityAlias then objRef else aliasRef
                 let recordArity key =
                     if allParamsUnconstrained && not isIdentityAlias && value.TypeParameters.Length > 0 then
                         GeneratorContext.Prelude.addTypeAliasArity ctx key value.TypeParameters.Length
                 // (1) Remap the alias BODY instance (`value.Type.Value`) — this is the instance
                 //     produced when the body's structural type is rendered directly.
-                GeneratorContext.Prelude.addTypeAliasRemap ctx value.Type.Value aliasRef
+                GeneratorContext.Prelude.addTypeAliasRemap ctx value.Type.Value bodyRef
                 recordArity value.Type.Value
                 // (2) After the extractor's self-reference decoupling, the alias body lives at a
                 //     distinct (generated) key, so a union member that references the alias by its
@@ -1043,7 +1058,7 @@ module ArenaInterner =
                 //     forcing — so this cannot stall on recursive graphs.
                 let exportKeyType = arena.ResolveType exportKey
                 if not (isShareableAliasBody exportKeyType) then
-                    GeneratorContext.Prelude.addTypeAliasRemap ctx exportKeyType aliasRef
+                    GeneratorContext.Prelude.addTypeAliasRemap ctx exportKeyType bodyRef
                     recordArity exportKeyType
             | _ -> ())
     let private getTopologicalSort (_: ArenaInterner) (graph: Graph) =

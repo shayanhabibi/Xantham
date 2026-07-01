@@ -20,9 +20,18 @@ let substitute (name: string) : string option =
     | "PromiseLike" -> Some "Promise"                // Fable.Core.JS.Promise (open Fable.Core.JS)
     | "IterableIterator" | "Iterator"
     | "ArrayIterator" | "AsyncIterableIterator"
+    | "StringIterator" | "RegExpStringIterator"      // lib.es iterator types Fable doesn't expose
+    | "Generator" | "AsyncGenerator"
     | "Iterable" -> Some "seq"                       // Fable maps seq<'T> to a JS iterable
-    | "ReadonlyArray" -> Some "System.Collections.Generic.IReadOnlyList"
+    | "ReadonlyArray" | "ConcatArray" -> Some "System.Collections.Generic.IReadOnlyList"
     | "Function" | "CallableFunction" | "NewableFunction" -> Some "obj"  // dynamic, no Fable equivalent
+    // lib.es/lib.dom globals the encoder attributes to `typescript` but Fable does not define — these
+    // have no faithful generic F#/Fable type, so erase to `obj` (always valid; the ref is opaque
+    // JS interop). Left undefined they render as a bare, dangling `RegExp`/`ReadonlyMap`/... name.
+    | "RegExp" | "RegExpMatchArray" | "RegExpExecArray"
+    | "ReadonlyMap" | "WeakMap" | "WeakSet"
+    | "PropertyKey" | "TemplateStringsArray"
+    | "ArrayBufferView" | "ArrayLike" -> Some "obj"
     | _ -> None
 
 // ── ResolvedTypePrelude interceptor ─────────────────────────────────────────────

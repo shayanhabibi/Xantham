@@ -1,0 +1,16 @@
+# Xantham transpile-conformance baseline — the ratchet for the Fable-transpile gate.
+# Lower as fixes land; the gate FAILS if FSHARP errors on the generated bindings regress above this.
+#
+# 2026-07-01: FIRST calibration. Fable-transpiling the generated bindings (the TRUE conformance
+# signal — the .NET FS-error harness UNDERCOUNTS because `module rec` name resolution masks broken
+# references) reported 1530 FSHARP errors. Two right-tier fixes brought it to 839:
+#  (1) identity-alias erasure — `type Identity<'T>='T` body now remaps to `obj` (bare `Identity`
+#      -> `obj`; applied `Identity<X>` -> `X` via the encoder). Fable 1530->902; Identity errors 637->0.
+#  (2) lib.es/lib.dom globals Fable doesn't define (RegExp, ConcatArray, StringIterator,
+#      RegExpStringIterator, Generator/AsyncGenerator, ReadonlyMap/WeakMap, ...) now substitute to
+#      `obj`/`seq` in LibEsSubstitution. Fable 902->839.
+# RESIDUAL ~839 is dominated by: local nested-type/hoisting DANGLES (Origin/ReplyTo/ListChanged/
+# _metaContentRole/... referenced-but-not-emitted — a deeper placement root), remaining arity
+# mismatches (Zod.ZodNumber/ZodObject given wrong args), unbound typars, and the PropertyKey
+# TypeAlias (the substitution only covers Interface/Class, not union TypeAliases yet).
+BL_FSHARP=839

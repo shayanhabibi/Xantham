@@ -18,7 +18,18 @@ let private mappings = [
     "AsyncIterableIterator", Some "seq"
     "Iterable",             Some "seq"
     "ReadonlyArray",        Some "System.Collections.Generic.IReadOnlyList"
+    "ConcatArray",          Some "System.Collections.Generic.IReadOnlyList"
     "Function",             Some "obj"
+    // lib.es/lib.dom globals Fable does not define -> erased to seq / obj (left unmapped they render
+    // as a dangling bare name that Fable's transpiler rejects, e.g. `RegExp` is not defined).
+    "StringIterator",       Some "seq"
+    "RegExpStringIterator", Some "seq"
+    "Generator",            Some "seq"
+    "AsyncGenerator",       Some "seq"
+    "RegExp",               Some "obj"
+    "ReadonlyMap",          Some "obj"
+    "PropertyKey",          Some "obj"
+    "TemplateStringsArray", Some "obj"
 ]
 
 // Names that are the surface's OWN types (or otherwise not stdlib) — must NOT be rewritten,
