@@ -37,10 +37,19 @@ let inline private createModulePath (qualifiedName: QualifiedName) (source: Aren
                 |> _.Split("node_modules")
                 |> Array.last
                 |> _.Split([|'\\'; '/'|], System.StringSplitOptions.RemoveEmptyEntries)
+            // The file path segments AFTER the package name (`dist/esm/client/index`, ...) are npm
+            // packaging artifacts, NOT F# module structure — turning them into module segments emits
+            // an unparseable `` ``@scope``.Dist.Esm.Client.Index.T ``. Keep ONLY the package identity:
+            // `@scope/pkg` (2 segments) for a scoped package, else the single package name.
+            let packageParts =
+                match fileNameParts with
+                | [||] -> fileNameParts
+                | arr when arr.[0].StartsWith("@") -> arr |> Array.truncate 2
+                | arr -> arr |> Array.truncate 1
             // change the source name to the first qualifier in the file path
-            let s = fileNameParts |> Array.head
-            // add the remaining qualifiers to the head of the path
-            fileNameParts
+            let s = packageParts |> Array.head
+            // add the remaining package qualifiers to the head of the path
+            packageParts
             |> Array.tail
             |> Array.toList
             |> List.append

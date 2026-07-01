@@ -48,6 +48,15 @@ let nestedArrayTests = testList "Nested Arrays" [
 ]
 
 let extraTupleTests = testList "Extra Tuples" [
+    // The EMPTY TS tuple type `[]` (zero-length fixed tuple) has no F# tuple equivalent — a
+    // zero-element tuple molecule renders to nothing (emitting `member: with get`, FS0010). The
+    // empty-tuple prerender arm maps it to `obj`. (zod's $ZodIssueInvalidUnionMultipleMatch.errors)
+    testCase "empty tuple `[]` renders obj (not an empty render)" <| fun _ ->
+        []
+        |> Tuple.create
+        |> Tuple.wrap
+        |> testRender "obj"
+        ||> Flip.Expect.equal ""
     testCase "Tuple with all optional" <| fun _ ->
         [
             primitive TypeKindPrimitive.String

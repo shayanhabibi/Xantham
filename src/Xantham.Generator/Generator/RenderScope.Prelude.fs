@@ -36,6 +36,23 @@ let private stableShortHash (s: string) : string =
         h <- (h ^^^ uint32 b) * 16777619u
     h.ToString("x8")
 
+/// Bound an underscore-joined token string to a legible identifier. A short name (<=40 char) is
+/// kept verbatim; a long one is truncated to a readable prefix (first 3 tokens, capped 28 char)
+/// plus a content-stable FNV-1a hash of the FULL string for UNIQUENESS. Deterministic and
+/// collision-safe (distinct full strings differ in the hash). Shared by every canonical-home name
+/// path (literal-union enums AND shared object-literals) so the two cannot diverge — an unbounded
+/// SharedLiterals name (335-char keyof-Array smash) was exactly such a divergence.
+let boundName (full: string) : string =
+    if full.Length <= 40 then full
+    else
+        let prefix =
+            full.Split('_')
+            |> Array.truncate 3
+            |> String.concat "_"
+            // Cap the readable prefix too (a single very long token can blow the budget).
+            |> fun p -> if p.Length > 28 then p.Substring(0, 28) else p
+        $"{prefix}_{stableShortHash full}"
+
 let literalUnionName (literals: ResolvedTypeLiteralLike list) : Name<Case.pascal> =
     let token =
         function
@@ -55,21 +72,10 @@ let literalUnionName (literals: ResolvedTypeLiteralLike list) : Name<Case.pascal
     // exceeds the threshold, keep the first few tokens for READABILITY and append a content-stable
     // hash of the FULL sorted token list for UNIQUENESS — still deterministic and collision-safe
     // (two distinct value-sets differ in the hash), just bounded.
+    // The canonical name is a legible identifier bounded via the shared `boundName` helper (40 keeps
+    // short enums verbatim; long ones become prefix+hash). Pascal-casing roughly preserves length.
     let sortedTokens = literals |> List.map token |> List.sort
-    let full = sortedTokens |> String.concat "_"
-    let bounded =
-        // Pascal-casing roughly preserves length; bound the raw token string so the final type name
-        // stays a legible identifier. 40 keeps short enums verbatim while taming the long ones.
-        if full.Length <= 40 then full
-        else
-            let prefix =
-                sortedTokens
-                |> List.truncate 3
-                |> String.concat "_"
-                // Cap the readable prefix too (a single very long literal value can blow the budget).
-                |> fun p -> if p.Length > 28 then p.Substring(0, 28) else p
-            $"{prefix}_{stableShortHash full}"
-    bounded |> Name.Pascal.create
+    sortedTokens |> String.concat "_" |> boundName |> Name.Pascal.create
 
 let literalUnionTypePath (literals: ResolvedTypeLiteralLike list) : TypePath =
     literalUnionModule |> TypePath.createWithName (literalUnionName literals)
@@ -107,7 +113,9 @@ let sharedLiteralNameStem (typeLiteral: TypeLiteral) : string =
         |> List.sort
     match names with
     | [] -> "Lit"
-    | _ -> names |> String.concat "_"
+    // Bound via the same shared helper as `literalUnionName`: an unbounded member-name smash
+    // produced a 335-char `SharedLiterals.``0[SymbolIterator]...With``` (keyof-Array) that broke F#.
+    | _ -> names |> String.concat "_" |> boundName
 
 /// True when a `TypeLiteral` renders as a HOISTED named object-type (the `_, _` arm of the
 /// TypeLiteral prerender below) rather than inlining to `obj` (empty) or a bare function signature
@@ -789,6 +797,13 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> prerender ctx scope
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
+    | ResolvedType.Tuple { Types = [] } ->
+        // The EMPTY TS tuple type `[]` (a zero-length fixed tuple, e.g. zod's
+        // `$ZodIssueInvalidUnionMultipleMatch.errors: []`) has NO F# tuple equivalent — a tuple
+        // molecule with zero elements renders to nothing (`errors: with get`, FS0010). Emit `obj`.
+        lift Intrinsic.obj
+        |> RenderScope.createRootless resolvedType
+        |> addOrReplaceScope ctx resolvedType
     | ResolvedType.Tuple tuple ->
         tuple.Types
         |> List.mapi (fun idx ->
@@ -969,8 +984,15 @@ module ArenaInterner =
                 let allParamsUnconstrained =
                     value.TypeParameters
                     |> List.forall (fun tp -> tp.Value.Constraint.IsNone)
+                // An IDENTITY alias (`type Identity<T> = T`, body is a bare type parameter) must NOT
+                // record arity: padding its remapped name to `Identity<obj>` collides with the real
+                // application args, emitting the unparseable double-generic `Identity<obj><realArgs>`.
+                // With NO recorded arity the name is left unpadded, so a reference `Identity<X>` applies
+                // its real args to the bare name -> a well-formed `Identity<X>` (`type Identity<'T>='T`).
+                let isIdentityAlias =
+                    match value.Type.Value with ResolvedType.TypeParameter _ -> true | _ -> false
                 let recordArity key =
-                    if allParamsUnconstrained && value.TypeParameters.Length > 0 then
+                    if allParamsUnconstrained && not isIdentityAlias && value.TypeParameters.Length > 0 then
                         GeneratorContext.Prelude.addTypeAliasArity ctx key value.TypeParameters.Length
                 // (1) Remap the alias BODY instance (`value.Type.Value`) — this is the instance
                 //     produced when the body's structural type is rendered directly.

@@ -191,4 +191,24 @@ let aliasArityPadTests =
             TestHelper.prerender ctx withoutBody
             |> Xantham.Generator.Tests.Tests.TypeRefRender.testTypeRef "option<Pkg.Without>"
             ||> Flip.Expect.equal "remapped body without recorded arity must render the bare name"
+
+        // IDENTITY alias (`type Identity<T> = T`): its resolved body is a bare TypeParameter.
+        // `prerenderTypeAliases` deliberately does NOT record arity for such a body (the `isIdentityAlias`
+        // guard on `recordArity`). Were the arity recorded, `padAliasNameToArity` would pad the remapped
+        // name to `Identity<obj>`, which then collides with the real application args and emits the
+        // unparseable double-generic `Identity<obj><realArgs>` (the zod `Identity`/`Flatten` breakage).
+        // With arity UNRECORDED the bare name is emitted and real args apply cleanly. This pins the
+        // no-pad OUTCOME the guard produces (parallel to the constrained-alias control above).
+        testCase "identity-alias body (bare TypeParameter) renders bare — no obj padding" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let identityBody = TypeParameter.create "T" |> TypeParameter.wrap
+            let nameRef =
+                Interface.create "Identity" |> Interface.withPath [ "Pkg" ] |> Interface.wrap
+                |> TestHelper.prerender ctx
+            GeneratorContext.Prelude.addTypeAliasRemap ctx identityBody nameRef
+            // No addTypeAliasArity — exactly what the isIdentityAlias guard enforces for a
+            // bare-TypeParameter body. The remapped identity body must render the bare name.
+            TestHelper.prerender ctx identityBody
+            |> Xantham.Generator.Tests.Tests.TypeRefRender.testTypeRef "Pkg.Identity"
+            ||> Flip.Expect.equal "identity-alias body must render the bare name (never Identity<obj>)"
     ]

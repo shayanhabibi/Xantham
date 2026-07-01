@@ -632,6 +632,11 @@ let pascalExhaustiveTests =
             "image/avif",     "ImageAvif"
             "$eq$gt",         "EqGt"
             "Message.inputImage", "MessageInputImage"
+            // `@` (scoped-npm-package segment, e.g. `@modelcontextprotocol` from a cross-package
+            // `node_modules/@scope/pkg` ref) is INVALID in a TYPE / module name even backticked —
+            // `` ``@scope``.Sub.T `` is unparseable. Treated as a word boundary like `.`/`/`/`$`.
+            "@modelcontextprotocol", "Modelcontextprotocol"
+            "@scope/pkg",            "ScopePkg"
         ] <| fun (source, expected) ->
             let m = modifiedCased (Name.Pascal.create source)
             Expect.equal m expected "pascal output"

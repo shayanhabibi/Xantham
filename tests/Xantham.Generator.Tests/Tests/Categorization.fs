@@ -153,6 +153,25 @@ let literalUnionNameBounding =
                 (nameOf (manyTokens "x" 30)) (nameOf (manyTokens "y" 30))
     ]
 
+// `boundName` is the SHARED bounding helper behind BOTH `literalUnionName` (union values) and
+// `sharedLiteralNameStem` (object-literal member names). Factoring it prevents the two paths
+// diverging — the SharedLiterals path was previously UNBOUNDED and emitted a 335-char
+// `SharedLiterals.``0[SymbolIterator]...With``` (keyof-Array member smash) that broke F#.
+let boundNameHelper =
+    let long = String.concat "_" [ for i in 1..40 -> $"memberNameNumber{i}" ]
+    testList "boundName (shared canonical-home name bound)" [
+        testCase "a short token string is kept verbatim (<=40 char)" <| fun _ ->
+            Flip.Expect.equal "short names untouched" "at_concat" (boundName "at_concat")
+        testCase "a long token string is BOUNDED to prefix + hash" <| fun _ ->
+            Flip.Expect.isTrue $"bounded, got {(boundName long).Length}: {boundName long}"
+                ((boundName long).Length <= 48)
+        testCase "bounded name is DETERMINISTIC (content-stable, not GetHashCode)" <| fun _ ->
+            Flip.Expect.equal "same input -> same bounded name" (boundName long) (boundName long)
+        testCase "distinct long inputs get DISTINCT bounded names (hash disambiguates)" <| fun _ ->
+            Flip.Expect.notEqual "different member sets must not collide"
+                (boundName long) (boundName (long + "_extra"))
+    ]
+
 // Mixed buckets: LiteralLike + Primitive -> the literals collapse to ONE inner literal-union
 // molecule member, unioned with the primitive (an Un over [literalUnion; primitive]).
 let mixedBuckets = testList "Mixed literal + primitive union" [
@@ -320,6 +339,7 @@ let tests = testList "Categorization" [
     singleCollapse
     literalUnionsHoist
     literalUnionNameBounding
+    boundNameHelper
     mixedBuckets
     enumLike
     unwrapping

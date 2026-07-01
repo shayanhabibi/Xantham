@@ -211,23 +211,26 @@ module Name =
             else
                 pascalCaseRegex.Replace(s, fun m -> m.Groups.[1].Value.ToUpperInvariant())
 
-        /// `$`, `/`, and `.` are valid in a backtick-quoted MEMBER name (`` ``a/b`` ``,
+        /// `$`, `/`, `.`, and `@` are valid in a backtick-quoted MEMBER name (`` ``a/b`` ``,
         /// `` ``c.d`` ``) but INVALID in a TYPE / module / union / namespace name even when
-        /// backticked (FS0883). They leak in from literal VALUES used as type-name fragments:
-        /// MongoDB-style query operators (`$eq`/`$in`/... and the smashed literal-union enum names
-        /// built from them), MIME-type literals (`image/avif`), and FQN-derived nested-literal
-        /// names joined with `.` (`Message.inputImage.imageUrl`). Treat each as a WORD boundary so
-        /// the name PascalCases across it (`$eq$gt` -> `EqGt`, `image/avif` -> `ImageAvif`,
-        /// `Message.inputImage` -> `MessageInputImage`) — readable, not just stripped — then drop
-        /// any residual occurrence. Applied ONLY on the Pascal (type-level) path, so valid
-        /// backtick-escaped member names are untouched.
-        let private typeNameSeparators = Regex(@"[$/.]+(.)?", RegexOptions.Compiled)
+        /// backticked (FS0883 — and a backtick-escaped segment mid dotted-path, e.g.
+        /// `` ``@scope``.Sub.T ``, is unparseable). They leak in from literal VALUES used as
+        /// type-name fragments: MongoDB-style query operators (`$eq`/`$in`/...), MIME-type literals
+        /// (`image/avif`), FQN-derived nested-literal names joined with `.`
+        /// (`Message.inputImage.imageUrl`), and scoped-npm-package module segments (`@scope`, from a
+        /// cross-package `node_modules/@scope/pkg` reference). Treat each as a WORD boundary so the
+        /// name PascalCases across it (`$eq$gt` -> `EqGt`, `image/avif` -> `ImageAvif`,
+        /// `Message.inputImage` -> `MessageInputImage`, `@modelcontextprotocol` ->
+        /// `Modelcontextprotocol`) — readable, not just stripped — then drop any residual occurrence.
+        /// Applied ONLY on the Pascal (type-level) path, so valid backtick-escaped member names are
+        /// untouched.
+        let private typeNameSeparators = Regex(@"[$/.@]+(.)?", RegexOptions.Compiled)
         let sanitizeTypeName (s: string) =
             let cased =
                 typeNameSeparators.Replace(s, fun m ->
                     if m.Groups.[1].Success then m.Groups.[1].Value.ToUpperInvariant() else "")
             // Drop any leading separator that produced no following char, and any stragglers.
-            cased.Replace("$", "").Replace("/", "").Replace(".", "")
+            cased.Replace("$", "").Replace("/", "").Replace(".", "").Replace("@", "")
 
         let toCamelCase (s: string) =
             if isUpperSnakeCase s then s
