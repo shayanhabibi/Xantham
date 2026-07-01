@@ -796,9 +796,13 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
           TransientChildren = ValueSome scope }
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeParameter typeParameter ->
+        // Render the typar as an INTRINSIC atom carrying its (quoted, e.g. `'S`) name — NOT a Widget.
+        // A Widget-wrapped `Ast.LongIdent` is opaque to the orphan-typar guards (both the heritage
+        // guard and the member-level guard match `Intrinsic s when s.StartsWith "'"`), so a free typar
+        // leaking from a collapsed alias body could never be rewritten to `obj`. As an Intrinsic it is
+        // visible to those guards; localise renders `Intrinsic s -> Ast.LongIdent s`, identical output.
         typeParameter.Name
         |> Name.Case.valueOrModified
-        |> Ast.LongIdent
         |> RenderScopeStore.TypeRefRender.create scope resolvedType false
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType

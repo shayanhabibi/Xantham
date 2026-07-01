@@ -21,4 +21,21 @@
 # (Zod.V3.X / Zod.V4.X). Fable FSHARP 839->733 (-106; ZodObject/ZodArray arity errors 99->0). The
 # corresponding count-blind golden-gate rises (synth-public +14, callbacks +1) are the fix SURFACING
 # v4 types the collision had erased — see golden-gate.baseline for the invalid->valid justification.
-BL_FSHARP=733
+# 2026-07-01: ORPHAN-TYPAR guard at the anchor stage + Transient/Concrete anchoring-module UNIFICATION.
+# A member/nested/alias-body render can reference a type parameter its enclosing emitted `type X =` does
+# not (and cannot) declare — a FREE typar leaking from a collapsed intermediate alias body (e.g. the
+# `S["_output"]` IndexedAccess inside an inlined conditional/mapped alias). F# rejects it (FS0010/FS0039
+# "The type parameter 'X is not defined"), which the .NET `module rec` harness masks but Fable surfaces.
+# The heritage clause already guarded this via TypeRefRender.substituteForHeritage; the fix extends the
+# SAME guard to member/function/alias-body positions. CRITICAL placement: `localise` rewrites every atom
+# to an opaque Widget (erasing the Intrinsic-typar distinction), so the guard MUST run BETWEEN anchor and
+# localise (RenderScope.Anchored.fs `anchorScrubLocalise`), and it UNIONs the enclosing type's typars WITH
+# each method's own declared typars so legitimately-generic members (registerTool<'InputArgs,'OutputArgs>,
+# ZodType<'Input,'Def,'Output>) are preserved while true orphans erase to `obj` (the only faithful render).
+# Applied uniformly by UNIFYING the two near-identical Transient/Concrete anchoring submodules into one
+# `Shared` core (99 lines of duplication removed) — so BOTH anchoring paths get the guard from one
+# definition. Fable FSHARP 733->511 (-222 cumulative; unbound-typar 237->8). .NET gate 10 (unchanged),
+# semantic golden gate PASS (no metric shift — erased typars were uncompilable free vars), determinism
+# byte-identical, generator+decoder suites green. Residual roots (distinct): unused-typar-abbrev (81),
+# ZodIssue/ZodIssueBase compat (28), obj-given-args (27), cyclic-abbrev (19).
+BL_FSHARP=511

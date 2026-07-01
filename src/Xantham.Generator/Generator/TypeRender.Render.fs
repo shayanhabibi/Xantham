@@ -536,26 +536,18 @@ module TypeLikeRender =
             })
             |> Documentation.renderForMember typeLike
             )
-    let renderInheritance (ctx: GeneratorContext) (inScopeTyparNames: Set<string>) (typeRefRender: TypeRefRender) =
-        // Non-interface bases (lib.es scalar substitutions like Error->exn) are already
-        // dropped at anchor time by TypeRefRender.isInterfaceBase (RenderScope.Anchored.fs),
-        // BEFORE localise erases the Path/scalar distinction. The only heritage substitution
-        // that still belongs here is the orphan-typar guard, which needs inScopeTyparNames
-        // (a render-time set): an in-scope typar base is rendered as-is; an orphan typar is
-        // rewritten to `obj` by substituteForHeritage, which is not a valid inherit base, so
-        // drop it. Everything reaching here is otherwise an interface base — render it.
-        let substituted = TypeRefRender.substituteForHeritage inScopeTyparNames typeRefRender
-        let isOrphanedScalar =
-            match substituted.Kind with
-            | TypeRefKind.Atom (TypeRefAtom.Intrinsic _) -> true
-            | _ -> false
-        if isOrphanedScalar then None
-        else
-            substituted
-            |> TypeRefRender.nonNullable
-            |> TypeRefRender.render
-            |> Ast.Inherit
-            |> Some
+    let renderInheritance (ctx: GeneratorContext) (typeRefRender: TypeRefRender) =
+        // Non-interface bases (lib.es scalar substitutions like Error->exn) AND orphan-typar bases are
+        // already handled at ANCHOR time (RenderScope.Anchored.fs `Shared.anchorTypeDefn`): the
+        // Inheritance list is `anchor -> filter isInterfaceBase -> substituteForHeritage -> localise`,
+        // so a bare orphan typar base is dropped by the filter and an orphan typar ARG is rewritten to
+        // `obj` before it ever reaches here. Everything arriving here is a valid, localised interface
+        // base — render it.
+        typeRefRender
+        |> TypeRefRender.nonNullable
+        |> TypeRefRender.render
+        |> Ast.Inherit
+        |> Some
     let renderConstructors (ctx: GeneratorContext) (typeLike: TypeLikeRender) =
         typeLike.Constructors
         |> List.map (fun parameters ->
@@ -587,10 +579,6 @@ module TypeLikeRender =
             typeLike.Functions
             |> List.collect (FunctionLikeRender.renderAbstract ctx)
         let memberCollection = members @ functions
-        let inScopeTypars =
-            typeLike.TypeParameters
-            |> List.map (fun tp -> "'" + Name.Case.valueOrModified tp.Name)
-            |> Set.ofList
         let builder =
             if List.isEmpty memberCollection
             then Ast.InterfaceEnd(renderName)
@@ -599,7 +587,7 @@ module TypeLikeRender =
             yield! renderAbstractConstructors ctx typeLike
             yield!
                 typeLike.Inheritance
-                |> List.choose (renderInheritance ctx inScopeTypars)
+                |> List.choose (renderInheritance ctx)
             yield! memberCollection
         }
         |> Documentation.renderForTypeDefn typeLike

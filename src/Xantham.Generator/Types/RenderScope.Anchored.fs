@@ -174,7 +174,9 @@ module TypeRefRender =
                         if Set.contains s inScopeTyparNames then
                             atom
                         else
-                            printfn "Warning: orphan type parameter '%s' in heritage clause, substituting with 'obj'" s
+                            // NOTE: stderr, not stdout — the generator writes the emitted F# to stdout,
+                            // so a `printfn` here would corrupt the output stream.
+                            eprintfn "Warning: orphan type parameter %s (not in scope), substituting with 'obj'" s
                             TypeRefAtom.Intrinsic "obj"
                     | _ -> atom
                 { render with Kind = TypeRefKind.Atom newAtom }
