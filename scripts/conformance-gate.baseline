@@ -13,4 +13,12 @@
 # _metaContentRole/... referenced-but-not-emitted — a deeper placement root), remaining arity
 # mismatches (Zod.ZodNumber/ZodObject given wrong args), unbound typars, and the PropertyKey
 # TypeAlias (the substitution only covers Interface/Class, not union TypeAliases yet).
-BL_FSHARP=839
+# 2026-07-01: zod v3/v4 TWIN-PATH disambiguation (TypeRefRender.Paths.fs createModulePath) — a package
+# shipping multiple versions in one install (zod: `zod/v3/types` + `zod/v4/classic/schemas`) declares
+# the SAME type names under each; the prior packageParts truncation kept only `zod`, collapsing both
+# versions to one path and breaking the loser's refs (v3 5-param class wins the slot, v4 2-param
+# interface refs resolve to wrong arity). Now keeps a following `vN` segment so twins get distinct homes
+# (Zod.V3.X / Zod.V4.X). Fable FSHARP 839->733 (-106; ZodObject/ZodArray arity errors 99->0). The
+# corresponding count-blind golden-gate rises (synth-public +14, callbacks +1) are the fix SURFACING
+# v4 types the collision had erased — see golden-gate.baseline for the invalid->valid justification.
+BL_FSHARP=733

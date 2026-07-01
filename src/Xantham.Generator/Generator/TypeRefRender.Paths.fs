@@ -40,12 +40,21 @@ let inline private createModulePath (qualifiedName: QualifiedName) (source: Aren
             // The file path segments AFTER the package name (`dist/esm/client/index`, ...) are npm
             // packaging artifacts, NOT F# module structure — turning them into module segments emits
             // an unparseable `` ``@scope``.Dist.Esm.Client.Index.T ``. Keep ONLY the package identity:
-            // `@scope/pkg` (2 segments) for a scoped package, else the single package name.
+            // `@scope/pkg` (2 segments) for a scoped package, else the single package name — PLUS an
+            // immediately-following VERSION segment (`v3`, `v4`, ...) when present. A package that ships
+            // MULTIPLE versions in one install (zod: `zod/v3/types` + `zod/v4/classic/schemas`) declares
+            // the SAME type name under each; truncating to just `zod` collapses both distinct types to
+            // one path (`Zod.ZodObject`), so one def wins the slot and the other version's references
+            // resolve to the wrong arity (the v3-class-wins / v4-interface-refs-break collision). Keep
+            // the `vN` segment so the twins get distinct homes (`Zod.V3.X` / `Zod.V4.X`).
+            let isVersionSeg (s: string) =
+                s.Length >= 2 && s.[0] = 'v' && s.[1..] |> Seq.forall System.Char.IsDigit
             let packageParts =
-                match fileNameParts with
-                | [||] -> fileNameParts
-                | arr when arr.[0].StartsWith("@") -> arr |> Array.truncate 2
-                | arr -> arr |> Array.truncate 1
+                let pkgLen = match fileNameParts with arr when arr.Length > 0 && arr.[0].StartsWith("@") -> 2 | _ -> 1
+                let withVersion =
+                    if fileNameParts.Length > pkgLen && isVersionSeg fileNameParts.[pkgLen]
+                    then pkgLen + 1 else pkgLen
+                fileNameParts |> Array.truncate withVersion
             // change the source name to the first qualifier in the file path
             let s = packageParts |> Array.head
             // add the remaining package qualifiers to the head of the path

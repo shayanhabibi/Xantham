@@ -34,9 +34,24 @@
 # (agents@0.17.1 with zod/mcp families), not a regression — the next semantic target is reducing it
 # by handling more literals inline / at the right tier. FS-error count is Fantomas-7-floored at 10
 # (see docs/toolchain-fantomas-fabulous-ast.md); judge generator progress by THESE metrics.
-BL_CALLBACK_IFACE=23
+# 2026-07-01: zod v3/v4 TWIN-PATH disambiguation (TypeRefRender.Paths.fs createModulePath) — a package
+# that ships MULTIPLE versions in one install (zod: `zod/v3/types` + `zod/v4/classic/schemas`) declares
+# the SAME type names (ZodObject/ZodArray/ZodErrorMap/ParseContext/...) under each. The prior packageParts
+# truncation kept only `zod`, COLLAPSING both distinct versions to one path (Zod.ZodObject); one def won
+# the emitted slot and the other version's refs resolved to the WRONG ARITY (v3 5-param class wins,
+# v4 2-param interface refs break). Now keeps a following `vN` version segment so twins get distinct homes
+# (Zod.V3.X / Zod.V4.X). Fable-conformance errors 839->733 (-106; ZodObject/ZodArray arity 99->0).
+# TWO count-blind metrics ratchet UP as a DIRECT CONSEQUENCE of the fix surfacing types the collision
+# had ERASED (verified: both deltas are 100% zod-attributable, zero collateral):
+#  - synth-public 664->678 (+14): the 658 Zod.V3.*/Zod.V4.* refs that formerly ALL collapsed onto one
+#    broken Zod.ZodObject home now correctly point at two distinct (correct) homes.
+#  - callbacks-as-Invoke 23->24 (+1): v4's `ZodErrorMap<'T>` callback interface was being SWALLOWED by
+#    v3's `ZodErrorMap` function alias winning the slot; it now exists as its own usable type.
+# These are invalid->valid (the v4 zod schemas went from unusable/wrong-arity to usable). Ratcheted the
+# two affected baselines UP by exactly the surfaced count, justified here. The others are unchanged.
+BL_CALLBACK_IFACE=24
 BL_PROTOTYPE=0
 BL_LIT_NUMBERED=0
 BL_SMASH=0
-BL_SYNTH_PUBLIC=664
+BL_SYNTH_PUBLIC=678
 BL_LINES=17777
