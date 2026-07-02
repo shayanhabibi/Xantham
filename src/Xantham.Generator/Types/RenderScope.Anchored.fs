@@ -209,6 +209,38 @@ module TypeRefRender =
                     TypeRefAtom.Intrinsic "obj"
             | _ -> atom)
 
+    /// OPAQUE/ERASED PREFIX COLLAPSE: generic applications whose HEAD is an
+    /// opaque-handle or Erased advisory path carry policy-meaningless arguments
+    /// (`Zod.ZodType<...garbage...>`, `Erased.X<...>`) — and malformed arg trees
+    /// (`obj<...>`) break compilation. Collapse the whole application to the head
+    /// atom; the phantom-arity interfaces make surviving shallow applications legal,
+    /// this makes DEEP/broken ones vanish. Roots = ErasedRoots + "Erased" + handles.
+    let collapseOpaquePrefixes (collapseRoots: string list) (render: TypeRefRender) : TypeRefRender =
+        let isCollapsible (head: TypeRefRender) =
+            match head.Kind with
+            // Args applied to `obj` (scrub residue) are NEVER valid F# — always collapse.
+            | TypeRefKind.Atom (TypeRefAtom.Intrinsic "obj") -> true
+            | TypeRefKind.Atom (TypeRefAtom.Path p) ->
+                match ModulePath.flatten p.Parent |> List.tryHead |> Option.map Name.Case.valueOrModified with
+                | Some root -> root = "Erased" || collapseRoots |> List.contains root
+                | None -> false
+            | _ -> false
+        let rec walk (render: TypeRefRender) : TypeRefRender =
+            match render.Kind with
+            | TypeRefKind.Atom _ -> render
+            | TypeRefKind.Molecule (TypeRefMolecule.Prefix(head, _)) when isCollapsible head ->
+                // Collapse the whole application to the bare head atom.
+                { render with Kind = head.Kind }
+            | TypeRefKind.Molecule molecule ->
+                let newMolecule =
+                    match molecule with
+                    | TypeRefMolecule.Tuple rs -> TypeRefMolecule.Tuple(rs |> List.map walk)
+                    | TypeRefMolecule.Union rs -> TypeRefMolecule.Union(rs |> List.map walk)
+                    | TypeRefMolecule.Function(ps, r) -> TypeRefMolecule.Function(ps |> List.map walk, walk r)
+                    | TypeRefMolecule.Prefix(head, args) -> TypeRefMolecule.Prefix(walk head, args |> List.map walk)
+                { render with Kind = TypeRefKind.Molecule newMolecule }
+        walk render
+
     /// FORWARD-REFERENCE SCRUB: under a placement order (unit DAG), a reference
     /// from a definition hosted at unit index H to a type rooted at index R > H
     /// points FORWARD in the DAG — uncompilable by construction. Degrade the atom

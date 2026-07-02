@@ -68,7 +68,15 @@
 # defs (localised refs to never-materialized depth-2 children: ProgressToken/Default/
 # Const/Tools/Resources/ReplyTo), 10x FS0033 args (the coordinated phantom-typar fix),
 # 1x FS0883. One focused interlude estimated to Zod assembly.
-BL_FIDELITY_CLOUDEDGE_ZOD=28
+# 2026-07-04 (2): burn 28 -> 16. Cleared: 8x FS0033 via the OPAQUE/ERASED PREFIX COLLAPSE
+# (generic applications onto handle/Erased/obj heads carry policy-meaningless args —
+# `Zod.ZodType<...>` deep trees and `obj<...>` scrub residue collapse to the bare head;
+# args-on-obj is NEVER valid F#, collapsed unconditionally); 4 more FS0039 with it.
+# Remaining 16: 15x FS0039 — the FORCED-DEF NESTED-CHILD gap (probe: `type Default`/
+# `type Const` exist NOWHERE; the canonical driver drives Anchored-rooted scopes only,
+# while depth-2 children of pool parents have TRANSIENT/moored roots that the normal
+# export-driven anchoring recursion would have materialized) — plus 1x FS0883.
+BL_FIDELITY_CLOUDEDGE_ZOD=16
 BL_FIDELITY_CLOUDEDGE_WORKERS=0
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0

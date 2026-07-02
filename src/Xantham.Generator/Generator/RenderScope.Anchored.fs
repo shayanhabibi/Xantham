@@ -49,6 +49,7 @@ module Render =
             ctx.SyntheticPlacementOrder
             (fun root -> GeneratorContext.Advisory.increment ctx $"forward-ref-scrub:{root}")
             hostRoot
+        |> TypeRefRender.collapseOpaquePrefixes ctx.ErasedRoots
         |> TypeRefRender.localise anchorPath
 
     // ---- Shared anchoring core (single source of truth for both the Transient and Concrete paths) ----
