@@ -1736,6 +1736,9 @@ module Schema =
         DuplicateTypes: Map<TypeKey, DuplicateEncoding<TsType> list>
         TopLevelExports: TypeKey list
         LibEsExports: TypeKey list
+        /// Per-entry provenance: resolved entry file path -> the top-level export keys
+        /// seeded from that file. TopLevelExports is the union across entries.
+        EntryExports: Map<string, TypeKey list>
     }
     module EncodedResult =
         let encode (value: EncodedResult) =
@@ -1772,6 +1775,11 @@ module Schema =
                 value.LibEsExports
                 |> List.map TypeKey.encode
                 |> Encode.list
+
+                "EntryExports",
+                value.EntryExports
+                |> Map.map (fun _ keys -> keys |> List.map TypeKey.encode |> Encode.list)
+                |> Encode.dict
             ]
         let decode: Decoder<EncodedResult> = Decode.object <| fun get -> {
             ExportedDeclarations = get.Required.Field "ExportedDeclarations" (Decode.map' TypeKey.decode TsExportDeclaration.decode)
@@ -1780,4 +1788,8 @@ module Schema =
             DuplicateTypes = get.Required.Field "DuplicateTypes" (Decode.map' TypeKey.decode (Decode.list (DuplicateEncoding.decode TsType.decode)))
             TopLevelExports = get.Required.Field "TopLevelExports" (Decode.list TypeKey.decode)
             LibEsExports = get.Required.Field "LibEsExports" (Decode.list TypeKey.decode)
+            // Optional: IR predating multi-entry provenance decodes to an empty map.
+            EntryExports =
+                get.Optional.Field "EntryExports" (Decode.dict (Decode.list TypeKey.decode))
+                |> Option.defaultValue Map.empty
         }
