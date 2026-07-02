@@ -79,8 +79,11 @@
 # 2026-07-03 (3): enforcement enabled + forward-ref scrub — RATCHETED DOWN:
 # synth-public 1249 -> 1097, callbacks 72 -> 71 (erased content + scrubbed forward
 # atoms leave the counted surface; all degradations ledgered in advisory-ledger.txt).
-BL_CALLBACK_IFACE=71
+# 2026-07-03 (4): canonical-driver FIXPOINT materializes formerly-dangling defs
+# (they now EXIST and therefore count): callbacks 71 -> 72, synth-public 1097 -> 1099.
+# Invalid->valid surfacing by exactly the materialized handful.
+BL_CALLBACK_IFACE=72
 BL_PROTOTYPE=4
 BL_LIT_NUMBERED=0
 BL_SMASH=55
-BL_SYNTH_PUBLIC=1097
+BL_SYNTH_PUBLIC=1099

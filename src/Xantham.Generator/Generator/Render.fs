@@ -39,7 +39,11 @@ let main argv =
     // (emitCanonicalPreludeScopes force-prerenders home-table entries with no
     // rendered definition — 194 latent cases measured, ledgered as
     // shared-home-forced-def; the enforcement-blocking family was 8 refs of one).
-    let erasedTops: string list = "Empty" :: OpaqueHandleSubstitution.erasedTopsOf recipe
+    let erasedTops: string list =
+        // "Intl": lib-es NAMESPACED surface (Intl.DateTimeFormat, ...) — the name-keyed
+        // LibEsSubstitution cannot see namespace-qualified stdlib refs; no Fable
+        // equivalent exists, so it degrades through the same Erased.* alias machinery.
+        "Empty" :: "Intl" :: OpaqueHandleSubstitution.erasedTopsOf recipe
     // Publish-ordered unit boundaries: shared synthetic homes mint under the earliest
     // owner unit's top module (Types/Generator.fs SyntheticPlacementOrder).
     let placementOrder =

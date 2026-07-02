@@ -49,7 +49,17 @@
 #      LibEsSubstitution), ContinueRetry/ProgressToken (parked families);
 #   10x FS0033 args classes + 9x FS0037 duplicate defs (forced-def collisions) +
 #   9x FS0883 invalid names — decomposed, each with an owner.
-BL_FIDELITY_CLOUDEDGE_ZOD=63
+# 2026-07-03 (4): second-order burn 63 -> 42. Cleared: FS0883 9->1 (sanitizer treats
+# [ ] as word boundaries — bracketed symbol names like `[Symbol.split]`); Intl.* 8->0
+# (namespaced lib-es surface joins the Erased.* machinery); missing literal-union defs
+# (the canonical driver now runs to FIXPOINT — children registered while driving a
+# round are picked up by the next; the old single snapshot missed forced defs' children).
+# Remaining 42 = the interlocking forced-def-closure + phantom-typar families:
+#   22x FS0039 (Input/Output/Default/Const zod-typar leakage + nested-child closure
+#      like InputOutput2.Input + ProgressToken/Tools), 10x FS0033 args, 9x FS0037
+#      duplicate defs at the unit head, 1x FS0883. This is the parked COORDINATED
+#      phantom-typar fix's territory — next interlude, fresh context, repro-first.
+BL_FIDELITY_CLOUDEDGE_ZOD=42
 BL_FIDELITY_CLOUDEDGE_WORKERS=0
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0

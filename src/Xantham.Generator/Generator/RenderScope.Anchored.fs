@@ -932,19 +932,31 @@ let emitCanonicalPreludeScopes (ctx: GeneratorContext) =
         if not (ctx.PreludeRenders.ContainsKey rt) then
             GeneratorContext.Advisory.increment ctx "shared-home-forced-def"
             prerender ctx store (LazyContainer.CreateTypeKeyDummy rt) |> ignore
-    ctx.PreludeRenders.Values
-    |> Seq.choose (fun renderScope ->
-        match renderScope.Root, renderScope.Render with
-        | ValueSome (TypeLikePath.Anchored path), Render.Transient _ -> Some (path, renderScope)
-        | _ -> None)
+    // FIXPOINT over rounds: driving a scope forces its lazy render, which can
+    // REGISTER further canonical scopes (children of forced defs above all) —
+    // those land after this round's snapshot and are picked up by the next.
+    // Each round is path-sorted, so emission order stays deterministic.
+    let driven = HashSet<TypePath>()
+    let mutable pending = true
+    while pending do
+        let round =
+            ctx.PreludeRenders.Values
+            |> Seq.choose (fun renderScope ->
+                match renderScope.Root, renderScope.Render with
+                | ValueSome (TypeLikePath.Anchored path), Render.Transient _ when not (driven.Contains path) ->
+                    Some (path, renderScope)
+                | _ -> None)
     // Sort by the canonical absolute path so emission order is DETERMINISTIC: `PreludeRenders` is a
     // ResolvedType-keyed dictionary whose iteration order is hash-dependent (and the shared-literal
     // counting pre-pass forces interner lazies that perturb it run-to-run). Anchoring these
     // canonical scopes in path order makes `collectModules` lay out the LiteralUnions/SharedLiterals
     // members identically every run.
-    |> Seq.sortBy (fun (path, _) -> TypePath.flatten path |> List.map Name.Case.valueOrModified)
-    |> Seq.iter (fun (path, renderScope) ->
-        anchorPreludeAnchorScope ctx None (AnchorPath.create path) renderScope)
+            |> Seq.sortBy (fun (path, _) -> TypePath.flatten path |> List.map Name.Case.valueOrModified)
+            |> Seq.toList
+        pending <- not round.IsEmpty
+        for path, renderScope in round do
+            driven.Add path |> ignore
+            anchorPreludeAnchorScope ctx None (AnchorPath.create path) renderScope
 
 module ArenaInterner =
     let processExports (ctx: GeneratorContext) (interner: ArenaInterner) =
