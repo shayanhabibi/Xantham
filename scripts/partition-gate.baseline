@@ -174,6 +174,24 @@ BL_FIDELITY_CLOUDEDGE_ZOD=0
 # handler classes), FS0033 x48 (the parked coordinated phantom-typar family, now
 # measured in its home unit), FS0887 x12, FS0035 x12, FS0001 x4, FS0953 x2.
 # This is the P1-exit burn-down target: Workers at true 0.
+# 2026-07-04 (2): count-neutral at 86, composition MATERIALLY improved. Landed:
+#  - HERITAGE SCRUBS (scrubAnchored shared stage in Generator/RenderScope.Anchored.fs):
+#    heritage was the one ref channel without the forward/home-child/collapse scrubs, so
+#    forward-unit ARGUMENTS survived into bases (`inherit EventTarget<Agents.X>`) — the
+#    Agents FS0039 x24 and their FS0887 cascades x12 are gone.
+#  - GENERALIZED DEF/REF-CLOSURE SCRUB: SyntheticHomePaths now includes EVERY defined
+#    type path (any type-as-module parent), and processExports runs a SECOND scrub-armed
+#    export pass so CONCRETE scopes see the def-set — the nested-under-type dangle class
+#    (Fetcher.Fetch / Get.Fetch.Input / Cache.* / Loopback* / Next) degraded to obj:
+#    442 atoms across 95 parents, ledgered home-child-scrub:*.
+# Remaining 86 composition: FS0039 x100 instances now a FLAT x2 tail on workers GLOBALS
+# (URL/URLPattern/WebSocketPair/... — a def/ref PLACEMENT mismatch class, e.g.
+# `ServiceWorkerGlobalScope.URL` refs vs where the nested def actually emitted);
+# FS0033 x70 (arity classes, grew +20 as deeper typechecking unmasked sites);
+# FS0035 x22 + FS0953 x4: ALIAS-BODY LEAF-DROP — alias bodies referencing nested
+# children print the PARENT name bare (leaf lost, NOT scrubbed: `type
+# LoopbackForExport<'T> = option<U3<LoopbackForExport, ...>>` self-cycles), an
+# alias-render channel that bypasses/garbles the scrub — next focused probe.
 BL_FIDELITY_CLOUDEDGE_WORKERS=86
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0

@@ -35,7 +35,12 @@ module Render =
     // render that references a typar its enclosing `type X =` does not declare (a free typar leaking from
     // a collapsed intermediate alias body, e.g. `S["_output"]`) is rewritten to `obj` — the only faithful
     // rendering, since that typar is unreachable at the emission site.
-    let anchorScrubLocalise (ctx: GeneratorContext) (inScope: Set<string>) anchorPath (render: Prelude.TypeRefRender) =
+    /// The three ANCHORED-REF SCRUBS as one stage — forward-DAG degradation,
+    /// home-child def/ref closure, opaque/erased prefix collapse — shared by the
+    /// member path (`anchorScrubLocalise`) and the HERITAGE path (which interleaves
+    /// its inheritability filters and must therefore compose the chain itself).
+    /// Every degradation is ledgered by its own scrub.
+    let scrubAnchored (ctx: GeneratorContext) anchorPath (render: TypeRefRender) =
         // Host unit root for the FORWARD-REFERENCE scrub: the def's anchor root
         // (its top module). Roots outside the placement order (pool/synthetic
         // modules) index as unit 1 inside scrubForwardRefs.
@@ -43,8 +48,7 @@ module Render =
             AnchorPath.flatten anchorPath
             |> List.tryHead
             |> Option.map Name.Case.valueOrModified
-        TypeRefRender.anchor anchorPath render
-        |> TypeRefRender.substituteForHeritage inScope
+        render
         |> TypeRefRender.scrubForwardRefs
             ctx.SyntheticPlacementOrder
             (fun root -> GeneratorContext.Advisory.increment ctx $"forward-ref-scrub:{root}")
@@ -54,6 +58,11 @@ module Render =
             ctx.SyntheticHomeChildDefs
             (fun home -> GeneratorContext.Advisory.increment ctx $"home-child-scrub:{home}")
         |> TypeRefRender.collapseOpaquePrefixes ctx.ErasedRoots
+
+    let anchorScrubLocalise (ctx: GeneratorContext) (inScope: Set<string>) anchorPath (render: Prelude.TypeRefRender) =
+        TypeRefRender.anchor anchorPath render
+        |> TypeRefRender.substituteForHeritage inScope
+        |> scrubAnchored ctx anchorPath
         |> TypeRefRender.localise anchorPath
 
     // ---- Shared anchoring core (single source of truth for both the Transient and Concrete paths) ----
@@ -173,6 +182,14 @@ module Render =
                     // The substituteForHeritage step also scrubs orphan typars from the base.
                     typeDefn.Inheritance
                     |> List.map (TypeRefRender.anchor anchorPath)
+                    // The SAME scrub stage the member path runs — heritage was the one
+                    // ref channel without it, so forward-unit ARGUMENTS survived into
+                    // bases (`inherit EventTarget<Agents.X>`: FS0039 + its FS0887
+                    // cascade at the first real Workers typecheck). A scrubbed ARG
+                    // degrades to obj and the base stays inheritable; a scrubbed HEAD
+                    // degrades the whole base to a scalar, which the filters below
+                    // then drop — every path ledgered by its scrub.
+                    |> List.map (scrubAnchored ctx anchorPath)
                     |> List.filter (fun base' ->
                         // A base rewritten to the Erased.* advisory aliases is `obj` —
                         // uninheritable. Dropped HERE (anchor time; localise erases the
@@ -1015,6 +1032,14 @@ let emitCanonicalPreludeScopes (ctx: GeneratorContext) =
             for typePath, _ in scope.Anchors.Values do
                 ctx.SyntheticHomeChildDefs.Add(flattenTypePath typePath) |> ignore
         | Choice1Of2 _ -> ()
+    // GENERALIZED PARENTS: every DEFINED TYPE path is a potential type-as-module
+    // parent — the nested-under-type dangle class is not specific to canonical
+    // shared-literal homes (measured at the first real Workers typecheck:
+    // `Fetcher.Fetch` / `Get.Fetch.Input` / `Cache.*` refs under CONCRETE types
+    // whose children never materialized — the same per-owner nested-def convention).
+    // A ref nested under a defined type either matches a materialized def (the
+    // def-set below) or can never resolve.
+    ctx.SyntheticHomePaths.UnionWith ctx.SyntheticHomeChildDefs
     if ctx.SyntheticHomePaths.Count > 0 then
         ctx.PreludeRenders.Values
         |> Seq.choose (fun renderScope ->
@@ -1035,6 +1060,16 @@ module ArenaInterner =
         interner.ExportMap
         |> Map.iter (fun _ -> registerExportsForAnchoring ctx)
         emitCanonicalPreludeScopes ctx
+        // SECOND EXPORT PASS, scrub-armed: `emitCanonicalPreludeScopes` armed the
+        // def/ref-closure scrub (SyntheticHomePaths/SyntheticHomeChildDefs) and
+        // re-drove the CANONICAL scopes — but CONCRETE export scopes were anchored
+        // in the first pass, before the def-set existed. Re-anchor them so their
+        // member/heritage refs see it too (nested-under-type dangles degrade to
+        // obj, ledgered). Registration is last-wins and the transient renders are
+        // already-forced pure values, so this is a deterministic overwrite; on the
+        // COUNTING context the collectors are sets, so double-visiting is a no-op.
+        interner.ExportMap
+        |> Map.iter (fun _ -> registerExportsForAnchoring ctx)
 
     /// Phase 1: drive the full anchoring once on a throwaway context whose `SharedLiteralVisits`
     /// collector records every literal def-home VISIT, then mark the genuinely-shared literals on
