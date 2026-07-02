@@ -14,6 +14,14 @@ open Xantham.Generator.Types
 //
 [<EntryPoint>]
 let main argv =
+    // `--recipe R --out-dir D` emits partitioned units (Emission.fs); no args keeps
+    // the legacy stdout monolith byte-for-byte (the whole-artifact gates consume it
+    // until the per-unit gates replace them — docs/PLAN.md Phase 1).
+    let emission =
+        match argv |> Array.toList with
+        | [ "--recipe"; recipePath; "--out-dir"; outDir ] -> Some(recipePath, outDir)
+        | [] -> None
+        | other -> failwithf "unrecognized arguments %A (expected: --recipe <path> --out-dir <dir> | no args)" other
     let file = IO.Path.Join(__SOURCE_DIRECTORY__, "../../Xantham.Fable/output.json")
     let tree = Decoder.Runtime.create file
     let interner = tree.GetArenaInterner()
@@ -52,8 +60,21 @@ let main argv =
     ArenaInterner.prerenderTypeAliases generatorContext interner
     // ArenaInterner.prerenderFromGraph generatorContext interner
     ArenaInterner.processExports generatorContext interner
+    let rootModule = RootModule.collectModules generatorContext
+    match emission with
+    | Some(recipePath, outDir) ->
+        match RecipeLoad.load recipePath with
+        | Error errors ->
+            errors |> List.iter (eprintfn "recipe error: %s")
+            failwithf "recipe %s did not load (%d error(s))" recipePath errors.Length
+        | Ok recipe ->
+            let emitted = Emission.emitUnits generatorContext (Emission.planUnits recipe) rootModule outDir
+            for unit, file, lines in emitted do
+                printfn $"unit: {unit.Lib} -> {file} ({lines} lines)"
+            0
+    | None ->
     let renders =
-        RootModule.collectModules generatorContext
+        rootModule
         // |> _.Modules["Typescript"]
         // |> renderModule generatorContext
         |> renderRoot generatorContext

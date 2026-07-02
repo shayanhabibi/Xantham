@@ -1,0 +1,20 @@
+# Xantham partition-gate baseline — per-unit OWN-FILE FS error counts (unique sites).
+# The per-area L1 ratchet (docs/GOALS.md Done(L1, area) = 0). Lower as fixes land;
+# the gate FAILS if any unit regresses above its line.
+#
+# 2026-07-02: FIRST CALIBRATION, first partitioned emission (7 units, publish order
+# Zod-first per the measured edge matrix; pool [SharedLiterals/LiteralUnions/Empty/
+# erased-dep modules] hosted in the Zod unit pending placement refinement).
+#  - Zod = 2: the residual Fantomas 7.0.1 FS0010 parse sites (doc-comment cascade +
+#    multi-line generic layout — the pinned toolchain floor, docs/toolchain-fantomas-
+#    fabulous-ast.md). The opaque-handle policy REPLACES this unit's machinery surface,
+#    deleting the sites; do not chase them at the render tier.
+#  - Downstream units are parse-clean; their full typecheck counts become exact once
+#    the Zod unit assembles (the gate marks them blocked until then).
+BL_FIDELITY_CLOUDEDGE_ZOD=2
+BL_FIDELITY_CLOUDEDGE_WORKERS=0
+BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
+BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0
+BL_FIDELITY_CLOUDEDGE_MCP=0
+BL_FIDELITY_CLOUDEDGE_CODEMODE=0
+BL_FIDELITY_CLOUDEDGE_AGENTS=0

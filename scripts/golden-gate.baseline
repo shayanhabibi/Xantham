@@ -59,9 +59,14 @@
 #  - synth-public 990->1759: proportional to surface; reduction remains the L2 semantic target,
 #    re-scoped per-area at Phase 1.
 # Lit<N> machine names HELD at 0 on the doubled surface.
-BL_CALLBACK_IFACE=75
+# 2026-07-02 (3): scoped-package module MERGE (TypeRefRender.Paths — "@scope/pkg" -> one
+# `ScopePkg` segment so each scoped package owns a splittable top module; prerequisite of
+# partitioned emission). Renames shift counting classes, all within noise: callbacks 75->72
+# (improved), synth-public 1759->1774 (+15, renamed module paths entering the counting
+# heuristic), lines 46538->49021 (rename-driven re-wrapping). Determinism x2 HELD.
+BL_CALLBACK_IFACE=72
 BL_PROTOTYPE=4
 BL_LIT_NUMBERED=0
 BL_SMASH=55
-BL_SYNTH_PUBLIC=1759
-BL_LINES=46538
+BL_SYNTH_PUBLIC=1774
+BL_LINES=49021

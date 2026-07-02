@@ -75,9 +75,9 @@ Per-area L1 signals (errors, arity, conflations, erasure ledger) begin at Phase-
 | Xantham.Fable.Tests | ReactiveBuildersTests.fs | 54 |
 | Xantham.Fable.Tests | DispatchKeyingPolicy.fs | 35 |
 | Xantham.Fable.Tests | EncoderMergeDedup.fs | 31 |
-| Xantham.Fable.Tests | RecipeTests.fs | 16 |
+| Xantham.Fable.Tests | RecipeTests.fs | 20 |
 | Xantham.Fable.Tests | Mocha.fs | 14 |
-| **Xantham.Fable.Tests** | **total** | **461** |
+| **Xantham.Fable.Tests** | **total** | **465** |
 | Xantham.Decoder.Tests | NameAndCodeKey.fs | 86 |
 | Xantham.Decoder.Tests | ArenaInternerResolve.fs | 71 |
 | **Xantham.Decoder.Tests** | **total** | **157** |
@@ -93,14 +93,17 @@ Per-area L1 signals (errors, arity, conflations, erasure ledger) begin at Phase-
 | Xantham.Generator.Tests | AnchoringHoisted.fs | 16 |
 | Xantham.Generator.Tests | TypeRefRender.SubstituteForHeritage.fs | 15 |
 | Xantham.Generator.Tests | UsedTypars.fs | 13 |
+| Xantham.Generator.Tests | AreaAssignment.fs | 13 |
 | Xantham.Generator.Tests | Collection.fs | 12 |
 | Xantham.Generator.Tests | TypeShapeRender.fs | 10 |
 | Xantham.Generator.Tests | EnumRender.fs | 9 |
+| Xantham.Generator.Tests | RecipeLoad.fs | 8 |
 | Xantham.Generator.Tests | AliasBodyLiteralPlacement.fs | 6 |
 | Xantham.Generator.Tests | Paths.fs | 5 |
 | Xantham.Generator.Tests | TypeAliasRender.fs | 5 |
 | Xantham.Generator.Tests | SharedDeepNestedLiteralPlacement.fs | 5 |
 | Xantham.Generator.Tests | WithoutArgDrop.fs | 5 |
+| Xantham.Generator.Tests | Emission.fs | 5 |
 | Xantham.Generator.Tests | TypeRefRender.EncoderInvariant.fs | 4 |
 | Xantham.Generator.Tests | LibEsCollectionArgs.fs | 4 |
 | Xantham.Generator.Tests | CallbackFunctionAbbrev.fs | 3 |
@@ -109,7 +112,7 @@ Per-area L1 signals (errors, arity, conflations, erasure ledger) begin at Phase-
 | Xantham.Generator.Tests | RenderScopeAnchored.fs | 2 |
 | Xantham.Generator.Tests | LibEsSubstitution.fs | 2 |
 | Xantham.Generator.Tests | Name.fs | 1 |
-| **Xantham.Generator.Tests** | **total** | **374** |
+| **Xantham.Generator.Tests** | **total** | **400** |
 
 ## L2 / L3
 

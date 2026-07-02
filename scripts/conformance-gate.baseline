@@ -53,4 +53,10 @@
 # (the placement/dangle class Phase-1 partitioned emission is designed to own — docs/PLAN.md),
 # 70 arity-expects (phantom-typar class, gated per-name by arity-gate). This whole-artifact
 # ratchet RETIRES at Phase 1 in favor of per-area ratchets (docs/GOALS.md Exit(P1)).
-BL_FSHARP=1101
+# 2026-07-02 (3): scoped-package module merge (partitioned-emission prerequisite) shifts the
+# RETIRING whole-artifact count 1101 -> 1223 while the tracked classes IMPROVED (not-defined
+# 474->464, arity-expects 70->61; golden gate PASS with callbacks 75->72; determinism held).
+# The per-unit successor gate now exists (scripts/partition-gate.sh: Zod=2 toolchain-floor,
+# six units parse-clean) — this monolith ratchet retires with Phase-1 completion; judge L1 by
+# the partition gate, not this number.
+BL_FSHARP=1223

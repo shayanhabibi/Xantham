@@ -5,6 +5,10 @@
 # alias class (unused-typar abbrevs pruned at decl, args still applied at refs — see memory
 # xantham-phantom-typar-alias: coordinated multi-site fix required, naive fix regressed +196).
 # They surfaced because the MCP entries are now first-class. Same work item, not new debt.
+# 2026-07-02 (scoped-merge): ZodBoolean left the ambiguous-twin SKIP set (50->49 names)
+# when scoped packages merged to single module segments, so it is now MEASURABLE and
+# disagrees — the already-parked ZodBoolean twin-cluster class (see memory), not new debt.
+# Total disagreeing names 9 -> 7.
 BaseToolCallback=3
 CreateTaskRequestHandler=1
 JsonSchemaType=1
@@ -12,5 +16,6 @@ JsonSchemaValidator=1
 TaskRequestHandler=1
 MCPObservabilityEvent=2
 ProgressToken=1
+ZodBoolean=1
 ZodNumber=1
 ZodString=1

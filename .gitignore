@@ -18,3 +18,6 @@ riderModule.iml
 # Generated extractor/test-fixture artifacts (regenerated, not source)
 tests/**/fixtures/**/output.json
 tests/**/fixtures/**/package-lock.json
+# partition-gate working directory (regenerated every run)
+scripts/.partition-work/
+

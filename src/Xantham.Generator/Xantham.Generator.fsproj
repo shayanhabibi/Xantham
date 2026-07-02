@@ -38,6 +38,7 @@
         <Compile Include="Generator\RenderScope.Anchored.fs" />
         <Compile Include="Generator\Render.Collection.fs" />
         <Compile Include="Generator\LibEsSubstitution.fs" />
+        <Compile Include="Generator\Emission.fs" />
         <Compile Include="Generator\Render.fs" />
     </ItemGroup>
 

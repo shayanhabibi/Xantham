@@ -13,7 +13,16 @@ let inline getQualifiedName (container: ^T when ^T:(member FullyQualifiedName: A
     |> QualifiedName.create
 
 let inline private sanitizeSource (source: string) =
-    source.Trim('@').Split([|'\\'; '/'|], System.StringSplitOptions.RemoveEmptyEntries) |> Array.toList
+    // Scoped packages ("@scope/pkg") merge to ONE module segment: two segments would put
+    // every "@scope/*" package under one umbrella module (all of "@cloudflare/*" under
+    // `Cloudflare`), which partitioned emission cannot split across compilation units —
+    // the same top-level module in two assemblies is a duplicate definition. The joined
+    // "scope-pkg" PascalCases downstream to e.g. `CloudflareWorkersTypes`. Same collapse
+    // class as the zod v3/v4 twin-path fix (see createModulePath below).
+    let parts = source.Trim('@').Split([|'\\'; '/'|], System.StringSplitOptions.RemoveEmptyEntries) |> Array.toList
+    match source.StartsWith "@", parts with
+    | true, scope :: name :: rest -> (scope + "-" + name) :: rest
+    | _ -> parts
 let inline private createModulePath (qualifiedName: QualifiedName) (source: ArenaInterner.QualifiedNamePart option) =
     let hasNodeModuleFilePath =
         qualifiedName.FilePath
@@ -55,6 +64,13 @@ let inline private createModulePath (qualifiedName: QualifiedName) (source: Aren
                     if fileNameParts.Length > pkgLen && isVersionSeg fileNameParts.[pkgLen]
                     then pkgLen + 1 else pkgLen
                 fileNameParts |> Array.truncate withVersion
+            // Scoped packages merge to ONE segment (see sanitizeSource): "@cloudflare/workers-types"
+            // -> "cloudflare-workers-types" -> `CloudflareWorkersTypes`, so each scoped package owns
+            // its own splittable top-level module instead of sharing a scope umbrella.
+            let packageParts =
+                if packageParts.Length >= 2 && packageParts.[0].StartsWith "@"
+                then Array.append [| packageParts.[0].Trim('@') + "-" + packageParts.[1] |] (packageParts |> Array.skip 2)
+                else packageParts
             // change the source name to the first qualifier in the file path
             let s = packageParts |> Array.head
             // add the remaining package qualifiers to the head of the path

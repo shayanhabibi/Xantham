@@ -20,8 +20,9 @@ Per-pass isolation coverage for two GENERATOR passes:
         - source=Some s                 -> sanitizeSource s is the module root; the FQN
                                            MemberPath nests beneath it (the synthetic module)
         - source=Some (Abnormal s) + node_modules FilePath (a FILE import from a declaration
-          file) -> module path = PACKAGE IDENTITY only: `@scope/pkg` (2 segments) or `pkg`
-          (1 segment), PLUS an immediately-following VERSION segment (`v3`, `v4`, ...) when
+          file) -> module path = PACKAGE IDENTITY only: `@scope/pkg` MERGED to ONE segment
+          (`ScopePkg` — a scope umbrella module cannot partition across compilation units)
+          or `pkg` (1 segment), PLUS an immediately-following VERSION segment (`v3`, `v4`, ...) when
           present — a package shipping multiple versions in one install (zod) declares the
           same type names under each, so the version segment keeps the twins apart
           (Zod.V3.X / Zod.V4.X). All other packaging dir segments (dist/esm/lib/...) are
@@ -297,13 +298,14 @@ let createModulePathTests =
             |> typePathStr
             |> Flip.Expect.equal "source 'mylib' is root; FQN module Foo nests; Bar leaf" "Mylib.Foo.Bar"
 
-        // A scoped/slashed source is split on path separators into nested modules.
-        testCase "source with path separators splits into nested modules" <| fun _ ->
+        // A SCOPED source merges to one module segment (a scope umbrella module cannot
+        // partition across compilation units); non-scoped slashed sources still split.
+        testCase "scoped source merges to one module segment" <| fun _ ->
             ResolvedType.Interface.create "Thing"
             |> ResolvedType.Interface.withSource "@scope/pkg"
             |> Path.fromInterface
             |> typePathStr
-            |> Flip.Expect.equal "@scope/pkg -> Scope.Pkg nested modules" "Scope.Pkg.Thing"
+            |> Flip.Expect.equal "@scope/pkg -> ScopePkg merged" "ScopePkg.Thing"
     ]
 
 // =====================================================================================
@@ -351,10 +353,11 @@ let nodeModulesPathTests =
             pathOf "/repo/node_modules/zod/lib/index" "ZodAny"
             |> Flip.Expect.equal "lib is a packaging dir, not a version" "Zod.ZodAny"
 
-        // Scoped package identity is 2 segments; deep dist/esm chains are dropped.
-        testCase "scoped package keeps @scope/pkg only" <| fun _ ->
+        // Scoped package identity MERGES to one segment: a scope umbrella module cannot
+        // partition across compilation units (duplicate top-level module in two assemblies).
+        testCase "scoped package merges @scope/pkg to one segment" <| fun _ ->
             pathOf "/repo/node_modules/@modelcontextprotocol/sdk/dist/esm/types" "ClientOptions"
-            |> Flip.Expect.equal "scoped identity, packaging chain dropped" "Modelcontextprotocol.Sdk.ClientOptions"
+            |> Flip.Expect.equal "scoped identity merged, packaging chain dropped" "ModelcontextprotocolSdk.ClientOptions"
 
         // The version segment must IMMEDIATELY follow the package name — a vN buried in
         // the packaging chain is not package-version identity.
@@ -375,9 +378,9 @@ let nodeModulesPathTests =
             pathOf "/repo/node_modules/zod/v10/mod" "Thing"
             |> Flip.Expect.equal "v10 is a version segment" "Zod.V10.Thing"
 
-        testCase "scoped package + version segment keeps both" <| fun _ ->
+        testCase "scoped package merges; the version segment stays its own module" <| fun _ ->
             pathOf "/repo/node_modules/@scope/pkg/v2/mod" "Thing"
-            |> Flip.Expect.equal "@scope/pkg/v2 -> Scope.Pkg.V2" "Scope.Pkg.V2.Thing"
+            |> Flip.Expect.equal "@scope/pkg/v2 -> ScopePkg.V2" "ScopePkg.V2.Thing"
 
         // The FQN's middle (namespace) parts still nest under the package home.
         testCase "member trace nests under the versioned package home" <| fun _ ->
@@ -407,7 +410,7 @@ let nodeModulesPathTests =
             iface
             |> Path.fromInterface
             |> typePathStr
-            |> Flip.Expect.equal "falls back to the sanitized source root" "Other.Lib.Thing"
+            |> Flip.Expect.equal "falls back to the sanitized source root (scoped merges)" "OtherLib.Thing"
     ]
 
 [<Tests>]
