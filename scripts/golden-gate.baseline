@@ -49,13 +49,19 @@
 #    v3's `ZodErrorMap` function alias winning the slot; it now exists as its own usable type.
 # These are invalid->valid (the v4 zod schemas went from unusable/wrong-arity to usable). Ratcheted the
 # two affected baselines UP by exactly the surfaced count, justified here. The others are unchanged.
-BL_CALLBACK_IFACE=24
-BL_PROTOTYPE=0
+# 2026-07-02 (2): REBASELINED TO THE v0 MULTI-ENTRY SURFACE (cloudflare.pilot.toml: 31 crawl
+# roots incl. workers-types latest ambient root; 30,719 IR types vs 14,704; generated lines
+# 20,883 -> 46,538; determinism x2 byte-identical HELD). All count metrics scale with the ~2.2x
+# richer surface — invalid->valid surfacing (the surface now EXISTS), not regression:
+#  - callbacks-as-Invoke 24->75: new workers-types latest + MCP callback shapes.
+#  - Prototype 0->4, smash 0->55: workers-types latest AI-model names + static-side classes
+#    (faithful long source names dominate smash, same class as the prior 80-count era).
+#  - synth-public 990->1759: proportional to surface; reduction remains the L2 semantic target,
+#    re-scoped per-area at Phase 1.
+# Lit<N> machine names HELD at 0 on the doubled surface.
+BL_CALLBACK_IFACE=75
+BL_PROTOTYPE=4
 BL_LIT_NUMBERED=0
-BL_SMASH=0
-BL_SYNTH_PUBLIC=990
-BL_LINES=20883
-# 2026-07-02: REBASELINED TO THE TRUTHFUL IR (see conformance-gate.baseline). synth-public rises
-# to 990: the closed-instantiation literals the old IR conflated behind wrong alias names now
-# render as SharedLiterals homes (invalid->valid surfacing), several now GENERIC with lifted
-# typars. Reducing synth-home penetration via proper naming remains the semantic target.
+BL_SMASH=55
+BL_SYNTH_PUBLIC=1759
+BL_LINES=46538

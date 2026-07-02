@@ -51,6 +51,8 @@
         <TypeScriptCompile Include="TypeFiles\packages\solid-js\types\jsx.d.ts" />
         <TypeScriptCompile Include="TypeFiles\packages\three\constants.d.ts" />
         <TypeScriptCompile Include="TypeFiles\multi-file\vectors.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\module-island.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\module-island-consumer.d.ts" />
         <TypeScriptCompile Include="TypeFiles\multi-entry\shared.d.ts" />
         <TypeScriptCompile Include="TypeFiles\multi-entry\entry-a.d.ts" />
         <TypeScriptCompile Include="TypeFiles\multi-entry\entry-b.d.ts" />

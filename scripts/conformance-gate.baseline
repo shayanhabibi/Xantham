@@ -47,4 +47,10 @@
 # unusable-binding breakers (dangles/phantom typars/arity splits) to the remaining known roots
 # (heritage/struct cycles ~60, ZodIssue compat ~40). Decl/ref arity agreement is now gated
 # mechanically (scripts/arity-gate.sh); IR identity is gated by scripts/ir-sentinel.sh.
-BL_FSHARP=644
+# 2026-07-02 (2): REBASELINED TO THE v0 MULTI-ENTRY SURFACE (cloudflare.pilot.toml; 31 crawl roots;
+# generated lines 20,883 -> 46,538). 644 -> 1101 is the count on a ~2.2x richer surface — the
+# RELATIVE rate improved ~23% (0.031 -> 0.024 errors/line). Composition: 474 'type not defined'
+# (the placement/dangle class Phase-1 partitioned emission is designed to own — docs/PLAN.md),
+# 70 arity-expects (phantom-typar class, gated per-name by arity-gate). This whole-artifact
+# ratchet RETIRES at Phase 1 in favor of per-area ratchets (docs/GOALS.md Exit(P1)).
+BL_FSHARP=1101

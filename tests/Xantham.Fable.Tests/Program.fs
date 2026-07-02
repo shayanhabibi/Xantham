@@ -1581,6 +1581,33 @@ let functionRefTests =
             | _ -> failwith "Expected TypeQuery"
     ]
 
+// Module-island imports: `import { X } from "some:module"` where the module is a
+// `declare module` block in an ambient file — the workers-types "cloudflare:workers"
+// shape. Characterizes the MISSREF class found by the first v0 crawl (7 dangling
+// builders, 6 of them this shape; crashed the decoder's compress on key -14171).
+let moduleIslandTests =
+    testList "module-island-consumer.d.ts (declare-module island imports)" [
+        let result = createTestReader "module-island-consumer" |> runReader
+        testCase "Consumer class is present" <| fun _ ->
+            result |> findClass "Consumer" |> ignore
+        testCase "heritage key of the island base class resolves to a node in result" <| fun _ ->
+            let heritage =
+                match result |> findClass "Consumer" with
+                | { Heritage = { Extends = [ extend ] } } -> extend
+                | c -> failwith $"expected one heritage entry, got %A{c.Heritage.Extends}"
+            let resolved = heritage.ResolvedType |> Option.defaultValue heritage.Type
+            "IslandClass body must be in Types (a MISSREF here is the cloudflare:workers dangle)"
+            |> Expect.isTrue (result.Types.ContainsKey resolved || result.ExportedDeclarations.ContainsKey resolved)
+        testCase "island interface member type resolves to a node in result" <| fun _ ->
+            let shapeKey =
+                (result |> findClass "Consumer").Members
+                |> List.pick (function
+                    | TsMember.Property p when p.Name = "shape" -> Some p.Type
+                    | _ -> None)
+            "IslandShape body must be in Types"
+            |> Expect.isTrue (result.Types.ContainsKey shapeKey || result.ExportedDeclarations.ContainsKey shapeKey)
+    ]
+
 // Multi-entry provenance: two entry files re-exporting one shared declaration
 // (the chunk-shim architecture in miniature). Verifies identity-keyed dedup
 // across entries and the per-entry EntryExports attribution.
@@ -2390,6 +2417,7 @@ let tests =
         refEnumTests
         functionRefTests
         multiEntryProvenanceTests
+        moduleIslandTests
         Xantham.Fable.Tests.RecipeTests.tests
         multiFileTests
         packageSourceTests

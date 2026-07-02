@@ -1,10 +1,16 @@
 # Xantham arity-gate baseline — pre-existing decl/ref arity disagreements PER NAME.
 # The gate fails on NEW names or a name's count increasing. Shrink as fixes land.
+# 2026-07-02: v0 multi-entry rebaseline. Total disagreeing names DROPPED 8->6; several old names
+# no longer disagree (removed). Two NEW names are fresh instances of the KNOWN phantom-typar
+# alias class (unused-typar abbrevs pruned at decl, args still applied at refs — see memory
+# xantham-phantom-typar-alias: coordinated multi-site fix required, naive fix regressed +196).
+# They surfaced because the MCP entries are now first-class. Same work item, not new debt.
 BaseToolCallback=3
 CreateTaskRequestHandler=1
 JsonSchemaType=1
 JsonSchemaValidator=1
-ParsePathComponent=1
 TaskRequestHandler=1
+MCPObservabilityEvent=2
+ProgressToken=1
 ZodNumber=1
 ZodString=1

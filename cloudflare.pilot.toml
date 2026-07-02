@@ -27,11 +27,13 @@ kind = "ambient-root"
 lib = "Fidelity.CloudEdge.Workers"
 # CRITICAL (survey find): package.json has NO types/main/exports; default resolution lands on
 # root index.d.ts which is byte-identical to oldest/ — the pre-2021-11-03 surface. Never crawl root.
-root = "latest/index.ts"
-# DECISION: crawl the MODULE TWIN (latest/index.ts, ~959 exports) rather than the ambient
-# latest/index.d.ts — every snapshot dir ships both; the twin makes the encoder uniform (no
-# ambient special-casing) and the surface is identical. Alternative: latest/index.d.ts as true
-# ambient root. Either way the compat pin is "latest" -> record the resolved date in the drift report.
+root = "latest/index.d.ts"
+# DECISION (revised 2026-07-02, measured): the AMBIENT file, not the module twin. The twin
+# (latest/index.ts) omits the `declare module "cloudflare:*"` islands, so third-party imports of
+# "cloudflare:workers" (partyserver/agents/codemode base classes: DurableObject, WorkerEntrypoint,
+# RpcTarget) resolved to NOTHING — 6 dangling builders, decoder crash. The ambient file declares
+# both the islands and the shared globals, giving ONE symbol set for all cross-package references.
+# The compat pin is "latest" -> record the resolved date in the drift report.
 depends-on = []
 
 [[entry]]

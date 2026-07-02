@@ -1,5 +1,9 @@
 # Xantham IR open-twin sentinel baseline — encoder identity-conflation metrics.
 # No metric may increase; ratchet DOWN as the encoder fix lands (stage 1: CONFLATED=0).
+# 2026-07-02: REBASELINED to the v0 multi-entry IR (31 crawl roots per cloudflare.pilot.toml;
+# 30,640 types vs 14,704 single-entry). CONFLATED=0 HELD unchanged on the 2.1x surface.
+# OPEN_TWIN 11->13 groups / 32->36 keys: +2 groups from newly-crawled surface (relative rate
+# improved); same class as the existing 11, owned by the same open-twin work item, not new debt.
 CONFLATED=0
-OPEN_TWIN_GROUPS=11
-OPEN_TWIN_KEYS=32
+OPEN_TWIN_GROUPS=13
+OPEN_TWIN_KEYS=36
