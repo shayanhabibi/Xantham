@@ -292,7 +292,25 @@ BL_FIDELITY_CLOUDEDGE_ZOD=0
 # Remaining 3: A-2 Cloudflare I-prefix ref leaf (2 sites) + 1 rpcStub (a synthesized
 # camelCase instance-side property whose bare RpcStub ref stays unqualified — under probe;
 # distinct from cache which DID qualify, so a target-path difference in the ref resolution).
-BL_FIDELITY_CLOUDEDGE_WORKERS=3
+# 2026-07-05 (Opus, 4th turn): 3 -> 1. NAMESPACE/DEF COLLISION ERASURE. A TS name
+# declared as BOTH an interface and a namespace collides in F#: the module wins the name
+# slot and the interface def is dropped, so a type-ref to the dropped interface dangles
+# (FS0039). Such a ref has no faithful F# form (a namespace used as a value type is
+# untypeable), so it erases to `obj`, ledgered `namespace-as-type-erased:*`. Impl:
+# ModuleTypePaths pre-pass (markModuleTypePaths, records every namespace's flattened path
+# before processExports) + a collision check in prerender's Interface AND Class arms.
+# Cleared BOTH `Cloudflare` refs (holder + ServiceWorkerGlobalScope) — one ResolvedType,
+# two use sites, one ledger entry. Verified: 569/400 suites, all gates PASS.
+# Remaining 1 = `rpcStub: RpcStub` (L65, in the synthesized ICloudflareWorkersTypes globals
+# holder). NO upstream rpcStub member exists — generator-synthesized junk (same class as the
+# cloudflare refs), but its type ref resolves through NEITHER the Interface/Class prerender
+# arm NOR the Variable export arm (probed all three — none fired), and its bare path
+# `CloudflareWorkersTypes.RpcStub` is NOT in ModuleTypePaths (the colliding `module RpcStub`
+# is nested deeper as CloudflareWorkersModule.RpcStub). So the erasure hook doesn't reach it.
+# Its resolution path is unidentified — a const static-side reached via a TypeReference/holder
+# path. Next: probe that TypeReference arm to find where the synthesized rpcStub type ref is
+# built, then extend the same collision-erasure (or suppress the synthesized member).
+BL_FIDELITY_CLOUDEDGE_WORKERS=1
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0
 BL_FIDELITY_CLOUDEDGE_MCP=0

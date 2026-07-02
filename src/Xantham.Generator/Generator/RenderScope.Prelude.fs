@@ -441,6 +441,23 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
     | ResolvedType.Interface ``interface`` ->
         let scope = RenderScopeStore.create()
         let path = Path.Interceptors.pipeInterface ctx ``interface``
+        // NAMESPACE/INTERFACE COLLISION ERASURE: a TS name declared as both an interface
+        // and a namespace collides in F# — the module wins the name slot and the
+        // interface def is dropped, so this ref would dangle (FS0039). A namespace used
+        // as a value type has no faithful F# form; erase to `obj`, ledgered. (Matched by
+        // the pre-recorded module paths; empty set outside the multi-unit pipeline.)
+        let collidesWithModule =
+            ctx.ModuleTypePaths.Count > 0
+            && (TypePath.flatten path
+                |> List.map Name.Case.valueOrModified
+                |> String.concat "."
+                |> ctx.ModuleTypePaths.Contains)
+        if collidesWithModule then
+            GeneratorContext.Advisory.increment ctx $"namespace-as-type-erased:{Name.Case.valueOrModified path.Name}"
+            liftNullable Intrinsic.obj
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
+        else
         let ref = path |> createConcreteTypeRef
         {
             RenderScope.Type = resolvedType
@@ -458,6 +475,22 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
     | ResolvedType.Class ``class`` ->
         let scope = RenderScopeStore.create()
         let path = Path.Interceptors.pipeClass ctx ``class``
+        // Same namespace/def collision erasure as the Interface arm: a name that is BOTH
+        // a class/const-static-side AND a namespace is ambiguous as a value type; erase
+        // to `obj`, ledgered (the RpcStub class — const static-side colliding with a
+        // same-named module).
+        let collidesWithModule =
+            ctx.ModuleTypePaths.Count > 0
+            && (TypePath.flatten path
+                |> List.map Name.Case.valueOrModified
+                |> String.concat "."
+                |> ctx.ModuleTypePaths.Contains)
+        if collidesWithModule then
+            GeneratorContext.Advisory.increment ctx $"namespace-as-type-erased:{Name.Case.valueOrModified path.Name}"
+            liftNullable Intrinsic.obj
+            |> RenderScope.createRootless resolvedType
+            |> addOrReplaceScope ctx resolvedType
+        else
         let ref = path |> createConcreteTypeRef
         {
             RenderScope.Type = resolvedType

@@ -92,6 +92,10 @@ let main argv =
     // Phase 1: count shared object-literals (those reached through >1 owner) on a throwaway
     // context and assign each a canonical SharedLiterals home, so the real prerender below roots
     // them there (every reference resolves to one absolute path; the single def is emitted once).
+    // Record every namespace-emitted-as-module path BEFORE anchoring, so a type ref to a
+    // name that is BOTH an interface and a namespace (the module wins, interface dropped)
+    // erases to `obj` instead of dangling (prerender's Interface arm).
+    ArenaInterner.markModuleTypePaths generatorContext interner
     ArenaInterner.markSharedLiteralsFromExports generatorContext interner
     ArenaInterner.prerenderTypeAliases generatorContext interner
     // ArenaInterner.prerenderFromGraph generatorContext interner

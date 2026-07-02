@@ -1206,3 +1206,24 @@ module ArenaInterner =
         RenderScope_Prelude.ArenaInterner.prerenderTypeAliases countingCtx interner
         processExports countingCtx interner
         markSharedLiterals countingCtx ctx
+
+    /// Record the flattened path of EVERY namespace (emitted as an F# module). A TS name
+    /// declared as both an interface and a namespace collides: the module wins the slot
+    /// and the interface def is dropped, so a type-REF to the interface dangles. Consulted
+    /// in `prerender`'s Interface arm to erase such refs to `obj` (a namespace used as a
+    /// value type is untypeable; ledgered). Uses `Path.fromModule`'s flattened form, which
+    /// `fromInterface` mirrors, so the interface ref's path matches this module's path.
+    let markModuleTypePaths (ctx: GeneratorContext) (interner: ArenaInterner) =
+        let rec walk (export: ResolvedExport) =
+            match export with
+            | ResolvedExport.Module m ->
+                Path.fromModule m
+                |> ModulePath.flatten
+                |> List.map Name.Case.valueOrModified
+                |> String.concat "."
+                |> ctx.ModuleTypePaths.Add
+                |> ignore
+                m.Exports |> List.iter walk
+            | _ -> ()
+        interner.ExportMap
+        |> Map.iter (fun _ exports -> exports |> List.iter walk)

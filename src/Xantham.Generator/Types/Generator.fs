@@ -166,6 +166,13 @@ and GeneratorContext =
         /// set. Reusing the pass-1 store lets pass 2 re-anchor the FULL child set with
         /// the scrubs armed.
         ExportScopeStores: Dictionary<ResolvedExport, RenderScopeStore>
+        /// Flattened dotted paths of every NAMESPACE emitted as a module (populated by a
+        /// pre-pass before processExports). A TS name declared as BOTH an interface and a
+        /// namespace collides in F#: the module wins the name slot and the interface def
+        /// is dropped. A type-REF to the (dropped) interface then dangles (FS0039). Such a
+        /// ref has no faithful F# target — a namespace used as a value type is untypeable —
+        /// so it erases to `obj`, ledgered. Consulted in `prerender`'s Interface arm.
+        ModuleTypePaths: HashSet<string>
         Customisation: Customisation
 
     }
@@ -186,6 +193,7 @@ and GeneratorContext =
         SyntheticHomePaths = HashSet()
         SyntheticHomeChildDefs = HashSet()
         ExportScopeStores = Dictionary()
+        ModuleTypePaths = HashSet()
         TypeAliasRemap = DictionaryImpl()
         TypeAliasArity = DictionaryImpl()
         HoistedHomeTypars = DictionaryImpl()
