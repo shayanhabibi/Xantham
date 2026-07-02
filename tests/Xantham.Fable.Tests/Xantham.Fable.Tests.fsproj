@@ -11,6 +11,7 @@
         <Compile Include="EncoderMergeDedup.fs"/>
         <Compile Include="ReactiveBuildersTests.fs"/>
         <Compile Include="DispatchKeyingPolicy.fs"/>
+        <Compile Include="RecipeTests.fs"/>
         <Compile Include="Program.fs"/>
         <TypeScriptCompile Include="TypeFiles\basic.d.ts" />
         <TypeScriptCompile Include="TypeFiles\merge.d.ts" />
@@ -50,6 +51,9 @@
         <TypeScriptCompile Include="TypeFiles\packages\solid-js\types\jsx.d.ts" />
         <TypeScriptCompile Include="TypeFiles\packages\three\constants.d.ts" />
         <TypeScriptCompile Include="TypeFiles\multi-file\vectors.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\multi-entry\shared.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\multi-entry\entry-a.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\multi-entry\entry-b.d.ts" />
         <TypeScriptCompile Include="TypeFiles\multi-file\shapes.d.ts" />
         <TypeScriptCompile Include="TypeFiles\accessors.d.ts" />
         <TypeScriptCompile Include="TypeFiles\namespace.d.ts" />

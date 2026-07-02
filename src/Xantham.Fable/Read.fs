@@ -329,11 +329,19 @@ module Internal =
     let initialise (reader: TypeScriptReader) =
         tagPrimitives reader
 
+    /// Seeds the stack from EVERY entry file, keeping the (entry file -> its export
+    /// tags) association for provenance. Identity-keyed caches make cross-entry
+    /// dedup intrinsic: a declaration reached from two entries registers once.
     let getAndPrepareExports (reader: TypeScriptReader) =
-        reader
-        |> _.program.getSourceFile(reader.entryFile).Value
-        |> getDeclarations reader
-        |> Array.apply (pushToStack reader)
+        reader.entryFiles
+        |> Array.map (fun entryFile ->
+            match reader.program.getSourceFile entryFile with
+            | Some sourceFile ->
+                entryFile,
+                sourceFile
+                |> getDeclarations reader
+                |> Array.apply (pushToStack reader)
+            | None -> failwith $"Entry file is not part of the program: {entryFile}")
 
     let runReader (reader: TypeScriptReader) =
         let mutable stackEntry = Unchecked.defaultof<XanthamTag>
@@ -486,6 +494,7 @@ module Internal =
                     DuplicateExports = result.DuplicateExports |> remapDuplicates remapExport
                     TopLevelExports = result.TopLevelExports |> List.map remapKey
                     LibEsExports = result.LibEsExports |> List.map remapKey
+                    EntryExports = result.EntryExports |> Map.map (fun _ -> List.map remapKey)
             }
         // ── fixpoint driver ────────────────────────────────────────────────────────
         // Compute the union remap from the CURRENT Types map, apply it, and repeat.
@@ -535,9 +544,10 @@ module Internal =
         loop result
 open Schema
 let read (reader: TypeScriptReader) =
-    let exportTags =
+    let exportTagsPerEntry =
         Internal.initialise reader
         |> Internal.getAndPrepareExports
+    let exportTags = exportTagsPerEntry |> Array.collect snd
     let exportTagIdentities =
         exportTags
         |> Array.map _.IdentityKey
@@ -607,6 +617,15 @@ let read (reader: TypeScriptReader) =
                 )
             |> Array.distinct
             |> Array.toList
+        EntryExports =
+            exportTagsPerEntry
+            |> Array.map (fun (entryFile, tags) ->
+                entryFile,
+                tags
+                |> Array.map (fun tag -> reader.exportCache[tag.IdentityKey].RefKey)
+                |> Array.distinct
+                |> Array.toList)
+            |> Map.ofArray
         LibEsExports =
             typeIdentities
             |> Array.filter reader.libCache.Contains

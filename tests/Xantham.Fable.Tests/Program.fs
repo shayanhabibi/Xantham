@@ -1581,6 +1581,69 @@ let functionRefTests =
             | _ -> failwith "Expected TypeQuery"
     ]
 
+// Multi-entry provenance: two entry files re-exporting one shared declaration
+// (the chunk-shim architecture in miniature). Verifies identity-keyed dedup
+// across entries and the per-entry EntryExports attribution.
+let multiEntryProvenanceTests =
+    testList "multi-entry provenance (entry-a.d.ts + entry-b.d.ts)" [
+        let result =
+            createMultiFileTestReader [| "multi-entry/entry-a"; "multi-entry/entry-b" |]
+            |> runReader
+        let entryKeys (suffix: string) =
+            result.EntryExports
+            |> Map.toList
+            |> List.tryPick (fun (file, keys) -> if file.EndsWith suffix then Some keys else None)
+            |> Option.defaultValue []
+        let interfaceNames (keys: TypeKey list) =
+            keys
+            |> List.choose (fun key ->
+                match result.ExportedDeclarations |> Map.tryFind key with
+                | Some(TsExportDeclaration.Interface iface) -> Some iface.Name
+                | _ -> None)
+            |> Set.ofList
+        let sharedThingKeys (keys: TypeKey list) =
+            keys
+            |> List.filter (fun key ->
+                match result.ExportedDeclarations |> Map.tryFind key with
+                | Some(TsExportDeclaration.Interface iface) -> iface.Name = "SharedThing"
+                | _ -> false)
+        testCase "EntryExports records both entry files" <| fun _ ->
+            "two entries expected"
+            |> Expect.equal (result.EntryExports |> Map.count) 2
+        testCase "entry-a attributes SharedThing and OnlyA" <| fun _ ->
+            "entry-a export names"
+            |> Expect.equal (entryKeys "entry-a.d.ts" |> interfaceNames) (Set [ "OnlyA"; "SharedThing" ])
+        testCase "entry-b attributes SharedThing and OnlyB" <| fun _ ->
+            "entry-b export names"
+            |> Expect.equal (entryKeys "entry-b.d.ts" |> interfaceNames) (Set [ "OnlyB"; "SharedThing" ])
+        testCase "SharedThing resolves to ONE key, shared by both entries" <| fun _ ->
+            let inA = entryKeys "entry-a.d.ts" |> sharedThingKeys
+            let inB = entryKeys "entry-b.d.ts" |> sharedThingKeys
+            "one SharedThing key attributed to entry-a" |> Expect.hasLength inA 1
+            "one SharedThing key attributed to entry-b" |> Expect.hasLength inB 1
+            "the SAME key across both entries (identity dedup)" |> Expect.equal inA inB
+        testCase "multi-entry adds no SharedThing declarations beyond single-entry behavior" <| fun _ ->
+            // A re-export (`export { X } from "./shared"`) may surface both the origin
+            // declaration and the re-export — that shape is the single-entry crawl's
+            // semantics. The multi-entry invariant is: a second entry re-exporting the
+            // SAME declaration mints NOTHING new.
+            let countShared (r: EncodedResult) =
+                r.ExportedDeclarations
+                |> Seq.filter (function
+                    | KeyValue(_, TsExportDeclaration.Interface iface) -> iface.Name = "SharedThing"
+                    | _ -> false)
+                |> Seq.length
+            let singleEntry =
+                createMultiFileTestReader [| "multi-entry/entry-a" |] |> runReader
+            "multi-entry SharedThing count equals single-entry count"
+            |> Expect.equal (countShared result) (countShared singleEntry)
+        testCase "TopLevelExports is the distinct union of the entry lists" <| fun _ ->
+            let union =
+                (entryKeys "entry-a.d.ts" @ entryKeys "entry-b.d.ts") |> List.distinct |> List.sort
+            "union of per-entry keys"
+            |> Expect.equal (result.TopLevelExports |> List.sort) union
+    ]
+
 let multiFileTests =
     testList "multi-file/vectors.d.ts" [
         let result = createTestReader "multi-file/vectors" |> runReader
@@ -2326,6 +2389,8 @@ let tests =
         templateLiteralTests
         refEnumTests
         functionRefTests
+        multiEntryProvenanceTests
+        Xantham.Fable.Tests.RecipeTests.tests
         multiFileTests
         packageSourceTests
         importSourceTests

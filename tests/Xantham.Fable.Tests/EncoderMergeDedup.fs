@@ -114,6 +114,7 @@ let private emptyResult : EncodedResult =
         DuplicateTypes = Map.empty
         TopLevelExports = []
         LibEsExports = []
+        EntryExports = Map.empty
     }
 
 // ---------------------------------------------------------------------------

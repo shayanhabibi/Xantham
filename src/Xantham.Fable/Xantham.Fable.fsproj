@@ -43,6 +43,7 @@
         <Compile Include="Reading\Dispatcher.fs" />
         <Compile Include="Reading\Entry.fs" />
         <Compile Include="Read.fs" />
+        <Compile Include="Recipe.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 

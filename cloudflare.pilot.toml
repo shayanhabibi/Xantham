@@ -38,6 +38,7 @@ depends-on = []
 package = "zod"
 version = "4.4.3"
 kind = "module"
+crawl = false      # policy-holder only: zod is reached transitively; opaque-handle shaping happens at emission
 lib = "Fidelity.CloudEdge.Zod"
 policy = "opaque-handle"
 # NOT a full zod binding (437 exports of type-program machinery). Survey verdict: zod sits in
@@ -74,6 +75,10 @@ version = "1.29.0"                 # agents pins EXACTLY 1.29.0 (codemode peers 
 kind = "module"
 lib = "Fidelity.CloudEdge.Mcp"
 policy = "bind-touchpoints"
+# NOTE: the SDK's exports map declares "." -> dist/esm/index.d.ts but the package does NOT ship
+# that file (verified 2026-07-02) — the root export is a lie; only subpaths resolve. These are the
+# survey's touchpoint closure (ESM ".js" specifiers; TS maps them to the .d.ts twins):
+entries = ["./types.js", "./client", "./client/sse.js", "./client/streamableHttp.js", "./client/auth.js", "./server", "./server/mcp.js", "./server/streamableHttp.js", "./server/webStandardStreamableHttp.js", "./server/auth/types.js", "./shared/protocol.js", "./shared/transport.js", "./shared/auth.js"]
 # Not Cloudflare-authored but a hard prerequisite: agents' ./mcp classes literally extend/implement
 # SDK classes (WorkerTransport extends WebStandardStreamableHTTPServerTransport, McpAgent.server:
 # McpServer, ...) so erasure would gut those entries. Survey-verified touchpoint closure ~50-60 types:
@@ -120,6 +125,10 @@ depends-on = ["Fidelity.CloudEdge.Workers", "Fidelity.CloudEdge.PartyServer", "F
 # ─────────────────────────────────────────────────────────────────────────────────────────────
 # DEPENDENCY POLICIES — packages REACHED but not bound as libraries.
 # ─────────────────────────────────────────────────────────────────────────────────────────────
+
+[dependencies."@types/json-schema"]
+policy = "erase-with-advisory"
+# Surfaced by the first v0 crawl (6 exports, transitive) — same class as json-schema-typed.
 
 [dependencies."json-schema-typed"]
 policy = "erase-with-advisory"

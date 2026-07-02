@@ -9,14 +9,17 @@
 # itself. The manifest (cloudflare.pilot.toml) is the owner's steering artifact —
 # this script only illuminates the territory.
 #
-# Run:  scripts/discover.sh [path/to/fable-log]
-#   IR: src/Xantham.Fable/output.json (committed)
+# Run:  scripts/discover.sh [path/to/ir.json] [path/to/fable-log]
+#   IR defaults to src/Xantham.Fable/output.json (committed); pass a *.json first
+#   arg to inspect another IR (e.g. a scratch multi-entry crawl).
 #   Optional: a conformance-gate Fable log to attribute errors to packages.
 # ─────────────────────────────────────────────────────────────────────────────
 set -uo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-IR="$REPO/src/Xantham.Fable/output.json"
-FABLE_LOG="${1:-}"
+case "${1:-}" in
+  *.json) IR="$1"; FABLE_LOG="${2:-}" ;;
+  *)      IR="$REPO/src/Xantham.Fable/output.json"; FABLE_LOG="${1:-}" ;;
+esac
 
 python3 - "$IR" "$FABLE_LOG" <<'PY'
 import json, re, sys
@@ -73,6 +76,20 @@ for pkg, n in sorted(pkg_exports.items(), key=lambda kv: -kv[1]):
     mods = sorted(pkg_modules[pkg].items(), key=lambda kv: -kv[1])[:3]
     modtxt = ', '.join(f"{m}({c})" for m, c in mods)
     print(f"{pkg:38s} {n:>8d}  {modtxt[:80]}")
+
+# ── per-entry provenance (EntryExports, present from the multi-entry crawl on) ─
+entry_exports = data.get("EntryExports") or {}
+if entry_exports:
+    print(f"\nPer-entry provenance ({len(entry_exports)} crawl roots):\n")
+    print(f"{'entry (resolved file, node_modules-relative)':74s} {'top-level exports':>18s}")
+    for file, keys in sorted(entry_exports.items(), key=lambda kv: -len(kv[1])):
+        m = re.search(r'node_modules/(.+)$', file)
+        rel = m.group(1) if m else file
+        print(f"{rel:74s} {len(keys):>18d}")
+    total_attributed = sum(len(v) for v in entry_exports.values())
+    print(f"\n{'TOTAL attributed top-level exports':74s} {total_attributed:>18d}")
+else:
+    print("\n(no EntryExports field — single-entry IR predating multi-entry provenance)")
 
 # ── error attribution (optional) ─────────────────────────────────────────────
 if log_path:

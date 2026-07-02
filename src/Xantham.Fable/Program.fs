@@ -1,4 +1,4 @@
-﻿module Main
+module Main
 
 // ====================
 // CLI implementation
@@ -9,19 +9,14 @@ open Node.Api
 open Xantham.Fable.Types
 open Fable.Core.JsInterop
 
-#if !RELEASE && !FABLE_TEST
-// let dtsFile = path.join(__SOURCE_DIRECTORY__, "../../node_modules/solid-js/types/index.d.ts")
-let dtsFile file = path.join(__SOURCE_DIRECTORY__, $"../../node_modules/{file}")
-let reader =
-    dtsFile "agents/dist/index.d.ts"
-    // dtsFile "solid-js/types/index.d.ts"
-    // dtsFile "typescript/lib/lib.dom.d.ts"
-    // path.join(__SOURCE_DIRECTORY__, "../../tests/Xantham.Fable.Tests/TypeFiles/multiple-extends.d.ts")
-    |> TypeScriptReader.create 
-
-reader
-|> readAndWrite (__SOURCE_DIRECTORY__ + "/output.json")
-#endif
+let private ensureOutputDir (output: string) =
+    let pathIsFile = path.extname output <> ""
+    let dirPath =
+        if pathIsFile
+        then path.join(output, "..")
+        else output
+    if fs.existsSync(!^dirPath) |> not then
+        fs.mkdirSync(dirPath)
 
 let private readFile (file: string) (destination: string) =
     let fn fileExists =
@@ -36,36 +31,51 @@ let private readFile (file: string) (destination: string) =
         else failwithf "File not found: %s" file
     fs.exists(!^file, fn)
 
+let private readRecipe (recipePath: string) (destination: string) =
+    match Recipe.load recipePath with
+    | Error errors ->
+        errors |> List.iter (eprintfn "recipe error: %s")
+        failwithf "recipe %s did not resolve (%d error(s))" recipePath errors.Length
+    | Ok resolved ->
+        resolved |> List.iter (fun r -> printfn $"entry: {r.Label} -> {r.File}")
+        resolved
+        |> List.map _.File
+        |> List.toArray
+        |> TypeScriptReader.createFor
+        |> readAndWrite destination
+
 let printHelp() =
     """
 Generate Xantham IR json.
 
 USAGE
-    xantham <INPUT> [OPTIONS]       Processes the given input `.d.ts` file.
+    xantham <INPUT> [OPTIONS]           Processes the given input `.d.ts` file.
+    xantham --recipe <RECIPE> [OPTIONS] Processes every crawlable [[entry]] of a
+                                        recipe TOML (multi-entry, per-entry provenance).
 
 EXAMPLE
     xantham ./node_modules/solid-js/types/index.d.ts
+    xantham --recipe cloudflare.pilot.toml -o src/Xantham.Fable/output.json
 
 OPTIONS
     --help                          Prints this message.
     -o, --output <OUTPUT>           Sets the output path for the generated json.
 """
     |> printfn "%s"
-    
+
 #if !FABLE_TEST
 [<EntryPoint>]
 let main argv =
     let argv = argv |> Array.toList
     match argv with
     | args when args |> List.contains "--help" || args = [] -> printHelp()
+    | "--recipe" :: recipePath :: ("--output" | "-o") :: [ output ] ->
+        ensureOutputDir output
+        readRecipe recipePath output
+    | [ "--recipe"; recipePath ] ->
+        readRecipe recipePath "output.json"
     | input :: ("--output" | "-o") :: [ output ] ->
-        let pathIsFile = path.extname output <> ""
-        let dirPath =
-            if pathIsFile
-            then path.join(output, "..")
-            else output
-        if fs.existsSync(!^dirPath) |> not then
-            fs.mkdirSync(dirPath)
+        ensureOutputDir output
         readFile input output
     | [ input ] ->
         readFile input null
