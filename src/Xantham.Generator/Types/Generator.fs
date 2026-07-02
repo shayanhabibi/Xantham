@@ -131,6 +131,14 @@ and GeneratorContext =
         /// a `typescript`-sourced top-level export from being dropped by the source-ignore
         /// gate, so its definition is emitted at the global root where references resolve.
         TopLevelExports: HashSet<ResolvedExport>
+        /// The recipe's publish-ordered top-level module names (unit boundaries), set in
+        /// emission. When non-empty, shared synthetic homes mint under
+        /// `<HostTopModule>.SharedLiterals.<name>` where the host is the EARLIEST unit
+        /// among the literal's owners — visible to every referencer via the unit DAG, and
+        /// placed into the host's compilation unit by the ordinary top-module split (no
+        /// cross-assembly module collision: each unit's SharedLiterals nests under its own
+        /// top module). Empty = root-level `SharedLiterals.<name>` (isolation-test default).
+        SyntheticPlacementOrder: string list
         Customisation: Customisation
 
     }
@@ -145,6 +153,7 @@ and GeneratorContext =
         PreludeGetTypeRef = preludeGetTypeRefFunc
         InFlight = HashSet()
         TopLevelExports = HashSet()
+        SyntheticPlacementOrder = []
         TypeAliasRemap = DictionaryImpl()
         TypeAliasArity = DictionaryImpl()
         HoistedHomeTypars = DictionaryImpl()

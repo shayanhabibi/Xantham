@@ -29,11 +29,14 @@ BASELINE="$REPO/scripts/arity-gate.baseline"
 
 SURFACE="${1:-}"
 if [ -z "$SURFACE" ]; then
+  # Monolith path retired 2026-07-03: the surface = the partitioned units, concatenated.
   WORK="$(mktemp -d)"
   SURFACE="$WORK/surface.fs"
   dotnet build "$REPO/src/Xantham.Generator/Xantham.Generator.fsproj" -c Debug >/dev/null 2>&1 \
     || { echo "FATAL: generator build failed"; exit 2; }
-  dotnet run --no-build --project "$REPO/src/Xantham.Generator" -c Debug 1>"$SURFACE" 2>/dev/null
+  dotnet run --no-build --project "$REPO/src/Xantham.Generator" -c Debug -- \
+    --recipe "$REPO/cloudflare.pilot.toml" --out-dir "$WORK/units" >/dev/null 2>/dev/null
+  find "$WORK/units" -name '*.fs' | sort | xargs cat > "$SURFACE"
 fi
 
 python3 - "$SURFACE" "$BASELINE" <<'PY'

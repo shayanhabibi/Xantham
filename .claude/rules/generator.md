@@ -5,15 +5,21 @@ paths:
 
 ### Xantham.Generator
 
-#### Toolchain pin — DO NOT bump Fantomas naively (see `docs/toolchain-fantomas-fabulous-ast.md`)
-Output is formatted via **Fabulous.AST 2.0.0-pre06 -> Fantomas.Core 7.0.1** (transitive, and every
-Fabulous.AST release incl. pre07/pre08 hard-pins `Fantomas.Core [7.0.1]`). Fantomas 7.0.1 has an
-offside/doc-comment layout bug (multi-line generic tupled params; `<deprecated>`/`<br/>` blocks in a
-large `module rec`) fixed only in **Fantomas 8.0.0-alpha** — which is **unreachable**: overriding
-Fantomas ABI-crashes (`BindingNode..ctor`), and pre08 crashes on `FSharp.Core` resolution. This
-accounts for a residual ~34 FS errors (~24 strict-indentation-only, ~10 doc-comment parser cascades)
-that do NOT isolate. `<br/>` is load-bearing (do not strip). Revisit only when a Fabulous.AST release
-ships against Fantomas ≥ 8. Full breadcrumb + verified dead-ends: `docs/toolchain-fantomas-fabulous-ast.md`.
+#### Emission model (the ONLY artifact)
+The generator emits PARTITIONED UNITS (`--recipe <toml> --out-dir <dir>`, Emission.fs): one
+compilation unit per recipe lib in publish order under `namespace rec Fidelity.CloudEdge`, gated by
+`scripts/partition-gate.sh` (+ golden/arity over the concatenated unit sources). There is NO other
+output mode — the legacy stdout monolith was retired 2026-07-03 (a kept monolith is only a
+counter-example; borrowing invites drift). Judge L1 by the partition gate.
+
+#### Toolchain pin — DO NOT bump Fantomas (see `docs/toolchain-fantomas-fabulous-ast.md`)
+Fabulous.AST 2.0.0-pre06 hard-pins Fantomas.Core [7.0.1]; every upgrade path is a verified dead end
+(ABI/FSharp.Core crashes) — AND upgrading is unnecessary. The historical "~34-error floor" was two
+defects, both resolved 2026-07-03: the `<deprecated>`/`<br/>` doc-comment cascade was OURS
+(unsanitized `\r` in upstream JSDoc; fixed by CR normalization in `normalizeDocString`,
+TypeRender.Render.fs), and Fantomas's real long-annotation wrapping bug is avoided by wide-format
+emission (`Gen.runWith { Default with MaxLineLength = 100000 }`, Emission.fs). Do not reintroduce
+default-width formatting for generated units.
 
 #### Path System (`Types/NamePath.fs`)
 

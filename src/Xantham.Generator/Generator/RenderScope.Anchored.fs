@@ -828,21 +828,49 @@ let markSharedLiterals (countingCtx: GeneratorContext) (realCtx: GeneratorContex
                         Seq.append (defHomes |> Seq.map pathKey) (owners |> Seq.map anchorKey)
                         |> Seq.sort
                         |> Seq.head
-                    Some (stem, rep, rt)
+                    // The ROOT module segments of every def-home and referencing owner — the
+                    // placement inputs (which units use this literal).
+                    let roots =
+                        Seq.append
+                            (defHomes |> Seq.choose (TypePath.flatten >> List.tryHead))
+                            (owners |> Seq.choose (fun o -> AnchorPath.flatten o |> List.tryHead))
+                        |> Seq.map Name.Case.valueOrModified
+                        |> Set.ofSeq
+                    Some (stem, rep, rt, roots)
                 else None)
             // Stable order independent of dictionary enumeration: by stem, then representative path.
-            |> Seq.sortBy (fun (stem, rep, _) -> stem, rep)
+            |> Seq.sortBy (fun (stem, rep, _, _) -> stem, rep)
             |> Seq.toList
+        // Host module for a literal's canonical home. With a placement order (emission):
+        // the EARLIEST unit among the literal's owner roots hosts `<Host>.SharedLiterals.<name>`
+        // — visible to every referencer through the unit DAG (each unit references all earlier
+        // ones), and placed into the host's compilation unit by the ordinary top-module split.
+        // Roots outside the order (pooled/erased-dep modules) map to the first unit.
+        // Without an order (isolation tests): the root-level `SharedLiterals` module, unchanged.
+        let hostModuleFor (roots: Set<string>) =
+            match realCtx.SyntheticPlacementOrder with
+            | [] -> sharedLiteralModule
+            | order ->
+                // Owners outside the order (pooled/erased-dep contexts) mean unit 1; and
+                // unit 1 hosting uses the ROOT-LEVEL module (pooled into the first unit's
+                // slice), never `<order[0]>.SharedLiterals` — the first unit's top module
+                // may be overlay-replaced (zod) and would drop the homes with it.
+                let indexOf root = order |> List.tryFindIndex ((=) root) |> Option.defaultValue 0
+                let minIdx =
+                    if Set.isEmpty roots then 0
+                    else roots |> Seq.map indexOf |> Seq.min
+                if minIdx = 0 then sharedLiteralModule
+                else ModulePath.create "SharedLiterals" (ModulePath.init order[minIdx])
         // Assign names, disambiguating against names already in use (this round and prior rounds)
         // by appending the smallest free numeric suffix — deterministic given the stable order.
-        for (stem, _rep, rt) in shared do
+        for (stem, _rep, rt, roots) in shared do
             let name =
                 if usedNames.Add stem then stem
                 else
                     let mutable n = 2
                     while not (usedNames.Add $"{stem}_{n}") do n <- n + 1
                     $"{stem}_{n}"
-            let typePath = sharedLiteralModule |> TypePath.createWithName (Name.Pascal.create name)
+            let typePath = hostModuleFor roots |> TypePath.createWithName (Name.Pascal.create name)
             GeneratorContext.SharedLiterals.addHome realCtx rt typePath)
 
 /// Run the shared-literal counting pass over an explicit export LIST (no interner) and mark the

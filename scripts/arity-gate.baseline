@@ -16,6 +16,9 @@ JsonSchemaValidator=1
 TaskRequestHandler=1
 MCPObservabilityEvent=2
 ProgressToken=1
+# 2026-07-03: placement moved Empty.Core.UtilCjs.Extend into arity-parser visibility —
+# one of the Zod-unit's counted FS0033 args-class sites (phantom-typar family), not new debt.
+Extend=1
 ZodBoolean=1
 ZodNumber=1
 ZodString=1

@@ -24,7 +24,16 @@
 #   6x FS0033 args classes (phantom-typar family, arity-gate-pinned, parked),
 #   3x FS0883 invalid name + 2x FS0953 cyclic abbrev (parked known roots).
 # Downstream stays parse-only until placement lands (Zod assembly still blocked by the 17).
-BL_FIDELITY_CLOUDEDGE_ZOD=17
+# 2026-07-03 (2): TYPE-GRANULAR PLACEMENT LANDED (SyntheticPlacementOrder): shared literal
+# homes mint under `<EarliestOwnerUnit>.SharedLiterals.*` (unit-1/unknown owners -> root-level
+# pooled module, overlay-safe). The gate's own-file scope widened to include the generated
+# ErasedUnions.fs, which exposed and fixed the inverted op_ErasedCast annotation (24 FS0660/663
+# sites -> 0). Zod-unit census at 18 unique sites (17 -> 18 = placement redistribution):
+#   5x FS0039 forward refs (was 6 — pooled JsonSchemaTyped/Empty content referencing later
+#      units; dissolves with erased-dep policy enforcement),
+#   7x FS0033 args classes (phantom-typar family, arity-pinned, parked),
+#   3x FS0883 + 3x FS0953 (parked known roots).
+BL_FIDELITY_CLOUDEDGE_ZOD=18
 BL_FIDELITY_CLOUDEDGE_WORKERS=0
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0

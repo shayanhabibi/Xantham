@@ -47,25 +47,50 @@ let inline getTypeSignalFromOption (ctx: TypeScriptReader) (parent: XanthamTag) 
     |> Option.map (getTypeSignalFromNode ctx parent)
     |> Option.toValueOption
 
+/// The checker returns a BARE name (no `"path".` qualifier) for module-internal
+/// symbols — chunk-file declarations above all (agents' shim chunks, zod's
+/// internal .cjs modules). Downstream, a pathless FQN leaves the type's module
+/// identity underivable: the path plane minted an `Empty` top module from the
+/// relative import specifier, leaking release-unstable chunk names (the survey's
+/// dedup hazard). Qualify with the declaring file, in the checker's own
+/// quoted-path convention (extensions stripped, as the checker itself does).
+let inline private qualifyWithDeclaringFile (symbol: Ts.Symbol) (name: string) =
+    if name.StartsWith "\"" then name
+    else
+        match symbol.declarations with
+        | Some decls when decls.Count > 0 ->
+            let file = decls[0].getSourceFile().fileName
+            let stripExt (f: string) =
+                let noLast =
+                    match f.LastIndexOf '.' with
+                    | i when i > f.LastIndexOf '/' -> f.Substring(0, i)
+                    | _ -> f
+                if noLast.EndsWith ".d" then noLast.Substring(0, noLast.Length - 2) else noLast
+            $"\"{stripExt file}\".{name}"
+        | _ -> name
+
 let inline getFullyQualifiedName (ctx: TypeScriptReader) (tag: XanthamTag) =
     let name =
+        let ofSymbol (symbol: Ts.Symbol) =
+            ctx.checker.getFullyQualifiedName symbol
+            |> qualifyWithDeclaringFile symbol
         match tag.IdentityKey with
         | IdentityKey.AliasSymbol symbol | IdentityKey.Symbol symbol ->
-            ctx.checker.getFullyQualifiedName symbol
+            ofSymbol symbol
             |> Some
         | IdentityKey.DeclarationPosition _ ->
             match tag.ToUnderlyingValue() with
             | Choice1Of2 typ ->
                 typ.aliasSymbol
                 |> Option.orElse (typ.getSymbol())
-                |> Option.map ctx.checker.getFullyQualifiedName
+                |> Option.map ofSymbol
             | Choice2Of2 decl ->
                 ctx.checker.getSymbolAtLocation decl
                 |> Option.orElseWith (fun () ->
                     let typ = ctx.checker.getTypeAtLocation decl
                     typ.aliasSymbol
                     |> Option.orElse (typ.getSymbol()))
-                |> Option.map ctx.checker.getFullyQualifiedName
+                |> Option.map ofSymbol
         | _ -> None
     match name with
     | Some name when not(name.StartsWith"{") -> name.Split('.')

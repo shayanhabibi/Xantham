@@ -40,7 +40,9 @@ units=$(grep "^unit: " "$WORK/emit.log" | sed 's/^unit: \([^ ]*\) ->.*/\1/')
 for unit in $units; do
   log="$WORK/$unit.build.log"
   dotnet build "$WORK/$unit/$unit.fsproj" -c Debug >"$log" 2>&1
-  own=$(grep -E " error " "$log" | grep -oE "$unit\.fs\([0-9]+,[0-9]+\): error [A-Z0-9]+" | sort -u | wc -l | tr -d ' ')
+  # Own-file = EVERY generated file in the unit dir (the unit body AND ErasedUnions.fs) —
+  # not the linked support library (hand-maintained repo source).
+  own=$(grep -E " error " "$log" | grep -oE "($unit|ErasedUnions)\.fs\([0-9]+,[0-9]+\): error [A-Z0-9]+" | sort -u | wc -l | tr -d ' ')
   # blocked: a referenced unit that never produced an assembly
   blocked=""
   for ref in $units; do

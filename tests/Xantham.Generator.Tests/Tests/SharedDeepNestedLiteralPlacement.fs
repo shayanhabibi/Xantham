@@ -254,7 +254,57 @@ let sharedDeepNestedLiteralTests = testList "shared deep-nested literal placemen
             (sprintf "single-owner union-member literal must NOT be canonicalized into SharedLiterals.\n%s" out)
 ]
 
+// ── SyntheticPlacementOrder: shared homes mint under the EARLIEST owner unit ──
+// (Phase-1 type-granular placement; Types/Generator.fs SyntheticPlacementOrder.)
+let private renderWithPlacement (order: string list) (ifaces: Interface list) : string =
+    let ctx = { GeneratorContext.Empty with SyntheticPlacementOrder = order }
+    let exports = ifaces |> List.map ResolvedExport.Interface
+    markSharedLiteralsFromExportList ctx exports
+    for export in exports do
+        registerAnchorFromExport ctx export
+    emitCanonicalPreludeScopes ctx
+    let root = RootModule.collectModules ctx
+    Ast.Oak() { Ast.AnonymousModule() { renderRoot ctx root } }
+    |> Gen.mkOak
+    |> Gen.run
+    |> _.Trim()
+
+let private ownerAt (root: string) (ifaceName: string) (ownerProp: string) : Interface =
+    { (Interface.create ifaceName |> Interface.withPath [ root ]) with
+        Members = [ Property.create ownerProp sharedRetrieval |> Property.wrap ] }
+
+let placementOrderTests = testList "shared-home placement by publish order" [
+    testCase "the EARLIEST owner unit hosts the shared home (nested SharedLiterals)" <| fun _ ->
+        // Owners in UnitA (index 0... but index-0 pools) — use owners at index 1 and 2:
+        // three-unit order; owners under B and C -> host = B (earliest owner), NOT root.
+        let out =
+            renderWithPlacement
+                [ "UnitA"; "UnitB"; "UnitC" ]
+                [ ownerAt "UnitB" "BetaOwner" "retrieval"; ownerAt "UnitC" "GammaOwner" "retrievalOptions" ]
+        Expect.stringContains out "UnitB" "host unit module present"
+        // The canonical home nests under the HOST unit's top module.
+        Expect.isTrue
+            (out.Contains "UnitB.SharedLiterals." || out.Contains "module SharedLiterals")
+            "home rooted under the earliest owner"
+        Expect.isFalse (out.Contains "UnitC.SharedLiterals.") "never under a later owner"
+
+    testCase "an owner in unit 1 forces ROOT-level pooling (overlay-safe)" <| fun _ ->
+        // Unit 1's top module may be overlay-replaced, so index-0 hosting uses the
+        // root-level SharedLiterals module (pooled into the first unit's slice).
+        let out =
+            renderWithPlacement
+                [ "UnitA"; "UnitB" ]
+                [ ownerAt "UnitA" "AlphaOwner" "retrieval"; ownerAt "UnitB" "BetaOwner" "retrievalOptions" ]
+        Expect.stringContains out "module SharedLiterals" "root-level canonical module"
+        Expect.isFalse (out.Contains "UnitA.SharedLiterals.") "not under the overlay-replaceable first unit"
+
+    testCase "empty order preserves the root-level module (isolation default)" <| fun _ ->
+        let out = renderWithPlacement [] [ alphaOwner; betaOwner ]
+        Expect.stringContains out "module SharedLiterals" "unchanged legacy shape"
+]
+
 [<Tests>]
 let tests = testList "SharedDeepNestedLiteralPlacement" [
     sharedDeepNestedLiteralTests
+    placementOrderTests
 ]

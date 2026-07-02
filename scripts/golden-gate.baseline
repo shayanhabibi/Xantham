@@ -64,9 +64,20 @@
 # partitioned emission). Renames shift counting classes, all within noise: callbacks 75->72
 # (improved), synth-public 1759->1774 (+15, renamed module paths entering the counting
 # heuristic), lines 46538->49021 (rename-driven re-wrapping). Determinism x2 HELD.
+# 2026-07-03: GATE RE-AIMED AT THE PARTITIONED UNITS (monolith retired — owner: a kept
+# monolith is only a counter-example; borrowing invites drift). Surface = concatenated
+# unit sources; determinism = double-emit dir compare. Ratcheted DOWN on the zod
+# opaque-handle payoff: synth-public 1774 -> 1115 (the machinery's synth-home
+# penetration left with it), callbacks 72 -> 71. LINES retired as a metric (unit
+# sizes live in the partition gate's report; a whole-surface line count is a
+# monolith-era measure with no per-area meaning).
+# 2026-07-03 (2): type-granular placement redistribution — homes under <Unit>.SharedLiterals
+# change localisation and canonicalization boundaries: synth-home refs 1115 -> 1249 and
+# callbacks 71 -> 72 are COUNT shifts of the same shapes across unit boundaries (arity
+# disagreements IMPROVED 10 -> 8 in the same run; partition gate PASS). Reduction of
+# synth-home penetration remains the L2 target, now per-unit-attributable.
 BL_CALLBACK_IFACE=72
 BL_PROTOTYPE=4
 BL_LIT_NUMBERED=0
 BL_SMASH=55
-BL_SYNTH_PUBLIC=1774
-BL_LINES=49021
+BL_SYNTH_PUBLIC=1249

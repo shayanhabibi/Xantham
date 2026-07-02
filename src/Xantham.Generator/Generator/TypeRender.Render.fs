@@ -746,11 +746,14 @@ module SpecialRender =
         let inline caseName (caseIdx: int) = $"Case%i{caseIdx + 1}"
 
         let renderStaticErase (caseIdx: int) =
-            Ast.Member("op_ErasedCast", [ $"x: {typeParam caseIdx}" ], $"{caseName caseIdx} x")
+            // Parenthesized: `(x: 'A)` is a PARAMETER annotation; without parens the
+            // rendered `op_ErasedCast x: 'A = Case1 x` reads `'A` as the RETURN type
+            // while the body returns the union — FS0660/FS0663 on every arity.
+            Ast.Member("op_ErasedCast", [ $"(x: {typeParam caseIdx})" ], $"{caseName caseIdx} x")
             |> _.toStatic()
             |> _.attribute(Attributes.emit "$0")
         let renderStaticImplicit (caseIdx: int) =
-            Ast.Member("op_Implicit", [ $"x: {typeParam caseIdx}" ], $"{caseName caseIdx} x")
+            Ast.Member("op_Implicit", [ $"(x: {typeParam caseIdx})" ], $"{caseName caseIdx} x")
             |> _.toStatic()
             |> _.attribute(Attributes.emit "$0")
             

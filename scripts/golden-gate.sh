@@ -45,25 +45,30 @@ echo
 dotnet build "$REPO/src/Xantham.Generator/Xantham.Generator.fsproj" -c Debug >/dev/null 2>&1 \
   || { echo "FATAL: generator build failed"; exit 2; }
 
-# ── 1. regenerate TWICE (determinism is a hard requirement) ──────────────────
-gen() { # $1 = out file
+# ── 1. emit the PARTITIONED UNITS twice (determinism is a hard requirement) ──
+# The monolith path was retired 2026-07-03; this gate reads the units, the same
+# artifact every other gate reads (one source of truth, no drift).
+gen() { # $1 = out dir
   [ "$IR" -ef "$GEN_INPUT" ] || cp "$IR" "$GEN_INPUT"   # skip self-copy when IR is the committed IR
-  dotnet run --no-build --project "$REPO/src/Xantham.Generator" -c Debug 1>"$1" 2>/dev/null
+  dotnet run --no-build --project "$REPO/src/Xantham.Generator" -c Debug -- \
+    --recipe "$REPO/cloudflare.pilot.toml" --out-dir "$1" >/dev/null 2>/dev/null
 }
-gen "$WORK/run1.fs"
-gen "$WORK/run2.fs"
+gen "$WORK/units1"
+gen "$WORK/units2"
 # Restore output.json ONLY when this gate overwrote it with a different staged IR. A blanket
 # `git checkout` here silently reverts an intentionally-modified WORKING IR (a re-extraction in
 # flight) — it cost a full stage of measurements against the wrong IR on 2026-07-01.
 if ! [ "$IR" -ef "$GEN_INPUT" ]; then
   git -C "$REPO" checkout -- "$GEN_INPUT" 2>/dev/null || true
 fi
-OUT="$WORK/run1.fs"
+# The metric surface = every emitted unit source, concatenated in publish order.
+OUT="$WORK/surface.fs"
+find "$WORK/units1" -name '*.fs' | sort | xargs cat > "$OUT"
 
-if diff -q "$WORK/run1.fs" "$WORK/run2.fs" >/dev/null; then
-  note "determinism (regen x2 byte-identical)" "OK"
+if diff -qr "$WORK/units1" "$WORK/units2" >/dev/null; then
+  note "determinism (emit x2 byte-identical)" "OK"
 else
-  note "determinism (regen x2 byte-identical)" "FAIL — output is non-deterministic"
+  note "determinism (emit x2 byte-identical)" "FAIL — output is non-deterministic"
   fail=1
 fi
 
@@ -129,7 +134,6 @@ BL_PROTOTYPE=$prototype_members
 BL_LIT_NUMBERED=$lit_numbered
 BL_SMASH=$smash_names
 BL_SYNTH_PUBLIC=$synth_public
-BL_LINES=$lines
 EOF
   echo "Baseline written. Re-run to gate against it."
 fi

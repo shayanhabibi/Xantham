@@ -129,7 +129,7 @@ for file, keys in sorted(entry_exports.items(), key=lambda kv: -len(kv[1])):
 w("")
 w("## L1 — raw binding (whole-artifact until Phase 1 partitions)")
 w("")
-w("Per-area L1 signals (errors, arity, conflations, erasure ledger) begin at Phase-1 partitioned emission. Until then the legacy whole-artifact gates apply: `ir-sentinel.sh`, `arity-gate.sh`, `golden-gate.sh`, `conformance-gate.sh` (baselines in `scripts/*.baseline`, each rebaseline dated and justified in-file).")
+w("Per-unit L1 signal: `partition-gate.sh` (own-file error counts per unit, baselines in `partition-gate.baseline`). Whole-surface signals over the SAME units: `ir-sentinel.sh` (IR identity), `arity-gate.sh` (decl/ref arity), `golden-gate.sh` (semantic budgets + determinism). The monolith and its Fable-transpile conformance gate retired 2026-07-03; Fable conformance returns as consumption (HelloWorker, Phase 2).")
 w("")
 w("## Coverage (test cases per module — parity rule in PLAN.md)")
 w("")
