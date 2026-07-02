@@ -88,4 +88,7 @@ BL_CALLBACK_IFACE=73
 BL_PROTOTYPE=4
 BL_LIT_NUMBERED=0
 BL_SMASH=55
-BL_SYNTH_PUBLIC=1099
+# 2026-07-04: 1099 -> 1100 with the def/ref-symmetry materialization (one more
+# qualified SharedLiterals.* reference now that a previously-dangling child def exists —
+# the materialization class, not a leak regression).
+BL_SYNTH_PUBLIC=1100

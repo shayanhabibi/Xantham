@@ -340,6 +340,21 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             remap ref
             
         | { TypeRef = ref } ->
+            // DEF/REF SYMMETRY on interned-subtree cache-hits: a cached MOLECULE ref
+            // (union / generic application / optional-union / tuple) EMBEDS its literal
+            // children's transient path atoms, but returning it from the cache skips the
+            // per-member descent that registered those children into the FIRST owner's
+            // TypeStore — every later owner (canonical shared-literal homes above all)
+            // renders `Owner.Child` references whose defs live only under the first owner.
+            // Re-walk the structural subtree (the same descent shape as
+            // `recordUnionMemberRefOwners`, which exists because of this same interning)
+            // and re-prerender each hoistable literal against the CURRENT scope: a
+            // Transient-rooted cached literal re-registers here idempotently (the arm
+            // above), a canonical-homed one falls through without registering — exactly
+            // the invariant the first render established. Multi-owner literals are homed
+            // by the ref-owner collector's IDENTICAL walk, so this never duplicates a
+            // def across unrelated owners.
+            reRegisterStructuralLiterals ctx scope resolvedType
             remap ref
     // a first visit to a type will either see the 'resolved type' as having been
     // lazily created but not yet processed (so it will not have a value in the
@@ -1043,6 +1058,58 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             |> TypeRefRender.orNullable nullable
             |> padAliasNameToArity ctx (fun d -> prerender ctx (RenderScopeStore.create()) d) lazyResolvedType.Value
         | Registered ref -> ref
+
+/// Structural companion of `recordUnionMemberRefOwners` at the RENDER seam (see the cache-hit
+/// fall-through in `prerender`): walk a cached molecule's structural subtree and re-prerender
+/// every hoistable object literal against the CURRENT scope, restoring the TypeStore
+/// registration the first owner's descent performed. Nominal heads stop the walk (another
+/// owner's body); only lazies the first render already forced are re-entered, so this adds
+/// dictionary entries, not render work. The root itself is NOT re-prerendered — a homed
+/// literal's own cache-hit lands here and must only descend (self-re-entry would not
+/// terminate). Cycle-safe per walk by reference identity.
+and reRegisterStructuralLiterals (ctx: GeneratorContext) (scope: RenderScopeStore) (rootRt: ResolvedType) =
+    let visited = HashSet<ResolvedType>(HashIdentity.Reference)
+    let isStructuralHead =
+        function
+        | ResolvedType.Union _ | ResolvedType.Array _ | ResolvedType.Intersection _
+        | ResolvedType.Tuple _ | ResolvedType.TypeLiteral _ | ResolvedType.Optional _
+        | ResolvedType.ReadOnly _ -> true
+        | _ -> false
+    let rec walk (rt: ResolvedType) =
+        if visited.Add rt then
+            match rt with
+            | ResolvedType.TypeLiteral tl ->
+                if obj.ReferenceEquals(rt, rootRt) then
+                    // A LITERAL root (a canonical home re-walked at ANCHOR time) descends its
+                    // member types — the members are where its child refs live. Non-root
+                    // literals are the children themselves and are never descended (their own
+                    // nested children register when THEIR def renders).
+                    for m in tl.Members do
+                        match m with
+                        | Member.Property p -> walk p.Type.Value
+                        | Member.GetAccessor g -> walk g.Type.Value
+                        | _ -> ()
+                elif isHoistableObjectLiteral tl
+                     && (GeneratorContext.Prelude.tryGet ctx rt |> ValueOption.isSome) then
+                    // CACHED literals only: the cache-hit arm re-registers the ORIGINAL named
+                    // transient path. A fresh prerender from here would mint a NAMELESS path
+                    // (no member-name context on this walk), collapsing the def onto its home.
+                    prerender ctx scope (LazyContainer.CreateFromValue rt) |> ignore
+            | ResolvedType.Union union ->
+                for lz in union.Types do walk lz.Value
+            | ResolvedType.Array inner -> walk inner
+            | ResolvedType.ReadOnly inner -> walk inner
+            | ResolvedType.Optional typeRef -> walk (ResolvedType.TypeReference typeRef)
+            | ResolvedType.TypeReference tr ->
+                tr.TypeArguments |> List.iter (fun a -> walk a.Value)
+                tr.ResolvedType |> Option.iter (fun r -> walk r.Value)
+                if isStructuralHead tr.Type.Value then walk tr.Type.Value
+            | ResolvedType.Intersection intersection ->
+                intersection.Types |> List.iter (fun t -> walk t.Value)
+            | ResolvedType.Tuple tuple ->
+                tuple.Types |> List.iter (fun t -> walk t.Type.Value)
+            | _ -> ()
+    walk rootRt
 
 module TestHelper =
     let prerender ctx resolvedType =

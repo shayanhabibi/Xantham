@@ -224,13 +224,13 @@ module Name =
         /// `Modelcontextprotocol`) — readable, not just stripped — then drop any residual occurrence.
         /// Applied ONLY on the Pascal (type-level) path, so valid backtick-escaped member names are
         /// untouched.
-        let private typeNameSeparators = Regex(@"[$/.@\[\]]+(.)?", RegexOptions.Compiled)
+        let private typeNameSeparators = Regex(@"[$/.@+\[\]]+(.)?", RegexOptions.Compiled)
         let sanitizeTypeName (s: string) =
             let cased =
                 typeNameSeparators.Replace(s, fun m ->
                     if m.Groups.[1].Success then m.Groups.[1].Value.ToUpperInvariant() else "")
             // Drop any leading separator that produced no following char, and any stragglers.
-            cased.Replace("$", "").Replace("/", "").Replace(".", "").Replace("@", "").Replace("[", "").Replace("]", "")
+            cased.Replace("$", "").Replace("/", "").Replace(".", "").Replace("@", "").Replace("+", "").Replace("[", "").Replace("]", "")
 
         let toCamelCase (s: string) =
             if isUpperSnakeCase s then s

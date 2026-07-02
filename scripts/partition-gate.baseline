@@ -76,7 +76,40 @@
 # `type Const` exist NOWHERE; the canonical driver drives Anchored-rooted scopes only,
 # while depth-2 children of pool parents have TRANSIENT/moored roots that the normal
 # export-driven anchoring recursion would have materialized) — plus 1x FS0883.
-BL_FIDELITY_CLOUDEDGE_ZOD=16
+# 2026-07-04 (3): FS0883 -> 0 (`+` joins the type-name boundary class: image/svg+xml -> ImageSvgXml).
+# Remaining 15 = ONLY the forced-def nested-child family (trace in flight).
+# 2026-07-04 (4): NESTED-CHILD ARM FIX (trace-agent-guided, one location:
+# RenderScope.Anchored.fs canonical-home arm) — two defects unique to that arm: children
+# anchored into a THROWAWAY dict while the registered scope kept an empty one, and the
+# child anchor path dropped its LEAF (TypeStore VALUE carries it, as the export path and
+# grandchild recursion already did). 15 -> 12; ProgressToken/Const materialized.
+# Remaining 12 (Default/Tools/Resources/ReplyTo/Prompts) = the documented VARIANT: these
+# children are referenced via ConcretePath refs which never TypeStore-register
+# (Types/RenderScope.Prelude.fs:176-177), so the parent's store has nothing to drive —
+# the child scopes exist Transient-rooted and undriven. Next fix: drive them from the
+# child's own cached scope (or register concrete-ref children into the store).
+# 2026-07-04 (5): 12 -> 10 via DEF/REF SYMMETRY ON INTERNED-SUBTREE CACHE-HITS
+# (reRegisterStructuralLiterals, the render-seam companion of recordUnionMemberRefOwners):
+# a cached molecule ref (union/generic-app/optional) embeds literal-child atoms but skipped
+# the per-member descent that registers children into the CURRENT owner's TypeStore; the
+# walk re-prerenders cached transient literals so every owner that embeds a child ref also
+# holds its registration (ReplyTo/From class cleared). Also: anchor-time member re-walk on
+# canonical homes, and the caller-dict filter dropped from the home arm's child recursion
+# (a re-anchored home REPLACES its registered scope; a caller-gated recursion would leave
+# the replacement's Anchors empty and drop already-emitted child defs).
+# Remaining 10 (Default x2 / Continue/Inst/Path/Message/Input / Resources/Prompts/Tools):
+# probed to the root — the children are THEMSELVES canonically-HOMED literals
+# (shape=anchored, e.g. Resources=[uri,name,description]) whose defs emit at their own
+# homes, while pool-home member refs re-root STALE RELATIVE atoms (minted by the child's
+# per-owner first render) under the pool home at anchor time: `Home.Resources` ref vs
+# `SharedLiterals.<StemHash>` def — a def/ref NAME disagreement at the REF layer, on
+# structurally-identical literal twins with distinct rt identity. NB: TypeLiteral
+# INTERNING was already tried and REVERTED (+36 e2e; same-shape literals under different
+# owners ARE distinct types) — per that pinned negative result the fix belongs at the
+# REF/path-anchoring layer: a re-rooted relative literal atom must be rewritten to the
+# rt's actual def path (needs the atom->rt linkage, today's known missing link), or the
+# molecule must re-render its literal atoms per anchoring site. Parked with breadcrumb.
+BL_FIDELITY_CLOUDEDGE_ZOD=10
 BL_FIDELITY_CLOUDEDGE_WORKERS=0
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0

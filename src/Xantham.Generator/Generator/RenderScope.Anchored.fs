@@ -445,18 +445,48 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
                       | other -> other)
             | ValueNone -> renderTuple
         let render = Render.Transient.anchor ctx selfAnchor renderTuple
+        // NESTED-CHILD MATERIALIZATION (fixed 2026-07-04; both defects were unique to
+        // this arm — the Concrete arm above and the export path were already correct):
+        //  (1) children must anchor into THIS scope's registered Anchors dict — the old
+        //      code registered a permanently-empty dict and recursed into the caller's
+        //      throwaway one, so child renders were computed and dropped (collectModules
+        //      reads registered scopes' Anchors only);
+        //  (2) the child's anchor path must carry its LEAF from the TypeStore VALUE
+        //      (`<home>.<Leaf>`, exactly as anchorPreludeExportScope and the grandchild
+        //      recursion derive it) — a child's own root is nameless, so anchoring the
+        //      leafless selfAnchor collapsed the def onto the home's own path.
+        // The CALLER's anchors dict must NOT gate the recursion: a home re-anchored
+        // through a second referencing context REPLACES its registered scope, so a
+        // caller-dict filter (children recorded on the FIRST pass) would leave the
+        // replacement's Anchors empty and silently drop the already-emitted child defs.
+        // Only the local dict gates — each registration materializes its own children.
+        let childAnchors = Dictionary<ResolvedType, TypePath * Render>()
         {
             RenderScope.Type = renderScope.Type
             Root = Choice1Of2 path
             TypeRef = renderScope.TypeRef |> TypeRefRender.anchor selfAnchor
             Render = render
-            Anchors = Dictionary<ResolvedType, TypePath * Render>()
+            Anchors = childAnchors
         }
         |> Choice2Of2
         |> GeneratorContext.Anchored.addResolvedType ctx renderScope.Type
-        transientChildren.TypeStore.Keys
-        |> Seq.filter (anchors.ContainsKey >> not)
-        |> Seq.iter (anchor ctx anchors selfAnchor)
+        // ANCHOR-TIME DEF/REF COMPLETION: the home's lazy render forces under whichever
+        // caller reaches it FIRST (often a main-pass export, whose scope then absorbs the
+        // cache-hit re-registrations) — so by the time the driver anchors the home, its
+        // TransientChildren store can be missing children whose molecule refs were cached.
+        // Re-walk the home's own member types against ITS store: cached transient children
+        // re-register here idempotently, so the recursion below materializes their defs
+        // under the home — where the anchored member refs point.
+        (match renderScope.Type with
+         | ResolvedType.TypeLiteral _ ->
+             reRegisterStructuralLiterals ctx transientChildren renderScope.Type
+         | _ -> ())
+        transientChildren.TypeStore
+        |> Seq.filter (fun (KeyValue(key, _)) -> not (childAnchors.ContainsKey key))
+        |> Seq.toList
+        |> List.iter (fun (KeyValue(key, storedTransient)) ->
+            let childPath = TransientPath.anchor selfAnchor (TransientPath.create storedTransient)
+            anchor ctx childAnchors childPath key)
     | { Root = ValueSome (TypeLikePath.Transient path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren } ->
         let path = TransientTypePath.anchor anchorPath path
         // LAMBDA-LIFT override (stage 3b): a hoisted literal grafted under its owning alias whose
