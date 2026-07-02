@@ -35,7 +35,11 @@ let main argv =
     // SharedLiterals homes (defs land under a dropped module while references survive;
     // Zod unit 18→96). One unresolved interaction between erased-module drop and
     // canonical-home minting — diagnosed fresh as the next PLAN item, not iterated blind.
-    let erasedTops: string list = [] // enable: "Empty" :: OpaqueHandleSubstitution.erasedTopsOf recipe
+    // Enforcement ENABLED 2026-07-03 after the def/ref-completeness root fix
+    // (emitCanonicalPreludeScopes force-prerenders home-table entries with no
+    // rendered definition — 194 latent cases measured, ledgered as
+    // shared-home-forced-def; the enforcement-blocking family was 8 refs of one).
+    let erasedTops: string list = "Empty" :: OpaqueHandleSubstitution.erasedTopsOf recipe
     // Publish-ordered unit boundaries: shared synthetic homes mint under the earliest
     // owner unit's top module (Types/Generator.fs SyntheticPlacementOrder).
     let placementOrder =

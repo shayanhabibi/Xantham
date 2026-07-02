@@ -33,7 +33,23 @@
 #      units; dissolves with erased-dep policy enforcement),
 #   7x FS0033 args classes (phantom-typar family, arity-pinned, parked),
 #   3x FS0883 + 3x FS0953 (parked known roots).
-BL_FIDELITY_CLOUDEDGE_ZOD=18
+# 2026-07-03 (3): ERASED-DEP ENFORCEMENT ENABLED after two root fixes, both gate-caught:
+#  (1) def/ref COMPLETENESS: SharedLiteralHomes entries whose real-pass render was
+#      short-circuited away were names-without-definitions (isolation repro passed for
+#      the markSharedLiterals family; production probe with drops-off located the gap).
+#      emitCanonicalPreludeScopes now force-prerenders missing entries — 194 latent
+#      cases (ledger: shared-home-forced-def).
+#  (2) FORWARD-REF SCRUB (mapAtoms shared walk): references pointing FORWARD in the
+#      unit DAG degrade to obj, ledgered per target root (1,350 atoms:
+#      Agents 825 / Workers 341 / Mcp 124 / Partyserver 60). The DAG now holds by
+#      construction for path atoms.
+# Pool = [LiteralUnions; SharedLiterals] — the PLAN target. Zod census at 63 unique:
+#   35x FS0039 — SECOND-ORDER closure of the 194 forced defs: zod typar leakage
+#      (Input/Output/Default bare names), Intl (lib-es NAMESPACED gap in
+#      LibEsSubstitution), ContinueRetry/ProgressToken (parked families);
+#   10x FS0033 args classes + 9x FS0037 duplicate defs (forced-def collisions) +
+#   9x FS0883 invalid names — decomposed, each with an owner.
+BL_FIDELITY_CLOUDEDGE_ZOD=63
 BL_FIDELITY_CLOUDEDGE_WORKERS=0
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0

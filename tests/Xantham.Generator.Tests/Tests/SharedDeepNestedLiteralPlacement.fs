@@ -303,8 +303,77 @@ let placementOrderTests = testList "shared-home placement by publish order" [
         Expect.stringContains out "module SharedLiterals" "unchanged legacy shape"
 ]
 
+// ── ISOLATION REPRO: the erased-enforcement home-vanishing defect ──────────────
+// Production symptom (2026-07-03, enforcement enabled): canonical shared-literal
+// home DEFINITIONS land under a dropped/rewritten module while REFERENCES survive
+// (Zod unit 18->96; ledger `erased-module:Erased = 360`, no `erased-shared-home`).
+// This repro drives the SAME pipeline with a TypePaths rewrite + ErasedRoots set
+// and asserts the def/ref invariant directly on the rendered surface.
+let private renderWithErasure (erasedTops: string list) (order: string list) (ifaces: Interface list) : string =
+    let ctx =
+        GeneratorContext.EmptyWithCustomisation (fun c ->
+            { c with
+                Customisation.Interceptors.Paths.TypePaths = fun _ _ s ->
+                    OpaqueHandleSubstitution.rewriteTypePath [] erasedTops s })
+    let ctx = { ctx with ErasedRoots = erasedTops; SyntheticPlacementOrder = order }
+    let exports = ifaces |> List.map ResolvedExport.Interface
+    markSharedLiteralsFromExportList ctx exports
+    for export in exports do
+        registerAnchorFromExport ctx export
+    emitCanonicalPreludeScopes ctx
+    let root = RootModule.collectModules ctx
+    Ast.Oak() { Ast.AnonymousModule() { renderRoot ctx root } }
+    |> Gen.mkOak
+    |> Gen.run
+    |> _.Trim()
+
+/// Every hoisted-name REFERENCE in the surface must have a DEFINITION in the
+/// surface — the invariant the production defect violates.
+let private assertNoDanglingHoists (out: string) =
+    let defs =
+        System.Text.RegularExpressions.Regex.Matches(out, @"type ([A-Za-z][A-Za-z0-9_]*)")
+        |> Seq.map (fun m -> m.Groups[1].Value)
+        |> Set.ofSeq
+    let refs =
+        System.Text.RegularExpressions.Regex.Matches(out, @"SharedLiterals\.([A-Za-z][A-Za-z0-9_]*)")
+        |> Seq.map (fun m -> m.Groups[1].Value)
+        |> Set.ofSeq
+    let dangling = Set.difference refs defs
+    Expect.isTrue dangling.IsEmpty $"dangling hoisted refs (defined nowhere): %A{dangling}"
+
+let erasureReproTests = testList "erased-enforcement repro (def/ref invariant under rewrite)" [
+    testCase "shared literal with one ERASED-module owner keeps a defined home" <| fun _ ->
+        // Mirror: JSONSchema-family literal owned by an erased module + a real unit.
+        let out =
+            renderWithErasure
+                [ "ErasedPkg" ]
+                [ "UnitA"; "UnitB" ]
+                [ ownerAt "ErasedPkg" "ErasedOwner" "retrieval"
+                  ownerAt "UnitB" "RealOwner" "retrievalOptions" ]
+        assertNoDanglingHoists out
+
+    testCase "shared literal owned ONLY by erased modules keeps def/ref consistency" <| fun _ ->
+        let out =
+            renderWithErasure
+                [ "ErasedPkg"; "ErasedPkg2" ]
+                [ "UnitA"; "UnitB" ]
+                [ ownerAt "ErasedPkg" "ErasedOwnerA" "retrieval"
+                  ownerAt "ErasedPkg2" "ErasedOwnerB" "retrievalOptions" ]
+        assertNoDanglingHoists out
+
+    testCase "control: no erasure, same shape, invariant holds" <| fun _ ->
+        let out =
+            renderWithErasure
+                []
+                [ "UnitA"; "UnitB" ]
+                [ ownerAt "UnitA" "AlphaOwner" "retrieval"
+                  ownerAt "UnitB" "BetaOwner" "retrievalOptions" ]
+        assertNoDanglingHoists out
+]
+
 [<Tests>]
 let tests = testList "SharedDeepNestedLiteralPlacement" [
     sharedDeepNestedLiteralTests
     placementOrderTests
+    erasureReproTests
 ]

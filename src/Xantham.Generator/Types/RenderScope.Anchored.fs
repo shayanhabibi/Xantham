@@ -176,47 +176,64 @@ module TypeRefRender =
         | TypeRefKind.Molecule (TypeRefMolecule.Prefix ({ Kind = TypeRefKind.Atom (TypeRefAtom.Path p) }, _)) -> rootOf p = Some "Erased"
         | _ -> false
 
-    let substituteForHeritage (inScopeTyparNames: Set<string>) (render: TypeRefRender) : TypeRefRender =
+    /// Map every ATOM in a render, recursing through all molecule shapes — the
+    /// ONE walk the scrubbers share (no mirrored walks).
+    let mapAtoms (f: TypeRefAtom -> TypeRefAtom) (render: TypeRefRender) : TypeRefRender =
         let rec walk (render: TypeRefRender) : TypeRefRender =
             match render.Kind with
-            | TypeRefKind.Atom atom ->
-                let newAtom =
-                    match atom with
-                    | TypeRefAtom.Intrinsic "_" ->
-                        TypeRefAtom.Intrinsic "obj"
-                    | TypeRefAtom.Intrinsic s when s.StartsWith("'") ->
-                        if Set.contains s inScopeTyparNames then
-                            atom
-                        else
-                            // NOTE: stderr, not stdout — the generator writes the emitted F# to stdout,
-                            // so a `printfn` here would corrupt the output stream.
-                            eprintfn "Warning: orphan type parameter %s (not in scope), substituting with 'obj'" s
-                            TypeRefAtom.Intrinsic "obj"
-                    | _ -> atom
-                { render with Kind = TypeRefKind.Atom newAtom }
+            | TypeRefKind.Atom atom -> { render with Kind = TypeRefKind.Atom(f atom) }
             | TypeRefKind.Molecule molecule ->
                 let newMolecule =
                     match molecule with
-                    | TypeRefMolecule.Tuple typeRefs ->
-                        typeRefs
-                        |> List.map walk
-                        |> TypeRefMolecule.Tuple
-                    | TypeRefMolecule.Union typeRefs ->
-                        typeRefs
-                        |> List.map walk
-                        |> TypeRefMolecule.Union
+                    | TypeRefMolecule.Tuple typeRefs -> typeRefs |> List.map walk |> TypeRefMolecule.Tuple
+                    | TypeRefMolecule.Union typeRefs -> typeRefs |> List.map walk |> TypeRefMolecule.Union
                     | TypeRefMolecule.Function(parameters, returnType) ->
-                        TypeRefMolecule.Function(
-                            parameters |> List.map walk,
-                            walk returnType
-                        )
+                        TypeRefMolecule.Function(parameters |> List.map walk, walk returnType)
                     | TypeRefMolecule.Prefix(prefix, args) ->
-                        TypeRefMolecule.Prefix(
-                            walk prefix,
-                            args |> List.map walk
-                        )
+                        TypeRefMolecule.Prefix(walk prefix, args |> List.map walk)
                 { render with Kind = TypeRefKind.Molecule newMolecule }
         walk render
+
+    let substituteForHeritage (inScopeTyparNames: Set<string>) (render: TypeRefRender) : TypeRefRender =
+        render
+        |> mapAtoms (fun atom ->
+            match atom with
+            | TypeRefAtom.Intrinsic "_" -> TypeRefAtom.Intrinsic "obj"
+            | TypeRefAtom.Intrinsic s when s.StartsWith "'" ->
+                if Set.contains s inScopeTyparNames then
+                    atom
+                else
+                    // NOTE: stderr, not stdout — the generator writes the emitted F# to stdout,
+                    // so a `printfn` here would corrupt the output stream.
+                    eprintfn "Warning: orphan type parameter %s (not in scope), substituting with 'obj'" s
+                    TypeRefAtom.Intrinsic "obj"
+            | _ -> atom)
+
+    /// FORWARD-REFERENCE SCRUB: under a placement order (unit DAG), a reference
+    /// from a definition hosted at unit index H to a type rooted at index R > H
+    /// points FORWARD in the DAG — uncompilable by construction. Degrade the atom
+    /// to `obj`, LEDGERED via the callback (Types layer stays context-free).
+    let scrubForwardRefs (order: string list) (ledger: string -> unit) (hostRoot: string option) (render: TypeRefRender) : TypeRefRender =
+        match order, hostRoot with
+        | [], _
+        | _, None -> render
+        | order, Some host ->
+            let idxOf r = order |> List.tryFindIndex ((=) r)
+            let hostIdx = idxOf host |> Option.defaultValue 0
+            render
+            |> mapAtoms (fun atom ->
+                match atom with
+                | TypeRefAtom.Path p ->
+                    let refRoot =
+                        ModulePath.flatten p.Parent
+                        |> List.tryHead
+                        |> Option.map Name.Case.valueOrModified
+                    match refRoot |> Option.bind idxOf with
+                    | Some r when r > hostIdx ->
+                        ledger (refRoot |> Option.defaultValue "?")
+                        TypeRefAtom.Intrinsic "obj"
+                    | _ -> atom
+                | _ -> atom)
 
 
 type TypeName = Name<Case.pascal>

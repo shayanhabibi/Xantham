@@ -76,8 +76,11 @@
 # callbacks 71 -> 72 are COUNT shifts of the same shapes across unit boundaries (arity
 # disagreements IMPROVED 10 -> 8 in the same run; partition gate PASS). Reduction of
 # synth-home penetration remains the L2 target, now per-unit-attributable.
-BL_CALLBACK_IFACE=72
+# 2026-07-03 (3): enforcement enabled + forward-ref scrub — RATCHETED DOWN:
+# synth-public 1249 -> 1097, callbacks 72 -> 71 (erased content + scrubbed forward
+# atoms leave the counted surface; all degradations ledgered in advisory-ledger.txt).
+BL_CALLBACK_IFACE=71
 BL_PROTOTYPE=4
 BL_LIT_NUMBERED=0
 BL_SMASH=55
-BL_SYNTH_PUBLIC=1249
+BL_SYNTH_PUBLIC=1097

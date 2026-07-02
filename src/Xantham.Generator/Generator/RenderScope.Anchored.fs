@@ -35,9 +35,20 @@ module Render =
     // render that references a typar its enclosing `type X =` does not declare (a free typar leaking from
     // a collapsed intermediate alias body, e.g. `S["_output"]`) is rewritten to `obj` — the only faithful
     // rendering, since that typar is unreachable at the emission site.
-    let anchorScrubLocalise (inScope: Set<string>) anchorPath (render: Prelude.TypeRefRender) =
+    let anchorScrubLocalise (ctx: GeneratorContext) (inScope: Set<string>) anchorPath (render: Prelude.TypeRefRender) =
+        // Host unit root for the FORWARD-REFERENCE scrub: the def's anchor root
+        // (its top module). Roots outside the placement order (pool/synthetic
+        // modules) index as unit 1 inside scrubForwardRefs.
+        let hostRoot =
+            AnchorPath.flatten anchorPath
+            |> List.tryHead
+            |> Option.map Name.Case.valueOrModified
         TypeRefRender.anchor anchorPath render
         |> TypeRefRender.substituteForHeritage inScope
+        |> TypeRefRender.scrubForwardRefs
+            ctx.SyntheticPlacementOrder
+            (fun root -> GeneratorContext.Advisory.increment ctx $"forward-ref-scrub:{root}")
+            hostRoot
         |> TypeRefRender.localise anchorPath
 
     // ---- Shared anchoring core (single source of truth for both the Transient and Concrete paths) ----
@@ -87,7 +98,7 @@ module Render =
                     FullyQualifiedName = typedName.Metadata.FullyQualifiedName
                 }
                 TypedNameRender.Name = typedName.Name
-                Type = typedName.Type |> anchorScrubLocalise inScope anchorPath
+                Type = typedName.Type |> anchorScrubLocalise ctx inScope anchorPath
                 Traits = typedName.Traits
                 TypeParameters = typedName.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
                 Documentation = typedName.Documentation
@@ -107,7 +118,7 @@ module Render =
                     |> List.map (anchorTypedNameRender ctx inScope anchorPath)
                 ReturnType =
                     functionSignature.ReturnType
-                    |> anchorScrubLocalise inScope anchorPath
+                    |> anchorScrubLocalise ctx inScope anchorPath
                 Traits = functionSignature.Traits
                 Documentation = functionSignature.Documentation
                 TypeParameters = functionSignature.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
@@ -242,7 +253,7 @@ module Render =
                     // Scrub orphan typars from the abbreviation body too (same mechanism as members):
                     // `type UnionToIntersectionFn<'T> = option<'Intersection>` leaks the undeclared
                     // `'Intersection`. In-scope = the alias's OWN declared typars.
-                    Type = alias.Type |> anchorScrubLocalise (typarNameSet alias.TypeParameters) anchorPath
+                    Type = alias.Type |> anchorScrubLocalise ctx (typarNameSet alias.TypeParameters) anchorPath
                 }
                 |> TypeAliasRender.Alias
             | Transient.TypeAliasRender.TypeDefn typeLikeRender ->
@@ -326,7 +337,7 @@ module Render =
                     Name = alias.Name
                     TypeParameters = alias.TypeParameters |> List.map (Shared.anchorTypeParameters ctx anchorPath)
                     Documentation = alias.Documentation
-                    Type = alias.Type |> anchorScrubLocalise (typarNameSet alias.TypeParameters) anchorPath
+                    Type = alias.Type |> anchorScrubLocalise ctx (typarNameSet alias.TypeParameters) anchorPath
                 }
                 |> TypeAliasRender.Alias
             | Concrete.TypeAliasRender.TypeDefn typeLikeRender ->
@@ -909,6 +920,18 @@ let markSharedLiteralsFromExportList (ctx: GeneratorContext) (exports: ResolvedE
 /// scopes also have anchored roots but Concrete renders and are emitted through the export pass —
 /// they must NOT be re-driven here. Shared by the interner-driven pipeline and the test harness.
 let emitCanonicalPreludeScopes (ctx: GeneratorContext) =
+    // DEF/REF COMPLETENESS for the home table: every SharedLiteralHomes entry is a
+    // NAME siblings may already reference (home paths flow into member renders), so
+    // every entry MUST materialize a definition scope. A literal whose only real-pass
+    // render path was short-circuited away (e.g. an alias remap — including remaps the
+    // erasure rewrite collapses) is assigned a home but never prerendered: its name is
+    // referenced, its def never renders (measured: 8 sibling refs to a home whose def
+    // was absent even with module drops disabled). Force-prerender the missing ones.
+    let store = RenderScopeStore.create ()
+    for KeyValue(rt, _home) in ctx.SharedLiteralHomes do
+        if not (ctx.PreludeRenders.ContainsKey rt) then
+            GeneratorContext.Advisory.increment ctx "shared-home-forced-def"
+            prerender ctx store (LazyContainer.CreateTypeKeyDummy rt) |> ignore
     ctx.PreludeRenders.Values
     |> Seq.choose (fun renderScope ->
         match renderScope.Root, renderScope.Render with
