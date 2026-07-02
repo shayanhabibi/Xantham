@@ -109,6 +109,24 @@
 # REF/path-anchoring layer: a re-rooted relative literal atom must be rewritten to the
 # rt's actual def path (needs the atom->rt linkage, today's known missing link), or the
 # molecule must re-render its literal atoms per anchoring site. Parked with breadcrumb.
+# 2026-07-04 (6): RETRACTED EXPERIMENT, two pinned negative results (owner-caught via the
+# Prototype metric moving; judged by GENERATION not error count). A workflow run (2
+# investigators + 2 designers) overturned the twins framing: the Resources/Prompts/Tools
+# referent is ONE interned INTERSECTION outside the shared-literal home system (homes gate
+# on TypeLiteral), and the keying audit showed ALL ResolvedType dicts share payload-
+# [<ReferenceEquality>] identity semantics (no comparer divergence anywhere). Generalizing
+# reRegisterStructuralLiterals to kind-independent re-registration bought Zod 10->8 BUT
+# over-materialized: TypeArguments descent + cross-owner first-write races planted
+# wrong-home defs (`module Prototype` with `BotManagement`) and DUPLICATE members in
+# downstream units that are gate-blind while Zod blocks — REVERTED. A second variant
+# (re-rendering cache-hit refs from the stored path) regressed 8->12 via the force-loop's
+# ONE shared bare-context store — REVERTED. Both pinned in prerender's cache-hit arm.
+# Remaining-10 root, now precise: the multi-member shared-rt class — one rt referenced
+# through several members (X["continue"]/X["inst"]/...; JSON-Schema const/default),
+# per-site anchoring stamps each member leaf, the rt-keyed TypeStore holds ONE def.
+# PREREQUISITES for the real fix: per-home store hygiene in emitCanonicalPreludeScopes
+# (fresh store per forced home) + member-named PathContext on every registration channel;
+# then def/ref coherence becomes decidable per home.
 BL_FIDELITY_CLOUDEDGE_ZOD=10
 BL_FIDELITY_CLOUDEDGE_WORKERS=0
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0

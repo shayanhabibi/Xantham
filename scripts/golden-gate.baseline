@@ -85,7 +85,11 @@
 # 2026-07-04: opaque-owned literal collapse redistributes one callback literal onto the
 # counted surface (72 -> 73) — same materialization class as the fixpoint note above.
 BL_CALLBACK_IFACE=73
-BL_PROTOTYPE=4
+# 2026-07-04 RECALIBRATION with the metric correction (see golden-gate.sh (b)): the old
+# suffix-regex value of 4 was noise (stem-named homes + qualifier hits). The true leak
+# shape — literal `prototype` members in the surface — measures 63, stable across the
+# last two generator states. Burn down by folding TS constructor-interface static sides.
+BL_PROTOTYPE=63
 BL_LIT_NUMBERED=0
 BL_SMASH=55
 # 2026-07-04: 1099 -> 1100 with the def/ref-symmetry materialization (one more

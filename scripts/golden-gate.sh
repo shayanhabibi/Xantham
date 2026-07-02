@@ -82,8 +82,14 @@ echo
 #     defect. A callback should be an F# function type `('T -> 'R)`.
 callback_iface=$(grep -cE 'abstract Invoke:' "$OUT")
 
-# (b) static-sides / constructor-sides leaking as `Prototype`-typed members.
-prototype_members=$(grep -cE ': [A-Za-z.]*Prototype\b' "$OUT")
+# (b) static-sides / constructor-sides leaking into the public surface.
+#     2026-07-04 METRIC CORRECTION: the old regex (`: [A-Za-z.]*Prototype\b`) counted
+#     name-suffix accidents — stem-named shared-literal homes (FromToRawPrototype:
+#     members from/to/raw/PROTOTYPE feed the stem) and `Prototype.X` qualifier hits —
+#     not the defect. The leak shape is a literal `prototype` MEMBER surviving into
+#     the surface (a TS constructor-interface static side rendered nominally instead
+#     of folded); count those directly.
+prototype_members=$(grep -cE '(abstract|member) (``)?_?prototype(``)?:' "$OUT")
 
 # (c) machine-smash public names: `SharedLiterals.Lit<N>` numbered refs +
 #     pathological >40-char type names (declaration-derived names are short/legible).

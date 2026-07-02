@@ -337,8 +337,23 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         | { Root = ValueSome (TypeLikePath.Transient path); TypeRef = ref } ->
             scope
             |> RenderScopeStore.tryAdd resolvedType path
+            // TWO PINNED NEGATIVE RESULTS (2026-07-04, both fully measured then REVERTED)
+            // for the multi-member shared-rt dangle class (one rt referenced through
+            // several members; per-site anchoring stamps each member's leaf while this
+            // rt-keyed store registers ONE def):
+            //  (a) re-rendering this ref from the STORE's path regressed Zod 8->12 — the
+            //      canonical force-loop threads ONE shared bare-context store across all
+            //      forced homes, so first-write poisons swapped refs cross-home;
+            //  (b) generalizing reRegisterStructuralLiterals to kind-independent
+            //      re-registration bought Zod 10->8 but OVER-MATERIALIZED: TypeArguments
+            //      descent + cross-owner first-write races planted wrong-home defs and
+            //      DUPLICATE members in downstream units the gate cannot see while Zod
+            //      blocks (judged by generation, not count — retracted).
+            // The principled sequence: per-home store hygiene in emitCanonicalPreludeScopes
+            // and member-named contexts on EVERY channel first; only then is def/ref
+            // coherence for this class decidable.
             remap ref
-            
+
         | { TypeRef = ref } ->
             // DEF/REF SYMMETRY on interned-subtree cache-hits: a cached MOLECULE ref
             // (union / generic application / optional-union / tuple) EMBEDS its literal
