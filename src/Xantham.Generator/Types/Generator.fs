@@ -85,6 +85,22 @@ and GeneratorContext =
         /// proven `LiteralUnions` canonical-home mechanism, gated to genuinely-shared literals so
         /// single-owner depth-2 literals keep nesting under their owner.
         SharedLiteralHomes: DictionaryImpl<ResolvedType, TypePath>
+        /// LAMBDA-LIFTED hoisted-home typars (stage 3b). A hoisted object literal grafted under
+        /// its owning alias (`caseLiteralRef`) whose members reference the alias's typars must
+        /// ABSTRACT over them: the emitted nested def declares these typars (the anchor stage
+        /// overrides the def's TypeParameters from this table, growing the orphan-scrub inScope
+        /// so member typar references SURVIVE), and the alias's abbreviation body APPLIES them
+        /// (the caseRef is a Prefix over the case path). Keyed by the literal's ResolvedType —
+        /// the same identity the TypeStore graft uses. Only single-owner (non-SharedLiterals)
+        /// literals are lifted; multi-owner homes are the stage-4 extension.
+        HoistedHomeTypars: DictionaryImpl<ResolvedType, Transient.TypeParameterRender list>
+        /// The declared typars (decoder-level, with their TS Constraint/Default lazies) of each
+        /// remap-registered alias, keyed like `TypeAliasArity`. Consumed by the arity padders:
+        /// a CONSTRAINED typar position cannot accept the `obj` placeholder (`'T :> ZodTypeAny`
+        /// given `obj` is FS0001), so pads synthesize the typar's TS DEFAULT where present —
+        /// which TS guarantees exists for any elidable parameter. Populated write-once in
+        /// prerenderTypeAliases phase 2 (real pass only).
+        TypeAliasTypars: DictionaryImpl<ResolvedType, Lazy<TypeParameter> list>
         /// Phase-1 collector for the shared-literal counting pre-pass. When `ValueSome`, the
         /// anchoring walk records, per hoisted object-literal ResolvedType, the set of distinct
         /// anchored def-home paths it is visited under. A literal with >1 distinct home is shared
@@ -131,6 +147,8 @@ and GeneratorContext =
         TopLevelExports = HashSet()
         TypeAliasRemap = DictionaryImpl()
         TypeAliasArity = DictionaryImpl()
+        HoistedHomeTypars = DictionaryImpl()
+        TypeAliasTypars = DictionaryImpl()
         Customisation = defaultArg customisation Customisation.Default
     }
     
@@ -187,8 +205,39 @@ module GeneratorContext =
         let addTypeAliasArity ctx key (arity: int) =
             ctx.TypeAliasArity
             |> Operation.addOrReplace key arity
+        /// Write-once arity recording. Decoder compress routinely makes TWO aliases share one
+        /// body/export-key instance (the JSONSchema/JsonSchemaType story), and `TypeAliasArity` is
+        /// instance-keyed — a silent last-writer-wins overwrite lets one alias's arity clobber
+        /// another's (an explicit 0 from a pruned alias zeroing a generic twin's arity truncates
+        /// the twin's REAL args to a bare name: an FS0033 storm). First write wins; a conflicting
+        /// later write is skipped with a diagnostic (stderr — stdout carries the generated F#).
+        let addTypeAliasArityOnce ctx key (arity: int) (aliasName: string) =
+            match ctx.TypeAliasArity |> Operation.tryGet key with
+            | ValueSome existing when existing <> arity ->
+                eprintfn "Warning: TypeAliasArity conflict for '%s': instance already recorded %d, skipping %d"
+                    aliasName existing arity
+            | ValueSome _ -> ()
+            | ValueNone ->
+                ctx.TypeAliasArity
+                |> Operation.addOrReplace key arity
         let tryGetTypeAliasArity ctx key =
             ctx.TypeAliasArity
+            |> Operation.tryGet key
+        let addHoistedHomeTypars ctx key (typars: Transient.TypeParameterRender list) =
+            ctx.HoistedHomeTypars
+            |> Operation.addOrReplace key typars
+        let tryGetHoistedHomeTypars ctx key =
+            ctx.HoistedHomeTypars
+            |> Operation.tryGet key
+        /// Write-once, mirroring `addTypeAliasArityOnce` (instance-sharing twins are routine).
+        let addTypeAliasTyparsOnce ctx key (typars: Lazy<TypeParameter> list) =
+            match ctx.TypeAliasTypars |> Operation.tryGet key with
+            | ValueSome _ -> ()
+            | ValueNone ->
+                ctx.TypeAliasTypars
+                |> Operation.addOrReplace key typars
+        let tryGetTypeAliasTypars ctx key =
+            ctx.TypeAliasTypars
             |> Operation.tryGet key
         let canFlight ctx key =
             #if CONCURRENT_DICT

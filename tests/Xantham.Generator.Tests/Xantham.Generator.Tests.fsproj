@@ -37,6 +37,7 @@
         <Compile Include="Tests\AliasBodyLiteralPlacement.fs" />
         <Compile Include="Tests\CallbackFunctionAbbrev.fs" />
         <Compile Include="Tests\WithoutArgDrop.fs" />
+        <Compile Include="Tests\UsedTypars.fs" />
         <Compile Include="Tests\LibEsCollectionArgs.fs" />
         <Compile Include="Main.fs"/>
     </ItemGroup>

@@ -38,4 +38,13 @@
 # semantic golden gate PASS (no metric shift — erased typars were uncompilable free vars), determinism
 # byte-identical, generator+decoder suites green. Residual roots (distinct): unused-typar-abbrev (81),
 # ZodIssue/ZodIssueBase compat (28), obj-given-args (27), cyclic-abbrev (19).
-BL_FSHARP=511
+# 2026-07-02: REBASELINED TO THE TRUTHFUL IR. The encoder identity-conflation fix (checker-read
+# instantiated members) re-extracted output.json: the old 511 floor was measured on an IR where
+# 16 open-twin shape groups (203 keys) conflated distinct types — errors the old count never saw.
+# Cumulative stages on the truthful surface: emitted-typar oracle + fully-phantom prune, typar
+# declaration order, lambda-lift of hoisted homes (single-owner graft + shared canonical homes),
+# counting-pass hardening, constraint-aware defaults synthesis. Composition shifted from
+# unusable-binding breakers (dangles/phantom typars/arity splits) to the remaining known roots
+# (heritage/struct cycles ~60, ZodIssue compat ~40). Decl/ref arity agreement is now gated
+# mechanically (scripts/arity-gate.sh); IR identity is gated by scripts/ir-sentinel.sh.
+BL_FSHARP=644

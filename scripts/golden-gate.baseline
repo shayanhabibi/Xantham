@@ -53,5 +53,9 @@ BL_CALLBACK_IFACE=24
 BL_PROTOTYPE=0
 BL_LIT_NUMBERED=0
 BL_SMASH=0
-BL_SYNTH_PUBLIC=678
-BL_LINES=17777
+BL_SYNTH_PUBLIC=990
+BL_LINES=20883
+# 2026-07-02: REBASELINED TO THE TRUTHFUL IR (see conformance-gate.baseline). synth-public rises
+# to 990: the closed-instantiation literals the old IR conflated behind wrong alias names now
+# render as SharedLiterals homes (invalid->valid surfacing), several now GENERIC with lifted
+# typars. Reducing synth-home penetration via proper naming remains the semantic target.

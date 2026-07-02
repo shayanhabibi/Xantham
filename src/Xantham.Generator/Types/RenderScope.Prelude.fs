@@ -131,46 +131,10 @@ module TypeRefRender =
     let setNullable (value: bool) (typeRefRender: TypeRefRender) = { typeRefRender with Nullable = value }
     let nullable (typeRefRender: TypeRefRender) = setNullable true typeRefRender
     let nonNullable (typeRefRender: TypeRefRender) = setNullable false typeRefRender
-
-    let substituteForHeritage (inScopeTyparNames: Set<string>) (render: TypeRefRender) : TypeRefRender =
-        let rec walk (render: TypeRefRender) : TypeRefRender =
-            match render.Kind with
-            | TypeRefKind.Atom_ atom ->
-                let newAtom =
-                    match atom with
-                    | TypeRefAtom.Intrinsic_ "_" ->
-                        TypeRefAtom.Intrinsic_ "obj"
-                    | TypeRefAtom.Intrinsic_ s when s.StartsWith("'") ->
-                        if Set.contains s inScopeTyparNames then
-                            atom
-                        else
-                            printfn "Warning: orphan type parameter '%s' in heritage clause, substituting with 'obj'" s
-                            TypeRefAtom.Intrinsic_ "obj"
-                    | _ -> atom
-                { render with Kind = TypeRefKind.Atom_ newAtom }
-            | TypeRefKind.Molecule_ molecule ->
-                let newMolecule =
-                    match molecule with
-                    | TypeRefMolecule.Tuple_ typeRefs ->
-                        typeRefs
-                        |> List.map walk
-                        |> TypeRefMolecule.Tuple_
-                    | TypeRefMolecule.Union_ typeRefs ->
-                        typeRefs
-                        |> List.map walk
-                        |> TypeRefMolecule.Union_
-                    | TypeRefMolecule.Function_ (parameters, returnType) ->
-                        TypeRefMolecule.Function_ (
-                            parameters |> List.map walk,
-                            walk returnType
-                        )
-                    | TypeRefMolecule.Prefix_ (prefix, args) ->
-                        TypeRefMolecule.Prefix_ (
-                            walk prefix,
-                            args |> List.map walk
-                        )
-                { render with Kind = TypeRefKind.Molecule_ newMolecule }
-        walk render
+    // NOTE: the orphan-typar guard (`substituteForHeritage`) lives on the ANCHORED TypeRefRender
+    // (Types/RenderScope.Anchored.fs) — the anchor stage runs it between anchor and localise. A
+    // structurally-identical Prelude twin previously lived here with zero production callers
+    // (both call sites type-resolve to the Anchored walk); it was removed 2026-07-01.
 
 type RenderScopeStore = {
     PathContext: TransientPath

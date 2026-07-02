@@ -381,11 +381,17 @@ module TypeParameterRender =
             ValueNone
         
     let renderTypeParametersIntoPostfixList (ctx: GeneratorContext) (typeParameters: TypeParameterRender list) =
+        // The fold PREPENDS, so without the final reverse both lists emit REVERSED vs the TS/IR
+        // declaration order — `JSONSchema<Value, SchemaType>` came out `<'SchemaType, 'Value>`,
+        // silently TRANSPOSING every positional application of a multi-param generic (obj-padding
+        // masked it at most sites). Decls and constraints are restored together: constraint-list
+        // order is semantically irrelevant, but keeping them aligned with their decls costs nothing.
         typeParameters
         |> List.fold (fun (decls, constraints) -> renderTypeParameter ctx >> function
             | decl, ValueSome typarConstraint -> decl :: decls, typarConstraint :: constraints
             | decl, ValueNone -> decl :: decls, constraints
             ) ([], [])
+        |> fun (decls, constraints) -> List.rev decls, List.rev constraints
         |> Ast.PostfixList
         
     // rendering as typar

@@ -59,17 +59,19 @@ let tests =
             |> Flip.Expect.equal "1-typar interface TypeDefn"
                 "type Box<'T> = interface end"
 
-        // Two type parameters. NOTE the emitted order is REVERSED vs. source order
-        // (`[T; U]` -> `<'U, 'T>`): `Interface.render` (Render.TypeShapes.fs:27-29) maps
-        // `shape.TypeParameters` in order, but the downstream fold/anchor accumulation reverses
-        // them — the same reversal observed for member emission. We assert the ACTUAL order.
-        testCase "generic interface with two type parameters renders reversed `<'U, 'T>`" <| fun _ ->
+        // Two type parameters emit in DECLARATION order. This test previously pinned the
+        // REVERSED order (`[T; U]` -> `<'U, 'T>`) as a documented defect: the
+        // renderTypeParametersIntoPostfixList fold prepends, and without a final reverse every
+        // multi-param generic decl transposed its positional applications (Agent<'Props,'State,
+        // 'Env> vs TS Agent<Env,State,Props> — heritage args cross-bound). Fixed 2026-07-01 by
+        // restoring order for decls and constraints together.
+        testCase "generic interface with two type parameters renders in declaration order" <| fun _ ->
             (Interface.create "Pair"
              |> Interface.withTypeParameters [ TypeParameter.create "T"; TypeParameter.create "U" ]
              |> Interface.wrap)
             |> render
-            |> Flip.Expect.equal "2-typar interface TypeDefn (reversed)"
-                "type Pair<'U, 'T> = interface end"
+            |> Flip.Expect.equal "2-typar interface TypeDefn (declaration order)"
+                "type Pair<'T, 'U> = interface end"
 
         // A type parameter carrying an `extends` constraint emits an F# `when 'T :> Base`
         // subtype constraint inside the postfix typar list.

@@ -1,0 +1,5 @@
+# Xantham IR open-twin sentinel baseline — encoder identity-conflation metrics.
+# No metric may increase; ratchet DOWN as the encoder fix lands (stage 1: CONFLATED=0).
+CONFLATED=0
+OPEN_TWIN_GROUPS=11
+OPEN_TWIN_KEYS=32

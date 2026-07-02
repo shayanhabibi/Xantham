@@ -19,6 +19,14 @@ Per-pass isolation coverage for two GENERATOR passes:
         - source=None,  MemberPath=h::t -> the FQN module trace becomes the module path
         - source=Some s                 -> sanitizeSource s is the module root; the FQN
                                            MemberPath nests beneath it (the synthetic module)
+        - source=Some (Abnormal s) + node_modules FilePath (a FILE import from a declaration
+          file) -> module path = PACKAGE IDENTITY only: `@scope/pkg` (2 segments) or `pkg`
+          (1 segment), PLUS an immediately-following VERSION segment (`v3`, `v4`, ...) when
+          present — a package shipping multiple versions in one install (zod) declares the
+          same type names under each, so the version segment keeps the twins apart
+          (Zod.V3.X / Zod.V4.X). All other packaging dir segments (dist/esm/lib/...) are
+          dropped. Guard: if the Abnormal source does not contain the file name, fall back
+          to the plain sanitizeSource arm.
       The custom TypePaths/MemberPaths interceptor prunes the phantom "Typescript" parent; the
       IgnorePathRender.Source gate suppresses babel/typescript-sourced renders.
 
@@ -169,6 +177,69 @@ let aliasRemapConsumptionTests =
     ]
 
 // =====================================================================================
+// (1b) THIN-REFERENCE alias-body STORE contract (the FS0953 self-abbreviation root).
+//
+// `type AgentOptions<Env> = PartyServerOptions<Env>`: the encoder's self-reference
+// decoupling makes the alias body a TypeReference whose ResolvedType IS the alias's own
+// export-key instance, and prerenderTypeAliases phase 1 remaps BOTH instances to the
+// alias NAME. The remap is a RETURN-layer concern (the cache-hit path re-applies it on
+// every read), so the STORED scope must keep the REAL render: resolveInnerRef reads
+// PreludeRenders directly (bypassing the return layer) to restore the alias's own decl
+// body — if the store bakes the remapped name in, the decl emits the FS0953
+// self-abbreviation `type AgentOptions<'Env> = AgentOptions<obj>` (61 aliases).
+// Two return-layer fixes were tried and reverted net-negative (+93 skipping the
+// registration; +48 following through at the decl) — the STORE is the owning seam.
+// =====================================================================================
+
+[<Tests>]
+let thinReferenceBodyStoreTests =
+    let aliasNameRef () =
+        ModulePath.createFromList [ "M" ]
+        |> TypePath.create "MyAlias"
+        |> RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath
+        |> RenderScopeStore.TypeRef.Unsafe.createAtom
+        |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+    let poisonShape (ctx: GeneratorContext) =
+        // body = TypeReference{ResolvedType = target}; phase-1 remaps body AND target to the name
+        let target = ResolvedType.Interface.create "Foreign" |> ResolvedType.Interface.wrap
+        let body =
+            ResolvedType.TypeReference {
+                Type = LazyContainer.CreateFromValue target
+                TypeArguments = []
+                ResolvedType = Some (LazyContainer.CreateFromValue target)
+            }
+        let nameRef = aliasNameRef ()
+        GeneratorContext.Prelude.addTypeAliasRemap ctx body nameRef
+        GeneratorContext.Prelude.addTypeAliasRemap ctx target nameRef
+        body, nameRef
+
+    testList "thin-reference alias-body STORE (FS0953 root)" [
+        // PENDING: the store fix (keep the target's un-remapped render when this node remaps to
+        // the same name) is contract-correct and was verified in isolation — but landing it
+        // re-emits 61 real alias bodies whose obj-padded CONSTRAINED args mint FS0001 violations
+        // ('obj' not compatible with 'ZodTypeAny', +54 net). PREREQUISITE: constraint-aware
+        // defaults synthesis (TypeParameter.Default instead of obj at constrained positions).
+        // Flip to testCase when the defaults machinery lands.
+        ptestCase "the body's STORED scope keeps the real render, not the remapped self-name" <| fun _ ->
+            let ctx = ctx ()
+            let body, nameRef = poisonShape ctx
+            TestHelper.prerender ctx body |> ignore
+            match ctx.PreludeRenders.TryGetValue body with
+            | true, stored ->
+                Expect.notEqual stored.TypeRef nameRef
+                    "stored scope must keep the REAL render — resolveInnerRef reads it directly to build the alias's own decl"
+            | _ -> failtest "body scope not registered"
+
+        testCase "external reads of the body still render the alias name (return-layer remap)" <| fun _ ->
+            let ctx = ctx ()
+            let body, nameRef = poisonShape ctx
+            TestHelper.prerender ctx body |> ignore
+            // second read = the cache-hit path, which re-applies the remap on return
+            TestHelper.prerender ctx body
+            |> Flip.Expect.equal "reference-position reads must still see the alias name" nameRef
+    ]
+
+// =====================================================================================
 // (2) PATH INTERCEPTORS — createModulePath contract via Path.fromXxx, and the pipeXxx
 //     interceptor hooks + IgnorePathRender gate.
 // =====================================================================================
@@ -233,6 +304,110 @@ let createModulePathTests =
             |> Path.fromInterface
             |> typePathStr
             |> Flip.Expect.equal "@scope/pkg -> Scope.Pkg nested modules" "Scope.Pkg.Thing"
+    ]
+
+// =====================================================================================
+// (2b) createModulePath — the node_modules FILE-IMPORT arm (Abnormal source + a
+//      node_modules FilePath). Coverage plane for the package-identity truncation and
+//      the multi-version (vN) twin disambiguation (zod v3/v4). The packaging dir
+//      segments after the package name (dist/esm/lib/...) are npm artifacts, NOT module
+//      structure — only the package identity and an IMMEDIATELY-following version
+//      segment survive.
+// =====================================================================================
+
+[<Tests>]
+let nodeModulesPathTests =
+    // An interface as read from a node_modules declaration-file import: the FQN carries the
+    // absolute file path (quoted, as the TS checker prints module sources) followed by the
+    // member trace; the Source is the same quoted path (Abnormal — quotes + slashes).
+    let quoted (filePath: string) = "\"" + filePath + "\""
+    let abnormal (filePath: string) =
+        QualifiedNamePart.Abnormal(
+            quoted filePath,
+            QualifiedNamePartDiagnostic.ContainsQuotationMarks
+            ||| QualifiedNamePartDiagnostic.ContainsSlash)
+    let fileImportInterface (filePath: string) (name: string) =
+        let iface = ResolvedType.Interface.create name
+        { iface with
+            Interface.Source = Some (abnormal filePath)
+            FullyQualifiedName = [ abnormal filePath; QualifiedNamePart.Normal name ] }
+    let pathOf filePath name =
+        fileImportInterface filePath name |> Path.fromInterface |> typePathStr
+
+    testList "createModulePath node_modules file-import arm" [
+
+        // The zod-twin disambiguation: a `vN` segment IMMEDIATELY after the package name
+        // is version identity and must be kept — v3 and v4 declare the same type names.
+        testCase "version segment kept: zod/v3 -> Zod.V3" <| fun _ ->
+            pathOf "/repo/node_modules/zod/v3/types" "ZodObject"
+            |> Flip.Expect.equal "v3 twin keeps its version home" "Zod.V3.ZodObject"
+
+        testCase "version segment kept: zod/v4 (deeper artifacts dropped)" <| fun _ ->
+            pathOf "/repo/node_modules/zod/v4/classic/schemas" "ZodString"
+            |> Flip.Expect.equal "v4 twin keeps V4; classic/schemas are packaging dirs" "Zod.V4.ZodString"
+
+        // Packaging dirs are NOT module structure.
+        testCase "non-version dir segment dropped: zod/lib -> Zod" <| fun _ ->
+            pathOf "/repo/node_modules/zod/lib/index" "ZodAny"
+            |> Flip.Expect.equal "lib is a packaging dir, not a version" "Zod.ZodAny"
+
+        // Scoped package identity is 2 segments; deep dist/esm chains are dropped.
+        testCase "scoped package keeps @scope/pkg only" <| fun _ ->
+            pathOf "/repo/node_modules/@modelcontextprotocol/sdk/dist/esm/types" "ClientOptions"
+            |> Flip.Expect.equal "scoped identity, packaging chain dropped" "Modelcontextprotocol.Sdk.ClientOptions"
+
+        // The version segment must IMMEDIATELY follow the package name — a vN buried in
+        // the packaging chain is not package-version identity.
+        testCase "vN not immediately after package name is dropped" <| fun _ ->
+            pathOf "/repo/node_modules/pkg/dist/v3/mod" "Thing"
+            |> Flip.Expect.equal "dist/v3 is a packaging chain, not a version home" "Pkg.Thing"
+
+        // isVersionSeg boundaries: `v` alone and `v<non-digits>` are NOT versions.
+        testCase "bare v is not a version segment" <| fun _ ->
+            pathOf "/repo/node_modules/zod/v/mod" "Thing"
+            |> Flip.Expect.equal "bare v dropped" "Zod.Thing"
+
+        testCase "vNext is not a version segment" <| fun _ ->
+            pathOf "/repo/node_modules/zod/vNext/mod" "Thing"
+            |> Flip.Expect.equal "v + non-digits dropped" "Zod.Thing"
+
+        testCase "multi-digit version v10 is kept" <| fun _ ->
+            pathOf "/repo/node_modules/zod/v10/mod" "Thing"
+            |> Flip.Expect.equal "v10 is a version segment" "Zod.V10.Thing"
+
+        testCase "scoped package + version segment keeps both" <| fun _ ->
+            pathOf "/repo/node_modules/@scope/pkg/v2/mod" "Thing"
+            |> Flip.Expect.equal "@scope/pkg/v2 -> Scope.Pkg.V2" "Scope.Pkg.V2.Thing"
+
+        // The FQN's middle (namespace) parts still nest under the package home.
+        testCase "member trace nests under the versioned package home" <| fun _ ->
+            let iface =
+                let baseIface = ResolvedType.Interface.create "Inner"
+                { baseIface with
+                    Interface.Source = Some (abnormal "/repo/node_modules/zod/v3/types")
+                    FullyQualifiedName =
+                        [ abnormal "/repo/node_modules/zod/v3/types"
+                          QualifiedNamePart.Normal "Ns"
+                          QualifiedNamePart.Normal "Inner" ] }
+            iface
+            |> Path.fromInterface
+            |> typePathStr
+            |> Flip.Expect.equal "FQN namespace nests under Zod.V3" "Zod.V3.Ns.Inner"
+
+        // Guard: an Abnormal source that does NOT contain the file name is NOT a file
+        // import — it falls back to the plain sanitizeSource arm.
+        testCase "abnormal source not matching the file name falls back to sanitizeSource" <| fun _ ->
+            let iface =
+                let baseIface = ResolvedType.Interface.create "Thing"
+                { baseIface with
+                    Interface.Source = Some (QualifiedNamePart.Abnormal("@other/lib", QualifiedNamePartDiagnostic.ContainsSlash))
+                    FullyQualifiedName =
+                        [ abnormal "/repo/node_modules/zod/v3/types"
+                          QualifiedNamePart.Normal "Thing" ] }
+            iface
+            |> Path.fromInterface
+            |> typePathStr
+            |> Flip.Expect.equal "falls back to the sanitized source root" "Other.Lib.Thing"
     ]
 
 [<Tests>]

@@ -1,0 +1,10 @@
+# Xantham arity-gate baseline — pre-existing decl/ref arity disagreements PER NAME.
+# The gate fails on NEW names or a name's count increasing. Shrink as fixes land.
+BaseToolCallback=3
+CreateTaskRequestHandler=1
+JsonSchemaType=1
+JsonSchemaValidator=1
+ParsePathComponent=1
+TaskRequestHandler=1
+ZodNumber=1
+ZodString=1

@@ -406,10 +406,25 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
         |> Seq.filter (anchors.ContainsKey >> not)
         |> Seq.iter (anchor ctx anchors anchorPath)
     | { Root = ValueSome (TypeLikePath.Anchored path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren } ->
-        // Canonical hoisted enum (LiteralUnions.<name>): anchored at its OWN absolute path, NOT
-        // re-anchored against any referencing owner. Registered directly so collectModules emits
-        // it once; addResolvedType is idempotent by ResolvedType so repeated drives are harmless.
+        // Canonical hoisted enum (LiteralUnions.<name>) or SHARED-LITERAL canonical home
+        // (SharedLiterals.<name>): anchored at its OWN absolute path, NOT re-anchored against any
+        // referencing owner. Registered directly so collectModules emits it once; addResolvedType
+        // is idempotent by ResolvedType so repeated drives are harmless.
         let selfAnchor = AnchorPath.create path
+        // SHARED-HOME LAMBDA-LIFT override (stage 4) — the same TypeParameters override as the
+        // Transient-root arm below: a lifted shared home's def must DECLARE its free typars so the
+        // orphan-scrub inScope preserves the member references (every cached reference to this home
+        // applies the same uniform typar args; out-of-scope sites scrub those args per-site).
+        let renderTuple =
+            match GeneratorContext.Prelude.tryGetHoistedHomeTypars ctx renderScope.Type with
+            | ValueSome lifted ->
+                let refRender, lazyRender = renderTuple
+                refRender,
+                lazy (match lazyRender.Value with
+                      | Transient.TypeRender.TypeDefn td ->
+                          Transient.TypeRender.TypeDefn { td with TypeParameters = lifted }
+                      | other -> other)
+            | ValueNone -> renderTuple
         let render = Render.Transient.anchor ctx selfAnchor renderTuple
         {
             RenderScope.Type = renderScope.Type
@@ -425,6 +440,24 @@ and anchorPreludeAnchorScope (ctx: GeneratorContext) anchors anchorPath renderSc
         |> Seq.iter (anchor ctx anchors selfAnchor)
     | { Root = ValueSome (TypeLikePath.Transient path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren } ->
         let path = TransientTypePath.anchor anchorPath path
+        // LAMBDA-LIFT override (stage 3b): a hoisted literal grafted under its owning alias whose
+        // members reference the alias's typars carries a HoistedHomeTypars entry (written by
+        // caseLiteralRef, keyed by this scope's ResolvedType). Override the def's TypeParameters
+        // BEFORE Shared.anchorTypeDefn so the emitted nested def DECLARES the lifted typars and
+        // the orphan-scrub inScope grows to preserve the member references. The lazy wrapper is
+        // transparent — Transient.anchor forces the render immediately. Applies only to this
+        // Transient-root arm (single-owner grafted defs); SharedLiterals canonical homes
+        // (Anchored-root arm above) stay un-lifted until the stage-4 per-site-args extension.
+        let renderTuple =
+            match GeneratorContext.Prelude.tryGetHoistedHomeTypars ctx renderScope.Type with
+            | ValueSome lifted ->
+                let refRender, lazyRender = renderTuple
+                refRender,
+                lazy (match lazyRender.Value with
+                      | Transient.TypeRender.TypeDefn td ->
+                          Transient.TypeRender.TypeDefn { td with TypeParameters = lifted }
+                      | other -> other)
+            | ValueNone -> renderTuple
         let render = Render.Transient.anchor ctx anchorPath renderTuple
         // SHARED-LITERAL COUNTING (phase 1 only): record EVERY def-home VISIT for a hoisted
         // object-LITERAL, BEFORE the first-write-wins `tryAdd` below. A literal visited under

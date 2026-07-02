@@ -52,7 +52,12 @@ gen() { # $1 = out file
 }
 gen "$WORK/run1.fs"
 gen "$WORK/run2.fs"
-git -C "$REPO" checkout -- "$GEN_INPUT" 2>/dev/null || true   # restore tracked output.json
+# Restore output.json ONLY when this gate overwrote it with a different staged IR. A blanket
+# `git checkout` here silently reverts an intentionally-modified WORKING IR (a re-extraction in
+# flight) — it cost a full stage of measurements against the wrong IR on 2026-07-01.
+if ! [ "$IR" -ef "$GEN_INPUT" ]; then
+  git -C "$REPO" checkout -- "$GEN_INPUT" 2>/dev/null || true
+fi
 OUT="$WORK/run1.fs"
 
 if diff -q "$WORK/run1.fs" "$WORK/run2.fs" >/dev/null; then
@@ -91,6 +96,17 @@ note "static-sides as Prototype members"      "$prototype_members"
 note "SharedLiterals.Lit<N> machine names"     "$lit_numbered"
 note "smash type names (>40 char)"             "$smash_names"
 note "synth-home refs in public surface"       "$synth_public"
+echo
+
+# ── 2b. ARITY-AGREEMENT gate (decl arity vs every application arity) ─────────
+# The class the semantic metrics are blind to: a decl whose arity moved without
+# its references (or vice versa) — the reverted 511→707 regression shape.
+if bash "$REPO/scripts/arity-gate.sh" "$OUT" | tail -1 | grep -q PASS; then
+  note "arity agreement (decl vs refs)" "OK"
+else
+  note "arity agreement (decl vs refs)" "FAIL — run scripts/arity-gate.sh for detail"
+  fail=1
+fi
 echo
 
 # ── 3. gate against the committed baseline (ratchet: must not regress) ────────

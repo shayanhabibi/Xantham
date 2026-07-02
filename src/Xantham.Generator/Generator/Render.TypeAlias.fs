@@ -15,8 +15,18 @@ module TypeAlias =
     let render (ctx: GeneratorContext) scopeStore (typ: TypeAlias) =
         let innerType = typ.Type
         let typeParameters =
-            typ.TypeParameters
-            |> List.map (_.Value >> TypeParameter.render ctx scopeStore)
+            // PHANTOM-TYPAR prune (decl side): a generic alias whose body renders NONE of its
+            // declared typars is emitted NON-generic — F# rejects an abbreviation with unused
+            // typars. This is the SAME `aliasKeepsTypars` oracle prerenderTypeAliases uses to
+            // record the reference arity (0 for pruned), computed here on the very export
+            // instance in hand — decl and refs cannot disagree (the 511->707 reverted-regression
+            // class). This one binding feeds every typar-emitting arm below. NOTE: a pruned
+            // alias with a self-headed body now reaches the bodyHeadIsAliasSelf guard (gated on
+            // an empty typar list) for the first time and correctly collapses to `obj`.
+            if aliasKeepsTypars ctx typ then
+                typ.TypeParameters
+                |> List.map (_.Value >> TypeParameter.render ctx scopeStore)
+            else []
         let documentation = typ.Documentation
         let name = typ.Name
         let path = Path.Interceptors.pipeTypeAlias ctx typ
@@ -149,11 +159,48 @@ module TypeAlias =
                             TransientPath.toTransientModulePath scopeStore.PathContext
                             |> TransientTypePath.createOnTransientModuleWithName n
                     scopeStore.TypeStore[memberType] <- casePath
-                    let caseRef =
+                    let caseRefAtom =
                         casePath
                         |> RenderScopeStore.TypeRefAtom.Unsafe.createTransientPath
                         |> RenderScopeStore.TypeRef.Unsafe.createAtom
                         |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+                    // LAMBDA-LIFT (stage 3b): a grafted OBJECT literal whose members reference the
+                    // alias's declared typars is a term hoisted with FREE type variables. Correct
+                    // lifting abstracts the home over them and re-applies them at the use site:
+                    // the home's def declares the typars (HoistedHomeTypars -> anchor-stage
+                    // TypeParameters override -> the orphan-scrub inScope GROWS, so member typar
+                    // references SURVIVE instead of erasing to obj), and this caseRef APPLIES them
+                    // (`Case2<'T>`), which is exactly why `usedTyparNames` counts graftable-literal
+                    // member typars as used — decl, arity oracle, home, and reference agree by
+                    // construction. `memberHasTransientDef` implies single-owner (a multi-owner
+                    // literal is SharedLiterals-homed, Root=Anchored — the stage-4 extension), so
+                    // no other referrer can reach this home bare. TemplateLiteral members carry no
+                    // member types and never lift (the `_ -> []` arm).
+                    let homeTypars =
+                        match memberOther, typ.TypeParameters with
+                        | ResolvedTypeOther.TypeLiteral _, (_ :: _ as declared) ->
+                            let usedInside = literalMemberTyparNames ctx memberType
+                            declared
+                            |> List.filter (fun tp ->
+                                Set.contains (Name.Case.valueOrModified tp.Value.Name) usedInside)
+                        | _ -> []
+                    let caseRef =
+                        match homeTypars with
+                        | [] -> caseRefAtom
+                        | lifted ->
+                            lifted
+                            |> List.map (_.Value >> TypeParameter.render ctx caseScope)
+                            |> GeneratorContext.Prelude.addHoistedHomeTypars ctx memberType
+                            let typarArgs =
+                                lifted
+                                |> List.map (fun tp ->
+                                    Name.Case.valueOrModified tp.Value.Name
+                                    |> RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic
+                                    |> RenderScopeStore.TypeRef.Unsafe.createAtom
+                                    |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false)
+                            RenderScopeStore.TypeRefMolecule.Unsafe.createPrefix caseRefAtom typarArgs
+                            |> RenderScopeStore.TypeRef.Unsafe.createMolecule
+                            |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
                     caseRef, true
                 else
                     prerendered, false

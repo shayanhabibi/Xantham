@@ -133,21 +133,48 @@ let private constructSigToMemberSlot (ctx: TypeScriptReader) (signature: Ts.Sign
     |> Signal.source
 
 /// Convert a property symbol to a member slot.
-let private propertySymToMemberSlot (ctx: TypeScriptReader) (sym: Ts.Symbol) : Signal<SMemberBuilder voption> =
+///
+/// `closeInstantiated`: an INSTANTIATED anonymous object's property symbols are TRANSIENT clones
+/// whose `valueDeclaration` is the OPEN generic declaration node — shared by every instantiation.
+/// Routing them to that node emits an open, typar-referencing COPY of the member (the
+/// identity-conflation root: `JsonSchemaType = JSONSchema.Interface` came out byte-identical to
+/// the open JSONSchema object body, so the decoder's structural compress merged them and the
+/// paramless alias claimed the generic body — 16 such shape-groups / 203 keys per the IR
+/// sentinel). With the flag set, a transient PropertySignature member takes its TYPE from the
+/// checker (the instantiated type) while name/optionality stay symbol-derived; every other
+/// symbol keeps the declaration route byte-for-byte. Scoped to PropertySignature declarations
+/// (methods keep the node route: overloads/docs) and NOT enabled for the Mapped arm (pinned
+/// fragile — mapped-type arg-drop). The OPEN declaration's own members are non-transient, so
+/// the open body keeps its faithful typar references.
+let private propertySymToMemberSlot (ctx: TypeScriptReader) (closeInstantiated: bool) (sym: Ts.Symbol) : Signal<SMemberBuilder voption> =
+    let hybridInstantiated =
+        closeInstantiated
+        && sym.flags.HasFlag Ts.SymbolFlags.Transient
+        && (match sym.valueDeclaration with
+            | Some decl -> (!!decl: Ts.Node).kind = Ts.SyntaxKind.PropertySignature
+            | None -> false)
     match sym.valueDeclaration with
-    | Some decl ->
+    | Some decl when not hybridInstantiated ->
         resolveToMemberBuilder ctx !!decl
-    | None ->
+    | _ ->
+        let isOptional = sym.flags.HasFlag Ts.SymbolFlags.Optional
         {
             SPropertyBuilder.Name = sym.name
             Type =
-                // Synthesized / computed property — build inline from the checker
-                ctx.checker.getTypeOfSymbol sym
+                // Synthesized/computed property (no declaration) OR an instantiated (transient)
+                // member routed away from its shared open declaration — build from the checker.
+                // strictNullChecks makes getTypeOfSymbol return `T | undefined` for an optional
+                // member; `IsOptional` already carries the optionality, so strip the nullable
+                // wrapper on the hybrid path (accepts the rare loss of an explicit `| null`
+                // on an optional member — the declaration route never saw it either).
+                (let symType = ctx.checker.getTypeOfSymbol sym
+                 if hybridInstantiated && isOptional then ctx.checker.getNonNullableType symType
+                 else symType)
                 |> ctx.CreateXanthamTag
                 |> fst
                 |> stackPushAndThen ctx _.TypeSignal
             IsStatic = false
-            IsOptional = sym.flags.HasFlag Ts.SymbolFlags.Optional
+            IsOptional = isOptional
             IsPrivate = false
             Accessor = TsAccessor.ReadWrite
             Documentation = []
@@ -157,10 +184,10 @@ let private propertySymToMemberSlot (ctx: TypeScriptReader) (sym: Ts.Symbol) : S
         |> Signal.source
 
 /// Enumerate all members of an object type (props + call/construct sigs + index sigs).
-let private buildMembersFromType (ctx: TypeScriptReader) (objType: Ts.ObjectType) =
+let private buildMembersFromType (ctx: TypeScriptReader) (closeInstantiated: bool) (objType: Ts.ObjectType) =
     let props =
         ctx.checker.getPropertiesOfType(objType).AsArray
-        |> Array.map (propertySymToMemberSlot ctx)
+        |> Array.map (propertySymToMemberSlot ctx closeInstantiated)
     let callSigs =
         ctx.checker.getSignaturesOfType(objType, Ts.SignatureKind.Call).AsArray
         |> Array.map (callSigToMemberSlot ctx)
@@ -190,7 +217,10 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) 
     | TypeFlagObject.Anonymous anonType ->
         nameof TypeFlagObject.Anonymous |> debugLocation
         {
-            STypeLiteralBuilder.Members = buildMembersFromType ctx anonType
+            // closeInstantiated=true: an instantiated anonymous object's transient property
+            // members take their instantiated types from the checker (identity-conflation fix);
+            // the open declaration's members are non-transient and keep the node route.
+            STypeLiteralBuilder.Members = buildMembersFromType ctx true anonType
         }
         |> SType.TypeLiteral
         |> setAstSignal
@@ -220,7 +250,11 @@ let dispatch (ctx: TypeScriptReader) (xanTag: XanthamTag) (tag: TypeFlagObject) 
         let props = ctx.checker.getPropertiesOfType(mappedType).AsArray
         let members =
             if props.Length > 0 then
-                Array.map (propertySymToMemberSlot ctx) props
+                // closeInstantiated=false: every Mapped-arm property symbol is Transient in tsc,
+                // so the hybrid predicate would reroute ALL mapped types (Partial/Pick/Readonly)
+                // through the checker — a pinned fragile area (mapped-type arg-drop). Mapped
+                // members keep the declaration route unchanged.
+                Array.map (propertySymToMemberSlot ctx false) props
             else
                 // Fully generic mapped type — emit { [key: string]: any } as a safe fallback
                 [|

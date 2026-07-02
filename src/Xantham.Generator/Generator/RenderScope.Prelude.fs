@@ -266,7 +266,7 @@ type private Registered = Registered of TypeRefRender
 /// cycle-safe (it never re-enters `prerender`), so this preserves the remap cycle-break. A target
 /// that is ALREADY a generic application (`Prefix`) carries real args (the cdc0108 arm built it)
 /// and is left untouched — no double-wrap.
-let private padAliasNameToArity (ctx: GeneratorContext) (key: ResolvedType) (ref: TypeRefRender) : TypeRefRender =
+let private padAliasNameToArity (ctx: GeneratorContext) (renderArg: LazyResolvedType -> TypeRefRender) (key: ResolvedType) (ref: TypeRefRender) : TypeRefRender =
     // Pad ONLY a bare NAME atom (the remapped alias name — a `ConcretePath`). Any molecule —
     // a `Prefix` already carrying real args (cdc0108), or a Function/Tuple/Union that is the
     // alias's OWN structural body re-substituted by `Render.TypeAlias.resolveInnerRef` at its
@@ -280,19 +280,48 @@ let private padAliasNameToArity (ctx: GeneratorContext) (key: ResolvedType) (ref
                 RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic Intrinsic.obj
                 |> RenderScopeStore.TypeRef.Unsafe.createAtom
                 |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+            // Per-slot pad: the typar's TS DEFAULT where present (a CONSTRAINED slot cannot
+            // accept `obj` — FS0001), `obj` otherwise. Rendering a default here is cycle-safe:
+            // the containing node's scope is registered before the return-layer remap applies
+            // (a self-referential default re-enters via the cache-hit arm), mirroring the
+            // bare-generic-defaults arm's register-head-first discipline.
+            let padArgs =
+                match GeneratorContext.Prelude.tryGetTypeAliasTypars ctx key with
+                | ValueSome typars when typars.Length = arity ->
+                    typars
+                    |> List.map (fun tp ->
+                        match tp.Value.Default with
+                        | Some d -> renderArg d
+                        | None -> objArg)
+                | _ -> List.replicate arity objArg
             let nameOnly = { ref with Nullable = false }
-            RenderScopeStore.TypeRefMolecule.Unsafe.createPrefix nameOnly (List.replicate arity objArg)
+            RenderScopeStore.TypeRefMolecule.Unsafe.createPrefix nameOnly padArgs
             |> RenderScopeStore.TypeRef.Unsafe.createMolecule
             |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind ref.Nullable
         | _ -> ref
     | _ -> ref
+
+/// Per-slot tail pads for an under-applied generic reference (slots [existing .. declared-1]):
+/// the typar's TS DEFAULT where present — a CONSTRAINED slot cannot accept the `obj` placeholder
+/// (`'T :> ZodTypeAny` given `obj` is FS0001) — `obj` otherwise. TS guarantees a default exists
+/// for any elidable parameter, so under-application implies defaults at the missing slots.
+let private padTailArgs (typars: Lazy<TypeParameter> list voption) (existing: int) (declaredCount: int) : LazyResolvedType list =
+    let objArg =
+        LazyContainer.CreateFromValue (ResolvedType.Primitive TypeKindPrimitive.NonPrimitive)
+    [ for i in existing .. declaredCount - 1 ->
+        match typars with
+        | ValueSome tps when i < tps.Length ->
+            match tps[i].Value.Default with
+            | Some d -> d
+            | None -> objArg
+        | _ -> objArg ]
 
 let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolvedType: LazyResolvedType): TypeRefRender =
     let remap = function
             | { Nullable = nullable } when ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Value) ->
                 ctx.TypeAliasRemap[lazyResolvedType.Value]
                 |> TypeRefRender.orNullable nullable
-                |> padAliasNameToArity ctx lazyResolvedType.Value
+                |> padAliasNameToArity ctx (fun d -> prerender ctx (RenderScopeStore.create()) d) lazyResolvedType.Value
             | ref -> ref
     let inline addOrReplaceScope ctx resolvedType renderScope =
         let renderScope = ctx.Customisation.Interceptors.ResolvedTypePrelude ctx resolvedType renderScope
@@ -621,11 +650,13 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             elif typeArguments.Length > declaredParamCount then
                 typeArguments |> List.truncate declaredParamCount
             else
-                let padCount = declaredParamCount - typeArguments.Length
-                let objArg =
-                    LazyContainer.CreateFromValue
-                        (ResolvedType.Primitive TypeKindPrimitive.NonPrimitive)
-                typeArguments @ List.replicate padCount objArg
+                // Per-slot DEFAULTS at the missing tail slots (constrained slots reject `obj`).
+                let headTypars =
+                    match innerResolvedType.Value with
+                    | ResolvedType.Interface i -> ValueSome i.TypeParameters
+                    | ResolvedType.Class c -> ValueSome c.TypeParameters
+                    | bodyValue -> GeneratorContext.Prelude.tryGetTypeAliasTypars ctx bodyValue
+                typeArguments @ padTailArgs headTypars typeArguments.Length declaredParamCount
         if List.isEmpty alignedArguments then
             // Declared arity is 0 (the resolved body is non-generic) — emit the head alone;
             // the placeholder scope already registered above is the final form.
@@ -717,7 +748,15 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
             | ResolvedType.Class c ->
                 fableDeclaredArity (Name.Case.valueOrSource c.Name)
                 |> Option.defaultValue c.TypeParameters.Length
-            | _ -> typeArguments.Length
+            // A remap-keyed ALIAS body reached through this arm renders as the alias NAME, whose
+            // emitted arity is the recorded `TypeAliasArity` (0 for a phantom-typar-pruned alias)
+            // — NOT this reference's raw IR arg count. Without the consult, a pruned alias
+            // reached here emits `Name<args>` against its bare `type Name = ...` decl (FS0033) —
+            // the exact split-oracle leak of the reverted 511->707 attempt. `.Value` is already
+            // forced above, so this adds no new lazy forcing (no cycle risk).
+            | bodyValue ->
+                GeneratorContext.Prelude.tryGetTypeAliasArity ctx bodyValue
+                |> ValueOption.defaultValue typeArguments.Length
         // Encoder/TS may produce a TypeReference whose argument count doesn't
         // match the inner type's declared type parameter count — happens with
         // declaration merging where the encoder can't disambiguate which
@@ -738,13 +777,15 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                     innerResolvedType.Raw typeArguments.Length declaredParamCount
                 typeArguments |> List.truncate declaredParamCount
             else
-                eprintfn "Warning: TypeReference application (type key %A) has %d arguments but declares %d type parameters; padding with obj to declared arity"
+                eprintfn "Warning: TypeReference application (type key %A) has %d arguments but declares %d type parameters; padding to declared arity (typar defaults where present, obj otherwise)"
                     innerResolvedType.Raw typeArguments.Length declaredParamCount
-                let padCount = declaredParamCount - typeArguments.Length
-                let objArg =
-                    LazyContainer.CreateFromValue
-                        (ResolvedType.Primitive TypeKindPrimitive.NonPrimitive)
-                typeArguments @ List.replicate padCount objArg
+                // Per-slot DEFAULTS at the missing tail slots (constrained slots reject `obj`).
+                let headTypars =
+                    match innerResolvedTypeValue with
+                    | ResolvedType.Interface i -> ValueSome i.TypeParameters
+                    | ResolvedType.Class c -> ValueSome c.TypeParameters
+                    | bodyValue -> GeneratorContext.Prelude.tryGetTypeAliasTypars ctx bodyValue
+                typeArguments @ padTailArgs headTypars typeArguments.Length declaredParamCount
         if List.isEmpty alignedArguments then
             innerResolvedType
             |> prerender ctx scope
@@ -901,7 +942,46 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                 // that emits canonical literal-unions). Without the canonical home the per-owner
                 // transient root below would place the single def under only the first owner and
                 // dangle every other owner's reference (the deep-nested shared-literal FS0039 class).
-                let ref = createConcreteTypeRef typePath
+                let nameRef = createConcreteTypeRef typePath
+                // SHARED-HOME LAMBDA-LIFT (stage 4): an OPEN shared literal (members referencing
+                // free typars) gets a home that ABSTRACTS over them, and this single cached ref
+                // APPLIES them UNIFORMLY: decoder compress merges only structurally-identical
+                // nodes, so every owner references the SAME TypeParameter nodes — the same names.
+                // At an in-scope referrer (JSONSchema<'Value,'SchemaType>'s own body) the args bind
+                // and fidelity survives; at an out-of-scope site the anchor-stage orphan scrub
+                // rewrites each arg to `obj` PER EMISSION SITE (`Home<obj,obj>`) — arity stays
+                // consistent with the home's decl everywhere by construction. Constraints/defaults
+                // are deliberately DROPPED from the lifted decl (maximally permissive home; also
+                // avoids re-entering prerender from inside this arm — the cycle-safety discipline).
+                let ref =
+                    match literalMemberTyparNodes ctx resolvedType with
+                    | [] -> nameRef
+                    | lifted ->
+                        lifted
+                        |> List.map (fun tp ->
+                            {
+                                Prelude.TypeParameterRender.Name = tp.Name
+                                Metadata = {
+                                    Path = Path.create TransientTypePath.Anchored
+                                    Original = Path.create TransientTypePath.Anchored
+                                    Source = ValueNone
+                                    FullyQualifiedName = ValueNone
+                                }
+                                Constraint = ValueNone
+                                Default = ValueNone
+                                Documentation = []
+                            })
+                        |> GeneratorContext.Prelude.addHoistedHomeTypars ctx resolvedType
+                        let typarArgs =
+                            lifted
+                            |> List.map (fun tp ->
+                                Name.Case.valueOrModified tp.Name
+                                |> RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic
+                                |> RenderScopeStore.TypeRef.Unsafe.createAtom
+                                |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false)
+                        RenderScopeStore.TypeRefMolecule.Unsafe.createPrefix nameRef typarArgs
+                        |> RenderScopeStore.TypeRef.Unsafe.createMolecule
+                        |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
                 let scope = RenderScopeStore.create()
                 {
                     RenderScope.Type = resolvedType
@@ -909,7 +989,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
                     TypeRef = ref
                     Render =
                         (lazy TypeLiteral.render ctx scope typeLiteral)
-                        |> Render.createFromTransientLazy ref
+                        |> Render.createFromTransientLazy nameRef
                     TransientChildren = ValueSome scope
                 }
                 |> addOrReplaceScope ctx resolvedType
@@ -961,7 +1041,7 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         | Registered { Nullable = nullable } when ctx.TypeAliasRemap.ContainsKey(lazyResolvedType.Value) ->
             ctx.TypeAliasRemap[lazyResolvedType.Value]
             |> TypeRefRender.orNullable nullable
-            |> padAliasNameToArity ctx lazyResolvedType.Value
+            |> padAliasNameToArity ctx (fun d -> prerender ctx (RenderScopeStore.create()) d) lazyResolvedType.Value
         | Registered ref -> ref
 
 module TestHelper =
@@ -989,8 +1069,15 @@ module ArenaInterner =
         | _ -> false
 
     let prerenderTypeAliases (ctx: GeneratorContext) (arena: ArenaInterner) =
-        // Iterate the export-key-keyed resolved exports (populated eagerly when the arena is
-        // built) rather than ExportMap, so each alias's EXPORT key is in hand.
+        // TWO PHASES, deliberately. The emitted-arity computation in phase 2 runs `usedTyparNames`,
+        // whose reference-arm mirror consults `ctx.TypeAliasRemap` (the cdc0108 remap-keyed test).
+        // Computing it inside the SAME iteration that populates the table would make each alias's
+        // prune decision depend on whether the aliases it references were registered YET — an
+        // enumeration-order-dependent (ConcurrentDictionary) and therefore nondeterministic prune.
+        // Phase 1 registers EVERY remap; phase 2 computes arity against the complete table.
+        //
+        // PHASE 1 — remap registration (iterate the export-key-keyed resolved exports, populated
+        // eagerly when the arena is built, so each alias's EXPORT key is in hand).
         arena.ResolvedExports
         |> Seq.iter (fun (KeyValue(exportKey, export)) ->
             match export with
@@ -1000,31 +1087,6 @@ module ArenaInterner =
                     RenderScopeStore.TypeRefAtom.Unsafe.createConcretePath path
                     |> RenderScopeStore.TypeRef.Unsafe.createAtom
                     |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
-                // Record the alias's DECLARED arity alongside each remap key. A reference to a
-                // generic mapped/utility alias (`Without<U,T>`) in a member/union/heritage position
-                // is resolved by the encoder to the alias's bare structural BODY with the
-                // application's `TypeArguments` DROPPED (verified: every such site reaches the remap
-                // as the bare body with no args anywhere in the IR). The remap renders the body as
-                // the bare alias name, but the alias is emitted as `type Without<'U,'T>`, so the
-                // bare name is FS0033. The args are unrecoverable here, so the remap pads the name
-                // to this arity with `obj` placeholders.
-                //
-                // Record arity ONLY when EVERY declared type parameter is UNCONSTRAINED. A
-                // constrained parameter (`type EventListener<'T when 'T :> Event> = ...`) cannot accept
-                // the `obj` placeholder — `EventListener<obj>` is FS0001 ("obj not compatible with
-                // Event"). Leaving the arity UNRECORDED for such aliases means (a) the remap padding
-                // skips them (the bare name stays as the pre-existing FS0033/FS0887 it was at HEAD — no
-                // NEW error class), and (b) the cdc0108 arm falls back to `typeArguments.Length` so a
-                // constrained alias that DOES carry real args is unaffected. `.Constraint` is an
-                // `option` over a lazy, so `.IsNone` does NOT force resolution.
-                let allParamsUnconstrained =
-                    value.TypeParameters
-                    |> List.forall (fun tp -> tp.Value.Constraint.IsNone)
-                // An IDENTITY alias (`type Identity<T> = T`, body is a bare type parameter) must NOT
-                // record arity: padding its remapped name to `Identity<obj>` collides with the real
-                // application args, emitting the unparseable double-generic `Identity<obj><realArgs>`.
-                // With NO recorded arity the name is left unpadded, so a reference `Identity<X>` applies
-                // its real args to the bare name -> a well-formed `Identity<X>` (`type Identity<'T>='T`).
                 // An IDENTITY alias (`type Identity<T> = T`, body is a bare type parameter) is
                 // TRANSPARENT — `Identity<X>` IS `X` (the encoder already resolves applications to the
                 // argument). Its body is `'T`; remapping that body to the nominal name `Identity` makes
@@ -1042,13 +1104,9 @@ module ArenaInterner =
                     |> RenderScopeStore.TypeRef.Unsafe.createAtom
                     |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
                 let bodyRef = if isIdentityAlias then objRef else aliasRef
-                let recordArity key =
-                    if allParamsUnconstrained && not isIdentityAlias && value.TypeParameters.Length > 0 then
-                        GeneratorContext.Prelude.addTypeAliasArity ctx key value.TypeParameters.Length
                 // (1) Remap the alias BODY instance (`value.Type.Value`) — this is the instance
                 //     produced when the body's structural type is rendered directly.
                 GeneratorContext.Prelude.addTypeAliasRemap ctx value.Type.Value bodyRef
-                recordArity value.Type.Value
                 // (2) After the extractor's self-reference decoupling, the alias body lives at a
                 //     distinct (generated) key, so a union member that references the alias by its
                 //     EXPORT key resolves (via `ResolveType exportKey`) to an instance that the
@@ -1063,8 +1121,70 @@ module ArenaInterner =
                 let exportKeyType = arena.ResolveType exportKey
                 if not (isShareableAliasBody exportKeyType) then
                     GeneratorContext.Prelude.addTypeAliasRemap ctx exportKeyType bodyRef
-                    recordArity exportKeyType
             | _ -> ())
+        // PHASE 2 — the EMITTED-arity oracle. REAL PASS ONLY: the shared-literal COUNTING pass
+        // (`SharedLiteralRefOwners` set) needs only the phase-1 remaps for its structural walk —
+        // its arity tables are discarded, and the oracle's lazy-forcing perturbs the counting
+        // pass's visit order enough to FLIP a literal's shared-home status between stages
+        // (observed: one literal left SharedLiterals and its member refs fell into the
+        // pre-existing nested-dangle class). Skipping the oracle here removes that sensitivity
+        // class permanently: counting-pass forcing no longer depends on oracle internals.
+        if ctx.SharedLiteralRefOwners.IsNone then
+        // References to a generic mapped/utility alias reach
+        // the remap as the bare body with the application's `TypeArguments` dropped; the remap
+        // renders the alias NAME, and the reference arms pad/truncate to the arity recorded here.
+        // The recorded arity is the EMITTED arity — the same `aliasKeepsTypars` oracle the decl
+        // side (Render.TypeAlias) evaluates on the same export instance:
+        //   - PRUNED alias (no declared typar rendered by the body): record an EXPLICIT 0 so the
+        //     cdc0108/general-args aligners truncate stale IR args to the bare (arity-0) name.
+        //     Recording 0 involves no `obj` padding, so the constrained-param rationale below is
+        //     moot for it. Skipping instead (the reverted 511->707 attempt) leaves the aligners
+        //     on their `typeArguments.Length` fallback — refs at arity N against a bare decl.
+        //   - KEPT alias: record the declared arity ONLY when every declared type parameter is
+        //     UNCONSTRAINED. A constrained parameter (`type EventListener<'T when 'T :> Event>`)
+        //     cannot accept the `obj` placeholder — `EventListener<obj>` is FS0001. Unrecorded =
+        //     the pre-existing HEAD behavior (no new error class). `.Constraint` is an `option`
+        //     over a lazy, so `.IsNone` does NOT force resolution.
+        //   - IDENTITY alias: never recorded — padding its remapped name to `Identity<obj>`
+        //     collides with the real application args (`Identity<obj><realArgs>`, unparseable).
+        //     Its body is a bare typar, so `aliasKeepsTypars` is always true for it (never pruned).
+        // All writes are WRITE-ONCE with a conflict diagnostic (`addTypeAliasArityOnce`): decoder
+        // compress makes instance-sharing across aliases routine, and a silent last-writer-wins
+        // would let a pruned alias's 0 clobber a generic twin's N (or vice versa).
+            arena.ResolvedExports
+            |> Seq.iter (fun (KeyValue(exportKey, export)) ->
+                match export with
+                | ResolvedExport.TypeAlias value when
+                    not (isShareableAliasBody value.Type.Value)
+                    && value.TypeParameters.Length > 0 ->
+                    let aliasName = Name.Case.valueOrSource value.Name
+                    let isIdentityAlias =
+                        match value.Type.Value with ResolvedType.TypeParameter _ -> true | _ -> false
+                    let allParamsUnconstrained =
+                        value.TypeParameters
+                        |> List.forall (fun tp -> tp.Value.Constraint.IsNone)
+                    // DEFAULTS SYNTHESIS extension: a CONSTRAINED typar cannot accept the `obj`
+                    // pad (`'T :> ZodTypeAny` given `obj` is FS0001) — historically such aliases
+                    // stayed UNRECORDED (bare-name refs, the pre-existing FS0033 class). When
+                    // every constrained typar carries a TS DEFAULT, the padder can synthesize the
+                    // default instead of `obj`, so recording becomes safe: the typar list is
+                    // stored alongside the arity and `padAliasNameToArity` pads per-slot from it.
+                    // `.Constraint`/`.Default` are options over lazies — no forcing here.
+                    let allConstrainedHaveDefaults =
+                        value.TypeParameters
+                        |> List.forall (fun tp -> tp.Value.Constraint.IsNone || tp.Value.Default.IsSome)
+                    let emittedArity =
+                        if aliasKeepsTypars ctx value then value.TypeParameters.Length else 0
+                    let recordArity key =
+                        if not isIdentityAlias && (emittedArity = 0 || allParamsUnconstrained || allConstrainedHaveDefaults) then
+                            GeneratorContext.Prelude.addTypeAliasArityOnce ctx key emittedArity aliasName
+                            if emittedArity > 0 then
+                                GeneratorContext.Prelude.addTypeAliasTyparsOnce ctx key value.TypeParameters
+                    recordArity value.Type.Value
+                    let exportKeyType = arena.ResolveType exportKey
+                    if not (isShareableAliasBody exportKeyType) then
+                        recordArity exportKeyType
+                | _ -> ())
     let private getTopologicalSort (_: ArenaInterner) (graph: Graph) =
         let degrees = ConcurrentDictionary graph.Degrees
         let dependencies =

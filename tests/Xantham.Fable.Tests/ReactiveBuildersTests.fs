@@ -245,7 +245,7 @@ let private methodTests =
                 { Name = "foo"
                   Parameters = [| someSlot (paramBuilder "a" 1); someSlot (paramBuilder "b" 2) |]
                   Type = TypeSignal.ofKey (tk 3)
-                  IsOptional = false; IsStatic = true; Documentation = [] }
+                  IsOptional = false; IsStatic = true; Documentation = []; TypeParameters = [||] }
             let built = b.Build()
             Expect.equal (built.Parameters |> List.map (fun p -> p.Name)) [ "a"; "b" ] "params in order"
             Expect.equal built.Type (tk 3) "return Type resolved"
@@ -256,14 +256,14 @@ let private methodTests =
                 { Name = "bar"
                   Parameters = [| noneSlot (); someSlot (paramBuilder "kept" 1); noneSlot () |]
                   Type = TypeSignal.ofKey (tk 0)
-                  IsOptional = false; IsStatic = false; Documentation = [] }
+                  IsOptional = false; IsStatic = false; Documentation = []; TypeParameters = [||] }
             Expect.equal (b.Build().Parameters |> List.map (fun p -> p.Name)) [ "kept" ] "only the filled slot survives"
 
         testCase "late-bound parameter slot: pending slot Set after construction is seen" <| fun _ ->
             let slot: Signal<SParameterBuilder voption> = Signal.pending ()
             let b: SMethodBuilder =
                 { Name = "baz"; Parameters = [| slot |]; Type = TypeSignal.ofKey (tk 0)
-                  IsOptional = false; IsStatic = false; Documentation = [] }
+                  IsOptional = false; IsStatic = false; Documentation = []; TypeParameters = [||] }
             // empty before fill
             Expect.equal (b.Build().Parameters) [] "pending slot is empty before fill"
             slot.Set (ValueSome (paramBuilder "late" 7))
@@ -320,7 +320,7 @@ let private signatureTests =
         testCase "SCallSignatureBuilder drops ValueNone params, resolves Type" <| fun _ ->
             let b: SCallSignatureBuilder =
                 { Parameters = [| someSlot (paramBuilder "x" 1); noneSlot () |]
-                  Type = TypeSignal.ofKey (tk 2); Documentation = [] }
+                  Type = TypeSignal.ofKey (tk 2); Documentation = []; TypeParameters = [||] }
             let built = b.Build()
             Expect.equal (built.Parameters |> List.map (fun p -> p.Name)) [ "x" ] "filled param only"
             Expect.equal built.Type (tk 2) "Type resolved"
@@ -328,7 +328,7 @@ let private signatureTests =
         testCase "SConstructSignatureBuilder resolves Type + params" <| fun _ ->
             let b: SConstructSignatureBuilder =
                 { Type = TypeSignal.ofKey (tk 4)
-                  Parameters = [| someSlot (paramBuilder "x" 1) |] }
+                  Parameters = [| someSlot (paramBuilder "x" 1) |]; TypeParameters = [||] }
             let built = b.Build()
             Expect.equal built.Type (tk 4) "Type resolved"
             Expect.equal (built.Parameters |> List.map (fun p -> p.Name)) [ "x" ] "param built"
@@ -358,7 +358,7 @@ let private memberDuTests =
         testCase "Method case builds to TsMember.Method (NoOverloads) carrying the method" <| fun _ ->
             let m: SMethodBuilder =
                 { Name = "go"; Parameters = [||]; Type = TypeSignal.ofKey (tk 1)
-                  IsOptional = false; IsStatic = false; Documentation = [] }
+                  IsOptional = false; IsStatic = false; Documentation = []; TypeParameters = [||] }
             match (SMemberBuilder.Method m).Build() with
             | TsMember.Method construct ->
                 Expect.equal construct.Values.Length 1 "single NoOverloads value"
@@ -736,7 +736,7 @@ let private lateBindingTests =
                 { Name = "x"; IsOptional = false; IsSpread = false; Type = paramType; Documentation = [] }
             let m: SMethodBuilder =
                 { Name = "m"; Parameters = [| someSlot p |]; Type = TypeSignal.ofKey (tk 0)
-                  IsOptional = false; IsStatic = false; Documentation = [] }
+                  IsOptional = false; IsStatic = false; Documentation = []; TypeParameters = [||] }
             // dispatcher fulfills the pending param type from upstream
             paramType |> Signal.fulfillWith (fun () -> upstream.Value)
             let built = m.Build()
