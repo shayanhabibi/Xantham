@@ -119,6 +119,10 @@ let renderUnitFile (ctx: GeneratorContext) (root: RootModule) =
             Ast.Open "Fable.Core"
             Ast.Open "Fable.Core.JS"
             Ast.Open "Fable.Core.JsInterop"
+            // The support library's module (keyof/typekeyof/proptypekey), opened
+            // explicitly: its [<AutoOpen>] serves source-linked consumers, but across
+            // the project-reference boundary an explicit open is deterministic.
+            Ast.Open "Xantham.FableCore.Extensions"
             for KeyValue(_, render) in root.Types do
                 match render with
                 | Anchored.TypeRender.TypeDefn typeLikeRender ->
@@ -220,28 +224,39 @@ let private wideFormat =
 /// under Fable.Core.JsInterop that activates in later units through the
 /// assembly reference when that namespace is open.
 let unitFsproj (supportLibrary: string option) (unit: EmissionUnit) : string =
-    // Compile ORDER is load-bearing (F# single-pass): support library, then the
-    // erased-union definitions, then the unit body. Only the first unit carries
-    // the two preludes; later units see both through the assembly reference.
+    // Compile ORDER is load-bearing (F# single-pass): the erased-union definitions,
+    // then the unit body. Only the first unit carries the erased-union prelude; later
+    // units see it through the assembly reference. The F#9 support library
+    // (Xantham.Fable.Core) is a PROJECT REFERENCE on the first unit — NOT a linked
+    // source file: the units pin LangVersion 7.0 (see below) while the support
+    // library needs F#9 features; each compiles under its own language version.
     let compiles =
         [
             if unit.References.IsEmpty then
-                match supportLibrary with
-                | Some lib -> $"        <Compile Include=\"{lib}\"><Link>XanthamFableCoreLibrary.fs</Link></Compile>"
-                | None -> ()
                 "        <Compile Include=\"ErasedUnions.fs\" />"
             $"        <Compile Include=\"{unit.Lib}.fs\" />"
         ]
         |> String.concat "\n"
     let references =
-        unit.References
-        |> List.map (fun lib -> $"        <ProjectReference Include=\"../{lib}/{lib}.fsproj\" />")
+        [
+            if unit.References.IsEmpty then
+                match supportLibrary with
+                | Some fsproj -> $"        <ProjectReference Include=\"{fsproj}\" />"
+                | None -> ()
+            yield!
+                unit.References
+                |> List.map (fun lib -> $"        <ProjectReference Include=\"../{lib}/{lib}.fsproj\" />")
+        ]
         |> String.concat "\n"
     $"""<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <!-- F#7 relaxed indentation absorbs the FS0058 half of the Fantomas 7.0.1 layout
-             floor; the wide-format emission avoids the FS0010 wrapping half entirely. -->
+             floor; the wide-format emission avoids the FS0010 wrapping half entirely.
+             The pin ALSO shields the generated surface from newer-compiler tightenings
+             (measured on `latest`: 46x FS0440 curried+optional, FS0438/439, FS3172) —
+             which is why the F#9 support library is a PROJECT REFERENCE, not a linked
+             source file: each compiles under its own language version. -->
         <LangVersion>7.0</LangVersion>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
@@ -250,7 +265,9 @@ let unitFsproj (supportLibrary: string option) (unit: EmissionUnit) : string =
 {compiles}
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Fable.Core" Version="4.5.0" />
+        <!-- Must match Xantham.Fable.Core's pin exactly: the first unit project-references
+             it, and an NU1605 downgrade leaves its types unloadable in the units. -->
+        <PackageReference Include="Fable.Core" Version="5.0.0-beta.4" />
 {references}
     </ItemGroup>
 </Project>

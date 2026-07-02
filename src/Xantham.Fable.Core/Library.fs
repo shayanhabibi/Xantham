@@ -1,5 +1,9 @@
-﻿[<AutoOpen>]
-module Fable.Core.JsInterop.XanthamExtensions
+﻿// Own namespace, deliberately NOT Fable.Core.JsInterop.*: that name is a MODULE in
+// Fable.Core.dll, and from a REFERENCING assembly the module shadows the namespace —
+// making a piggybacked extension module unreachable (and its [<AutoOpen>] inert).
+// Consumers (the generated units) `open Xantham.FableCore.Extensions` explicitly.
+[<AutoOpen>]
+module Xantham.FableCore.Extensions
 
 open System.Runtime.CompilerServices
 open Fable.Core

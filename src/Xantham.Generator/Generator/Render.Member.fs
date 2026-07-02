@@ -330,11 +330,23 @@ module Member =
             [ ConstructSignature.render ctx scopeStore constructSignatures ]
         
     let partitionRender ctx scopeStore (members: Member list) =
+        // DUPLICATE-PROPERTY DEDUP (ledgered): TS member merges (intersections,
+        // upstream twin declarations) can land same-named properties with different
+        // types in ONE interface — and F# properties cannot overload (FS0438
+        // duplicate get_/set_ methods, FS3172 getter/setter type mismatch). The first
+        // declaration in source order wins; every drop is counted in the advisory
+        // ledger. Methods are untouched (overloads are legal).
+        let seenProperties = System.Collections.Generic.HashSet<string>()
         members
         |> Seq.collect (render ctx scopeStore)
         |> Seq.fold (fun (members, functions) m ->
             match m with
-            | MemberRender.Property typedNameRender -> typedNameRender :: members, functions
+            | MemberRender.Property typedNameRender ->
+                if seenProperties.Add(Name.Case.valueOrModified typedNameRender.Name) then
+                    typedNameRender :: members, functions
+                else
+                    GeneratorContext.Advisory.increment ctx "duplicate-property-drop"
+                    members, functions
             | MemberRender.Method functionLikeRender -> members, functionLikeRender :: functions
             ) ([], [])
     let setReadOnly = function

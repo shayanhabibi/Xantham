@@ -92,8 +92,16 @@ module private Implementation =
                 let returnType = render returnType
                 Ast.Funs(Ast.Unit(), returnType)
             | Anchored.TypeRefMolecule.Function(parameters, returnType) ->
+                // Mirror the Prelude side's paren rule (line ~54): a function-typed
+                // PARAMETER inside a function type must parenthesize or the arrow
+                // chain re-associates.
+                let renderParam (p: Anchored.TypeRefRender) =
+                    match p.Kind with
+                    | Anchored.TypeRefKind.Molecule (Anchored.TypeRefMolecule.Function _) ->
+                        render p |> Ast.Paren
+                    | _ -> render p
                 Ast.Funs(
-                    parameters |> List.map render,
+                    parameters |> List.map renderParam,
                     render returnType
                     )
             | Anchored.TypeRefMolecule.Prefix(prefix, args) ->

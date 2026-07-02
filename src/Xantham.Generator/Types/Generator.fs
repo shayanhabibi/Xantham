@@ -150,6 +150,15 @@ and GeneratorContext =
         /// "erased-module:JsonSchemaTyped", "erased-heritage:Executor"); emission
         /// dumps it, the partition gate reports it. Never silent.
         AdvisoryLedger: DictionaryImpl<string, int>
+        /// HOME-CHILD SCRUB STATE (armed by `emitCanonicalPreludeScopes`' post-drive
+        /// second round, empty = inactive). `SyntheticHomePaths` = the flattened paths
+        /// of every canonical shared-literal home; `SyntheticHomeChildDefs` = every
+        /// MATERIALIZED def path (scope roots + child anchors) once the fixpoint drive
+        /// completes. A path atom under a home with no matching materialized def can
+        /// never resolve (the multi-member shared-rt class: per-site leaf stamping vs
+        /// the one-slot rt-keyed store) — the scrub degrades it to `obj`, ledgered.
+        SyntheticHomePaths: HashSet<string>
+        SyntheticHomeChildDefs: HashSet<string>
         Customisation: Customisation
 
     }
@@ -167,6 +176,8 @@ and GeneratorContext =
         SyntheticPlacementOrder = []
         ErasedRoots = []
         AdvisoryLedger = DictionaryImpl()
+        SyntheticHomePaths = HashSet()
+        SyntheticHomeChildDefs = HashSet()
         TypeAliasRemap = DictionaryImpl()
         TypeAliasArity = DictionaryImpl()
         HoistedHomeTypars = DictionaryImpl()

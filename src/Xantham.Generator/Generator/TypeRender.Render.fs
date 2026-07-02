@@ -269,6 +269,14 @@ module TypedNameRender =
     /// <param name="ctx"></param>
     /// <param name="typedName"></param>
     /// <param name="anchorPath"></param>
+    // A FUNCTION-typed parameter must parenthesize its type: an unparenthesized arrow
+    // chain in a member signature reads as CURRYING of the member itself — FS0440 when
+    // optional/ParamArray params follow, FS0439 overload clashes on Invoke shapes.
+    let private parenIfFunction (t: TypeRefRender) (widget: WidgetBuilder<Type>) =
+        match t.Kind with
+        | TypeRefKind.Molecule (TypeRefMolecule.Function _) -> Ast.Paren widget
+        | _ -> widget
+
     let renderAsNamedTypeImpl withOption (ctx: GeneratorContext) (typedName: TypedNameRender) =
         let typeWidget =
             if withOption then
@@ -276,7 +284,8 @@ module TypedNameRender =
             else
                 typedName.Type
                 |> TypeRefRender.orNullable (typedName.Traits.Contains(RenderTraits.Optional) || typedName.Type.Nullable)
-            |> TypeRefRender.render 
+            |> TypeRefRender.render
+            |> parenIfFunction typedName.Type
         let name =
             Name.Case.valueOrModified typedName.Name
             |> if withOption && (typedName.Traits.Contains(RenderTraits.Optional) || typedName.Type.Nullable) then
@@ -301,8 +310,11 @@ module TypedNameRender =
     /// <param name="typedName"></param>
     let renderAsNamedType (ctx: GeneratorContext) (typedName: TypedNameRender) =
         renderAsNamedTypeImpl false ctx typedName 
-    // when extracting type
-    let renderTypeOnly (ctx: GeneratorContext) (typedName: TypedNameRender) = TypeRefRender.render typedName.Type
+    // when extracting type (feeds `Ast.Funs` param lists — function-typed params
+    // need the same parenthesization as named params)
+    let renderTypeOnly (ctx: GeneratorContext) (typedName: TypedNameRender) =
+        TypeRefRender.render typedName.Type
+        |> parenIfFunction typedName.Type
     // rendering properties/members as abstracts
     let renderAbstractImpl withOption (ctx: GeneratorContext) (typedName: TypedNameRender) = 
         let name = Name.Case.valueOrModified typedName.Name

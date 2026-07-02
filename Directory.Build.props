@@ -4,10 +4,10 @@ naive AI tooling to not pick up errors on building fable projects and running
 rampant.
 -->
 <Project>
-    <!--    Xantham.Fable.Core properties    -->
-    <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Xantham.Fable.Core'">
-        <IsExcludedFromRootBuild>true</IsExcludedFromRootBuild>
-    </PropertyGroup>
+    <!-- Xantham.Fable.Core is NO LONGER excluded (2026-07-04): the generated partition
+         units PROJECT-REFERENCE it (LangVersion split: units pin 7.0, the support lib
+         needs F#9), so its build must be real. It compiles clean under `dotnet build` —
+         the exclusions below are for the genuinely Fable-only projects. -->
     <!--    Xantham.Fable properties    -->
     <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Xantham.Fable'">
         <IsExcludedFromRootBuild>true</IsExcludedFromRootBuild>

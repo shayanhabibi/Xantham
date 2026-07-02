@@ -267,6 +267,47 @@ module TypeRefRender =
                     | _ -> atom
                 | _ -> atom)
 
+    /// HOME-CHILD DEF/REF CLOSURE SCRUB (the ledgered "around" for the multi-member
+    /// shared-rt class — history in partition-gate.baseline 2026-07-04 (6)/(7)): a path
+    /// atom whose MODULE chain passes through a canonical shared-literal home (the home
+    /// TYPE as a module segment) names a nested def that per-site leaf stamping can mint
+    /// with no def to match — one rt referenced through several members, while the
+    /// rt-keyed TypeStore registers exactly ONE def. Once the fixpoint drive has
+    /// materialized every child def, a home-child path outside `definedPaths` can never
+    /// resolve: degrade the atom to `obj`, LEDGERED via the callback (keyed by the home).
+    /// Inactive until the caller arms it with non-empty home paths (the post-drive
+    /// second round); paths are compared as dotted `valueOrModified` segment strings.
+    let scrubUndefinedHomeChildren
+        (homePaths: HashSet<string>)
+        (definedPaths: HashSet<string>)
+        (ledger: string -> unit)
+        (render: TypeRefRender) : TypeRefRender =
+        if homePaths.Count = 0 then render
+        else
+            let flattenModules (p: ModulePath) =
+                ModulePath.flatten p |> List.map Name.Case.valueOrModified
+            render
+            |> mapAtoms (fun atom ->
+                match atom with
+                | TypeRefAtom.Path p ->
+                    let parentSegments = flattenModules p.Parent
+                    // The innermost home the atom sits under: test every dotted prefix
+                    // of the module chain against the home set (O(depth) lookups).
+                    let underHome =
+                        parentSegments
+                        |> List.scan (fun acc seg -> if acc = "" then seg else acc + "." + seg) ""
+                        |> List.skip 1
+                        |> List.tryFindBack homePaths.Contains
+                    match underHome with
+                    | Some home ->
+                        let flat = (parentSegments |> String.concat ".") + "." + Name.Case.valueOrModified p.Name
+                        if definedPaths.Contains flat then atom
+                        else
+                            ledger home
+                            TypeRefAtom.Intrinsic "obj"
+                    | None -> atom
+                | _ -> atom)
+
 
 type TypeName = Name<Case.pascal>
 type MemberName = Name<Case.camel>

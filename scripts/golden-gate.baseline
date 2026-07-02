@@ -95,4 +95,7 @@ BL_SMASH=55
 # 2026-07-04: 1099 -> 1100 with the def/ref-symmetry materialization (one more
 # qualified SharedLiterals.* reference now that a previously-dangling child def exists —
 # the materialization class, not a leak regression).
-BL_SYNTH_PUBLIC=1100
+# 2026-07-04 (3): 1100 -> 1101 with the home-child scrub's post-drive re-anchor round
+# (one additional qualified ref in a re-anchored canonical render). Same accounting
+# class as the two entries above.
+BL_SYNTH_PUBLIC=1101

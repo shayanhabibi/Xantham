@@ -49,6 +49,10 @@ module Render =
             ctx.SyntheticPlacementOrder
             (fun root -> GeneratorContext.Advisory.increment ctx $"forward-ref-scrub:{root}")
             hostRoot
+        |> TypeRefRender.scrubUndefinedHomeChildren
+            ctx.SyntheticHomePaths
+            ctx.SyntheticHomeChildDefs
+            (fun home -> GeneratorContext.Advisory.increment ctx $"home-child-scrub:{home}")
         |> TypeRefRender.collapseOpaquePrefixes ctx.ErasedRoots
         |> TypeRefRender.localise anchorPath
 
@@ -988,6 +992,39 @@ let emitCanonicalPreludeScopes (ctx: GeneratorContext) =
         for path, renderScope in round do
             driven.Add path |> ignore
             anchorPreludeAnchorScope ctx None (AnchorPath.create path) renderScope
+    // ── SECOND ROUND: HOME-CHILD DEF/REF CLOSURE (the ledgered "around"; history in
+    // partition-gate.baseline 2026-07-04 (6)/(7)) ────────────────────────────────────
+    // With the fixpoint complete, the materialized def-set is FINAL: every canonical
+    // scope's root and every child anchor it holds. Arm the home-child scrub (read by
+    // `anchorScrubLocalise` on every subsequent anchoring) and re-anchor every
+    // canonical scope: registration is last-wins by design and the transient renders
+    // are already-forced pure values, so the overwrite is deterministic — identical
+    // output except that refs under a canonical home with NO materialized def (the
+    // multi-member shared-rt class: per-site leaf stamping vs the one-slot rt-keyed
+    // store) degrade to `obj`, counted per home in the advisory ledger.
+    let flattenTypePath (p: TypePath) =
+        TypePath.flatten p |> List.map Name.Case.valueOrModified |> String.concat "."
+    for home in ctx.SharedLiteralHomes.Values do
+        ctx.SyntheticHomePaths.Add(flattenTypePath home) |> ignore
+    for KeyValue(_, registered) in ctx.AnchorRenders do
+        match registered with
+        | Choice2Of2 scope ->
+            (match scope.Root with
+             | Choice1Of2 typePath -> ctx.SyntheticHomeChildDefs.Add(flattenTypePath typePath) |> ignore
+             | Choice2Of2 _ -> ())
+            for typePath, _ in scope.Anchors.Values do
+                ctx.SyntheticHomeChildDefs.Add(flattenTypePath typePath) |> ignore
+        | Choice1Of2 _ -> ()
+    if ctx.SyntheticHomePaths.Count > 0 then
+        ctx.PreludeRenders.Values
+        |> Seq.choose (fun renderScope ->
+            match renderScope.Root, renderScope.Render with
+            | ValueSome (TypeLikePath.Anchored path), Render.Transient _ -> Some (path, renderScope)
+            | _ -> None)
+        |> Seq.sortBy (fun (path, _) -> TypePath.flatten path |> List.map Name.Case.valueOrModified)
+        |> Seq.toList
+        |> List.iter (fun (path, renderScope) ->
+            anchorPreludeAnchorScope ctx None (AnchorPath.create path) renderScope)
 
 module ArenaInterner =
     let processExports (ctx: GeneratorContext) (interner: ArenaInterner) =

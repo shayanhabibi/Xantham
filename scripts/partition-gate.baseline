@@ -143,8 +143,38 @@
 #      (also a fidelity WIN: real member types instead of proptypekey<X,K> renders).
 #  (B) Around (ledgered degradation, forward-ref-scrub idiom): post-drive second round
 #      degrading home-child path atoms without defs to obj + advisory ledger.
-BL_FIDELITY_CLOUDEDGE_ZOD=10
-BL_FIDELITY_CLOUDEDGE_WORKERS=0
+# 2026-07-04 (8): ZOD AT ZERO — THE UNIT COMPILES AND PRODUCES ITS ASSEMBLY (first L1
+# unit-exit cell). Landed as option (B) from (7) plus the integration fixes the first
+# real assembly attempt surfaced, each at its own layer:
+#  - HOME-CHILD SCRUB (TypeRefRender.scrubUndefinedHomeChildren + post-drive second
+#    round in emitCanonicalPreludeScopes): after the fixpoint drive the materialized
+#    def-set is final; refs under a canonical home with no matching def degrade to obj,
+#    LEDGERED per home (16 atoms / 8 homes, advisory-ledger.txt: home-child-scrub:*) —
+#    the forward-ref-scrub idiom applied to the multi-member shared-rt class.
+#  - SUPPORT LIBRARY made a PROJECT REFERENCE (was a source-link): the units pin
+#    LangVersion 7.0 (shields the surface from newer-compiler tightenings — measured
+#    46x FS0440 etc. under `latest`) while Xantham.Fable.Core needs F#9; its module
+#    renamed Fable.Core.JsInterop.XanthamExtensions -> Xantham.FableCore.Extensions
+#    (the piggybacked name is SHADOWED by Fable.Core.dll's module cross-assembly);
+#    Fable.Core aligned at 5.0.0-beta.4 both sides (NU1605 downgrade made the support
+#    types unloadable); its Directory.Build.props root-build exclusion REMOVED (its
+#    "builds" were no-ops — the library had never actually compiled; it compiles clean).
+#  - FUNCTION-PARAM PARENTHESIZATION (TypeRender.Render.fs parenIfFunction + the
+#    anchored Function-molecule param arm): unparenthesized arrow chains in member
+#    signatures read as CURRYING of the member itself (46x FS0440 with optional params,
+#    6x FS0439 Invoke overload clashes).
+#  - DUPLICATE-PROPERTY DEDUP (Member.partitionRender, ledgered
+#    duplicate-property-drop): TS member merges land same-named properties with
+#    different types in one interface; F# properties cannot overload (FS0438/FS3172).
+#    First declaration wins, drops counted.
+BL_FIDELITY_CLOUDEDGE_ZOD=0
+# 2026-07-04: FIRST REAL TYPECHECK COUNT (the old 0 was a parse-stage placeholder while
+# Zod blocked the reference chain). Census at 86 unique sites: FS0039 x122 instances
+# (Next/Fetch/Request/LoopbackServiceStub/RpcStub — workers-internal nested-child and
+# handler classes), FS0033 x48 (the parked coordinated phantom-typar family, now
+# measured in its home unit), FS0887 x12, FS0035 x12, FS0001 x4, FS0953 x2.
+# This is the P1-exit burn-down target: Workers at true 0.
+BL_FIDELITY_CLOUDEDGE_WORKERS=86
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0
 BL_FIDELITY_CLOUDEDGE_MCP=0

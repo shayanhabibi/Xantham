@@ -98,7 +98,7 @@ let main argv =
     ArenaInterner.processExports generatorContext interner
     let rootModule = RootModule.collectModules generatorContext
     let recipeDir = IO.Path.GetDirectoryName(IO.Path.GetFullPath recipePath)
-    let supportLibrary = IO.Path.GetFullPath(IO.Path.Join(__SOURCE_DIRECTORY__, "../../Xantham.Fable.Core/Library.fs"))
+    let supportLibrary = IO.Path.GetFullPath(IO.Path.Join(__SOURCE_DIRECTORY__, "../../Xantham.Fable.Core/Xantham.Fable.Core.fsproj"))
     let emitted = Emission.emitUnits generatorContext (Some supportLibrary) erasedTops (Emission.planUnits recipeDir recipe) rootModule outDir
     for unit, file, lines in emitted do
         printfn $"unit: {unit.Lib} -> {file} ({lines} lines)"
