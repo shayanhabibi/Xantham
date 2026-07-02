@@ -215,6 +215,26 @@ module IndexSignature =
         |> MemberRender.Method
     
 module ConstructSignature =
+    // A construct-signature RETURN (`new(...): C`) often arrives as a NAKED generic
+    // `ResolvedType.Class`/`Interface` (arity > 0, no applied args) — the prototype-holder
+    // static-side shape. Prerendered directly, that naked Class renders bare
+    // (`SqlStorageCursor` against `type SqlStorageCursor<'T>` = FS0033); the bare-generic
+    // DEFAULT-synthesis arm (RenderScope.Prelude.fs) only fires for a `TypeReference` with
+    // empty TypeArguments. Wrap the naked generic head in exactly that shape so the return
+    // routes through the existing per-typar default padding (`C<option<obj>>`). Do NOT touch
+    // the naked Class/Interface prerender arms directly — those also render the DEFINITION
+    // and every non-return ref, where padding would over-fire.
+    let private padGenericReturn (returnType: LazyResolvedType) : LazyResolvedType =
+        let isNakedGeneric =
+            match returnType.Value with
+            | ResolvedType.Class c -> not (List.isEmpty c.TypeParameters)
+            | ResolvedType.Interface i -> not (List.isEmpty i.TypeParameters)
+            | _ -> false
+        if isNakedGeneric then
+            ResolvedType.TypeReference { Type = returnType; TypeArguments = []; ResolvedType = None }
+            |> LazyContainer.CreateFromValue
+        else returnType
+
     let render (ctx: GeneratorContext) scopeStore (constructSignature: ConstructSignature list) =
         let path = Path.create TransientMemberPath.Anchored
         let metadata = {
@@ -237,7 +257,7 @@ module ConstructSignature =
                         Prelude.FunctionLikeSignature.Parameters =
                             constructSignature.Parameters
                             |> List.map (Parameter.render ctx scopeStore)
-                        ReturnType = ctx.PreludeGetTypeRef ctx scopeStore constructSignature.Type
+                        ReturnType = ctx.PreludeGetTypeRef ctx scopeStore (padGenericReturn constructSignature.Type)
                         Traits = Set [ RenderTraits.JSConstructor ]
                         TypeParameters = []
                         Documentation = []

@@ -285,7 +285,14 @@ BL_FIDELITY_CLOUDEDGE_ZOD=0
 #    rpcStub -> RpcStub bare). Fix = construct-sig / prototype-holder return arity pad
 #    (the bare-generic default synthesis, applied to the returned/referenced type's OWN
 #    declared typars).
-BL_FIDELITY_CLOUDEDGE_WORKERS=4
+# 2026-07-05 (Opus) CLASS C: 4 -> 3. ConstructSignature.render padGenericReturn — a
+# construct-sig return that is a NAKED generic Class/Interface (arity>0, no args: the
+# prototype static-side shape) is wrapped in TypeReference{TypeArguments=[]} so the
+# existing bare-generic default-synthesis arm pads it (SqlStorageCursor -> <option<obj>>).
+# Remaining 3: A-2 Cloudflare I-prefix ref leaf (2 sites) + 1 rpcStub (a synthesized
+# camelCase instance-side property whose bare RpcStub ref stays unqualified — under probe;
+# distinct from cache which DID qualify, so a target-path difference in the ref resolution).
+BL_FIDELITY_CLOUDEDGE_WORKERS=3
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0
 BL_FIDELITY_CLOUDEDGE_MCP=0
