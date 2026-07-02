@@ -65,6 +65,45 @@ module Render =
         |> scrubAnchored ctx anchorPath
         |> TypeRefRender.localise anchorPath
 
+    /// ABBREVIATION-LEGALITY VERDICT for an ANCHORED, PRE-LOCALISE alias body (shared by
+    /// the Transient and Concrete alias arms — the check must see atoms, and localise
+    /// widgetizes them). Two F#-illegal abbreviation shapes degrade, LEDGERED:
+    ///  (1) SELF-REFERENCE — a body atom carrying the alias's OWN path is the prerender
+    ///      cycle-break placeholder (`type X<'T> = option<U3<X,X,X>>`, conditional-alias
+    ///      chains whose branches resolve back through the alias node): cyclic garbage
+    ///      by construction (FS0953).
+    ///  (2) PHANTOM TYPARS — a declared typar absent from the (post-scrub) body makes
+    ///      the abbreviation illegal (FS0035), and the arity-CHANGING fix needs every
+    ///      ref-arity source coordinated (the pinned +196 regression).
+    /// `Some localisedBody` = legal abbreviation; `None` = the caller must emit the
+    /// erased-preamble shape instead (an EMPTY INTERFACE with the same name and arity —
+    /// refs stay legal at every use site, the unexpressible body becomes an opaque token).
+    let aliasBodyVerdict (ctx: GeneratorContext) anchorPath (name: Name<Case.pascal>) (inScope: Set<string>) (anchoredBody: TypeRefRender) =
+        let selfFlat =
+            match anchorPath with
+            | AnchorPath.Type tp ->
+                TypePath.flatten tp |> List.map Name.Case.valueOrModified |> String.concat "." |> Some
+            | _ -> None
+        let mutable selfRef = false
+        let usedTypars = HashSet<string>()
+        anchoredBody
+        |> TypeRefRender.mapAtoms (fun atom ->
+            (match atom with
+             | TypeRefAtom.Path p ->
+                 let flat = TypePath.flatten p |> List.map Name.Case.valueOrModified |> String.concat "."
+                 if Some flat = selfFlat then selfRef <- true
+             | TypeRefAtom.Intrinsic s when s.StartsWith "'" -> usedTypars.Add s |> ignore
+             | _ -> ())
+            atom)
+        |> ignore
+        let unusedTypars = inScope |> Set.filter (usedTypars.Contains >> not)
+        if selfRef || not (Set.isEmpty unusedTypars) then
+            let reason = if selfRef then "cyclic-alias-body" else "phantom-typar-alias"
+            GeneratorContext.Advisory.increment ctx $"{reason}:{Name.Case.valueOrModified name}"
+            None
+        else
+            Some (anchoredBody |> TypeRefRender.localise anchorPath)
+
     // ---- Shared anchoring core (single source of truth for both the Transient and Concrete paths) ----
     // The two paths differ ONLY in (a) their input `TypeName` (`Name<pascal> voption` for Transient,
     // already-concrete `Name<pascal>` for Concrete) and (b) whether an enum's case paths are re-anchored.
@@ -262,22 +301,47 @@ module Render =
                 let anchorPath =
                     alias.Metadata.Path
                     |> anchorMetadataPath ctx anchorPath
-                {
-                    TypeAliasRenderRef.Metadata = {
-                        Path = Path.create anchorPath
-                        Original = alias.Metadata.Original
-                        Source = alias.Metadata.Source
-                        FullyQualifiedName = alias.Metadata.FullyQualifiedName
-                    }
-                    Name = alias.Name |> ValueOption.defaultWith (fun () -> Shared.resolvePathName anchorPath)
-                    TypeParameters = alias.TypeParameters |> List.map (Shared.anchorTypeParameters ctx anchorPath)
-                    Documentation = alias.Documentation
-                    // Scrub orphan typars from the abbreviation body too (same mechanism as members):
-                    // `type UnionToIntersectionFn<'T> = option<'Intersection>` leaks the undeclared
-                    // `'Intersection`. In-scope = the alias's OWN declared typars.
-                    Type = alias.Type |> anchorScrubLocalise ctx (typarNameSet alias.TypeParameters) anchorPath
+                let name = alias.Name |> ValueOption.defaultWith (fun () -> Shared.resolvePathName anchorPath)
+                let typeParameters = alias.TypeParameters |> List.map (Shared.anchorTypeParameters ctx anchorPath)
+                let inScope = typarNameSet alias.TypeParameters
+                let metadata = {
+                    Path = Path.create anchorPath
+                    Original = alias.Metadata.Original
+                    Source = alias.Metadata.Source
+                    FullyQualifiedName = alias.Metadata.FullyQualifiedName
                 }
-                |> TypeAliasRender.Alias
+                // Anchor + scrub the body but DELAY localise: the abbreviation-legality
+                // verdict (`aliasBodyVerdict`) must inspect atoms, which localise
+                // widgetizes. Scrubbing orphan typars from the abbreviation body is the
+                // same mechanism as members: `type UnionToIntersectionFn<'T> =
+                // option<'Intersection>` leaks the undeclared `'Intersection`; in-scope
+                // = the alias's OWN declared typars.
+                let anchoredBody =
+                    TypeRefRender.anchor anchorPath alias.Type
+                    |> TypeRefRender.substituteForHeritage inScope
+                    |> scrubAnchored ctx anchorPath
+                match aliasBodyVerdict ctx anchorPath name inScope anchoredBody with
+                | Some localisedBody ->
+                    {
+                        TypeAliasRenderRef.Metadata = metadata
+                        Name = name
+                        TypeParameters = typeParameters
+                        Documentation = alias.Documentation
+                        Type = localisedBody
+                    }
+                    |> TypeAliasRender.Alias
+                | None ->
+                    {
+                        TypeLikeRender.Metadata = metadata
+                        Name = name
+                        TypeParameters = typeParameters
+                        Inheritance = []
+                        Members = []
+                        Functions = []
+                        Constructors = []
+                        Documentation = alias.Documentation
+                    }
+                    |> TypeAliasRender.TypeDefn
             | Transient.TypeAliasRender.TypeDefn typeLikeRender ->
                 anchorTypeDefn ctx anchorPath typeLikeRender
                 |> TypeAliasRender.TypeDefn
@@ -349,19 +413,43 @@ module Render =
                     match alias.Metadata.Path with
                     | Path.Anchor anchorPath -> anchorPath
                     | _ -> failwith "UNREACHABLE"
-                {
-                    TypeAliasRenderRef.Metadata = {
-                        Path = Path.create anchorPath
-                        Original = alias.Metadata.Original
-                        Source = alias.Metadata.Source
-                        FullyQualifiedName = alias.Metadata.FullyQualifiedName
-                    }
-                    Name = alias.Name
-                    TypeParameters = alias.TypeParameters |> List.map (Shared.anchorTypeParameters ctx anchorPath)
-                    Documentation = alias.Documentation
-                    Type = alias.Type |> anchorScrubLocalise ctx (typarNameSet alias.TypeParameters) anchorPath
+                let inScope = typarNameSet alias.TypeParameters
+                let typeParameters = alias.TypeParameters |> List.map (Shared.anchorTypeParameters ctx anchorPath)
+                let metadata = {
+                    Path = Path.create anchorPath
+                    Original = alias.Metadata.Original
+                    Source = alias.Metadata.Source
+                    FullyQualifiedName = alias.Metadata.FullyQualifiedName
                 }
-                |> TypeAliasRender.Alias
+                // Same abbreviation-legality treatment as the Transient alias arm — the
+                // CONCRETE arm is where top-level exported aliases anchor (this twin
+                // being missed is exactly why the first legality pass never fired).
+                let anchoredBody =
+                    TypeRefRender.anchor anchorPath alias.Type
+                    |> TypeRefRender.substituteForHeritage inScope
+                    |> scrubAnchored ctx anchorPath
+                match aliasBodyVerdict ctx anchorPath alias.Name inScope anchoredBody with
+                | Some localisedBody ->
+                    {
+                        TypeAliasRenderRef.Metadata = metadata
+                        Name = alias.Name
+                        TypeParameters = typeParameters
+                        Documentation = alias.Documentation
+                        Type = localisedBody
+                    }
+                    |> TypeAliasRender.Alias
+                | None ->
+                    {
+                        TypeLikeRender.Metadata = metadata
+                        Name = alias.Name
+                        TypeParameters = typeParameters
+                        Inheritance = []
+                        Members = []
+                        Functions = []
+                        Constructors = []
+                        Documentation = alias.Documentation
+                    }
+                    |> TypeAliasRender.TypeDefn
             | Concrete.TypeAliasRender.TypeDefn typeLikeRender ->
                 anchorTypeDefn ctx typeLikeRender
                 |> TypeAliasRender.TypeDefn

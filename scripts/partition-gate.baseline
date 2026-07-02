@@ -192,7 +192,27 @@ BL_FIDELITY_CLOUDEDGE_ZOD=0
 # children print the PARENT name bare (leaf lost, NOT scrubbed: `type
 # LoopbackForExport<'T> = option<U3<LoopbackForExport, ...>>` self-cycles), an
 # alias-render channel that bypasses/garbles the scrub — next focused probe.
-BL_FIDELITY_CLOUDEDGE_WORKERS=86
+# 2026-07-04 (3): 86 -> 44. Two fixes, both tested (Tests/AnchoredRegistration.fs):
+#  - ABBREVIATION-LEGALITY VERDICT (Render.aliasBodyVerdict, shared by the Transient AND
+#    Concrete alias arms — the Concrete twin is where top-level aliases anchor): a body
+#    atom carrying the alias's OWN path (the prerender cycle-break placeholder, e.g.
+#    `type LoopbackForExport<'T> = option<U3<X,X,X>>`) or a declared typar absent from
+#    the post-scrub body cannot be an abbreviation (FS0953/FS0035); such aliases emit as
+#    EMPTY SAME-ARITY INTERFACES (refs stay legal everywhere — no ref-arity coordination,
+#    sidestepping the pinned +196 trap). 118 aliases degraded, ledgered
+#    cyclic-alias-body:*/phantom-typar-alias:*. FS0035 22->0, FS0953 4->0, FS0033 70->32;
+#    golden IMPROVED (callbacks 72->70, synth-home 1101->1084).
+#  - CHILD-PRESERVING REPLACEMENT (Anchored.addOrReplace): the scrub-armed second export
+#    pass re-renders against the prelude cache, and cache-hits under-register nested
+#    children that only FRESH minting stores — replacement scopes silently LOST
+#    materialized child defs (ServiceWorkerGlobalScope's nested globals vanished while
+#    their refs survived the scrub, whose def-set had honestly recorded them). Replacing
+#    a scope now UNIONS the previous registration's Anchors (new entries win conflicts).
+# Remaining 44: FS0039 x52 (Get/Service/Invoke/GetEntrypoint nested-under-type residue +
+# LoopbackForExport arity-0 refs to the degraded arity-1 interface), FS0033 x32 (Fable
+# lib arities: AsyncIterable given 3, BigInt64Array given 1; workers streams self-arity),
+# FS0001 x4, FS1212 x2, FS0701 x2.
+BL_FIDELITY_CLOUDEDGE_WORKERS=44
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0
 BL_FIDELITY_CLOUDEDGE_MCP=0

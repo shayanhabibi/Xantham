@@ -315,6 +315,21 @@ module GeneratorContext =
 
         let addOrReplace (ctx: GeneratorContext) (key: Choice<ResolvedType, ResolvedExport>) (value: Choice<Anchored.TypeRefRender, Anchored.RenderScope>) =
             let value = ctx.Customisation.Interceptors.AnchoredRender ctx key value
+            // CHILD-PRESERVING REPLACEMENT: registration is last-wins by design, but a
+            // RE-anchor (the scrub-armed second export pass above all) re-renders
+            // against the PRELUDE CACHE, and cache-hits under-register nested children
+            // that only FRESH minting places in the store — so the replacement scope's
+            // Anchors can silently LOSE defs the first pass materialized (measured:
+            // ServiceWorkerGlobalScope's nested globals vanished while their refs
+            // survived the def/ref-closure scrub, whose def-set had honestly recorded
+            // them). Union the previous registration's Anchors into the replacement:
+            // re-anchoring may improve a scope's own render, never shrink its children.
+            (match value, ctx.AnchorRenders |> Operation.tryGet key with
+             | Choice2Of2 newScope, ValueSome (Choice2Of2 oldScope) ->
+                 for KeyValue(rt, entry) in oldScope.Anchors do
+                     if not (newScope.Anchors.ContainsKey rt) then
+                         newScope.Anchors.Add(rt, entry)
+             | _ -> ())
             ctx.AnchorRenders
             |> Operation.addOrReplace key value
             
