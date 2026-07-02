@@ -127,6 +127,22 @@
 # PREREQUISITES for the real fix: per-home store hygiene in emitCanonicalPreludeScopes
 # (fresh store per forced home) + member-named PathContext on every registration channel;
 # then def/ref coherence becomes decidable per home.
+# 2026-07-04 (7): THIRD ref-side variant measured and REVERTED — the LEAF-GUARDED swap
+# (only swap onto leaf-ful stored paths, the guard both prior failures implied) still
+# regressed 10->11: stored paths can be MULTI-SEGMENT chains (`Default.Const` — the rt's
+# first registration happened in a NESTED member context), so swapped refs print
+# `Home.Default.Const` while child materialization emits a single-level `type Const` —
+# a DEPTH mismatch between store grafting and def placement. Ref-side is now 3-for-3
+# failed on this class. Def-side duplication (materialize the child under every stamping
+# member leaf) was designed and rejected without running: it requires RECURSIVE grandchild
+# duplication (same one-slot rt-keyed store, one level down).
+# THE CLASS'S REAL FIXES, for the next design chunk (fresh context, isolation-test-first):
+#  (A) INSIDE-OUT (preferred): resolve `X["k"]`-with-literal-index at the DECODER to the
+#      SELECTED member type — each member then references a DISTINCT rt, per-member
+#      stamping becomes correct-by-construction, and the class dissolves upstream
+#      (also a fidelity WIN: real member types instead of proptypekey<X,K> renders).
+#  (B) Around (ledgered degradation, forward-ref-scrub idiom): post-drive second round
+#      degrading home-child path atoms without defs to obj + advisory ledger.
 BL_FIDELITY_CLOUDEDGE_ZOD=10
 BL_FIDELITY_CLOUDEDGE_WORKERS=0
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
