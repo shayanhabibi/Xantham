@@ -124,13 +124,16 @@ module AreaAssignment =
                 v.Type :: v.SignatureKey :: (v.Parameters |> List.collect keysOfParam) @ (v.TypeParameters |> List.collect keysOfInlinedTypar))
 
     // ── provenance: the declaring source path, when the node carries one ──────
+    // DECLARATION nodes only. TypeQuery is deliberately excluded: its FQN names the
+    // QUERIED TARGET, not the querying context — using it assigned reference nodes
+    // to the referenced package (measured: 587 impossible Zod->Mcp edges). Reference-
+    // sided nodes inherit their owner from their referencers via the fixpoint.
     let private fqnOfType (typ: TsType) : string list option =
         match typ with
         | TsType.Interface i -> Some i.FullyQualifiedName
         | TsType.Class c -> Some c.FullyQualifiedName
         | TsType.Enum e -> Some e.FullyQualifiedName
         | TsType.EnumCase ec -> Some ec.FullyQualifiedName
-        | TsType.TypeQuery q -> Some q.FullyQualifiedName
         | _ -> None
 
     let rec private fqnOfExport (export: TsExportDeclaration) : string list option =
@@ -208,7 +211,14 @@ module AreaAssignment =
         for key in result.LibEsExports do
             if not (owners.ContainsKey key) then owners[key] <- LibEs
 
-        // pass 4 — reverse-reference fixpoint for synthetics and transitively-reached types
+        // pass 4 — reverse-reference fixpoint for synthetics and transitively-reached
+        // types. MONOTONE LATTICE, not first-assignment-wins: passes 1–3 are
+        // authoritative (declarations belong to their package, frozen); fixpoint-
+        // DERIVED owners are recomputed every sweep and only climb the lattice
+        // (None -> LibEs/Erased/OwnedBy -> SharedRoot), so a key first seen from one
+        // lib upgrades to SharedRoot when a second lib's evidence arrives — assignment
+        // is order-independent (measured defect: 587 impossible Zod->Mcp edges from
+        // first-wins ownership of shared instantiation literals).
         let referencers = System.Collections.Generic.Dictionary<TypeKey, ResizeArray<TypeKey>>()
         let addEdge fromKey toKey =
             match referencers.TryGetValue toKey with
@@ -224,6 +234,14 @@ module AreaAssignment =
             |> Seq.distinct
             |> Seq.toArray
 
+        let derived = System.Collections.Generic.Dictionary<TypeKey, AreaOwner>()
+        let ownerOf key =
+            match owners.TryGetValue key with
+            | true, o -> Some o
+            | _ ->
+                match derived.TryGetValue key with
+                | true, o -> Some o
+                | _ -> None
         let mutable changed = true
         while changed do
             changed <- false
@@ -231,19 +249,19 @@ module AreaAssignment =
                 if not (owners.ContainsKey key) then
                     match referencers.TryGetValue key with
                     | true, froms ->
-                        let referencerOwners =
-                            froms
-                            |> Seq.choose (fun f ->
-                                match owners.TryGetValue f with
-                                | true, o -> Some o
-                                | _ -> None)
-                            |> Seq.toList
-                        match combineOwners referencerOwners with
-                        | Some owner ->
-                            owners[key] <- owner
+                        let combined =
+                            froms |> Seq.choose ownerOf |> Seq.toList |> combineOwners
+                        match combined, derived.TryGetValue key with
+                        | Some owner, (false, _) ->
+                            derived[key] <- owner
                             changed <- true
-                        | None -> ()
+                        | Some owner, (true, previous) when owner <> previous ->
+                            derived[key] <- owner
+                            changed <- true
+                        | _ -> ()
                     | _ -> ()
+        for KeyValue(key, owner) in derived do
+            owners[key] <- owner
 
         {
             Owners = owners |> Seq.map (fun (KeyValue(k, v)) -> k, v) |> Map.ofSeq

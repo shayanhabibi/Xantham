@@ -89,7 +89,9 @@ entries = ["./types.js", "./client", "./client/sse.js", "./client/streamableHttp
 # AuthInfo, EventStore/EventId/StreamId.
 # Omitted (survey-confirmed unreachable from agents' entries): express/node-http transports,
 # validation/ajv + validation/cfworker, experimental/tasks, cli.
-depends-on = ["Fidelity.CloudEdge.Zod"]
+# depends-on corrected 2026-07-02 by the measured edge matrix: MCP signatures name web-standard
+# Workers types (Request/Response/...) 883 times — Workers is a real dependency.
+depends-on = ["Fidelity.CloudEdge.Zod", "Fidelity.CloudEdge.Workers"]
 
 [[entry]]
 package = "@cloudflare/codemode"

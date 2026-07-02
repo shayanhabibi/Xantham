@@ -165,6 +165,25 @@ let unitTests =
                         ] }
             Expect.equal (assign result).Owners[key 10] (OwnedBy "Lib.A") "lib wins over erased"
 
+        testCase "ownership is ORDER-INDEPENDENT: late second-lib evidence upgrades to SharedRoot" <| fun _ ->
+            // The measured defect: a literal argument shared by an instantiation node
+            // (itself fixpoint-owned by lib A) and a lib-B declaration must be
+            // SharedRoot regardless of which referencer the sweep sees first.
+            let result =
+                { emptyResult with
+                    Types =
+                        Map [
+                            // pkg-a decl -> reference node -> literal
+                            key 1, TsType.Interface(iface "A" (pathFqn "pkg-a" "A") [ prop "x" 10 ])
+                            key 10, TsType.Union(TsTypeUnion [ key 20 ])
+                            // pkg-b decl -> the SAME literal, directly
+                            key 2, TsType.Interface(iface "B" (pathFqn "pkg-b" "B") [ prop "y" 20 ])
+                            key 20, TsType.Union(TsTypeUnion [])
+                        ] }
+            let a = assign result
+            Expect.equal a.Owners[key 10] (OwnedBy "Lib.A") "reference node stays single-owner"
+            Expect.equal a.Owners[key 20] SharedRoot "shared literal upgrades to SharedRoot"
+
         testCase "an unreachable key (no provenance, no entry, no referencer) is classified Dead" <| fun _ ->
             let result =
                 { emptyResult with Types = Map [ key 42, TsType.Union(TsTypeUnion []) ] }
