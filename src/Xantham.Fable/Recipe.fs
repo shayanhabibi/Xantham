@@ -13,33 +13,13 @@ module Xantham.Fable.Recipe
 
 open Fable.Core
 open Fable.Core.JsInterop
+open Fable.Core.DynamicExtensions
 open Node.Api
 open TypeScript
+open Xantham
 // Node.Api/TypeScript expose the JS `Error` class, shadowing FSharp.Core's
 // Result case constructor in expression position — restore Core's precedence.
 open Microsoft.FSharp.Core
-
-type EntryKind =
-    /// Resolved through the package's exports map (the ecosystem's own declaration).
-    | Module
-    /// A file added directly as a compilation root (ambient packages / module twins).
-    | AmbientRoot
-
-type RecipeEntry = {
-    Package: string
-    Kind: EntryKind
-    /// AmbientRoot: path of the root file inside the package directory.
-    Root: string option
-    /// Module: subpath specifiers ("." | "./mcp" | ...). Empty means ["."].
-    Entries: string list
-    /// False marks a policy-holder entry that is reached transitively and must
-    /// not seed the crawl (e.g. zod under the opaque-handle policy).
-    Crawl: bool
-}
-
-type Recipe = {
-    Entries: RecipeEntry list
-}
 
 /// A resolved crawl root: the recipe coordinate it came from and the file on disk.
 type ResolvedEntry = {
@@ -77,26 +57,59 @@ let private decodeEntry (index: int) (o: obj) : Result<RecipeEntry, string> =
     let root = o?root |> asString
     let entries = o?entries |> asStringList
     let crawl = o?crawl |> asBool |> Option.defaultValue true
+    let lib = o?lib |> asString
+    let dependsOn = o.["depends-on"] |> asStringList |> Option.defaultValue []
+    let policy =
+        match o?policy |> asString with
+        | None -> Ok None
+        | Some text -> DependencyPolicy.parse text |> Result.map Some |> Result.mapError (fun e -> $"{at}: {e}")
+    match policy with
+    | Error e -> Error e
+    | Ok policy ->
     match kindText with
     | "ambient-root" ->
         match root with
         | None -> Error $"{at}: kind 'ambient-root' requires string field 'root'"
-        | Some _ -> Ok { Package = package; Kind = AmbientRoot; Root = root; Entries = []; Crawl = crawl }
+        | Some _ -> Ok { Package = package; Kind = AmbientRoot; Root = root; Entries = []; Crawl = crawl; Lib = lib; Policy = policy; DependsOn = dependsOn }
     | "module" ->
-        Ok { Package = package; Kind = Module; Root = None; Entries = entries |> Option.defaultValue [ "." ]; Crawl = crawl }
+        Ok { Package = package; Kind = Module; Root = None; Entries = entries |> Option.defaultValue [ "." ]; Crawl = crawl; Lib = lib; Policy = policy; DependsOn = dependsOn }
     | other -> Error $"{at}: unknown kind '{other}' (expected 'module' or 'ambient-root')"
+
+let private decodeDependencies (table: obj) : Result<DependencyRule list, string list> =
+    match table?dependencies with
+    | deps when not (isNull deps) && jsTypeof deps = "object" ->
+        let results =
+            JS.Constructors.Object.keys deps
+            |> Seq.toList
+            |> List.map (fun package ->
+                match deps?(package)?policy |> asString with
+                | None -> Error $"[dependencies.\"{package}\"]: required string field 'policy'"
+                | Some text ->
+                    DependencyPolicy.parse text
+                    |> Result.map (fun policy -> { Package = package; Policy = policy })
+                    |> Result.mapError (fun e -> $"[dependencies.\"{package}\"]: {e}"))
+        match results |> List.choose (function Error e -> Some e | Ok _ -> None) with
+        | [] -> Ok(results |> List.choose (function Ok r -> Some r | Error _ -> None))
+        | errors -> Error errors
+    | _ -> Ok []
 
 let decodeRecipe (tomlText: string) : Result<Recipe, string list> =
     let table = tomlParse tomlText
     match table?entry with
     | entries when JS.Constructors.Array.isArray entries ->
-        let decoded =
+        let decodedEntries =
             (unbox<obj array> entries)
             |> Array.mapi decodeEntry
             |> Array.toList
-        match decoded |> List.choose (function Error e -> Some e | Ok _ -> None) with
-        | [] -> Ok { Entries = decoded |> List.choose (function Ok e -> Some e | Error _ -> None) }
-        | errors -> Error errors
+        let entryErrors = decodedEntries |> List.choose (function Error e -> Some e | Ok _ -> None)
+        match decodeDependencies table with
+        | Error depErrors -> Error(entryErrors @ depErrors)
+        | Ok dependencies when entryErrors.IsEmpty ->
+            Ok {
+                Entries = decodedEntries |> List.choose (function Ok e -> Some e | Error _ -> None)
+                Dependencies = dependencies
+            }
+        | Ok _ -> Error entryErrors
     | _ -> Error [ "recipe has no [[entry]] tables" ]
 
 // ── resolution (typed, total over the model) ─────────────────────────────────

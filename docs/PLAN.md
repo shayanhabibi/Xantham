@@ -24,6 +24,8 @@ Doer tags: **[owner]** = decision/markup only the owner can make. **[gen]** = ge
 
 ## Phase 1 — Partitioned emission + per-area L1 gates
 
+- [x] **[gen]** Recipe consumed by generation — foundation: shared typed model (`Xantham.Common/Recipe.Model.fs`: entry kinds, `DependencyPolicy` DU with total parse, lib/depends-on/policy fields), Fable loader refactored onto it, .NET loader (`RecipeLoad.fs`, Tomlyn 2.9 boundary) mirroring the same decode contract; the committed recipe is a live fixture on BOTH boundaries. — *Closed 2026-07-02: encoder suite 474, generator suite 517 (+8), IR byte-identical after refactor.*
+- [ ] **[gen]** Area-assignment pass: every IR type → owning lib, from EntryExports provenance + source-path mapping + the recipe's workers-types area table; synthetics by dependency classification (single-owner → that lib; shared → dependency-order root). *Closure: assignment total (0 unassigned types) + isolation tests.*
 - [ ] **[gen]** Emit one `.fs` unit per recipe lib (publish order: Workers, Zod, PartySocket, PartyServer, Mcp, CodeMode, Agents) + shared-root placement by type-dependency classification. *Closure: 7 units emitted; no `module rec` monolith.*
 - [ ] **[gen]** SharedLiterals homes placed by manifest classification (the designed fix for the 227 literal-home dangles). *Closure: dangle class = 0 in per-area gates.*
 - [ ] **[gen]** Per-area fsproj generation + all four gates re-scoped per area; whole-artifact 644 ratchet retired. *Closure: per-area baselines committed; old baseline deleted.*
