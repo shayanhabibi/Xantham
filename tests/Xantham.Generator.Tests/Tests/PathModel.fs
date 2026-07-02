@@ -276,4 +276,33 @@ let getRelativePath =
                 |> AnchorPath.Member
             relStr target from
             |> Flip.Expect.equal "" "TargetRoot.TargetMod.Target"
+
+        // MODULE-GLOBAL ROOT-ANCHOR (the 2026-07-05 globals-holder fix). A module-scope
+        // global (`declare namespace M { export const x: T }`) is collected into a holder
+        // type emitted at namespace ROOT. Localising its type ref against the member's OWN
+        // module `M` strips M's prefix -> bare `Target`, which is out of scope in the
+        // root-emitted holder (and shadow-binds a bare `SharedLiterals.X` across the
+        // namespace-rec assembly boundary). Localising against a ROOT anchor (empty module
+        // trace) keeps the full `M.Target` qualification. These two cases pin both sides.
+        testCase "in-module anchor strips to bare leaf (the over-strip bug)" <| fun _ ->
+            let target =
+                ModulePath.createFromList [ "M" ]
+                |> TypePath.create "Target"
+            let inModule =
+                ModulePath.createFromList [ "M" ]
+                |> MemberPath.createOnModule "x"
+                |> AnchorPath.Member
+            relStr target inModule
+            |> Flip.Expect.equal "in-module strips M" "Target"
+
+        testCase "root anchor (empty module) keeps the M. qualification" <| fun _ ->
+            let target =
+                ModulePath.createFromList [ "M" ]
+                |> TypePath.create "Target"
+            let rootAnchor =
+                ModulePath.init ""
+                |> MemberPath.createOnModule "x"
+                |> AnchorPath.Member
+            relStr target rootAnchor
+            |> Flip.Expect.equal "root keeps M.Target" "M.Target"
     ]

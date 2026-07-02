@@ -151,7 +151,12 @@ let tests =
 
         // Optional param -> `?name`; spread param -> `[<ParamArray>] name`.
         // (Parameter render lives in Render.Parameter.fs; covered here through the member path.)
-        testCase "method with optional + spread params" <| fun _ ->
+        // OPTIONAL-BEFORE-REQUIRED normalization (FS1212, 2026-07-05): F# forbids an
+        // optional param before a non-optional one (a [<ParamArray>] rest is non-optional),
+        // and reordering is not allowed (positional Emit binding). So `?b` before the
+        // spread is stripped to required `b: Qux` — it still binds positionally and a
+        // caller passes JS.undefined. Ledgered `optional-before-required-strip`.
+        testCase "method with optional-before-spread strips the optional (FS1212)" <| fun _ ->
             ifaceWith [
                 method' "fmt" false [
                     Parameter.create "a" (namedRef "Foo")
@@ -160,9 +165,24 @@ let tests =
                 ] (namedRef "Bar")
             ]
             |> render
-            |> Flip.Expect.equal "method opt+spread" (lines [
+            |> Flip.Expect.equal "method opt+spread normalized" (lines [
                 "type Probe ="
-                "    abstract fmt: a: Foo * ?b: Qux * [<ParamArray>] rest: Zap -> Bar"
+                "    abstract fmt: a: Foo * b: Qux * [<ParamArray>] rest: Zap -> Bar"
+            ])
+
+        // A TRAILING optional (nothing required after it) is KEPT — the normalization
+        // only strips optionals that precede a required/spread param.
+        testCase "trailing optional param is preserved" <| fun _ ->
+            ifaceWith [
+                method' "at" false [
+                    Parameter.create "a" (namedRef "Foo")
+                    Parameter.create "b" (namedRef "Qux") |> Parameter.optional
+                ] (namedRef "Bar")
+            ]
+            |> render
+            |> Flip.Expect.equal "trailing optional kept" (lines [
+                "type Probe ="
+                "    abstract at: a: Foo * ?b: Qux -> Bar"
             ])
 
         // An IsOptional METHOD emits identically to a required one: the Optional trait

@@ -731,10 +731,24 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
     | ResolvedExport.Variable value ->
         let path = Interceptors.pipeVariable ctx value
         let anchorPath = AnchorPath.create path
+        // MODULE-GLOBAL LOCALISE ANCHOR (root, not the member's own module).
+        // A module-scope global (`declare namespace M { export const x: T }`) is
+        // collected into a SYNTHESIZED globals-holder type that `renderModuleInterface`
+        // emits ONE SCOPE UP from module M — at namespace root for a top-level module
+        // (Render.Collection.fs renderRoot). But localising the type ref against the
+        // member's OWN anchor (module M) strips M's prefix, yielding a bare ref that is
+        // out of scope in the root-emitted holder (the CacheContext/Tracing FS0039 class)
+        // AND lets a bare `SharedLiterals.X` shadow-bind to another unit's pooled root
+        // `SharedLiterals` across the namespace-rec assembly boundary (the FromToRawPrototype
+        // class). Localise against a ROOT anchor (empty module trace) so the full
+        // `M.Target` qualification survives — correct for the holder's true emission scope.
+        let localiseAnchor =
+            MemberPath.createOnModule (Name.Case.valueOrSource value.Name) (ModulePath.init "")
+            |> AnchorPath.Member
         let typeRef =
             value.Type
             |> prerender ctx scope
-            |> TypeRefRender.anchorAndLocalise anchorPath
+            |> TypeRefRender.anchorAndLocalise localiseAnchor
         if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value && not (ctx.TopLevelExports.Contains export) then
             typeRef |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
         else
@@ -830,6 +844,14 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
     | ResolvedExport.Function (headFunc :: rest) ->
         let path = Interceptors.pipeFunction ctx headFunc
         let anchorPath = AnchorPath.create path
+        // ROOT LOCALISE ANCHOR (same rationale as the Variable arm): a module-scope
+        // function global is collected into the root-emitted globals-holder type, so its
+        // parameter/return type refs must be localised against namespace root (empty
+        // module trace) to keep the `M.Target` qualification, not against the function's
+        // own module anchor which strips it (the fetch/dispatchEvent bare-Request class).
+        let localiseAnchor =
+            MemberPath.createOnModule (Name.Case.valueOrSource headFunc.Name) (ModulePath.init "")
+            |> AnchorPath.Member
         let ref =
             headFunc.SignatureKey.Value
             |> ResolvedType.TypeLiteral
@@ -862,12 +884,12 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                                 func.Parameters
                                 |> List.map (
                                     Parameter.render ctx scope
-                                    >> Render.Concrete.anchorTypedNameRender ctx anchorPath
+                                    >> Render.Concrete.anchorTypedNameRender ctx localiseAnchor
                                     )
                             ReturnType =
                                 func.Type
                                 |> prerender ctx scope
-                                |> TypeRefRender.anchorAndLocalise anchorPath
+                                |> TypeRefRender.anchorAndLocalise localiseAnchor
                             Traits = Set [ RenderTraits.Static ]
                             Documentation = func.Documentation
                             TypeParameters =

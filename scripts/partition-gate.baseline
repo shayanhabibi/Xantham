@@ -254,7 +254,38 @@ BL_FIDELITY_CLOUDEDGE_ZOD=0
 #  - FS1212 (optional param before required — needs the strip-optionality-when-not-last
 #    normalization at the signature renderers; Emit-based members are positional, so
 #    REORDERING is not an option).
-BL_FIDELITY_CLOUDEDGE_WORKERS=8
+# 2026-07-05 (Opus): 8 -> 4. Diagnostic workflow (4 parallel root-cause traces +
+# synthesis) reshaped the catalogue. TWO fixes landed:
+#  - CLASS D optional-before-required (FS1212): stripNonFinalOptionals in
+#    FunctionLikeSignature (TypeRender.Render.fs) at all 5 param-render call sites — an
+#    optional param followed by a required/ParamArray param has its Optional trait
+#    stripped (positional Emit binding forbids reordering); ledgered
+#    optional-before-required-strip (8 params). Test pins updated (MemberRender: the
+#    opt+spread case now strips; added a trailing-optional-kept case).
+#  - CLASS A-1 + B (unified root cause, the synthesis's key discovery): the synthesized
+#    globals-holder type (ICloudflareWorkersTypes etc.) is emitted at namespace ROOT by
+#    renderModuleInterface but its member type-refs were localised against the member's
+#    OWN module anchor, so getRelativePath over-stripped the module prefix -> bare refs
+#    (CacheContext/Tracing FS0039) that also shadow-bound bare SharedLiterals.X to the
+#    Zod-pooled root module across the namespace-rec assembly boundary (FromToRawPrototype).
+#    FIX: localise a module-GLOBAL's (Variable AND Function export arms) type refs against
+#    a ROOT anchor (empty module trace) so the full M.Target qualification survives. This
+#    unmasked the FULL holder-member class (34 latent behind the F#-per-decl error cap),
+#    then cleared all of it: cache/tracing/fetch/dispatchEvent/... all qualify to
+#    CloudflareWorkersTypes.X; FromToRawPrototype resolves to the local nested module.
+# Remaining 4 = A-2 + C:
+#  - A-2 (2 sites, Cloudflare/ServiceWorkerGlobalScope.cloudflare): the ref is now
+#    correctly QUALIFIED (CloudflareWorkersTypes.Cloudflare) but the def is named
+#    ICloudflare (the I-prefix rename for a TS name that is BOTH interface and namespace);
+#    the rename is applied to the holder DEF but not the REF leaf. Fix = apply prefixIModule
+#    to a ref leaf whose target is an I-prefixed globals-holder (predicate MUST match
+#    renderModuleInterface's exactly — flagged highest-risk edit).
+#  - C (2 sites, SqlStorageCursor + rpcStub): a prototype-holder static-side type ref
+#    (const's static side) whose generic arity is lost (bare SqlStorageCursor vs arity-1;
+#    rpcStub -> RpcStub bare). Fix = construct-sig / prototype-holder return arity pad
+#    (the bare-generic default synthesis, applied to the returned/referenced type's OWN
+#    declared typars).
+BL_FIDELITY_CLOUDEDGE_WORKERS=4
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0
 BL_FIDELITY_CLOUDEDGE_MCP=0

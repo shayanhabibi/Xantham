@@ -460,10 +460,33 @@ module TypeParameterRender =
         
 
 module FunctionLikeSignature =
+    // OPTIONAL-BEFORE-REQUIRED normalization (FS1212). TS permits `f(a, b?, ...rest)` — an
+    // optional param followed by a required one (including a `[<ParamArray>]` rest). F#
+    // forbids optional args before non-optional, and REORDERING is not an option (Emit/Import
+    // members bind positionally at runtime). So strip `Optional` from any param that is
+    // followed by a non-optional one: it renders as required but positionally correct, and a
+    // caller still passes `undefined`/`JS.undefined` for it (Fable erases). Right-to-left fold
+    // tracking whether a required param has been seen after the current position.
+    let private stripNonFinalOptionals (ctx: GeneratorContext) (parameters: TypedNameRender list) =
+        let mutable sawRequiredAfter = false
+        [ for p in List.rev parameters ->
+            let isOptional = p.Traits.Contains RenderTraits.Optional
+            let normalized =
+                if isOptional && sawRequiredAfter then
+                    GeneratorContext.Advisory.increment ctx "optional-before-required-strip"
+                    { p with Traits = p.Traits.Remove RenderTraits.Optional }
+                else p
+            // A ParamArray is a required trailing form; anything non-optional (required
+            // param OR ParamArray) makes preceding optionals illegal.
+            if not isOptional then sawRequiredAfter <- true
+            normalized ]
+        |> List.rev
+
     let renderAbstractWithName (ctx: GeneratorContext) (name: Name<_>) (functionLike: FunctionLikeSignature) =
         let renderName = Name.Case.valueOrModified name
         let parameters =
             functionLike.Parameters
+            |> stripNonFinalOptionals ctx
             |> List.map (TypedNameRender.renderAsNamedTypeWithOptionName ctx)
             |> function
                 | [] -> [ Ast.Unit() ]
@@ -483,6 +506,7 @@ module FunctionLikeSignature =
         let renderName = Name.Case.valueOrModified name
         let parameters =
             functionLike.Parameters
+            |> stripNonFinalOptionals ctx
             |> List.map (TypedNameRender.renderAsPatternWithOptionName ctx)
             |> function
                 | [] -> [ unitPat ]
@@ -501,6 +525,7 @@ module FunctionLikeSignature =
         let renderName = Name.Case.valueOrModified name
         let parameters =
             functionLike.Parameters
+            |> stripNonFinalOptionals ctx
             |> List.map (TypedNameRender.renderAsPattern ctx >> Ast.ParenPat)
             |> function
                 | [] -> [ Ast.UnitPat() ]
@@ -511,6 +536,7 @@ module FunctionLikeSignature =
     let renderSignature (ctx: GeneratorContext) (functionLike: FunctionLikeSignature) =
         let parameters =
             functionLike.Parameters
+            |> stripNonFinalOptionals ctx
             |> List.map (TypedNameRender.renderTypeOnly ctx)
             |> function
                 | [] -> [ Ast.Unit() ]
@@ -521,6 +547,7 @@ module FunctionLikeSignature =
     let renderDelegate (ctx: GeneratorContext) (name: Name<_>) (functionLike: FunctionLikeSignature) =
         let parameters =
             functionLike.Parameters
+            |> stripNonFinalOptionals ctx
             |> List.map (TypedNameRender.renderAsNamedTypeWithOptionName ctx)
             |> function
                 | [] -> [ Ast.Unit() ]
