@@ -139,6 +139,17 @@ and GeneratorContext =
         /// cross-assembly module collision: each unit's SharedLiterals nests under its own
         /// top module). Empty = root-level `SharedLiterals.<name>` (isolation-test default).
         SyntheticPlacementOrder: string list
+        /// Top-level module names under erase-with-advisory policy (+ the internal
+        /// chunk-stub module). A shared synthetic whose owners ALL live under these
+        /// roots is itself erased content: its home mints under the first erased
+        /// root, which the path substitution immediately rewrites to the Erased.*
+        /// alias — definitions drop with the erased modules, references collapse.
+        ErasedRoots: string list
+        /// THE ERASURE LEDGER (docs/GOALS.md Done(L1): every deliberate degradation
+        /// counted and classed). Keys are "<class>:<subject>" (e.g.
+        /// "erased-module:JsonSchemaTyped", "erased-heritage:Executor"); emission
+        /// dumps it, the partition gate reports it. Never silent.
+        AdvisoryLedger: DictionaryImpl<string, int>
         Customisation: Customisation
 
     }
@@ -154,6 +165,8 @@ and GeneratorContext =
         InFlight = HashSet()
         TopLevelExports = HashSet()
         SyntheticPlacementOrder = []
+        ErasedRoots = []
+        AdvisoryLedger = DictionaryImpl()
         TypeAliasRemap = DictionaryImpl()
         TypeAliasArity = DictionaryImpl()
         HoistedHomeTypars = DictionaryImpl()
@@ -184,6 +197,22 @@ module GeneratorContext =
         let inline addOrReplace key value (dict: DictionaryImpl<'Key, 'Value>) =
             dict[key] <- value
     
+    module Advisory =
+        /// Increment an erasure-ledger class counter (key = "<class>:<subject>").
+        let incrementBy (ctx: GeneratorContext) (key: string) (count: int) =
+            let current =
+                ctx.AdvisoryLedger
+                |> Operation.tryGet key
+                |> ValueOption.defaultValue 0
+            ctx.AdvisoryLedger |> Operation.addOrReplace key (current + count)
+        let increment (ctx: GeneratorContext) (key: string) = incrementBy ctx key 1
+        /// The ledger, sorted for deterministic reporting.
+        let dump (ctx: GeneratorContext) : (string * int) list =
+            ctx.AdvisoryLedger
+            |> Seq.map (fun (KeyValue(k, v)) -> k, v)
+            |> Seq.sortBy fst
+            |> Seq.toList
+
     module SharedLiterals =
         /// The canonical owner-independent home (if any) for a shared hoisted object-literal.
         let tryGetHome ctx (key: ResolvedType) =

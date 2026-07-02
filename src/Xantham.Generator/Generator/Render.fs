@@ -27,6 +27,15 @@ let main argv =
             | Ok recipe -> recipePath, outDir, recipe
         | other -> failwithf "usage: --recipe <path> --out-dir <dir> (got %A)" other
     let opaqueHandles = OpaqueHandleSubstitution.handlesOf recipe
+    // Erased tops: the generator-internal "Empty" module (chunk-modules' VALUE-export
+    // stubs — mangled, release-unstable names; not consumer API) drops at emission with
+    // a ledger entry; references rewrite to the Erased.* advisory aliases.
+    // RECIPE-DEP enforcement (json-schema-typed/eventsource/@types) is STAGED but
+    // DISABLED 2026-07-03: enabling it vanishes the JSONSchema-family canonical
+    // SharedLiterals homes (defs land under a dropped module while references survive;
+    // Zod unit 18→96). One unresolved interaction between erased-module drop and
+    // canonical-home minting — diagnosed fresh as the next PLAN item, not iterated blind.
+    let erasedTops: string list = [] // enable: "Empty" :: OpaqueHandleSubstitution.erasedTopsOf recipe
     // Publish-ordered unit boundaries: shared synthetic homes mint under the earliest
     // owner unit's top module (Types/Generator.fs SyntheticPlacementOrder).
     let placementOrder =
@@ -59,14 +68,14 @@ let main argv =
                  // unconditionally so the reference resolves to the emitted type.
                  Customisation.Interceptors.Paths.TypePaths = fun ctx typ s ->
                      TypePath.pruneParent (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") s
-                     |> OpaqueHandleSubstitution.rewriteTypePath opaqueHandles
+                     |> OpaqueHandleSubstitution.rewriteTypePath opaqueHandles erasedTops
                  Customisation.Interceptors.Paths.MemberPaths = fun ctx typ s ->
                      MemberPath.pruneParent (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") s
 
          })
     // Same mutable caches, publish order attached: shared synthetic homes mint under
     // their earliest owner unit (see SyntheticPlacementOrder).
-    let generatorContext = { generatorContext with SyntheticPlacementOrder = placementOrder }
+    let generatorContext = { generatorContext with SyntheticPlacementOrder = placementOrder; ErasedRoots = erasedTops }
     // Phase 1: count shared object-literals (those reached through >1 owner) on a throwaway
     // context and assign each a canonical SharedLiterals home, so the real prerender below roots
     // them there (every reference resolves to one absolute path; the single def is emitted once).
@@ -77,7 +86,7 @@ let main argv =
     let rootModule = RootModule.collectModules generatorContext
     let recipeDir = IO.Path.GetDirectoryName(IO.Path.GetFullPath recipePath)
     let supportLibrary = IO.Path.GetFullPath(IO.Path.Join(__SOURCE_DIRECTORY__, "../../Xantham.Fable.Core/Library.fs"))
-    let emitted = Emission.emitUnits generatorContext (Some supportLibrary) (Emission.planUnits recipeDir recipe) rootModule outDir
+    let emitted = Emission.emitUnits generatorContext (Some supportLibrary) erasedTops (Emission.planUnits recipeDir recipe) rootModule outDir
     for unit, file, lines in emitted do
         printfn $"unit: {unit.Lib} -> {file} ({lines} lines)"
     0

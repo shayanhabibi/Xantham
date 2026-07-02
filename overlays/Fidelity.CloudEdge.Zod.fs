@@ -33,9 +33,18 @@ module Zod =
     /// generic applications (`Zod.ZodType<Shape, Mode>` from `ZodObject<S, $strip>`
     /// instantiations) collapse onto the same handle. The parameters carry no
     /// meaning — the schema is opaque by policy.
-    type ZodType<'A> = ZodType
-    type ZodType<'A, 'B> = ZodType
-    type ZodType<'A, 'B, 'C> = ZodType
+    /// Unused typars are illegal on abbreviations (FS0035); the arity variants
+    /// are interfaces EXTENDING the handle so generic applications still unify
+    /// with `ZodType` member positions where needed.
+    [<AllowNullLiteral>]
+    type ZodType<'A> =
+        inherit ZodType
+    [<AllowNullLiteral>]
+    type ZodType<'A, 'B> =
+        inherit ZodType
+    [<AllowNullLiteral>]
+    type ZodType<'A, 'B, 'C> =
+        inherit ZodType
 
     /// ZodRawShapeCompat = Record<string, AnySchema> — the tool-authoring shape
     /// (`registerTool` inputSchema/outputSchema). MUST be a plain JS object:

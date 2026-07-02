@@ -64,7 +64,7 @@ let private recipe : Recipe = {
         entry "pkg-a" "Lib.A"
         entry "pkg-b" "Lib.B"
     ]
-    Dependencies = [ { Package = "dep-x"; Policy = EraseWithAdvisory } ]
+    Dependencies = [ { Package = "dep-x"; Policy = EraseWithAdvisory; Modules = [] } ]
 }
 
 /// The same node_modules extraction the production caller injects.

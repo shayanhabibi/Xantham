@@ -86,8 +86,9 @@ let private decodeDependencies (table: obj) : Result<DependencyRule list, string
                 match deps?(package)?policy |> asString with
                 | None -> Error $"[dependencies.\"{package}\"]: required string field 'policy'"
                 | Some text ->
+                    let modules = deps?(package)?modules |> asStringList |> Option.defaultValue []
                     DependencyPolicy.parse text
-                    |> Result.map (fun policy -> { Package = package; Policy = policy })
+                    |> Result.map (fun policy -> { Package = package; Policy = policy; Modules = modules })
                     |> Result.mapError (fun e -> $"[dependencies.\"{package}\"]: {e}"))
         match results |> List.choose (function Error e -> Some e | Ok _ -> None) with
         | [] -> Ok(results |> List.choose (function Ok r -> Some r | Error _ -> None))

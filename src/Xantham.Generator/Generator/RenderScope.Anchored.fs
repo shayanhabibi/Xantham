@@ -157,7 +157,14 @@ module Render =
                     // The substituteForHeritage step also scrubs orphan typars from the base.
                     typeDefn.Inheritance
                     |> List.map (TypeRefRender.anchor anchorPath)
-                    |> List.filter TypeRefRender.isInterfaceBase
+                    |> List.filter (fun base' ->
+                        // A base rewritten to the Erased.* advisory aliases is `obj` —
+                        // uninheritable. Dropped HERE (anchor time; localise erases the
+                        // distinction) and LEDGERED, never silent.
+                        if TypeRefRender.isErasedBase base' then
+                            GeneratorContext.Advisory.increment ctx $"erased-heritage:{Name.Case.valueOrModified name}"
+                            false
+                        else TypeRefRender.isInterfaceBase base')
                     |> List.map (TypeRefRender.substituteForHeritage inScope)
                     |> List.map (TypeRefRender.localise anchorPath)
                 Members =
@@ -850,6 +857,14 @@ let markSharedLiterals (countingCtx: GeneratorContext) (realCtx: GeneratorContex
         let hostModuleFor (roots: Set<string>) =
             match realCtx.SyntheticPlacementOrder with
             | [] -> sharedLiteralModule
+            | _ when
+                not (Set.isEmpty roots)
+                && roots |> Set.forall (fun r -> realCtx.ErasedRoots |> List.contains r) ->
+                // Owned ONLY by erased content: the home is erased content too. Minting
+                // under an erased root lets the path substitution collapse every
+                // reference to the Erased.* alias; the definition drops with the module.
+                GeneratorContext.Advisory.increment realCtx $"erased-shared-home:{Set.minElement roots}"
+                ModulePath.create "SharedLiterals" (ModulePath.init (Set.minElement roots))
             | order ->
                 // Owners outside the order (pooled/erased-dep contexts) mean unit 1; and
                 // unit 1 hosting uses the ROOT-LEVEL module (pooled into the first unit's

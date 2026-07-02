@@ -162,6 +162,20 @@ module TypeRefRender =
         | TypeRefKind.Molecule (TypeRefMolecule.Prefix _) -> true
         | _ -> false
 
+    /// A base whose path was rewritten to the `Erased.*` advisory aliases (the
+    /// policy substitution's output contract) cannot be inherited — the alias IS
+    /// `obj`. Checked at anchor time like `isInterfaceBase` (post-localise atoms
+    /// are opaque Widgets); every drop is ledgered by the caller.
+    let isErasedBase (render: TypeRefRender) =
+        let rootOf (path: TypePath) =
+            ModulePath.flatten path.Parent
+            |> List.tryHead
+            |> Option.map Name.Case.valueOrModified
+        match render.Kind with
+        | TypeRefKind.Atom (TypeRefAtom.Path p) -> rootOf p = Some "Erased"
+        | TypeRefKind.Molecule (TypeRefMolecule.Prefix ({ Kind = TypeRefKind.Atom (TypeRefAtom.Path p) }, _)) -> rootOf p = Some "Erased"
+        | _ -> false
+
     let substituteForHeritage (inScopeTyparNames: Set<string>) (render: TypeRefRender) : TypeRefRender =
         let rec walk (render: TypeRefRender) : TypeRefRender =
             match render.Kind with

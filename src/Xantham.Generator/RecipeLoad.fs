@@ -79,8 +79,9 @@ let private decodeDependencies (table: TomlTable) : Result<DependencyRule list, 
                     match tryGet rule "policy" |> Option.bind asString with
                     | None -> Error $"[dependencies.\"{package}\"]: required string field 'policy'"
                     | Some text ->
+                        let modules = tryGet rule "modules" |> Option.bind asStringList |> Option.defaultValue []
                         DependencyPolicy.parse text
-                        |> Result.map (fun policy -> { Package = package; Policy = policy })
+                        |> Result.map (fun policy -> { Package = package; Policy = policy; Modules = modules })
                         |> Result.mapError (fun e -> $"[dependencies.\"{package}\"]: {e}")
                 | _ -> Error $"[dependencies.\"{package}\"]: expected a table with a 'policy' field" ]
         match results |> List.choose (function Error e -> Some e | Ok _ -> None) with

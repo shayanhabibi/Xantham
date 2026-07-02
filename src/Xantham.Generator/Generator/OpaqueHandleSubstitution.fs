@@ -29,17 +29,33 @@ let handlesOf (recipe: Recipe) : (string * string) list =
         let top = Emission.packageTopModule e.Package
         top, top + "Type")
 
+/// The top-level module names owned by erase-with-advisory dependency rules:
+/// the package-name derivation plus any recipe-declared `modules` overrides
+/// (namespace-derived module names the derivation cannot see). References
+/// rooted at these rewrite to the `Erased.<Top>` advisory aliases; the modules
+/// themselves are dropped at emission with ledger entries.
+let erasedTopsOf (recipe: Recipe) : string list =
+    recipe.Dependencies
+    |> List.filter (fun d -> d.Policy = EraseWithAdvisory)
+    |> List.collect (fun d -> Emission.packageTopModule d.Package :: d.Modules)
+    |> List.distinct
+
 let private rootSegment (modulePath: ModulePath) =
     ModulePath.flatten modulePath
     |> List.tryHead
     |> Option.map Name.Case.valueOrModified
 
 /// Rewrite any TypePath rooted under an opaque-handle package's top module to
-/// the handle's path. Idempotent: the handle's own path rewrites to itself.
-let rewriteTypePath (handles: (string * string) list) (typePath: TypePath) : TypePath =
-    match handles, rootSegment typePath.Parent with
-    | [], _ | _, None -> typePath
-    | handles, Some root ->
+/// the handle's path, and any path rooted under an erased top module to its
+/// `Erased.<Top>` advisory alias. Idempotent: handle and Erased paths rewrite
+/// to themselves.
+let rewriteTypePath (handles: (string * string) list) (erasedTops: string list) (typePath: TypePath) : TypePath =
+    match rootSegment typePath.Parent with
+    | None -> typePath
+    | Some root ->
         match handles |> List.tryFind (fun (top, _) -> top = root) with
         | Some(top, handle) -> TypePath.create handle (ModulePath.init top)
-        | None -> typePath
+        | None ->
+            if erasedTops |> List.contains root
+            then TypePath.create root (ModulePath.init "Erased")
+            else typePath

@@ -151,6 +151,46 @@ let renderUnitFile (ctx: GeneratorContext) (root: RootModule) =
         |> _.toRecursive()
     }
 
+/// Drop the modules owned by erased tops from the collected tree — the
+/// enforcement point of the erase-with-advisory policy (and the generator-
+/// internal chunk-stub module). Every drop is LEDGERED with its node count;
+/// references into the dropped content were rewritten to the `Erased.*`
+/// advisory aliases by the path substitution.
+let dropErasedModules (ctx: GeneratorContext) (erasedTops: string list) (root: RootModule) =
+    let rec countNodes (m: Module) =
+        m.Types.Count + m.Members.Count + (m.Modules.Values |> Seq.sumBy countNodes)
+    // "Erased" itself: the path rewrite re-anchors erased DEFINITIONS under the
+    // Erased root (the interceptor cannot distinguish def from ref paths), so
+    // their renders collect into a real `Erased` module — dropped here; the
+    // generated alias preamble supplies the names references point at.
+    for top in "Erased" :: erasedTops do
+        match root.Modules.TryGetValue top with
+        | true, m ->
+            GeneratorContext.Advisory.incrementBy ctx $"erased-module:{top}" (countNodes m)
+            root.Modules.Remove top |> ignore
+        | _ -> ()
+
+/// The `Erased.*` advisory aliases — the rewrite targets for references into
+/// dropped content. Phantom arities absorb surviving generic applications
+/// (the ZodType pattern). Appended to the first unit's preamble file.
+let erasedAliasPreamble (erasedTops: string list) =
+    match erasedTops with
+    | [] -> ""
+    | tops ->
+        "\nmodule Erased =\n"
+        + (tops
+           |> List.sort
+           |> List.collect (fun n ->
+               [ $"    /// Advisory alias: content under `{n}` is erased by recipe policy."
+                 $"    type {n} = obj"
+                 // Unused typars are ILLEGAL on abbreviations (FS0035) but legal on
+                 // nominal definitions — the arity variants are empty interfaces.
+                 $"    [<AllowNullLiteral>] type {n}<'A> = interface end"
+                 $"    [<AllowNullLiteral>] type {n}<'A, 'B> = interface end"
+                 $"    [<AllowNullLiteral>] type {n}<'A, 'B, 'C> = interface end" ])
+           |> String.concat "\n")
+        + "\n"
+
 /// Erased-union arities beyond Fable.Core's U2..U9 as their OWN first-unit file.
 /// The arity set accumulates GLOBALLY while unit bodies render, so this must be
 /// produced AFTER every unit's pass-1 render (the monolith forced all renders
@@ -218,7 +258,8 @@ let unitFsproj (supportLibrary: string option) (unit: EmissionUnit) : string =
 
 /// Emit every unit of the plan into outDir/<Lib>/{<Lib>.fs, <Lib>.fsproj}.
 /// Returns (unit, file, generated-line-count) for the report.
-let emitUnits (ctx: GeneratorContext) (supportLibrary: string option) (plan: EmissionUnit list) (root: RootModule) (outDir: string) =
+let emitUnits (ctx: GeneratorContext) (supportLibrary: string option) (erasedTops: string list) (plan: EmissionUnit list) (root: RootModule) (outDir: string) =
+    dropErasedModules ctx erasedTops root
     let split = splitRoot plan root
     if not split.Pooled.IsEmpty then
         eprintfn $"""pooled into {plan.Head.Lib}: {split.Pooled |> String.concat ", "}"""
@@ -252,8 +293,11 @@ let emitUnits (ctx: GeneratorContext) (supportLibrary: string option) (plan: Emi
                     |> Gen.mkOak
                     |> Gen.runWith wideFormat
             unit, source)
-    // Pass 2 — the complete arity set exists now.
-    let erasedUnions = renderErasedUnionsFile () |> Gen.mkOak |> Gen.runWith wideFormat
+    // Pass 2 — the complete arity set exists now; the Erased advisory aliases
+    // ride in the same first-unit preamble file.
+    let erasedUnions =
+        (renderErasedUnionsFile () |> Gen.mkOak |> Gen.runWith wideFormat)
+        + erasedAliasPreamble erasedTops
     sources
     |> List.mapi (fun i (unit, source) ->
         let dir = System.IO.Path.Combine(outDir, unit.Lib)
@@ -264,3 +308,13 @@ let emitUnits (ctx: GeneratorContext) (supportLibrary: string option) (plan: Emi
         System.IO.File.WriteAllText(file, source)
         System.IO.File.WriteAllText(System.IO.Path.Combine(dir, unit.Lib + ".fsproj"), unitFsproj supportLibrary unit)
         unit, file, (source |> Seq.filter ((=) '\n') |> Seq.length))
+    |> fun emitted ->
+        // THE ERASURE LEDGER (docs/GOALS.md): every deliberate degradation, counted
+        // and classed — written next to the artifact and echoed for the gate.
+        let ledger = GeneratorContext.Advisory.dump ctx
+        if not ledger.IsEmpty then
+            let text = ledger |> List.map (fun (k, v) -> $"{k} = {v}") |> String.concat "\n"
+            System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "advisory-ledger.txt"), text + "\n")
+            eprintfn $"advisory ledger ({ledger.Length} classes):"
+            for k, v in ledger do eprintfn $"  {k} = {v}"
+        emitted

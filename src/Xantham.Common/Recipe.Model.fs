@@ -67,6 +67,10 @@ type RecipeEntry = {
 type DependencyRule = {
     Package: string
     Policy: DependencyPolicy
+    /// The rendered top-level module names this package owns, when they differ
+    /// from the package-name derivation — e.g. json-schema-typed also surfaces
+    /// its declared TS namespace as a `JsonSchema` module. Empty = derivation only.
+    Modules: string list
 }
 
 type Recipe = {

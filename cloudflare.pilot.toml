@@ -132,6 +132,7 @@ policy = "erase-with-advisory"
 
 [dependencies."json-schema-typed"]
 policy = "erase-with-advisory"
+modules = ["JsonSchema"]   # its declared TS namespace also surfaces as a top-level module
 # Single touchpoint (JSONSchema.Interface) at the optional jsonSchemaValidator plug-in position;
 # degrading to obj loses nothing structural. Promote to own lib only if consumers need typed validators.
 
