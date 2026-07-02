@@ -40,6 +40,7 @@
         <Compile Include="Tests\UsedTypars.fs" />
         <Compile Include="Tests\LibEsCollectionArgs.fs" />
         <Compile Include="Tests\RecipeLoad.fs" />
+        <Compile Include="Tests\AreaAssignment.fs" />
         <Compile Include="Main.fs"/>
     </ItemGroup>
 
