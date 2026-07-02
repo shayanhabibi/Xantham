@@ -1,4 +1,4 @@
-module Xantham.Generator.Tests.Tests.TypeRefRenderHomeChildScrub
+﻿module Xantham.Generator.Tests.Tests.TypeRefRenderHomeChildScrub
 
 (*
 Coverage plane for the HOME-CHILD DEF/REF CLOSURE SCRUB — the Anchored
@@ -89,13 +89,21 @@ let homeChildScrubTests =
             expectPath [ "Workers" ] "Request" result
             Expect.isEmpty ledgered "non-home paths are out of scope"
 
-        testCase "the home's OWN path is not a home-child — untouched" <| fun _ ->
-            // The atom's PARENT chain must pass through the home; the home type itself
-            // (parent = SharedLiterals) is a def, not a child ref.
+        testCase "the home's OWN path, DEFINED, is untouched" <| fun _ ->
+            // The home type itself (parent = SharedLiterals) with a registered def is
+            // an ordinary resolvable ref — never a child.
+            let render = pathAtom [ "SharedLiterals" ] "Home"
+            let result, ledgered = scrub homeSet (defs [ "SharedLiterals.Home" ]) render
+            expectPath [ "SharedLiterals" ] "Home" result
+            Expect.isEmpty ledgered "a defined home is not scrubbed"
+
+        testCase "an ASSIGNED home with NO registered def scrubs on exact match" <| fun _ ->
+            // The dangling-home-ref shape: `SharedLiterals.X` was assigned as a canonical
+            // home but its def landed elsewhere (or nowhere) — the ref can never resolve.
             let render = pathAtom [ "SharedLiterals" ] "Home"
             let result, ledgered = scrub homeSet (defs []) render
-            expectPath [ "SharedLiterals" ] "Home" result
-            Expect.isEmpty ledgered "the home itself is not scrubbed"
+            expectObj result
+            Expect.equal ledgered [ "SharedLiterals.Home" ] "ledgered by the dangling home path"
 
         testCase "undefined GRANDCHILD under a home degrades (depth-general prefix match)" <| fun _ ->
             let render = pathAtom [ "SharedLiterals"; "Home"; "Code" ] "Deep"

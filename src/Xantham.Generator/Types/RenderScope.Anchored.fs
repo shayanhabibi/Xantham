@@ -291,6 +291,14 @@ module TypeRefRender =
                 match atom with
                 | TypeRefAtom.Path p ->
                     let parentSegments = flattenModules p.Parent
+                    let flat = (parentSegments |> String.concat ".") + "." + Name.Case.valueOrModified p.Name
+                    // EXACT-MATCH first: a path that IS an assigned canonical home with no
+                    // registered def at that path (`SharedLiterals.X` assigned, def landed
+                    // elsewhere) can never resolve — the dangling-home-ref shape.
+                    if homePaths.Contains flat && not (definedPaths.Contains flat) then
+                        ledger flat
+                        TypeRefAtom.Intrinsic "obj"
+                    else
                     // The innermost home the atom sits under: test every dotted prefix
                     // of the module chain against the home set (O(depth) lookups).
                     let underHome =
@@ -300,7 +308,6 @@ module TypeRefRender =
                         |> List.tryFindBack homePaths.Contains
                     match underHome with
                     | Some home ->
-                        let flat = (parentSegments |> String.concat ".") + "." + Name.Case.valueOrModified p.Name
                         if definedPaths.Contains flat then atom
                         else
                             ledger home

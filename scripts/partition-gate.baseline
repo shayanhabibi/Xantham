@@ -234,6 +234,26 @@ BL_FIDELITY_CLOUDEDGE_ZOD=0
 # shape @12887; FS0001 x2 proptypekey<'EventMap,_>-vs-Event (EventTarget handler
 # shapes); FS0033 SqlStorageCursor arity straggler; FS0039 `Cloudflare` namespace
 # collision @2979; FS0039 BigUint64Array (no Fable.Core 5 type; needs a substitution).
+# 2026-07-04 (5): count-neutral at 8, five of the original singletons KILLED (property
+# parens FS0701; typar-constraint advisory-drop policy FS0001 x2, ledgered
+# typar-constraint-drop, test pins updated; instance value members get self-notation
+# FS0673; lib-substitution heads+placeholder args now INTRINSIC atoms — widgets are
+# opaque to every anchor-stage scrub, which had leaked `ResizeArray<'T>` typars AND hidden
+# `obj<args>` from the collapse; BigUint64Array -> obj erasure, no such type in
+# Fable.Core 5). The globals-holder type (ICloudflareWorkersTypes) then typechecked PAST
+# its old line-11 abort for the first time, exposing one latent per fix. Remaining 8:
+#  - FromToRawPrototype x2 (holder members ref the ROOT-pool form `SharedLiterals.X`
+#    while the home registered host-placed under Workers — a home-path/placement
+#    disagreement; the exact-match dangling-home scrub covers assigned-home forms and is
+#    test-pinned, but this ref carries the STALE root form neither set knows).
+#  - CacheContext/Tracing/Cloudflare x4 (holder members ref types that exist upstream
+#    but emitted RENAMED (ICloudflare — the interface/namespace collision I-prefix) or
+#    as modules only; the rename must be applied at the PATH level so refs follow).
+#  - SqlStorageCursor FS0033 (a construct-signature return that bypasses the
+#    bare-generic default synthesis).
+#  - FS1212 (optional param before required — needs the strip-optionality-when-not-last
+#    normalization at the signature renderers; Emit-based members are positional, so
+#    REORDERING is not an option).
 BL_FIDELITY_CLOUDEDGE_WORKERS=8
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0

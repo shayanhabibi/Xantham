@@ -326,6 +326,10 @@ module TypedNameRender =
             else
                 TypeRefRender.nonNullable typedName.Type
                 |> TypeRefRender.render
+            // A PROPERTY whose type is a curried function must parenthesize it or
+            // `abstract f: a -> b -> c with get, set` parses as a multi-argument
+            // INDEXER property (FS0701) — same rule as function-typed parameters.
+            |> parenIfFunction typedName.Type
 
         match typedName.Traits.Contains(RenderTraits.Readable), typedName.Traits.Contains(RenderTraits.Writable) with
         | true, true ->
@@ -356,7 +360,13 @@ module TypedNameRender =
             (typedName.Traits.Contains(RenderTraits.Optional), typedName.Type)
             ||> TypeRefRender.orNullable
             |> TypeRefRender.render
-        Ast.Member(name, Exprs.jsUndefined, typeWidget)
+        // An INSTANCE value member requires self-notation (`member _.x`) — the bare
+        // `member x: T = ...` form is FS0673 unconditionally, so any historically-green
+        // use of this renderer carried the Static trait (measured: the globals-holder
+        // type's `_emailMessage` was the first instance-form emission to typecheck).
+        let memberName =
+            if typedName.Traits.Contains(RenderTraits.Static) then name else "_." + name
+        Ast.Member(memberName, Exprs.jsUndefined, typeWidget)
         |> Attributes.renderAttributesForMember (attributes {
             compiledNameOrErase typedName.Name
         })
@@ -399,14 +409,20 @@ module TypedNameRender =
 
 module TypeParameterRender =
     // rendering constraints
-    let renderConstraints (ctx: GeneratorContext) (typeParameter: TypeParameterRender) =
+    let renderConstraints (ctx: GeneratorContext) (typeParameter: TypeParameterRender) : WidgetBuilder<Type> voption =
         match typeParameter with
         | { Constraint = ValueNone } -> ValueNone
         | { Constraint = ValueSome constrain } ->
-            constrain
-            |> TypeRefRender.nonNullable
-            |> TypeRefRender.render
-            |> ValueSome
+            // TYPAR CONSTRAINTS ARE ADVISORY-DROPPED (ledgered). TS `extends`
+            // constraints are guidance the checker enforces STRUCTURALLY; the
+            // generator's erasure machinery (obj scrubs, proptypekey selections,
+            // opaque handles) legitimately produces arguments that cannot satisfy a
+            // NOMINAL F# `:>` constraint (`EventListenerObject<'E when 'E :> Event>`
+            // applied at proptypekey<'EventMap,'Type> — FS0001). Fable erases the
+            // types at runtime either way; compilability wins over the lost guidance.
+            ignore constrain
+            GeneratorContext.Advisory.increment ctx "typar-constraint-drop"
+            ValueNone
     
     // rendering as typar decl node
     let renderTypeParameter (ctx: GeneratorContext) (typeParameter: TypeParameterRender) =

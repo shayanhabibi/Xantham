@@ -1,4 +1,4 @@
-module Xantham.Generator.Generator.LibEsSubstitution
+﻿module Xantham.Generator.Generator.LibEsSubstitution
 
 // Faithful TS-stdlib (lib.es) -> F#/Fable name mappings. These names have no F#
 // definition in the emitted surface, so a by-name reference would dangle (FS0039).
@@ -32,6 +32,9 @@ let substitute (name: string) : string option =
     | "ReadonlyMap" | "WeakMap" | "WeakSet"
     | "PropertyKey" | "TemplateStringsArray"
     | "ArrayBufferView" | "ArrayLike" -> Some "obj"
+    // Fable.Core 5.0.0-beta.4 declares BigInt64Array but has NO BigUint64Array at all
+    // (only the DataView get/setBigUint64 methods) — erase the unrepresentable type.
+    | "BigUint64Array" -> Some "obj"
     | _ -> None
 
 // ── ResolvedTypePrelude interceptor ─────────────────────────────────────────────
@@ -77,28 +80,37 @@ let private genericCollectionTargets = set [ "ResizeArray"; "seq"; "System.Colle
 let private substituteLibEsGeneric (typeParameters: Lazy<TypeParameter> list) (libEsName: Name<Case.pascal>) (renderScope: RenderScope) : RenderScope =
     match substitute (Name.Case.valueOrSource libEsName) with
     | Some target ->
-        let headWidget = Ast.LongIdent target
+        // INTRINSIC head, not a Widget: widgets are OPAQUE to the anchor-stage scrubs
+        // (the pinned placement constraint) — an obj-target head baked as a widget hid
+        // `obj<args>` applications from collapseOpaquePrefixes (FS0033 "obj ... given 1").
+        // An Intrinsic renders identically (Ast.LongIdent of the raw text).
+        let headAtom =
+            RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic target
+            |> RenderScopeStore.TypeRef.Unsafe.createAtom
+            |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
         let ref =
             if genericCollectionTargets.Contains target && not (List.isEmpty typeParameters) then
                 // Build `target<'P1, 'P2, ...>` from the interface's own type params.
-                let head =
-                    RenderScopeStore.TypeRefAtom.Unsafe.createWidget headWidget
-                    |> RenderScopeStore.TypeRef.Unsafe.createAtom
-                    |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+                let head = headAtom
                 let argRefs =
                     typeParameters
                     |> List.map (fun tp ->
+                        // INTRINSIC, not Widget: a widget is OPAQUE to the anchor-stage
+                        // orphan-typar scrub (the pinned placement constraint), so a
+                        // placeholder typar baked as a widget LEAKS into scopes that do
+                        // not declare it (`ResizeArray<'T>` inside a non-generic home —
+                        // FS0039 "The type parameter 'T is not defined"). An Intrinsic
+                        // renders identically and stays scrubbable.
                         tp.Value.Name
                         |> Name.Case.valueOrModified
-                        |> Ast.LongIdent
-                        |> RenderScopeStore.TypeRefAtom.Unsafe.createWidget
+                        |> RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic
                         |> RenderScopeStore.TypeRef.Unsafe.createAtom
                         |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false)
                 RenderScopeStore.TypeRefMolecule.Unsafe.createPrefix head argRefs
                 |> RenderScopeStore.TypeRef.Unsafe.createMolecule
                 |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind renderScope.TypeRef.Nullable
             else
-                RenderScopeStore.TypeRefAtom.Unsafe.createWidget headWidget
+                RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic target
                 |> RenderScopeStore.TypeRef.Unsafe.createAtom
                 |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind renderScope.TypeRef.Nullable
         { renderScope with TypeRef = ref; Render = Render.RefOnly ref }

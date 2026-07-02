@@ -1,4 +1,4 @@
-module Xantham.Generator.Tests.Tests.TypeShapeRender
+﻿module Xantham.Generator.Tests.Tests.TypeShapeRender
 
 open Expecto
 open Xantham
@@ -75,15 +75,20 @@ let tests =
 
         // A type parameter carrying an `extends` constraint emits an F# `when 'T :> Base`
         // subtype constraint inside the postfix typar list.
-        testCase "generic interface with a constrained type parameter renders `when 'T :> Base`" <| fun _ ->
+        // POLICY (2026-07-04): typar constraints are ADVISORY-DROPPED, ledgered
+        // `typar-constraint-drop` — the erasure machinery (obj scrubs, proptypekey
+        // selections, opaque handles) legitimately produces arguments that cannot
+        // satisfy a NOMINAL `:>` constraint (measured: EventListenerObject applied at
+        // proptypekey<'EventMap,_>, FS0001). Fable erases types at runtime either way.
+        testCase "constrained type parameter DROPS the constraint (advisory-drop policy)" <| fun _ ->
             (Interface.create "Constrained"
              |> Interface.withTypeParameters [
                  TypeParameter.create "T"
                  |> TypeParameter.withConstraint (Interface.create "BaseA" |> Interface.wrap) ]
              |> Interface.wrap)
             |> render
-            |> Flip.Expect.equal "constrained-typar interface TypeDefn"
-                "type Constrained<'T when 'T :> BaseA> = interface end"
+            |> Flip.Expect.equal "constraint dropped from the decl"
+                "type Constrained<'T> = interface end"
 
         // An interface extending a GENERIC base (`extends BaseG<T>`) DOES emit an `inherit`
         // clause. The generic base resolves to a `Prefix` molecule, and `renderInheritance`'s
@@ -226,7 +231,7 @@ let tests =
                 (out.Contains("'Key"))
 
         // A TS `extends <interface>` constraint is VALID F# (`'T :> Event`) and must be KEPT.
-        testCase "type parameter constrained to an interface keeps the :> constraint" <| fun _ ->
+        testCase "interface-typed constraint is dropped too (advisory-drop policy)" <| fun _ ->
             let eventBase = Interface.create "Event" |> Interface.wrap
             let iface =
                 Interface.create "Listener"
@@ -237,7 +242,7 @@ let tests =
                 ({ iface with Members = [ Property.create "ev" (primitive TypeKindPrimitive.String) |> Property.wrap ] }
                  |> Interface.wrap)
                 |> render
-            Flip.Expect.isTrue "interface constraint must be kept as a valid `:> Event` subtype constraint"
+            Flip.Expect.isFalse "the `:> Event` constraint is advisory-dropped (ledgered)"
                 (out.Contains(":> Event"))
 
     ]
