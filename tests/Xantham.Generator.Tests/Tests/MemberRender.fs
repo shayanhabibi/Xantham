@@ -1,4 +1,4 @@
-module Xantham.Generator.Tests.Tests.MemberRender
+﻿module Xantham.Generator.Tests.Tests.MemberRender
 
 open Expecto
 open Xantham
@@ -347,5 +347,48 @@ let tests =
                 "type Probe ="
                 "    abstract b: string with get, set"
                 "    abstract a: string with get, set"
+            ])
+
+        // DUPLICATE-PROPERTY DEDUP (Member.partitionRender, ledgered): TS member merges
+        // (intersections, upstream twin declarations) can land same-named properties with
+        // DIFFERENT types in one interface — F# properties cannot overload (FS0438 duplicate
+        // get_/set_, FS3172 getter/setter type mismatch). First declaration in source order
+        // wins; the drop is counted in the advisory ledger.
+        testCase "duplicate property names dedup — first declaration wins" <| fun _ ->
+            ifaceWith [
+                Property.create "dup" (namedRef "Foo") |> Property.wrap
+                Property.create "dup" (namedRef "Bar") |> Property.wrap
+            ]
+            |> render
+            |> Flip.Expect.equal "duplicate property dedup" (lines [
+                "type Probe ="
+                "    abstract dup: Foo with get, set"
+            ])
+
+        // FUNCTION-PARAM PARENTHESIZATION (TypeRender.Render.fs `parenIfFunction`): a
+        // function-typed parameter's arrow chain must parenthesize, or the member's own
+        // signature reads as CURRIED — FS0440 when an optional parameter follows (the
+        // `every: predicate ... * ?thisArg` class, 46 sites at the first Zod assembly),
+        // FS0439 curried-vs-tupled Invoke overload clashes.
+        testCase "function-typed parameter is parenthesized (optional param follows)" <| fun _ ->
+            let callback =
+                TypeLiteral.empty
+                |> TypeLiteral.withMembers [
+                    CallSignature.create (namedRef "Out")
+                    |> CallSignature.withParameters [ Parameter.create "x" (namedRef "In") ]
+                    |> List.singleton
+                    |> CallSignature.wrap
+                ]
+                |> TypeLiteral.wrap
+            ifaceWith [
+                method' "every" false [
+                    Parameter.create "predicate" callback
+                    Parameter.create "thisArg" (namedRef "Foo") |> Parameter.optional
+                ] (namedRef "Bar")
+            ]
+            |> render
+            |> Flip.Expect.equal "parenthesized function param" (lines [
+                "type Probe ="
+                "    abstract every: predicate: (In -> Out) * ?thisArg: Foo -> Bar"
             ])
     ]

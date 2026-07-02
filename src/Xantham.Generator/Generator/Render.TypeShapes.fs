@@ -37,13 +37,10 @@ module Interface =
         let path = Interceptors.pipeInterface ctx shape |> Path.create
         let metadata = RenderMetadata.createWithPathFromExport path shape
         let members, functions =
+            // The ONE member partition (Member.partitionRender) — it owns the
+            // duplicate-property dedup; a mirrored inline fold here silently skips it.
             shape.Members
-            |> Seq.collect (Member.render ctx scopeStore)
-            |> Seq.fold (fun (members, functions) m ->
-                match m with
-                | MemberRender.Property typedNameRender -> typedNameRender :: members, functions
-                | MemberRender.Method functionLikeRender -> members, functionLikeRender :: functions
-                ) ([], [])
+            |> Member.partitionRender ctx scopeStore
         {
             Metadata = metadata
             TypeLikeRender.Name = shape.Name
@@ -71,13 +68,9 @@ module Class =
         let path = Interceptors.pipeClass ctx shape |> Path.create
         let metadata = RenderMetadata.createWithPathFromExport path shape
         let members, functions =
+            // Same single-seam rule as Interface.render above.
             shape.Members
-            |> Seq.collect (Member.render ctx scopeStore)
-            |> Seq.fold (fun (members, functions) m ->
-                match m with
-                | MemberRender.Property typedNameRender -> typedNameRender :: members, functions
-                | MemberRender.Method functionLikeRender -> members, functionLikeRender :: functions
-                ) ([], [])
+            |> Member.partitionRender ctx scopeStore
         {
             Metadata = metadata
             TypeLikeRender.Name = shape.Name

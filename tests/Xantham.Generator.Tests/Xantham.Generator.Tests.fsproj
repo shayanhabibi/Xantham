@@ -18,6 +18,7 @@
         <Compile Include="Tests\NamePath.fs" />
         <Compile Include="Tests\TypeRefRender.EncoderInvariant.fs" />
         <Compile Include="Tests\TypeRefRender.SubstituteForHeritage.fs" />
+        <Compile Include="Tests\TypeRefRender.HomeChildScrub.fs" />
         <Compile Include="Tests\RenderScopeAnchored.fs" />
         <Compile Include="Tests\AliasRemap.fs" />
         <Compile Include="Tests\Categorization.fs" />
