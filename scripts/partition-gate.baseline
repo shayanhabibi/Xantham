@@ -11,7 +11,20 @@
 #    deleting the sites; do not chase them at the render tier.
 #  - Downstream units are parse-clean; their full typecheck counts become exact once
 #    the Zod unit assembles (the gate marks them blocked until then).
-BL_FIDELITY_CLOUDEDGE_ZOD=2
+#
+# 2026-07-03: OPAQUE-HANDLE + PARSE-WALL REMOVAL. The zod policy landed (overlay handle
+# module replaces 332 machinery nodes; all 564 cross-unit zod refs collapsed onto
+# Zod.ZodType) and BOTH halves of the "Fantomas floor" resolved: the FS0010 doc-comment
+# cascade was OURS (unsanitized \r in upstream JSDoc — normalizeDocString fix,
+# TypeRender.Render.fs), and the layout-wrap half is avoided by wide-format emission.
+# The Zod unit now TYPECHECKS for the first time, surfacing the pool's true debt:
+# 17 unique sites, all in owned classes —
+#   6x FS0039 forward refs into later units (pool-placement debt: the type-granular
+#      placement item moves the pool out of this unit, dissolving these),
+#   6x FS0033 args classes (phantom-typar family, arity-gate-pinned, parked),
+#   3x FS0883 invalid name + 2x FS0953 cyclic abbrev (parked known roots).
+# Downstream stays parse-only until placement lands (Zod assembly still blocked by the 17).
+BL_FIDELITY_CLOUDEDGE_ZOD=17
 BL_FIDELITY_CLOUDEDGE_WORKERS=0
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0

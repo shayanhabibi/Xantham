@@ -57,6 +57,10 @@ type RecipeEntry = {
     Policy: DependencyPolicy option
     /// Publish-order edges: libs this entry's lib depends on.
     DependsOn: string list
+    /// Recipe-relative path of a hand-shaped overlay file that REPLACES this
+    /// entry's rendered unit at emission (the Farscape Overlay discipline:
+    /// developer-owned refinement, declared in the recipe, stable across regens).
+    Overlay: string option
 }
 
 /// A [dependencies."pkg"] rule for a reached package not bound as a library.

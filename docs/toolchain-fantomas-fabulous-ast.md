@@ -1,7 +1,11 @@
 # Toolchain: Fantomas / Fabulous.AST version constraints (breadcrumb)
 
-**Status:** known blocker. Do not re-investigate from scratch — the paths below were
-exhaustively verified (2026-06-30) and are dead ends.
+**Status:** known blocker for the LEGACY monolith path only; RESOLVED for partitioned emission. The upgrade paths below remain verified dead ends (2026-06-30) — and are now unnecessary.
+
+**CORRECTION (2026-07-03, byte-level diagnosis on the partitioned units):** the "residual ~34 error" class was TWO defects, and only one was Fantomas's.
+
+1. **The `<deprecated>`/`<br/>` doc-comment cascade was OURS, not Fantomas's.** Upstream JSDoc arrives with `\r\n`; `normalizeDocString` (TypeRender.Render.fs) split on `"\n"` alone, leaving a bare `\r` MID-LINE once `<br/>` was appended (`...keywords:\r<br/>`). The F# lexer treats the lone `\r` as a line terminator, so the remainder fell out of the `///` comment and parsed as code — FS0010 at an apparently-innocent doc line. That is why the class "did not isolate" (minimal repros typed by hand carried no `\r`) and why `<br/>` looked load-bearing (its removal moved the invisible `\r`). Fixed at the render tier (CR normalization in `normalizeDocString`); the class is gone on BOTH paths.
+2. **The multi-line generic layout bug (closing `>` outdented one column) IS Fantomas 7.0.1's** — but it only triggers when an annotation exceeds the line width. Partitioned emission avoids it entirely: `Gen.runWith { FormatConfig.Default with MaxLineLength = 100000 }` (Emission.fs) keeps long annotations on one line. The earlier "raising MaxLineLength is cosmetic" verdict was measured before the `\r` defect was separated — with `\r` fixed, the wide format eliminates the layout half too. The legacy monolith keeps the default width (gate stability) and retires with Phase 1.
 
 ## The pin
 

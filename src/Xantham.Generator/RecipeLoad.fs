@@ -52,6 +52,7 @@ let private decodeEntry (index: int) (table: TomlTable) : Result<RecipeEntry, st
     let crawl = tryGet table "crawl" |> Option.bind asBool |> Option.defaultValue true
     let lib = tryGet table "lib" |> Option.bind asString
     let dependsOn = tryGet table "depends-on" |> Option.bind asStringList |> Option.defaultValue []
+    let overlay = tryGet table "overlay" |> Option.bind asString
     let policy =
         match tryGet table "policy" |> Option.bind asString with
         | None -> Ok None
@@ -63,9 +64,9 @@ let private decodeEntry (index: int) (table: TomlTable) : Result<RecipeEntry, st
     | "ambient-root" ->
         match root with
         | None -> Error $"{at}: kind 'ambient-root' requires string field 'root'"
-        | Some _ -> Ok { Package = package; Kind = AmbientRoot; Root = root; Entries = []; Crawl = crawl; Lib = lib; Policy = policy; DependsOn = dependsOn }
+        | Some _ -> Ok { Package = package; Kind = AmbientRoot; Root = root; Entries = []; Crawl = crawl; Lib = lib; Policy = policy; DependsOn = dependsOn; Overlay = overlay }
     | "module" ->
-        Ok { Package = package; Kind = Module; Root = None; Entries = entries |> Option.defaultValue [ "." ]; Crawl = crawl; Lib = lib; Policy = policy; DependsOn = dependsOn }
+        Ok { Package = package; Kind = Module; Root = None; Entries = entries |> Option.defaultValue [ "." ]; Crawl = crawl; Lib = lib; Policy = policy; DependsOn = dependsOn; Overlay = overlay }
     | other -> Error $"{at}: unknown kind '{other}' (expected 'module' or 'ambient-root')"
 
 let private decodeDependencies (table: TomlTable) : Result<DependencyRule list, string list> =

@@ -56,6 +56,7 @@ let private entry package lib : RecipeEntry = {
     Lib = Some lib
     Policy = None
     DependsOn = []
+    Overlay = None
 }
 
 let private recipe : Recipe = {

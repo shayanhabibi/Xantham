@@ -76,7 +76,13 @@ module Documentation =
                 makeClosingTag tag
             ]
     let private normalizeDocString (docString: string) =
-        (docString.Split("\n"), [])
+        // Upstream JSDoc arrives with \r\n (occasionally bare \r) terminators.
+        // Splitting on "\n" alone left a trailing \r MID-LINE once <br/> was
+        // appended ("...keywords:\r<br/>"): the F# lexer treats the lone \r as a
+        // line break, so the remainder fell OUT of the /// comment and parsed as
+        // code — the FS0010 "doc-comment cascade" long misattributed to Fantomas 7
+        // (docs/toolchain-fantomas-fabulous-ast.md, corrected 2026-07-03).
+        (docString.Replace("\r\n", "\n").Replace("\r", "\n").Split("\n"), [])
         ||> Array.foldBack (fun line -> function
             | [] -> [ line ]
             | lines -> line + "<br/>" :: lines

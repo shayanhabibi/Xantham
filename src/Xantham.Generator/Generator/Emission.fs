@@ -30,6 +30,9 @@ type EmissionUnit = {
     TopModule: string
     /// Libs this unit's project references (all earlier units, conservative DAG).
     References: string list
+    /// Absolute path of a hand-shaped overlay that REPLACES this unit's rendered
+    /// slice (the recipe's `overlay` key — e.g. the zod opaque-handle module).
+    Overlay: string option
 }
 
 /// The npm-name -> top-level-module-name derivation, mirroring the path plane
@@ -46,7 +49,8 @@ let packageTopModule (package: string) : string =
 /// entry, in [[entry]] order; each unit references every earlier unit.
 /// Policy-holder entries (crawl = false, e.g. zod) ARE units: their content is
 /// reached transitively and renders under their top module regardless of seeding.
-let planUnits (recipe: Recipe) : EmissionUnit list =
+/// Overlay paths are recipe-relative and resolve against recipeDir.
+let planUnits (recipeDir: string) (recipe: Recipe) : EmissionUnit list =
     recipe.Entries
     |> List.choose (fun entry -> entry.Lib |> Option.map (fun lib -> entry, lib))
     |> List.fold (fun (planned: EmissionUnit list) (entry, lib) ->
@@ -55,6 +59,7 @@ let planUnits (recipe: Recipe) : EmissionUnit list =
             Package = entry.Package
             TopModule = packageTopModule entry.Package
             References = planned |> List.map _.Lib |> List.rev
+            Overlay = entry.Overlay |> Option.map (fun o -> System.IO.Path.Combine(recipeDir, o))
         } :: planned) []
     |> List.rev
 
@@ -105,14 +110,15 @@ let splitRoot (plan: EmissionUnit list) (root: RootModule) : SplitResult =
 /// namespace wrapper instead of an anonymous module — if a render arm is added
 /// there, add it here (single wrapper difference keeps both readable; unifying
 /// behind an inline builder abstraction traded worse than the mirror).
-let renderUnitFile (ctx: GeneratorContext) (emitErasedUnions: bool) (root: RootModule) =
+let renderUnitFile (ctx: GeneratorContext) (root: RootModule) =
     Ast.Oak() {
         (Ast.Namespace "Fidelity.CloudEdge") {
-            if emitErasedUnions then
-                // Erased-union arities beyond Fable.Core's U2..U9, first unit only:
-                // every later unit sees them through the namespace.
-                for i in erasedUnion.UnionLengths |> Seq.sort do
-                    SpecialRender.renderErasedUnion i
+            // Self-contained units: the opens the conformance harness used to
+            // prepend to the monolith are part of every unit file itself.
+            Ast.Open "System"
+            Ast.Open "Fable.Core"
+            Ast.Open "Fable.Core.JS"
+            Ast.Open "Fable.Core.JsInterop"
             for KeyValue(_, render) in root.Types do
                 match render with
                 | Anchored.TypeRender.TypeDefn typeLikeRender ->
@@ -145,9 +151,48 @@ let renderUnitFile (ctx: GeneratorContext) (emitErasedUnions: bool) (root: RootM
         |> _.toRecursive()
     }
 
+/// Erased-union arities beyond Fable.Core's U2..U9 as their OWN first-unit file.
+/// The arity set accumulates GLOBALLY while unit bodies render, so this must be
+/// produced AFTER every unit's pass-1 render (the monolith forced all renders
+/// before its definitions loop for the same reason); a separate compiled-first
+/// file keeps the ordering structural instead of textual.
+let renderErasedUnionsFile () =
+    Ast.Oak() {
+        (Ast.Namespace "Fidelity.CloudEdge") {
+            Ast.Open "Fable.Core"
+            for i in erasedUnion.UnionLengths |> Seq.sort do
+                SpecialRender.renderErasedUnion i
+        }
+    }
+
+/// Emission-only formatter config: a very wide line keeps long generic
+/// annotations on ONE line, never entering Fantomas 7.0.1's buggy multi-line
+/// generic wrapping (closing `>` outdented one column -> downstream FS0010
+/// parse cascade — the pinned toolchain floor, docs/toolchain-fantomas-
+/// fabulous-ast.md). Config-level avoidance, not a formatter patch; the legacy
+/// monolith keeps the default width so its gates stay byte-stable.
+let private wideFormat =
+    { Fantomas.Core.FormatConfig.Default with MaxLineLength = 100000 }
+
 /// The generated fsproj for one unit: net10.0 library, Fable.Core for the
-/// interop attributes, project references to every earlier unit.
-let unitFsproj (unit: EmissionUnit) : string =
+/// interop attributes, project references to every earlier unit. The FIRST unit
+/// (no references) also compiles the Xantham support library — an [<AutoOpen>]
+/// under Fable.Core.JsInterop that activates in later units through the
+/// assembly reference when that namespace is open.
+let unitFsproj (supportLibrary: string option) (unit: EmissionUnit) : string =
+    // Compile ORDER is load-bearing (F# single-pass): support library, then the
+    // erased-union definitions, then the unit body. Only the first unit carries
+    // the two preludes; later units see both through the assembly reference.
+    let compiles =
+        [
+            if unit.References.IsEmpty then
+                match supportLibrary with
+                | Some lib -> $"        <Compile Include=\"{lib}\"><Link>XanthamFableCoreLibrary.fs</Link></Compile>"
+                | None -> ()
+                "        <Compile Include=\"ErasedUnions.fs\" />"
+            $"        <Compile Include=\"{unit.Lib}.fs\" />"
+        ]
+        |> String.concat "\n"
     let references =
         unit.References
         |> List.map (fun lib -> $"        <ProjectReference Include=\"../{lib}/{lib}.fsproj\" />")
@@ -155,15 +200,14 @@ let unitFsproj (unit: EmissionUnit) : string =
     $"""<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
-        <!-- F#7 relaxed indentation: absorbs the FS0058 half of the pinned Fantomas 7.0.1
-             layout floor (docs/toolchain-fantomas-fabulous-ast.md); the residual FS0010
-             sites live only in the Zod unit and dissolve with the opaque-handle policy. -->
+        <!-- F#7 relaxed indentation absorbs the FS0058 half of the Fantomas 7.0.1 layout
+             floor; the wide-format emission avoids the FS0010 wrapping half entirely. -->
         <LangVersion>7.0</LangVersion>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     </PropertyGroup>
     <ItemGroup>
-        <Compile Include="{unit.Lib}.fs" />
+{compiles}
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Fable.Core" Version="4.5.0" />
@@ -174,19 +218,49 @@ let unitFsproj (unit: EmissionUnit) : string =
 
 /// Emit every unit of the plan into outDir/<Lib>/{<Lib>.fs, <Lib>.fsproj}.
 /// Returns (unit, file, generated-line-count) for the report.
-let emitUnits (ctx: GeneratorContext) (plan: EmissionUnit list) (root: RootModule) (outDir: string) =
+let emitUnits (ctx: GeneratorContext) (supportLibrary: string option) (plan: EmissionUnit list) (root: RootModule) (outDir: string) =
     let split = splitRoot plan root
     if not split.Pooled.IsEmpty then
         eprintfn $"""pooled into {plan.Head.Lib}: {split.Pooled |> String.concat ", "}"""
-    split.Units
-    |> List.mapi (fun i (unit, slice) ->
-        let source =
-            renderUnitFile ctx (i = 0) slice
-            |> Gen.mkOak
-            |> Gen.run
+    // Pass 1 — render EVERY unit body first: erased-union arities accumulate
+    // globally while bodies render, so the definitions file must come after.
+    let sources =
+        split.Units
+        |> List.map (fun (unit, slice) ->
+            let source =
+                match unit.Overlay with
+                | Some overlayPath ->
+                    // The overlay REPLACES the unit's OWN rendered module (the policy's
+                    // enforcement point: the machinery surface is not emitted; the
+                    // hand-shaped fragment is appended at namespace level). Pooled and
+                    // other slice modules still render — retained units inherit from
+                    // pooled types resident in this file (measured 2026-07-03).
+                    let dropped =
+                        match slice.Modules.TryGetValue unit.TopModule with
+                        | true, machinery ->
+                            slice.Modules.Remove unit.TopModule |> ignore
+                            machinery.Types.Count + machinery.Modules.Count
+                        | _ -> 0
+                    eprintfn $"overlay: {unit.Lib} <- {overlayPath} (module {unit.TopModule} not emitted: {dropped} rendered node(s) replaced by the hand-shaped fragment)"
+                    let rendered =
+                        renderUnitFile ctx slice
+                        |> Gen.mkOak
+                        |> Gen.runWith wideFormat
+                    rendered + "\n" + System.IO.File.ReadAllText overlayPath
+                | None ->
+                    renderUnitFile ctx slice
+                    |> Gen.mkOak
+                    |> Gen.runWith wideFormat
+            unit, source)
+    // Pass 2 — the complete arity set exists now.
+    let erasedUnions = renderErasedUnionsFile () |> Gen.mkOak |> Gen.runWith wideFormat
+    sources
+    |> List.mapi (fun i (unit, source) ->
         let dir = System.IO.Path.Combine(outDir, unit.Lib)
         System.IO.Directory.CreateDirectory dir |> ignore
+        if i = 0 then
+            System.IO.File.WriteAllText(System.IO.Path.Combine(dir, "ErasedUnions.fs"), erasedUnions)
         let file = System.IO.Path.Combine(dir, unit.Lib + ".fs")
         System.IO.File.WriteAllText(file, source)
-        System.IO.File.WriteAllText(System.IO.Path.Combine(dir, unit.Lib + ".fsproj"), unitFsproj unit)
+        System.IO.File.WriteAllText(System.IO.Path.Combine(dir, unit.Lib + ".fsproj"), unitFsproj supportLibrary unit)
         unit, file, (source |> Seq.filter ((=) '\n') |> Seq.length))

@@ -24,6 +24,7 @@ let private entry package lib dependsOn : RecipeEntry = {
     Lib = Some lib
     Policy = None
     DependsOn = dependsOn
+    Overlay = None
 }
 
 let private emptyModule name : Module = {
@@ -52,13 +53,13 @@ let unitTests =
                 Entries = [ entry "a" "Lib.A" []; { entry "b" "Lib.B" [] with Crawl = false }; entry "c" "Lib.C" [] ]
                 Dependencies = []
             }
-            let plan = planUnits recipe
+            let plan = planUnits "/repo" recipe
             Expect.equal (plan |> List.map _.Lib) [ "Lib.A"; "Lib.B"; "Lib.C" ] "order; crawl=false entries ARE units"
             Expect.equal plan[2].References [ "Lib.A"; "Lib.B" ] "each unit references all earlier"
             Expect.equal plan[0].References [] "first references nothing"
 
         testCase "splitRoot is total: matched modules to their units, rest pooled to FIRST" <| fun _ ->
-            let plan = planUnits { Entries = [ entry "zod" "Lib.Zod" []; entry "agents" "Lib.Agents" [] ]; Dependencies = [] }
+            let plan = planUnits "/repo" { Entries = [ entry "zod" "Lib.Zod" []; entry "agents" "Lib.Agents" [] ]; Dependencies = [] }
             let root = rootWith [ "Zod"; "Agents"; "SharedLiterals"; "Empty" ]
             let split = splitRoot plan root
             let sliceOf lib = split.Units |> List.find (fun (u, _) -> u.Lib = lib) |> snd
@@ -70,7 +71,7 @@ let unitTests =
             Expect.equal total root.Modules.Count "every module lands exactly once"
 
         testCase "root-level types and members pool to the first unit" <| fun _ ->
-            let plan = planUnits { Entries = [ entry "zod" "Lib.Zod" []; entry "agents" "Lib.Agents" [] ]; Dependencies = [] }
+            let plan = planUnits "/repo" { Entries = [ entry "zod" "Lib.Zod" []; entry "agents" "Lib.Agents" [] ]; Dependencies = [] }
             let root = rootWith []
             root.Types.Add("RootThing", Unchecked.defaultof<_>)
             let split = splitRoot plan root
@@ -88,7 +89,7 @@ let integrationTests =
                 match Generator.RecipeLoad.load (Path.Combine(repoRoot, "cloudflare.pilot.toml")) with
                 | Ok r -> r
                 | Error e -> failwith $"recipe: %A{e}"
-            let plan = planUnits recipe
+            let plan = planUnits repoRoot recipe
             Expect.hasLength plan 7 "seven units"
             Expect.equal plan.Head.Lib "Fidelity.CloudEdge.Zod" "Zod first (measured debt minimization)"
             Expect.equal (plan |> List.last).Lib "Fidelity.CloudEdge.Agents" "Agents last"

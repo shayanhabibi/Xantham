@@ -148,28 +148,28 @@ let private resolveIn (entries: RecipeEntry list) =
 let integrationTests =
     testList "Recipe.resolveEntryFiles (integration, repo node_modules)" [
         testCase "module '.' resolves through the exports map to the types file" <| fun _ ->
-            match resolveIn [ { Package = "agents"; Kind = Module; Root = None; Entries = [ "." ]; Crawl = true; Lib = None; Policy = None; DependsOn = [] } ] with
+            match resolveIn [ { Package = "agents"; Kind = Module; Root = None; Entries = [ "." ]; Crawl = true; Lib = None; Policy = None; DependsOn = []; Overlay = None } ] with
             | Ok [ r ] ->
                 "label" |> Expect.equal r.Label "agents:."
                 "types file" |> Expect.isTrue (r.File.EndsWith ".d.ts")
             | other -> failwith $"unexpected: %A{other}"
 
         testCase "module subpath './mcp' resolves distinctly from '.'" <| fun _ ->
-            match resolveIn [ { Package = "agents"; Kind = Module; Root = None; Entries = [ "."; "./mcp" ]; Crawl = true; Lib = None; Policy = None; DependsOn = [] } ] with
+            match resolveIn [ { Package = "agents"; Kind = Module; Root = None; Entries = [ "."; "./mcp" ]; Crawl = true; Lib = None; Policy = None; DependsOn = []; Overlay = None } ] with
             | Ok [ root; mcp ] ->
                 "distinct files" |> Expect.notEqual root.File mcp.File
                 "mcp label" |> Expect.equal mcp.Label "agents:./mcp"
             | other -> failwith $"unexpected: %A{other}"
 
         testCase "ambient-root resolves to an ABSOLUTE existing file" <| fun _ ->
-            match resolveIn [ { Package = "@cloudflare/workers-types"; Kind = AmbientRoot; Root = Some "latest/index.ts"; Entries = []; Crawl = true; Lib = None; Policy = None; DependsOn = [] } ] with
+            match resolveIn [ { Package = "@cloudflare/workers-types"; Kind = AmbientRoot; Root = Some "latest/index.ts"; Entries = []; Crawl = true; Lib = None; Policy = None; DependsOn = []; Overlay = None } ] with
             | Ok [ r ] ->
                 "absolute" |> Expect.isTrue (path.isAbsolute r.File)
                 "exists" |> Expect.isTrue (fs.existsSync !^r.File)
             | other -> failwith $"unexpected: %A{other}"
 
         testCase "crawl=false entries resolve to NOTHING (policy-holders)" <| fun _ ->
-            match resolveIn [ { Package = "zod"; Kind = Module; Root = None; Entries = [ "." ]; Crawl = false; Lib = None; Policy = None; DependsOn = [] } ] with
+            match resolveIn [ { Package = "zod"; Kind = Module; Root = None; Entries = [ "." ]; Crawl = false; Lib = None; Policy = None; DependsOn = []; Overlay = None } ] with
             | Ok [] -> ()
             | other -> failwith $"unexpected: %A{other}"
 
@@ -177,12 +177,12 @@ let integrationTests =
             // The exports map declares "." -> dist/esm/index.d.ts; the package does not
             // ship it (verified 2026-07-02). The recipe must use subpath entries. If this
             // test ever FAILS, upstream fixed their root — the recipe can then simplify.
-            match resolveIn [ { Package = "@modelcontextprotocol/sdk"; Kind = Module; Root = None; Entries = [ "." ]; Crawl = true; Lib = None; Policy = None; DependsOn = [] } ] with
+            match resolveIn [ { Package = "@modelcontextprotocol/sdk"; Kind = Module; Root = None; Entries = [ "." ]; Crawl = true; Lib = None; Policy = None; DependsOn = []; Overlay = None } ] with
             | Error [ e ] -> "resolution failure names the entry" |> Expect.isTrue (e.Contains "@modelcontextprotocol/sdk:.")
             | other -> failwith $"unexpected (did upstream ship a root barrel?): %A{other}"
 
         testCase "MCP SDK '.js' touchpoint subpaths resolve to their .d.ts twins" <| fun _ ->
-            match resolveIn [ { Package = "@modelcontextprotocol/sdk"; Kind = Module; Root = None; Entries = [ "./types.js"; "./server/mcp.js" ]; Crawl = true; Lib = None; Policy = None; DependsOn = [] } ] with
+            match resolveIn [ { Package = "@modelcontextprotocol/sdk"; Kind = Module; Root = None; Entries = [ "./types.js"; "./server/mcp.js" ]; Crawl = true; Lib = None; Policy = None; DependsOn = []; Overlay = None } ] with
             | Ok [ types; mcp ] ->
                 "types twin" |> Expect.isTrue (types.File.EndsWith "types.d.ts")
                 "mcp twin" |> Expect.isTrue (mcp.File.EndsWith "mcp.d.ts")
@@ -200,7 +200,7 @@ let integrationTests =
             "dependencies present" |> Expect.isTrue (recipe.Dependencies.Length >= 5)
 
         testCase "errors accumulate across ALL failing resolutions" <| fun _ ->
-            let missing sub = { Package = "agents"; Kind = Module; Root = None; Entries = [ sub ]; Crawl = true; Lib = None; Policy = None; DependsOn = [] }
+            let missing sub = { Package = "agents"; Kind = Module; Root = None; Entries = [ sub ]; Crawl = true; Lib = None; Policy = None; DependsOn = []; Overlay = None }
             match resolveIn [ missing "./no-such-entry-a"; missing "./no-such-entry-b" ] with
             | Error errors -> "both reported" |> Expect.hasLength errors 2
             | other -> failwith $"unexpected: %A{other}"

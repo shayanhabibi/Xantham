@@ -59,6 +59,7 @@ let private decodeEntry (index: int) (o: obj) : Result<RecipeEntry, string> =
     let crawl = o?crawl |> asBool |> Option.defaultValue true
     let lib = o?lib |> asString
     let dependsOn = o.["depends-on"] |> asStringList |> Option.defaultValue []
+    let overlay = o?overlay |> asString
     let policy =
         match o?policy |> asString with
         | None -> Ok None
@@ -70,9 +71,9 @@ let private decodeEntry (index: int) (o: obj) : Result<RecipeEntry, string> =
     | "ambient-root" ->
         match root with
         | None -> Error $"{at}: kind 'ambient-root' requires string field 'root'"
-        | Some _ -> Ok { Package = package; Kind = AmbientRoot; Root = root; Entries = []; Crawl = crawl; Lib = lib; Policy = policy; DependsOn = dependsOn }
+        | Some _ -> Ok { Package = package; Kind = AmbientRoot; Root = root; Entries = []; Crawl = crawl; Lib = lib; Policy = policy; DependsOn = dependsOn; Overlay = overlay }
     | "module" ->
-        Ok { Package = package; Kind = Module; Root = None; Entries = entries |> Option.defaultValue [ "." ]; Crawl = crawl; Lib = lib; Policy = policy; DependsOn = dependsOn }
+        Ok { Package = package; Kind = Module; Root = None; Entries = entries |> Option.defaultValue [ "." ]; Crawl = crawl; Lib = lib; Policy = policy; DependsOn = dependsOn; Overlay = overlay }
     | other -> Error $"{at}: unknown kind '{other}' (expected 'module' or 'ambient-root')"
 
 let private decodeDependencies (table: obj) : Result<DependencyRule list, string list> =

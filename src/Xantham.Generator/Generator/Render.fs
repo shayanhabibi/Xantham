@@ -19,9 +19,20 @@ let main argv =
     // until the per-unit gates replace them — docs/PLAN.md Phase 1).
     let emission =
         match argv |> Array.toList with
-        | [ "--recipe"; recipePath; "--out-dir"; outDir ] -> Some(recipePath, outDir)
+        | [ "--recipe"; recipePath; "--out-dir"; outDir ] ->
+            match RecipeLoad.load recipePath with
+            | Error errors ->
+                errors |> List.iter (eprintfn "recipe error: %s")
+                failwithf "recipe %s did not load (%d error(s))" recipePath errors.Length
+            | Ok recipe -> Some(recipePath, outDir, recipe)
         | [] -> None
         | other -> failwithf "unrecognized arguments %A (expected: --recipe <path> --out-dir <dir> | no args)" other
+    // Opaque-handle path rewrites are EMISSION-ONLY: without a recipe the list is
+    // empty and the legacy monolith (and every gate that reads it) is untouched.
+    let opaqueHandles =
+        emission
+        |> Option.map (fun (_, _, recipe) -> OpaqueHandleSubstitution.handlesOf recipe)
+        |> Option.defaultValue []
     let file = IO.Path.Join(__SOURCE_DIRECTORY__, "../../Xantham.Fable/output.json")
     let tree = Decoder.Runtime.create file
     let interner = tree.GetArenaInterner()
@@ -49,6 +60,7 @@ let main argv =
                  // unconditionally so the reference resolves to the emitted type.
                  Customisation.Interceptors.Paths.TypePaths = fun ctx typ s ->
                      TypePath.pruneParent (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") s
+                     |> OpaqueHandleSubstitution.rewriteTypePath opaqueHandles
                  Customisation.Interceptors.Paths.MemberPaths = fun ctx typ s ->
                      MemberPath.pruneParent (_.Name >> Name.Case.valueOrModified >> (=) "Typescript") s
                      
@@ -62,16 +74,13 @@ let main argv =
     ArenaInterner.processExports generatorContext interner
     let rootModule = RootModule.collectModules generatorContext
     match emission with
-    | Some(recipePath, outDir) ->
-        match RecipeLoad.load recipePath with
-        | Error errors ->
-            errors |> List.iter (eprintfn "recipe error: %s")
-            failwithf "recipe %s did not load (%d error(s))" recipePath errors.Length
-        | Ok recipe ->
-            let emitted = Emission.emitUnits generatorContext (Emission.planUnits recipe) rootModule outDir
-            for unit, file, lines in emitted do
-                printfn $"unit: {unit.Lib} -> {file} ({lines} lines)"
-            0
+    | Some(recipePath, outDir, recipe) ->
+        let recipeDir = IO.Path.GetDirectoryName(IO.Path.GetFullPath recipePath)
+        let supportLibrary = IO.Path.GetFullPath(IO.Path.Join(__SOURCE_DIRECTORY__, "../../Xantham.Fable.Core/Library.fs"))
+        let emitted = Emission.emitUnits generatorContext (Some supportLibrary) (Emission.planUnits recipeDir recipe) rootModule outDir
+        for unit, file, lines in emitted do
+            printfn $"unit: {unit.Lib} -> {file} ({lines} lines)"
+        0
     | None ->
     let renders =
         rootModule
