@@ -676,7 +676,19 @@ and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: R
     anchors
 
 let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport): unit =
-    let scope = RenderScopeStore.create()
+    // MEMOIZED per export (ctx.ExportScopeStores): nested children register into this
+    // store only when their refs mint FRESH; a re-anchor pass with a fresh store would
+    // cache-hit those renders, under-register, and silently shrink the child set (the
+    // measured residue: refs living inside pass-1-preserved children never re-anchored
+    // under the armed scrubs). Reusing the store lets the second pass re-anchor the
+    // FULL child set scrub-armed.
+    let scope =
+        match ctx.ExportScopeStores.TryGetValue export with
+        | true, existing -> existing
+        | _ ->
+            let fresh = RenderScopeStore.create()
+            ctx.ExportScopeStores[export] <- fresh
+            fresh
     // COUNTING PRE-PASS ONLY: attribute every union-wrapped hoistable object-literal reachable from
     // THIS top-level export to it as a referencing owner (a STRUCTURAL ResolvedType walk that, unlike
     // prerender, is not defeated by the interned/cached union subtree shared across owners). A

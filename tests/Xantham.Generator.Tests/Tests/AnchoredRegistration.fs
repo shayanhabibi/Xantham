@@ -171,3 +171,29 @@ let aliasBodyVerdictTests =
             let verdict, _ = verdictFor "Twin" Set.empty (pathAtom [ "Other" ] "Twin")
             Expect.isSome verdict "path comparison is full-chain, not name-based"
     ]
+
+// ---------------------------------------------------------------------------
+// Per-export scope-store memoization
+// ---------------------------------------------------------------------------
+
+[<Tests>]
+let exportScopeStoreMemoizationTests =
+    testList "registerAnchorFromExport (memoized per-export scope stores)" [
+
+        // Nested children register into the export's RenderScopeStore only when their
+        // refs mint FRESH — a re-anchor pass (the scrub-armed second export pass) that
+        // rebuilt stores from scratch would cache-hit those renders and under-register,
+        // silently shrinking the child set (measured: the Get/Fetch/Service residue —
+        // refs living inside pass-1-preserved children, never re-anchored under the
+        // armed scrubs). Contract: the SAME store instance serves every pass.
+        testCase "the second pass reuses the first pass's store instance" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let export = Interface.create "Exported" |> ResolvedExport.Interface
+            RenderScope_Anchored.registerAnchorFromExport ctx export
+            let firstStore = ctx.ExportScopeStores[export]
+            RenderScope_Anchored.registerAnchorFromExport ctx export
+            Expect.equal ctx.ExportScopeStores.Count 1 "one store per export"
+            Expect.isTrue
+                (obj.ReferenceEquals(ctx.ExportScopeStores[export], firstStore))
+                "the memoized store instance is reused across passes"
+    ]

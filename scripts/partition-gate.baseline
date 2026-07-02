@@ -212,7 +212,29 @@ BL_FIDELITY_CLOUDEDGE_ZOD=0
 # LoopbackForExport arity-0 refs to the degraded arity-1 interface), FS0033 x32 (Fable
 # lib arities: AsyncIterable given 3, BigInt64Array given 1; workers streams self-arity),
 # FS0001 x4, FS1212 x2, FS0701 x2.
-BL_FIDELITY_CLOUDEDGE_WORKERS=44
+# 2026-07-04 (4): 44 -> 8. Three fixes:
+#  - FABLE ARITY TABLE (verified against the Fable.Core 5.0.0-beta.4 DLL): AsyncIterable
+#    joins singleParamIterators (3-param TS -> 1-param Fable); BigInt64Array joins
+#    nonGenericTypedArrays (the old bare-name-invalid exclusion described the 4.x
+#    surface); BigUint64Array stays excluded — 5.0.0-beta.4 has NO such type at all
+#    (substitution gap, 1 residual site).
+#  - BARE-GENERIC DEFAULT SYNTHESIS extended to the `ResolvedType = Some` lazy side
+#    (previously fell to the render-inner-alone arm, emitting bare `WritableStream`
+#    against `type WritableStream<'W>`), and CONSTRUCTOR RETURNS self-apply the type's
+#    own typars (`abstract Create: ... -> WritableStream<'W>`, was bare).
+#  - MEMOIZED PER-EXPORT SCOPE STORES (ctx.ExportScopeStores): nested children register
+#    only on FRESH mints, so the scrub-armed second export pass with fresh stores
+#    cache-hit and under-registered — its replacements shrank child sets, and the
+#    child-preserving merge then kept pass-1 children whose refs were anchored
+#    UNSCRUBBED (the Get/Fetch/Service/LoopbackForExport residue: refs inside preserved
+#    pass-1 children). Reusing the pass-1 store re-anchors the FULL child set with the
+#    scrubs armed; the union-merge remains as belt-and-suspenders.
+# Remaining 8 = heterogeneous singletons (the long tail, each its own micro-class):
+# FS0673 support-file-head instance member; FS0039 leaked 'T @12091; FS0701 indexer
+# shape @12887; FS0001 x2 proptypekey<'EventMap,_>-vs-Event (EventTarget handler
+# shapes); FS0033 SqlStorageCursor arity straggler; FS0039 `Cloudflare` namespace
+# collision @2979; FS0039 BigUint64Array (no Fable.Core 5 type; needs a substitution).
+BL_FIDELITY_CLOUDEDGE_WORKERS=8
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0
 BL_FIDELITY_CLOUDEDGE_MCP=0

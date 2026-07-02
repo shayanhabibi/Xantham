@@ -159,6 +159,13 @@ and GeneratorContext =
         /// the one-slot rt-keyed store) — the scrub degrades it to `obj`, ledgered.
         SyntheticHomePaths: HashSet<string>
         SyntheticHomeChildDefs: HashSet<string>
+        /// Per-export RenderScopeStore, MEMOIZED across export passes: nested children
+        /// register into this store only when their refs mint FRESH — a re-anchor pass
+        /// (the scrub-armed second export pass) that rebuilt stores from scratch would
+        /// cache-hit those renders and under-register, silently shrinking the child
+        /// set. Reusing the pass-1 store lets pass 2 re-anchor the FULL child set with
+        /// the scrubs armed.
+        ExportScopeStores: Dictionary<ResolvedExport, RenderScopeStore>
         Customisation: Customisation
 
     }
@@ -178,6 +185,7 @@ and GeneratorContext =
         AdvisoryLedger = DictionaryImpl()
         SyntheticHomePaths = HashSet()
         SyntheticHomeChildDefs = HashSet()
+        ExportScopeStores = Dictionary()
         TypeAliasRemap = DictionaryImpl()
         TypeAliasArity = DictionaryImpl()
         HoistedHomeTypars = DictionaryImpl()

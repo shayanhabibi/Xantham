@@ -232,6 +232,12 @@ let private nonGenericTypedArrays =
         "Int32Array"; "Uint32Array"
         "Float32Array"; "Float64Array"
         "ArrayBufferView"
+        // Fable.Core 5.0.0-beta.4 (the pinned unit dependency) DOES declare a
+        // non-generic `BigInt64Array` — the old exclusion note (bare name invalid,
+        // dangles FS0039) described the 4.x surface and is stale. `BigUint64Array`
+        // remains excluded: 5.0.0-beta.4 still has no such type (only the DataView
+        // get/setBigUint64 methods), so stripping its arg WOULD dangle the name.
+        "BigInt64Array"
     ]
 
 // The iterator interfaces are 3-parameter in recent TS (`Iterator<T, TReturn, TNext>`,
@@ -241,7 +247,9 @@ let private nonGenericTypedArrays =
 // arg-alignment keeps only the first (element) arg and truncates `TReturn`/`TNext`. (`ArrayIterator`
 // is already 1-parameter in the IR, so it needs no override.)
 let private singleParamIterators =
-    set [ "Iterator"; "Iterable"; "IterableIterator"; "AsyncIterableIterator" ]
+    // `AsyncIterable` itself is also 3-param in recent TS but single-param in
+    // Fable.Core.JS (`AsyncIterable<'T>` — verified against 5.0.0-beta.4).
+    set [ "Iterator"; "Iterable"; "IterableIterator"; "AsyncIterable"; "AsyncIterableIterator" ]
 
 /// The Fable-side declared arity for a named type whose Fable equivalent's arity differs from its TS
 /// declaration: 0 for the numeric typed arrays / ArrayBufferView (non-generic in Fable), 1 for the
@@ -702,18 +710,23 @@ let rec prerender (ctx: GeneratorContext) (scope: RenderScopeStore) (lazyResolve
         |> RenderScope.createRootless resolvedType
         |> addOrReplaceScope ctx resolvedType
     | ResolvedType.TypeReference { Type = innerResolvedType; TypeArguments = []; ResolvedType = None }
+    | ResolvedType.TypeReference { ResolvedType = Some innerResolvedType; TypeArguments = [] }
         when (let typeParams =
                 match innerResolvedType.Value with
                 | ResolvedType.Interface i -> i.TypeParameters
                 | ResolvedType.Class c -> c.TypeParameters
                 | _ -> []
-              // A BARE reference (no args) to a GENERIC Interface/Class. TypeScript permits this
-              // when EVERY type parameter has a DEFAULT (`EventTarget<EventMap = Record<...>>` then
-              // `extends EventTarget`). F# has NO default type parameters, so the bare reference
-              // emits `inherit EventTarget` against `type EventTarget<'EventMap>` -> FS0033 "expects
-              // 1 type argument(s) but is given 0". Fire ONLY when the head is generic AND a Fable
-              // arity override doesn't make it non-generic (typed arrays stay bare via the no-args
-              // arm below). Synthesize the defaults below.
+              // A BARE reference (no args) to a GENERIC Interface/Class — through EITHER
+              // lazy side (the `ResolvedType = Some` side previously fell to the
+              // render-inner-alone arm below, emitting bare `WritableStream` against
+              // `type WritableStream<'W>` — the workers-streams FS0033 class).
+              // TypeScript permits bare refs when EVERY type parameter has a DEFAULT
+              // (`EventTarget<EventMap = Record<...>>` then `extends EventTarget`). F#
+              // has NO default type parameters, so the bare reference emits
+              // `inherit EventTarget` against `type EventTarget<'EventMap>` -> FS0033
+              // "expects 1 type argument(s) but is given 0". Fire ONLY when the head is
+              // generic AND a Fable arity override doesn't make it non-generic (typed
+              // arrays stay bare via the no-args arm below). Synthesize the defaults below.
               not (List.isEmpty typeParams)
               && (match innerResolvedType.Value with
                   | ResolvedType.Interface i -> fableDeclaredArity (Name.Case.valueOrSource i.Name) |> Option.isNone

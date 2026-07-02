@@ -548,8 +548,21 @@ module FunctionLikeRender =
         renderMember ctx functionLike
 
 module TypeLikeRender =
+    // A constructor's RETURN is the constructed type — including its OWN type
+    // parameters (`abstract Create: ... -> WritableStream` inside
+    // `type WritableStream<'W>` is FS0033 "expects 1 given 0"; the return must be
+    // `WritableStream<'W>`). Shared by the abstract and member constructor renderers.
+    let private selfReturnType (typeLike: TypeLikeRender) =
+        let bare = Name.Case.valueOrModified typeLike.Name |> Ast.LongIdent
+        match typeLike.TypeParameters with
+        | [] -> bare
+        | typars ->
+            typars
+            |> List.map (fun tp -> Name.Case.valueOrModified tp.Name |> Ast.LongIdent)
+            |> fun args -> Ast.AppPrefix(bare, args)
+
     let renderAbstractConstructors (ctx: GeneratorContext) (typeLike: TypeLikeRender) =
-        let returnType = Name.Case.valueOrModified typeLike.Name |> Ast.LongIdent
+        let returnType = selfReturnType typeLike
         typeLike.Constructors
         |> List.map (fun parameters ->
             let parameters =
@@ -565,7 +578,7 @@ module TypeLikeRender =
             })
             )
     let renderMemberConstructors (ctx: GeneratorContext) (typeLike: TypeLikeRender) =
-        let returnType = Name.Case.valueOrModified typeLike.Name |> Ast.LongIdent
+        let returnType = selfReturnType typeLike
         typeLike.Constructors
         |> List.map (fun parameters ->
             let parameters =
