@@ -185,9 +185,30 @@ module LiteralUnionRender =
         }
         |> Documentation.renderForEnum enumType
     let renderUnion (ctx: GeneratorContext) (unionType: LiteralUnionRender<TsLiteral, _>) =
+        // Case-INSENSITIVE literal twins ("Low"/"low") collide on the SAME F# case
+        // name after PascalCasing (FS0037) — the CompiledName attribute keeps them
+        // distinct at runtime but not in the case list. Disambiguate the F# name
+        // with a numeric suffix, wire order preserved by the deterministic case order.
+        let usedCaseNames = System.Collections.Generic.HashSet<string>()
         Ast.Union(Name.Case.valueOrModified unionType.Name) {
             for case in unionType.Cases do
-                LiteralCaseRender.renderUnionCase ctx case
+                let baseName = Name.Case.valueOrModified case.Name
+                let name =
+                    if usedCaseNames.Add baseName then baseName
+                    else
+                        let mutable n = 2
+                        while not (usedCaseNames.Add $"{baseName}{n}") do n <- n + 1
+                        $"{baseName}{n}"
+                if name = baseName then
+                    LiteralCaseRender.renderUnionCase ctx case
+                else
+                    // The suffixed case MUST carry the original literal as CompiledName.
+                    let value =
+                        match case.Value with
+                        | TsLiteral.String v -> v
+                        | other -> string other
+                    Ast.UnionCase name
+                    |> Attributes.renderAttributesForUnionCase (attributes { Some(Attributes.compiledName value) })
         }
         |> Attributes.renderAttributesForTypeDefn (attributes {
             stringEnum

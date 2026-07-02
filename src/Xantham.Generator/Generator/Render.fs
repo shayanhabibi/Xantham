@@ -83,7 +83,12 @@ let main argv =
          })
     // Same mutable caches, publish order attached: shared synthetic homes mint under
     // their earliest owner unit (see SyntheticPlacementOrder).
-    let generatorContext = { generatorContext with SyntheticPlacementOrder = placementOrder; ErasedRoots = erasedTops }
+    // Opaque-handle tops join ErasedRoots for HOME PLACEMENT: a shared literal owned
+    // ONLY by opaque-package contexts is that package's internals — its home mints
+    // under the package top, where the overlay drop + handle rewrite collapse it
+    // onto the handle (the same machinery as erased-owned literals).
+    let syntheticErasedRoots = erasedTops @ (opaqueHandles |> List.map fst)
+    let generatorContext = { generatorContext with SyntheticPlacementOrder = placementOrder; ErasedRoots = syntheticErasedRoots }
     // Phase 1: count shared object-literals (those reached through >1 owner) on a throwaway
     // context and assign each a canonical SharedLiterals home, so the real prerender below roots
     // them there (every reference resolves to one absolute path; the single def is emitted once).

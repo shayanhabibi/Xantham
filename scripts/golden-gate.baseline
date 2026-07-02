@@ -82,7 +82,9 @@
 # 2026-07-03 (4): canonical-driver FIXPOINT materializes formerly-dangling defs
 # (they now EXIST and therefore count): callbacks 71 -> 72, synth-public 1097 -> 1099.
 # Invalid->valid surfacing by exactly the materialized handful.
-BL_CALLBACK_IFACE=72
+# 2026-07-04: opaque-owned literal collapse redistributes one callback literal onto the
+# counted surface (72 -> 73) — same materialization class as the fixpoint note above.
+BL_CALLBACK_IFACE=73
 BL_PROTOTYPE=4
 BL_LIT_NUMBERED=0
 BL_SMASH=55

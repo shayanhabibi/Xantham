@@ -59,7 +59,16 @@
 #      like InputOutput2.Input + ProgressToken/Tools), 10x FS0033 args, 9x FS0037
 #      duplicate defs at the unit head, 1x FS0883. This is the parked COORDINATED
 #      phantom-typar fix's territory — next interlude, fresh context, repro-first.
-BL_FIDELITY_CLOUDEDGE_ZOD=42
+# 2026-07-04: budget-focused burn 42 -> 28. Cleared: 9x FS0037 (case-INSENSITIVE literal
+# twins "Low"/"low" collide on one F# case name — renderUnion disambiguates with numeric
+# suffix, CompiledName preserved); Input/Output leakage (opaque-handle tops join the
+# synthetic-erasure roots: zod-owned shared literals are zod INTERNALS — homes mint under
+# the package top where the overlay drop + handle rewrite collapse them onto ZodType).
+# Remaining 28 in TWO families: 17x FS0039 nested-child materialization gap of forced
+# defs (localised refs to never-materialized depth-2 children: ProgressToken/Default/
+# Const/Tools/Resources/ReplyTo), 10x FS0033 args (the coordinated phantom-typar fix),
+# 1x FS0883. One focused interlude estimated to Zod assembly.
+BL_FIDELITY_CLOUDEDGE_ZOD=28
 BL_FIDELITY_CLOUDEDGE_WORKERS=0
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0
