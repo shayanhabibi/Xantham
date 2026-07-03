@@ -1234,7 +1234,22 @@ module ArenaInterner =
                     RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic Intrinsic.obj
                     |> RenderScopeStore.TypeRef.Unsafe.createAtom
                     |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
-                let bodyRef = if isIdentityAlias then objRef else aliasRef
+                // A STDLIB ALIAS whose name has a Fable substitution (`PropertyKey` ->
+                // obj, ...) remaps to the SUBSTITUTED intrinsic, not its nominal path:
+                // the name-keyed LibEs prelude interceptor sees only Interface/Class/
+                // Enum nodes, so an alias's nominal remap would emit a bare stdlib name
+                // with no definition anywhere (the CodeMode PropertyKey FS0039 class).
+                let libEsTarget =
+                    if value.IsLibEs || LibEsSubstitution.isStdlibSourced value.Source then
+                        LibEsSubstitution.substitute (Name.Case.valueOrSource value.Name)
+                    else None
+                let bodyRef =
+                    match libEsTarget with
+                    | Some target ->
+                        RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic target
+                        |> RenderScopeStore.TypeRef.Unsafe.createAtom
+                        |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
+                    | None -> if isIdentityAlias then objRef else aliasRef
                 // (1) Remap the alias BODY instance (`value.Type.Value`) — this is the instance
                 //     produced when the body's structural type is rendered directly.
                 GeneratorContext.Prelude.addTypeAliasRemap ctx value.Type.Value bodyRef
@@ -1311,6 +1326,16 @@ module ArenaInterner =
                     let exportKeyType = arena.ResolveType exportKey
                     if not (isShareableAliasBody exportKeyType) then
                         recordArity exportKeyType
+                // NON-GENERIC alias (0 declared typars): record an EXPLICIT arity 0 keyed
+                // ONLY by the export-key rt — unique per export, so no shared-BODY
+                // write-once conflicts (recording 0 against a body instance shared with a
+                // generic twin would mis-truncate the twin's refs) — letting the aligners
+                // TRUNCATE spurious IR args riding a non-generic alias reference
+                // (`RequestId = ProgressToken<Zod.ZodType>` against arity-0 ProgressToken).
+                | ResolvedExport.TypeAlias value when value.TypeParameters.IsEmpty ->
+                    let exportKeyType = arena.ResolveType exportKey
+                    if not (isShareableAliasBody exportKeyType) then
+                        GeneratorContext.Prelude.addTypeAliasArityOnce ctx exportKeyType 0 (Name.Case.valueOrSource value.Name)
                 | _ -> ())
     let private getTopologicalSort (_: ArenaInterner) (graph: Graph) =
         let degrees = ConcurrentDictionary graph.Degrees

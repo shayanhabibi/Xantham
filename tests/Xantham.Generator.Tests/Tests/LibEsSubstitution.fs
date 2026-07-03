@@ -30,6 +30,11 @@ let private mappings = [
     "ReadonlyMap",          Some "obj"
     "PropertyKey",          Some "obj"
     "TemplateStringsArray", Some "obj"
+    // lib.decorators.d.ts context types (TC39 decorators metadata) — no Fable
+    // equivalent; opaque JS interop (agents' unstable_callable).
+    "ClassMethodDecoratorContext",   Some "obj"
+    "ClassDecoratorContext",         Some "obj"
+    "ClassAccessorDecoratorContext", Some "obj"
 ]
 
 // Names that are the surface's OWN types (or otherwise not stdlib) — must NOT be rewritten,

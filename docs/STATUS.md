@@ -72,11 +72,11 @@ State source: the committed per-unit own-file error baselines in `scripts/partit
 | Fidelity.CloudEdge.Workers | 0 | **COMPILES + ASSEMBLY** |
 | Fidelity.CloudEdge.PartySocket | 0 | **COMPILES + ASSEMBLY** |
 | Fidelity.CloudEdge.PartyServer | 0 | **COMPILES + ASSEMBLY** |
-| Fidelity.CloudEdge.Mcp | 2 | **burn-down target (first real count)** |
-| Fidelity.CloudEdge.CodeMode | 0 | parse-stage placeholder (blocked by Fidelity.CloudEdge.Mcp) |
-| Fidelity.CloudEdge.Agents | 0 | parse-stage placeholder (blocked by Fidelity.CloudEdge.Mcp) |
+| Fidelity.CloudEdge.Mcp | 0 | **COMPILES + ASSEMBLY** |
+| Fidelity.CloudEdge.CodeMode | 0 | **COMPILES + ASSEMBLY** |
+| Fidelity.CloudEdge.Agents | 2 | **burn-down target (first real count)** |
 
-**Phase-1 exit progress: 4/7 units at true 0.** Current wall: Fidelity.CloudEdge.Mcp.
+**Phase-1 exit progress: 6/7 units at true 0.** Current wall: Fidelity.CloudEdge.Agents.
 
 Whole-surface signals over the SAME units: `ir-sentinel.sh` (IR identity), `arity-gate.sh` (decl/ref arity), `golden-gate.sh` (semantic budgets + determinism); deliberate degradations are counted per class in the emitted `advisory-ledger.txt`. The monolith and its Fable-transpile conformance gate retired 2026-07-03; Fable conformance returns as consumption (HelloWorker, Phase 2).
 
@@ -98,7 +98,7 @@ Whole-surface signals over the SAME units: `ir-sentinel.sh` (IR identity), `arit
 | Xantham.Generator.Tests | Categorization.fs | 40 |
 | Xantham.Generator.Tests | TypeRefRender.fs | 38 |
 | Xantham.Generator.Tests | AliasRemapAndPaths.fs | 37 |
-| Xantham.Generator.Tests | MemberRender.fs | 32 |
+| Xantham.Generator.Tests | MemberRender.fs | 33 |
 | Xantham.Generator.Tests | PrerenderTypeMapping.fs | 27 |
 | Xantham.Generator.Tests | PathModel.fs | 26 |
 | Xantham.Generator.Tests | AnchoringInvariance.fs | 23 |
@@ -109,10 +109,10 @@ Whole-surface signals over the SAME units: `ir-sentinel.sh` (IR identity), `arit
 | Xantham.Generator.Tests | UsedTypars.fs | 13 |
 | Xantham.Generator.Tests | AreaAssignment.fs | 13 |
 | Xantham.Generator.Tests | Collection.fs | 12 |
+| Xantham.Generator.Tests | AnchoredRegistration.fs | 12 |
 | Xantham.Generator.Tests | SharedDeepNestedLiteralPlacement.fs | 11 |
 | Xantham.Generator.Tests | TypeRefRender.HomeChildScrub.fs | 11 |
 | Xantham.Generator.Tests | TypeShapeRender.fs | 10 |
-| Xantham.Generator.Tests | AnchoredRegistration.fs | 10 |
 | Xantham.Generator.Tests | EnumRender.fs | 9 |
 | Xantham.Generator.Tests | RecipeLoad.fs | 8 |
 | Xantham.Generator.Tests | AliasBodyLiteralPlacement.fs | 6 |
@@ -130,7 +130,7 @@ Whole-surface signals over the SAME units: `ir-sentinel.sh` (IR identity), `arit
 | Xantham.Generator.Tests | TypeDefnRenderHarness.fs | 3 |
 | Xantham.Generator.Tests | LibEsSubstitution.fs | 2 |
 | Xantham.Generator.Tests | Name.fs | 1 |
-| **Xantham.Generator.Tests** | **total** | **451** |
+| **Xantham.Generator.Tests** | **total** | **454** |
 
 ## L2 / L3
 

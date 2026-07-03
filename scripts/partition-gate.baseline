@@ -467,6 +467,39 @@ BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0
 # Designed fix: emit obj-degraded aliases as EMPTY INTERFACES (the abbreviation-verdict
 # idiom — refs stay legal at every use site, inherits become legal) — a def-side change
 # to measure fresh next session, NOT a tail bolt-on.
-BL_FIDELITY_CLOUDEDGE_MCP=2
+# 2026-07-05 (3): 2 -> 0 — THE MCP UNIT COMPILES AND PRODUCES ITS ASSEMBLY (fifth L1
+# unit-exit cell). The designed fixes, both measured:
+#  - BARE-OBJ ALIAS -> EMPTY INTERFACE (aliasBodyVerdict third illegal shape): a body
+#    fully degraded to `obj` emits as an empty same-arity interface — inheritable
+#    (FS0887 cleared) and ref-legal; option<obj> bodies stay abbreviations. Fired x215
+#    across the surface (ledger obj-alias-interface:*), ALL units held/cleared.
+#  - 0-TYPAR ALIAS ARITY (prerenderTypeAliases): non-generic aliases record an explicit
+#    arity 0 keyed ONLY by their export-key rt (unique per export — no shared-BODY
+#    write-once conflicts), letting the aligners TRUNCATE spurious IR args
+#    (ProgressToken<Zod.ZodType> -> bare ProgressToken, FS0033 cleared).
+#  - Unmasked tail same-day: FS0440 (member RETURNING a function reads as currying,
+#    forbidding optional params — mcp createElicitationCompletionNotifier) — fixed by
+#    FUNCTION-RETURN PARENTHESIZATION (parenIfFunction on signature returns, the same
+#    rule as function-typed params; MemberRender pin). Verdict pins in
+#    AnchoredRegistration (obj-body -> None ledgered; option<obj> stays abbreviation).
+BL_FIDELITY_CLOUDEDGE_MCP=0
+# 2026-07-05: FIRST REAL COUNT = 2 (PropertyKey stdlib-ALIAS refs escaping the
+# name-keyed LibEs interceptor, which sees only Interface/Class/Enum nodes), fixed
+# SAME DAY: a stdlib alias whose name is in the substitute map remaps to the
+# substituted INTRINSIC at prerenderTypeAliases (LibEsSubstitution.fs moved earlier
+# in compile order). REAL 0 — the unit compiles and produces its assembly (sixth cell).
 BL_FIDELITY_CLOUDEDGE_CODEMODE=0
-BL_FIDELITY_CLOUDEDGE_AGENTS=0
+# 2026-07-05: FIRST REAL COUNT = 4 -> 2 same day (ClassMethodDecoratorContext x2 —
+# lib.decorators.d.ts types with no Fable equivalent — joined the obj-substitution map).
+# Remaining 2 = the CROSS-OWNER CACHE-HIT class, the catalogued deferred-together item
+# (see the PartyServer entry): `Agents.CreateMcpHandler`/`.ExperimentalCreateMcpHandler`
+# refs resolve at their exports' anchors, but the literal rides the interned
+# Request<...> arg subtree first minted under another owner, so no def materializes in
+# these exports' stores. A reRegisterStructuralLiterals wiring into the Variable/
+# Function export arms (+ root-literal CallSignature descent) was MEASURED — zero
+# movement — and REVERTED (the walk's cache-hit re-registration path does not reach
+# this shape; per the 3-for-3 pinned ref-side negatives, no further arm-local attempts).
+# THE LAST P1 WALL = the designed cross-owner def/ref closure + scrub-host correction
+# pair (PLAN.md Phase-1 open item). NOTE: Agents is not on the HelloWorker critical
+# path — Phase-2's first proof needs only the Workers unit.
+BL_FIDELITY_CLOUDEDGE_AGENTS=2

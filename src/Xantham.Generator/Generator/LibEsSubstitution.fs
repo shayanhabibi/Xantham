@@ -32,6 +32,11 @@ let substitute (name: string) : string option =
     | "ReadonlyMap" | "WeakMap" | "WeakSet"
     | "PropertyKey" | "TemplateStringsArray"
     | "ArrayBufferView" | "ArrayLike" -> Some "obj"
+    // lib.decorators.d.ts context types (TC39 decorators metadata) — no Fable
+    // equivalent exists; the refs are opaque JS interop (agents' unstable_callable).
+    | "ClassMethodDecoratorContext" | "ClassDecoratorContext"
+    | "ClassGetterDecoratorContext" | "ClassSetterDecoratorContext"
+    | "ClassFieldDecoratorContext" | "ClassAccessorDecoratorContext" -> Some "obj"
     // Fable.Core 5.0.0-beta.4 declares BigInt64Array but has NO BigUint64Array at all
     // (only the DataView get/setBigUint64 methods) — erase the unrepresentable type.
     | "BigUint64Array" -> Some "obj"
@@ -56,7 +61,7 @@ open Xantham.Decoder.ArenaInterner
 // (not flagged IsLibEs). The substitution map is the safety gate: workers-types' own
 // `typescript`-sourced types (Response, Request, ...) are NOT in the map, so they fall
 // through untouched.
-let private isStdlibSourced (source: QualifiedNamePart option) =
+let isStdlibSourced (source: QualifiedNamePart option) =
     match source with
     | Some (QualifiedNamePart.Normal s | QualifiedNamePart.Abnormal(s, _)) ->
         s.Contains("typescript", StringComparison.OrdinalIgnoreCase)

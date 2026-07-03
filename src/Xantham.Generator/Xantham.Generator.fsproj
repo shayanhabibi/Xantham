@@ -25,6 +25,7 @@
         <Compile Include="Generator\ResolvedType.Categorization.fs" />
         <Compile Include="Generator\TypeRefRender.Paths.fs" />
         <Compile Include="Generator\TypeRefRender.Render.fs" />
+        <Compile Include="Generator\LibEsSubstitution.fs" />
         <Compile Include="Generator\Render.TypeParameter.fs" />
         <Compile Include="Generator\Render.Parameter.fs" />
         <Compile Include="Generator\Render.Member.fs" />
@@ -37,7 +38,6 @@
         <Compile Include="Generator\RenderScope.Prelude.fs" />
         <Compile Include="Generator\RenderScope.Anchored.fs" />
         <Compile Include="Generator\Render.Collection.fs" />
-        <Compile Include="Generator\LibEsSubstitution.fs" />
         <Compile Include="Generator\Emission.fs" />
         <Compile Include="Generator\OpaqueHandleSubstitution.fs" />
         <Compile Include="Generator\Render.fs" />

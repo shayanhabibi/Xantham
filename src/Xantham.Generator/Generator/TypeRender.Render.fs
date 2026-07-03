@@ -25,6 +25,16 @@ let private renderedTypeText (typeWidget: WidgetBuilder<Type>) =
     |> Gen.run
     |> _.Trim()
 
+// A FUNCTION-typed parameter or RETURN must parenthesize its type: an unparenthesized
+// arrow chain in a member signature reads as CURRYING of the member itself — FS0440 when
+// optional/ParamArray params are declared (params: a function-typed param; returns: a
+// member RETURNING a function, e.g. mcp-sdk's createElicitationCompletionNotifier
+// thunk factory), FS0439 overload clashes on Invoke shapes.
+let private parenIfFunction (t: TypeRefRender) (widget: WidgetBuilder<Type>) =
+    match t.Kind with
+    | TypeRefKind.Molecule (TypeRefMolecule.Function _) -> Ast.Paren widget
+    | _ -> widget
+
 module Attributes =
     let inline renderAttributes<^Modifier, ^T
         when (^T or ^Modifier):(static member attributes: ^T * WidgetBuilder<AttributeNode> list -> ^T)
@@ -282,14 +292,6 @@ module TypedNameRender =
     /// <param name="ctx"></param>
     /// <param name="typedName"></param>
     /// <param name="anchorPath"></param>
-    // A FUNCTION-typed parameter must parenthesize its type: an unparenthesized arrow
-    // chain in a member signature reads as CURRYING of the member itself — FS0440 when
-    // optional/ParamArray params follow, FS0439 overload clashes on Invoke shapes.
-    let private parenIfFunction (t: TypeRefRender) (widget: WidgetBuilder<Type>) =
-        match t.Kind with
-        | TypeRefKind.Molecule (TypeRefMolecule.Function _) -> Ast.Paren widget
-        | _ -> widget
-
     let renderAsNamedTypeImpl withOption (ctx: GeneratorContext) (typedName: TypedNameRender) =
         let typeWidget =
             if withOption then
@@ -521,7 +523,10 @@ module FunctionLikeSignature =
                 | [] -> [ Ast.Unit() ]
                 | paras -> paras
             |> Ast.Tuple
-        let returnType = functionLike.ReturnType |> TypeRefRender.render
+        let returnType =
+            functionLike.ReturnType
+            |> TypeRefRender.render
+            |> parenIfFunction functionLike.ReturnType
         Ast.AbstractMember(renderName, [ parameters ], returnType)
         |> if functionLike.Traits.Contains(RenderTraits.Static) then _.toStatic() else id
         // Attach the member's OWN type parameters (`abstract runWorkflow<'P>: ...`) so the body's
@@ -542,7 +547,10 @@ module FunctionLikeSignature =
                 | paras -> paras
             |> Ast.TuplePat
             |> Ast.ParenPat
-        let returnType = functionLike.ReturnType |> TypeRefRender.render
+        let returnType =
+            functionLike.ReturnType
+            |> TypeRefRender.render
+            |> parenIfFunction functionLike.ReturnType
         Ast.Member(renderName, parameters, Exprs.jsUndefined, returnType)
         |> if functionLike.Traits.Contains(RenderTraits.Static) then _.toStatic() else id
         |> match functionLike.TypeParameters with

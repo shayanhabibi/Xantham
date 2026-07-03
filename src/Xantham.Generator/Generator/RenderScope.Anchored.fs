@@ -126,8 +126,22 @@ module Render =
             atom)
         |> ignore
         let unusedTypars = inScope |> Set.filter (usedTypars.Contains >> not)
-        if selfRef || not (Set.isEmpty unusedTypars) then
-            let reason = if selfRef then "cyclic-alias-body" else "phantom-typar-alias"
+        // (3) BARE-OBJ BODY — a body fully degraded to `obj` (scrub/opaque-rewrite output,
+        // e.g. the zod-Infer aliases: `type CreateMessageRequestParams = obj`). The
+        // abbreviation is legal F# but UNINHERITABLE — an interface extending the alias
+        // is FS0887 — while the empty-interface shape keeps inherits AND refs legal.
+        // `option<obj>` bodies stay abbreviations (already un-inheritable-by-filter, and
+        // the nullability is load-bearing at ref sites).
+        let bareObjBody =
+            not anchoredBody.Nullable
+            && (match anchoredBody.Kind with
+                | TypeRefKind.Atom (TypeRefAtom.Intrinsic "obj") -> true
+                | _ -> false)
+        if selfRef || bareObjBody || not (Set.isEmpty unusedTypars) then
+            let reason =
+                if selfRef then "cyclic-alias-body"
+                elif bareObjBody then "obj-alias-interface"
+                else "phantom-typar-alias"
             GeneratorContext.Advisory.increment ctx $"{reason}:{Name.Case.valueOrModified name}"
             None
         else
@@ -835,7 +849,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
             |> TypeRender.Variable
         {
             Type = value.Type.Value
-            Root = Choice2Of2 path 
+            Root = Choice2Of2 path
             TypeRef = typeRef
             Render = Anchored.Render( typeRef, lazy render )
             Anchors = anchorPreludeExportScope ctx export scope
@@ -1010,7 +1024,7 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
         {
             Type = headFunc.SignatureKey.Value |> ResolvedType.TypeLiteral
             Root = Choice2Of2 path
-            TypeRef = ref 
+            TypeRef = ref
             Render = Anchored.Render( ref, lazy render )
             Anchors = anchorPreludeExportScope ctx export scope
         }

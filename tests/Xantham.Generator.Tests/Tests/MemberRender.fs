@@ -256,6 +256,31 @@ let tests =
                 "    abstract pick: x: Qux -> Out"
             ])
 
+        // FUNCTION-RETURN PARENTHESIZATION (FS0440, 2026-07-05). A member RETURNING a
+        // function (mcp-sdk's createElicitationCompletionNotifier thunk factory) reads
+        // as CURRYING of the member itself unless parenthesized — and a curried member
+        // cannot declare optional params. Same rule as function-typed PARAMS.
+        testCase "a method returning a function parenthesizes the return (optional param stays legal)" <| fun _ ->
+            let thunk =
+                primitive TypeKindPrimitive.String
+                |> CallSignature.create
+                |> List.singleton
+                |> CallSignature.wrap
+                |> TypeLiteral.addMember
+                |> funApply TypeLiteral.empty
+                |> TypeLiteral.wrap
+            ifaceWith [
+                method' "notifier" false [
+                    Parameter.create "id" (namedRef "Foo")
+                    Parameter.create "options" (namedRef "Qux") |> Parameter.optional
+                ] thunk
+            ]
+            |> render
+            |> Flip.Expect.equal "function return must parenthesize" (lines [
+                "type Probe ="
+                "    abstract notifier: id: Foo * ?options: Qux -> (unit -> string)"
+            ])
+
         // BARE-`unit` PROPERTY SETTER DROP (FS0252, 2026-07-05). A `never`/`undefined`
         // member erases to `unit`, and `unit` is not a valid setter parameter type —
         // the brand/symbol-member shape (`[__WORKFLOW_ENTRYPOINT_BRAND]: never`).

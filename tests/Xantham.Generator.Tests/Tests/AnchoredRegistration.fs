@@ -170,6 +170,18 @@ let aliasBodyVerdictTests =
         testCase "a DIFFERENT type with the same name under another module is NOT self" <| fun _ ->
             let verdict, _ = verdictFor "Twin" Set.empty (pathAtom [ "Other" ] "Twin")
             Expect.isSome verdict "path comparison is full-chain, not name-based"
+
+        // BARE-OBJ BODY (2026-07-05, the Mcp zod-Infer class): `type X = obj` is legal
+        // F# but UNINHERITABLE (FS0887 on `inherit X`), so it degrades to the
+        // empty-interface shape like the other illegal-abbreviation classes.
+        testCase "bare-obj body -> None, ledgered obj-alias-interface" <| fun _ ->
+            let verdict, ctx = verdictFor "Erasedish" Set.empty (intrinsic "obj")
+            Expect.isNone verdict "an obj abbreviation cannot be inherited — degrade to interface"
+            Expect.equal (ledgerCount ctx "obj-alias-interface:Erasedish") 1 "ledgered"
+
+        testCase "option<obj> body stays a legal abbreviation (nullability is load-bearing)" <| fun _ ->
+            let verdict, _ = verdictFor "MaybeAny" Set.empty { intrinsic "obj" with Nullable = true }
+            Expect.isSome verdict "nullable obj bodies keep the abbreviation form"
     ]
 
 // ---------------------------------------------------------------------------
