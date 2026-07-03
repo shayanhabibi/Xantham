@@ -1185,6 +1185,56 @@ type GeneratorContext with
     static member EmptyWithCustomisation customisation = GeneratorContext.Create(prerender, Customisation.Create customisation)
     
 module ArenaInterner =
+    /// A STDLIB ALIAS whose name has a Fable substitution (`PropertyKey` -> obj, ...)
+    /// remaps to the SUBSTITUTED intrinsic, not its nominal path: the name-keyed LibEs
+    /// prelude interceptor sees only Interface/Class/Enum nodes, so an alias's nominal
+    /// remap would emit a bare stdlib name with no definition anywhere (the CodeMode
+    /// PropertyKey FS0039 class). Extracted from the interner walk for isolation tests.
+    let libEsAliasTarget (value: TypeAlias) : string option =
+        if value.IsLibEs || LibEsSubstitution.isStdlibSourced value.Source then
+            LibEsSubstitution.substitute (Name.Case.valueOrSource value.Name)
+        else None
+
+    let isShareableAliasBody =
+        function
+        | ResolvedType.Primitive _
+        | ResolvedType.Literal _
+        | ResolvedType.GlobalThis -> true
+        | _ -> false
+
+    /// Phase-2's PER-ALIAS emitted-arity recording (see prerenderTypeAliases), extracted
+    /// from the interner walk for isolation tests. Rules:
+    ///  - GENERIC alias with a non-shareable body: record the EMITTED arity (declared
+    ///    count if `aliasKeepsTypars`, else an explicit 0) against the body instance and
+    ///    the (non-shareable) export-key instance; typars alongside when arity > 0 so
+    ///    the padders synthesize per-slot defaults. CONSTRAINED typars do NOT gate
+    ///    recording (2026-07-05): the historical exclusion existed because an `obj` pad
+    ///    violated a nominal constraint (FS0001), obsolete since the typar-constraint
+    ///    advisory-drop policy — leaving them unrecorded put refs on the
+    ///    `typeArguments.Length` fallback (the Mcp BaseToolCallback given-2-of-3 class).
+    ///  - NON-GENERIC alias: record an explicit 0 keyed ONLY by the export-key rt —
+    ///    unique per export, so no shared-BODY write-once conflicts — letting the
+    ///    aligners TRUNCATE spurious IR args (`RequestId = ProgressToken<Zod.ZodType>`).
+    ///  - IDENTITY alias: never recorded (padding `Identity<obj>` collides with real
+    ///    application args).
+    let recordAliasArity (ctx: GeneratorContext) (exportKeyType: ResolvedType) (value: TypeAlias) =
+        let aliasName = Name.Case.valueOrSource value.Name
+        let isIdentityAlias =
+            match value.Type.Value with ResolvedType.TypeParameter _ -> true | _ -> false
+        if value.TypeParameters.Length > 0 && not (isShareableAliasBody value.Type.Value) then
+            let emittedArity =
+                if aliasKeepsTypars ctx value then value.TypeParameters.Length else 0
+            let recordArity key =
+                if not isIdentityAlias then
+                    GeneratorContext.Prelude.addTypeAliasArityOnce ctx key emittedArity aliasName
+                    if emittedArity > 0 then
+                        GeneratorContext.Prelude.addTypeAliasTyparsOnce ctx key value.TypeParameters
+            recordArity value.Type.Value
+            if not (isShareableAliasBody exportKeyType) then
+                recordArity exportKeyType
+        elif value.TypeParameters.IsEmpty && not (isShareableAliasBody exportKeyType) then
+            GeneratorContext.Prelude.addTypeAliasArityOnce ctx exportKeyType 0 aliasName
+
     /// True when a resolved type is memoised by the interner to a single shared
     /// instance (primitives, literals, globalThis). Such a type must NOT be used
     /// as a `TypeAliasRemap` key: the remap substitutes the alias name wherever
@@ -1192,12 +1242,6 @@ module ArenaInterner =
     /// `type D1SessionBookmark = string`, `type Mode = "primary-only"`) would make
     /// *every* occurrence of that primitive/literal render as the alias name across
     /// the entire surface. Only nominal/structural alias bodies are safe to remap.
-    let isShareableAliasBody =
-        function
-        | ResolvedType.Primitive _
-        | ResolvedType.Literal _
-        | ResolvedType.GlobalThis -> true
-        | _ -> false
 
     let prerenderTypeAliases (ctx: GeneratorContext) (arena: ArenaInterner) =
         // TWO PHASES, deliberately. The emitted-arity computation in phase 2 runs `usedTyparNames`,
@@ -1234,15 +1278,7 @@ module ArenaInterner =
                     RenderScopeStore.TypeRefAtom.Unsafe.createIntrinsic Intrinsic.obj
                     |> RenderScopeStore.TypeRef.Unsafe.createAtom
                     |> RenderScopeStore.TypeRefRender.Unsafe.createFromKind false
-                // A STDLIB ALIAS whose name has a Fable substitution (`PropertyKey` ->
-                // obj, ...) remaps to the SUBSTITUTED intrinsic, not its nominal path:
-                // the name-keyed LibEs prelude interceptor sees only Interface/Class/
-                // Enum nodes, so an alias's nominal remap would emit a bare stdlib name
-                // with no definition anywhere (the CodeMode PropertyKey FS0039 class).
-                let libEsTarget =
-                    if value.IsLibEs || LibEsSubstitution.isStdlibSourced value.Source then
-                        LibEsSubstitution.substitute (Name.Case.valueOrSource value.Name)
-                    else None
+                let libEsTarget = libEsAliasTarget value
                 let bodyRef =
                     match libEsTarget with
                     | Some target ->
@@ -1300,42 +1336,8 @@ module ArenaInterner =
             arena.ResolvedExports
             |> Seq.iter (fun (KeyValue(exportKey, export)) ->
                 match export with
-                | ResolvedExport.TypeAlias value when
-                    not (isShareableAliasBody value.Type.Value)
-                    && value.TypeParameters.Length > 0 ->
-                    let aliasName = Name.Case.valueOrSource value.Name
-                    let isIdentityAlias =
-                        match value.Type.Value with ResolvedType.TypeParameter _ -> true | _ -> false
-                    // CONSTRAINED typars no longer gate recording (2026-07-05): the historical
-                    // exclusion existed because an `obj` pad violated a nominal constraint
-                    // (`'T :> ZodTypeAny` given `obj` is FS0001) — but typar constraints are now
-                    // ADVISORY-DROPPED at render (typar-constraint-drop policy, 2026-07-04), so
-                    // emitted decls carry no constraints and the pad is always legal. Leaving
-                    // such aliases UNRECORDED left their refs on the `typeArguments.Length`
-                    // fallback — unaligned partial applications (the Mcp BaseToolCallback
-                    // given-2-of-3 FS0033 class, an intermediate-alias collapse dropping a
-                    // fixed middle arg).
-                    let emittedArity =
-                        if aliasKeepsTypars ctx value then value.TypeParameters.Length else 0
-                    let recordArity key =
-                        if not isIdentityAlias then
-                            GeneratorContext.Prelude.addTypeAliasArityOnce ctx key emittedArity aliasName
-                            if emittedArity > 0 then
-                                GeneratorContext.Prelude.addTypeAliasTyparsOnce ctx key value.TypeParameters
-                    recordArity value.Type.Value
-                    let exportKeyType = arena.ResolveType exportKey
-                    if not (isShareableAliasBody exportKeyType) then
-                        recordArity exportKeyType
-                // NON-GENERIC alias (0 declared typars): record an EXPLICIT arity 0 keyed
-                // ONLY by the export-key rt — unique per export, so no shared-BODY
-                // write-once conflicts (recording 0 against a body instance shared with a
-                // generic twin would mis-truncate the twin's refs) — letting the aligners
-                // TRUNCATE spurious IR args riding a non-generic alias reference
-                // (`RequestId = ProgressToken<Zod.ZodType>` against arity-0 ProgressToken).
-                | ResolvedExport.TypeAlias value when value.TypeParameters.IsEmpty ->
-                    let exportKeyType = arena.ResolveType exportKey
-                    if not (isShareableAliasBody exportKeyType) then
-                        GeneratorContext.Prelude.addTypeAliasArityOnce ctx exportKeyType 0 (Name.Case.valueOrSource value.Name)
+                | ResolvedExport.TypeAlias value ->
+                    recordAliasArity ctx (arena.ResolveType exportKey) value
                 | _ -> ())
     let private getTopologicalSort (_: ArenaInterner) (graph: Graph) =
         let degrees = ConcurrentDictionary graph.Degrees

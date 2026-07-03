@@ -516,3 +516,93 @@ let ignorePathRenderTests =
             |> Path.Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors
             |> Flip.Expect.isFalse "an ordinary package source must not be gated out"
     ]
+
+// ---------------------------------------------------------------------------
+// libEsAliasTarget + recordAliasArity — the interner-walk PER-ALIAS decisions
+// (extracted 2026-07-05 so the previously E2E-only seams have isolation pins)
+// ---------------------------------------------------------------------------
+
+[<Tests>]
+let aliasWalkDecisionTests =
+    let namedBody name =
+        ResolvedType.Interface.create name |> ResolvedType.Interface.wrap
+    let arityOf (ctx: GeneratorContext) (key: ResolvedType) =
+        match ctx.TypeAliasArity.TryGetValue key with
+        | true, n -> Some n
+        | _ -> None
+    testList "ArenaInterner per-alias decisions" [
+
+        // STDLIB-ALIAS SUBSTITUTION (the CodeMode PropertyKey class): a lib.es ALIAS
+        // whose name is in the substitute map remaps to the substituted intrinsic —
+        // the name-keyed prelude interceptor sees only Interface/Class/Enum nodes.
+        testCase "a lib.es alias with a mapped name yields the substituted intrinsic" <| fun _ ->
+            { ResolvedType.TypeAlias.create (namedBody "Whatever") "PropertyKey" with IsLibEs = true }
+            |> ArenaInterner.libEsAliasTarget
+            |> Flip.Expect.equal "PropertyKey alias -> obj" (Some "obj")
+
+        testCase "a typescript-sourced alias with a mapped name yields the substitution" <| fun _ ->
+            ResolvedType.TypeAlias.create (namedBody "Whatever") "Generator"
+            |> ResolvedType.TypeAlias.withSource (QualifiedNamePart.Normal "node_modules/typescript/lib/lib.es2015.generator.d.ts")
+            |> ArenaInterner.libEsAliasTarget
+            |> Flip.Expect.equal "stdlib-sourced Generator alias -> seq" (Some "seq")
+
+        testCase "a NON-stdlib alias never substitutes, even with a colliding name" <| fun _ ->
+            ResolvedType.TypeAlias.create (namedBody "Whatever") "PropertyKey"
+            |> ArenaInterner.libEsAliasTarget
+            |> Flip.Expect.equal "provenance gates the substitution, not the name alone" None
+
+        // ARITY RECORDING, constrained generic alias (the Mcp BaseToolCallback class):
+        // constrained typars no longer gate recording (constraints are advisory-dropped
+        // at render), so the aligners can pad/truncate partial applications.
+        testCase "a CONSTRAINED generic alias records its arity (gate removed 2026-07-05)" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let tp1 =
+                ResolvedType.TypeParameter.create "SendResultT"
+                |> ResolvedType.TypeParameter.withConstraint (namedBody "Result")
+            let tp2 =
+                ResolvedType.TypeParameter.create "ExtraT"
+                |> ResolvedType.TypeParameter.withConstraint (namedBody "Extra")
+            let body =
+                ResolvedType.TypeReference.create (namedBody "Target")
+                |> ResolvedType.TypeReference.withTypeArguments [
+                    ResolvedType.TypeParameter.wrap (ResolvedType.TypeParameter.create "SendResultT")
+                    ResolvedType.TypeParameter.wrap (ResolvedType.TypeParameter.create "ExtraT")
+                ]
+                |> ResolvedType.TypeReference.wrap
+            let alias =
+                ResolvedType.TypeAlias.create body "BaseToolCallback"
+                |> ResolvedType.TypeAlias.withTypeParameters [ tp1; tp2 ]
+            let exportKey = namedBody "ExportKeyInstance"
+            ArenaInterner.recordAliasArity ctx exportKey alias
+            arityOf ctx body
+            |> Flip.Expect.equal "body key records the emitted arity" (Some 2)
+            arityOf ctx exportKey
+            |> Flip.Expect.equal "export key records the emitted arity" (Some 2)
+
+        // 0-TYPAR alias (the Mcp ProgressToken class): explicit 0 keyed ONLY by the
+        // export-key rt — a shared BODY instance must never be stamped (a generic twin
+        // sharing the body would have its refs mis-truncated).
+        testCase "a non-generic alias records arity 0 under the EXPORT key only" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let body = namedBody "InferredShape"
+            let alias = ResolvedType.TypeAlias.create body "ProgressToken"
+            let exportKey = namedBody "ProgressTokenExportInstance"
+            ArenaInterner.recordAliasArity ctx exportKey alias
+            arityOf ctx exportKey
+            |> Flip.Expect.equal "export key records 0" (Some 0)
+            arityOf ctx body
+            |> Flip.Expect.equal "the body instance is NEVER stamped for 0-typar aliases" None
+
+        // IDENTITY alias: never recorded (padding `Identity<obj>` collides with the
+        // real application args).
+        testCase "an identity alias records nothing" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let tp = ResolvedType.TypeParameter.create "T"
+            let alias =
+                ResolvedType.TypeAlias.create (ResolvedType.TypeParameter.wrap tp) "Identity"
+                |> ResolvedType.TypeAlias.withTypeParameters [ tp ]
+            let exportKey = namedBody "IdentityExportInstance"
+            ArenaInterner.recordAliasArity ctx exportKey alias
+            arityOf ctx exportKey
+            |> Flip.Expect.equal "identity aliases are excluded from the oracle" None
+    ]

@@ -17,13 +17,13 @@ Reported per area × per layer in a generated `STATUS.md` (`scripts/status-repor
 - **Done(L0 — declared surface):** unassigned declarations = 0; every reached package has an explicit surface-or-dependency policy; the recipe is consumed by generation, not advisory.
 - **Done(L1 — raw binding, per area):** Fable error count 0 for the area's own compilation unit; arity disagreements 0; identity conflations 0; every deliberate erasure counted, classed, and justified in the erasure ledger.
 - **Done(L2 — conventions, per area):** semantic budgets met (callbacks-as-Invoke, synth-home penetration, smash names); zero unacknowledged advisories — each shape either has a declared convention or an explicit accept-passthrough mark.
-- **Done(L3 — usable API, per area):** a sample consumer compiles (Fable exit 0), runs (miniflare/workerd), and the area's package packs. A running program, not a grep, proves usability.
+- **Done(L3 — usable API, per area):** a sample consumer compiles (Fable exit 0), runs on a REAL deployment (management-API upload via the clef-lang-site CLI model — owner directive 2026-07-05: no wrangler/miniflare), and the area's package packs. A running program, not a grep, proves usability.
 
 ## Phase exit criteria
 
 - **Exit(P0):** unassigned declarations = 0; every reached package has a declared policy; error decomposition owned by tooling, not session analysis.
 - **Exit(P1):** `Fidelity.CloudEdge.Workers` compiles at 0 errors as its own unit; every area has its own ratchet; the whole-artifact ratchet is retired.
-- **Exit(P2):** an installable package exists; HelloWorker (fetch + KV/R2/D1 round-trip) runs under miniflare; the minimal Agent slice (subclass, `routeAgentRequest`, `getAgentByName`, state, `this.sql`) compiles and runs; a zod tool-authoring sample compiles (proves the opaque-handle policy) or the policy is revised.
+- **Exit(P2):** an installable package exists; HelloWorker (fetch + KV/R2/D1 round-trip) runs as a real deployment via the CLI model (edited 2026-07-05, was "under miniflare" — owner directive: no wrangler); the minimal Agent slice (subclass, `routeAgentRequest`, `getAgentByName`, state, `this.sql`) compiles and runs; a zod tool-authoring sample compiles (proves the opaque-handle policy) or the policy is revised.
 - **Exit(P3):** shipping areas' semantic budgets green; zero unacknowledged advisories; MCP area at L1 = 0.
 - **Exit(P4 — the goal):** every declared area at L1 = 0; one real sample per area compiling and running; ported upstream test slice green; packages published changelog-gated in dependency order; one real upstream version bump processed end-to-end as an update run.
 
