@@ -90,7 +90,10 @@
 # cleared, Workers 88 -> 31) now emit as N distinct defs. Two formerly-swallowed
 # callback literals surface as their own nominal types (73 -> 75, e.g. the
 # SharedLiterals Props/Props2 pair) — invalid->valid by exactly the split count.
-BL_CALLBACK_IFACE=75
+# 2026-07-05 (2): RATCHETED DOWN 75 -> 73 with the return-only overload unification
+# (Workers 31 -> 0): two counted Invoke shapes left the surface as their carrying
+# duplicate signatures merged.
+BL_CALLBACK_IFACE=73
 # 2026-07-04 RECALIBRATION with the metric correction (see golden-gate.sh (b)): the old
 # suffix-regex value of 4 was noise (stem-named homes + qualifier hits). The true leak
 # shape — literal `prototype` members in the surface — measures 63, stable across the

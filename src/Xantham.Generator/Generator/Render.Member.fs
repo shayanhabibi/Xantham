@@ -369,6 +369,24 @@ module Member =
                     members, functions
             | MemberRender.Method functionLikeRender -> members, functionLikeRender :: functions
             ) ([], [])
+        // SAME-NAME METHOD GROUPING: each TS overload declaration arrives as its OWN
+        // Member.Method, so a name's overload set spans several FunctionLikeRenders.
+        // Fold them into ONE render carrying the full signature list — the emission-side
+        // return-only overload unification (TypeRender.Render.fs) operates per render
+        // and can only judge a group it can see.
+        ||> fun members functions ->
+            members,
+            functions
+            // The fold cons-REVERSES; restore SOURCE order so the merged signature
+            // list and the unification's first-wins follow declaration order (the
+            // same convention as duplicate-property-drop).
+            |> List.rev
+            |> List.groupBy (fun f -> Name.Case.valueOrModified f.Name)
+            |> List.map (fun (_, group) ->
+                match group with
+                | [ single ] -> single
+                | first :: _ -> { first with Signatures = group |> List.collect _.Signatures }
+                | [] -> failwith "unreachable: groupBy yields non-empty groups")
     let setReadOnly = function
         | Member.Property ({ Accessor = TsAccessor.ReadWrite | TsAccessor.WriteOnly } as prop) ->
             { prop with Accessor = TsAccessor.ReadOnly }

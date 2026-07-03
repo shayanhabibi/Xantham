@@ -12,6 +12,19 @@ open Fantomas.Core.SyntaxOak
 
 let private unitPat = Ast.ParameterPat("_", Ast.Unit())
 
+// Render a TYPE widget to its emitted text — the COMPILER's view of the type. Needed
+// where render-value equality cannot serve: member renders are localised at anchor
+// time, collapsing atoms to opaque widgets whose equality is reference-like.
+let private renderedTypeText (typeWidget: WidgetBuilder<Type>) =
+    Ast.Oak() {
+        Ast.AnonymousModule() {
+            Ast.Value("_", Exprs.jsUndefined, typeWidget)
+        }
+    }
+    |> Gen.mkOak
+    |> Gen.run
+    |> _.Trim()
+
 module Attributes =
     let inline renderAttributes<^Modifier, ^T
         when (^T or ^Modifier):(static member attributes: ^T * WidgetBuilder<AttributeNode> list -> ^T)
@@ -331,15 +344,31 @@ module TypedNameRender =
             // INDEXER property (FS0701) — same rule as function-typed parameters.
             |> parenIfFunction typedName.Type
 
-        match typedName.Traits.Contains(RenderTraits.Readable), typedName.Traits.Contains(RenderTraits.Writable) with
+        // A BARE-`unit` property cannot carry a setter — `unit` is not a valid setter
+        // parameter type (FS0252). Shape: brand/symbol members typed `never`/`undefined`
+        // (e.g. `[__WORKFLOW_ENTRYPOINT_BRAND]`) erase to unit. Optional/nullable stay
+        // writable: they render `option<unit>`, a legal setter type. Detection is by the
+        // RENDERED text (localised atoms are opaque widgets), gated behind the writable
+        // traits so the extra Gen.run only happens for get/set candidates. Ledgered.
+        let isBareUnit =
+            typedName.Traits.Contains(RenderTraits.Writable)
+            && renderedTypeText typeWidget = "let _: unit = JS.undefined"
+        match typedName.Traits.Contains(RenderTraits.Readable),
+              typedName.Traits.Contains(RenderTraits.Writable) && not isBareUnit with
         | true, true ->
             Ast.AbstractMember(name, typeWidget, hasGetter = true, hasSetter = true)
         | true, false ->
+            if typedName.Traits.Contains(RenderTraits.Writable) then
+                GeneratorContext.Advisory.increment ctx "unit-property-setter-drop"
             Ast.AbstractMember(name, typeWidget, hasGetter = true)
         | false, true ->
             Ast.AbstractMember(name, typeWidget, hasSetter = true)
         | false, false ->
-            Ast.AbstractMember(name, typeWidget)
+            if typedName.Traits.Contains(RenderTraits.Writable) then
+                GeneratorContext.Advisory.increment ctx "unit-property-setter-drop"
+                Ast.AbstractMember(name, typeWidget, hasGetter = true)
+            else
+                Ast.AbstractMember(name, typeWidget)
         |> Attributes.renderAttributesForAbstractMember (attributes {
             // `CompiledName` is rejected by F# on abstract members (FS0755). Use
             // Fable's `EmitProperty`, which is valid here, to map a member whose
@@ -559,14 +588,53 @@ module FunctionLikeSignature =
         |> Documentation.renderForTypeDefn functionLike
 
 module FunctionLikeRender =
+    // RETURN-ONLY OVERLOAD UNIFICATION (FS0438). TS overloads discriminated by literal
+    // arg types (KVNamespace get/getWithMetadata: 'text'|'json'|'arrayBuffer'|'stream',
+    // BrowserRun quickAction) WIDEN under erasure ('text' -> string; erased node/option
+    // types -> obj), leaving signatures that differ only by RETURN type — which .NET
+    // member resolution ignores — or by nothing at all (param NAMES don't count either).
+    // TS also legally overloads by return alone via union subsumption (AutoRAG.aiSearch).
+    // Neither shape can exist as F# overloads: group signatures by their .NET-visible
+    // key (param types + optionality + ParamArray, typar arity); a group's DISTINCT
+    // returns merge into ONE signature returning their erased union (no capability
+    // loss), and residual exact-signature duplicates drop, first wins. Both ledgered.
+    // The key compares param types by their RENDERED TEXT, not TypeRefRender equality:
+    // member renders are LOCALISED at anchor time, collapsing every atom to an opaque
+    // widget whose equality is reference-like (compiled Oak nodes) — two same-text
+    // params never compare equal structurally. Text is exactly the compiler's view.
+    let private dotnetKey (s: FunctionLikeSignature) =
+        s.Parameters
+        |> List.map (fun p ->
+            TypeRefRender.render p.Type |> renderedTypeText,
+            p.Traits.Contains RenderTraits.Optional,
+            p.Traits.Contains RenderTraits.ParamArray),
+        s.TypeParameters.Length
+    let private unifyReturnOnlyOverloads (ctx: GeneratorContext) (signatures: FunctionLikeSignature list) =
+        signatures
+        |> List.groupBy dotnetKey
+        |> List.map (fun (_, group) ->
+            match group with
+            | [ single ] -> single
+            | first :: _ ->
+                match group |> List.map _.ReturnType |> List.distinct with
+                | [ _ ] ->
+                    GeneratorContext.Advisory.incrementBy ctx "overload-duplicate-drop" (group.Length - 1)
+                    first
+                | returns ->
+                    GeneratorContext.Advisory.increment ctx "overload-return-union"
+                    { first with ReturnType = { Kind = TypeRefKind.Molecule(TypeRefMolecule.Union returns); Nullable = false } }
+            | [] -> failwith "unreachable: groupBy yields non-empty groups")
+
     // rendering as abstract
     let renderAbstract (ctx: GeneratorContext) (functionLike: FunctionLikeRender) =
         functionLike.Signatures
+        |> unifyReturnOnlyOverloads ctx
         |> List.map (FunctionLikeSignature.renderAbstractWithName ctx functionLike.Name)
-        
+
     // rendering as member
     let renderMember (ctx: GeneratorContext) (functionLike: FunctionLikeRender) =
         functionLike.Signatures
+        |> unifyReturnOnlyOverloads ctx
         |> List.map (FunctionLikeSignature.renderMember ctx functionLike.Name)
         
     // rendering as function/let binding

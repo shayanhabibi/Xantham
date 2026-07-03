@@ -196,6 +196,78 @@ let tests =
                 "    abstract maybe: input: Foo -> Bar"
             ])
 
+        // RETURN-ONLY OVERLOAD UNIFICATION (FS0438, 2026-07-05). TS overloads
+        // discriminated by literal arg types WIDEN under erasure ('text' -> string)
+        // until only the RETURN differs — which .NET member resolution ignores (as it
+        // ignores param NAMES). Same-signature-key overloads unify: distinct returns
+        // merge into their erased union (no capability loss); exact duplicates drop,
+        // first wins. Ledgered overload-return-union / overload-duplicate-drop.
+        testCase "same-param overloads differing only by return unify into a union return" <| fun _ ->
+            let overload parameters returnType : Method =
+                { Name = Name.Camel.create "read"
+                  Parameters = parameters
+                  TypeParameters = []
+                  Type = LazyContainer.CreateFromValue returnType
+                  Documentation = []
+                  IsOptional = false
+                  IsStatic = false }
+            ifaceWith [
+                Member.Method [
+                    overload [ Parameter.create "src" (namedRef "In") ] (namedRef "TextOut")
+                    overload [ Parameter.create "src" (namedRef "In") ] (namedRef "JsonOut")
+                ]
+            ]
+            |> render
+            |> Flip.Expect.equal "return-only overloads unify" (lines [
+                "type Probe ="
+                "    abstract read: src: In -> U2<TextOut, JsonOut>"
+            ])
+
+        testCase "same-type different-name params collapse to one overload (dup drop)" <| fun _ ->
+            let overload paramName : Method =
+                { Name = Name.Camel.create "go"
+                  Parameters = [ Parameter.create paramName (namedRef "In") ]
+                  TypeParameters = []
+                  Type = LazyContainer.CreateFromValue (namedRef "Out")
+                  Documentation = []
+                  IsOptional = false
+                  IsStatic = false }
+            ifaceWith [ Member.Method [ overload "options"; overload "server" ] ]
+            |> render
+            |> Flip.Expect.equal "identical .NET signatures drop to first" (lines [
+                "type Probe ="
+                "    abstract go: options: In -> Out"
+            ])
+
+        testCase "overloads with distinct param types are both kept" <| fun _ ->
+            let overload paramType : Method =
+                { Name = Name.Camel.create "pick"
+                  Parameters = [ Parameter.create "x" (namedRef paramType) ]
+                  TypeParameters = []
+                  Type = LazyContainer.CreateFromValue (namedRef "Out")
+                  Documentation = []
+                  IsOptional = false
+                  IsStatic = false }
+            ifaceWith [ Member.Method [ overload "Foo"; overload "Qux" ] ]
+            |> render
+            |> Flip.Expect.equal "distinct params stay overloaded" (lines [
+                "type Probe ="
+                "    abstract pick: x: Foo -> Out"
+                "    abstract pick: x: Qux -> Out"
+            ])
+
+        // BARE-`unit` PROPERTY SETTER DROP (FS0252, 2026-07-05). A `never`/`undefined`
+        // member erases to `unit`, and `unit` is not a valid setter parameter type —
+        // the brand/symbol-member shape (`[__WORKFLOW_ENTRYPOINT_BRAND]: never`).
+        // Renders get-only, ledgered unit-property-setter-drop.
+        testCase "a never-typed read-write property drops its setter" <| fun _ ->
+            ifaceWith [ Property.create "brand" (primitive TypeKindPrimitive.Never) |> Property.wrap ]
+            |> render
+            |> Flip.Expect.equal "bare unit property is get-only" (lines [
+                "type Probe ="
+                "    abstract brand: unit with get"
+            ])
+
         // GET ACCESSOR -- GetAccessor.render -> MemberRender.Property with Readable+JSGetter
         // traits, so emits a property with `with get`. Render.Member.fs:97-140.
         testCase "get-accessor -> property with get" <| fun _ ->

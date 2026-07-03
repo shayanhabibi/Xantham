@@ -370,9 +370,41 @@ BL_FIDELITY_CLOUDEDGE_ZOD=0
 #  - 1x FS0252 @11399: unit-typed brand property (`[Rpc.__WORKFLOW_ENTRYPOINT_BRAND]`)
 #    with a setter — F# forbids unit property setters; render get-only or obj
 #    (unmasked capped-tail singleton).
-BL_FIDELITY_CLOUDEDGE_WORKERS=31
+# 2026-07-05 (Fable, 4): 31 -> 0 — THE WORKERS UNIT COMPILES AND PRODUCES ITS ASSEMBLY
+# (second L1 unit-exit cell; the downstream chain unblocks for first real counts).
+# THREE seams, all ledgered:
+#  - RETURN-ONLY OVERLOAD UNIFICATION (TypeRender.Render.fs unifyReturnOnlyOverloads,
+#    wired in FunctionLikeRender.renderAbstract/renderMember): signatures grouped by
+#    their .NET-visible key — param types BY RENDERED TEXT (localised atoms are opaque
+#    widgets whose equality is reference-like; text is the compiler's own view) +
+#    optionality + ParamArray + typar arity. Distinct returns merge into their erased
+#    union (U2<Promise<...>, ...> — no capability loss: KVNamespace get/getWithMetadata,
+#    BrowserRun quickAction, AutoRAG aiSearch); exact-duplicate signatures drop first-
+#    wins (Cloudflare:node httpServerHandler's obj-erased pair). Ledger:
+#    overload-return-union x15, overload-duplicate-drop x4.
+#  - SAME-NAME METHOD GROUPING (Render.Member.fs partitionRender): each TS overload
+#    declaration arrives as its OWN Member.Method render, so a name's overload set
+#    spanned several FunctionLikeRenders and the per-render unification saw singletons.
+#    Same-name renders now fold into ONE (source order restored — the cons-fold
+#    reverses; first-wins follows declaration order like duplicate-property-drop).
+#  - BARE-UNIT SETTER DROP (TypeRender.Render.fs renderAbstractImpl): a never/undefined
+#    member erases to `unit`, which cannot be a setter parameter type (FS0252) —
+#    renders get-only, detection by rendered text. Ledger: unit-property-setter-drop x10
+#    (one erroring site + 9 latent twins).
+# Tests: MemberRender pins (return-union merge, dup drop, distinct-params kept,
+# never-property get-only). NOTE the deferred FIDELITY item: literal-discriminant
+# WIDENING ('text' -> string) remains the deeper root of the KVNamespace/BrowserRun
+# class — rendering param literals as distinct erased types would keep the overloads
+# real instead of union-merged. The policy is the honest L1 bridge, not the end state.
+BL_FIDELITY_CLOUDEDGE_WORKERS=0
+# 2026-07-05: REAL typecheck 0 (was a parse-stage placeholder while Workers blocked
+# the reference chain) — the unit compiles and produces its assembly with no burn-down.
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
-BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0
+# 2026-07-05: FIRST REAL TYPECHECK COUNT (parse-stage placeholder 0 while
+# PartySocket/Workers blocked). 2 unique sites, one class: FS0039 x2 at (14,99)/(14,134)
+# — refs to a `GetServerByName` module that is never emitted (a nested-under-member
+# synthesized home dangle, PartyServer-owned). This is the unit's burn-down target.
+BL_FIDELITY_CLOUDEDGE_PARTYSERVER=2
 BL_FIDELITY_CLOUDEDGE_MCP=0
 BL_FIDELITY_CLOUDEDGE_CODEMODE=0
 BL_FIDELITY_CLOUDEDGE_AGENTS=0
