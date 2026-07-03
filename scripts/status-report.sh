@@ -170,7 +170,7 @@ for suite, mods in coverage.items():
 w("")
 w("## L2 / L3")
 w("")
-w("L2 (conventions layer): not started — fragments welded into L1 renderer (Phase 3). L3 (consumption proof): not started — first signal is HelloWorker under miniflare (Phase 2).")
+w("L2 (conventions layer): not started — fragments welded into L1 renderer (Phase 3). L3 (consumption proof): not started — first signal is HelloWorker Fable-compiled through the units and deployed via the clef-lang-site CLI model (management-API upload; NO wrangler/miniflare — owner directive, PLAN.md Phase 2).")
 open(out_path, 'w').write('\n'.join(lines) + '\n')
 print(f"wrote {out_path}")
 print(f"L0 gate: {len(missing)} missing-policy package(s)" + (f": {', '.join(missing)}" if missing else " — PASS"))

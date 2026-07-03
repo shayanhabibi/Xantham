@@ -9,6 +9,7 @@ open Xantham.Generator
 open Xantham.Generator.Generator
 open Xantham.Generator.Generator.TypeRefRender
 open Xantham.Generator.Types
+open Xantham.Generator.NamePath
 open Mocking.ArenaInterner.ResolvedType
 
 // After upstream PR #55 wired exportdeclaration into export specifiers, a
@@ -200,4 +201,110 @@ let tests =
                     Flip.Expect.equal "single func → single signature" 1 functionLike.Signatures.Length
                 | other ->
                     failtestf "expected TypeRender.Function but got %A" other
+    ]
+
+// ---------------------------------------------------------------------------
+// DANGLING SELF-NAMESPACE SCRUB (`Render.scrubDanglingSelfRefs`) — the ref-side
+// closure of the cross-owner cache-hit class (the Agents createMcpHandler FS0039s):
+// a path atom INSIDE the export's own anchor namespace that the export's store will
+// NOT materialize is a cross-owner cached transient's per-site resolution — its def
+// lives only under its first owner. Degrade to obj, ledgered foreign-transient-scrub.
+//
+// The KEEP-list is threefold, each pinned below:
+//   - STORE-BACKED same-export transients (RpcStub, Case{n} children) materialize
+//     under this anchor — kept;
+//   - DECLARED types whose path coincides with the anchor namespace (`env:
+//     Cloudflare.Env` under the Cloudflare.* anchors) are real defs — kept via
+//     ctx.DeclaredTypePaths (the markDeclaredTypePaths pre-pass);
+//   - atoms OUTSIDE the anchor namespace (concrete cross-unit refs) are not this
+//     scrub's business — untouched.
+//
+// DEF-SIDE ADOPTION is the pinned 3-for-3 negative (walk-wide Workers 0->37;
+// export-arm-gated 0->34; declared-guarded Agents 2->22): every variant collides
+// with the def-placement universe, which is not enumerable at prerender time. The
+// ref side is total and collision-free — this scrub is the design, not a fallback.
+// ---------------------------------------------------------------------------
+
+let private scrubAnchor =
+    ModulePath.init "Agents"
+    |> TypePath.create "CreateMcpHandler"
+    |> AnchorPath.createType
+
+let private pathAtomRender (path: TypePath) : Anchored.TypeRefRender =
+    { Kind = Anchored.TypeRefKind.Atom(Anchored.TypeRefAtom.Path path); Nullable = false }
+
+let private runScrub (ctx: GeneratorContext) (scope: RenderScopeStore) (render: Anchored.TypeRefRender) =
+    Render.scrubDanglingSelfRefs ctx scope scrubAnchor render
+
+let private expectAtom (render: Anchored.TypeRefRender) =
+    match render.Kind with
+    | Anchored.TypeRefKind.Atom a -> a
+    | other -> failtestf "expected an Atom but got %A" other
+
+[<Tests>]
+let scrubDanglingSelfRefsTests =
+    testList "Render.scrubDanglingSelfRefs (cross-owner dangling ref scrub)" [
+
+        testCase "an anchor-namespace atom with no def degrades to obj, ledgered" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let dangling =
+                ModulePath.createFromList [ "Agents"; "CreateMcpHandler" ]
+                |> TypePath.create "Request"
+                |> pathAtomRender
+            match runScrub ctx (RenderScopeStore.create ()) dangling |> expectAtom with
+            | Anchored.TypeRefAtom.Intrinsic s -> Flip.Expect.equal "degraded to obj" "obj" s
+            | other -> failtestf "expected Intrinsic obj but got %A" other
+            let ledger = GeneratorContext.Advisory.dump ctx |> Map.ofList
+            Flip.Expect.equal "scrub is ledgered by subject" (Some 1) (Map.tryFind "foreign-transient-scrub:Request" ledger)
+
+        testCase "the anchor path ITSELF with no def is scrubbed (self-name dangle)" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let self = ModulePath.init "Agents" |> TypePath.create "CreateMcpHandler" |> pathAtomRender
+            match runScrub ctx (RenderScopeStore.create ()) self |> expectAtom with
+            | Anchored.TypeRefAtom.Intrinsic s -> Flip.Expect.equal "degraded to obj" "obj" s
+            | other -> failtestf "expected Intrinsic obj but got %A" other
+
+        testCase "a STORE-BACKED same-export transient is kept (it will materialize)" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let scope = RenderScopeStore.create ()
+            scope.TypeStore[primitive TypeKindPrimitive.Any] <-
+                TransientTypePath.Moored(TransientModulePath.Anchored, Name.Pascal.create "Stub")
+            let stubRef =
+                ModulePath.createFromList [ "Agents"; "CreateMcpHandler" ]
+                |> TypePath.create "Stub"
+                |> pathAtomRender
+            match runScrub ctx scope stubRef |> expectAtom with
+            | Anchored.TypeRefAtom.Path p -> Flip.Expect.equal "kept" "Stub" (Name.Case.valueOrModified p.Name)
+            | other -> failtestf "expected the Path atom kept but got %A" other
+
+        testCase "a DECLARED type coinciding with the anchor namespace is kept" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            ctx.DeclaredTypePaths.Add "Agents.CreateMcpHandler.Env" |> ignore
+            let envRef =
+                ModulePath.createFromList [ "Agents"; "CreateMcpHandler" ]
+                |> TypePath.create "Env"
+                |> pathAtomRender
+            match runScrub ctx (RenderScopeStore.create ()) envRef |> expectAtom with
+            | Anchored.TypeRefAtom.Path p -> Flip.Expect.equal "kept" "Env" (Name.Case.valueOrModified p.Name)
+            | other -> failtestf "expected the Path atom kept but got %A" other
+
+        testCase "an atom OUTSIDE the anchor namespace is untouched" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let foreign = ModulePath.init "Workers" |> TypePath.create "Request" |> pathAtomRender
+            match runScrub ctx (RenderScopeStore.create ()) foreign |> expectAtom with
+            | Anchored.TypeRefAtom.Path p -> Flip.Expect.equal "untouched" "Request" (Name.Case.valueOrModified p.Name)
+            | other -> failtestf "expected the Path atom untouched but got %A" other
+
+        // Guard against prefix false-positives: "AgentsX.CreateMcpHandler" shares the
+        // anchor's leading TEXT but not its namespace — the scrub matches on the dotted
+        // boundary, not raw StartsWith.
+        testCase "a sibling namespace sharing the anchor's text prefix is untouched" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let sibling =
+                ModulePath.createFromList [ "AgentsX"; "CreateMcpHandler" ]
+                |> TypePath.create "Request"
+                |> pathAtomRender
+            match runScrub ctx (RenderScopeStore.create ()) sibling |> expectAtom with
+            | Anchored.TypeRefAtom.Path _ -> ()
+            | other -> failtestf "expected the Path atom untouched but got %A" other
     ]

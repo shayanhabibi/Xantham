@@ -508,4 +508,20 @@ let tests =
                 "type Probe ="
                 "    abstract every: predicate: (In -> Out) * ?thisArg: Foo -> Bar"
             ])
+
+        // PROPERTY-vs-METHOD NAME COLLISION (Member.partitionRender, ledgered
+        // property-vs-method-drop): TS twin declarations / intersection merges can land a
+        // PROPERTY and a METHOD under one name in one interface — F# forbids the pair
+        // (FS0434 property clashing with method group). The METHOD is the richer surface
+        // (params + overloads); the property drops regardless of declaration order.
+        testCase "property colliding with a same-name method drops — method wins" <| fun _ ->
+            ifaceWith [
+                Property.create "close" (namedRef "Bar") |> Property.wrap
+                method' "close" false [ Parameter.create "code" (namedRef "Foo") ] (namedRef "Bar")
+            ]
+            |> render
+            |> Flip.Expect.equal "property dropped, method kept" (lines [
+                "type Probe ="
+                "    abstract close: code: Foo -> Bar"
+            ])
     ]

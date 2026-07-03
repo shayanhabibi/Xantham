@@ -259,6 +259,106 @@ let filteringTests = testList "input filtering" [
         Flip.Expect.equal "ref-only anchor ignored: no modules" 0 root.Modules.Count
 ]
 
+// ---------------------------------------------------------------------------
+// SAME-PATH DEF MERGE (`combine` / mergeTypeLike): when two anchored renders land
+// on ONE TypePath (the ledgered same-path-def-merge census), the raw member and
+// function concat must be re-hygiened — the per-rt render dedup never saw the two
+// halves together. Contract (Render.Collection.fs mergeTypeLike):
+//   - same-named FUNCTIONS fold into ONE render (signatures concatenated) so the
+//     render-time overload unification judges the whole group — two renders of one
+//     name would emit duplicate members (the unmasked Agents FS0438 class);
+//   - a MEMBER sharing a FUNCTION's name drops, ledgered
+//     merged-def-property-vs-method-drop (FS0434 property-vs-method);
+//   - duplicate MEMBER names drop first-wins, ledgered duplicate-property-drop
+//     (FS0438 accessor dups / FS3172 get-set mismatch);
+//   - the TypeDefn arms only merge when INHERITANCE agrees — differing heritage
+//     keeps the primary untouched.
+// ---------------------------------------------------------------------------
+
+let private mergeMeta : Prelude.RenderMetadata = {
+    Path = Path.create TransientTypePath.Anchored
+    Original = Path.create TransientTypePath.Anchored
+    Source = ValueNone
+    FullyQualifiedName = ValueNone
+}
+
+let private mergeIntrinsic (s: string) : Anchored.TypeRefRender =
+    { Kind = Anchored.TypeRefKind.Atom(Anchored.TypeRefAtom.Intrinsic s); Nullable = false }
+
+let private mergeSignature paramType : Anchored.FunctionLikeSignature =
+    { Metadata = mergeMeta
+      Parameters = [ { Metadata = mergeMeta; Name = Name.Camel.create "x"; Type = mergeIntrinsic paramType; Traits = Set.empty; TypeParameters = []; Documentation = [] } ]
+      ReturnType = mergeIntrinsic "unit"
+      Traits = Set.empty
+      Documentation = []
+      TypeParameters = [] }
+
+let private mergeFunc name signatures : Anchored.FunctionLikeRender =
+    { Metadata = mergeMeta; Name = Name.Camel.create name; Signatures = signatures; Traits = Set.empty; TypeParameters = []; Documentation = [] }
+
+let private mergeProp name typeText : Anchored.TypedNameRender =
+    { Metadata = mergeMeta; Name = Name.Camel.create name; Type = mergeIntrinsic typeText; Traits = Set.empty; TypeParameters = []; Documentation = [] }
+
+let private typeLike name inheritance members functions : Anchored.TypeLikeRender =
+    { Metadata = mergeMeta
+      Name = Name.Pascal.create name
+      TypeParameters = []
+      Inheritance = inheritance
+      Members = members
+      Functions = functions
+      Constructors = []
+      Documentation = [] }
+
+let private combineDefs t1 t2 =
+    let ctx = GeneratorContext.Empty
+    let merged = Render_Collection.combine ctx (Anchored.TypeRender.TypeDefn t1) (Anchored.TypeRender.TypeDefn t2)
+    ctx, merged
+
+let private expectTypeDefn merged =
+    match merged with
+    | Anchored.TypeRender.TypeDefn t -> t
+    | other -> failtestf "expected TypeDefn but got %A" other
+
+let mergeTypeLikeTests = testList "same-path def merge (combine/mergeTypeLike)" [
+    testCase "same-named functions fold into ONE render with concatenated signatures" <| fun _ ->
+        let t1 = typeLike "Probe" [] [] [ mergeFunc "invoke" [ mergeSignature "string" ] ]
+        let t2 = typeLike "Probe" [] [] [ mergeFunc "invoke" [ mergeSignature "float" ] ]
+        let _, merged = combineDefs t1 t2
+        let t = expectTypeDefn merged
+        Flip.Expect.equal "one function render" 1 t.Functions.Length
+        Flip.Expect.equal "both signatures carried" 2 t.Functions.Head.Signatures.Length
+
+    testCase "a property colliding with a function name drops, ledgered" <| fun _ ->
+        let t1 = typeLike "Probe" [] [ mergeProp "close" "string" ] []
+        let t2 = typeLike "Probe" [] [] [ mergeFunc "close" [ mergeSignature "float" ] ]
+        let ctx, merged = combineDefs t1 t2
+        let t = expectTypeDefn merged
+        Flip.Expect.equal "property dropped" 0 t.Members.Length
+        Flip.Expect.equal "function kept" 1 t.Functions.Length
+        let ledger = GeneratorContext.Advisory.dump ctx |> Map.ofList
+        Flip.Expect.equal "drop is ledgered" (Some 1) (Map.tryFind "merged-def-property-vs-method-drop:close" ledger)
+
+    testCase "duplicate member names drop first-wins, ledgered" <| fun _ ->
+        let t1 = typeLike "Probe" [] [ mergeProp "state" "string" ] []
+        let t2 = typeLike "Probe" [] [ mergeProp "state" "float" ] []
+        let ctx, merged = combineDefs t1 t2
+        let t = expectTypeDefn merged
+        Flip.Expect.equal "one member survives" 1 t.Members.Length
+        Flip.Expect.equal "first declaration wins" "string"
+            (match t.Members.Head.Type.Kind with
+             | Anchored.TypeRefKind.Atom(Anchored.TypeRefAtom.Intrinsic s) -> s
+             | _ -> "?")
+        let ledger = GeneratorContext.Advisory.dump ctx |> Map.ofList
+        Flip.Expect.equal "drop is ledgered" (Some 1) (Map.tryFind "duplicate-property-drop" ledger)
+
+    testCase "differing inheritance blocks the merge — primary untouched" <| fun _ ->
+        let t1 = typeLike "Probe" [ mergeIntrinsic "obj" ] [ mergeProp "a" "string" ] []
+        let t2 = typeLike "Probe" [] [ mergeProp "b" "float" ] []
+        let _, merged = combineDefs t1 t2
+        let t = expectTypeDefn merged
+        Flip.Expect.equal "primary member set only" [ "a" ] (t.Members |> List.map (fun m -> Name.Case.valueOrModified m.Name))
+]
+
 [<Tests>]
 let tests = testList "Collection" [
     placementTests
@@ -266,4 +366,5 @@ let tests = testList "Collection" [
     prefixSharingTests
     rootPlacementTests
     filteringTests
+    mergeTypeLikeTests
 ]

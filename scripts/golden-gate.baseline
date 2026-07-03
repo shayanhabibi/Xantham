@@ -96,7 +96,12 @@
 # 2026-07-05 (3): 73 -> 75 with the Mcp burn-down (26 -> 2): two formerly-dangling
 # callback aliases render as nominal Invoke types now that constrained aliases record
 # their arity (invalid -> valid surfacing, the usual materialization class).
-BL_CALLBACK_IFACE=75
+# 2026-07-03 (agents-close; NOTE the two entries above are future-dated typos, git
+# history disambiguates): RATCHETED DOWN 75 -> 69 with the Agents close (2 -> 0,
+# 7/7 units assemble): same-name function grouping (groupFunctionsByName) + the
+# widened return-only unification key (Erased-alias normalization, two-channel
+# optionality) merge duplicate Invoke shapes off the counted surface.
+BL_CALLBACK_IFACE=69
 # 2026-07-04 RECALIBRATION with the metric correction (see golden-gate.sh (b)): the old
 # suffix-regex value of 4 was noise (stem-named homes + qualifier hits). The true leak
 # shape — literal `prototype` members in the surface — measures 63, stable across the
@@ -118,4 +123,8 @@ BL_SMASH=55
 # 26 -> 2): Variable typeRefs and Function returns now run the anchored-ref scrubs,
 # so forward-unit and undefined-home qualified refs degrade to obj (ledgered) instead
 # of dangling on the counted surface.
-BL_SYNTH_PUBLIC=1067
+# 2026-07-03 (agents-close): RATCHETED DOWN 1067 -> 1058 with the Agents close: the
+# dangling self-namespace scrub (foreign-transient-scrub x4) plus merged-def member
+# hygiene remove cross-owner qualified refs and duplicate-member shapes from the
+# counted surface.
+BL_SYNTH_PUBLIC=1058

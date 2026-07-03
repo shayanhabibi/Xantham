@@ -375,6 +375,20 @@ module Member =
         // return-only overload unification (TypeRender.Render.fs) operates per render
         // and can only judge a group it can see.
         ||> fun members functions ->
+            // CROSS-KIND NAME CLASH: an upstream decl-merge can land the same name as
+            // BOTH a property and a method in one type (`shouldReconnectOnClose` — a
+            // function-typed property beside a method render). F# rejects it (FS0434);
+            // the METHOD is the richer surface, the property drops, ledgered.
+            let functionNames =
+                functions |> List.map (fun f -> Name.Case.valueOrModified f.Name) |> Set.ofList
+            let members =
+                members
+                |> List.filter (fun m ->
+                    let name = Name.Case.valueOrModified m.Name
+                    if functionNames.Contains name then
+                        GeneratorContext.Advisory.increment ctx $"property-vs-method-drop:{name}"
+                        false
+                    else true)
             members,
             functions
             // The fold cons-REVERSES; restore SOURCE order so the merged signature

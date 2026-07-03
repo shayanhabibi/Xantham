@@ -10,9 +10,9 @@ Doer tags: **[owner]** = decision/markup only the owner can make. **[gen]** = ge
 
 All nine steps closed 2026-07-02 (constellation survey; `cloudflare.pilot.toml` v0; multi-entry crawl seeding + per-entry provenance; recipe loader/entry resolution; first v0 crawl, 31 roots / 30,719 types; `status-report.sh` → generated STATUS.md with the L0 gate; re-baseline of all four gates; exit: unassigned = 0, every reached package policied). Owner recipe markup deferred by owner ("defaults stand, ratified by use"). Findings ledger (module-twin DECISION reversed by measurement; MISSREF crawl-gating deferred to Phase 4) — details in git history of this file and the baselines.
 
-## Phase 1 — Partitioned emission + per-area L1 gates
+## Phase 1 — Partitioned emission + per-area L1 gates — CLOSED 2026-07-03
 
-**Exit criterion: every unit's own-file error count = 0 (compiles + produces its assembly). Progress: the L1 matrix in [STATUS.md](STATUS.md).**
+**Exit criterion MET 2026-07-03: every unit's own-file error count = 0 (compiles + produces its assembly) — the STATUS matrix is all-zero.**
 
 Closed steps (dated; narratives in `scripts/partition-gate.baseline` unless noted):
 
@@ -23,12 +23,9 @@ Closed steps (dated; narratives in `scripts/partition-gate.baseline` unless note
 
 Closed 2026-07-05 (continued): **MCP AT 0** (obj-alias→empty-interface verdict shape ×215 ledgered + 0-typar export-key arity recording + function-return parenthesization; fifth cell); **CODEMODE AT 0** (stdlib-ALIAS substitution at the remap mint — PropertyKey class; sixth cell); Agents first real count 4 → 2 (decorator-context types joined the obj map).
 
-Open steps:
+Closed *2026-07-03 (agents-close):* **AGENTS AT 0 — PHASE-1 EXIT, 7/7 UNITS ASSEMBLE.** The cross-owner cache-hit class closed on the REF side (`scrubDanglingSelfRefs` — fired exactly 4×, zero false positives; def-side adoption measured 3 ways, pinned 3-for-3 negative), which unmasked 14 later-phase latents (the Workers-88 pattern) burned to 0 by four seam fixes (collection `mergeTypeLike`, render-entry `groupFunctionsByName`, partition property-vs-method drop, and two unification-KEY corrections: bare-`Erased.X`-as-obj + two-channel optionality). +22 coverage pins (suite 620, new `OverloadUnification.fs` plane); arity gate ratcheted 11→0 disagreeing names; golden callbacks 75→69, synth-public 1067→1058. Full narrative: the baseline's agents-close entry.
 
-- **[gen]** Agents at 0 — THE LAST P1 CELL. The remaining 2 (`CreateMcpHandler`/`ExperimentalCreateMcpHandler`) are the CROSS-OWNER CACHE-HIT class: it closes via the DEFERRED-TOGETHER pair below, not another arm-local patch (a reRegisterStructuralLiterals wiring was measured 2026-07-05 — zero movement — and reverted; ref-side attempts are 4-for-4 negative on this family). *Closure: per-unit build exit 0; Phase-1 exit = the STATUS matrix all-zero.*
-- **[gen]** DEFERRED-TOGETHER pair (measured 2026-07-05, evidence in the baseline; now the Agents blocker): scrub-host correction for holder params (surfaces real refs — fetch renders true `Request`/`URL` types instead of `obj`) + the cross-owner def/ref closure (cache-hit literals' defs materialize only at their first owner — the `ExportedHandler.Fetch` / 120B-`U2<obj,obj>` / Agents-`CreateMcpHandler` family). *Closure: Agents at 0; params scrub at the export-unit host with zero new dangles; ledgered obj-degradations on holder params burn down.*
-- **[gen]** SharedLiterals homes placed by manifest classification (the designed fix for the literal-home dangle class). *Closure: dangle class = 0 in per-area gates.*
-- **[gen]** Fidelity refinements catalogued during the burn-down, per-area after Phase 2: literal-discriminant widening (KV overloads become real again), never-arm strip for XOR expansions, `TypeReference` intermediate-alias arg preservation (the BaseToolCallback middle-arg drop). *Closure: each retires its advisory-ledger class.*
+*2026-07-03 dated note (divergence-edit per standing rules):* the DEFERRED-TOGETHER pair closed **differently than designed** — the ref side (scrub) sufficed for assembly; the def side (cross-owner def materialization) and the params scrub-host correction are NOT landed and NO LONGER BLOCK any unit. Their remaining value is fidelity (real types instead of ledgered `obj` degradations), so they move to the Phase-3 fidelity catalogue below, alongside the SharedLiterals manifest-placement item (same reclassification: its dangle class is scrubbed-to-obj + ledgered, not erroring).
 
 ## Phase 2 — Ship the first slice (the near-term goal)
 
@@ -36,7 +33,7 @@ Open steps:
 
 - **[gen]** Pack the v0 libs as nupkgs (upstream-tracking versions, publish order). *Closure: `dotnet add package` works from a local feed.*
 - **[gen]** HelloWorker: fetch handler + KV/R2/D1 round-trip, Fable-compiled through the Xantham units, deployed via the clef-lang-site CLI model (management-API upload), verified against the live workers.dev endpoint. *Closure: deploy succeeds + correct response bytes from the deployed worker.* **Unblocked NOW — needs only the Workers unit; the earliest signal on the runtime `Emit`/`Import` fidelity unknown (fable 5.0.0-rc.3 × Fable.Core 5.0.0-beta.4 never exercised on a generated unit). Do not gate on Agents.**
-- **[gen]** Minimal Agent slice consumer: `Agent` subclass + `routeAgentRequest` + `getAgentByName` + state + `this.sql`, compiled through the bindings, deployed the same way. *Closure: Fable compile exit 0; deployed slice responds.* (Gated on Agents at 0.)
+- **[gen]** Minimal Agent slice consumer: `Agent` subclass + `routeAgentRequest` + `getAgentByName` + state + `this.sql`, compiled through the bindings, deployed the same way. *Closure: Fable compile exit 0; deployed slice responds.* (Ungated 2026-07-03 — Agents at 0.)
 - **[owner]** zod/MCP policy proof-or-adjust: the opaque-handle builders suffice for `registerTool` authoring, or the policy is revised. *Closure: a tool-authoring sample compiles.*
 - **[both]** Phase 2 exit = the "ecstatic" milestone: 1:1 import→export, a consumer builds something real without reading Xantham internals.
 
@@ -44,6 +41,7 @@ Open steps:
 
 - **[gen]** 7-stage hook model implemented; inline policies migrated behind it.
 - **[both]** Per-area conventions declared in the recipe; advisory ledger live; zero unacknowledged advisories on shipping areas.
+- **[gen]** FIDELITY CATALOGUE (moved from Phase 1, 2026-07-03 — scrubbed-to-obj + ledgered, no longer assembly-blocking; each item retires its advisory-ledger class): literal-discriminant widening (KV overloads become real again); never-arm strip for XOR expansions; `TypeReference` intermediate-alias arg preservation (the BaseToolCallback middle-arg drop); params scrub-host correction (holder params render true `Request`/`URL` instead of `obj`); cross-owner def materialization + SharedLiterals homes placed by manifest classification (the `foreign-transient-scrub` and literal-home classes get real defs instead of obj).
 
 ## Phase 4 — L3 + steady-state operation
 

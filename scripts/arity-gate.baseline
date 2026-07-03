@@ -9,16 +9,12 @@
 # when scoped packages merged to single module segments, so it is now MEASURABLE and
 # disagrees — the already-parked ZodBoolean twin-cluster class (see memory), not new debt.
 # Total disagreeing names 9 -> 7.
-BaseToolCallback=3
-CreateTaskRequestHandler=1
-JsonSchemaType=1
-JsonSchemaValidator=1
-TaskRequestHandler=1
-MCPObservabilityEvent=2
-ProgressToken=1
-# 2026-07-03: placement moved Empty.Core.UtilCjs.Extend into arity-parser visibility —
-# one of the Zod-unit's counted FS0033 args-class sites (phantom-typar family), not new debt.
-Extend=1
-ZodBoolean=1
-ZodNumber=1
-ZodString=1
+# 2026-07-03 (agents-close): ZERO disagreeing names — the full list (11 names: the
+# BaseToolCallback/JsonSchema*/ProgressToken/MCPObservabilityEvent handler-alias class,
+# the Extend phantom-typar site, the ZodBoolean/ZodNumber/ZodString twin-cluster)
+# cleared across the Mcp/Agents burn-downs: constrained-no-default aliases now RECORD
+# their arity (prerenderTypeAliases recording-gate removal), 0-typar aliases record an
+# explicit arity 0, and the aligners pad/truncate refs against the recorded values.
+# The phantom-typar-alias class (memory xantham-phantom-typar-alias) has no MEASURED
+# instances on this surface; the coordinated-fix item stays catalogued in case a new
+# surface re-surfaces it. Any name appearing below this line is NEW DEBT.

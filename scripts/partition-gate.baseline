@@ -502,4 +502,36 @@ BL_FIDELITY_CLOUDEDGE_CODEMODE=0
 # THE LAST P1 WALL = the designed cross-owner def/ref closure + scrub-host correction
 # pair (PLAN.md Phase-1 open item). NOTE: Agents is not on the HelloWorker critical
 # path — Phase-2's first proof needs only the Workers unit.
-BL_FIDELITY_CLOUDEDGE_AGENTS=2
+# 2026-07-03 (agents-close): 2 -> 0 — THE AGENTS UNIT COMPILES AND PRODUCES ITS
+# ASSEMBLY. 7/7 units assemble: the Phase-1 L1 partition exit is COMPLETE.
+# Two stages, both measured:
+#  - CROSS-OWNER DANGLING REFS closed on the REF side: scrubDanglingSelfRefs
+#    (RenderScope.Anchored.fs) degrades an anchor-namespace path atom that the
+#    export's store will NOT materialize to obj — fired exactly 4x (ledger
+#    foreign-transient-scrub: CreateMcpHandler x2, ExperimentalCreateMcpHandler x2),
+#    zero false positives. The keep-list is threefold: store-backed same-export
+#    transients (RpcStub/Case{n}); DECLARED types coinciding with anchor namespaces
+#    (env: Cloudflare.Env — ctx.DeclaredTypePaths via the markDeclaredTypePaths
+#    pre-pass); atoms outside the anchor namespace. DEF-SIDE ADOPTION is the pinned
+#    3-for-3 NEGATIVE (walk-wide: Workers 0->37, a non-generic `type Request` planted
+#    beside the real generic; export-arm-gated: 0->34; declared-guarded: Agents
+#    2->22 synthesized-def merges): every variant collides with the def-placement
+#    universe, which is not enumerable at prerender time. The ref side is total.
+#    The params scrub-host correction stays catalogued (deferred; see the PartyServer
+#    entry) — it is no longer load-bearing for any unit's assembly.
+#  - Clearing the last FS0039 UNMASKED 14 later-phase latents (FS0438/FS3172/FS0434
+#    — the same compiler-phase unmasking as the Workers-88 pattern), burned 14 -> 0
+#    by four seam fixes: mergeTypeLike (Render.Collection.fs — same-path def merges
+#    re-hygiene members/functions; ledger merged-def-property-vs-method-drop +
+#    duplicate-property-drop); groupFunctionsByName (TypeRender.Render.fs — same-name
+#    renders fuse at renderInterface/renderClass so unification judges the group);
+#    partitionRender property-vs-method drop (Render.Member.fs, ledger
+#    property-vs-method-drop); and TWO unification-KEY corrections (bare Erased.X
+#    params key as obj — abbreviation-transparent to .NET; optionality keys as the
+#    COMBINED Optional-trait/Nullable-flag channel on the non-nullable type text —
+#    the final pair was byte-identical printed twins keying differently, the
+#    TypedAgentClientCall Invoke class).
+# Coverage: +22 pins (OverloadUnification.fs new plane; Collection/
+# RenderScopeAnchored/MemberRender extended), suite 620. Arity gate ratcheted 11->0
+# names; golden callbacks 75->69, synth-public 1067->1058.
+BL_FIDELITY_CLOUDEDGE_AGENTS=0

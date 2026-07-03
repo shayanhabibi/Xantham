@@ -173,6 +173,12 @@ and GeneratorContext =
         /// ref has no faithful F# target — a namespace used as a value type is untypeable —
         /// so it erases to `obj`, ledgered. Consulted in `prerender`'s Interface arm.
         ModuleTypePaths: HashSet<string>
+        /// Every REAL declared type's flattened path (interface/class/alias/enum, all
+        /// modules), recorded by `markDeclaredTypePaths` before processExports. The
+        /// dangling-self-namespace scrub's KEEP-list: a holder variable named like its
+        /// own type (`env: Cloudflare.Env`) produces a ref that coincides with the
+        /// export's anchor namespace yet targets a REAL type — never scrub those.
+        DeclaredTypePaths: HashSet<string>
         Customisation: Customisation
 
     }
@@ -194,6 +200,7 @@ and GeneratorContext =
         SyntheticHomeChildDefs = HashSet()
         ExportScopeStores = Dictionary()
         ModuleTypePaths = HashSet()
+        DeclaredTypePaths = HashSet()
         TypeAliasRemap = DictionaryImpl()
         TypeAliasArity = DictionaryImpl()
         HoistedHomeTypars = DictionaryImpl()

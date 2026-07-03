@@ -96,6 +96,7 @@ let main argv =
     // name that is BOTH an interface and a namespace (the module wins, interface dropped)
     // erases to `obj` instead of dangling (prerender's Interface arm).
     ArenaInterner.markModuleTypePaths generatorContext interner
+    ArenaInterner.markDeclaredTypePaths generatorContext interner
     ArenaInterner.markSharedLiteralsFromExports generatorContext interner
     ArenaInterner.prerenderTypeAliases generatorContext interner
     // ArenaInterner.prerenderFromGraph generatorContext interner

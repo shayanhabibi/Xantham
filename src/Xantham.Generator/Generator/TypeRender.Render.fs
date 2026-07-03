@@ -610,11 +610,25 @@ module FunctionLikeRender =
     // member renders are LOCALISED at anchor time, collapsing every atom to an opaque
     // widget whose equality is reference-like (compiled Oak nodes) — two same-text
     // params never compare equal structurally. Text is exactly the compiler's view.
+    // Bare (arity-0) `Erased.X` advisory aliases ARE `obj` ABBREVIATIONS — .NET
+    // signatures see straight through them, so the key must too: an `Erased.Empty`
+    // param beside an `obj` param is the SAME .NET signature (FS0438 despite the
+    // different text — the Agents UntypedAgentClientCall Invoke class). Applied
+    // (arity>0) `Erased.X<...>` forms are real interfaces and stay distinct.
+    let private normalizeErasedAliases (text: string) =
+        System.Text.RegularExpressions.Regex.Replace(text, @"\bErased\.[A-Za-z_][A-Za-z0-9_]*\b(?!<)", "obj")
+    let private signatureTypeText (t: TypeRefRender) =
+        TypeRefRender.render t |> renderedTypeText |> normalizeErasedAliases
     let private dotnetKey (s: FunctionLikeSignature) =
         s.Parameters
         |> List.map (fun p ->
-            TypeRefRender.render p.Type |> renderedTypeText,
-            p.Traits.Contains RenderTraits.Optional,
+            // Nullability reaches the printed param EITHER via the Optional trait OR
+            // the type's own Nullable flag (orNullable at render) — two signatures can
+            // carry it on different sides and print/compile IDENTICALLY (the Agents
+            // TypedAgentClientCall Invoke pair). Key on the non-nullable form + the
+            // COMBINED flag, matching what .NET actually sees.
+            signatureTypeText (TypeRefRender.nonNullable p.Type),
+            (p.Traits.Contains RenderTraits.Optional || p.Type.Nullable),
             p.Traits.Contains RenderTraits.ParamArray),
         s.TypeParameters.Length
     let private unifyReturnOnlyOverloads (ctx: GeneratorContext) (signatures: FunctionLikeSignature list) =
@@ -624,7 +638,7 @@ module FunctionLikeRender =
             match group with
             | [ single ] -> single
             | first :: _ ->
-                match group |> List.map _.ReturnType |> List.distinct with
+                match group |> List.map _.ReturnType |> List.distinctBy signatureTypeText with
                 | [ _ ] ->
                     GeneratorContext.Advisory.incrementBy ctx "overload-duplicate-drop" (group.Length - 1)
                     first
@@ -667,6 +681,20 @@ module FunctionLikeRender =
         renderMember ctx functionLike
 
 module TypeLikeRender =
+    // SAME-NAME FUNCTION GROUPING at the emission seam — the one place every inflow
+    // passes (partitionRender output, TypeLiteral.prerender's groupless fold, the
+    // collection combine): a name's overload set must reach the return-only overload
+    // unification as ONE render, or identical-signature twins emit as duplicate
+    // members (the Agents TypedAgentClientCall Invoke FS0438 class).
+    let private groupFunctionsByName (functions: FunctionLikeRender list) =
+        functions
+        |> List.groupBy (fun f -> Name.Case.valueOrModified f.Name)
+        |> List.map (fun (_, group) ->
+            match group with
+            | [ single ] -> single
+            | first :: _ -> { first with Signatures = group |> List.collect _.Signatures |> List.distinct }
+            | [] -> failwith "unreachable: groupBy yields non-empty groups")
+
     // A constructor's RETURN is the constructed type — including its OWN type
     // parameters (`abstract Create: ... -> WritableStream` inside
     // `type WritableStream<'W>` is FS0033 "expects 1 given 0"; the return must be
@@ -754,6 +782,7 @@ module TypeLikeRender =
             |> List.map (TypedNameRender.renderAbstract ctx)
         let functions =
             typeLike.Functions
+            |> groupFunctionsByName
             |> List.collect (FunctionLikeRender.renderAbstract ctx)
         let memberCollection = members @ functions
         let builder =
@@ -786,6 +815,7 @@ module TypeLikeRender =
             |> List.map (TypedNameRender.renderMember ctx)
         let functions =
             typeLike.Functions
+            |> groupFunctionsByName
             |> List.collect (FunctionLikeRender.renderMember ctx)
         let memberCollection = members @ functions
         let constructors = renderConstructors ctx typeLike

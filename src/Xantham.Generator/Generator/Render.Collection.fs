@@ -86,7 +86,47 @@ let tryRenderMetadataImport (metadata: RenderMetadata) =
             |> ValueSome
         | _ -> ValueNone
 
-let combine (primary: Anchored.TypeRender) (secondary: Anchored.TypeRender) =
+// MERGED-DEF NAME HYGIENE (the collection-seam twin of partitionRender's contract):
+// when two SAME-PATH defs merge (the ledgered same-path-def-merge class — cross-scope
+// path collisions the per-scope occupancy cannot see), the raw member/function concat
+// carries F#-illegal shapes the per-rt render dedup never saw together:
+//  - same-named MEMBERS with different types (FS0438 accessor dups, FS3172 get/set
+//    mismatch) — first declaration wins, ledgered (the duplicate-property-drop rule);
+//  - same-named FUNCTIONS as separate renders (duplicate Invoke FS0438) — signatures
+//    fold into ONE render so the render-time overload unification can judge the group;
+//  - a MEMBER sharing a FUNCTION's name (FS0434 property-vs-method) — the property
+//    drops, ledgered (the method is the richer surface).
+let private mergeTypeLike (ctx: GeneratorContext) (t1: Anchored.TypeLikeRender) (t2: Anchored.TypeLikeRender) : Anchored.TypeLikeRender =
+    let functions =
+        t1.Functions @ t2.Functions
+        |> List.distinct
+        |> List.groupBy (fun f -> Name.Case.valueOrModified f.Name)
+        |> List.map (fun (_, group) ->
+            match group with
+            | [ single ] -> single
+            | first :: _ -> { first with Signatures = group |> List.collect _.Signatures |> List.distinct }
+            | [] -> failwith "unreachable: groupBy yields non-empty groups")
+    let functionNames =
+        functions |> List.map (fun f -> Name.Case.valueOrModified f.Name) |> Set.ofList
+    let seenMembers = System.Collections.Generic.HashSet<string>()
+    let members =
+        t1.Members @ t2.Members
+        |> List.distinct
+        |> List.filter (fun m ->
+            let name = Name.Case.valueOrModified m.Name
+            if functionNames.Contains name then
+                GeneratorContext.Advisory.increment ctx $"merged-def-property-vs-method-drop:{name}"
+                false
+            elif seenMembers.Add name then true
+            else
+                GeneratorContext.Advisory.increment ctx "duplicate-property-drop"
+                false)
+    { t1 with
+          Constructors = t1.Constructors @ t2.Constructors |> List.distinct
+          Members = members
+          Functions = functions }
+
+let combine (ctx: GeneratorContext) (primary: Anchored.TypeRender) (secondary: Anchored.TypeRender) =
     // primary
     match primary, secondary with
     | _ when primary = secondary -> primary
@@ -101,18 +141,12 @@ let combine (primary: Anchored.TypeRender) (secondary: Anchored.TypeRender) =
         { fn1 with Signatures = fn1.Signatures @ fn2.Signatures |> List.distinct }
         |> Anchored.TypeRender.Function
     | Anchored.TypeRender.TypeDefn t1, Anchored.TypeRender.TypeDefn t2 when t1.Inheritance = t2.Inheritance ->
-        { t1 with
-              Constructors = t1.Constructors @ t2.Constructors |> List.distinct
-              Members = t1.Members @ t2.Members |> List.distinct
-              Functions = t1.Functions @ t2.Functions |> List.distinct }
+        mergeTypeLike ctx t1 t2
         |> Anchored.TypeRender.TypeDefn
     | Anchored.TypeRender.TypeAlias t1, Anchored.TypeRender.TypeAlias t2 ->
         match t1, t2 with
         | TypeAliasRender.TypeDefn t1, TypeAliasRender.TypeDefn t2 when t1.Inheritance = t2.Inheritance ->
-            { t1 with
-                  Constructors = t1.Constructors @ t2.Constructors |> List.distinct
-                  Members = t1.Members @ t2.Members |> List.distinct
-                  Functions = t1.Functions @ t2.Functions |> List.distinct }
+            mergeTypeLike ctx t1 t2
             |> Anchored.TypeRender.TypeDefn
         | _ -> primary
     | _ -> primary
@@ -267,14 +301,14 @@ module RootModule =
                         // ledger makes it gate-visible (silent merges produced the FS0438 class).
                         if module'.Types[name] <> typeRender then
                             GeneratorContext.Advisory.increment ctx $"same-path-def-merge:{module'.Name}.{name}"
-                        module'.Types[name] <- combine module'.Types[name] typeRender
+                        module'.Types[name] <- combine ctx module'.Types[name] typeRender
                 | Choice2Of3 ({ Name = name } as typedNameRender) ->
                     let name = Name.Case.valueOrModified name
                     if module'.Members.TryAdd(name, Choice1Of2 typedNameRender) |> not then
                         match module'.Members[name] with
                         | Choice1Of2 t ->
                             (Anchored.TypeRender.Variable t, Anchored.TypeRender.Variable typedNameRender)
-                            ||> combine
+                            ||> combine ctx
                             |> function
                                 | Anchored.TypeRender.Variable t -> module'.Members[name] <- Choice1Of2 t
                                 | _ -> failwith "unreachable guaranteed by guard in partition"
@@ -285,7 +319,7 @@ module RootModule =
                         match module'.Members[name] with
                         | Choice2Of2 t ->
                             (Anchored.TypeRender.Function t, Anchored.TypeRender.Function functionLikeRender)
-                            ||> combine
+                            ||> combine ctx
                             |> function
                                 | Anchored.TypeRender.Function t -> module'.Members[name] <- Choice2Of2 t
                                 | _ -> failwith "unreachable guaranteed by guard in partition"

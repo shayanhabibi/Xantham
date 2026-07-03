@@ -94,6 +94,43 @@ module Render =
         |> scrubAnchored ctx scrubHost
         |> TypeRefRender.localise localiseAnchor
 
+    /// DANGLING SELF-NAMESPACE SCRUB (module-global holder channels): after anchoring,
+    /// a path atom INSIDE this export's own anchor namespace that the export's store
+    /// will NOT materialize is a cross-owner cached transient's per-site resolution —
+    /// its def lives only under its first owner (the Agents createMcpHandler class:
+    /// the cf-shape INTERSECTION rides the interned-molecule cache into a later
+    /// export's refs, and the shared-literal homes gate on TypeLiteral so it has no
+    /// canonical home). Degrade the atom to obj, ledgered. DEF-SIDE ADOPTION was
+    /// measured three ways (walk-wide: Workers 0->37 — a non-generic `type Request`
+    /// planted beside the real one; export-arm-gated: 0->34; declared-type-guarded:
+    /// Agents 2->22 duplicate-member merges with SYNTHESIZED defs) — every variant
+    /// collides with the def-placement universe, which is not enumerable at prerender
+    /// time. The ref side is total and collision-free. Healthy same-export transients
+    /// (RpcStub, GetServerByName, Case{n} children) are STORE-BACKED and kept; concrete
+    /// cross-unit refs live outside the anchor namespace and are untouched.
+    let scrubDanglingSelfRefs (ctx: GeneratorContext) (scope: RenderScopeStore) (anchorPath: AnchorPath) (render: TypeRefRender) =
+        let flatten names = names |> List.map Name.Case.valueOrModified |> String.concat "."
+        let anchorFlat = AnchorPath.flatten anchorPath |> flatten
+        let materialized =
+            scope.TypeStore.Values
+            |> Seq.map (fun t ->
+                TransientPath.anchor anchorPath (TransientPath.create t)
+                |> AnchorPath.flatten
+                |> flatten)
+            |> HashSet
+        render
+        |> TypeRefRender.mapAtoms (fun atom ->
+            match atom with
+            | TypeRefAtom.Path p ->
+                let f = TypePath.flatten p |> flatten
+                if (f = anchorFlat || f.StartsWith(anchorFlat + "."))
+                   && not (materialized.Contains f)
+                   && not (ctx.DeclaredTypePaths.Contains f) then
+                    GeneratorContext.Advisory.increment ctx $"foreign-transient-scrub:{Name.Case.valueOrModified p.Name}"
+                    TypeRefAtom.Intrinsic Intrinsic.obj
+                else atom
+            | a -> a)
+
     /// ABBREVIATION-LEGALITY VERDICT for an ANCHORED, PRE-LOCALISE alias body (shared by
     /// the Transient and Concrete alias arms — the check must see atoms, and localise
     /// widgetizes them). Two F#-illegal abbreviation shapes degrade, LEDGERED:
@@ -828,7 +865,14 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
             // Scrubbed with the RESOLVE host (see anchorScrubLocaliseSplit): this channel
             // was never scrubbed, which let obj-with-args escape the opaque collapse and
             // forward-unit refs escape the DAG scrub (the Mcp first-count channel gap).
-            |> Render.anchorScrubLocaliseSplit ctx Set.empty anchorPath anchorPath localiseAnchor
+            // Plus the dangling-self-namespace scrub (see scrubDanglingSelfRefs): a
+            // cross-owner cached transient resolving into THIS export's namespace with
+            // no store-backed def degrades to obj, ledgered.
+            |> TypeRefRender.anchor anchorPath
+            |> TypeRefRender.substituteForHeritage Set.empty
+            |> Render.scrubAnchored ctx anchorPath
+            |> Render.scrubDanglingSelfRefs ctx scope anchorPath
+            |> TypeRefRender.localise localiseAnchor
         if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value && not (ctx.TopLevelExports.Contains export) then
             typeRef |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
         else
@@ -977,8 +1021,13 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                                 func.Type
                                 |> prerender ctx scope
                                 // Scrubbed with the RESOLVE host — never-scrubbed channel,
-                                // same rationale as the Variable-arm typeRef above.
-                                |> Render.anchorScrubLocaliseSplit ctx Set.empty anchorPath anchorPath localiseAnchor
+                                // same rationale as the Variable-arm typeRef above,
+                                // including the dangling-self-namespace scrub.
+                                |> TypeRefRender.anchor anchorPath
+                                |> TypeRefRender.substituteForHeritage Set.empty
+                                |> Render.scrubAnchored ctx anchorPath
+                                |> Render.scrubDanglingSelfRefs ctx scope anchorPath
+                                |> TypeRefRender.localise localiseAnchor
                             Traits = Set [ RenderTraits.Static ]
                             Documentation = func.Documentation
                             TypeParameters =
@@ -1302,6 +1351,27 @@ module ArenaInterner =
     /// in `prerender`'s Interface arm to erase such refs to `obj` (a namespace used as a
     /// value type is untypeable; ledgered). Uses `Path.fromModule`'s flattened form, which
     /// `fromInterface` mirrors, so the interface ref's path matches this module's path.
+    /// Record every REAL declared type's flattened path (interface/class/alias/enum,
+    /// walked through modules) BEFORE processExports — the dangling-self-namespace
+    /// scrub's KEEP-list (see scrubDanglingSelfRefs).
+    let markDeclaredTypePaths (ctx: GeneratorContext) (interner: ArenaInterner) =
+        let record (path: TypePath) =
+            TypePath.flatten path
+            |> List.map Name.Case.valueOrModified
+            |> String.concat "."
+            |> ctx.DeclaredTypePaths.Add
+            |> ignore
+        let rec walk (export: ResolvedExport) =
+            match export with
+            | ResolvedExport.Interface i -> record (Interceptors.pipeInterface ctx i)
+            | ResolvedExport.Class c -> record (Interceptors.pipeClass ctx c)
+            | ResolvedExport.TypeAlias a -> record (Interceptors.pipeTypeAlias ctx a)
+            | ResolvedExport.Enum e -> record (Interceptors.pipeEnum ctx e)
+            | ResolvedExport.Module m -> m.Exports |> List.iter walk
+            | _ -> ()
+        interner.ExportMap
+        |> Map.iter (fun _ exports -> exports |> List.iter walk)
+
     let markModuleTypePaths (ctx: GeneratorContext) (interner: ArenaInterner) =
         let rec walk (export: ResolvedExport) =
             match export with

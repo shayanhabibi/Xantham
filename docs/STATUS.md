@@ -74,9 +74,9 @@ State source: the committed per-unit own-file error baselines in `scripts/partit
 | Fidelity.CloudEdge.PartyServer | 0 | **COMPILES + ASSEMBLY** |
 | Fidelity.CloudEdge.Mcp | 0 | **COMPILES + ASSEMBLY** |
 | Fidelity.CloudEdge.CodeMode | 0 | **COMPILES + ASSEMBLY** |
-| Fidelity.CloudEdge.Agents | 2 | **burn-down target (first real count)** |
+| Fidelity.CloudEdge.Agents | 0 | **COMPILES + ASSEMBLY** |
 
-**Phase-1 exit progress: 6/7 units at true 0.** Current wall: Fidelity.CloudEdge.Agents.
+**Phase-1 exit progress: 7/7 units at true 0.** PHASE-1 L1 CRITERION MET FOR ALL UNITS.
 
 Whole-surface signals over the SAME units: `ir-sentinel.sh` (IR identity), `arity-gate.sh` (decl/ref arity), `golden-gate.sh` (semantic budgets + determinism); deliberate degradations are counted per class in the emitted `advisory-ledger.txt`. The monolith and its Fable-transpile conformance gate retired 2026-07-03; Fable conformance returns as consumption (HelloWorker, Phase 2).
 
@@ -95,29 +95,30 @@ Whole-surface signals over the SAME units: `ir-sentinel.sh` (IR identity), `arit
 | Xantham.Decoder.Tests | NameAndCodeKey.fs | 86 |
 | Xantham.Decoder.Tests | ArenaInternerResolve.fs | 71 |
 | **Xantham.Decoder.Tests** | **total** | **157** |
+| Xantham.Generator.Tests | AliasRemapAndPaths.fs | 43 |
 | Xantham.Generator.Tests | Categorization.fs | 40 |
 | Xantham.Generator.Tests | TypeRefRender.fs | 38 |
-| Xantham.Generator.Tests | AliasRemapAndPaths.fs | 37 |
-| Xantham.Generator.Tests | MemberRender.fs | 33 |
+| Xantham.Generator.Tests | MemberRender.fs | 34 |
 | Xantham.Generator.Tests | PrerenderTypeMapping.fs | 27 |
 | Xantham.Generator.Tests | PathModel.fs | 26 |
 | Xantham.Generator.Tests | AnchoringInvariance.fs | 23 |
 | Xantham.Generator.Tests | TypeRefRenderExtra.fs | 21 |
 | Xantham.Generator.Tests | AnchoringPlacement.fs | 16 |
 | Xantham.Generator.Tests | AnchoringHoisted.fs | 16 |
+| Xantham.Generator.Tests | Collection.fs | 16 |
 | Xantham.Generator.Tests | TypeRefRender.SubstituteForHeritage.fs | 15 |
 | Xantham.Generator.Tests | UsedTypars.fs | 13 |
 | Xantham.Generator.Tests | AreaAssignment.fs | 13 |
-| Xantham.Generator.Tests | Collection.fs | 12 |
 | Xantham.Generator.Tests | AnchoredRegistration.fs | 12 |
+| Xantham.Generator.Tests | RenderScopeAnchored.fs | 12 |
 | Xantham.Generator.Tests | SharedDeepNestedLiteralPlacement.fs | 11 |
 | Xantham.Generator.Tests | TypeRefRender.HomeChildScrub.fs | 11 |
+| Xantham.Generator.Tests | OverloadUnification.fs | 11 |
 | Xantham.Generator.Tests | TypeShapeRender.fs | 10 |
 | Xantham.Generator.Tests | EnumRender.fs | 9 |
 | Xantham.Generator.Tests | RecipeLoad.fs | 8 |
 | Xantham.Generator.Tests | AliasBodyLiteralPlacement.fs | 6 |
 | Xantham.Generator.Tests | TransientPathOccupancy.fs | 6 |
-| Xantham.Generator.Tests | RenderScopeAnchored.fs | 6 |
 | Xantham.Generator.Tests | Paths.fs | 5 |
 | Xantham.Generator.Tests | TypeAliasRender.fs | 5 |
 | Xantham.Generator.Tests | WithoutArgDrop.fs | 5 |
@@ -130,8 +131,8 @@ Whole-surface signals over the SAME units: `ir-sentinel.sh` (IR identity), `arit
 | Xantham.Generator.Tests | TypeDefnRenderHarness.fs | 3 |
 | Xantham.Generator.Tests | LibEsSubstitution.fs | 2 |
 | Xantham.Generator.Tests | Name.fs | 1 |
-| **Xantham.Generator.Tests** | **total** | **454** |
+| **Xantham.Generator.Tests** | **total** | **482** |
 
 ## L2 / L3
 
-L2 (conventions layer): not started — fragments welded into L1 renderer (Phase 3). L3 (consumption proof): not started — first signal is HelloWorker under miniflare (Phase 2).
+L2 (conventions layer): not started — fragments welded into L1 renderer (Phase 3). L3 (consumption proof): not started — first signal is HelloWorker Fable-compiled through the units and deployed via the clef-lang-site CLI model (management-API upload; NO wrangler/miniflare — owner directive, PLAN.md Phase 2).
