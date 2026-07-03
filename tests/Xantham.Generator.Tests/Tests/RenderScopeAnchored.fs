@@ -100,6 +100,50 @@ let variableAnchoringTests =
             registerAnchorFromExport ctx (ResolvedExport.Variable variable)
             renderedVariableTypeText ctx
             |> Flip.Expect.equal "union arms must not collapse onto one path" "let _: U2<M.Combo, M.Combo.Case2> = JS.undefined"
+
+        // FUNCTION-ARM SPLIT (the PartyServer GetServerByName class — the Variable-arm
+        // rpcStub fix's flagged latent twin): a module-global FUNCTION's hoisted param
+        // and return literals must render refs at the export's TRUE anchor (where the
+        // def walk places their defs: nameless ↔ context path, second literal ↔ Case2
+        // child) with the module qualification kept — not rooted bare at the holder.
+        testCase "function param and return literals qualify at the export anchor (def/ref agreement)" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let literalWith name typ =
+                TypeLiteral.empty
+                |> TypeLiteral.addMember (Property.create name (primitive typ) |> Property.wrap)
+                |> TypeLiteral.wrap
+            let func =
+                Function.create "getServerByName" (literalWith "id" TypeKindPrimitive.String)
+                |> Function.withPath [ "M" ]
+                |> Function.withParameters [ Parameter.create "options" (literalWith "retry" TypeKindPrimitive.Boolean) ]
+            registerAnchorFromExport ctx (ResolvedExport.Function [ func ])
+            let signature =
+                ctx.AnchorRenders
+                |> Seq.choose (function
+                    | KeyValue(_, Choice2Of2 scope) -> Some scope
+                    | _ -> None)
+                |> Seq.tryPick (fun scope ->
+                    match snd scope.Render |> _.Value with
+                    | Anchored.TypeRender.Function f -> Some f.Signatures.Head
+                    | _ -> None)
+                |> Option.defaultWith (fun () -> failtest "expected a Function render scope")
+            let text (ref: Xantham.Generator.Types.Anchored.TypeRefRender) =
+                Ast.Oak() {
+                    Ast.AnonymousModule() {
+                        Ast.Value("_", Exprs.jsUndefined, TypeRefRender.render ref)
+                    }
+                }
+                |> Gen.mkOak |> Gen.run |> _.Trim()
+            // Both refs must resolve AT THE EXPORT ANCHOR — qualified `M.GetServerByName`,
+            // neither bare `GetServerByName` (the pre-split root-localise failure) nor
+            // param-rebased `M.GetServerByName.Options`. NB: production literals pre-mint
+            // through the function's full SignatureKey (so a second literal in the scope
+            // re-homes to Case2 — see the PartyServer emission); this mock's SignatureKey
+            // is empty, so both literals resolve nameless at the anchor.
+            text signature.Parameters.Head.Type
+            |> Flip.Expect.equal "param literal ref must resolve at the export anchor" "let _: M.GetServerByName = JS.undefined"
+            text signature.ReturnType
+            |> Flip.Expect.equal "return literal ref must resolve at the export anchor" "let _: M.GetServerByName = JS.undefined"
     ]
 
 [<Tests>]

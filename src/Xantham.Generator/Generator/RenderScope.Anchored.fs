@@ -65,6 +65,29 @@ module Render =
         |> scrubAnchored ctx anchorPath
         |> TypeRefRender.localise anchorPath
 
+    /// `anchorScrubLocalise` with the ANCHOR and LOCALISE roles SPLIT (the module-global
+    /// holder classes — the Variable-arm rpcStub fix extended to Function params/returns):
+    /// transient atoms resolve against the export's TRUE anchor, the same anchor the def
+    /// walk places hoisted literals with, so a param literal's ref and def agree by
+    /// construction (nameless ↔ nameless, Case{n} ↔ Case{n}); localisation shortens
+    /// against the holder's REAL emission scope (namespace root), keeping the full
+    /// module qualification. One shared anchor breaks one side or the other (the
+    /// PartyServer GetServerByName class).
+    ///
+    /// The SCRUBS deliberately keep the LOCALISE anchor as host — the legacy empty
+    /// module trace indexes as unit 1, degrading holder-function param refs to obj as
+    /// they always have been. Correcting the host to the export's unit (measured) lets
+    /// REAL refs through, most valid — but cross-owner cache-hit literals whose defs
+    /// materialized at their FIRST owner's path then dangle (Workers: the ExportedHandler
+    /// .Fetch cf-properties literal referenced from the fetch holder as bare
+    /// CloudflareWorkersTypes.Fetch). Host correction lands TOGETHER with the
+    /// cross-owner def/ref closure, not before.
+    let anchorScrubLocaliseSplit (ctx: GeneratorContext) (inScope: Set<string>) resolveAnchor localiseAnchor (render: Prelude.TypeRefRender) =
+        TypeRefRender.anchor resolveAnchor render
+        |> TypeRefRender.substituteForHeritage inScope
+        |> scrubAnchored ctx localiseAnchor
+        |> TypeRefRender.localise localiseAnchor
+
     /// ABBREVIATION-LEGALITY VERDICT for an ANCHORED, PRE-LOCALISE alias body (shared by
     /// the Transient and Concrete alias arms — the check must see atoms, and localise
     /// widgetizes them). Two F#-illegal abbreviation shapes degrade, LEDGERED:
@@ -154,6 +177,29 @@ module Render =
                 Type = typedName.Type |> anchorScrubLocalise ctx inScope anchorPath
                 Traits = typedName.Traits
                 TypeParameters = typedName.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
+                Documentation = typedName.Documentation
+            }
+        /// Split-anchor variant for MODULE-GLOBAL function params (see
+        /// anchorScrubLocaliseSplit): metadata/typars keep the member-rebased path
+        /// (naming, docs), but the TYPE deliberately resolves at the EXPORT anchor —
+        /// rebasing the resolve anchor by the param leaf (as the member form above does)
+        /// detaches a hoisted param literal's ref from its member-anchored def by
+        /// exactly that leaf.
+        let anchorTypedNameRenderSplit (ctx: GeneratorContext) (inScope: Set<string>) (resolveAnchor: AnchorPath) (localiseAnchor: AnchorPath) (typedName: TypedNameRender<Prelude.TypeRefRender, Name<Case.camel>, Name<Case.typar>>) =
+            let metadataAnchor =
+                typedName.Metadata.Path
+                |> anchorMetadataPath ctx resolveAnchor
+            {
+                Metadata = {
+                    Path = Path.create metadataAnchor
+                    Original = typedName.Metadata.Original
+                    Source = typedName.Metadata.Source
+                    FullyQualifiedName = typedName.Metadata.FullyQualifiedName
+                }
+                TypedNameRender.Name = typedName.Name
+                Type = typedName.Type |> anchorScrubLocaliseSplit ctx inScope resolveAnchor localiseAnchor
+                Traits = typedName.Traits
+                TypeParameters = typedName.TypeParameters |> List.map (anchorTypeParameters ctx metadataAnchor)
                 Documentation = typedName.Documentation
             }
         let anchorFunctionSignature (ctx: GeneratorContext) (inScope: Set<string>) (anchorPath: AnchorPath) (functionSignature: FunctionLikeSignature<Prelude.TypeRefRender, Name<Case.camel>, Name<Case.typar>>) =
@@ -399,6 +445,7 @@ module Render =
             }
         let anchorTypeParameters ctx anchorPath (tp: Concrete.TypeParameterRender) = Shared.anchorTypeParameters ctx anchorPath tp
         let anchorTypedNameRender ctx anchorPath (tn: Concrete.TypedNameRender) = Shared.anchorTypedNameRender ctx Set.empty anchorPath tn
+        let anchorTypedNameRenderSplit ctx resolveAnchor localiseAnchor (tn: Concrete.TypedNameRender) = Shared.anchorTypedNameRenderSplit ctx Set.empty resolveAnchor localiseAnchor tn
         let anchorFunction ctx anchorPath (f: Concrete.FunctionLikeRender) = Shared.anchorFunction ctx Set.empty anchorPath f
         let anchorTypeDefn (ctx: GeneratorContext) (typeDefn: Concrete.TypeLikeRender) =
             let anchorPath =
@@ -891,16 +938,24 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                                 Source = func.Source |> Option.toValueOption
                                 FullyQualifiedName = ValueSome func.FullyQualifiedName
                             }
+                            // Params and return use the SPLIT anchors (see
+                            // anchorScrubLocaliseSplit): transients resolve at the
+                            // export's TRUE anchor — where anchorPreludeExportScope
+                            // places their defs — and localise against ROOT (the
+                            // holder's emission scope). The former shared localise
+                            // anchor rooted refs away from their module-placed defs
+                            // (PartyServer's GetServerByName.Options/.Case2 FS0039s).
                             Parameters =
                                 func.Parameters
                                 |> List.map (
                                     Parameter.render ctx scope
-                                    >> Render.Concrete.anchorTypedNameRender ctx localiseAnchor
+                                    >> Render.Concrete.anchorTypedNameRenderSplit ctx anchorPath localiseAnchor
                                     )
                             ReturnType =
                                 func.Type
                                 |> prerender ctx scope
-                                |> TypeRefRender.anchorAndLocalise localiseAnchor
+                                |> TypeRefRender.anchor anchorPath
+                                |> TypeRefRender.localise localiseAnchor
                             Traits = Set [ RenderTraits.Static ]
                             Documentation = func.Documentation
                             TypeParameters =

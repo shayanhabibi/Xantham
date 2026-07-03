@@ -404,7 +404,39 @@ BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 # PartySocket/Workers blocked). 2 unique sites, one class: FS0039 x2 at (14,99)/(14,134)
 # — refs to a `GetServerByName` module that is never emitted (a nested-under-member
 # synthesized home dangle, PartyServer-owned). This is the unit's burn-down target.
-BL_FIDELITY_CLOUDEDGE_PARTYSERVER=2
-BL_FIDELITY_CLOUDEDGE_MCP=0
+# 2026-07-05 (2): 2 -> 0 — THE PARTYSERVER UNIT COMPILES AND PRODUCES ITS ASSEMBLY
+# (fourth L1 unit-exit cell, same session as Workers). Root = the FUNCTION-ARM
+# anchor/localise CONFLATION — the exact latent twin of the Variable-arm rpcStub fix,
+# flagged when that landed ("split it symmetrically if it ever fires"; PartyServer's
+# getServerByName is the first module-global function whose param/return literals
+# actually hoist). `declare function getServerByName(ns, name, options?: {...}):
+# Promise<DurableObjectStub<T>>` — the options literal's def anchors at the export's
+# member anchor (Partyserver.GetServerByName; the stub-shape return literal re-homes to
+# .Case2 via the occupancy machinery) while the refs anchored against the shared
+# root-localise anchor: rooted bare (`GetServerByName.Options` / `.Case2`, FS0039 x2).
+# FIX (RenderScope.Anchored.fs): anchorScrubLocaliseSplit + anchorTypedNameRenderSplit —
+# Function-arm params and returns resolve transients at the export's TRUE anchor
+# (def/ref agreement by construction: nameless <-> context path, Case{n} <-> Case{n})
+# and localise at ROOT. The SCRUB HOST deliberately stays on the legacy localise anchor
+# (empty trace -> unit 1): correcting it to the export's unit was MEASURED and lets real
+# holder-param refs through — mostly a fidelity win (fetch's params render true
+# Request/URL types instead of obj) — but cross-owner CACHE-HIT literals whose defs
+# materialized at their first owner's path then dangle (Workers: the ExportedHandler
+# .Fetch cf-properties literal, referenced from the fetch holder as bare
+# CloudflareWorkersTypes.Fetch, 0->1). Host correction is CATALOGUED to land together
+# with the cross-owner def/ref closure (the 120B-U2<obj,obj> family), not before.
+# Pinned in Tests/RenderScopeAnchored.fs (pre-fix actual: bare GetServerByName.Options).
+BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0
+# 2026-07-05: FIRST REAL TYPECHECK COUNT (parse-stage placeholder while the chain
+# blocked). 26 unique sites, ALL known arity classes with existing machinery:
+#  - FS0033 obj-with-args (~19): generic applications onto obj heads that slipped the
+#    opaque/erased prefix collapse — a CHANNEL gap, not a new class (the collapse landed
+#    2026-07-04 (2) for handle/Erased/obj heads; these arrive via a path it doesn't see).
+#  - FS0033 seq<_> given 3 (x2 sites): a lib-substitution arity gap — the same
+#    singleParamIterators family as AsyncIterable (3-param TS -> 1-param Fable).
+#  - FS0033 ProgressToken (x1) + FS0039 x4 + FS0887 x2: the parked JSON-Schema/typar
+#    families, now measured in their home unit.
+# This is the next burn-down target; CodeMode/Agents get first real counts at Mcp 0.
+BL_FIDELITY_CLOUDEDGE_MCP=26
 BL_FIDELITY_CLOUDEDGE_CODEMODE=0
 BL_FIDELITY_CLOUDEDGE_AGENTS=0
