@@ -249,7 +249,10 @@ let private nonGenericTypedArrays =
 let private singleParamIterators =
     // `AsyncIterable` itself is also 3-param in recent TS but single-param in
     // Fable.Core.JS (`AsyncIterable<'T>` — verified against 5.0.0-beta.4).
-    set [ "Iterator"; "Iterable"; "IterableIterator"; "AsyncIterable"; "AsyncIterableIterator" ]
+    // `Generator`/`AsyncGenerator` are the 3-param generator shapes (mcp-sdk's
+    // callToolStream) — same seq<'T> target, same first-arg truncation.
+    set [ "Iterator"; "Iterable"; "IterableIterator"; "AsyncIterable"; "AsyncIterableIterator"
+          "Generator"; "AsyncGenerator" ]
 
 /// The Fable-side declared arity for a named type whose Fable equivalent's arity differs from its TS
 /// declaration: 0 for the numeric typed arrays / ArrayBufferView (non-generic in Fable), 1 for the
@@ -1288,23 +1291,19 @@ module ArenaInterner =
                     let aliasName = Name.Case.valueOrSource value.Name
                     let isIdentityAlias =
                         match value.Type.Value with ResolvedType.TypeParameter _ -> true | _ -> false
-                    let allParamsUnconstrained =
-                        value.TypeParameters
-                        |> List.forall (fun tp -> tp.Value.Constraint.IsNone)
-                    // DEFAULTS SYNTHESIS extension: a CONSTRAINED typar cannot accept the `obj`
-                    // pad (`'T :> ZodTypeAny` given `obj` is FS0001) — historically such aliases
-                    // stayed UNRECORDED (bare-name refs, the pre-existing FS0033 class). When
-                    // every constrained typar carries a TS DEFAULT, the padder can synthesize the
-                    // default instead of `obj`, so recording becomes safe: the typar list is
-                    // stored alongside the arity and `padAliasNameToArity` pads per-slot from it.
-                    // `.Constraint`/`.Default` are options over lazies — no forcing here.
-                    let allConstrainedHaveDefaults =
-                        value.TypeParameters
-                        |> List.forall (fun tp -> tp.Value.Constraint.IsNone || tp.Value.Default.IsSome)
+                    // CONSTRAINED typars no longer gate recording (2026-07-05): the historical
+                    // exclusion existed because an `obj` pad violated a nominal constraint
+                    // (`'T :> ZodTypeAny` given `obj` is FS0001) — but typar constraints are now
+                    // ADVISORY-DROPPED at render (typar-constraint-drop policy, 2026-07-04), so
+                    // emitted decls carry no constraints and the pad is always legal. Leaving
+                    // such aliases UNRECORDED left their refs on the `typeArguments.Length`
+                    // fallback — unaligned partial applications (the Mcp BaseToolCallback
+                    // given-2-of-3 FS0033 class, an intermediate-alias collapse dropping a
+                    // fixed middle arg).
                     let emittedArity =
                         if aliasKeepsTypars ctx value then value.TypeParameters.Length else 0
                     let recordArity key =
-                        if not isIdentityAlias && (emittedArity = 0 || allParamsUnconstrained || allConstrainedHaveDefaults) then
+                        if not isIdentityAlias then
                             GeneratorContext.Prelude.addTypeAliasArityOnce ctx key emittedArity aliasName
                             if emittedArity > 0 then
                                 GeneratorContext.Prelude.addTypeAliasTyparsOnce ctx key value.TypeParameters

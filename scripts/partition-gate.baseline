@@ -437,6 +437,36 @@ BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0
 #  - FS0033 ProgressToken (x1) + FS0039 x4 + FS0887 x2: the parked JSON-Schema/typar
 #    families, now measured in their home unit.
 # This is the next burn-down target; CodeMode/Agents get first real counts at Mcp 0.
-BL_FIDELITY_CLOUDEDGE_MCP=26
+# 2026-07-05 (2): 26 -> 2. Three fixes, one measured revert:
+#  - HOLDER-CHANNEL SCRUBS (RenderScope.Anchored.fs): Variable typeRefs and Function
+#    returns were the two NEVER-SCRUBBED anchored-ref channels — obj-with-args escaped
+#    the opaque collapse (~14) and the Mcp->Agents stray back-edges escaped the
+#    forward-DAG scrub (4). Both now run anchorScrubLocaliseSplit with the RESOLVE host
+#    (correct; no legacy to preserve on never-scrubbed channels — scrubbing only ADDS
+#    degradations, so the assembled units could not regress, and held at 0). The scrub
+#    HOST is now an explicit per-channel parameter: params keep the legacy localise
+#    host until the cross-owner closure (see the PartyServer entry).
+#  - ITERATOR ARITY: Generator/AsyncGenerator join singleParamIterators (3-param TS ->
+#    seq<'T>; mcp-sdk callToolStream x6 sites). Test: LibEsCollectionArgs.
+#  - ALIAS-ARITY RECORDING GATE REMOVED (RenderScope.Prelude.fs prerenderTypeAliases):
+#    constrained-no-default aliases were unrecorded because an obj pad violated nominal
+#    constraints (FS0001) — obsolete since the typar-constraint advisory-drop policy
+#    (2026-07-04); recording them lets the EXISTING aligner pad/truncate their refs
+#    (BaseToolCallback given-2-of-3 x3 — an intermediate-alias collapse dropping a fixed
+#    middle arg upstream in the IR; the pad is positionally imperfect but erased-legal;
+#    the IR-side arg preservation is the catalogued fidelity item). Pinned by the E2E
+#    ratchets (the recording walk needs the interner; unit-pin not reachable).
+#  - REVERTED (measured, not kept): an IR-level alias-heritage filter dropped 40 HEALTHY
+#    inherits (Agent/Client/DOMException...) without fixing its target — a silent
+#    fidelity regression invisible to error counts; and a Prefix over-application
+#    aligner in padAliasNameToArity measured zero movement (dead code).
+# Remaining 2 = ONE def-side class: zod-Infer aliases emitted as `= obj` ABBREVIATIONS
+# while refs treat them as types — (565-area) FS0887 `inherit TypesJs.
+# CreateMessageRequestParams` (an abbreviation-to-obj cannot be inherited) and (424-area)
+# FS0033 `ProgressToken<Zod.ZodType>` (args applied to the arity-0 abbreviation).
+# Designed fix: emit obj-degraded aliases as EMPTY INTERFACES (the abbreviation-verdict
+# idiom — refs stay legal at every use site, inherits become legal) — a def-side change
+# to measure fresh next session, NOT a tail bolt-on.
+BL_FIDELITY_CLOUDEDGE_MCP=2
 BL_FIDELITY_CLOUDEDGE_CODEMODE=0
 BL_FIDELITY_CLOUDEDGE_AGENTS=0

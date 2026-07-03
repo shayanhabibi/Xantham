@@ -106,4 +106,25 @@ let tests =
             // The load-bearing assertion: a SINGLE arg `seq<string>`, NOT `seq<string, obj, obj>`.
             |> testRender "seq<string>"
             ||> Flip.Expect.equal "iterator's 3 TS args must truncate to seq's single element arg"
+
+        // The GENERATOR shapes are the same class (mcp-sdk's callToolStream returns
+        // `AsyncGenerator<T, TReturn, TNext>`): 3-param TS, single-param `seq<'T>` target.
+        testCase "AsyncGenerator<T, TReturn, TNext> renders seq<T> (generator args truncate)" <| fun _ ->
+            Interface.create "AsyncGenerator"
+            |> Interface.esLib
+            |> Interface.withTypeParameters [
+                TypeParameter.create "T"
+                TypeParameter.create "TReturn"
+                TypeParameter.create "TNext"
+            ]
+            |> Interface.wrap
+            |> TypeReference.create
+            |> TypeReference.withTypeArguments [
+                primitive TypeKindPrimitive.String
+                primitive TypeKindPrimitive.NonPrimitive
+                primitive TypeKindPrimitive.NonPrimitive
+            ]
+            |> TypeReference.wrap
+            |> testRender "seq<string>"
+            ||> Flip.Expect.equal "generator's 3 TS args must truncate to seq's single element arg"
     ]

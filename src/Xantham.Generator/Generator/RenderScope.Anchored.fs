@@ -74,18 +74,24 @@ module Render =
     /// module qualification. One shared anchor breaks one side or the other (the
     /// PartyServer GetServerByName class).
     ///
-    /// The SCRUBS deliberately keep the LOCALISE anchor as host — the legacy empty
-    /// module trace indexes as unit 1, degrading holder-function param refs to obj as
-    /// they always have been. Correcting the host to the export's unit (measured) lets
-    /// REAL refs through, most valid — but cross-owner cache-hit literals whose defs
-    /// materialized at their FIRST owner's path then dangle (Workers: the ExportedHandler
-    /// .Fetch cf-properties literal referenced from the fetch holder as bare
-    /// CloudflareWorkersTypes.Fetch). Host correction lands TOGETHER with the
-    /// cross-owner def/ref closure, not before.
-    let anchorScrubLocaliseSplit (ctx: GeneratorContext) (inScope: Set<string>) resolveAnchor localiseAnchor (render: Prelude.TypeRefRender) =
+    /// The SCRUB HOST is the caller's choice, per channel history:
+    ///  - PARAMS pass the LOCALISE anchor — its legacy empty module trace indexes as
+    ///    unit 1, degrading holder-function param refs to obj as they always have been.
+    ///    Correcting their host to the export's unit (measured) lets REAL refs through,
+    ///    most valid — but cross-owner cache-hit literals whose defs materialized at
+    ///    their FIRST owner's path then dangle (Workers: the ExportedHandler.Fetch
+    ///    cf-properties literal referenced from the fetch holder as bare
+    ///    CloudflareWorkersTypes.Fetch). Params' host correction lands TOGETHER with
+    ///    the cross-owner def/ref closure, not before.
+    ///  - VARIABLE typeRefs and FUNCTION returns pass the RESOLVE anchor (the correct
+    ///    host): these channels were NEVER scrubbed, so there is no legacy to preserve
+    ///    and scrubbing only ADDS degradations — it cannot surface new refs. Their
+    ///    unscrubbed state was the Mcp first-count channel gap (obj-with-args escaping
+    ///    the collapse; the Mcp->Agents stray back-edges escaping the forward-DAG scrub).
+    let anchorScrubLocaliseSplit (ctx: GeneratorContext) (inScope: Set<string>) resolveAnchor scrubHost localiseAnchor (render: Prelude.TypeRefRender) =
         TypeRefRender.anchor resolveAnchor render
         |> TypeRefRender.substituteForHeritage inScope
-        |> scrubAnchored ctx localiseAnchor
+        |> scrubAnchored ctx scrubHost
         |> TypeRefRender.localise localiseAnchor
 
     /// ABBREVIATION-LEGALITY VERDICT for an ANCHORED, PRE-LOCALISE alias body (shared by
@@ -197,7 +203,7 @@ module Render =
                     FullyQualifiedName = typedName.Metadata.FullyQualifiedName
                 }
                 TypedNameRender.Name = typedName.Name
-                Type = typedName.Type |> anchorScrubLocaliseSplit ctx inScope resolveAnchor localiseAnchor
+                Type = typedName.Type |> anchorScrubLocaliseSplit ctx inScope resolveAnchor localiseAnchor localiseAnchor
                 Traits = typedName.Traits
                 TypeParameters = typedName.TypeParameters |> List.map (anchorTypeParameters ctx metadataAnchor)
                 Documentation = typedName.Documentation
@@ -805,8 +811,10 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
         let typeRef =
             value.Type
             |> prerender ctx scope
-            |> TypeRefRender.anchor anchorPath
-            |> TypeRefRender.localise localiseAnchor
+            // Scrubbed with the RESOLVE host (see anchorScrubLocaliseSplit): this channel
+            // was never scrubbed, which let obj-with-args escape the opaque collapse and
+            // forward-unit refs escape the DAG scrub (the Mcp first-count channel gap).
+            |> Render.anchorScrubLocaliseSplit ctx Set.empty anchorPath anchorPath localiseAnchor
         if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value && not (ctx.TopLevelExports.Contains export) then
             typeRef |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
         else
@@ -954,8 +962,9 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
                             ReturnType =
                                 func.Type
                                 |> prerender ctx scope
-                                |> TypeRefRender.anchor anchorPath
-                                |> TypeRefRender.localise localiseAnchor
+                                // Scrubbed with the RESOLVE host — never-scrubbed channel,
+                                // same rationale as the Variable-arm typeRef above.
+                                |> Render.anchorScrubLocaliseSplit ctx Set.empty anchorPath anchorPath localiseAnchor
                             Traits = Set [ RenderTraits.Static ]
                             Documentation = func.Documentation
                             TypeParameters =

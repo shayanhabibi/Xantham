@@ -93,7 +93,10 @@
 # 2026-07-05 (2): RATCHETED DOWN 75 -> 73 with the return-only overload unification
 # (Workers 31 -> 0): two counted Invoke shapes left the surface as their carrying
 # duplicate signatures merged.
-BL_CALLBACK_IFACE=73
+# 2026-07-05 (3): 73 -> 75 with the Mcp burn-down (26 -> 2): two formerly-dangling
+# callback aliases render as nominal Invoke types now that constrained aliases record
+# their arity (invalid -> valid surfacing, the usual materialization class).
+BL_CALLBACK_IFACE=75
 # 2026-07-04 RECALIBRATION with the metric correction (see golden-gate.sh (b)): the old
 # suffix-regex value of 4 was noise (stem-named homes + qualifier hits). The true leak
 # shape — literal `prototype` members in the surface — measures 63, stable across the
@@ -111,4 +114,8 @@ BL_SMASH=55
 # refs that formerly ALL collapsed onto one merged (wrong) def now point at their own
 # Case{n}-homed defs — the +136 is the surfaced-ref count of the un-merged family,
 # invalid->valid (the merged defs carried duplicate members and did not compile).
-BL_SYNTH_PUBLIC=1237
+# 2026-07-05 (2): RATCHETED DOWN 1237 -> 1067 with the holder-channel scrubs (Mcp
+# 26 -> 2): Variable typeRefs and Function returns now run the anchored-ref scrubs,
+# so forward-unit and undefined-home qualified refs degrade to obj (ledgered) instead
+# of dangling on the counted surface.
+BL_SYNTH_PUBLIC=1067

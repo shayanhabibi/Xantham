@@ -127,9 +127,37 @@ for file, keys in sorted(entry_exports.items(), key=lambda kv: -len(kv[1])):
     rel = re.search(r'node_modules/(.+)$', file)
     w(f"| {rel.group(1) if rel else file} | {len(keys)} |")
 w("")
-w("## L1 — raw binding (whole-artifact until Phase 1 partitions)")
+w("## L1 — per-unit raw binding (partition-gate ratchets)")
 w("")
-w("Per-unit L1 signal: `partition-gate.sh` (own-file error counts per unit, baselines in `partition-gate.baseline`). Whole-surface signals over the SAME units: `ir-sentinel.sh` (IR identity), `arity-gate.sh` (decl/ref arity), `golden-gate.sh` (semantic budgets + determinism). The monolith and its Fable-transpile conformance gate retired 2026-07-03; Fable conformance returns as consumption (HelloWorker, Phase 2).")
+w("State source: the committed per-unit own-file error baselines in `scripts/partition-gate.baseline` — the machine-enforced ratchet (`partition-gate.sh` FAILS on any regression above these; dated burn-down narratives live as comments in that file). 0 = the unit compiles and produces its assembly — the Phase-1 exit criterion per unit. A downstream unit's count is only REAL once every upstream unit assembles; until then it is a parse-stage placeholder.")
+w("")
+bl = {}
+for line in open(f"{repo}/scripts/partition-gate.baseline"):
+    m = re.match(r'^BL_([A-Z0-9_]+)=(\d+)', line)
+    if m: bl[m.group(1)] = int(m.group(2))
+libs, seen = [], set()
+for e in recipe.get('entry', []):
+    lib = e.get('lib')
+    if lib and lib not in seen:
+        seen.add(lib); libs.append(lib)
+w("| unit (publish order) | error baseline | state |")
+w("|---|---:|---|")
+real_zero, measured, blocked_by = 0, 0, None
+for lib in libs:
+    n = bl.get(lib.upper().replace('.', '_'))
+    if n is None: continue
+    measured += 1
+    if blocked_by:
+        state = f"parse-stage placeholder (blocked by {blocked_by})"
+    elif n == 0:
+        state = "**COMPILES + ASSEMBLY**"; real_zero += 1
+    else:
+        state = "**burn-down target (first real count)**"; blocked_by = lib
+    w(f"| {lib} | {n} | {state} |")
+w("")
+w(f"**Phase-1 exit progress: {real_zero}/{measured} units at true 0.**" + (f" Current wall: {blocked_by}." if blocked_by else " PHASE-1 L1 CRITERION MET FOR ALL UNITS."))
+w("")
+w("Whole-surface signals over the SAME units: `ir-sentinel.sh` (IR identity), `arity-gate.sh` (decl/ref arity), `golden-gate.sh` (semantic budgets + determinism); deliberate degradations are counted per class in the emitted `advisory-ledger.txt`. The monolith and its Fable-transpile conformance gate retired 2026-07-03; Fable conformance returns as consumption (HelloWorker, Phase 2).")
 w("")
 w("## Coverage (test cases per module — parity rule in PLAN.md)")
 w("")
