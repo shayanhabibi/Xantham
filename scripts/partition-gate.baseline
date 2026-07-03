@@ -310,7 +310,31 @@ BL_FIDELITY_CLOUDEDGE_ZOD=0
 # Its resolution path is unidentified — a const static-side reached via a TypeReference/holder
 # path. Next: probe that TypeReference arm to find where the synthesized rpcStub type ref is
 # built, then extend the same collision-erasure (or suppress the synthesized member).
-BL_FIDELITY_CLOUDEDGE_WORKERS=1
+# 2026-07-05 (Fable, 2): FS0039 -> 0 (rpcStub CLOSED — the last name-resolution error).
+# CORRECTION to the entry above: the ref DOES flow through the Variable export arm (the
+# upstream `declare const RpcStub` const static-side TypeLiteral, camelCased into the
+# holder). Root cause was an ANCHOR/LOCALISE CONFLATION introduced by the A-1 root-localise
+# fix: `anchorAndLocalise` uses ONE anchor for both transient resolution and path
+# shortening. A hoisted un-homed literal's ref is a TRANSIENT atom: root-anchoring rooted
+# the ref at bare `RpcStub` while the DEF (placed via the export scope's true anchor)
+# emitted under `module CloudflareWorkersTypes` — a def/ref anchor disagreement. FIX
+# (RenderScope.Anchored.fs Variable arm): split the roles — anchor with the export's TRUE
+# anchorPath (matching def placement, def/ref agreement by construction), localise with
+# ROOT (matching the holder's emission site). Concrete atoms are anchor-invariant, so the
+# A-1 classes are untouched: the good-vs-fixed emission diff is EXACTLY one line
+# (L65 `RpcStub` -> `CloudflareWorkersTypes.RpcStub`). Pinned both ways in
+# Tests/RenderScopeAnchored.fs (fails bare-`RpcStub` on pre-fix code).
+# Census now 88 — ALL UNMASKED, not regression: with any FS0039 present the F# compiler
+# never runs post-inference relations checking, so killing the last typecheck error let
+# FS0438/FS3172 report for the FIRST time (same phase-unmasking as A-1's 34). The emitted
+# unit text is byte-identical except L65. Composition: FS0438 x86 sites (duplicate
+# members from MERGED HOISTED-LITERAL DEFS — structurally-different literals anchored to
+# one path, e.g. BaseAiCfOpenaiGptOss20B.Inputs holds 4 literals' members, each x4; also
+# AutoRAG.AiSearch.Params, KVNamespace<'K>, LoopbackForExport, Ai<...>, BrowserRun,
+# AutoRAG, Cloudflare:node — the union over-minting / hoist-dedup class, encoder-side
+# per its memory) + FS3172 x2 (stream: bool getter vs bool-option setter, one site).
+# This is the next burn-down family: def-side merge, NOT a ref/anchoring class.
+BL_FIDELITY_CLOUDEDGE_WORKERS=88
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0
 BL_FIDELITY_CLOUDEDGE_MCP=0

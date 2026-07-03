@@ -215,6 +215,19 @@ module ResolvedType =
         let withParameters parameters func = { func with Function.Parameters = parameters }
         let withReturnType returnType func = { func with Function.Type = LazyContainer.CreateFromValue returnType }
 
+    module Variable =
+        let create name typ =
+            {
+                IsLibEs = false
+                Source = None
+                FullyQualifiedName = [ QualifiedNamePart.Normal name ]
+                Variable.Name = Name.Camel.create name
+                Type = LazyContainer.CreateFromValue typ
+                Documentation = []
+            }
+        let withPath modules variable =
+            { variable with Variable.FullyQualifiedName = (List.map QualifiedNamePart.Normal modules) @ variable.FullyQualifiedName }
+
     module TypeReference =
         let wrap = ResolvedType.TypeReference
         let create typ = {

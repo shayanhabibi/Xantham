@@ -742,13 +742,24 @@ let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport
         // `SharedLiterals` across the namespace-rec assembly boundary (the FromToRawPrototype
         // class). Localise against a ROOT anchor (empty module trace) so the full
         // `M.Target` qualification survives — correct for the holder's true emission scope.
+        //
+        // ANCHOR and LOCALISE take DIFFERENT anchors here. Anchoring resolves TRANSIENT
+        // atoms (a hoisted un-homed literal, e.g. the RpcStub const's static-side
+        // `{new(...)}`) and must use the export's TRUE anchor — the same anchor
+        // `anchorPreludeExportScope` places the hoisted DEF with — so def and ref agree
+        // by construction (`M.RpcStub`). Concrete atoms are anchor-invariant, so the
+        // root-localise classes above are untouched. Localising shortens paths for the
+        // emission site and must use ROOT (the holder's real scope): anchoring AND
+        // localising at the same anchor either strips the module prefix (member anchor)
+        // or roots the transient away from its def (root anchor) — both dangle.
         let localiseAnchor =
             MemberPath.createOnModule (Name.Case.valueOrSource value.Name) (ModulePath.init "")
             |> AnchorPath.Member
         let typeRef =
             value.Type
             |> prerender ctx scope
-            |> TypeRefRender.anchorAndLocalise localiseAnchor
+            |> TypeRefRender.anchor anchorPath
+            |> TypeRefRender.localise localiseAnchor
         if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value && not (ctx.TopLevelExports.Contains export) then
             typeRef |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
         else
