@@ -260,6 +260,13 @@ module RootModule =
                         | TypeAlias (TypeAliasRender.Function { Name = name }) -> Name.Case.valueOrModified name
                         | _ | _ -> failwith "unreachable guaranteed by guard in partition"
                     if module'.Types.TryAdd(name, typeRender) |> not then
+                        // TRIPWIRE: a structurally-DIFFERENT def landing on an already-claimed
+                        // (module, name) slot is the merged-def family's signature — distinct
+                        // synthesized types (union/intersection arms, overload-param literals)
+                        // grafted onto one context-derived path. The merge itself stays; the
+                        // ledger makes it gate-visible (silent merges produced the FS0438 class).
+                        if module'.Types[name] <> typeRender then
+                            GeneratorContext.Advisory.increment ctx $"same-path-def-merge:{module'.Name}.{name}"
                         module'.Types[name] <- combine module'.Types[name] typeRender
                 | Choice2Of3 ({ Name = name } as typedNameRender) ->
                     let name = Name.Case.valueOrModified name

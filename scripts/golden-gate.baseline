@@ -84,7 +84,13 @@
 # Invalid->valid surfacing by exactly the materialized handful.
 # 2026-07-04: opaque-owned literal collapse redistributes one callback literal onto the
 # counted surface (72 -> 73) — same materialization class as the fixpoint note above.
-BL_CALLBACK_IFACE=73
+# 2026-07-05: PATH-OCCUPANCY SPLIT (createTransientPath Case{n} re-homing) — N distinct
+# types that formerly MERGED into one def at a shared context path (the ledgered
+# same-path-def-merge family: XOR/union arms, overload-param literals; FS0438 x60+
+# cleared, Workers 88 -> 31) now emit as N distinct defs. Two formerly-swallowed
+# callback literals surface as their own nominal types (73 -> 75, e.g. the
+# SharedLiterals Props/Props2 pair) — invalid->valid by exactly the split count.
+BL_CALLBACK_IFACE=75
 # 2026-07-04 RECALIBRATION with the metric correction (see golden-gate.sh (b)): the old
 # suffix-regex value of 4 was noise (stem-named homes + qualifier hits). The true leak
 # shape — literal `prototype` members in the surface — measures 63, stable across the
@@ -98,4 +104,8 @@ BL_SMASH=55
 # 2026-07-04 (3): 1100 -> 1101 with the home-child scrub's post-drive re-anchor round
 # (one additional qualified ref in a re-anchored canonical render). Same accounting
 # class as the two entries above.
-BL_SYNTH_PUBLIC=1101
+# 2026-07-05: 1101 -> 1237 with the path-occupancy split (see BL_CALLBACK_IFACE entry):
+# refs that formerly ALL collapsed onto one merged (wrong) def now point at their own
+# Case{n}-homed defs — the +136 is the surfaced-ref count of the un-merged family,
+# invalid->valid (the merged defs carried duplicate members and did not compile).
+BL_SYNTH_PUBLIC=1237

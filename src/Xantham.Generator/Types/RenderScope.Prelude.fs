@@ -139,6 +139,15 @@ module TypeRefRender =
 type RenderScopeStore = {
     PathContext: TransientPath
     TypeStore: Dictionary<ResolvedType, TransientTypePath>
+    // Path OCCUPANCY per scope (flattened transient-path keys). TypeStore is keyed by
+    // ResolvedType, so two DISTINCT types grafting onto one context-derived path is
+    // invisible to it — this set is the inverse view that makes the collision checkable
+    // at mint time (`with`-copies share it, like TypeStore: one claims index per scope).
+    PathClaims: HashSet<string>
+    // Ref atoms for types that lost a path claim and were re-homed to a `Case{n}` child
+    // (see createTransientPath). Re-visits must return this atom — the nameless original
+    // would resolve back to the occupied context path, splitting the ref from its def.
+    SuffixedAtoms: Dictionary<ResolvedType, TransientTypePath>
 }
 
 /// <summary>
@@ -149,6 +158,8 @@ module RenderScopeStore =
     let create () = {
             PathContext = TransientPath.create TransientTypePath.Anchored
             TypeStore = Dictionary<ResolvedType, TransientTypePath>()
+            PathClaims = HashSet<string>()
+            SuffixedAtoms = Dictionary<ResolvedType, TransientTypePath>()
         }
     let mapPathContext (fn: TransientPath -> TransientPath) (scope: RenderScopeStore) = { scope with PathContext = fn scope.PathContext }
     let appendStringToPathContext scope (str: string) =
@@ -177,23 +188,65 @@ module RenderScopeStore =
             Unsafe.createConcretePath path
         let inline createIntrinsic (_scope: RenderScopeStore) (_resolvedType: ResolvedType) (intrinsic: string) =
             Unsafe.createIntrinsic intrinsic
+        let private claimKey (p: TransientTypePath) =
+            TransientTypePath.toAnchored p
+            |> List.map _.ValueOrSource
+            |> String.concat "."
         let createTransientPath (scope: RenderScopeStore) (resolvedType: ResolvedType) (path: TransientTypePath) =
             match path with
             | TransientTypePath.Anchored ->
-                TransientPath.toTransientModulePath scope.PathContext
-                |> TransientTypePath.graft
+                // A NAMELESS root takes its entire identity from the scope's PathContext
+                // (the owning member/parameter name). Distinct ResolvedTypes reaching one
+                // context (union/intersection arms, overload-param literals) would claim
+                // the SAME path: their defs merge at collection (the FS0438 duplicate-
+                // member class, ledgered same-path-def-merge) and their refs render
+                // self-unions (U2<X, X>). PathClaims makes the collision checkable: the
+                // first occupant keeps today's behavior verbatim (store the graft, return
+                // the nameless original — refs re-derive the context path from each ref-
+                // site anchor); each later DISTINCT type re-homes to a `Case{n}` CHILD of
+                // the context path. A child (not a sibling suffix) is the only shape both
+                // sides reach: the def anchors store-spine [ctx; Case{n}] at the EXPORT
+                // anchor, the ref anchors leaf `Case{n}` at the MEMBER anchor (whose
+                // trace ends with ctx) — same TypePath from both directions.
+                match scope.SuffixedAtoms.TryGetValue resolvedType with
+                | true, atom -> Unsafe.createTransientPath atom
+                | _ ->
+                    let contextModule = TransientPath.toTransientModulePath scope.PathContext
+                    let grafted = TransientTypePath.graft contextModule
+                    if scope.TypeStore.ContainsKey resolvedType
+                       || scope.PathClaims.Add(claimKey grafted) then
+                        scope.TypeStore.TryAdd(resolvedType, grafted) |> ignore
+                        Unsafe.createTransientPath path
+                    else
+                        let rec free n =
+                            let candidate =
+                                TransientTypePath.createOnTransientModule $"Case{n}" contextModule
+                            if scope.PathClaims.Add(claimKey candidate) then candidate else free (n + 1)
+                        let claimed = free 2
+                        scope.TypeStore.TryAdd(resolvedType, claimed) |> ignore
+                        let atom =
+                            match claimed with
+                            | TransientTypePath.Moored(_, name) -> TransientTypePath.AnchoredAndMoored name
+                            | other -> other
+                        scope.SuffixedAtoms[resolvedType] <- atom
+                        Unsafe.createTransientPath atom
             | TransientTypePath.Moored(parent, name) ->
                 parent
                 |> TransientModulePath.graft (TransientPath.toTransientModulePath scope.PathContext)
                 |> TransientTypePath.createOnTransientModuleWithName name
+                |> fun grafted ->
+                    scope.TypeStore.TryAdd(resolvedType, grafted) |> ignore
+                    // Named transients keep first-wins semantics; they only REGISTER their
+                    // claim so a later nameless mint cannot collide with a named def.
+                    scope.PathClaims.Add(claimKey grafted) |> ignore
+                Unsafe.createTransientPath path
             | TransientTypePath.AnchoredAndMoored name ->
                 TransientPath.toTransientModulePath scope.PathContext
                 |> TransientTypePath.createOnTransientModuleWithName name
-            |> fun path ->
-                scope.TypeStore.TryAdd(resolvedType, path)
-                |> ignore
-            // scope.TryAdd(resolvedType, path) |> ignore
-            Unsafe.createTransientPath path
+                |> fun grafted ->
+                    scope.TypeStore.TryAdd(resolvedType, grafted) |> ignore
+                    scope.PathClaims.Add(claimKey grafted) |> ignore
+                Unsafe.createTransientPath path
         
         type SRTPHelper =
             static member inline Create(scope, resolvedType, widget) = createWidget scope resolvedType widget

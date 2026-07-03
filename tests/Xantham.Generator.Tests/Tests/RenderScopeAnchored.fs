@@ -80,6 +80,26 @@ let variableAnchoringTests =
             registerAnchorFromExport ctx (ResolvedExport.Variable variable)
             renderedVariableTypeText ctx
             |> Flip.Expect.equal "hoisted literal must qualify under M, not render bare" "let _: M.RpcStub = JS.undefined"
+
+        // PATH OCCUPANCY through the full anchor machinery (the merged-def family):
+        // TWO structurally-distinct nameless literals under ONE context must render
+        // DISTINCT ref paths (first keeps the context, second re-homes to a Case2
+        // child) — not the U2<X, X> self-union whose defs merged (FS0438).
+        testCase "two distinct hoisted literals under one context split into context + Case2 child" <| fun _ ->
+            let ctx = GeneratorContext.Empty
+            let literalWith name typ =
+                TypeLiteral.empty
+                |> TypeLiteral.addMember (Property.create name (primitive typ) |> Property.wrap)
+                |> TypeLiteral.wrap
+            let variable =
+                [ literalWith "a" TypeKindPrimitive.String
+                  literalWith "b" TypeKindPrimitive.Number ]
+                |> Union.create
+                |> Variable.create "combo"
+                |> Variable.withPath [ "M" ]
+            registerAnchorFromExport ctx (ResolvedExport.Variable variable)
+            renderedVariableTypeText ctx
+            |> Flip.Expect.equal "union arms must not collapse onto one path" "let _: U2<M.Combo, M.Combo.Case2> = JS.undefined"
     ]
 
 [<Tests>]

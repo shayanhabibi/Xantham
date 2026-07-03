@@ -334,7 +334,43 @@ BL_FIDELITY_CLOUDEDGE_ZOD=0
 # AutoRAG, Cloudflare:node — the union over-minting / hoist-dedup class, encoder-side
 # per its memory) + FS3172 x2 (stream: bool getter vs bool-option setter, one site).
 # This is the next burn-down family: def-side merge, NOT a ref/anchoring class.
-BL_FIDELITY_CLOUDEDGE_WORKERS=88
+# 2026-07-05 (Fable, 3): 88 -> 31. PATH-OCCUPANCY at the transient mint (the merged-def
+# family's root, diagnosed by a 4-trace + adversarial-verify workflow; encoder VERIFIED
+# CLEAN — one IR node per XOR arm, union interned; the "88" was the compiler's 100-error
+# cap, true count higher). Root: a NAMELESS hoisted literal takes its whole path identity
+# from the scope PathContext (owning member/param name), so N distinct types under one
+# context claimed ONE path — every registry is rt-keyed, so the collision was invisible
+# until defs merged at collection (Render.Collection combine's member/function concat)
+# and refs rendered U2<X,X> self-unions. TWO seams landed:
+#  - TRIPWIRE (Render.Collection.fs collect): a structurally-different def landing on a
+#    claimed (module, name) slot ledgers same-path-def-merge:<path> — 247 sites measured
+#    pre-fix (most beyond the error cap; spans ALL units incl. Agents/Mcp), 224 post-fix
+#    (residual = cross-scope + named-arm collisions, next tier of the same family).
+#  - OCCUPANCY (Types/RenderScope.Prelude.fs createTransientPath): per-scope PathClaims;
+#    first occupant byte-identical to before; each later DISTINCT type re-homes to a
+#    Case{n} CHILD of the context path (a child, not a sibling suffix — the only shape
+#    the export-anchored def walk and the member-anchored ref atom BOTH reach; def/ref
+#    agreement by construction). Re-visits return the pinned atom (SuffixedAtoms).
+# Cleared: XOR family (BaseAi* Inputs/PostProcessedOutputs -> Inputs + Inputs.Case2,
+# refs U2<distinct,distinct>), overload-param family (AiSearch.Params + FS3172 stream,
+# Ai.Run.Options x3), LoopbackForExport x5. Tests: TransientPathOccupancy.fs (6, at the
+# mint boundary) + RenderScopeAnchored union-split integration pin. Golden budgets
+# callbacks 73->75 / synth-home 1101->1237 ratcheted UP by exactly the un-merged
+# surfaced count (documented in golden-gate.baseline).
+# Remaining 31 = the OTHER roots the diagnosis catalogued (none are merge/anchoring):
+#  - 24x KVNamespace + 2x BrowserRun: literal-discriminant WIDENING ('text' -> string,
+#    KVNamespaceGetOptions<'json'> -> <string>) collapses source overloads to return-
+#    type-only differences (.NET signatures ignore returns). Needs the overload policy:
+#    unify returns into a U-union or ledgered first-wins drop.
+#  - 2x AutoRAG: upstream-faithful return-type-only overloads (TS legal via union
+#    subsumption) — same policy as above covers them.
+#  - 2x Cloudflare:node: over-broad ref-erasure in the quoted-module statics arm
+#    (NodeStyleServer IS emitted + correctly referenced elsewhere; scoping bug in the
+#    ecc57e3 namespace-collision erasure rule).
+#  - 1x FS0252 @11399: unit-typed brand property (`[Rpc.__WORKFLOW_ENTRYPOINT_BRAND]`)
+#    with a setter — F# forbids unit property setters; render get-only or obj
+#    (unmasked capped-tail singleton).
+BL_FIDELITY_CLOUDEDGE_WORKERS=31
 BL_FIDELITY_CLOUDEDGE_PARTYSOCKET=0
 BL_FIDELITY_CLOUDEDGE_PARTYSERVER=0
 BL_FIDELITY_CLOUDEDGE_MCP=0

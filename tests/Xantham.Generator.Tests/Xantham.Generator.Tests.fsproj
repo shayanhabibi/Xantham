@@ -20,6 +20,7 @@
         <Compile Include="Tests\TypeRefRender.SubstituteForHeritage.fs" />
         <Compile Include="Tests\TypeRefRender.HomeChildScrub.fs" />
         <Compile Include="Tests\AnchoredRegistration.fs" />
+        <Compile Include="Tests\TransientPathOccupancy.fs" />
         <Compile Include="Tests\NamespaceCollisionErasure.fs" />
         <Compile Include="Tests\RenderScopeAnchored.fs" />
         <Compile Include="Tests\AliasRemap.fs" />
