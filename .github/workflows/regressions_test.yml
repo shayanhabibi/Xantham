@@ -1,12 +1,5 @@
 ﻿name: regressions_test
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - '**.fs'
-      - 'src/**/**.fsproj'
-      - '!ci/**.fs'
   workflow_dispatch: 
 
 env:

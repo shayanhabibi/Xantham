@@ -3,13 +3,13 @@
     <PropertyGroup>
         <TargetFrameworks>net10.0;net8.0;netstandard2.1</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    </PropertyGroup>
+    <Version>0.1.0</Version><AssemblyVersion>0.0.0.0</AssemblyVersion></PropertyGroup>
 
     <ItemGroup>
         <!-- `Slot` and `AstNode` are internal: the typed layer supersedes them, and two public
              APIs over the same bytes is the thing worth avoiding. The tests still exercise the
              raw walk, so they keep the key. -->
-        <InternalsVisibleTo Include="Xantham.TypeScript.Wire.Tests"/>
+        <InternalsVisibleTo Include="Xantham.TypeScript.Wire.Tests" />
     </ItemGroup>
 
     <ItemGroup>
@@ -18,23 +18,23 @@
         <Compile Include="Measures.fs" />
         <!-- The compiler flag enums, from the vendored `packages/typescript/src/enums`. First,
              because `Ast` reads NodeFlags and TokenFlags and the proto records carry the rest. -->
-        <Compile Include="Enums.generated.fs"/>
-        <Compile Include="Ast.generated.fs"/>
-        <Compile Include="Library.fs"/>
+        <Compile Include="Enums.generated.fs" />
+        <Compile Include="Ast.generated.fs" />
+        <Compile Include="Library.fs" />
         <!-- Named child accessors. After Library.fs, which they are written against. -->
-        <Compile Include="AstNode.generated.fs"/>
+        <Compile Include="AstNode.generated.fs" />
         <!-- The typed layer over the untyped accessors above: tags, Node<'Tag>, views. -->
-        <Compile Include="Typed.generated.fs"/>
+        <Compile Include="Typed.generated.fs" />
         <!-- The .generated.fs files come from tools/proto-gen/generate.mjs. The order is
              forced: RawJsonConverter is attached to generated fields by attribute so it must
              precede them, the types are needed by the converters, the converters by the calls,
              and TscMailbox by the async calls that extend it. -->
-        <Compile Include="RawJson.fs"/>
-        <Compile Include="Proto.generated.fs"/>
-        <Compile Include="ProtoJson.fs"/>
+        <Compile Include="RawJson.fs" />
+        <Compile Include="Proto.generated.fs" />
+        <Compile Include="ProtoJson.fs" />
         <Compile Include="Mailbox.fs" />
-        <Compile Include="ProtoApi.generated.fs"/>
-        <Compile Include="ProtoAsync.generated.fs"/>
+        <Compile Include="ProtoApi.generated.fs" />
+        <Compile Include="ProtoAsync.generated.fs" />
     </ItemGroup>
 
     <ItemGroup>

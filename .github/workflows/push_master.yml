@@ -6,7 +6,8 @@ on:
     paths:
       - '**.fs'
       - 'src/**/**.fsproj'
-      - '!ci/**.fs'
+      - '!**/*.fsx'
+      - '!build.fsx'
   workflow_dispatch: 
 
 env:
@@ -24,7 +25,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
-      - name: Restore FAKE
-        run: dotnet restore Build.fsproj
-      - name: Run FAKE
-        run: dotnet run -- tests
+      - name: Run CI
+        run: dotnet fsi build.fsx -- test
