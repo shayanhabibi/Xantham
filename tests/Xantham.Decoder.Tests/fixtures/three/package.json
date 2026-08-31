@@ -1,7 +1,0 @@
-﻿{
-    "type": "module",
-    "name": "xantham",
-    "dependencies": {
-        "@types/three": "*"
-    }
-}

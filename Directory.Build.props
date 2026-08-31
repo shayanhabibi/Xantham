@@ -8,14 +8,6 @@ rampant.
     <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Xantham.Fable.Core'">
         <IsExcludedFromRootBuild>true</IsExcludedFromRootBuild>
     </PropertyGroup>
-    <!--    Xantham.Fable properties    -->
-    <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Xantham.Fable'">
-        <IsExcludedFromRootBuild>true</IsExcludedFromRootBuild>
-    </PropertyGroup>
-    <!--    Xantham.Fable properties    -->
-    <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Xantham.Fable.Tests'">
-        <IsExcludedFromRootBuild>true</IsExcludedFromRootBuild>
-    </PropertyGroup>
     
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>

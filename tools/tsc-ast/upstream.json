@@ -1,0 +1,36 @@
+{
+  "repo": "microsoft/TypeScript",
+  "ref": "9a8581c393a38961489cc8409ae4dfbe97fc25ec",
+  "comment": "Pinned commit of the upstream sources vendored into tools/tsc-ast/upstream, which mirrors the upstream directory layout. Bump `ref` (or pass --ref) and run `dotnet fsi tools/generate-wire.fsx sync tsc-ast` to resync.",
+  "sources": [
+    {
+      "comment": "The AST schema and the generators read by tools/tsc-ast/generate-ast.mts.",
+      "dir": "tools/scripts/tsc",
+      "files": [
+        "ast.json",
+        "ast.schema.json",
+        "schema.ts",
+        "generate.ts",
+        "generate-encoder.ts",
+        "generate-go-ast.ts",
+        "generate-ts-ast.ts",
+        "package.json",
+        "tsconfig.json"
+      ]
+    },
+    {
+      "comment": "The binary format itself. encoder.go documents every section at :72-200, and is the only statement anywhere of the SourceFile extended-data record; generate-ast.mts parses that table.",
+      "dir": "tsc/internal/api/encoder",
+      "files": [
+        "encoder.go"
+      ]
+    },
+    {
+      "comment": "The reader side of the same format: the data-word masks and section offsets that Ast in Library.fs is written against.",
+      "dir": "packages/typescript/src/api/node",
+      "files": [
+        "node.infrastructure.ts"
+      ]
+    }
+  ]
+}
