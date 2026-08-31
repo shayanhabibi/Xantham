@@ -1,7 +1,7 @@
 {
   "repo": "microsoft/TypeScript",
   "ref": "9a8581c393a38961489cc8409ae4dfbe97fc25ec",
-  "fetched": "2026-08-31T03:47:34.0951585Z",
+  "fetched": "2026-08-31T12:57:20.5554735Z",
   "files": {
     "tools/scripts/tsc/ast.json": "bd6e75d7b217f97293c7750f0fdb441f0e6d5533075ce42cdb629248278e70d6",
     "tools/scripts/tsc/ast.schema.json": "c614df46892e8623fcb4ba9d2cbdc4da2537af140674776f3dbb78e96cdf16d2",
@@ -13,6 +13,27 @@
     "tools/scripts/tsc/package.json": "5a065fe7d8eab2a582f428e11c2ea63aaf70607a54f69cfd5c711b5c53d91b32",
     "tools/scripts/tsc/tsconfig.json": "6494e2c2ef474e5caeeeddc62fa8f99b1788a8f5b4065293e957f5f4c8d55f64",
     "tsc/internal/api/encoder/encoder.go": "e29cdff08715379d241f7bbb23c6e3126d172c00d5a0e36df2e1431b63ca92ad",
-    "packages/typescript/src/api/node/node.infrastructure.ts": "4623faeb185e8f3dc811a261aef46383ec306fd0b8655218d7792319a184ad26"
+    "packages/typescript/src/api/node/node.infrastructure.ts": "4623faeb185e8f3dc811a261aef46383ec306fd0b8655218d7792319a184ad26",
+    "packages/typescript/src/enums/symbolFlags.enum.ts": "da42ba0eafa3d284a5c0b0b4d74fa1c68571627bb02439a65c7969f6c974c711",
+    "packages/typescript/src/enums/checkFlags.enum.ts": "ffdb7c3f42ea92acd93b5ce2ab14e73cb031bb568b44fd7b97f69cfbcef01910",
+    "packages/typescript/src/enums/typeFlags.enum.ts": "35c2c47eb01f20db9177fe213e2858dd19a4c3607c39c91a950a45f769bc16bd",
+    "packages/typescript/src/enums/objectFlags.enum.ts": "5339d1e74aa53d79a2467780d19b126b3f9207d66866a1552b70ec600d3ae3aa",
+    "packages/typescript/src/enums/signatureFlags.enum.ts": "8f41fb58a0244dbbe7d3d5b01f259112ba092fef53dabaddc44d2c8bb793cdc4",
+    "packages/typescript/src/enums/elementFlags.enum.ts": "1f2b53fdd7732500556ee166f1ce9ee38c57a58fd9559951912abf4f190301f4",
+    "packages/typescript/src/enums/signatureKind.enum.ts": "cb63e25c7ec1ae322c4f46504dbaaa8f5d9c7729d1bc373a86a5aec1481c70cb",
+    "packages/typescript/src/enums/nodeBuilderFlags.enum.ts": "a588456311a694d2f7a98717475ad42af9cf4539eff47a7f7d535eff74aff5ea",
+    "packages/typescript/src/enums/typePredicateKind.enum.ts": "2681a2250e0b3b08cc3346bf6c5ed3b967b8f6d7aa99d962f2f8942e32372e44",
+    "packages/typescript/src/enums/internalSymbolName.enum.ts": "278ffe4331d52bbeea11d3be8449ffdab4c77e300f4144177b737855d80663a2",
+    "packages/typescript/src/enums/nodeFlags.enum.ts": "9c73824c93c52ee73f905c09e6107f2994392cd257f366f9e33233b87145671f",
+    "packages/typescript/src/enums/tokenFlags.enum.ts": "344efa8cf8263750ddcb56c13c875922098810a29120c90db538663c555d5acd",
+    "packages/typescript/src/enums/modifierFlags.enum.ts": "477e48bbb392a83492be6ed7403cf3fbf9df9e8ed29ab4f19be8f7f845b2681a",
+    "packages/typescript/src/enums/scriptKind.enum.ts": "6b106dc5ce86cb79b81e97b4697fe73831d075e0b855aac58c8356a02e66390b",
+    "packages/typescript/src/enums/languageVariant.enum.ts": "4a8b25d95b2cf8a5f05e046fb5dfee8d9133261f089b9f6720c354daf18c11da",
+    "packages/typescript/src/enums/spanMapKind.enum.ts": "49a0129e9262744a5714f4d249b99c7787566baae156d8930d2839553ad89e75",
+    "packages/typescript/src/enums/spanMapFeature.enum.ts": "ca1bc5d88c79008428361d8071167f783ded4aedaa0c2775bbd4a102ea96e192",
+    "packages/typescript/src/enums/spanMapFidelity.enum.ts": "84ba14271773db4e828d399fb485fe0fa03de328cc0c4a06314984a1370cec66",
+    "packages/typescript/src/enums/diagnosticDirectivePolicy.enum.ts": "577dcbb24d4dcd43db75581a774a958b44ad76fdb92edf42cd61384f0077f123",
+    "packages/typescript/src/enums/commentDirectiveType.enum.ts": "4ee84ad2f31b65a81f92f75196277b4c1a9ec2a427c9c517ee5f1d1b6e763a31",
+    "packages/typescript/src/enums/syntaxKind.enum.ts": "ca1b5e6f90946016230344ee84702768a04c327998edf08c415f455577f71c39"
   }
 }

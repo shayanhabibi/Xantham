@@ -1,4 +1,4 @@
-#r "nuget: Partas.Build, 0.3.0"
+﻿#r "nuget: Partas.Build, 0.3.0"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
 #r "nuget: Str"
 
@@ -168,8 +168,8 @@ let syncTscAst = input {
     }
 }
 
-/// Emits `Ast.generated.fs` and `AstNode.generated.fs` from the vendored `ast.json`, via the
-/// upstream `SchemaAPI`.
+/// Emits `Ast.generated.fs`, `AstNode.generated.fs` and `Typed.generated.fs` from the vendored
+/// `ast.json`, via the upstream `SchemaAPI`.
 let generateAst = input {
     let! outputDir = Options.astOutputDir
     return stage "generate ast" {

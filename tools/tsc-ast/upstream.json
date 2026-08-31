@@ -31,6 +31,33 @@
       "files": [
         "node.infrastructure.ts"
       ]
+    },
+    {
+      "comment": "The flag and kind enums the checker answers with. Upstream generates these from tsc/internal/**/*.go and commits them, so they are transcribed from a generated file rather than parsed out of Go. syntaxKind is vendored as an oracle: generate-enums.mts diffs it against the SyntaxKind that generate-ast.mts derives positionally from ast.json.",
+      "dir": "packages/typescript/src/enums",
+      "files": [
+        "symbolFlags.enum.ts",
+        "checkFlags.enum.ts",
+        "typeFlags.enum.ts",
+        "objectFlags.enum.ts",
+        "signatureFlags.enum.ts",
+        "elementFlags.enum.ts",
+        "signatureKind.enum.ts",
+        "nodeBuilderFlags.enum.ts",
+        "typePredicateKind.enum.ts",
+        "internalSymbolName.enum.ts",
+        "nodeFlags.enum.ts",
+        "tokenFlags.enum.ts",
+        "modifierFlags.enum.ts",
+        "scriptKind.enum.ts",
+        "languageVariant.enum.ts",
+        "spanMapKind.enum.ts",
+        "spanMapFeature.enum.ts",
+        "spanMapFidelity.enum.ts",
+        "diagnosticDirectivePolicy.enum.ts",
+        "commentDirectiveType.enum.ts",
+        "syntaxKind.enum.ts"
+      ]
     }
   ]
 }

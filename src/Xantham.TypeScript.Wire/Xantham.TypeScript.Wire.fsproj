@@ -16,6 +16,9 @@
         <!-- SyntaxKind and its guards, from tools/tsc-ast/generate-ast.mts. First, because
              Ast in Library.fs reads the blob's kind word as one. -->
         <Compile Include="Measures.fs" />
+        <!-- The compiler flag enums, from the vendored `packages/typescript/src/enums`. First,
+             because `Ast` reads NodeFlags and TokenFlags and the proto records carry the rest. -->
+        <Compile Include="Enums.generated.fs"/>
         <Compile Include="Ast.generated.fs"/>
         <Compile Include="Library.fs"/>
         <!-- Named child accessors. After Library.fs, which they are written against. -->

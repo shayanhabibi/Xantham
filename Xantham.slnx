@@ -23,6 +23,7 @@
 <!--          DOCUMENTATION         -->
   <Folder Name="/docs/">
     <File Path="docs/index.md" />
+    <File Path="docs/wire-hand-written.md" />
     <File Path="docs/wire-navigation.md" />
     <File Path="docs/_head.html" />
   </Folder>
@@ -91,6 +92,7 @@
     <File Path="tools/proto-gen/generate.mjs" />
   </Folder>
   <Folder Name="/tools/tsc-ast/">
+    <File Path="tools/tsc-ast/enums.mts" />
     <File Path="tools/tsc-ast/fsharp.mjs" />
     <File Path="tools/tsc-ast/generate-ast.mts" />
     <File Path="tools/tsc-ast/kinds.mts" />

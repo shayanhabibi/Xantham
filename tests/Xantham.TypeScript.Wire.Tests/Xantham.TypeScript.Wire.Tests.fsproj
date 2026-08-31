@@ -11,6 +11,7 @@
         <Compile Include="Live.fs" />
         <Compile Include="Mailbox.fs" />
         <Compile Include="Typed.test.fs" />
+        <Compile Include="Enums.test.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
 

@@ -26,3 +26,7 @@ tests/Xantham.EndToEnd/fixtures/**/*
 # Decoder test ephemeral run artifacts (per-run temp.d.ts files written
 # into .xantham/run_<id>/temp.d.ts during decoder fixture encoding).
 .xantham/
+# Vendored microsoft/TypeScript AST generator sources, fetched by
+# `dotnet fsi tools/generate-wire.fsx sync tsc-ast` and verified against the per-file
+# digests in tools/tsc-ast/upstream.lock.json. The lock is committed; the tree is not.
+tools/tsc-ast/upstream/

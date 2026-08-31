@@ -10,7 +10,8 @@ open System.Text.Json.Nodes
 open System.Text.Json.Serialization
 
 /// Enums the wire schema refers to, transcribed from the compiler's own `dist/enums`.
-/// Aliases that repeat a value (`ScriptTarget.Latest`) are dropped: F# enums reject duplicates.
+/// Aliases that repeat a value are kept as declared (`ScriptTarget.Latest` beside `ESNext`);
+/// F# permits duplicate enum cases, and dropping one would diverge from the compiler's own names.
 module ProtoEnums =
 
     type JsxEmit =
@@ -370,10 +371,10 @@ module rec Proto =
         Name: string
 
         [<JsonPropertyName "flags">]
-        Flags: int
+        Flags: SymbolFlags
 
         [<JsonPropertyName "checkFlags">]
-        CheckFlags: int
+        CheckFlags: CheckFlags
 
         [<JsonPropertyName "declarations">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
@@ -471,11 +472,11 @@ module rec Proto =
         Id: int
 
         [<JsonPropertyName "flags">]
-        Flags: int
+        Flags: TypeFlags
 
         [<JsonPropertyName "objectFlags">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ObjectFlags: int voption
+        ObjectFlags: ObjectFlags voption
 
         [<JsonPropertyName "isTupleType">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
@@ -508,7 +509,7 @@ module rec Proto =
         ///  TupleType data
         [<JsonPropertyName "elementFlags">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        ElementFlags: int[] voption
+        ElementFlags: ElementFlags[] voption
 
         [<JsonPropertyName "fixedLength">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
@@ -678,7 +679,7 @@ module rec Proto =
 
         ///  SymbolFlags for what kind of symbol to find
         [<JsonPropertyName "meaning">]
-        Meaning: int
+        Meaning: SymbolFlags
 
         ///  Whether to exclude global symbols
         [<JsonPropertyName "excludeGlobals">]
@@ -712,7 +713,7 @@ module rec Proto =
 
         ///  SymbolFlags for what kind of symbols to find
         [<JsonPropertyName "meaning">]
-        Meaning: int
+        Meaning: SymbolFlags
     }
 
     type GetSignaturesOfTypeParams = {
@@ -726,7 +727,7 @@ module rec Proto =
         ``Type``: int
 
         [<JsonPropertyName "kind">]
-        Kind: int
+        Kind: SignatureKind
     }
 
     type SignatureResponse = {
@@ -734,7 +735,7 @@ module rec Proto =
         Id: int
 
         [<JsonPropertyName "flags">]
-        Flags: int
+        Flags: SignatureFlags
 
         [<JsonPropertyName "declaration">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
@@ -993,7 +994,7 @@ module rec Proto =
         Signature: int
 
         [<JsonPropertyName "kind">]
-        Kind: int
+        Kind: SyntaxKind
 
         [<JsonPropertyName "location">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
@@ -1001,7 +1002,7 @@ module rec Proto =
 
         [<JsonPropertyName "flags">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
-        Flags: int voption
+        Flags: NodeBuilderFlags voption
     }
 
     ///  CheckerSignatureParams are parameters for checker methods that operate on a signature.
@@ -1019,7 +1020,7 @@ module rec Proto =
     ///  TypePredicateResponse is the response for getTypePredicateOfSignature.
     type TypePredicateResponse = {
         [<JsonPropertyName "kind">]
-        Kind: int
+        Kind: TypePredicateKind
 
         [<JsonPropertyName "parameterIndex">]
         ParameterIndex: int

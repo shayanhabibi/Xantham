@@ -15,10 +15,11 @@ Xantham is a TypeScript-to-F# bindings generator that separates concerns into th
 - `dotnet test` - Run .NET tests
 - `dotnet fsi tools/generate-wire.fsx sync tsc-ast [--check]` - Vendor (or verify) the upstream
   sources pinned in `tools/tsc-ast/upstream.json`, grouped by upstream directory
-- `dotnet fsi tools/generate-wire.fsx generate ast` - Emit `Ast.generated.fs` (`SyntaxKind`,
-  its guards, the node-alias guards, and the `Slot` numbers), `AstNode.generated.fs` (named child
-  and data accessors) and `Typed.generated.fs` (tags, `Node<'Tag>`, typed accessors, views) into
-  `src/Xantham.TypeScript.Wire/`, from the vendored `ast.json`
+- `dotnet fsi tools/generate-wire.fsx generate ast` - Emit `Enums.generated.fs` (the compiler's
+  flag and kind enums), `Ast.generated.fs` (`SyntaxKind`, its guards, the node-alias guards, and
+  the `Slot` numbers), `AstNode.generated.fs` (named child and data accessors) and
+  `Typed.generated.fs` (tags, `Node<'Tag>`, typed accessors, views) into
+  `src/Xantham.TypeScript.Wire/`, from the vendored `ast.json` and `enums/`
 - `dotnet fsi tools/generate-wire.fsx generate proto` - Emit the `Proto*.generated.fs` files
 
 ## Project Structure
@@ -85,11 +86,13 @@ Ground truth, in order of preference:
    upstream `main` whenever the two disagree, because upstream is always ahead of the release.
 2. `tools/tsc-ast/upstream/` — vendored at a pinned commit and checksummed in
    `upstream.lock.json`, mirroring the upstream directory layout. Read these rather than
-   fetching; `sync tsc-ast --check` says whether the pin has moved. Three directories:
+   fetching; `sync tsc-ast --check` says whether the pin has moved. Four directories:
    `tools/scripts/tsc/` (the AST schema `ast.json` and its generators),
    `tsc/internal/api/encoder/encoder.go` (the writer, and the only statement anywhere of the
-   binary format — every section is documented at `:72-200`), and
-   `packages/typescript/src/api/node/node.infrastructure.ts` (the reader's masks).
+   binary format — every section is documented at `:72-200`),
+   `packages/typescript/src/api/node/node.infrastructure.ts` (the reader's masks), and
+   `packages/typescript/src/enums/` (the flag and kind enums, which upstream generates from its
+   own Go and commits, plus `syntaxKind.enum.ts` vendored as an oracle on our derived ordinals).
 3. `gh api repos/microsoft/TypeScript/contents/<path>` for anything neither shipped in `dist/`
    nor vendored.
 
@@ -151,5 +154,23 @@ which is *not* where `@ts-ignore`/`@ts-expect-error` comments go.
 
 Kind ordinals are **not** the JavaScript compiler API's. They are positional in `ast.json`, so
 they move whenever a kind is inserted upstream — never hand-write one. `SyntaxKind` in
-`Ast.generated.fs` is the only source of truth, and the generator asserts the anchors
-(`Identifier = 79`, `SourceFile = 307`) on every run.
+`Ast.generated.fs` is the only source of truth, and the generator diffs all 351 of them against
+upstream's published `syntaxKind.enum.ts` on every run.
+
+Flags are named too. `Enums.generated.fs` carries 20 enums over 448 members, generated from
+upstream's own `packages/typescript/src/enums`: `NodeFlags` and `TokenFlags` on the syntax side,
+`SymbolFlags`, `TypeFlags`, `ObjectFlags`, `CheckFlags`, `SignatureFlags` and `ElementFlags` on
+the checker's responses, and the small ones the `SourceFile` record uses (`ScriptKind`,
+`LanguageVariant`, `SpanMap*`). The schema types all of them as bare `number`, so which response
+field carries which enum is an explicit table in `tools/proto-gen/generate.mjs`.
+
+Each enum is emitted in two halves: the bits upstream defines are enum cases, and the 122 members
+it builds by combining them are `[<Literal>]`s in a companion module of the same name, since an
+enum case may not name another case of its own enum. Callers see one prefix either way. The
+combining expressions are re-parsed and fully re-parenthesised rather than copied, because F# puts
+`|||` and `&&&` at one precedence where TypeScript does not; a test reads all 122 back out of the
+built assembly and checks them against the generator's own evaluator.
+
+Facts in this pipeline that are transcribed rather than derived — the per-kind extended-record
+offsets, the msgpack tag subset, that field-to-enum table, and ten more — are catalogued in
+`docs/wire-hand-written.md`, each with how it was derived and how to update it.

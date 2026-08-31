@@ -19,8 +19,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { api, type NodeType } from "./upstream/tools/scripts/tsc/schema.ts";
-import { fsIdent, header, Lines, needsEscape } from "./fsharp.mjs";
+import { fsIdent, header, Lines, needsEscape, xml } from "./fsharp.mjs";
 import { ANCHORS, kindValues } from "./kinds.mts";
+import { readEnums, render, syntaxKindOracle, type EnumType } from "./enums.mts";
 import { sourceFileRecord } from "./record.mts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -976,6 +977,30 @@ for (const [kind, expected] of ANCHORS) {
   }
 }
 
+// And now it does not have to be trusted. `syntaxKind.enum.ts` is upstream's own published
+// enum, generated from `kind_generated.go`, vendored beside the flag enums. Every kind and
+// every marker is checked against it, which turns the four anchors above from the evidence
+// into a fast smoke test.
+{
+  const oracle = syntaxKindOracle();
+  for (const [kind, ours] of values) {
+    if (!oracle.has(kind)) problems.push(`SyntaxKind.${kind} is not in the published enum`);
+    else if (oracle.get(kind) !== ours) {
+      problems.push(`SyntaxKind.${kind} came out as ${ours}, upstream publishes ${oracle.get(kind)}`);
+    }
+  }
+  for (const marker of markers) {
+    const ours = values.get(marker.target);
+    if (oracle.has(marker.name) && oracle.get(marker.name) !== ours) {
+      problems.push(`Marker.${marker.name} came out as ${ours}, upstream publishes ${oracle.get(marker.name)}`);
+    }
+  }
+  const unchecked = [...oracle.keys()].filter(name => !values.has(name) && !markers.some(m => m.name === name));
+  if (unchecked.length !== 1 || unchecked[0] !== "Count") {
+    problems.push(`published SyntaxKind has entries that are neither a kind nor a marker: ${unchecked.join(", ")}`);
+  }
+}
+
 // The slot order has the same property, and `generate-encoder.ts:1819-1824` writes this exact
 // layout out longhand in a worked example - the one place upstream states it in prose.
 const METHOD_DECLARATION_SLOTS =
@@ -1282,6 +1307,139 @@ typedOut.indent(w => {
   }
 });
 
+// ────────────────────────────────────────────────────────────────────────────
+// Enums.generated.fs
+// ────────────────────────────────────────────────────────────────────────────
+
+const enums = readEnums();
+
+/**
+ * A flag set is one that declares bits, i.e. two or more members spelled `1 << n`. Syntactic
+ * rather than numeric on purpose: `SymbolFlags.All` is `(1 << 30) - 1` and
+ * `ExportDoesNotSupportDefaultModifier` is a `~`, so neither is a power of two and a rule that
+ * looked only at values would call the largest flag set in the file an ordinal enum.
+ *
+ * Detected rather than listed, so an upstream enum changing character is picked up instead of
+ * mislabelled - `SpanMapFeature` is a bitfield whose name does not say so, and `[<Flags>]` on an
+ * ordinal enum makes `ToString` invent nonsense like `Standard, JSX`.
+ */
+const isFlagSet = (type: EnumType) => type.members.filter(member => member.bit).length > 1;
+
+const enumsOut = new Lines();
+
+enumsOut.w(...header({
+  namespace: "Xantham.TypeScript.Wire",
+  generator: "tools/tsc-ast/generate-ast.mts",
+  repo: lock.repo,
+  ref: lock.ref,
+  source: "packages/typescript/src/enums",
+}));
+enumsOut.blank();
+
+for (const line of [
+  "The compiler's own flag and kind enums.",
+  "",
+  "These are the words the checker answers with - `SymbolResponse.Flags` is a `SymbolFlags`,",
+  "`TypeResponse.Flags` is a `TypeFlags` - and the two `Ast` reads straight off a node,",
+  "`NodeFlags` and `TokenFlags`.",
+  "",
+  "Each enum arrives in two halves. The cases are the bits upstream defines, spelled as it spells",
+  "them (`1u <<< 23`, not `8388608u`); the companion module holds the members upstream builds by",
+  "combining those bits, as `[<Literal>]` values computed the same way. `SymbolFlags.Property` and",
+  "`SymbolFlags.Value` both still resolve, so which half a name landed in does not matter to a",
+  "caller, and a literal is still usable as a match pattern.",
+  "",
+  "The split is forced: an enum case may not name another case of its own enum. A composite that",
+  "mixes in a bare integer - `SymbolFlags.All = (1 << 30) - 1` - has no enum type to be written at",
+  "and stays a case, carrying upstream's spelling as a comment.",
+  "",
+  "Duplicate values are kept rather than dropped, and F# permits them: `ObjectFlags` reuses its",
+  "high bits across disjoint categories of type, so eight of its bits carry two or three names.",
+  "`ToString` reports the first name declared at a value, which is upstream order.",
+]) enumsOut.w(line ? `// ${line}` : "//");
+enumsOut.blank();
+
+for (const type of enums) {
+  enumsOut.doc(`\`${type.name}\`, from \`${type.origin}\` upstream.`);
+
+  if (type.isString) {
+    // A string-valued enum is not an enum in F#. It emits as literals, which are still usable in
+    // a pattern match - the reason `[<Literal>]` is worth the noise over plain bindings.
+    enumsOut.w("[<RequireQualifiedAccess>]", `module ${fsIdent(type.name)} =`);
+    enumsOut.indent(w => {
+      for (const member of type.members) {
+        w.blank();
+        w.w("[<Literal>]", `let ${fsIdent(member.name)} = ${JSON.stringify(member.value)}`);
+      }
+    });
+    enumsOut.blank();
+    continue;
+  }
+
+  // An enum case may not name another case of its own enum, so a composite cannot be spelled as
+  // the thing it is. Composites move to a companion module instead, as `[<Literal>]` values
+  // computed from the cases - `SymbolFlags.Property` and `SymbolFlags.Variable` both still
+  // resolve, so the split is invisible to callers. A composite that mixes a bare integer in has
+  // no enum type to be rendered at, and stays a case with its evaluated value.
+  const cases = new Set(type.members.filter(member => !member.composite).map(member => member.name));
+  const literals = new Set<string>();
+  const rendered = new Map<string, string>();
+
+  for (const member of type.members) {
+    if (!member.composite || !member.tree) continue;
+    const fsharp = render(member.tree, name =>
+      literals.has(name) ? fsIdent(name) : `${fsIdent(type.name)}.${fsIdent(name)}`);
+    if (fsharp === null) {
+      cases.add(member.name);
+      continue;
+    }
+    literals.add(member.name);
+    rendered.set(member.name, fsharp);
+  }
+
+  if (isFlagSet(type)) enumsOut.w("[<System.Flags>]");
+  enumsOut.w(`type ${fsIdent(type.name)} =`);
+  enumsOut.indent(w => {
+    for (const member of type.members) {
+      if (!cases.has(member.name)) continue;
+      // Bits keep upstream's shift: `JSDocPublic = (1u <<< 23)` says what `8388608u` does not,
+      // and F# folds it to the same constant.
+      const shift = member.bit ? /^1 << (\d+)$/.exec(member.expression) : null;
+      // Upstream's spelling, for the cases where the emitted value is not it. No `<returns>`:
+      // the number is on the very next line.
+      if (!shift && member.expression !== String(member.value))
+        w.w(`/// <summary><code>${xml(member.expression)}</code></summary>`);
+      w.w(`| ${fsIdent(member.name)} = ${shift ? `(1u <<< ${shift[1]})` : `${member.value}u`}`);
+    }
+  });
+  enumsOut.blank();
+
+  if (literals.size === 0) continue;
+
+  enumsOut.doc(
+    `Composite \`${type.name}\` values, computed from the cases above rather than written out.`,
+    "",
+    "They live here because an enum case may not name another case of its own enum. Callers see",
+    "no difference - both halves answer to the same prefix - and `[<Literal>]` keeps them usable",
+    "as match patterns.");
+  enumsOut.w(
+    "[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]",
+    `module ${fsIdent(type.name)} =`);
+  enumsOut.indent(w => {
+    for (const member of type.members) {
+      if (!literals.has(member.name)) continue;
+      w.blank();
+      // Upstream's own spelling, which is shorter than the parenthesised form below it, and the
+      // value it evaluates to - which the F# expression deliberately does not state, and which
+      // `Enums.test.fs` reads back out of the assembly to check the two against each other.
+      w.w(`/// <summary><code>${xml(member.expression)}</code></summary>`
+        + `<returns><c>${member.value}u</c></returns>`);
+      w.w("[<Literal>]", `let ${fsIdent(member.name)} = ${rendered.get(member.name)}`);
+    }
+  });
+  enumsOut.blank();
+}
+
 const write = (name: string, lines: Lines) => {
   const file = path.join(outDir, name);
   fs.mkdirSync(path.dirname(path.resolve(file)), { recursive: true });
@@ -1289,11 +1447,13 @@ const write = (name: string, lines: Lines) => {
   return file;
 };
 
+console.log(`out     ${write("Enums.generated.fs", enumsOut)}`);
 console.log(`out     ${write("Ast.generated.fs", out)}`);
 console.log(`out     ${write("AstNode.generated.fs", nodesOut)}`);
 console.log(`out     ${write("Typed.generated.fs", typedOut)}`);
 
 console.log(`kinds   ${values.size}`);
+console.log(`enums   ${enums.length} over ${enums.reduce((total, type) => total + type.members.length, 0)} members (${enums.filter(isFlagSet).length} flag sets)`);
 console.log(`markers ${markers.length}`);
 console.log(`guards  ${guards.length} (${guards.filter(guard => guard.type === "range").length} range)`);
 console.log(`aliases ${nodeAliasGuards.length} node aliases over ${[...new Set([...aliasKinds.values()].flatMap(kinds => [...kinds]))].length} distinct kinds`);

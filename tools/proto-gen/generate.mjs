@@ -94,6 +94,54 @@ function mapType(node, ctx) {
   return { fs: "JsonNode", nullable: true };
 }
 
+/**
+ * Fields the schema types as a bare `number` that are really one of the compiler's flag or kind
+ * enums, keyed by "<interface>.<wire field>".
+ *
+ * The schema cannot say so - the Go side serialises every enum as an integer - but upstream's own
+ * typed wrapper does, in `dist/api/sync/api.d.ts` and `dist/api/async/types.d.ts`. Each entry
+ * below is transcribed from a declaration there; the register in `docs/wire-hand-written.md`
+ * names the declaration for each one.
+ *
+ * Explicit rather than inferred from the field name: `TypeToTypeNodeParams.flags` is a
+ * counter-example that a name rule would get wrong, since `typeToTypeNode` and `typeToString`
+ * share that one parameter record and upstream types the argument `NodeBuilderFlags` for the
+ * first and `TypeFormatFlags` for the second. It stays `int`.
+ *
+ * The named types are all top-level types in the `Xantham.TypeScript.Wire` namespace, from
+ * `Enums.generated.fs` and `Ast.generated.fs`, both of which compile before this file.
+ */
+const FIELD_ENUMS = {
+  "SymbolResponse.flags": "SymbolFlags",
+  "SymbolResponse.checkFlags": "CheckFlags",
+  "TypeResponse.flags": "TypeFlags",
+  "TypeResponse.objectFlags": "ObjectFlags",
+  "TypeResponse.elementFlags": "ElementFlags",
+  "SignatureResponse.flags": "SignatureFlags",
+  "TypePredicateResponse.kind": "TypePredicateKind",
+  "GetSignaturesOfTypeParams.kind": "SignatureKind",
+  "ResolveNameParams.meaning": "SymbolFlags",
+  "GetSymbolsInScopeParams.meaning": "SymbolFlags",
+  "SignatureToSignatureDeclarationParams.kind": "SyntaxKind",
+  "SignatureToSignatureDeclarationParams.flags": "NodeBuilderFlags",
+};
+
+/**
+ * Applies `FIELD_ENUMS` to a mapped field type. Only `int` and `int[]` are retyped: anything else
+ * under a listed key means the schema changed shape beneath the table, which is a problem rather
+ * than something to retype anyway.
+ */
+const retypedFields = new Set();
+function retype(mapped, key) {
+  const enumName = FIELD_ENUMS[key];
+  if (!enumName) return mapped;
+  retypedFields.add(key);
+  if (mapped.fs === "int") return { ...mapped, fs: enumName };
+  if (mapped.fs === "int[]") return { ...mapped, fs: `${enumName}[]` };
+  problems.push(`${key}: listed in FIELD_ENUMS as ${enumName}, but the schema types it '${mapped.fs}'`);
+  return mapped;
+}
+
 /** Doc comment lines, reflowed as F# `///` comments. */
 function docLines(node) {
   const full = node.getFullText();
@@ -160,7 +208,8 @@ w("open System.Text.Json.Serialization");
 w();
 
 w("/// Enums the wire schema refers to, transcribed from the compiler's own `dist/enums`.");
-w("/// Aliases that repeat a value (`ScriptTarget.Latest`) are dropped: F# enums reject duplicates.");
+w("/// Aliases that repeat a value are kept as declared (`ScriptTarget.Latest` beside `ESNext`);");
+w("/// F# permits duplicate enum cases, and dropping one would diverge from the compiler's own names.");
 w("module ProtoEnums =");
 w();
 for (const name of [...enumImports].sort()) {
@@ -221,7 +270,7 @@ for (const decl of interfaces) {
   members.forEach((m, i) => {
     const wire = m.name.getText().replace(/^["']|["']$/g, "");
     const isDocId = m.type.getText().includes("DocumentIdentifier");
-    const mapped = mapType(m.type, `${name}.${wire}${isDocId ? "#docid" : ""}`);
+    const mapped = retype(mapType(m.type, `${name}.${wire}${isDocId ? "#docid" : ""}`), `${name}.${wire}`);
     const optional = !!m.questionToken || mapped.nullable;
     for (const d of docLines(m)) w(`        /// ${d}`);
     if (mapped.literals) w(`        /// One of: ${mapped.literals.map(s => "`" + s + "`").join(", ")}`);
@@ -241,6 +290,12 @@ for (const decl of interfaces) {
   });
   w("    }");
   w();
+}
+
+// A key that matches nothing is a table entry the schema has moved out from under, and it would
+// otherwise go unnoticed as a field quietly staying an `int`.
+for (const key of Object.keys(FIELD_ENUMS)) {
+  if (!retypedFields.has(key)) problems.push(`FIELD_ENUMS: ${key} matches no field in the schema`);
 }
 
 const info = interfaces.find(d => d.name.text === "APIMethodInfo");

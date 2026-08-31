@@ -606,7 +606,10 @@ module Ast =
 
     let parent (file: SourceFile) (index: int) = int (u32 file.Data (nodeAt file index + 16))
 
-    let flags (file: SourceFile) (index: int) = u32 file.Data (nodeAt file index + 24)
+    /// The node's `NodeFlags` - `Const`, `Ambient`, `JavaScriptFile` and the rest of the word
+    /// the parser set while reading it.
+    let flags (file: SourceFile) (index: int) : NodeFlags =
+        LanguagePrimitives.EnumOfValue<uint32, NodeFlags>(u32 file.Data (nodeAt file index + 24))
 
     let data (file: SourceFile) (index: int) =
         // The word is one role until its type bits are read and another afterwards, so each
@@ -687,14 +690,15 @@ module Ast =
         | SyntaxKind.StringLiteral
         | SyntaxKind.NumericLiteral
         | SyntaxKind.BigIntLiteral
-        | SyntaxKind.RegularExpressionLiteral -> extendedWord file index 4<byteOffset>
+        | SyntaxKind.RegularExpressionLiteral ->
+            extendedWord file index 4<byteOffset> |> ValueOption.map LanguagePrimitives.EnumOfValue<uint32, TokenFlags>
         | _ -> ValueNone
 
     /// The template fragment's `TokenFlags`, which sit past its raw text.
     let templateFlags (file: SourceFile) (index: int) =
         match kind file index with
         | SyntaxKind.TemplateHead | SyntaxKind.TemplateMiddle | SyntaxKind.TemplateTail ->
-            extendedWord file index 8<byteOffset>
+            extendedWord file index 8<byteOffset> |> ValueOption.map LanguagePrimitives.EnumOfValue<uint32, TokenFlags>
         | _ -> ValueNone
 
     /// The child occupying declared slot `order`, if present.
@@ -781,9 +785,9 @@ module Ast =
           VirtualLength: int
           OriginalStart: int
           OriginalLength: int
-          Kind: uint32
+          Kind: SpanMapKind
           /// Absent for segments the compiler wrote without one.
-          Features: uint32 voption }
+          Features: SpanMapFeature voption }
 
     /// A suppression directive mapped from an original file onto a virtual one, in UTF-16 code
     /// units.
@@ -793,7 +797,7 @@ module Ast =
           OriginalLength: int
           VirtualStart: int
           VirtualLength: int
-          Policy: uint32
+          Policy: DiagnosticDirectivePolicy
           UnusedCode: uint32 }
 
     let private sourceFileWord (file: SourceFile) (offset: int<byteOffset>) =
@@ -860,18 +864,13 @@ module Ast =
     let originalText (file: SourceFile) =
         getString file (stringIndexField file SourceFileRecord.OriginalText)
 
-    /// <summary>
-    /// The file's <c>ScriptKind</c>.
-    /// </summary>
-    /// <remarks>
-    /// A compiler-internal enum: it is neither in the AST schema nor in the protocol types, so
-    /// it stays a number rather than being transcribed by hand into a third place that could
-    /// drift.
-    /// </remarks>
-    let scriptKind (file: SourceFile) = sourceFileWord file SourceFileRecord.ScriptKind
+    /// The file's `ScriptKind`: what the compiler decided it was reading.
+    let scriptKind (file: SourceFile) : ScriptKind =
+        LanguagePrimitives.EnumOfValue<uint32, ScriptKind>(sourceFileWord file SourceFileRecord.ScriptKind)
 
-    /// The file's `LanguageVariant`, a compiler-internal enum for the same reason as `scriptKind`.
-    let languageVariant (file: SourceFile) = sourceFileWord file SourceFileRecord.LanguageVariant
+    /// The file's `LanguageVariant`, i.e. whether JSX syntax is on.
+    let languageVariant (file: SourceFile) : LanguageVariant =
+        LanguagePrimitives.EnumOfValue<uint32, LanguageVariant>(sourceFileWord file SourceFileRecord.LanguageVariant)
 
     /// <summary>
     /// The node whose presence made this file a module, if any.
@@ -928,7 +927,7 @@ module Ast =
               OriginalLength = int (reader.ReadUInt32())
               VirtualStart = int (reader.ReadUInt32())
               VirtualLength = int (reader.ReadUInt32())
-              Policy = reader.ReadUInt32()
+              Policy = LanguagePrimitives.EnumOfValue<uint32, DiagnosticDirectivePolicy>(reader.ReadUInt32())
               UnusedCode = reader.ReadUInt32() })
 
     /// <summary>
@@ -943,8 +942,9 @@ module Ast =
               VirtualLength = int (reader.ReadUInt32())
               OriginalStart = int (reader.ReadUInt32())
               OriginalLength = int (reader.ReadUInt32())
-              Kind = reader.ReadUInt32()
-              Features = if length > 5 then ValueSome(reader.ReadUInt32()) else ValueNone })
+              Kind = LanguagePrimitives.EnumOfValue<uint32, SpanMapKind>(reader.ReadUInt32())
+              Features =
+                if length > 5 then ValueSome(LanguagePrimitives.EnumOfValue<uint32, SpanMapFeature>(reader.ReadUInt32())) else ValueNone })
 
     /// The names of the files this one was assembled from.
     let supplementalSourceFileNames (file: SourceFile) =

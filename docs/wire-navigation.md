@@ -150,7 +150,7 @@ value rather than a node, because a blob holds exactly one source file:
 Ast.fileName ast        // string
 Ast.path ast            // canonical path - this is what a node handle carries
 Ast.sourceText ast      // the whole text
-Ast.scriptKind ast      // uint32, the Go enum, not the JS API's
+Ast.scriptKind ast      // ScriptKind, the Go enum, not the JS API's
 Ast.imports ast         // int[], the module-specifier *nodes*
 Ast.referencedFiles ast // FileReference[], from /// <reference path=...>
 Ast.ambientModuleNames ast // string[]
@@ -184,7 +184,30 @@ Node.retag node             // change the claim, not the node
 
 ## Example: a symbol's declarations
 
-A symbol comes from a request, and its `Declarations` is an array of **node handles**:
+A symbol comes from a request. Its `Flags` and `CheckFlags` are typed, so read them by name
+rather than by bit:
+
+```fsharp
+symbol |> ValueOption.exists (fun symbol -> symbol.Flags.HasFlag SymbolFlags.Property)
+```
+
+`SymbolFlags`, `TypeFlags`, `ObjectFlags`, `CheckFlags`, `SignatureFlags` and `ElementFlags` are
+generated into `Enums.generated.fs` from upstream's published enums, and the response records name
+them. Which field carries which enum is an explicit table in the proto generator, not a guess from
+the field name — see entry 3 of `docs/wire-hand-written.md`.
+
+Each enum comes in two halves, and the seam is invisible from here. The single bits upstream
+defines are enum cases; the combinations it builds out of them are `[<Literal>]`s in a companion
+module of the same name, because an enum case may not name another case of its own enum. Both
+answer to the same prefix, and a literal still works as a match pattern:
+
+```fsharp
+match symbol.Flags &&& SymbolFlags.Value with
+| SymbolFlags.Accessor -> "a getter or a setter"
+| _ -> "something else"
+```
+
+Its `Declarations` is an array of **node handles**:
 
 ```fsharp
 let symbol =
@@ -245,11 +268,16 @@ of it. When a second caller needs them, they belong beside `Ast.read` in `Librar
 
 ## Where the truth lives
 
-`Ast.generated.fs`, `AstNode.generated.fs` and `Typed.generated.fs` are emitted by
-`tools/tsc-ast/generate-ast.mts` from the vendored `ast.json`, plus the `SourceFile` record
-layout parsed out of `encoder.go`. Regenerate with
+`Enums.generated.fs`, `Ast.generated.fs`, `AstNode.generated.fs` and `Typed.generated.fs` are
+emitted by `tools/tsc-ast/generate-ast.mts` from the vendored `ast.json`, plus the `SourceFile`
+record layout parsed out of `encoder.go` and the flag enums transcribed from upstream's own
+`packages/typescript/src/enums`. Regenerate with
 `dotnet fsi tools/generate-wire.fsx generate ast`; check the vendor pin with
 `dotnet fsi tools/generate-wire.fsx sync tsc-ast --check`.
 
 Kind ordinals are positional in `ast.json` and move whenever upstream inserts a kind, so never
-write one down: `SyntaxKind.StringLiteral`, never `11u`.
+write one down: `SyntaxKind.StringLiteral`, never `11u`. The same goes for the flag enums:
+`SymbolFlags.Property`, never `4`.
+
+The handful of facts in this pipeline that are transcribed rather than derived — and what to do
+when upstream moves them — are listed in `docs/wire-hand-written.md`.

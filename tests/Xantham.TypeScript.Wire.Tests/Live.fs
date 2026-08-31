@@ -214,16 +214,15 @@ let liveTests =
             Ast.text ast (only SyntaxKind.NumericLiteral)
             |> Flip.Expect.equal "the numeric literal's cooked text" (ValueSome "42")
 
-            // TokenFlags values are not part of the vendored schema, so this asserts the shape:
-            // the hex literal records flags, and a plain one does not.
+            // The base the cooked text lost. Named rather than asserted as "nonzero", now that
+            // `TokenFlags` is generated from the vendored enums.
             Ast.tokenFlags ast (only SyntaxKind.NumericLiteral)
-            |> ValueOption.map (fun flags -> flags <> 0u)
-            |> Flip.Expect.equal "the hex literal records token flags" (ValueSome true)
+            |> Flip.Expect.equal "the hex literal records its specifier" (ValueSome TokenFlags.HexSpecifier)
 
             ofKind SyntaxKind.StringLiteral
             |> List.map (Ast.tokenFlags ast)
             |> Flip.Expect.equal "ordinary string literals record none"
-                [ ValueSome 0u; ValueSome 0u; ValueSome 0u ]
+                [ ValueSome TokenFlags.None; ValueSome TokenFlags.None; ValueSome TokenFlags.None ]
 
             let head = only SyntaxKind.TemplateHead
             Ast.text ast head |> Flip.Expect.equal "the template head's cooked text" (ValueSome "hello ")
@@ -272,10 +271,8 @@ let liveTests =
             Ast.path ast
             |> Flip.Expect.stringEnds "the canonicalised path" "fixtures/sourcefile.ts"
 
-            // ScriptKind and LanguageVariant are compiler-internal enums that reach us as plain
-            // numbers; 3 is `TS` and 0 is `Standard`.
-            Ast.scriptKind ast |> Flip.Expect.equal "scriptKind is TS" 3u
-            Ast.languageVariant ast |> Flip.Expect.equal "languageVariant is Standard" 0u
+            Ast.scriptKind ast |> Flip.Expect.equal "scriptKind is TS" ScriptKind.TS
+            Ast.languageVariant ast |> Flip.Expect.equal "languageVariant is Standard" LanguageVariant.Standard
 
             // A node index rather than an offset or a string, so it resolves against the blob.
             Ast.externalModuleIndicator ast

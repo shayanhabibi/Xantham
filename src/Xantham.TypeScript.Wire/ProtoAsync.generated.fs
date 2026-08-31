@@ -501,7 +501,7 @@ module TscMailboxExtensions =
         member inline this.updateTemporarySnapshot(snapshot: int, file: DocumentIdentifier, newText: string) =
             this.updateTemporarySnapshot(
                 { Snapshot = snapshot
-                  File = file
+                  ``File`` = file
                   NewText = newText }
                 : UpdateTemporarySnapshotParams
             )
@@ -532,7 +532,7 @@ module TscMailboxExtensions =
         /// The fields of ReadConfigFileParams, spread. Builds the record and calls the overload above.
         member inline this.readConfigFile(file: DocumentIdentifier) =
             this.readConfigFile(
-                { File = file }
+                { ``File`` = file }
                 : ReadConfigFileParams
             )
 
@@ -552,7 +552,7 @@ module TscMailboxExtensions =
         /// The fields of ParseConfigFileParams, spread. Builds the record and calls the overload above.
         member inline this.parseConfigFile(file: DocumentIdentifier) =
             this.parseConfigFile(
-                { File = file }
+                { ``File`` = file }
                 : ParseConfigFileParams
             )
 
@@ -602,7 +602,7 @@ module TscMailboxExtensions =
         member inline this.getDefaultProjectForFile(snapshot: int, file: DocumentIdentifier) =
             this.getDefaultProjectForFile(
                 { Snapshot = snapshot
-                  File = file }
+                  ``File`` = file }
                 : GetDefaultProjectForFileParams
             )
 
@@ -613,7 +613,7 @@ module TscMailboxExtensions =
             this.getSymbolAtPosition(
                 { Snapshot = snapshot
                   Project = project
-                  File = file
+                  ``File`` = file
                   Position = position }
                 : GetSymbolAtPositionParams
             )
@@ -625,7 +625,7 @@ module TscMailboxExtensions =
             this.getSymbolsAtPositions(
                 { Snapshot = snapshot
                   Project = project
-                  File = file
+                  ``File`` = file
                   Positions = positions }
                 : GetSymbolsAtPositionsParams
             )
@@ -659,7 +659,7 @@ module TscMailboxExtensions =
             this.getSymbolOfSourceFile(
                 { Snapshot = snapshot
                   Project = project
-                  File = file }
+                  ``File`` = file }
                 : GetSymbolOfSourceFileParams
             )
 
@@ -725,7 +725,7 @@ module TscMailboxExtensions =
             this.getSourceFile(
                 { Snapshot = snapshot
                   Project = project
-                  File = file }
+                  ``File`` = file }
                 : GetSourceFileParams
             )
 
@@ -746,7 +746,7 @@ module TscMailboxExtensions =
             this.getSourceFileMetadata(
                 { Snapshot = snapshot
                   Project = project
-                  File = file }
+                  ``File`` = file }
                 : GetSourceFileParams
             )
 
@@ -767,21 +767,21 @@ module TscMailboxExtensions =
             this.getConfigSourceFile(
                 { Snapshot = snapshot
                   Project = project
-                  File = file }
+                  ``File`` = file }
                 : GetSourceFileParams
             )
 
         member this.resolveName(parameters: ResolveNameParams) = AsyncApi.resolveName this parameters
 
         /// The fields of ResolveNameParams, spread. Builds the record and calls the overload above.
-        member inline this.resolveName(snapshot: int, project: string, name: string, meaning: int, [<Struct>] ?location: string, [<Struct>] ?file: DocumentIdentifier, [<Struct>] ?position: int, [<Struct>] ?excludeGlobals: bool) =
+        member inline this.resolveName(snapshot: int, project: string, name: string, meaning: SymbolFlags, [<Struct>] ?location: string, [<Struct>] ?file: DocumentIdentifier, [<Struct>] ?position: int, [<Struct>] ?excludeGlobals: bool) =
             this.resolveName(
                 { Snapshot = snapshot
                   Project = project
                   Name = name
                   Meaning = meaning
                   Location = location
-                  File = file
+                  ``File`` = file
                   Position = position
                   ExcludeGlobals = excludeGlobals }
                 : ResolveNameParams
@@ -790,13 +790,13 @@ module TscMailboxExtensions =
         member this.getSymbolsInScope(parameters: GetSymbolsInScopeParams) = AsyncApi.getSymbolsInScope this parameters
 
         /// The fields of GetSymbolsInScopeParams, spread. Builds the record and calls the overload above.
-        member inline this.getSymbolsInScope(snapshot: int, project: string, meaning: int, [<Struct>] ?location: string, [<Struct>] ?file: DocumentIdentifier, [<Struct>] ?position: int) =
+        member inline this.getSymbolsInScope(snapshot: int, project: string, meaning: SymbolFlags, [<Struct>] ?location: string, [<Struct>] ?file: DocumentIdentifier, [<Struct>] ?position: int) =
             this.getSymbolsInScope(
                 { Snapshot = snapshot
                   Project = project
                   Meaning = meaning
                   Location = location
-                  File = file
+                  ``File`` = file
                   Position = position }
                 : GetSymbolsInScopeParams
             )
@@ -804,11 +804,11 @@ module TscMailboxExtensions =
         member this.getSignaturesOfType(parameters: GetSignaturesOfTypeParams) = AsyncApi.getSignaturesOfType this parameters
 
         /// The fields of GetSignaturesOfTypeParams, spread. Builds the record and calls the overload above.
-        member inline this.getSignaturesOfType(snapshot: int, project: string, ``type``: int, kind: int) =
+        member inline this.getSignaturesOfType(snapshot: int, project: string, ``type``: int, kind: SignatureKind) =
             this.getSignaturesOfType(
                 { Snapshot = snapshot
                   Project = project
-                  Type = ``type``
+                  ``Type`` = ``type``
                   Kind = kind }
                 : GetSignaturesOfTypeParams
             )
@@ -853,7 +853,7 @@ module TscMailboxExtensions =
             this.getTypeAtPosition(
                 { Snapshot = snapshot
                   Project = project
-                  File = file
+                  ``File`` = file
                   Position = position }
                 : GetTypeAtPositionParams
             )
@@ -865,7 +865,7 @@ module TscMailboxExtensions =
             this.getTypesAtPositions(
                 { Snapshot = snapshot
                   Project = project
-                  File = file
+                  ``File`` = file
                   Positions = positions }
                 : GetTypesAtPositionsParams
             )
@@ -1152,7 +1152,7 @@ module TscMailboxExtensions =
             this.getBaseTypeOfLiteralType(
                 { Snapshot = snapshot
                   Project = project
-                  Type = ``type`` }
+                  ``Type`` = ``type`` }
                 : GetBaseTypeOfLiteralTypeParams
             )
 
@@ -1185,7 +1185,7 @@ module TscMailboxExtensions =
             this.getWidenedType(
                 { Snapshot = snapshot
                   Project = project
-                  Type = ``type`` }
+                  ``Type`` = ``type`` }
                 : GetWidenedTypeParams
             )
 
@@ -1220,7 +1220,7 @@ module TscMailboxExtensions =
             this.isArrayLikeType(
                 { Snapshot = snapshot
                   Project = project
-                  Type = ``type`` }
+                  ``Type`` = ``type`` }
                 : IsArrayLikeTypeParams
             )
 
@@ -1266,7 +1266,7 @@ module TscMailboxExtensions =
             this.typeToTypeNode(
                 { Snapshot = snapshot
                   Project = project
-                  Type = ``type``
+                  ``Type`` = ``type``
                   Location = location
                   Flags = flags }
                 : TypeToTypeNodeParams
@@ -1275,7 +1275,7 @@ module TscMailboxExtensions =
         member this.signatureToSignatureDeclaration(parameters: SignatureToSignatureDeclarationParams) = AsyncApi.signatureToSignatureDeclaration this parameters
 
         /// The fields of SignatureToSignatureDeclarationParams, spread. Builds the record and calls the overload above.
-        member inline this.signatureToSignatureDeclaration(snapshot: int, project: string, signature: int, kind: int, [<Struct>] ?location: string, [<Struct>] ?flags: int) =
+        member inline this.signatureToSignatureDeclaration(snapshot: int, project: string, signature: int, kind: SyntaxKind, [<Struct>] ?location: string, [<Struct>] ?flags: NodeBuilderFlags) =
             this.signatureToSignatureDeclaration(
                 { Snapshot = snapshot
                   Project = project
@@ -1293,7 +1293,7 @@ module TscMailboxExtensions =
             this.typeToString(
                 { Snapshot = snapshot
                   Project = project
-                  Type = ``type``
+                  ``Type`` = ``type``
                   Location = location
                   Flags = flags }
                 : TypeToTypeNodeParams
@@ -1350,7 +1350,7 @@ module TscMailboxExtensions =
             this.getBaseTypes(
                 { Snapshot = snapshot
                   Project = project
-                  Type = ``type`` }
+                  ``Type`` = ``type`` }
                 : CheckerTypeParams
             )
 
@@ -1361,7 +1361,7 @@ module TscMailboxExtensions =
             this.getPropertiesOfType(
                 { Snapshot = snapshot
                   Project = project
-                  Type = ``type`` }
+                  ``Type`` = ``type`` }
                 : CheckerTypeParams
             )
 
@@ -1405,7 +1405,7 @@ module TscMailboxExtensions =
             this.getPropertyOfType(
                 { Snapshot = snapshot
                   Project = project
-                  Type = ``type``
+                  ``Type`` = ``type``
                   Name = name }
                 : GetPropertyOfTypeParams
             )
@@ -1417,7 +1417,7 @@ module TscMailboxExtensions =
             this.getIndexInfosOfType(
                 { Snapshot = snapshot
                   Project = project
-                  Type = ``type`` }
+                  ``Type`` = ``type`` }
                 : CheckerTypeParams
             )
 
@@ -1450,7 +1450,7 @@ module TscMailboxExtensions =
             this.getBaseConstraintOfType(
                 { Snapshot = snapshot
                   Project = project
-                  Type = ``type`` }
+                  ``Type`` = ``type`` }
                 : CheckerTypeParams
             )
 
@@ -1461,7 +1461,7 @@ module TscMailboxExtensions =
             this.getTypeArguments(
                 { Snapshot = snapshot
                   Project = project
-                  Type = ``type`` }
+                  ``Type`` = ``type`` }
                 : CheckerTypeParams
             )
 
@@ -1472,7 +1472,7 @@ module TscMailboxExtensions =
             this.getImportAdderEdits(
                 { Snapshot = snapshot
                   Project = project
-                  File = file
+                  ``File`` = file
                   Actions = actions }
                 : GetImportAdderEditsParams
             )
@@ -1628,7 +1628,7 @@ module TscMailboxExtensions =
             this.isArrayType(
                 { Snapshot = snapshot
                   Project = project
-                  Type = ``type`` }
+                  ``Type`` = ``type`` }
                 : CheckerTypeParams
             )
 
@@ -1650,7 +1650,7 @@ module TscMailboxExtensions =
             this.getReferencesToSymbolInFile(
                 { Snapshot = snapshot
                   Project = project
-                  File = file
+                  ``File`` = file
                   Symbol = symbol }
                 : GetReferencesToSymbolInFileParams
             )
@@ -1685,7 +1685,7 @@ module TscMailboxExtensions =
             this.getCompletionsAtPosition(
                 { Snapshot = snapshot
                   Project = project
-                  File = file
+                  ``File`` = file
                   Position = position
                   TriggerCharacter = triggerCharacter
                   IncludeSymbol = includeSymbol }
@@ -1796,7 +1796,7 @@ module TscMailboxExtensions =
             this.formatNodeForInsertion(
                 { Snapshot = snapshot
                   Project = project
-                  File = file
+                  ``File`` = file
                   Position = position
                   Data = data }
                 : FormatNodeForInsertionParams
