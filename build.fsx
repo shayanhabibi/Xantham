@@ -179,4 +179,11 @@ rootCommand fsi.CommandLineArgs[1..] {
         Stages.clean
         Stages.test
     }
+    command "pack" {
+        Stages.restore
+        Stages.clean
+        Stages.build (Options.projects |> InputSpec.map (List.map _.RelativePath))
+        Stages.test
+        Stages.pack
+    }
 }
