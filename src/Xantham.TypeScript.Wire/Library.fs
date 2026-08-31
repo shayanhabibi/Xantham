@@ -162,7 +162,11 @@ module internal Msgpack =
 
     let private readExactly (stream: Stream) (count: int) =
         let buffer = Array.zeroCreate<byte> count
+        #if !NETSTANDARD2_1
         stream.ReadExactly(buffer, 0, count)
+        #else
+        stream.Read(buffer, 0, count) |> ignore
+        #endif
         buffer
 
     let private readBin (stream: Stream) =
@@ -308,10 +312,18 @@ module Tsc =
     let locate (searchRoot: string) =
         let rid =
             let platform =
+                #if !NETSTANDARD2_1
                 if OperatingSystem.IsWindows() then "win32"
                 elif OperatingSystem.IsMacOS() then "darwin"
                 elif OperatingSystem.IsFreeBSD() then "freebsd"
                 else "linux"
+                #else
+                if System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows) then "win32"
+                elif System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX) then "darwin"
+                elif System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux) then "linux"
+                else "freebsd"
+                #endif
+                
 
             let arch =
                 match Runtime.InteropServices.RuntimeInformation.OSArchitecture with
@@ -321,7 +333,11 @@ module Tsc =
 
             $"{platform}-{arch}"
 
+        #if !NETSTANDARD2_1
         let extension = if OperatingSystem.IsWindows() then ".exe" else ""
+        #else
+        let extension = if System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows) then ".exe" else ""
+        #endif
 
         // Platform package and executable stem, most current layout first.
         let layouts = [ $"typescript-{rid}", "tsc"; $"native-preview-{rid}", "tsgo" ]
@@ -475,7 +491,11 @@ type TscChannel (exePath: string, cwd: string, ?callbacks: IDictionary<string, T
                 input.Close()
 
                 if not (proc.WaitForExit 2000) then
+                    #if !NETSTANDARD2_1
                     proc.Kill true
+                    #else
+                    proc.Kill()
+                    #endif
             with _ ->
                 ()
 
@@ -723,7 +743,21 @@ module Ast =
             // many `next` pointers from the first child.
             //
             // Present slots below `order`; equivalently `order` minus the missing ones.
+            #if !NETSTANDARD2_1
             let propertyIndex = BitOperations.PopCount(uint32 (mask &&&& slotsBelow order))
+            #else
+            let popCount32 (value: uint32) : int =
+                // Subtract the shifted value to count pairs of bits
+                let v1 = value - ((value >>> 1) &&& 0x55555555u)
+                
+                // Combine neighboring 2-bit fields into 4-bit fields
+                let v2 = (v1 &&& 0x33333333u) + ((v1 >>> 2) &&& 0x33333333u)
+                
+                // Combine 4-bit fields into 8-bit fields, then multiply to sum all bytes
+                int (((v2 + (v2 >>> 4)) &&& 0x0F0F0F0Fu) * 0x01010101u) >>> 24
+
+            let propertyIndex = popCount32(uint32 (mask &&&& slotsBelow order))
+            #endif
 
             let mutable child = index + 1
 
