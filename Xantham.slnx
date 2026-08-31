@@ -3,6 +3,7 @@
     <File Path=".github/workflows/docs.yml" />
     <File Path=".github/workflows/push_master.yml" />
     <File Path=".github/workflows/regressions_test.yml" />
+    <File Path="build.fsx" />
     <Project Path="Build.fsproj" />
   </Folder>
   <Folder Name="/ai/">
@@ -22,6 +23,8 @@
 <!--          DOCUMENTATION         -->
   <Folder Name="/docs/">
     <File Path="docs/index.md" />
+    <File Path="docs/wire-navigation.md" />
+    <File Path="docs/_head.html" />
   </Folder>
   <Folder Name="/docs/plans/">
     <File Path="docs/plans/generator-extensibility-refactor.md" />
@@ -31,6 +34,9 @@
     <File Path="docs/plans/post-pr3-progress.md" />
     <File Path="docs/plans/post-pr3-re-engineering.md" />
     <File Path="docs/plans/prevent-silent-drops-progress.md" />
+    <File Path="docs/plans/tsgo-fsharp-client.md" />
+    <File Path="docs/plans/tsgo-native-route.md" />
+    <File Path="docs/plans/tsgo-protocol.md" />
   </Folder>
   <Folder Name="/docs/Overview/">
     <File Path="docs/Overview/litmus-tests.md" />
@@ -80,5 +86,16 @@
   </Folder>
   <Folder Name="/tools/">
     <File Path="tools/generate-wire.fsx" />
+  </Folder>
+  <Folder Name="/tools/proto-gen/">
+    <File Path="tools/proto-gen/generate.mjs" />
+  </Folder>
+  <Folder Name="/tools/tsc-ast/">
+    <File Path="tools/tsc-ast/fsharp.mjs" />
+    <File Path="tools/tsc-ast/generate-ast.mts" />
+    <File Path="tools/tsc-ast/kinds.mts" />
+    <File Path="tools/tsc-ast/record.mts" />
+    <File Path="tools/tsc-ast/upstream.json" />
+    <File Path="tools/tsc-ast/upstream.lock.json" />
   </Folder>
 </Solution>
