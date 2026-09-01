@@ -1,10 +1,11 @@
-/// End-to-end against the live compiler: the ansi-regex fixture through the whole pipeline,
-/// diffed against the committed goldens, plus the run-twice determinism property.
+/// End-to-end against the live compiler: fixtures through the whole pipeline, diffed against
+/// the committed goldens, plus the run-twice determinism property.
 ///
-/// The fixture packages are npm-installed and therefore untracked: a linked worktree carries
+/// The npm fixture packages are installed and therefore untracked: a linked worktree carries
 /// tracked files only, so - like `tools/workspace.fsx` does for the compiler itself - the
-/// lookup falls back to the main checkout's install. `XANTHAM_REQUIRE_TSC` turns every skip
-/// here into a failure, because a green run that generated nothing tested nothing.
+/// lookup falls back to the main checkout's install. The `lab` fixture is hand-authored and
+/// tracked, so it always resolves locally. `XANTHAM_REQUIRE_TSC` turns every skip here into a
+/// failure, because a green run that generated nothing tested nothing.
 module Xantham.Generator.Tests.PipelineTests
 
 open System
@@ -45,27 +46,17 @@ let private mainCheckout (root: string) : string option =
                 let checkout = Path.GetDirectoryName common
                 if Directory.Exists checkout then Some checkout else None
 
-/// The installed ansi-regex package: this checkout's fixture install, or the main checkout's
-/// when this checkout is a worktree with no install of its own.
-let private fixturePackage =
-    let root = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", ".."))
+let private root = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "..", ".."))
 
+/// An npm-installed fixture package: this checkout's install, or the main checkout's when this
+/// checkout is a worktree with no install of its own.
+let private npmFixture (name: string) =
     [ root; yield! mainCheckout root |> Option.toList ]
-    |> List.map (fun checkout ->
-        Path.Combine(checkout, "tests", "fixtures", "ansi-regex", "node_modules", "ansi-regex"))
+    |> List.map (fun checkout -> Path.Combine(checkout, "tests", "fixtures", name, "node_modules", name))
     |> List.tryFind Directory.Exists
 
-let private goldenDir = Path.Combine(__SOURCE_DIRECTORY__, "golden", "ansi-regex")
-
-/// Golden files are committed, so git may have rewritten their line endings; the generator
-/// itself emits `\n` unconditionally.
-let private readGolden name =
-    let path = Path.Combine(goldenDir, name)
-
-    if File.Exists path then
-        Some(File.ReadAllText(path).Replace("\r\n", "\n"))
-    else
-        None
+/// The hand-authored lab fixture, tracked in git - always present.
+let private labFixture = Path.Combine(root, "tests", "fixtures", "lab")
 
 let private updateGoldens =
     match Environment.GetEnvironmentVariable "XANTHAM_UPDATE_GOLDEN" with
@@ -74,72 +65,109 @@ let private updateGoldens =
     | "0" -> false
     | _ -> true
 
+/// Golden files are committed, so git may have rewritten their line endings; the generator
+/// itself emits `\n` unconditionally.
+let private readGolden (goldenDir: string) name =
+    let path = Path.Combine(goldenDir, name)
+
+    if File.Exists path then
+        Some(File.ReadAllText(path).Replace("\r\n", "\n"))
+    else
+        None
+
+/// The golden diff for one fixture: every rendered file matches its committed text, byte for
+/// byte (`XANTHAM_UPDATE_GOLDEN=1` rewrites the corpus instead - review the diff).
+let private matchesGoldens (fixture: string) (config: GeneratorConfig) (package: string) =
+    let goldenDir = Path.Combine(__SOURCE_DIRECTORY__, "golden", fixture)
+    let rendered = Async.RunSynchronously(Pipeline.generate config package)
+
+    Expect.equal
+        (rendered.Files |> List.map fst)
+        [ $"{rendered.ModuleName}.fs"; "manifest.json" ]
+        "one source file and the manifest"
+
+    if updateGoldens then
+        Directory.CreateDirectory goldenDir |> ignore
+
+        for name, content in rendered.Files do
+            File.WriteAllText(Path.Combine(goldenDir, name), content, Text.UTF8Encoding false)
+    else
+        for name, content in rendered.Files do
+            match readGolden goldenDir name with
+            | None ->
+                failtest
+                    $"golden {fixture}/{name} does not exist - run once with XANTHAM_UPDATE_GOLDEN=1 \
+                      and review the diff"
+            | Some golden -> Expect.equal content golden $"{fixture}/{name} matches its golden"
+
+    rendered
+
+let private fixtureTests (fixture: string) (package: string option) (config: GeneratorConfig) extra =
+    match Tsc.locate __SOURCE_DIRECTORY__, package with
+    | None, _ ->
+        [ testCase $"{fixture}: live generation skipped - no compiler" <| fun _ ->
+              if required then
+                  failtest
+                      "XANTHAM_REQUIRE_TSC is set and no tsc was found: `npm install` did not run, or \
+                       the worktree redirect in tools/workspace.fsx broke"
+              else
+                  skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE" ]
+    | _, None ->
+        [ testCase $"{fixture}: live generation skipped - no fixture install" <| fun _ ->
+              if required then
+                  failtest
+                      $"XANTHAM_REQUIRE_TSC is set and tests/fixtures/{fixture} has no node_modules: \
+                        run `npm install` in that fixture directory"
+              else
+                  skiptest $"run `npm install` in tests/fixtures/{fixture}" ]
+    | Some _, Some package ->
+        [ testCase $"{fixture} generates the committed goldens" <| fun _ ->
+              matchesGoldens fixture config package |> ignore
+
+          testCase $"{fixture} generation is deterministic run to run" <| fun _ ->
+              let first = Async.RunSynchronously(Pipeline.generate config package)
+              let second = Async.RunSynchronously(Pipeline.generate config package)
+
+              Expect.equal second.Files first.Files "byte-identical output across fresh sessions"
+
+          yield! extra package ]
+
 [<Tests>]
 let pipelineTests =
     testList "generator e2e" [
-        match Tsc.locate __SOURCE_DIRECTORY__, fixturePackage with
-        | None, _ ->
-            testCase "live generation skipped - no compiler" <| fun _ ->
-                if required then
-                    failtest
-                        "XANTHAM_REQUIRE_TSC is set and no tsc was found: `npm install` did not run, or \
-                         the worktree redirect in tools/workspace.fsx broke"
-                else
-                    skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE"
-        | _, None ->
-            testCase "live generation skipped - no fixture install" <| fun _ ->
-                if required then
-                    failtest
-                        "XANTHAM_REQUIRE_TSC is set and tests/fixtures/ansi-regex has no node_modules: \
-                         run `npm install` in that fixture directory"
-                else
-                    skiptest "run `npm install` in tests/fixtures/ansi-regex"
-        | Some _, Some package ->
-            testCase "ansi-regex generates the committed goldens" <| fun _ ->
-                let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+        yield!
+            fixtureTests "ansi-regex" (npmFixture "ansi-regex") GeneratorConfig.Default (fun package ->
+                [ testCase "no export of ansi-regex is silently dropped" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let counts = Render.counts (Render.symbolTiers rendered)
 
-                Expect.equal
-                    (rendered.Files |> List.map fst)
-                    [ "AnsiRegex.fs"; "manifest.json" ]
-                    "one source file and the manifest"
+                      Expect.equal counts.Escape 0 "ansi-regex is declared fully representable - no escapes"
 
-                if updateGoldens then
-                    Directory.CreateDirectory goldenDir |> ignore
+                  testCase "a reference disposition templates lib types instead of widening" <| fun _ ->
+                      let config =
+                          { GeneratorConfig.Default with
+                              Groups = Map.ofList [ "typescript/lib", Reference ] }
 
-                    for name, content in rendered.Files do
-                        File.WriteAllText(Path.Combine(goldenDir, name), content, Text.UTF8Encoding false)
-                else
-                    for name, content in rendered.Files do
-                        match readGolden name with
-                        | None ->
-                            failtest
-                                $"golden {name} does not exist - run once with XANTHAM_UPDATE_GOLDEN=1 \
-                                  and review the diff"
-                        | Some golden -> Expect.equal content golden $"{name} matches its golden"
+                      let rendered = Async.RunSynchronously(Pipeline.generate config package)
+                      let source = rendered.Files |> List.find (fst >> (=) "AnsiRegex.fs") |> snd
 
-            testCase "no export of the fixture is silently dropped" <| fun _ ->
-                let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
-                let counts = Render.counts (Render.symbolTiers rendered)
+                      Expect.stringContains source ": TypeScript.Lib.RegExp = jsNative" "the return is templated (O7)"
 
-                Expect.equal counts.Escape 0 "ansi-regex is declared fully representable - no escapes"
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun finding -> finding.Message.Contains "RegExp"))
+                          "a reference emission is Exact - no finding" ])
 
-            testCase "generation is deterministic run to run" <| fun _ ->
-                let first = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
-                let second = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+        yield!
+            fixtureTests
+                "lab"
+                (if Directory.Exists labFixture then Some labFixture else None)
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "no export of the lab is silently dropped" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let counts = Render.counts (Render.symbolTiers rendered)
 
-                Expect.equal second.Files first.Files "byte-identical output across fresh sessions"
+                          Expect.equal counts.Escape 0 "the lab exercises only supported features - no escapes" ])
 
-            testCase "a reference disposition templates lib types instead of widening" <| fun _ ->
-                let config =
-                    { GeneratorConfig.Default with
-                        Groups = Map.ofList [ "typescript/lib", Reference ] }
-
-                let rendered = Async.RunSynchronously(Pipeline.generate config package)
-                let source = rendered.Files |> List.find (fst >> (=) "AnsiRegex.fs") |> snd
-
-                Expect.stringContains source ": TypeScript.Lib.RegExp = jsNative" "the return is templated (O7)"
-
-                Expect.isEmpty
-                    (rendered.Findings |> List.filter (fun finding -> finding.Message.Contains "RegExp"))
-                    "a reference emission is Exact - no finding"
+        yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
     ]

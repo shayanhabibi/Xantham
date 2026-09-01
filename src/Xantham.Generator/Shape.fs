@@ -39,10 +39,13 @@ let literalOf (facts: TypeFacts) : FsLiteral option =
         | null -> None
         | value -> Some(LitNumber(value.GetValue<float>()))
     elif flag TypeFlags.BooleanLiteral facts then
-        match facts.Response.IntrinsicName with
-        | ValueSome "true" -> Some(LitBool true)
-        | ValueSome "false" -> Some(LitBool false)
-        | _ -> None
+        match facts.Response.Value with
+        | null ->
+            match facts.Response.IntrinsicName with
+            | ValueSome "true" -> Some(LitBool true)
+            | ValueSome "false" -> Some(LitBool false)
+            | _ -> None
+        | value -> Some(LitBool(value.GetValue<bool>()))
     else
         None
 
@@ -56,6 +59,38 @@ let private splitNullish (model: ShapeModel) (facts: TypeFacts) =
         match Map.tryFind id model.Types with
         | Some m -> isNullish m
         | None -> false)
+
+/// `true | false` after nullish hoisting: TS re-expands `boolean` inside larger unions, and
+/// the pair is just `bool` again.
+let private isBooleanPair (model: ShapeModel) (memberIds: int list) =
+    memberIds.Length = 2
+    && memberIds
+       |> List.forall (fun id ->
+           match Map.tryFind id model.Types with
+           | Some m -> flag TypeFlags.BooleanLiteral m
+           | None -> false)
+
+/// The declared union whose non-nullish member set matches, if any: what lets an
+/// `"ms" | "s" | undefined` member position resolve to the exported `TimeUnit` rather than a
+/// synthesized twin (literal types are interned, so the ids match across positions).
+let private namedUnionByMembers (model: ShapeModel) (memberIds: int list) : string option =
+    let wanted = List.sort memberIds
+
+    model.DeclNames
+    |> Map.toSeq
+    |> Seq.sortBy fst
+    |> Seq.tryPick (fun (typeId, name) ->
+        match Map.tryFind typeId model.Types with
+        | Some candidate when flag TypeFlags.Union candidate && not (flag TypeFlags.Boolean candidate) ->
+            let nonNullish =
+                candidate.UnionMembers
+                |> List.filter (fun id ->
+                    match Map.tryFind id model.Types with
+                    | Some m -> not (isNullish m)
+                    | None -> true)
+
+            if List.sort nonNullish = wanted then Some name else None
+        | _ -> None)
 
 /// An object type that is only a callback: call signatures and nothing else worth keeping.
 let private isPureCallback (facts: TypeFacts) =
@@ -71,7 +106,17 @@ let private arrayElement (facts: TypeFacts) =
     | _ -> None
 
 /// A symbol name the checker made up for an anonymous shape rather than one the author wrote.
-let private isSyntheticName (name: string) = name.StartsWith "__"
+/// Module symbols are named by their quoted file path, which is no name either.
+let private isSyntheticName (name: string) =
+    name.StartsWith "__" || name.StartsWith "\""
+
+/// A member keyed by a JS well-known symbol (`__@iterator@<id>`): unrepresentable in F#, and
+/// the embedded checker id is session-specific - keeping one would also break determinism.
+let private isSymbolKeyed (name: string) = name.StartsWith "__@"
+
+/// A tuple type - shaped as an array until D7's dedicated pass (phase C).
+let private isTuple (facts: TypeFacts) =
+    facts.Response.IsTupleType = ValueSome true
 
 // ---------------------------------------------------------------------------------------------
 // Type references.
@@ -136,7 +181,21 @@ and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (
     match Map.tryFind facts.Response.Id model.DeclNames with
     | Some name -> FsNamed name, []
     | None ->
-        if isPureCallback facts then
+        if isTuple facts then
+            // Tuples read as arrays until D7's shape-tuples pass (phase C): the homogeneous
+            // element type when there is one, `obj[]` otherwise.
+            let elements =
+                facts.TypeArguments
+                |> List.map (fun element -> typeRef ctx model self owner element |> fst)
+                |> List.distinct
+
+            match elements with
+            | [ element ] ->
+                FsArray element, [ Finding.make Widened owner "tuple reads as an array (D7 tuples are phase C)" ]
+            | _ ->
+                FsArray FsObj,
+                [ Finding.make Widened owner "heterogeneous tuple widened to obj[] (D7 tuples are phase C)" ]
+        elif isPureCallback facts then
             delegateRef ctx model self owner facts
         else
             match GeneratorConfig.disposition ctx.Config facts.Origin, facts.SymbolName with
@@ -196,10 +255,15 @@ and private unionRef (ctx: Context) (model: ShapeModel) (self: string option) (o
     | [ single ] ->
         let inner, findings = typeRef ctx model self owner single
         wrap inner findings
+    | _ when isBooleanPair model remaining -> wrap FsBool []
     | _ ->
         match Map.tryFind facts.Response.Id model.DeclNames with
         | Some name -> wrap (FsNamed name) []
-        | None -> wrap FsObj [ Finding.make Widened owner "union with several non-null members widened to obj (D4 is phase C)" ]
+        | None ->
+            match namedUnionByMembers model remaining with
+            | Some name -> wrap (FsNamed name) []
+            | None ->
+                wrap FsObj [ Finding.make Widened owner "union with several non-null members widened to obj (D4 is phase C)" ]
 
 /// An optional member or parameter reads as `option`, one level deep however the optionality
 /// arrived (a `?` marker, an `undefined` union member, or both).
@@ -257,6 +321,15 @@ let private shapeMembers (ctx: Context) (model: ShapeModel) (self: string) (fact
 
     let members =
         facts.Members
+        |> List.filter (fun m ->
+            if isSymbolKeyed m.Symbol.Name then
+                // The name is cut at the checker id (`__@iterator@1469` -> `__@iterator`):
+                // the id is session-specific and would break run-to-run determinism.
+                let stable = m.Symbol.Name.Substring(0, m.Symbol.Name.LastIndexOf '@')
+                emit (Finding.make Widened $"{self}.{stable}" "symbol-keyed member dropped (unrepresentable in F#)")
+                false
+            else
+                true)
         |> List.collect (fun m ->
             let owner = $"{self}.{m.Symbol.Name}"
 
@@ -351,7 +424,8 @@ let synthesizeAnonymous: Pass<ShapeModel> =
             orders <- Map.add typeId order orders
             taken <- Set.add unique taken
 
-        /// A literal union worth a declaration: at least two non-nullish members, all literal.
+        /// A literal union worth a declaration: at least two non-nullish members, all literal,
+        /// not just `true | false`, and no already-named union with the same member set.
         let isLiteralUnion (facts: TypeFacts) =
             let _, remaining = splitNullish model facts
 
@@ -361,6 +435,8 @@ let synthesizeAnonymous: Pass<ShapeModel> =
                    match Map.tryFind id model.Types with
                    | Some m -> (literalOf m).IsSome
                    | None -> false)
+            && not (isBooleanPair model remaining)
+            && (namedUnionByMembers { model with DeclNames = names } remaining).IsNone
 
         let needsName (facts: TypeFacts) =
             if Map.containsKey facts.Response.Id names then
@@ -369,10 +445,14 @@ let synthesizeAnonymous: Pass<ShapeModel> =
                 isLiteralUnion facts
             elif flag TypeFlags.Object facts then
                 // Entry-group object shapes with members become interfaces; callbacks stay
-                // inline as delegates and arrays as arrays.
+                // inline as delegates, arrays as arrays, tuples as arrays (D7). Constructor
+                // objects (a class's static side) get their constructors on `Exports`, not a
+                // declaration.
                 GeneratorConfig.disposition ctx.Config facts.Origin = Ship
                 && not (isPureCallback facts)
                 && (arrayElement facts).IsNone
+                && not (isTuple facts)
+                && facts.ConstructSignatures.IsEmpty
                 && not facts.Members.IsEmpty
             else
                 false
@@ -489,7 +569,11 @@ let classifyLiteralUnions: Pass<ShapeModel> =
                                     Map.tryFind id model.Types
                                     |> Option.bind (fun m -> literalOf m |> Option.map (fun l -> m, l)))
 
-                            if literals.Length < remaining.Length || literals.Length < 2 then
+                            if
+                                literals.Length < remaining.Length
+                                || literals.Length < 2
+                                || isBooleanPair model remaining
+                            then
                                 None
                             else
 
@@ -648,6 +732,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                             flag TypeFlags.Object facts
                             && not facts.Members.IsEmpty
                             && (arrayElement facts).IsNone
+                            && not (isTuple facts)
                             ->
                             let members, memberFindings = shapeMembers ctx model name facts
                             findings <- findings @ memberFindings
@@ -941,6 +1026,11 @@ let shapeExports: Pass<ShapeModel> =
                         Degraded(model, findings)
             } }
 
+/// Parameters beyond this stop being construction ergonomics: a Create this wide is unusable
+/// at a call site, and each one is quadratic work for the F# typechecker.
+[<Literal>]
+let private CreateParameterBudget = 24
+
 /// Construction ergonomics (D3, §4.4): every plain-data interface - properties only - gains a
 /// `[<ParamObject; Emit("$0")>]` Create overload mirroring its members, required members
 /// first, so consumers never hand-build objects.
@@ -956,6 +1046,7 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                     |> List.map (function
                         | FsInterface decl when
                             not decl.Members.IsEmpty
+                            && decl.Members.Length <= CreateParameterBudget
                             && decl.Members
                                |> List.forall (function
                                    | FsProperty _ -> true
@@ -988,6 +1079,110 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                         | decl -> decl)
 
                 let model = { model with Decls = decls }
+
+                return
+                    if List.isEmpty findings then
+                        Advanced model
+                    else
+                        Degraded(model, findings)
+            } }
+
+/// Overloads that widened into the same F# signature are duplicates the compiler rejects -
+/// .NET overload resolution sees through type abbreviations and ignores return types. The
+/// first survives; the rest drop with a finding.
+let dedupeOverloads: Pass<ShapeModel> =
+    { Name = "dedupe-overloads"
+      Run =
+        fun _ model ->
+            async {
+                let mutable findings = []
+
+                let abbrevs =
+                    model.Decls
+                    |> List.choose (function
+                        | FsAbbrev decl -> Some(decl.Name, decl.Target)
+                        | _ -> None)
+                    |> Map.ofList
+
+                /// The reference with abbreviations expanded, so `TargetsParam` and
+                /// `DOMTargetsParam` (both `obj`) compare equal the way the compiler sees them.
+                let rec normalize (visited: Set<string>) (reference: FsTypeRef) : FsTypeRef =
+                    match reference with
+                    | FsNamed name when Map.containsKey name abbrevs && not (Set.contains name visited) ->
+                        normalize (Set.add name visited) abbrevs[name]
+                    | FsOption inner -> FsOption(normalize visited inner)
+                    | FsArray element -> FsArray(normalize visited element)
+                    | FsDelegate(args, ret) -> FsDelegate(args |> List.map (normalize visited), normalize visited ret)
+                    | other -> other
+
+                let signatureKey (parameters: FsParam list) =
+                    parameters
+                    |> List.map (fun p -> p.Optional, p.Rest, normalize Set.empty p.Type)
+
+                let dedupeMethods (owner: string) (members: FsMember list) =
+                    let mutable seen = Set.empty
+
+                    members
+                    |> List.filter (function
+                        | FsProperty _ -> true
+                        | FsMethod m ->
+                            let key = (m.Name, signatureKey m.Parameters).ToString()
+
+                            if Set.contains key seen then
+                                findings <-
+                                    findings
+                                    @ [ Finding.make
+                                            Widened
+                                            $"{owner}.{m.Name}"
+                                            "overload dropped: identical to an earlier one after widening" ]
+
+                                false
+                            else
+                                seen <- Set.add key seen
+                                true)
+
+                let decls =
+                    model.Decls
+                    |> List.map (function
+                        | FsInterface decl ->
+                            FsInterface
+                                { decl with
+                                    Members = dedupeMethods decl.Name decl.Members }
+                        | decl -> decl)
+
+                let mutable seenExports = Set.empty
+
+                let exportMembers =
+                    model.ExportMembers
+                    |> List.filter (fun (_, m) ->
+                        let key =
+                            match m.Body with
+                            | ExportFunction(parameters, _) -> Some("fn", signatureKey parameters)
+                            | ExportConstructor(parameters, _) -> Some("new", signatureKey parameters)
+                            | ExportValue _ -> None
+
+                        match key with
+                        | None -> true
+                        | Some key ->
+                            let key = (m.Name, key).ToString()
+
+                            if Set.contains key seenExports then
+                                findings <-
+                                    findings
+                                    @ [ Finding.make
+                                            Widened
+                                            m.Name
+                                            "overload dropped: identical to an earlier one after widening" ]
+
+                                false
+                            else
+                                seenExports <- Set.add key seenExports
+                                true)
+
+                let model =
+                    { model with
+                        Decls = decls
+                        ExportMembers = exportMembers }
 
                 return
                     if List.isEmpty findings then
@@ -1071,5 +1266,6 @@ let passes: Pass<ShapeModel> list =
       shapeClasses
       shapeExports
       synthesizeParamObjects
+      dedupeOverloads
       orderDeclarations
       auditCoverage ]

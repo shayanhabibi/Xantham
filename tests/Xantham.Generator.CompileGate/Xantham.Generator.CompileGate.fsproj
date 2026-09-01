@@ -16,6 +16,8 @@
 
     <ItemGroup>
         <Compile Include="..\Xantham.Generator.Tests\golden\ansi-regex\AnsiRegex.fs" Link="ansi-regex\AnsiRegex.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\lab\PhaseBLab.fs" Link="lab\PhaseBLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\animejs\Animejs.fs" Link="animejs\Animejs.fs" />
     </ItemGroup>
 
     <ItemGroup>

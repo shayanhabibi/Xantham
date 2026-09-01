@@ -529,6 +529,63 @@ let shapePassTests =
             | [ FsInterface decl ] -> Expect.isEmpty decl.CreateOverloads "not plain data"
             | decls -> failtest $"expected the interface back, got %A{decls}"
 
+        testCase "dedupe-overloads sees through abbreviations and drops the twin" <| fun _ ->
+            let parameter name reference =
+                { Name = name
+                  Optional = false
+                  Rest = false
+                  Type = reference }
+
+            let method' name parameters =
+                FsMethod
+                    { Name = name
+                      Docs = ""
+                      Tags = []
+                      Parameters = parameters
+                      Return = FsUnit }
+
+            let abbrev name =
+                FsAbbrev
+                    { Name = name
+                      Docs = ""
+                      Tags = []
+                      Order = None
+                      Target = FsObj }
+
+            let model =
+                { Build.shapeModel [] with
+                    Decls =
+                        [ abbrev "DOMTargets"
+                          abbrev "JSTargets"
+                          FsInterface
+                              { Name = "Scope"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                Inherits = []
+                                Members =
+                                  [ method' "add" [ parameter "targets" (FsNamed "DOMTargets") ]
+                                    method' "add" [ parameter "targets" (FsNamed "JSTargets") ]
+                                    method' "add" [ parameter "targets" FsString ] ]
+                                CreateOverloads = [] } ] }
+
+            let deduped, findings = Build.runPass Shape.dedupeOverloads model
+
+            Expect.equal
+                (findings |> List.map (fun f -> f.Tier, f.Symbol))
+                [ Widened, "Scope.add" ]
+                "the twin is a finding"
+
+            match deduped.Decls |> List.pick (function FsInterface d -> Some d | _ -> None) with
+            | decl ->
+                Expect.equal
+                    (decl.Members
+                     |> List.map (function
+                         | FsMethod m -> m.Parameters.Head.Type
+                         | FsProperty p -> p.Type))
+                    [ FsNamed "DOMTargets"; FsString ]
+                    "first of the obj pair survives; the string overload is distinct"
+
         testCase "order-declarations puts declarations in source order, Exports last" <| fun _ ->
             let interface' name order =
                 FsInterface
