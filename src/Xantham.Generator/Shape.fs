@@ -9,18 +9,8 @@ open Xantham.TypeScript.Wire.Proto
 
 let private hasAny (mask: SymbolFlags) (flags: SymbolFlags) = uint32 (flags &&& mask) <> 0u
 
-/// The fallback name for a default export: the package name's last segment, camelCased
-/// (`ansi-regex` -> `ansiRegex`).
-let defaultExportName (ctx: Context) =
-    let last = ctx.PackageName.TrimStart('@').Split('/') |> Array.last
-
-    last.Split([| '-'; '_'; '.' |], System.StringSplitOptions.RemoveEmptyEntries)
-    |> Array.mapi (fun i part ->
-        if i = 0 then
-            part.Substring(0, 1).ToLowerInvariant() + part.Substring 1
-        else
-            string (System.Char.ToUpperInvariant part[0]) + part.Substring 1)
-    |> String.concat ""
+/// The fallback name for a default export - `Naming.defaultExport` over the entry package.
+let defaultExportName (ctx: Context) = Naming.defaultExport ctx.PackageName
 
 /// The F# name a harvested export generates under: the exported name; a default export takes
 /// its declaring symbol's name - except `export default function name` binds the symbol itself
@@ -33,7 +23,7 @@ let fsName (fallback: string) (export: HarvestedExport) =
 /// The F# type written at a reference position, with the findings any widening produces.
 /// Order of the flag tests matters twice: literals before their base primitives, and `boolean`
 /// (a union wearing the Boolean flag) before the union case.
-let rec typeRef (model: ShapeModel) (owner: string) (typeId: int) : FsTypeRef * Finding list =
+let rec typeRef (ctx: Context) (model: ShapeModel) (owner: string) (typeId: int) : FsTypeRef * Finding list =
     match Map.tryFind typeId model.Types with
     | None ->
         match Map.tryFind typeId model.NotFollowed with
@@ -59,7 +49,7 @@ let rec typeRef (model: ShapeModel) (owner: string) (typeId: int) : FsTypeRef * 
         elif has TypeFlags.Unknown then
             FsObj, [ Finding.make Widened owner "unknown maps to obj (D8)" ]
         elif has TypeFlags.Union then
-            unionRef model owner facts
+            unionRef ctx model owner facts
         elif has TypeFlags.Object then
             let named =
                 [ facts.Response.AliasSymbol; facts.Response.Symbol ]
@@ -71,15 +61,23 @@ let rec typeRef (model: ShapeModel) (owner: string) (typeId: int) : FsTypeRef * 
             match named with
             | Some name -> FsNamed name, []
             | None ->
-                let shown = facts.SymbolName |> Option.defaultValue "an anonymous object type"
-                FsObj, [ Finding.make Widened owner $"{shown} is not among the generated declarations; widened to obj" ]
+                match GeneratorConfig.disposition ctx.Config facts.Origin, facts.SymbolName with
+                | Reference, Some typeName ->
+                    // The O7 contract: a `ship` run of this group produces exactly this name.
+                    FsNamed $"{Naming.groupModule ctx.PackageName facts.Origin}.{typeName}", []
+                | Reference, None ->
+                    FsObj,
+                    [ Finding.make Widened owner "anonymous type in a referenced group cannot be templated; widened to obj" ]
+                | (Ship | Widen), _ ->
+                    let shown = facts.SymbolName |> Option.defaultValue "an anonymous object type"
+                    FsObj, [ Finding.make Widened owner $"{shown} is not among the generated declarations; widened to obj" ]
         else
             FsObj, [ Finding.make Widened owner $"type flags {facts.Response.Flags} not mapped in phase A; widened to obj" ]
 
 /// A union hoists its `null`/`undefined` members into `option` (D1); what remains must be a
 /// single type for the skeleton to keep it, otherwise the union widens to `obj` (D4 union
 /// classification is phase C).
-and private unionRef (model: ShapeModel) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
+and private unionRef (ctx: Context) (model: ShapeModel) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
     let nullish typeId =
         match Map.tryFind typeId model.Types with
         | Some memberFacts ->
@@ -92,7 +90,7 @@ and private unionRef (model: ShapeModel) (owner: string) (facts: TypeFacts) : Fs
 
     match remaining with
     | [ single ] ->
-        let inner, findings = typeRef model owner single
+        let inner, findings = typeRef ctx model owner single
 
         if List.isEmpty hoisted then
             inner, findings
@@ -170,7 +168,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                     facts.Members
                                     |> List.map (fun m ->
                                         let owner = $"{name}.{m.Symbol.Name}"
-                                        let reference, refFindings = typeRef model owner m.TypeId
+                                        let reference, refFindings = typeRef ctx model owner m.TypeId
                                         refFindings |> List.iter emit
 
                                         if m.Optional then
@@ -253,7 +251,7 @@ let shapeExports: Pass<ShapeModel> =
                                         signature.Parameters
                                         |> List.map (fun p ->
                                             let owner = $"{name}({p.Symbol.Name})"
-                                            let reference, refFindings = typeRef model owner p.TypeId
+                                            let reference, refFindings = typeRef ctx model owner p.TypeId
                                             refFindings |> List.iter emit
 
                                             // The wire does not flag optional parameters on their
@@ -273,7 +271,7 @@ let shapeExports: Pass<ShapeModel> =
                                               Optional = optional
                                               Type = optionalRef optional reference })
 
-                                    let returnRef, returnFindings = typeRef model $"{name}()" signature.ReturnTypeId
+                                    let returnRef, returnFindings = typeRef ctx model $"{name}()" signature.ReturnTypeId
                                     returnFindings |> List.iter emit
 
                                     Some

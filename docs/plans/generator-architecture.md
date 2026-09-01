@@ -227,12 +227,12 @@ Phases — each ends with the compile gate green on its fixtures:
   **Landed (2026-09-01):** `src/Xantham.Generator` + `tests/Xantham.Generator.Tests`
   (per-pass units, live e2e goldens, run-twice determinism) +
   `tests/Xantham.Generator.CompileGate` (goldens compiled against Fable.Core on every
-  build). Two things the fixture taught that the plan should carry forward: the resolve
-  tier stops at the package boundary (expanding an external type like `RegExp` reaches
-  most of `lib.d.ts` for nothing — external object types stay shallow and widen with a
-  named finding), and the wire flags neither optional parameters nor declared `readonly`
-  on symbols (`?` optionality is derived from the hoisted `undefined`; readonly comes
-  from `isReadonlySymbol`).
+  build). Two things the fixture taught that the plan should carry forward: expanding
+  one external type (`RegExp`) transitively reaches most of `lib.d.ts` — which forced
+  the package-boundary grouping now recorded as O7 (external groups resolve to identity
+  only unless their disposition says otherwise) — and the wire flags neither optional
+  parameters nor declared `readonly` on symbols (`?` optionality is derived from the
+  hoisted `undefined`; readonly comes from `isReadonlySymbol`).
 - **B — the common 90%.** Literal unions (D12), enums, ParamObject synthesis (D3),
   callbacks (D5), classes/statics, naming pass hardening. Fixture: `animejs`.
 - **C — unions and generics.** Position-aware unions (D4), tagged-union detection, tuples
@@ -264,6 +264,42 @@ section above.
 - **O6 — `tests/Test.fsx` retires after phase A.** It remains the ad-hoc live-compiler
   probe until the walking skeleton runs end to end, then is deleted (not archived — its
   lessons are already recorded in `wire-remaining-work.md` phase 1).
+- **O7 — resolution groups by package boundary (2026-09-01).** The resolve tier
+  classifies every type's origin into a *group* — the entry package, the compiler's
+  `lib.*.d.ts`, or a dependency, from its declaration's file path — and a per-group
+  **disposition** decides how deep resolution follows and what a reference to the
+  group's types renders as:
+
+  | Disposition | Resolve tier | Shape tier |
+  |---|---|---|
+  | `ship` | full member resolution | group emitted as its own module (its own package) |
+  | `reference` | identity only (name, arity, type args) | `FsNamed` into the group's templated module |
+  | `map` *(future)* | identity only | redirected to an existing package (`Fable.Browser.*`, BCL/Fable-native types) |
+  | `inline` *(future)* | demand-driven full | folded into the entry group, scoped to what is actually referenced |
+  | `widen` | identity only | `obj` + finding |
+
+  The entry package (and unplaceable anonymous types) is always `ship`. Every other
+  group defaults to `widen` **until the shipped compiler-lib package exists**, at which
+  point the default flips to `reference` — a `reference` emission is Exact, no finding.
+  Groups are addressed in `xantham.json` under `"groups"` by npm name, the compiler lib
+  as `"typescript/lib"`.
+
+  Two consequences are the point of the design. First, generation order stops
+  mattering: a `reference` group templates exactly the names a real `ship` run of that
+  group produces, so "generate B against already-generated A" and "generate B first"
+  emit identical source. Second, **naming is a contract**: `Naming.groupModule`
+  (`@scope/pkg` → `Scope.Pkg`, compiler lib → `TypeScript.Lib`) is pinned and versioned
+  because independently generated packages must agree on every templated name — while
+  remembering that source-level agreement is not identity; the compiled *assembly*
+  (NuGet version discipline against the `typescript` npm pin, as Wire already
+  practices) is what unifies a type across packages. Ship-group emission beyond the
+  entry package, and demand-driven resolve (a prerequisite for `inline` and for
+  shipping large groups), are phase B+.
+
+  **Open:** what the compile gate means for output whose `reference` groups are not
+  shipped anywhere yet — gate only closed configurations (every group `ship`/`map`/
+  `inline`), or synthesize stub assemblies from the templated identities. Simplest
+  first: gate closed configurations only.
 
 Watch items rather than open questions: the debug assertion pass (O3) and the bespoke
 JSON model dump (O5) are named escape hatches, built only when their triggering need

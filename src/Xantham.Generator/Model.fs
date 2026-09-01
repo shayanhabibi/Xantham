@@ -36,17 +36,52 @@ module Finding =
     let make tier symbol message =
         { Pass = ""; Symbol = symbol; Tier = tier; Message = message }
 
+/// The package boundary a symbol or type originates from, classified from its declaration's
+/// file path (decision O7). Resolution depth and reference rendering are decided per group.
+type PackageId =
+    /// The package being generated.
+    | EntryPackage
+    /// The compiler's own `lib.*.d.ts` (bundled with the `typescript` npm package).
+    | CompilerLib
+    /// A dependency, by npm name (`@scope/name` kept whole).
+    | Dependency of string
+    /// No declaration path to classify by - anonymous and synthetic shapes. Treated as part
+    /// of the entry package, which is what they are in practice.
+    | Unclassified
+
+/// What the generator does with one group's types (O7). `Map` and `Inline` are decided but
+/// not yet built; they arrive with the reference-map machinery.
+type GroupDisposition =
+    /// Resolve fully and emit the group's declarations. Always the entry package's mode.
+    | Ship
+    /// Resolve identity only; references render as the group's templated module name, on the
+    /// contract that a `ship` run of that group (ours or anyone's) produces those names.
+    | Reference
+    /// Resolve identity only; references widen to `obj` with a finding. The default for
+    /// non-entry groups until the shipped compiler-lib package exists.
+    | Widen
+
 /// Per-package generator configuration, read from `xantham.json` next to the package manifest
 /// when present (decision O4 in `docs/plans/generator-architecture.md`).
 type GeneratorConfig =
     { /// Overrides the F# module name otherwise derived from the package name.
-      ModuleName: string option }
+      ModuleName: string option
+      /// Disposition per group, keyed as `xantham.json` spells them: npm name for a
+      /// dependency, `typescript/lib` for the compiler lib.
+      Groups: Map<string, GroupDisposition> }
 
-    static member Default = { ModuleName = None }
+    static member Default = { ModuleName = None; Groups = Map.empty }
 
 module GeneratorConfig =
     let private jsonOptions =
         JsonDocumentOptions(CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true)
+
+    let private parseDisposition (key: string) =
+        function
+        | "ship" -> Ship
+        | "reference" -> Reference
+        | "widen" -> Widen
+        | other -> failwith $"xantham.json: group {key} has unknown disposition '{other}' (ship|reference|widen)"
 
     /// Loads `<packageDir>/xantham.json`, tolerating comments and trailing commas (the file is
     /// authored by hand). A missing file is the default configuration, not an error.
@@ -63,7 +98,76 @@ module GeneratorConfig =
                 | true, v when v.ValueKind = JsonValueKind.String -> Some(v.GetString())
                 | _ -> None
 
-            { ModuleName = field "module" }
+            let groups =
+                match doc.RootElement.TryGetProperty "groups" with
+                | true, v when v.ValueKind = JsonValueKind.Object ->
+                    v.EnumerateObject()
+                    |> Seq.map (fun p -> p.Name, parseDisposition p.Name (p.Value.GetString()))
+                    |> Map.ofSeq
+                | _ -> Map.empty
+
+            { ModuleName = field "module"; Groups = groups }
+
+    /// The key a group is addressed by under `xantham.json`'s `groups`; `None` for the groups
+    /// that are not configurable (the entry package always ships).
+    let groupKey =
+        function
+        | EntryPackage
+        | Unclassified -> None
+        | CompilerLib -> Some "typescript/lib"
+        | Dependency name -> Some name
+
+    /// A group's effective disposition: the entry always ships, everything else is `widen`
+    /// unless configured (the default flips to `reference` once the shipped compiler-lib
+    /// package exists - O7).
+    let disposition (config: GeneratorConfig) (origin: PackageId) =
+        match groupKey origin with
+        | None -> Ship
+        | Some key -> config.Groups |> Map.tryFind key |> Option.defaultValue Widen
+
+/// The naming contract (O7): the deterministic scheme mapping package identities to F# module
+/// names. Pinned, because a `reference` group's templated names must be exactly what a `ship`
+/// run of that group produces - independently generated packages have to agree on every name
+/// here. Renaming anything below is a breaking change to every shipped binding.
+module Naming =
+    let private capitalize (part: string) =
+        string (System.Char.ToUpperInvariant part[0]) + part.Substring 1
+
+    let private segments (text: string) =
+        text.Split([| '-'; '_'; '.' |], System.StringSplitOptions.RemoveEmptyEntries)
+
+    /// One path segment of a package name, PascalCased: `workers-types` -> `WorkersTypes`.
+    let pascalSegment (text: string) =
+        segments text |> Array.map capitalize |> String.concat ""
+
+    /// A package's module name: `@scope/pkg-name` -> `Scope.PkgName`.
+    let packageModule (packageName: string) =
+        packageName.TrimStart('@').Split('/') |> Array.map pascalSegment |> String.concat "."
+
+    /// The compiler-lib group's module.
+    [<Literal>]
+    let CompilerLibModule = "TypeScript.Lib"
+
+    /// The module a group's declarations live in (or are templated to live in).
+    let groupModule (entryPackageName: string) =
+        function
+        | EntryPackage
+        | Unclassified -> packageModule entryPackageName
+        | CompilerLib -> CompilerLibModule
+        | Dependency name -> packageModule name
+
+    /// The name a default export falls back to when its symbol is itself named `default`:
+    /// the package name's last segment, camelCased (`ansi-regex` -> `ansiRegex`).
+    let defaultExport (packageName: string) =
+        let last = packageName.TrimStart('@').Split('/') |> Array.last
+
+        segments last
+        |> Array.mapi (fun i part ->
+            if i = 0 then
+                part.Substring(0, 1).ToLowerInvariant() + part.Substring 1
+            else
+                capitalize part)
+        |> String.concat ""
 
 /// Everything a pass may reach for, created once per run by `Bootstrap.start`. Passes never
 /// create programs; the session here is the only wire access they have.
@@ -145,8 +249,11 @@ type ResolvedSignature =
 /// call signatures, union membership. Everything else stays on the raw response.
 type TypeFacts =
     { Response: TypeResponse
-      /// Name of the type's own symbol where it has one - only used to report legibly when the
-      /// type is widened ("external type RegExp widened to obj").
+      /// The group the type's own symbol is declared in (O7). Meaningful for object types;
+      /// primitives and unions stay `Unclassified`, which dispositions as the entry group.
+      Origin: PackageId
+      /// Name of the type's own symbol where it has one - what a `reference` emission
+      /// templates with, and what a widening finding names.
       SymbolName: string option
       Members: ResolvedMember list
       CallSignatures: ResolvedSignature list
@@ -156,6 +263,7 @@ module TypeFacts =
     /// Facts before derivation: the response alone.
     let shallow (response: TypeResponse) =
         { Response = response
+          Origin = Unclassified
           SymbolName = None
           Members = []
           CallSignatures = []

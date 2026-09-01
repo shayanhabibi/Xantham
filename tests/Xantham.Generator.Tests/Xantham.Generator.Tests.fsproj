@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <Compile Include="Build.fs" />
+        <Compile Include="Resolve.test.fs" />
         <Compile Include="Shape.test.fs" />
         <Compile Include="Render.test.fs" />
         <Compile Include="Pipeline.test.fs" />

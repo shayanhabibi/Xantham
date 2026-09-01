@@ -13,7 +13,7 @@ let typeRefTests =
             let model = Build.shapeModel Build.primitives
 
             for typeId, expected in [ 1, FsString; 2, FsFloat; 3, FsBool; 4, FsUnit ] do
-                let reference, findings = Shape.typeRef model "x" typeId
+                let reference, findings = Shape.typeRef Build.context model "x" typeId
                 Expect.equal reference expected $"type {typeId}"
                 Expect.isEmpty findings $"type {typeId} findings"
 
@@ -22,7 +22,7 @@ let typeRefTests =
                 { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 1; 5 ] }
 
             let model = Build.shapeModel (union :: Build.primitives)
-            let reference, findings = Shape.typeRef model "x" 10
+            let reference, findings = Shape.typeRef Build.context model "x" 10
 
             Expect.equal reference (FsOption FsString) "string | undefined"
             Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "one ergonomic finding"
@@ -32,7 +32,7 @@ let typeRefTests =
                 { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 5; 6 ] }
 
             let model = Build.shapeModel (union :: Build.primitives)
-            let reference, findings = Shape.typeRef model "x" 10
+            let reference, findings = Shape.typeRef Build.context model "x" 10
 
             Expect.equal reference FsUnit "null | undefined"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
@@ -42,7 +42,7 @@ let typeRefTests =
                 { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 1; 2; 5 ] }
 
             let model = Build.shapeModel (union :: Build.primitives)
-            let reference, findings = Shape.typeRef model "x" 10
+            let reference, findings = Shape.typeRef Build.context model "x" 10
 
             Expect.equal reference (FsOption FsObj) "string | number | undefined"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened, but the hoist survives"
@@ -54,14 +54,14 @@ let typeRefTests =
             let model =
                 { Build.shapeModel [ aliased ] with DeclNames = Map.ofList [ 100, "Options" ] }
 
-            Expect.equal (Shape.typeRef model "x" 20) (FsNamed "Options", []) "alias reference"
+            Expect.equal (Shape.typeRef Build.context model "x" 20) (FsNamed "Options", []) "alias reference"
 
         testCase "an external object type widens to obj and the finding names it" <| fun _ ->
             let external =
                 { Build.facts (Build.typeResponse 21 TypeFlags.Object) with SymbolName = Some "RegExp" }
 
             let model = Build.shapeModel [ external ]
-            let reference, findings = Shape.typeRef model "x" 21
+            let reference, findings = Shape.typeRef Build.context model "x" 21
 
             Expect.equal reference FsObj "widened"
 
@@ -72,7 +72,7 @@ let typeRefTests =
             | findings -> failtest $"expected one finding, got %A{findings}"
 
         testCase "a type id absent from the table is an escape, not an exception" <| fun _ ->
-            let reference, findings = Shape.typeRef (Build.shapeModel []) "x" 99
+            let reference, findings = Shape.typeRef Build.context (Build.shapeModel []) "x" 99
 
             Expect.equal reference FsObj "widened"
             Expect.equal (findings |> List.map _.Tier) [ Escape ] "escape"
@@ -81,11 +81,43 @@ let typeRefTests =
             let model =
                 { Build.shapeModel [] with NotFollowed = Map.ofList [ 99, "beyond the depth cutoff (12)" ] }
 
-            let reference, findings = Shape.typeRef model "x" 99
+            let reference, findings = Shape.typeRef Build.context model "x" 99
 
             Expect.equal reference FsObj "widened"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened, not escaped"
             Expect.stringContains (findings.Head.Message) "depth cutoff" "the reason is carried"
+
+        testCase "a referenced group's type templates into its module, exact, no finding" <| fun _ ->
+            let external =
+                { Build.facts (Build.typeResponse 21 TypeFlags.Object) with
+                    Origin = CompilerLib
+                    SymbolName = Some "RegExp" }
+
+            let context =
+                { Build.context with
+                    Config =
+                        { GeneratorConfig.Default with
+                            Groups = Map.ofList [ "typescript/lib", Reference ] } }
+
+            Expect.equal
+                (Shape.typeRef context (Build.shapeModel [ external ]) "x" 21)
+                (FsNamed "TypeScript.Lib.RegExp", [])
+                "the O7 template"
+
+        testCase "an anonymous type in a referenced group still widens, with a finding" <| fun _ ->
+            let external =
+                { Build.facts (Build.typeResponse 22 TypeFlags.Object) with Origin = Dependency "left-pad" }
+
+            let context =
+                { Build.context with
+                    Config =
+                        { GeneratorConfig.Default with
+                            Groups = Map.ofList [ "left-pad", Reference ] } }
+
+            let reference, findings = Shape.typeRef context (Build.shapeModel [ external ]) "x" 22
+
+            Expect.equal reference FsObj "nothing to template with"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "reported, not silent"
     ]
 
 /// The Options-and-ansiRegex shape of the ansi-regex fixture, built by hand: an aliased

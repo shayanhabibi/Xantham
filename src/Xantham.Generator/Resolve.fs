@@ -15,20 +15,39 @@ let private FollowDepth = 12
 
 let private hasAny (mask: SymbolFlags) (flags: SymbolFlags) = uint32 (flags &&& mask) <> 0u
 
-/// Whether a type's own symbol is declared outside the package being generated. Such types -
-/// the standard library, dependencies - widen to `obj` in phase A, so deriving their members
-/// would be wire traffic nothing reads; worse, one `RegExp` reaches most of the standard
-/// library transitively. Anonymous shapes (no symbol, or no declaration) always derive.
-let private declaredOutside (ctx: Context) (symbol: SymbolResponse voption) =
+/// Classifies a symbol's origin group (O7) from its first declaration's file path: under the
+/// package directory is the entry package; the compiler's default libs are the compiler-lib
+/// group; under a `node_modules` entry is that dependency; anything else - including anonymous
+/// shapes with no declaration - is unclassified, which dispositions as the entry group.
+///
+/// The default libs are recognised three ways because the compiler serves them three ways: from
+/// the platform package (`node_modules/@typescript/typescript-<rid>/lib/lib.*.d.ts` - what the
+/// live wire reports), from `typescript/lib`, or as `bundled:` pseudo-paths for the embedded
+/// copies. A non-entry `lib.*.d.ts` anywhere else still classifies as compiler lib rather than
+/// unclassified: unclassified means Ship, and full derivation of a mistaken standard-lib file
+/// is the expensive failure, while a mis-grouped oddball is a visible finding.
+let classify (packageDir: string) (symbol: SymbolResponse voption) : PackageId =
     match symbol |> ValueOption.bind (fun s -> Harvest.declOrder s.Declarations |> ValueOption.ofOption) with
-    | ValueNone -> false
+    | ValueNone -> Unclassified
     | ValueSome order ->
-        let normalize (path: string) = path.Replace('\\', '/').TrimEnd '/'
+        let path = order.File.Replace('\\', '/')
+        let root = packageDir.Replace('\\', '/').TrimEnd '/' + "/"
+        let file = path.Substring(path.LastIndexOf '/' + 1)
+        let isLibFile = file.StartsWith "lib." && file.EndsWith ".d.ts"
 
-        not (
-            (normalize order.File)
-                .StartsWith(normalize ctx.PackageDir + "/", System.StringComparison.OrdinalIgnoreCase)
-        )
+        if path.StartsWith(root, System.StringComparison.OrdinalIgnoreCase) then
+            EntryPackage
+        else
+            match path.LastIndexOf "/node_modules/" with
+            | -1 -> if isLibFile then CompilerLib else Unclassified
+            | at ->
+                match path.Substring(at + "/node_modules/".Length).Split '/' with
+                | parts when parts.Length > 0 && (parts[0] = "typescript" || parts[0] = "@typescript") ->
+                    CompilerLib
+                | _ when isLibFile -> CompilerLib
+                | parts when parts.Length > 1 && parts[0].StartsWith "@" -> Dependency $"{parts[0]}/{parts[1]}"
+                | parts when parts.Length > 0 -> Dependency parts[0]
+                | _ -> Unclassified
 
 /// The type ids each export resolves to: the declared type for type-like symbols, the value
 /// type for value-like ones, both for symbols that are both (a class). The responses land in
@@ -105,12 +124,14 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                 members
         elif has TypeFlags.Object then
             let! symbol = ctx.Session.getSymbolOfType ty.Id
+            let origin = classify ctx.PackageDir symbol
 
-            if declaredOutside ctx symbol then
-                // Kept shallow on purpose: the shape tier widens references to it, and the
-                // symbol name kept here is what makes that finding legible.
+            if GeneratorConfig.disposition ctx.Config origin <> Ship then
+                // Identity only (O7): the shape tier renders references to this group by
+                // templated name or widens them, and either way nothing reads its members.
                 return
                     { TypeFacts.shallow ty with
+                        Origin = origin
                         SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption },
                     []
             else
@@ -169,6 +190,7 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
 
             return
                 { Response = ty
+                  Origin = origin
                   SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
                   Members = members |> Array.map fst |> Array.toList
                   CallSignatures = signatureFacts |> Array.map fst |> Array.toList

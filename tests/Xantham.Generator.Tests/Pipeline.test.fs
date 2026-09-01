@@ -128,4 +128,18 @@ let pipelineTests =
                 let second = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
 
                 Expect.equal second.Files first.Files "byte-identical output across fresh sessions"
+
+            testCase "a reference disposition templates lib types instead of widening" <| fun _ ->
+                let config =
+                    { GeneratorConfig.Default with
+                        Groups = Map.ofList [ "typescript/lib", Reference ] }
+
+                let rendered = Async.RunSynchronously(Pipeline.generate config package)
+                let source = rendered.Files |> List.find (fst >> (=) "AnsiRegex.fs") |> snd
+
+                Expect.stringContains source ": TypeScript.Lib.RegExp = jsNative" "the return is templated (O7)"
+
+                Expect.isEmpty
+                    (rendered.Findings |> List.filter (fun finding -> finding.Message.Contains "RegExp"))
+                    "a reference emission is Exact - no finding"
     ]

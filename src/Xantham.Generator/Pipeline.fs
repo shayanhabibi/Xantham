@@ -41,17 +41,12 @@ let toShape (resolve: ResolveModel) : ShapeModel =
       DeclNames = Map.empty
       Decls = [] }
 
-let private pascal (text: string) =
-    text.Split([| '-'; '_'; '.' |], StringSplitOptions.RemoveEmptyEntries)
-    |> Array.map (fun part -> string (Char.ToUpperInvariant part[0]) + part.Substring 1)
-    |> String.concat ""
-
-/// The generated module's name: the config override, or the package name PascalCased with a
-/// scope's slash becoming a dot (`@scope/pkg-name` -> `Scope.PkgName`).
+/// The generated module's name: the config override, or the entry package's name under the
+/// O7 naming contract (`@scope/pkg-name` -> `Scope.PkgName`).
 let moduleName (ctx: Context) =
     match ctx.Config.ModuleName with
     | Some name -> name
-    | None -> ctx.PackageName.TrimStart('@').Split('/') |> Array.map pascal |> String.concat "."
+    | None -> Naming.packageModule ctx.PackageName
 
 /// Shape -> Render: declarations plus every finding of every earlier tier.
 let toRender (ctx: Context) (shape: ShapeModel) (findings: Finding list) : RenderModel =

@@ -42,7 +42,9 @@ let rec printType =
     | FsUnit -> "unit"
     | FsObj -> "obj"
     | FsOption inner -> $"{printType inner} option"
-    | FsNamed name -> ident name
+    // A name may be qualified into another group's templated module (O7); each segment
+    // escapes on its own.
+    | FsNamed name -> name.Split '.' |> Array.map ident |> String.concat "."
 
 let private xmlEscape (text: string) =
     text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;")

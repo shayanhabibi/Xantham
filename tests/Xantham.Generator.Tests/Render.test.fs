@@ -26,6 +26,10 @@ let renderTests =
             Expect.equal (Render.ident "utf-8") "``utf-8``" "not identifier-shaped"
             Expect.equal (Render.ident "_tag") "_tag" "leading underscore is fine"
 
+        testCase "a qualified templated name escapes per segment" <| fun _ ->
+            Expect.equal (Render.printType (FsNamed "TypeScript.Lib.RegExp")) "TypeScript.Lib.RegExp" "qualified"
+            Expect.equal (Render.printType (FsNamed "Pkg.type")) "Pkg.``type``" "keyword segment"
+
         testCase "the printed source is exactly the golden text" <| fun _ ->
             let model =
                 { baseModel with
