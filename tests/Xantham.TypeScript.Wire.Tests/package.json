@@ -1,8 +1,0 @@
-{
-  "name": "xantham-typescript-wire-tests",
-  "private": true,
-  "description": "Supplies the native tsc binary the live tests run against. Run `npm install` here to enable them; without it those tests skip. Pinned to the exact build the wire types were generated from: the sync protocol is unversioned, so client and server must come from the same tree.",
-  "devDependencies": {
-    "typescript": "7.1.0-dev.20260830.1"
-  }
-}

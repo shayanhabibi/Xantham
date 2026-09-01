@@ -8,8 +8,9 @@ open Xantham.TypeScript.Wire.Proto
 
 let private fixtures = Path.Combine(__SOURCE_DIRECTORY__, "fixtures")
 
-/// The compiler comes from the `typescript` npm package declared beside this file; run
-/// `npm install` here to enable these tests. It is not vendored, so they are skipped rather
+/// The compiler comes from the `typescript` npm package pinned by the repository root
+/// `package.json`; run `npm install` there to enable these tests. `Tsc.locate` walks parents,
+/// so the root install is found from here. It is not vendored, so they are skipped rather
 /// than failed when it is absent.
 let private exePath = Tsc.locate __SOURCE_DIRECTORY__
 
@@ -43,7 +44,7 @@ let liveTests =
         match exePath with
         | None ->
             testCase "native tsc not found - live tests skipped" <| fun _ ->
-                skiptest "run `npm install` in tests/Xantham.TypeScript.Wire.Tests, or set XANTHAM_TSGO_EXE"
+                skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE"
         | Some _ ->
 
         // The no-parameter request shape: the server rejects an empty payload, so this fails

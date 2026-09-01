@@ -32,21 +32,21 @@ the table below first. `.archive/scratch/tmp/tsgo-native` is a checkout of the d
 
 - `src/Xantham.TypeScript.Wire` — the only live source project. Generated API surface, binary AST
   reader, typed node layer, batching mailbox, virtual filesystem. Published to NuGet.
-- `tests/Xantham.TypeScript.Wire.Tests` — Expecto suite. Has its own `package.json` /
-  `node_modules` pinning the `typescript` 7.x package used as ground truth and as the live server.
+- `tests/Xantham.TypeScript.Wire.Tests` — Expecto suite. No `package.json` of its own: the live
+  tests call `Tsc.locate`, which walks parents and finds the root `node_modules`.
 - `tests/Test.fsx` — scratch script driving Wire against `tests/fixtures/` via the packed nupkg
   in `bin/`.
 - `tools/tsc-ast` — vendors upstream compiler sources and emits the AST/enum F# layers.
 - `tools/proto-gen` — emits the protocol F# layers from the `typescript` package's shipped schema.
 - `build.fsx` — the current build pipeline (Partas.Build).
-- `package.json` — root manifest, tooling only. Pins the `typescript` 7.x compiler that generation
-  reads and that `Tsc.locate` resolves upward to; the Wire test project pins the same version.
+- `package.json` — root manifest, tooling only. The single pin of the `typescript` 7.x compiler,
+  used both as generation input and as the live `tsc --api` server. Nothing else pins it.
 
 ## Key Commands
 
 - `dotnet build Xantham.slnx` — build. `dotnet test` — run the Expecto suite.
-- `dotnet fsi build.fsx -- <build|test|generate|docs|pack|publish|bump>` — the full pipeline; `test`
-  runs `npm install` in the Wire test project first.
+- `dotnet fsi build.fsx -- <build|test|generate|docs|pack|publish|bump>` — the full pipeline; the
+  commands that need the compiler run `npm install` at the repository root first.
 - `dotnet fsi build.fsx -- generate [--only ast|proto] [--sync]` — installs the root `typescript`
   pin, then routes to `tools/generate-wire.fsx` for both generated layers with repository defaults.
   `--sync` re-vendors the upstream sources first (network).

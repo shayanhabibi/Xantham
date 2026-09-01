@@ -152,17 +152,13 @@ module Stages =
         }
     }
     
+    /// Compose with `deps`: the live tests resolve the compiler with `Tsc.locate`, which walks
+    /// parents from the test project, so the root install is what they find.
     let test = input {
         let! skipTests = Options.skipTests
         and! config = Options.config
-        and! quick = Options.quick
         return stage "test" {
             when' (not skipTests)
-            stage "npm install" {
-                when' (not quick)
-                workingDir Repo.Project.``Xantham.TypeScript.Wire.Tests``.Directory
-                run "npm install"
-            }
             run (cmd $"dotnet test {Repo.Project.``Xantham.TypeScript.Wire.Tests``.Path} -c {config}")
         }
     }
@@ -213,6 +209,7 @@ rootCommand fsi.CommandLineArgs[1..] {
         Stages.restore
         Stages.clean
         Stages.build (Options.projects |> InputSpec.map (List.map _.RelativePath))
+        Stages.deps
         Stages.test
         Stages.pack
         Stages.publish
@@ -220,12 +217,14 @@ rootCommand fsi.CommandLineArgs[1..] {
     command "test" {
         Stages.restore
         Stages.clean
+        Stages.deps
         Stages.test
     }
     command "pack" {
         Stages.restore
         Stages.clean
         Stages.build (Options.projects |> InputSpec.map (List.map _.RelativePath))
+        Stages.deps
         Stages.test
         Stages.pack
     }

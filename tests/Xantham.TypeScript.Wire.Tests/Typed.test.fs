@@ -55,7 +55,7 @@ let typedTests =
         match exePath with
         | None ->
             testCase "native tsc not found - typed layer tests skipped" <| fun _ ->
-                skiptest "run `npm install` in tests/Xantham.TypeScript.Wire.Tests, or set XANTHAM_TSGO_EXE"
+                skiptest "run `npm install` at the repository root, or set XANTHAM_TSGO_EXE"
         | Some _ ->
 
         // `name` is typed as `Node<Identifier>`, so `Identifier.text` applies without a check -

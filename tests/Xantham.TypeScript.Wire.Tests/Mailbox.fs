@@ -30,7 +30,7 @@ let mailboxTests =
         match exePath with
         | None ->
             testCase "native tsc not found - mailbox tests skipped" <| fun _ ->
-                skiptest "run `npm install` in tests/Xantham.TypeScript.Wire.Tests"
+                skiptest "run `npm install` at the repository root"
         | Some _ ->
 
         // The agent is a loop, not a single Receive. A body that served one message and completed
