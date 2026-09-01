@@ -2,9 +2,9 @@
   "package": "animejs",
   "module": "Animejs",
   "counts": {
-    "exact": 31,
-    "ergonomic": 33,
-    "widened": 102,
+    "exact": 44,
+    "ergonomic": 39,
+    "widened": 83,
     "escape": 50
   },
   "symbols": [
@@ -31,19 +31,8 @@
     },
     {
       "name": "Clock",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "ScrollContainer",
@@ -113,32 +102,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "Function is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -262,18 +231,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -459,7 +418,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Window is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -494,37 +458,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "tuple reads as an array (D7 tuples are phase C)"
+          "message": "MouseEvent is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "tuple reads as an array (D7 tuples are phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "tuple reads as an array (D7 tuples are phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "tuple reads as an array (D7 tuples are phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "tuple reads as an array (D7 tuples are phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "TouchEvent is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -534,7 +473,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "MouseEvent is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "TouchEvent is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -660,11 +604,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "tuple reads as an array (D7 tuples are phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -673,11 +612,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "tuple reads as an array (D7 tuples are phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -693,11 +627,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "tuple reads as an array (D7 tuples are phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -705,36 +634,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "tuple reads as an array (D7 tuples are phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "tuple reads as an array (D7 tuples are phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "tuple reads as an array (D7 tuples are phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "tuple reads as an array (D7 tuples are phase C)"
         }
       ]
     },
@@ -767,7 +666,17 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "SVGElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -909,16 +818,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
         }
@@ -942,31 +841,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "tuple reads as an array (D7 tuples are phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -1334,7 +1208,22 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "NodeList is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "SVGElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -1354,11 +1243,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -1366,11 +1250,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -1427,11 +1306,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -1439,11 +1313,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -1684,22 +1553,17 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "__type is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -1724,7 +1588,17 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "Document is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "SVGElement is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -1829,7 +1703,22 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "NodeList is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -1839,7 +1728,22 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "Element is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Element is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "NodeList is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -1860,7 +1764,22 @@
         {
           "pass": "shape-classes",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "Element is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-classes",
+          "tier": "widened",
+          "message": "Element is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-classes",
+          "tier": "widened",
+          "message": "NodeList is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-classes",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -1874,21 +1793,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
         },
@@ -1904,8 +1808,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -1931,11 +1835,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "Node is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -1986,11 +1885,6 @@
       "tier": "escape",
       "findings": [
         {
-          "pass": "dedupe-overloads",
-          "tier": "widened",
-          "message": "overload dropped: identical to an earlier one after widening"
-        },
-        {
           "pass": "shape-classes",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
@@ -2008,22 +1902,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "Function is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -2069,11 +1948,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -2212,18 +2086,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -2334,32 +2198,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "Function is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -2468,18 +2312,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -2539,8 +2373,28 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
           "pass": "shape-interfaces",
@@ -2554,11 +2408,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -2566,26 +2415,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -2630,7 +2459,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "type flags Intersection not mapped yet; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2641,11 +2470,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -2901,25 +2725,13 @@
     },
     {
       "name": "Renderable",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "Tickable",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "CallbackArgument",
@@ -2939,19 +2751,14 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "union of 10 distinct types widened to obj (D4 caps the erased union at 4)"
         }
       ]
     },
     {
       "name": "StaggerFunction",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
-        },
         {
           "pass": "shape-callbacks",
           "tier": "ergonomic",
@@ -3016,77 +2823,82 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -3102,7 +2914,12 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "SVGElement is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -3124,7 +2941,17 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "SVGElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -3135,7 +2962,22 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "NodeList is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "SVGElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -3146,7 +2988,22 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "NodeList is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "SVGElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -3157,7 +3014,22 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "NodeList is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "SVGElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -3168,14 +3040,8 @@
     },
     {
       "name": "JSTargetsParam",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "JSTargetsArray",
@@ -3189,7 +3055,22 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "NodeList is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "SVGElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -3253,14 +3134,8 @@
     },
     {
       "name": "EasingFunctionWithParams",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "EasingParam",
@@ -3392,11 +3267,6 @@
           "pass": "shape-callbacks",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
         }
       ]
     },
@@ -3407,32 +3277,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "pass": "shape-interfaces",
@@ -3461,8 +3306,28 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "PointerEvent is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3491,8 +3356,28 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "PointerEvent is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3521,11 +3406,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -3548,41 +3428,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -3598,6 +3443,11 @@
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
@@ -3619,11 +3469,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -3658,11 +3503,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
         },
@@ -3710,11 +3550,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -3812,14 +3647,8 @@
     },
     {
       "name": "ColorArray",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "tuple reads as an array (D7 tuples are phase C)"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "Tween",
@@ -3929,7 +3758,27 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -4144,7 +3993,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "type flags Intersection not mapped yet; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -4176,14 +4025,8 @@
     },
     {
       "name": "TimelinePosition",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "TimelineAnimationPosition",
@@ -4244,14 +4087,8 @@
     },
     {
       "name": "WAAPITweenValue",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "WAAPIFunctionValue",
@@ -4271,7 +4108,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "union of 6 distinct types widened to obj (D4 caps the erased union at 4)"
         }
       ]
     },
@@ -4301,11 +4138,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4313,11 +4145,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -4397,11 +4224,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4422,11 +4244,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4434,11 +4251,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -4459,11 +4271,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -4546,24 +4353,13 @@
           "pass": "shape-callbacks",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         }
       ]
     },
     {
       "name": "AnimatablePropertyGetter",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "AnimatableProperty",
@@ -4732,6 +4528,21 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "NodeList is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "SVGElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4743,7 +4554,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -4754,14 +4565,8 @@
     },
     {
       "name": "ScopedCallback",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "ScopeCleanupCallback",
@@ -4854,14 +4659,8 @@
     },
     {
       "name": "ScrollThresholdCallback",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "ScrollObserverParams",
@@ -4880,7 +4679,22 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
           "pass": "shape-interfaces",
@@ -4915,7 +4729,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
           "pass": "shape-interfaces",
@@ -4940,7 +4754,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
           "pass": "shape-interfaces",
@@ -5176,11 +4990,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -5211,7 +5020,7 @@
     },
     {
       "name": "DraggableAxisParam",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -5252,11 +5061,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -5333,33 +5137,18 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
+          "tier": "widened",
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
+          "message": "NodeList is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "SVGElement is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -5374,7 +5163,27 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "NodeList is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "SVGElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -5388,8 +5197,13 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         },
         {
           "pass": "shape-interfaces",
@@ -5403,8 +5217,13 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         },
         {
           "pass": "shape-interfaces",
@@ -5418,11 +5237,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -5433,11 +5247,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -5445,11 +5254,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -5673,11 +5477,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -5728,11 +5527,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -5743,11 +5537,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -5755,11 +5544,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -5783,11 +5567,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -5798,11 +5577,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -5810,17 +5584,12 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         }
       ]
     },
     {
       "name": "SplitTemplateParams",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -5831,11 +5600,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -5866,14 +5630,8 @@
     },
     {
       "name": "SplitValue",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "SplitFunctionValue",
@@ -5886,19 +5644,24 @@
         },
         {
           "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "widened",
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-callbacks",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "Node is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
     {
       "name": "TextSplitterParams",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -5922,11 +5685,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -5957,11 +5715,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -5969,11 +5722,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -5998,8 +5746,13 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         },
         {
           "pass": "shape-interfaces",
@@ -6013,11 +5766,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -6025,26 +5773,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -6069,117 +5797,127 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -6322,11 +6060,6 @@
           "pass": "shape-callbacks",
           "tier": "widened",
           "message": "type flags Intersection not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         }
       ]
     },
@@ -6421,12 +6154,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -6490,8 +6223,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -6505,8 +6238,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -6541,12 +6274,17 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -6557,11 +6295,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -6723,17 +6456,17 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "Animation is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "Animation is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         },
         {
           "pass": "shape-interfaces",
@@ -6940,12 +6673,12 @@
         {
           "pass": "shape-exports",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-exports",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         }
       ]
     },
@@ -6953,11 +6686,6 @@
       "name": "$",
       "tier": "widened",
       "findings": [
-        {
-          "pass": "dedupe-overloads",
-          "tier": "widened",
-          "message": "overload dropped: identical to an earlier one after widening"
-        },
         {
           "pass": "dedupe-overloads",
           "tier": "widened",
@@ -7201,7 +6929,22 @@
         {
           "pass": "shape-exports",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "Element is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "Element is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "NodeList is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -7217,7 +6960,22 @@
         {
           "pass": "shape-exports",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "HTMLElement is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "NodeList is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -7444,12 +7202,17 @@
         {
           "pass": "shape-exports",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-exports",
           "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "type parameter is not in scope here; widened to obj"
         }
       ]
     },
@@ -7471,7 +7234,7 @@
     },
     {
       "name": "stagger",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-exports",
@@ -7592,29 +7355,13 @@
           "pass": "shape-exports",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "tuple reads as an array (D7 tuples are phase C)"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "tuple reads as an array (D7 tuples are phase C)"
         }
       ]
     },
     {
       "name": "get",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "dedupe-overloads",
-          "tier": "widened",
-          "message": "overload dropped: identical to an earlier one after widening"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "set",
@@ -7629,7 +7376,7 @@
     },
     {
       "name": "remove",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-exports",
@@ -7640,11 +7387,6 @@
           "pass": "shape-exports",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
         }
       ]
     },
@@ -7680,8 +7422,8 @@
       "findings": [
         {
           "pass": "shape-exports",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-exports",
@@ -7695,8 +7437,8 @@
         },
         {
           "pass": "shape-exports",
-          "tier": "widened",
-          "message": "union with several non-null members widened to obj (D4 is phase C)"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-exports",

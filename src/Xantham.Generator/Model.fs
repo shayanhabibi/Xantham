@@ -267,6 +267,9 @@ type ResolvedSignature =
     { Parameters: ResolvedMember list
       /// The signature's last parameter is a rest parameter (`...args`).
       HasRest: bool
+      /// The signature's own type parameters (§4.9). A generic *function* carries them here
+      /// rather than on its type, which is where a callback alias's `T` lives.
+      TypeParameters: int list
       ReturnTypeId: int }
 
 /// A `TypeResponse` plus the derived facts of the kinds the skeleton resolves: object members,
@@ -287,6 +290,19 @@ type TypeFacts =
       /// Type arguments of a generic reference, resolved for *every* group - an external
       /// `Array<T>` carries entry-package types that must still be reached (O7 note).
       TypeArguments: int list
+      /// A tuple's per-element flags, in element order, copied off its *target* - the wire
+      /// carries them there, not on the reference. The target itself is deliberately left out
+      /// of the table: deriving it drags all of `Array.prototype` in again for every distinct
+      /// tuple shape, and nothing but these flags is wanted from it.
+      TupleElements: ElementFlags list
+      /// The arguments the type's *alias* was written with, by id (§4.9). On the declaration
+      /// form of a generic alias these are its own parameters - `type Mapper<T> = (t: T) => T`
+      /// leaves the function type itself parameterless, so this is the only place `T` appears.
+      AliasTypeArguments: int list
+      /// A type parameter's `extends` bound, by id (§4.9). Only type parameters carry one.
+      Constraint: int option
+      /// A type parameter's default type argument, by id (§4.9).
+      Default: int option
       UnionMembers: int list }
 
 module TypeFacts =
@@ -300,6 +316,10 @@ module TypeFacts =
           ConstructSignatures = []
           BaseTypes = []
           TypeArguments = []
+          TupleElements = []
+          AliasTypeArguments = []
+          Constraint = None
+          Default = None
           UnionMembers = [] }
 
 /// The type ids an export resolves to. A symbol can be both a type and a value (a class), so
@@ -335,9 +355,24 @@ type FsTypeRef =
     | FsObj
     | FsOption of FsTypeRef
     | FsArray of FsTypeRef
+    /// A fixed-length tuple (D7, §4.12): Fable compiles an F# tuple to a JS array, so the
+    /// mapping is exact. Optional tail elements arrive already `option`-wrapped, because the
+    /// checker hands them over as `T | undefined`.
+    | FsTuple of FsTypeRef list
+    /// A heterogeneous union as Fable's erased `U2`-`U4` (D4, §4.5(4)). The threshold is four;
+    /// wider unions widen to `obj`. Arms are distinct - a union whose arms collapse to one F#
+    /// type is that type instead.
+    | FsErasedUnion of FsTypeRef list
     /// A callback as a delegate (D5): parameter types and return. Renders as
     /// `System.Action`/`System.Func` so the arity is guaranteed at the Fable boundary.
     | FsDelegate of FsTypeRef list * FsTypeRef
+    /// A type variable in scope - a type parameter of the declaration being shaped (§4.9).
+    /// Carries the name TypeScript spelled, without the leading tick the renderer adds.
+    | FsTypeVar of string
+    /// A generic declaration applied to arguments: `Box<string>` (§4.9). The checker
+    /// substitutes members eagerly, so this is written only when the instantiation's target is
+    /// itself a declaration this run generates; otherwise the expansion stands on its own.
+    | FsApp of string * FsTypeRef list
     | FsNamed of string
 
 /// A literal payload carried by a StringEnum case (D12: mixed literal unions keep their
@@ -398,11 +433,20 @@ type FsExportMember =
       Binding: ImportBinding
       Body: FsExportBody }
 
+/// A declaration's type parameter (§4.9). The constraint is carried only when F# can express
+/// it - a subtype constraint against another generated interface. TypeScript bounds that have
+/// no F# form (`extends string`, `extends keyof T`) are dropped with a finding rather than
+/// approximated, because a wrong constraint rejects correct code.
+type FsTypeParam =
+    { Name: string
+      Constraint: FsTypeRef option }
+
 type FsInterfaceDecl =
     { Name: string
       Docs: string
       Tags: JSDocTagInfo list
       Order: DeclOrder option
+      TypeParameters: FsTypeParam list
       /// Base interfaces (`extends`, or a class base) - rendered as `inherit` lines.
       Inherits: FsTypeRef list
       Members: FsMember list
@@ -424,6 +468,38 @@ type FsStringEnumDecl =
       Order: DeclOrder option
       Cases: FsUnionCase list }
 
+/// One field of a tagged-union case. The name is the JS property key verbatim: Fable emits the
+/// field under its F# name, and backtick escaping is transparent there (`` ``type`` `` reaches
+/// JS as `type`), so no separate compiled name is needed.
+type FsTaggedField = { Name: string; Type: FsTypeRef }
+
+/// One case of a `[<TypeScriptTaggedUnion>]` DU: the case name, the tag literal when it does
+/// not spell the case name, and the arm's own properties as case fields.
+///
+/// The fields are the arm's properties *other than* the discriminant - Fable writes the tag
+/// itself from the case's compiled name. Verified against Fable 5.13: `Circle(radius = 2.0)`
+/// emits `{ kind: "circle", radius: 2 }`, and a `None` in an optional field omits the key
+/// rather than writing `undefined`, which is exactly TypeScript's optional-property semantics.
+/// Carrying the arm type as a single payload field instead does *not* work - Fable wraps it as
+/// `{ kind: "circle", Item: x }`, an object no TypeScript signature would accept.
+type FsTaggedCase =
+    { Name: string
+      CompiledName: string option
+      Fields: FsTaggedField list }
+
+/// A discriminated union the checker proved is tagged (D4, §4.5(2)): every member is an object
+/// type carrying the same property, and that property's type is a distinct string literal in
+/// each. Fable erases the DU to a plain object literal, so this is Exact *and* pattern-matchable
+/// - by far the best consumer experience, which is why §4.5 says to detect it aggressively.
+type FsTaggedUnionDecl =
+    { Name: string
+      Docs: string
+      Tags: JSDocTagInfo list
+      Order: DeclOrder option
+      /// The discriminant property's name, as TypeScript spells it.
+      Tag: string
+      Cases: FsTaggedCase list }
+
 /// A numeric TS enum as an F# enum - `type E = A = 1` (§4.7).
 type FsEnumDecl =
     { Name: string
@@ -439,11 +515,15 @@ type FsAbbrevDecl =
       Docs: string
       Tags: JSDocTagInfo list
       Order: DeclOrder option
+      /// The alias's own type parameters, in declaration order (§4.9). A generic alias binds
+      /// them on its left side exactly as TypeScript does: `type Callback<'T> = Func<'T, obj>`.
+      TypeParameters: FsTypeParam list
       Target: FsTypeRef }
 
 type FsDecl =
     | FsInterface of FsInterfaceDecl
     | FsStringEnum of FsStringEnumDecl
+    | FsTaggedUnion of FsTaggedUnionDecl
     | FsEnum of FsEnumDecl
     | FsAbbrev of FsAbbrevDecl
     /// The one `Exports` type gathering the module's value exports.
@@ -464,6 +544,11 @@ type ShapeModel =
       /// `Exports` members accumulated by the class/function/value passes, keyed by harvest
       /// position so `order-declarations` can assemble them in source order.
       ExportMembers: (int * FsExportMember) list
+      /// Type-parameter id -> the name it is in scope under, for the declaration currently
+      /// being shaped. Scope lives on the model rather than in `typeRef`'s arguments because
+      /// it is a property of *where* the reference is written, not of the reference: a pass
+      /// binds it once around a declaration and every nested `typeRef` inherits it.
+      TypeVars: Map<int, string>
       Decls: FsDecl list }
 
 // ---------------------------------------------------------------------------------------------

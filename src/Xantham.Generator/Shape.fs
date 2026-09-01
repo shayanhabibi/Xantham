@@ -116,9 +116,107 @@ let private isSyntheticName (name: string) =
 /// the embedded checker id is session-specific - keeping one would also break determinism.
 let private isSymbolKeyed (name: string) = name.StartsWith "__@"
 
-/// A tuple type - shaped as an array until D7's dedicated pass (phase C).
+/// The discriminant of a tagged union (D4, §4.5(2)), when the checker proves there is one:
+/// every non-nullish member is an object type carrying the same property, and that property's
+/// type is a string literal that is *distinct* across the members. Returns the property name
+/// as TypeScript spells it, paired with each member's facts and its tag value, in the union's
+/// own member order.
+///
+/// §4.5 says to detect this aggressively, and this is why: Fable erases the DU back to the
+/// object, so the mapping costs nothing at runtime and buys pattern matching - the single
+/// biggest ergonomic win available anywhere in the catalogue.
+///
+/// Candidate properties are considered in the *first* member's declaration order, so a union
+/// discriminated by two properties at once picks the same one on every run.
+let private taggedUnionShape (model: ShapeModel) (facts: TypeFacts) : (string * (TypeFacts * string) list) option =
+    let members =
+        facts.UnionMembers
+        |> List.choose (fun id -> Map.tryFind id model.Types)
+        |> List.filter (isNullish >> not)
+
+    let isObjectMember (m: TypeFacts) =
+        flag TypeFlags.Object m && not m.Members.IsEmpty
+
+    if members.Length < 2 || not (members |> List.forall isObjectMember) then
+        None
+    else
+        /// The member's own string-literal value for `tag`, when it has exactly one.
+        let tagValue (m: TypeFacts) (tag: string) =
+            m.Members
+            |> List.tryFind (fun property -> property.Symbol.Name = tag)
+            |> Option.bind (fun property -> Map.tryFind property.TypeId model.Types)
+            |> Option.bind (fun propertyType ->
+                match literalOf propertyType with
+                | Some(LitString text) -> Some text
+                | _ -> None)
+
+        members
+        |> List.head
+        |> _.Members
+        |> List.map _.Symbol.Name
+        |> List.filter (isSymbolKeyed >> not)
+        |> List.tryPick (fun tag ->
+            let tagged = members |> List.map (fun m -> tagValue m tag |> Option.map (fun value -> m, value))
+
+            if tagged |> List.forall Option.isSome then
+                let tagged = tagged |> List.map Option.get
+                let values = tagged |> List.map snd
+
+                // Two members sharing a tag value are not discriminated by it - matching on
+                // that case could not tell them apart.
+                if List.distinct values = values then Some(tag, tagged) else None
+            else
+                None)
+
+/// The widest erased union D4 allows. Fable ships `U2`-`U9`; the decision is four, because
+/// past that the consumer is doing runtime tests the type no longer helps them write.
+[<Literal>]
+let private ErasedUnionArity = 4
+
+/// The widest tagged-union case worth generating. A DU case binds its fields positionally, so
+/// past a dozen every `match` clause is a wall of wildcards and the erased union over the arm
+/// interfaces - which keeps the properties named - reads better.
+[<Literal>]
+let private TaggedCaseFieldBudget = 12
+
+/// A tuple type (§4.12). Fable compiles an F# tuple to a JS array, so a fixed tuple is an
+/// exact match; the variadic forms are not.
 let private isTuple (facts: TypeFacts) =
     facts.Response.IsTupleType = ValueSome true
+
+/// A tuple element the checker marked `...rest` or variadic. F# tuples are fixed-arity, so a
+/// tuple carrying one has no tuple form at all.
+let private isVariadicElement (flags: ElementFlags) =
+    flags.HasFlag ElementFlags.Rest || flags.HasFlag ElementFlags.Variadic
+
+/// A tuple's element flags, one per type argument. The wire reports them off the tuple's
+/// target and the two can only disagree if the schema changes under us; a disagreement reads
+/// every element as required, which is the conservative shape.
+let private tupleElementFlags (facts: TypeFacts) =
+    if facts.TupleElements.Length = facts.TypeArguments.Length then
+        facts.TupleElements
+    else
+        facts.TypeArguments |> List.map (fun _ -> ElementFlags.Required)
+
+/// The generic declaration an instantiation points back at, when this run declares it. A
+/// generic declaration is its own target, so only a genuine instantiation matches.
+///
+/// The checker substitutes members eagerly, so `Box<string>` arrives fully expanded and would
+/// read perfectly well as a structure of its own; writing it as an application instead keeps
+/// the two spellings tied together, which is what §4.9 asks for.
+let private instantiationOf (model: ShapeModel) (facts: TypeFacts) =
+    match facts.Response.Target with
+    | ValueSome target when target <> facts.Response.Id ->
+        Map.tryFind target model.DeclNames |> Option.map (fun name -> name, facts.TypeArguments)
+    | _ -> None
+
+/// The arguments a generic declaration stands for when it is named at a reference position:
+/// its own parameters. F# has no bare spelling for a generic type, so the self-reference in
+/// `map(next: T): Box<T>` has to re-apply them to come back out as it was written.
+let private ownArguments (facts: TypeFacts) =
+    match facts.Response.Target with
+    | ValueSome target when target = facts.Response.Id -> facts.TypeArguments
+    | _ -> []
 
 // ---------------------------------------------------------------------------------------------
 // Type references.
@@ -167,7 +265,11 @@ let rec typeRef (ctx: Context) (model: ShapeModel) (self: string option) (owner:
                 | Some name -> FsNamed name, [ Finding.make Ergonomic owner "polymorphic this reads as the declaring type" ]
                 | None -> FsObj, [ Finding.make Widened owner "this type outside a declaration; widened to obj" ]
             else
-                FsObj, [ Finding.make Widened owner "type parameter widened to obj (generics are phase C)" ]
+                // In scope only where the declaration being shaped bound it (§4.9); a
+                // parameter of some *other* declaration has no name here to write.
+                match Map.tryFind typeId model.TypeVars with
+                | Some name -> FsTypeVar name, []
+                | None -> FsObj, [ Finding.make Widened owner "type parameter is not in scope here; widened to obj" ]
         elif has TypeFlags.Object then
             objectRef ctx model self owner facts
         else
@@ -181,25 +283,20 @@ and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (
     | None ->
 
     match Map.tryFind facts.Response.Id model.DeclNames with
-    | Some name -> FsNamed name, []
+    | Some name ->
+        match ownArguments facts with
+        | [] -> FsNamed name, []
+        | arguments -> appliedRef ctx model self owner name arguments
     | None ->
         if isTuple facts then
-            // Tuples read as arrays until D7's shape-tuples pass (phase C): the homogeneous
-            // element type when there is one, `obj[]` otherwise.
-            let elements =
-                facts.TypeArguments
-                |> List.map (fun element -> typeRef ctx model self owner element |> fst)
-                |> List.distinct
-
-            match elements with
-            | [ element ] ->
-                FsArray element, [ Finding.make Widened owner "tuple reads as an array (D7 tuples are phase C)" ]
-            | _ ->
-                FsArray FsObj,
-                [ Finding.make Widened owner "heterogeneous tuple widened to obj[] (D7 tuples are phase C)" ]
+            tupleRef ctx model self owner facts
         elif isPureCallback facts then
             delegateRef ctx model self owner facts
         else
+
+        match instantiationOf model facts with
+        | Some(name, arguments) -> appliedRef ctx model self owner name arguments
+        | None ->
             match GeneratorConfig.disposition ctx.Config facts.Origin, facts.SymbolName with
             | Reference, Some typeName ->
                 // The O7 contract: a `ship` run of this group produces exactly this name.
@@ -210,6 +307,59 @@ and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (
             | (Ship | Widen), _ ->
                 let shown = facts.SymbolName |> Option.defaultValue "an anonymous object type"
                 FsObj, [ Finding.make Widened owner $"{shown} is not among the generated declarations; widened to obj" ]
+
+/// A tuple as an F# tuple (D7, §4.12) - Fable compiles the two to the same JS array, so a
+/// fixed tuple is Exact. Element labels are cosmetic and drop.
+///
+/// Optional tail elements need no work of their own: the checker hands `[string, number?]`
+/// over as `string` and `number | undefined`, so D1's hoist has already made that component an
+/// `option`. That is exactly D7's decision - an `undefined` slot rather than a shorter array -
+/// falling out of the representation instead of being imposed on it.
+///
+/// A rest or variadic element has no F# tuple form at all, so it widens to an array: the
+/// element type when every component agrees, `obj[]` otherwise. §4.12 recommends an erased
+/// carrier with typed accessors instead; that waits for a fixture that needs one, the way
+/// class statics do.
+/// A generic name applied to type arguments, each shaped at this position (§4.9).
+and private appliedRef (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (name: string) (arguments: int list) : FsTypeRef * Finding list =
+    let mutable findings = []
+
+    let mapped =
+        arguments
+        |> List.map (fun argument ->
+            let reference, argumentFindings = typeRef ctx model self owner argument
+            findings <- findings @ argumentFindings
+            reference)
+
+    FsApp(name, mapped), findings
+
+and private tupleRef (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
+    let mutable findings = []
+
+    let components =
+        facts.TypeArguments
+        |> List.map (fun element ->
+            let reference, refFindings = typeRef ctx model self owner element
+            findings <- findings @ refFindings
+            reference)
+
+    let widenToArray reason =
+        let element =
+            match List.distinct components with
+            | [ single ] -> single
+            | _ -> FsObj
+
+        FsArray element, findings @ [ Finding.make Widened owner reason ]
+
+    if tupleElementFlags facts |> List.exists isVariadicElement then
+        widenToArray "tuple with a rest element widened to an array (§4.12 leaves the erased carrier to a fixture)"
+    else
+        match components with
+        // F# has no zero- or one-component tuple, so neither maps; an array is the honest
+        // shape for both, and both are vanishingly rare.
+        | []
+        | [ _ ] -> widenToArray $"{components.Length}-element tuple has no F# tuple form; widened to an array"
+        | components -> FsTuple components, findings
 
 /// A callback as a delegate (D5): guaranteed arity at the boundary. Only the first signature
 /// shapes the delegate; further overloads on a callback are a finding.
@@ -264,8 +414,51 @@ and private unionRef (ctx: Context) (model: ShapeModel) (self: string option) (o
         | None ->
             match namedUnionByMembers model remaining with
             | Some name -> wrap (FsNamed name) []
-            | None ->
-                wrap FsObj [ Finding.make Widened owner "union with several non-null members widened to obj (D4 is phase C)" ]
+            | None -> let reference, findings = erasedUnionRef ctx model self owner remaining in wrap reference findings
+
+/// An unnamed heterogeneous union as Fable's `U2`-`U4` (D4, §4.5(4)). The threshold is four.
+///
+/// The arms are the members' own F# types, deduplicated: `boolean` re-expands to `true | false`
+/// inside a union, and several string-literal members all widen to `string`, so the arm count
+/// is only known after mapping. A union that collapses to one arm *is* that type - which is how
+/// an unnamed literal union comes out `string` rather than `obj`.
+///
+/// One arm widening to `obj` collapses the whole union: `U2<obj, Foo>` type-checks against
+/// anything at all, so it would trade a legible `obj` for an illegible one.
+///
+/// D4 asks for this by position - erased-union constructors at input, discriminable values at
+/// output. `U_n` is both at once: `U2.Case1 x` is the input-position constructor §4.5 names,
+/// and the DU is matchable on the way out. The position-specific thing still missing is
+/// expanding an input union into overloads, which is a member rewrite rather than a reference
+/// mapping, and which the Create budget's lesson about quadratic overload sets argues for
+/// leaving until a fixture asks.
+and private erasedUnionRef (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (memberIds: int list) : FsTypeRef * Finding list =
+    let mutable findings = []
+
+    let arms =
+        memberIds
+        |> List.map (fun id ->
+            let reference, refFindings = typeRef ctx model self owner id
+            findings <- findings @ refFindings
+            reference)
+        |> List.distinct
+
+    match arms with
+    | [] -> FsObj, findings @ [ Finding.make Widened owner "empty union widened to obj" ]
+    | [ single ] -> single, findings
+    | arms when arms |> List.contains FsObj ->
+        FsObj,
+        findings
+        @ [ Finding.make Widened owner "union with an obj arm widened to obj (an erased union over obj is no safer)" ]
+    | arms when arms.Length <= ErasedUnionArity ->
+        FsErasedUnion arms, findings
+    | arms ->
+        FsObj,
+        findings
+        @ [ Finding.make
+                Widened
+                owner
+                $"union of {arms.Length} distinct types widened to obj (D4 caps the erased union at {ErasedUnionArity})" ]
 
 /// An optional member or parameter reads as `option`, one level deep however the optionality
 /// arrived (a `?` marker, an `undefined` union member, or both).
@@ -283,6 +476,98 @@ and private isOptionalParam (p: ResolvedMember) (reference: FsTypeRef) =
     || (match reference with
         | FsOption _ -> true
         | _ -> false)
+
+// ---------------------------------------------------------------------------------------------
+// Generics (§4.9).
+// ---------------------------------------------------------------------------------------------
+
+/// A declaration's own type parameters, and the scope its members must be shaped under.
+///
+/// Both come from the same walk because they have to agree: a parameter that earns a name is
+/// the one a member is allowed to reference, and one that does not must not be in scope, or
+/// the member would name a variable the declaration never binds.
+///
+/// A constraint survives only if it maps to a named type, which is the only bound F# can
+/// state. `extends string` and `extends keyof T` are dropped with a finding: F# has no form
+/// for them, and the nearest approximation would reject code TypeScript accepts.
+let private typeParamsOf
+    (ctx: Context)
+    (model: ShapeModel)
+    (owner: string)
+    (ids: int list)
+    : FsTypeParam list * Map<int, string> * Finding list =
+    let mutable findings = []
+
+    let named =
+        ids
+        |> List.choose (fun id ->
+            match Map.tryFind id model.Types |> Option.bind _.SymbolName with
+            | Some name -> Some(id, name)
+            | None ->
+                findings <-
+                    findings
+                    @ [ Finding.make Widened owner $"type parameter #{id} has no name to write; its uses widen to obj" ]
+
+                None)
+
+    let scope = named |> Map.ofList
+
+    // The constraint is read under the scope being defined, so `T extends Node<T>` resolves
+    // its own variable rather than widening it.
+    let scoped = { model with TypeVars = scope }
+
+    let parameters =
+        named
+        |> List.map (fun (id, name) ->
+            let bound =
+                Map.tryFind id model.Types
+                |> Option.bind _.Constraint
+                |> Option.map (fun boundId -> typeRef ctx scoped None owner boundId)
+
+            match bound with
+            | Some((FsNamed _ | FsApp _) as reference, boundFindings) ->
+                findings <- findings @ boundFindings
+                { Name = name; Constraint = Some reference }
+            | Some _ ->
+                findings <-
+                    findings
+                    @ [ Finding.make Ergonomic owner $"constraint on '{name}' has no F# form and is dropped (§4.9)" ]
+
+                { Name = name; Constraint = None }
+            | None -> { Name = name; Constraint = None })
+
+    parameters, scope, findings
+
+/// The ids a declaration binds: its own where it is a genuine generic declaration, and the
+/// alias's where it is a generic *alias*. `type Mapper<T> = (t: T) => T` leaves the function
+/// type itself parameterless - the alias is the only place `T` appears - so both are read.
+let private declParamIds (facts: TypeFacts) =
+    (facts.Response.TypeParameters
+     |> ValueOption.map Array.toList
+     |> ValueOption.defaultValue [])
+    @ facts.AliasTypeArguments
+    |> List.distinct
+
+/// The parameters a declaration binds on its left side.
+let private declTypeParams (ctx: Context) (model: ShapeModel) (owner: string) (facts: TypeFacts) =
+    declParamIds facts |> typeParamsOf ctx model owner
+
+/// The parameters a callback alias binds, which include the signature's own. F# has no rank-2
+/// form, so a generic *function type* - `type F = <T>(t: T) => T`, where each caller picks `T`
+/// - can only be approximated by hoisting the variable onto the alias, and that shift is worth
+/// a finding. A generic alias to a plain function type binds nothing extra and costs nothing.
+let private aliasTypeParams (ctx: Context) (model: ShapeModel) (owner: string) (facts: TypeFacts) =
+    let declared = declParamIds facts
+    let hoisted = facts.CallSignatures |> List.collect _.TypeParameters |> List.distinct
+    let parameters, scope, findings = declared @ hoisted |> List.distinct |> typeParamsOf ctx model owner
+
+    let hoistFindings =
+        if hoisted |> List.exists (fun id -> not (List.contains id declared)) then
+            [ Finding.make Ergonomic owner "generic function type hoisted onto the alias; F# has no rank-2 form (§4.9)" ]
+        else
+            []
+
+    parameters, scope, findings @ hoistFindings
 
 // ---------------------------------------------------------------------------------------------
 // Shared shaping of members and signatures.
@@ -447,7 +732,7 @@ let synthesizeAnonymous: Pass<ShapeModel> =
                 isLiteralUnion facts
             elif flag TypeFlags.Object facts then
                 // Entry-group object shapes with members become interfaces; callbacks stay
-                // inline as delegates, arrays as arrays, tuples as arrays (D7). Constructor
+                // inline as delegates, arrays as arrays, tuples as F# tuples (D7). Constructor
                 // objects (a class's static side) get their constructors on `Exports`, not a
                 // declaration.
                 GeneratorConfig.disposition ctx.Config facts.Origin = Ship
@@ -456,6 +741,10 @@ let synthesizeAnonymous: Pass<ShapeModel> =
                 && not (isTuple facts)
                 && facts.ConstructSignatures.IsEmpty
                 && not facts.Members.IsEmpty
+                // An instantiation of a generic this run declares is written as an
+                // application (§4.9). Naming it would declare the expansion a second time
+                // under a made-up name and lose the tie to the generic it came from.
+                && (instantiationOf { model with DeclNames = names } facts).IsNone
             else
                 false
 
@@ -479,8 +768,13 @@ let synthesizeAnonymous: Pass<ShapeModel> =
                     let named = Map.tryFind typeId names
                     let into segment = (named |> Option.defaultValue path) + segment
 
-                    for m in facts.Members do
-                        walk (into (Naming.pascalSegment m.Symbol.Name)) order m.TypeId
+                    // A tuple declaration reads only its components, so its members - `length`
+                    // and the numeric indices - are not part of the shape and must not claim
+                    // names: `[number, number?]` would otherwise declare its own `1 | 2` length
+                    // as an enum nothing references.
+                    if not (isTuple facts) then
+                        for m in facts.Members do
+                            walk (into (Naming.pascalSegment m.Symbol.Name)) order m.TypeId
 
                     let signatures = facts.CallSignatures @ facts.ConstructSignatures
 
@@ -516,26 +810,11 @@ let synthesizeAnonymous: Pass<ShapeModel> =
 
 /// Case names must be unique within one DU; a later duplicate takes a numeric suffix in member
 /// order, deterministically.
-let private dedupeUnionCases (cases: FsUnionCase list) =
+let private uniqueCaseNames (names: string list) =
     let mutable seen = Set.empty
 
-    cases
-    |> List.map (fun case ->
-        let unique =
-            if not (Set.contains case.Name seen) then
-                case.Name
-            else
-                Seq.initInfinite (fun i -> $"{case.Name}{i + 2}")
-                |> Seq.find (fun candidate -> not (Set.contains candidate seen))
-
-        seen <- Set.add unique seen
-        { case with Name = unique })
-
-let private dedupeEnumCases (cases: (string * int) list) =
-    let mutable seen = Set.empty
-
-    cases
-    |> List.map (fun (name, value) ->
+    names
+    |> List.map (fun name ->
         let unique =
             if not (Set.contains name seen) then
                 name
@@ -544,7 +823,16 @@ let private dedupeEnumCases (cases: (string * int) list) =
                 |> Seq.find (fun candidate -> not (Set.contains candidate seen))
 
         seen <- Set.add unique seen
-        unique, value)
+        unique)
+
+let private dedupeUnionCases (cases: FsUnionCase list) =
+    List.map2
+        (fun (case: FsUnionCase) name -> { case with Name = name })
+        cases
+        (uniqueCaseNames (cases |> List.map _.Name))
+
+let private dedupeEnumCases (cases: (string * int) list) =
+    List.map2 (fun (_, value) name -> name, value) cases (uniqueCaseNames (cases |> List.map fst))
 
 /// Declarations for named literal unions: StringEnum DUs with `CompiledName` per case, mixed
 /// unions carrying `CompiledValue` cases (D12), all-integer unions as F# enums - including
@@ -651,6 +939,111 @@ let classifyLiteralUnions: Pass<ShapeModel> =
                         Degraded(model, findings)
             } }
 
+/// Declarations for the unions the checker proves are discriminated (D4, §4.5(2)): an F# DU
+/// carrying one payload per case, tagged so Fable erases it straight back to the underlying
+/// object. Runs after `classify-literal-unions` because the two are disjoint - a union of
+/// literals has no members to carry a discriminant - and before `shape-aliases`, which would
+/// otherwise abbreviate the same name structurally.
+///
+/// Each case carries the arm's own properties as case fields, because that is what Fable's
+/// erasure actually writes: `Circle(radius = 2.0)` becomes `{ kind: "circle", radius: 2 }`. An
+/// arm that is not plain data has no such form - a method would have to arrive as a delegate
+/// field, which reads back as a value rather than a callable member - so a union with one is
+/// left to `shape-aliases`, where it stays an erased union over the arm types.
+let detectTaggedUnions: Pass<ShapeModel> =
+    { Name = "detect-tagged-unions"
+      Run =
+        fun ctx model ->
+            async {
+                let mutable findings = []
+
+                let decls =
+                    model.DeclNames
+                    |> Map.toList
+                    |> List.sortBy fst
+                    |> List.choose (fun (typeId, name) ->
+                        match Map.tryFind typeId model.Types with
+                        | Some facts when flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) ->
+                            let nullish, _ = splitNullish model facts
+
+                            // A nullable tagged union would have to drop its `null` case to fit
+                            // the DU, so it stays an abbreviation and keeps the `option`.
+                            if not (List.isEmpty nullish) then
+                                None
+                            else
+
+                            match taggedUnionShape model facts with
+                            | None -> None
+                            | Some(tag, tagged) ->
+                                // Fable writes the discriminant itself, so the tag property is
+                                // not a field; everything else on the arm is.
+                                let fieldsOf (arm: TypeFacts) =
+                                    arm.Members
+                                    |> List.filter (fun m -> m.Symbol.Name <> tag && not (isSymbolKeyed m.Symbol.Name))
+
+                                let isPlainData (arm: TypeFacts) =
+                                    arm.CallSignatures.IsEmpty
+                                    && arm.ConstructSignatures.IsEmpty
+                                    && (fieldsOf arm |> List.forall (fun m -> not (hasAny SymbolFlags.Method m.Symbol.Flags)))
+                                    && (fieldsOf arm).Length <= TaggedCaseFieldBudget
+
+                                if not (tagged |> List.forall (fst >> isPlainData)) then
+                                    findings <-
+                                        findings
+                                        @ [ Finding.make
+                                                Ergonomic
+                                                name
+                                                $"discriminated by '{tag}', but an arm is not plain data; left as an erased union" ]
+
+                                    None
+                                else
+
+                                let caseNames =
+                                    tagged |> List.map (snd >> Naming.enumCaseOfString) |> uniqueCaseNames
+
+                                let cases =
+                                    List.map2
+                                        (fun (arm, value) caseName ->
+                                            let fields =
+                                                fieldsOf arm
+                                                |> List.map (fun m ->
+                                                    let reference, refFindings =
+                                                        typeRef ctx model None $"{name}.{caseName}.{m.Symbol.Name}" m.TypeId
+
+                                                    findings <- findings @ refFindings
+
+                                                    { Name = m.Symbol.Name
+                                                      Type = optionalRef m.Optional reference })
+
+                                            { Name = caseName
+                                              CompiledName = (if value = caseName then None else Some value)
+                                              Fields = fields })
+                                        tagged
+                                        caseNames
+
+                                findings <-
+                                    findings @ [ Finding.make Exact name $"discriminated union on '{tag}' (D4)" ]
+
+                                Some(
+                                    FsTaggedUnion
+                                        { Name = name
+                                          Docs = ""
+                                          Tags = []
+                                          Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+                                          Tag = tag
+                                          Cases = cases }
+                                )
+                        | _ -> None)
+
+                let model = { model with Decls = model.Decls @ decls }
+
+                return
+                    if List.isEmpty findings then
+                        Advanced model
+                    else
+                        Degraded(model, findings)
+            } }
+
 /// The delegate shape of a named callback, without the self-name lookup that would just return
 /// the abbreviation being defined.
 let private delegateRefFor (ctx: Context) (model: ShapeModel) (name: string) (facts: TypeFacts) : FsTypeRef * Finding list =
@@ -683,8 +1076,14 @@ let shapeCallbacks: Pass<ShapeModel> =
                     |> List.choose (fun (typeId, name) ->
                         match Map.tryFind typeId model.Types with
                         | Some facts when flag TypeFlags.Object facts && isPureCallback facts ->
-                            let reference, refFindings = delegateRefFor ctx model name facts
-                            findings <- findings @ refFindings
+                            let typeParameters, scope, parameterFindings = aliasTypeParams ctx model name facts
+
+                            // The signature is read under the alias's own parameters, so
+                            // `Callback<T> = (self: T) => void` writes `'T` rather than widening it.
+                            let reference, refFindings =
+                                delegateRefFor ctx { model with TypeVars = scope } name facts
+
+                            findings <- findings @ parameterFindings @ refFindings
 
                             Some(
                                 FsAbbrev
@@ -692,6 +1091,7 @@ let shapeCallbacks: Pass<ShapeModel> =
                                       Docs = ""
                                       Tags = []
                                       Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+                                      TypeParameters = typeParameters
                                       Target = reference }
                             )
                         | _ -> None)
@@ -735,8 +1135,21 @@ let shapeInterfaces: Pass<ShapeModel> =
                             && not facts.Members.IsEmpty
                             && (arrayElement facts).IsNone
                             && not (isTuple facts)
+                            // A named instantiation - `type StringBox = Box<string>` - is an
+                            // abbreviation of the application, not a second copy of the
+                            // expansion the checker substituted; `shape-aliases` writes it.
+                            && (instantiationOf model facts).IsNone
                             ->
-                            let members, memberFindings = shapeMembers ctx model name facts
+                            let typeParameters, scope, parameterFindings =
+                                declTypeParams ctx model name facts
+
+                            findings <- findings @ parameterFindings
+
+                            // Members are shaped under the declaration's own parameters, so a
+                            // `T` in a member position names the variable rather than widening.
+                            let members, memberFindings =
+                                shapeMembers ctx { model with TypeVars = scope } name facts
+
                             findings <- findings @ memberFindings
 
                             if not facts.CallSignatures.IsEmpty then
@@ -764,6 +1177,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                       Docs = docs
                                       Tags = tags
                                       Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+                                      TypeParameters = typeParameters
                                       Inherits = []
                                       Members = members
                                       CreateOverloads = [] }
@@ -824,12 +1238,35 @@ let shapeAliases: Pass<ShapeModel> =
                     |> List.collect (function
                         | FsInterface decl -> [ decl.Name ]
                         | FsStringEnum decl -> [ decl.Name ]
+                        | FsTaggedUnion decl -> [ decl.Name ]
                         | FsEnum decl -> [ decl.Name ]
                         | FsAbbrev decl -> [ decl.Name ]
                         | FsExports _ -> [])
                     |> Set.ofList
 
                 let fallback = defaultExportName ctx
+
+                // An abbreviation that stands in for an export - `type StringBox = Box<string>`
+                // reaches here rather than `shape-interfaces` - still carries that export's
+                // documentation; it is the only declaration the reader will see for it.
+                let exportDocs =
+                    model.Harvest.Exports
+                    |> List.choose (fun export ->
+                        Map.tryFind export.Symbol.Id model.ExportTypes
+                        |> Option.bind _.Declared
+                        |> Option.map (fun typeId -> typeId, (export.Docs, export.Tags)))
+                    |> Map.ofList
+
+                // A generic declaration cannot be named bare on the right of an abbreviation -
+                // F# demands the full arity - so an alias to one repeats its parameters and
+                // applies them straight through: `type Alias<'T> = Primary<'T>`.
+                let parametersOf =
+                    model.Decls
+                    |> List.choose (function
+                        | FsInterface decl -> Some(decl.Name, decl.TypeParameters)
+                        | FsAbbrev decl -> Some(decl.Name, decl.TypeParameters)
+                        | _ -> None)
+                    |> Map.ofList
 
                 // A second type-like export of an already-named type abbreviates to it.
                 let aliasDecls =
@@ -844,13 +1281,23 @@ let shapeAliases: Pass<ShapeModel> =
                             | Some typeId ->
                                 match Map.tryFind typeId model.DeclNames with
                                 | Some primary when primary <> name ->
+                                    let typeParameters =
+                                        Map.tryFind primary parametersOf |> Option.defaultValue []
+
+                                    let target =
+                                        if typeParameters.IsEmpty then
+                                            FsNamed primary
+                                        else
+                                            FsApp(primary, typeParameters |> List.map (_.Name >> FsTypeVar))
+
                                     Some(
                                         FsAbbrev
                                             { Name = name
                                               Docs = export.Docs
                                               Tags = export.Tags
                                               Order = export.Order
-                                              Target = FsNamed primary }
+                                              TypeParameters = typeParameters
+                                              Target = target }
                                     )
                                 | _ -> None
                             | None -> None)
@@ -865,26 +1312,35 @@ let shapeAliases: Pass<ShapeModel> =
                         else
                             match Map.tryFind typeId model.Types with
                             | Some facts ->
+                                let typeParameters, scope, parameterFindings =
+                                    declTypeParams ctx model name facts
+
+                                let scoped = { model with TypeVars = scope }
+
                                 // The named cases earlier passes handle; what reaches here is
                                 // referable without a declaration of its own.
                                 let reference, refFindings =
                                     match arrayElement facts with
                                     | Some element ->
-                                        let inner, innerFindings = typeRef ctx model None name element
+                                        let inner, innerFindings = typeRef ctx scoped None name element
                                         FsArray inner, innerFindings
                                     | None ->
                                         match Map.tryFind facts.Response.Id model.DeclNames with
                                         | Some primary when primary <> name -> FsNamed primary, []
-                                        | _ -> typeRefIgnoringSelf ctx model name facts
+                                        | _ -> typeRefIgnoringSelf ctx scoped name facts
 
-                                findings <- findings @ refFindings
+                                findings <- findings @ parameterFindings @ refFindings
+
+                                let docs, tags =
+                                    Map.tryFind typeId exportDocs |> Option.defaultValue ("", [])
 
                                 Some(
                                     FsAbbrev
                                         { Name = name
-                                          Docs = ""
-                                          Tags = []
+                                          Docs = docs
+                                          Tags = tags
                                           Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+                                          TypeParameters = typeParameters
                                           Target = reference }
                                 )
                             | None -> None)
@@ -1229,6 +1685,7 @@ let orderDeclarations: Pass<ShapeModel> =
             |> List.sortBy (function
                 | FsInterface decl -> orderKey decl.Order decl.Name
                 | FsStringEnum decl -> orderKey decl.Order decl.Name
+                | FsTaggedUnion decl -> orderKey decl.Order decl.Name
                 | FsEnum decl -> orderKey decl.Order decl.Name
                 | FsAbbrev decl -> orderKey decl.Order decl.Name
                 | FsExports _ -> ("￿", System.Int32.MaxValue), "￿")
@@ -1258,6 +1715,7 @@ let auditCoverage: Pass<ShapeModel> =
                     |> List.collect (function
                         | FsInterface decl -> [ decl.Name ]
                         | FsStringEnum decl -> [ decl.Name ]
+                        | FsTaggedUnion decl -> [ decl.Name ]
                         | FsEnum decl -> [ decl.Name ]
                         | FsAbbrev decl -> [ decl.Name ]
                         | FsExports members -> members |> List.map _.Name)
@@ -1283,6 +1741,7 @@ let passes: Pass<ShapeModel> list =
     [ nameExports
       synthesizeAnonymous
       classifyLiteralUnions
+      detectTaggedUnions
       shapeCallbacks
       shapeInterfaces
       shapeAliases

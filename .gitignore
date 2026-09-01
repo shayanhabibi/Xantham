@@ -20,6 +20,11 @@ node_modules/
 tests/**/output.json
 tests/**/package-lock.json
 tests/fixtures/**/*
+# ... except the hand-authored lab fixture, which is source: the committed goldens are
+# generated from it, so an ignored copy would make them unreproducible.
+!tests/fixtures/lab/
+!tests/fixtures/lab/**
+tests/fixtures/lab/node_modules/
 
 # Vendored microsoft/TypeScript AST generator sources, fetched by
 # `dotnet fsi tools/generate-wire.fsx sync tsc-ast` and verified against the per-file

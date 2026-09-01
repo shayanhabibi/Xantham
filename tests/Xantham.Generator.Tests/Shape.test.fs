@@ -20,6 +20,27 @@ let private numberLiteral (id: int) (value: float) =
         { Build.typeResponse id TypeFlags.NumberLiteral with
             Value = JsonValue.Create value }
 
+/// A tuple type over the given component ids, with one element flag each.
+let private tuple (id: int) (components: int list) (flags: ElementFlags list) =
+    { Build.facts
+        { Build.typeResponse id TypeFlags.Object with
+            IsTupleType = ValueSome true } with
+        TypeArguments = components
+        TupleElements = flags }
+
+/// A type parameter type, named by its own symbol the way the resolve tier records it.
+let private typeParam (id: int) (name: string) =
+    { Build.facts (Build.typeResponse id TypeFlags.TypeParameter) with SymbolName = Some name }
+
+/// A generic declaration: its own target, holding its parameters as its arguments.
+let private genericDecl (id: int) (parameters: int list) (members: ResolvedMember list) =
+    { Build.facts
+        { Build.typeResponse id TypeFlags.Object with
+            Target = ValueSome id
+            TypeParameters = ValueSome(List.toArray parameters) } with
+        TypeArguments = parameters
+        Members = members }
+
 [<Tests>]
 let typeRefTests =
     testList "shape typeRef" [
@@ -51,19 +72,129 @@ let typeRefTests =
             Expect.equal reference FsUnit "null | undefined"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
 
-        testCase "a union of several non-null members widens to obj" <| fun _ ->
+        testCase "a union of several non-null members is erased (D4)" <| fun _ ->
             let union =
                 { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 1; 2; 5 ] }
 
             let model = Build.shapeModel (union :: Build.primitives)
             let reference, findings = Shape.typeRef Build.context model None "x" 10
 
-            Expect.equal reference (FsOption FsObj) "string | number | undefined"
+            Expect.equal reference (FsOption(FsErasedUnion [ FsString; FsFloat ])) "string | number | undefined"
 
             Expect.equal
                 (findings |> List.map _.Tier)
-                [ Ergonomic; Widened ]
-                "the hoist and the widening are both reported"
+                [ Ergonomic ]
+                "the hoist is reported; the erased union is not a widening"
+
+        testCase "a union wider than the erased arity still widens to obj" <| fun _ ->
+            // Five distinct arms: `U5` exists in Fable, but past four the consumer is doing
+            // runtime tests the type no longer helps them write.
+            let named id name =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with SymbolName = Some name }
+
+            let union =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with
+                    UnionMembers = [ 1; 2; 3; 20; 21; 22 ] }
+
+            let model =
+                Build.shapeModel (union :: named 20 "A" :: named 21 "B" :: named 22 "C" :: Build.primitives)
+
+            let model =
+                { model with DeclNames = [ 20, "A"; 21, "B"; 22, "C" ] |> Map.ofList }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference FsObj "six members, five arms"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
+
+        testCase "a fixed tuple maps to an F# tuple (D7)" <| fun _ ->
+            let model =
+                Build.shapeModel (tuple 10 [ 1; 2 ] [ ElementFlags.Required; ElementFlags.Required ] :: Build.primitives)
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsTuple [ FsString; FsFloat ]) "[string, number]"
+            Expect.isEmpty findings "Fable compiles both to the same JS array"
+
+        testCase "an optional tail element arrives already hoisted to option" <| fun _ ->
+            // The checker hands `[number, number?]` over as `number` and `number | undefined`,
+            // so D1's hoist does the work and D7 imposes nothing of its own.
+            let optionalTail =
+                { Build.facts (Build.typeResponse 11 TypeFlags.Union) with UnionMembers = [ 2; 5 ] }
+
+            let model =
+                Build.shapeModel (
+                    tuple 10 [ 2; 11 ] [ ElementFlags.Required; ElementFlags.Optional ]
+                    :: optionalTail
+                    :: Build.primitives
+                )
+
+            let reference, _ = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsTuple [ FsFloat; FsOption FsFloat ]) "[number, number?]"
+
+        testCase "a rest element leaves no tuple form, so it widens to an array" <| fun _ ->
+            let model =
+                Build.shapeModel (tuple 10 [ 1; 2 ] [ ElementFlags.Required; ElementFlags.Rest ] :: Build.primitives)
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsArray FsObj) "components disagree, so the element is obj"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
+
+        testCase "a one-element tuple has no F# form either" <| fun _ ->
+            let model =
+                Build.shapeModel (tuple 10 [ 1 ] [ ElementFlags.Required ] :: Build.primitives)
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsArray FsString) "widened to its element"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
+
+        testCase "a type parameter in scope names its variable (§4.9)" <| fun _ ->
+            let model =
+                { Build.shapeModel (typeParam 20 "T" :: Build.primitives) with
+                    TypeVars = Map.ofList [ 20, "T" ] }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 20
+
+            Expect.equal reference (FsTypeVar "T") "'T"
+            Expect.isEmpty findings "a bound variable costs nothing"
+
+        testCase "a type parameter of some other declaration is not in scope" <| fun _ ->
+            let model = Build.shapeModel (typeParam 20 "T" :: Build.primitives)
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 20
+
+            Expect.equal reference FsObj "nothing here binds T"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
+
+        testCase "an instantiation of a declared generic is written as an application" <| fun _ ->
+            let instantiation =
+                { Build.facts
+                    { Build.typeResponse 31 TypeFlags.Object with Target = ValueSome 30 } with
+                    TypeArguments = [ 1 ] }
+
+            let model =
+                { Build.shapeModel (genericDecl 30 [ 20 ] [] :: instantiation :: typeParam 20 "T" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 30, "Box" ] }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 31
+
+            Expect.equal reference (FsApp("Box", [ FsString ])) "Box<string>, not the expansion"
+            Expect.isEmpty findings "an application is exact"
+
+        testCase "a generic declaration named at a reference re-applies its parameters" <| fun _ ->
+            // `map(next: T): Box<T>` refers to the declaration itself; F# has no bare `Box`.
+            let model =
+                { Build.shapeModel (genericDecl 30 [ 20 ] [] :: typeParam 20 "T" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 30, "Box" ]
+                    TypeVars = Map.ofList [ 20, "T" ] }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 30
+
+            Expect.equal reference (FsApp("Box", [ FsTypeVar "T" ])) "Box<'T>"
+            Expect.isEmpty findings "exact"
 
         testCase "a named literal union references its declaration, hoist intact" <| fun _ ->
             let union =
@@ -432,6 +563,93 @@ let shapePassTests =
                     "this-chaining is the only finding"
             | decls -> failtest $"expected one interface, got %A{decls}"
 
+        testCase "shape-interfaces binds a declaration's parameters for its members (§4.9)" <| fun _ ->
+            let box =
+                genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "value" SymbolFlags.Property) 20 ]
+
+            let model =
+                { Build.shapeModel (box :: typeParam 20 "T" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 30, "Box" ] }
+
+            let shaped, _ = Build.runPass Shape.shapeInterfaces model
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                Expect.equal decl.TypeParameters [ { Name = "T"; Constraint = None } ] "Box<'T>"
+
+                match decl.Members with
+                | [ FsProperty property ] -> Expect.equal property.Type (FsTypeVar "T") "the member names the variable"
+                | members -> failtest $"expected one property, got %A{members}"
+            | decls -> failtest $"expected one interface, got %A{decls}"
+
+        testCase "a constraint naming a generated type survives" <| fun _ ->
+            let bounded = { typeParam 20 "T" with Constraint = Some 60 }
+            let timer = Build.facts (Build.typeResponse 60 TypeFlags.Object)
+
+            let holder =
+                genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "held" SymbolFlags.Property) 20 ]
+
+            let model =
+                { Build.shapeModel (holder :: bounded :: timer :: Build.primitives) with
+                    DeclNames = Map.ofList [ 30, "Holder"; 60, "Timer" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeInterfaces model
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                Expect.equal decl.TypeParameters [ { Name = "T"; Constraint = Some(FsNamed "Timer") } ] "'T :> Timer"
+            | decls -> failtest $"expected one interface, got %A{decls}"
+
+            Expect.isEmpty
+                (findings |> List.filter (fun finding -> finding.Message.Contains "constraint"))
+                "a bound F# can state costs nothing"
+
+        testCase "a constraint with no F# form is dropped with a finding" <| fun _ ->
+            // `K extends string`: an F# subtype constraint cannot name a primitive, and the
+            // nearest approximation would reject code TypeScript accepts.
+            let bounded = { typeParam 20 "K" with Constraint = Some 1 }
+
+            let keyed =
+                genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "key" SymbolFlags.Property) 20 ]
+
+            let model =
+                { Build.shapeModel (keyed :: bounded :: Build.primitives) with
+                    DeclNames = Map.ofList [ 30, "Keyed" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeInterfaces model
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                Expect.equal decl.TypeParameters [ { Name = "K"; Constraint = None } ] "the variable stays, the bound goes"
+            | decls -> failtest $"expected one interface, got %A{decls}"
+
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "a dropped bound is ergonomic, not widening"
+
+        testCase "shape-callbacks binds the parameters the alias carries" <| fun _ ->
+            // `type Mapper<T> = (input: T) => T` leaves the function type parameterless; the
+            // variable is only reachable through the alias's arguments.
+            let mapper =
+                { Build.facts (Build.typeResponse 50 TypeFlags.Object) with
+                    AliasTypeArguments = [ 20 ]
+                    CallSignatures =
+                        [ Build.signature
+                              [ Build.resolvedMember (Build.symbol 500 "input" SymbolFlags.FunctionScopedVariable) 20 ]
+                              20 ] }
+
+            let model =
+                { Build.shapeModel (mapper :: typeParam 20 "T" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 50, "Mapper" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeCallbacks model
+
+            match shaped.Decls with
+            | [ FsAbbrev decl ] ->
+                Expect.equal decl.TypeParameters [ { Name = "T"; Constraint = None } ] "Mapper<'T>"
+                Expect.equal decl.Target (FsDelegate([ FsTypeVar "T" ], FsTypeVar "T")) "Func<'T, 'T>"
+            | decls -> failtest $"expected one abbreviation, got %A{decls}"
+
+            Expect.isEmpty findings "a generic alias is exact"
+
         testCase "shape-classes emits a constructor member per construct signature" <| fun _ ->
             let instance =
                 { Build.facts (Build.typeResponse 80 TypeFlags.Object) with
@@ -473,6 +691,7 @@ let shapePassTests =
                       Docs = ""
                       Tags = []
                       Order = None
+                      TypeParameters = []
                       Inherits = []
                       Members =
                         [ FsProperty
@@ -510,6 +729,7 @@ let shapePassTests =
                       Docs = ""
                       Tags = []
                       Order = None
+                      TypeParameters = []
                       Inherits = []
                       Members =
                         [ FsMethod
@@ -550,6 +770,7 @@ let shapePassTests =
                       Docs = ""
                       Tags = []
                       Order = None
+                      TypeParameters = []
                       Target = FsObj }
 
             let model =
@@ -562,6 +783,7 @@ let shapePassTests =
                                 Docs = ""
                                 Tags = []
                                 Order = None
+                                TypeParameters = []
                                 Inherits = []
                                 Members =
                                   [ method' "add" [ parameter "targets" (FsNamed "DOMTargets") ]
@@ -586,9 +808,85 @@ let shapePassTests =
                     [ FsNamed "DOMTargets"; FsString ]
                     "first of the obj pair survives; the string overload is distinct"
 
+        testCase "detect-tagged-unions reads the arms' fields, not the arm types" <| fun _ ->
+            // The arm properties become the case fields, because that is what Fable's erasure
+            // writes: `Circle(radius = 2.0)` -> `{ kind: "circle", radius: 2 }`. The tag itself
+            // is not a field - Fable writes it from the compiled name.
+            let arm id tag extra =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                    Members =
+                        [ Build.resolvedMember (Build.symbol (id * 10) "kind" SymbolFlags.Property) tag
+                          Build.resolvedMember (Build.symbol (id * 10 + 1) extra SymbolFlags.Property) 2 ] }
+
+            let union =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 20; 21 ] }
+
+            let model =
+                { Build.shapeModel (
+                      union
+                      :: arm 20 7 "radius"
+                      :: arm 21 8 "width"
+                      :: stringLiteral 7 "circle"
+                      :: stringLiteral 8 "round-rect"
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 10, "Shape" ] }
+
+            let shaped, findings = Build.runPass Shape.detectTaggedUnions model
+
+            match shaped.Decls |> List.pick (function FsTaggedUnion d -> Some d | _ -> None) with
+            | decl ->
+                Expect.equal decl.Tag "kind" "the discriminant the checker proved"
+
+                Expect.equal
+                    (decl.Cases |> List.map (fun c -> c.Name, c.CompiledName))
+                    [ "Circle", Some "circle"; "RoundRect", Some "round-rect" ]
+                    "case names derive from the tag values, which keep a CompiledName"
+
+                Expect.equal
+                    (decl.Cases |> List.map (fun c -> c.Fields |> List.map (fun f -> f.Name, f.Type)))
+                    [ [ "radius", FsFloat ]; [ "width", FsFloat ] ]
+                    "the tag is not a field; everything else is"
+
+            Expect.equal (findings |> List.map _.Tier) [ Exact ] "a tagged union costs no fidelity"
+
+        testCase "detect-tagged-unions leaves an arm that is not plain data alone" <| fun _ ->
+            let method' id =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                    CallSignatures = [ Build.signature [] 4 ] }
+
+            let arm id tag =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                    Members =
+                        [ Build.resolvedMember (Build.symbol (id * 10) "kind" SymbolFlags.Property) tag
+                          Build.resolvedMember (Build.symbol (id * 10 + 1) "run" SymbolFlags.Method) 30 ] }
+
+            let union =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 20; 21 ] }
+
+            let model =
+                { Build.shapeModel (
+                      union
+                      :: method' 30
+                      :: arm 20 7
+                      :: arm 21 8
+                      :: stringLiteral 7 "a"
+                      :: stringLiteral 8 "b"
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 10, "Shape" ] }
+
+            let shaped, findings = Build.runPass Shape.detectTaggedUnions model
+
+            Expect.isEmpty
+                (shaped.Decls |> List.choose (function FsTaggedUnion d -> Some d | _ -> None))
+                "a method has no case-field form, so the erased union stands"
+
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the missed match is reported"
+
         testCase "shape-aliases twin unions chain to the smallest id, never cycle" <| fun _ ->
             // Two declared unions over the same member set: only the smaller id is canonical.
-            // The larger abbreviates to it; the smaller widens structurally. An A <-> B
+            // The larger abbreviates to it; the smaller resolves structurally. An A <-> B
             // abbreviation cycle here sends fsc into non-termination once a generic
             // instantiation references it, so the chain must strictly decrease.
             let twin id =
@@ -609,10 +907,11 @@ let shapePassTests =
 
             Expect.equal
                 targets
-                [ "ScrollThresholdValue", FsObj; "TimelinePosition", FsNamed "ScrollThresholdValue" ]
-                "the smaller twin widens, the larger references it"
+                [ "ScrollThresholdValue", FsErasedUnion [ FsString; FsFloat ]
+                  "TimelinePosition", FsNamed "ScrollThresholdValue" ]
+                "the smaller twin resolves structurally, the larger references it"
 
-            Expect.equal (findings |> List.map _.Tier) [ Widened ] "only the canonical twin's widening"
+            Expect.equal (findings |> List.map _.Tier) [] "an erased union costs no fidelity"
 
         testCase "order-declarations puts declarations in source order, Exports last" <| fun _ ->
             let interface' name order =
@@ -621,6 +920,7 @@ let shapePassTests =
                       Docs = ""
                       Tags = []
                       Order = Some order
+                      TypeParameters = []
                       Inherits = []
                       Members = []
                       CreateOverloads = [] }

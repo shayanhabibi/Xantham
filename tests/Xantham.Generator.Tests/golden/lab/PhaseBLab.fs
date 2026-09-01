@@ -57,9 +57,99 @@ type ConfigureSettings =
     [<ParamObject; Emit("$0")>]
     static member Create (fps: float, ?muted: bool) : ConfigureSettings = jsNative
 
-type Coords = float[]
+/// <summary>
+/// A homogeneous tuple (D7).
+/// </summary>
+type Coords = float * float
 
-type Entry = obj[]
+/// <summary>
+/// A heterogeneous tuple (D7).
+/// </summary>
+type Entry = string * float
+
+/// <summary>
+/// An optional tail element - the checker hands it over as `number | undefined`.
+/// </summary>
+type Span = float * float option
+
+/// <summary>
+/// A rest element - no fixed F# tuple form, so it widens to an array.
+/// </summary>
+type Segments = obj[]
+
+/// <summary>
+/// A heterogeneous union, erased (D4).
+/// </summary>
+type Sizeish = U2<string, float>
+
+/// <summary>
+/// An erased union over two named shapes.
+/// </summary>
+type Subject = U2<Timer, TimerOptions>
+
+/// <summary>
+/// Wider than the erased-union arity, so it widens to obj.
+/// </summary>
+type Anything = obj
+
+/// <summary>
+/// One arm of a discriminated union.
+/// </summary>
+[<Interface>]
+type CircleShape =
+    abstract kind: string with get, set
+    abstract radius: float with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (kind: string, radius: float) : CircleShape = jsNative
+
+/// <summary>
+/// Another arm, whose tag needs a CompiledName.
+/// </summary>
+[<Interface>]
+type RoundRectShape =
+    abstract kind: string with get, set
+    abstract width: float with get, set
+    abstract height: float with get, set
+    abstract radius: float with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (kind: string, width: float, height: float, radius: float) : RoundRectShape = jsNative
+
+[<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
+type Shape =
+    | [<CompiledName("circle")>] Circle of radius: float
+    | [<CompiledName("round-rect")>] RoundRect of width: float * height: float * radius: float
+
+/// <summary>
+/// A generic declaration, referenced from its own members (§4.9).
+/// </summary>
+type Box<'T> =
+    abstract value: 'T with get, set
+    abstract map: next: 'T -> Box<'T>
+
+/// <summary>
+/// An instantiation of a generic declaration - written as an application, not re-expanded.
+/// </summary>
+type StringBox = Box<string>
+
+/// <summary>
+/// A constraint F# can state: the bound is another generated interface.
+/// </summary>
+[<Interface>]
+type Holder<'T when 'T :> Timer> =
+    abstract held: 'T with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (held: 'T) : Holder<'T> = jsNative
+
+/// <summary>
+/// A constraint F# has no form for, dropped with a finding.
+/// </summary>
+[<Interface>]
+type Keyed<'K> =
+    abstract key: 'K with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (key: 'K) : Keyed<'K> = jsNative
+
+type Mapper<'T> = Func<'T, 'T>
 
 [<Interface>]
 type Utils =

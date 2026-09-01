@@ -1,4 +1,4 @@
-/// Tier 4 - Render: F# source text plus the fidelity manifest, from the shaped model alone.
+﻿/// Tier 4 - Render: F# source text plus the fidelity manifest, from the shaped model alone.
 /// The printer is generator-owned (decision O2): no formatter dependency, golden stability
 /// over delegated style, and the compile gate absorbs the correctness risk. The tier's
 /// invariant is byte-identical output for an identical model - nothing here may consult the
@@ -20,8 +20,10 @@ let private keywords =
           "then"; "to"; "true"; "try"; "type"; "upcast"; "use"; "val"; "void"; "when"
           "while"; "with"; "yield"; "atomic"; "break"; "checked"; "component"; "const"
           "constraint"; "constructor"; "continue"; "eager"; "event"; "external"; "functor"
-          "include"; "method"; "mixin"; "object"; "parallel"; "process"; "protected"; "pure"
-          "sealed"; "tailcall"; "trait"; "virtual" ]
+          "include"; "method"; "mixin"; "object"; "parallel"; "params"; "process"; "protected"
+          "pure"; "sealed"; "tailcall"; "trait"; "virtual"
+          // Inherited from OCaml: keywords rather than operators, so they need backticks too.
+          "asr"; "land"; "lor"; "lsl"; "lsr"; "lxor"; "mod"; "sig" ]
 
 let private identifierShaped =
     System.Text.RegularExpressions.Regex @"^[A-Za-z_][A-Za-z0-9_']*$"
@@ -34,24 +36,47 @@ let ident (name: string) =
     else
         name
 
-let rec printType =
+/// A dotted templated name (O7), escaped one segment at a time - the dots are ours, not part
+/// of any identifier.
+let private qualified (name: string) =
+    name.Split '.' |> Array.map ident |> String.concat "."
+
+/// `atomic` is true in a position that binds tighter than `*` - an array element, an option's
+/// argument, a generic argument. Only a tuple cares: everything else already prints as one
+/// term, while `a * b` reassociates unless it is parenthesised there.
+let rec private printTypeIn (atomic: bool) =
     function
     | FsBool -> "bool"
     | FsString -> "string"
     | FsFloat -> "float"
     | FsUnit -> "unit"
     | FsObj -> "obj"
-    | FsOption inner -> $"{printType inner} option"
-    | FsArray element -> $"{printType element}[]"
+    | FsOption inner -> $"{printTypeIn true inner} option"
+    | FsArray element -> $"{printTypeIn true element}[]"
+    | FsTuple components ->
+        let text = components |> List.map (printTypeIn true) |> String.concat " * "
+        if atomic then $"({text})" else text
+    // Fable's erased unions (D4): the arity names the type, so `U2`-`U4` need no threshold
+    // check here - the shape tier never builds a wider one.
+    | FsErasedUnion arms ->
+        let text = arms |> List.map (printTypeIn true) |> String.concat ", "
+        $"U{arms.Length}<{text}>"
     // Delegates guarantee arity at the Fable boundary (D5): `Action` when nothing is
     // returned, `Func` otherwise.
     | FsDelegate([], FsUnit) -> "Action"
-    | FsDelegate(args, FsUnit) -> args |> List.map printType |> String.concat ", " |> sprintf "Action<%s>"
+    | FsDelegate(args, FsUnit) ->
+        args |> List.map (printTypeIn true) |> String.concat ", " |> sprintf "Action<%s>"
     | FsDelegate(args, ret) ->
-        args @ [ ret ] |> List.map printType |> String.concat ", " |> sprintf "Func<%s>"
+        args @ [ ret ] |> List.map (printTypeIn true) |> String.concat ", " |> sprintf "Func<%s>"
+    | FsTypeVar name -> $"'{name}"
+    | FsApp(name, arguments) ->
+        let text = arguments |> List.map (printTypeIn true) |> String.concat ", "
+        $"{qualified name}<{text}>"
     // A name may be qualified into another group's templated module (O7); each segment
     // escapes on its own.
-    | FsNamed name -> name.Split '.' |> Array.map ident |> String.concat "."
+    | FsNamed name -> qualified name
+
+let printType = printTypeIn false
 
 /// An F# string literal with the escapes source text needs.
 let stringLit (text: string) =
@@ -160,6 +185,31 @@ let private renderMember (m: FsMember) =
         [ yield! docLines "    " m.Docs m.Tags
           yield $"    abstract {ident m.Name}: {renderAbstractSignature m.Parameters m.Return}" ]
 
+/// A declaration's name with its type parameters and their constraints (§4.9), as written at
+/// the point of definition: `Box<'T>`, `Node<'T when 'T :> Element>`.
+let private declHead (name: string) (typeParameters: FsTypeParam list) =
+    if typeParameters.IsEmpty then
+        ident name
+    else
+        let parameters =
+            typeParameters
+            |> List.map (fun p ->
+                match p.Constraint with
+                | Some bound -> $"'{p.Name} when '{p.Name} :> {printTypeIn true bound}"
+                | None -> $"'{p.Name}")
+            |> String.concat ", "
+
+        $"{ident name}<{parameters}>"
+
+/// The same declaration written at a reference position, where the parameters appear bare:
+/// `Box<'T>`. A constraint belongs to the definition only, so it is not repeated here.
+let private declRef (name: string) (typeParameters: FsTypeParam list) =
+    if typeParameters.IsEmpty then
+        ident name
+    else
+        let parameters = typeParameters |> List.map (fun p -> $"'{p.Name}") |> String.concat ", "
+        $"{ident name}<{parameters}>"
+
 let private renderInterface (decl: FsInterfaceDecl) =
     [ yield! docLines "" decl.Docs decl.Tags
 
@@ -170,10 +220,10 @@ let private renderInterface (decl: FsInterfaceDecl) =
 
       match decl.Inherits, decl.Members, decl.CreateOverloads with
       | [], [], [] ->
-          yield $"type {ident decl.Name} ="
+          yield $"type {declHead decl.Name decl.TypeParameters} ="
           yield "    interface end"
       | inherits, members, creates ->
-          yield $"type {ident decl.Name} ="
+          yield $"type {declHead decl.Name decl.TypeParameters} ="
 
           for baseRef in inherits do
               yield $"    inherit {printType baseRef}"
@@ -185,7 +235,8 @@ let private renderInterface (decl: FsInterfaceDecl) =
           // object literal the TS API expects; `$0` emits the (erased) argument object itself.
           for overload in creates do
               yield "    [<ParamObject; Emit(\"$0\")>]"
-              yield $"    static member Create {renderParamList overload} : {ident decl.Name} = jsNative" ]
+              yield
+                  $"    static member Create {renderParamList overload} : {declRef decl.Name decl.TypeParameters} = jsNative" ]
 
 let private renderStringEnum (decl: FsStringEnumDecl) =
     [ yield! docLines "" decl.Docs decl.Tags
@@ -205,6 +256,27 @@ let private renderStringEnum (decl: FsStringEnumDecl) =
           | [] -> yield $"    | {ident case.Name}"
           | attributes -> yield $"""    | [<{String.concat "; " attributes}>] {ident case.Name}""" ]
 
+/// A tagged union (D4, §4.5(2)). `RequireQualifiedAccess` for the same reason the StringEnum
+/// emission takes it: one generated module holds every declaration a package has, and bare
+/// case names collide across unions - and here with the member interfaces the cases carry.
+let private renderTaggedUnion (decl: FsTaggedUnionDecl) =
+    [ yield! docLines "" decl.Docs decl.Tags
+      yield $"[<RequireQualifiedAccess; TypeScriptTaggedUnion({stringLit decl.Tag}, CaseRules.None)>]"
+      yield $"type {ident decl.Name} ="
+
+      for case in decl.Cases do
+          // Named fields, so the JS keys survive: Fable emits each field under its own name.
+          let fields =
+              case.Fields
+              |> List.map (fun field -> $"{ident field.Name}: {printTypeIn true field.Type}")
+              |> String.concat " * "
+
+          let carries = if case.Fields.IsEmpty then "" else $" of {fields}"
+
+          match case.CompiledName with
+          | Some tag -> yield $"    | [<CompiledName({stringLit tag})>] {ident case.Name}{carries}"
+          | None -> yield $"    | {ident case.Name}{carries}" ]
+
 let private renderEnum (decl: FsEnumDecl) =
     [ yield! docLines "" decl.Docs decl.Tags
       yield $"type {ident decl.Name} ="
@@ -214,7 +286,7 @@ let private renderEnum (decl: FsEnumDecl) =
 
 let private renderAbbrev (decl: FsAbbrevDecl) =
     [ yield! docLines "" decl.Docs decl.Tags
-      yield $"type {ident decl.Name} = {printType decl.Target}" ]
+      yield $"type {declHead decl.Name decl.TypeParameters} = {printType decl.Target}" ]
 
 let private renderExports (packageName: string) (members: FsExportMember list) =
     [ yield "/// <summary>The package's value exports, each bound to its import.</summary>"
@@ -249,6 +321,7 @@ let renderSource: Pass<RenderModel> =
             |> List.map (function
                 | FsInterface decl -> renderInterface decl
                 | FsStringEnum decl -> renderStringEnum decl
+                | FsTaggedUnion decl -> renderTaggedUnion decl
                 | FsEnum decl -> renderEnum decl
                 | FsAbbrev decl -> renderAbbrev decl
                 | FsExports members -> renderExports model.PackageName members)
@@ -291,6 +364,7 @@ let symbolTiers (model: RenderModel) : (string * Tier * Finding list) list =
         |> List.collect (function
             | FsInterface decl -> [ decl.Name ]
             | FsStringEnum decl -> [ decl.Name ]
+            | FsTaggedUnion decl -> [ decl.Name ]
             | FsEnum decl -> [ decl.Name ]
             | FsAbbrev decl -> [ decl.Name ]
             | FsExports members -> members |> List.map _.Name)
