@@ -158,7 +158,7 @@ let typeRefTests =
 
             Expect.equal reference FsObj "widened"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened, not escaped"
-            Expect.stringContains (findings.Head.Message) "depth cutoff" "the reason is carried"
+            Expect.stringContains findings.Head.Message "depth cutoff" "the reason is carried"
 
         testCase "a referenced group's type templates into its module, exact, no finding" <| fun _ ->
             let external =
@@ -291,7 +291,7 @@ let shapePassTests =
             let model =
                 { Build.shapeModel (anonymous :: makeType :: Build.primitives) with
                     Harvest = { Exports = [ Build.export "make" (Build.symbol 400 "make" SymbolFlags.Function) ] }
-                    ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 41 } ] }
+                    ExportTypes = Map.ofList [ 400, { Declared = ValueNone; Value = ValueSome 41 } ] }
 
             let named, _ = Build.runPass Shape.synthesizeAnonymous model
 
@@ -308,7 +308,7 @@ let shapePassTests =
                 { Build.shapeModel (internal' :: Build.primitives) with
                     Harvest =
                         { Exports = [ Build.export "globals" (Build.symbol 400 "globals" SymbolFlags.BlockScopedVariable) ] }
-                    ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 40 } ] }
+                    ExportTypes = Map.ofList [ 400, { Declared = ValueNone; Value = ValueSome 40 } ] }
 
             let named, _ = Build.runPass Shape.synthesizeAnonymous model
 
@@ -450,7 +450,7 @@ let shapePassTests =
                     Harvest =
                         { Exports =
                             [ Build.export "Timer" (Build.symbol 800 "Timer" (SymbolFlags.Class ||| SymbolFlags.Value)) ] }
-                    ExportTypes = Map.ofList [ 800, { Declared = Some 80; Value = Some 81 } ]
+                    ExportTypes = Map.ofList [ 800, { Declared = ValueSome 80; Value = ValueSome 81 } ]
                     DeclNames = Map.ofList [ 80, "Timer" ] }
 
             let shaped, findings = Build.runPass Shape.shapeClasses model

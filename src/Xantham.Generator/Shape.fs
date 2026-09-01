@@ -392,7 +392,7 @@ let nameExports: Pass<ShapeModel> =
                     if not (hasAny SymbolFlags.Type export.Symbol.Flags) then
                         names, orders
                     else
-                        match Map.tryFind export.Symbol.Id model.ExportTypes |> Option.bind _.Declared with
+                        match Map.tryFind export.Symbol.Id model.ExportTypes |> Option.bind(_.Declared >> ValueOption.toOption) with
                         | Some typeId when not (Map.containsKey typeId names) ->
                             Map.add typeId (fsName fallback export) names, Map.add typeId export.Order orders
                         | _ -> names, orders)
@@ -506,7 +506,7 @@ let synthesizeAnonymous: Pass<ShapeModel> =
 
             match Map.tryFind export.Symbol.Id model.ExportTypes with
             | Some ids ->
-                for typeId in [ yield! Option.toList ids.Declared; yield! Option.toList ids.Value ] do
+                for typeId in [ yield! ValueOption.toList ids.Declared; yield! ValueOption.toList ids.Value ] do
                     walk root export.Order typeId
             | None -> ()
 
@@ -720,7 +720,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                     model.Harvest.Exports
                     |> List.choose (fun export ->
                         Map.tryFind export.Symbol.Id model.ExportTypes
-                        |> Option.bind _.Declared
+                        |> Option.bind (_.Declared >> ValueOption.toOption)
                         |> Option.map (fun typeId -> typeId, (export.Docs, export.Tags)))
                     |> Map.ofList
 
@@ -840,7 +840,7 @@ let shapeAliases: Pass<ShapeModel> =
                         else
                             let name = fsName fallback export
 
-                            match Map.tryFind export.Symbol.Id model.ExportTypes |> Option.bind _.Declared with
+                            match Map.tryFind export.Symbol.Id model.ExportTypes |> Option.bind (_.Declared >> ValueOption.toOption) with
                             | Some typeId ->
                                 match Map.tryFind typeId model.DeclNames with
                                 | Some primary when primary <> name ->
@@ -922,7 +922,7 @@ let shapeClasses: Pass<ShapeModel> =
 
                             let valueFacts =
                                 Map.tryFind export.Symbol.Id model.ExportTypes
-                                |> Option.bind _.Value
+                                |> Option.bind (_.Value >> ValueOption.toOption)
                                 |> Option.bind (fun typeId -> Map.tryFind typeId model.Types)
 
                             match valueFacts with
@@ -1006,7 +1006,7 @@ let shapeExports: Pass<ShapeModel> =
 
                             let valueFacts =
                                 Map.tryFind export.Symbol.Id model.ExportTypes
-                                |> Option.bind _.Value
+                                |> Option.bind (_.Value >> ValueOption.toOption)
                                 |> Option.bind (fun typeId -> Map.tryFind typeId model.Types)
 
                             match valueFacts with
