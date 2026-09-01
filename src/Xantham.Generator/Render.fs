@@ -175,24 +175,9 @@ let private renderAbstractSignature (parameters: FsParam list) (returns: FsTypeR
 
     $"{left} -> {printType returns}"
 
-let private renderMember (m: FsMember) =
-    match m with
-    | FsProperty p ->
-        [ yield! docLines "    " p.Docs p.Tags
-          let mutability = if p.ReadOnly then "" else " with get, set"
-          yield $"    abstract {ident p.Name}: {printType p.Type}{mutability}" ]
-    | FsMethod m ->
-        [ yield! docLines "    " m.Docs m.Tags
-          yield $"    abstract {ident m.Name}: {renderAbstractSignature m.Parameters m.Return}" ]
-    | FsIndexer i ->
-        // `[<EmitIndexer>]` is what makes this reach JavaScript as `bag[key]` rather than a
-        // method call; the member must be named `Item` for F# indexer syntax to bind to it.
-        [ yield "    [<EmitIndexer>]"
-          let mutability = if i.ReadOnly then "" else " with get, set"
-          yield $"    abstract Item: {printType i.Key} -> {printType i.Value}{mutability}" ]
-
 /// A declaration's name with its type parameters and their constraints (§4.9), as written at
-/// the point of definition: `Box<'T>`, `Node<'T when 'T :> Element>`.
+/// the point of definition: `Box<'T>`, `Node<'T when 'T :> Element>`. A generic *member*
+/// writes its own parameters the same way - `abstract read<'K> : ...`.
 let private declHead (name: string) (typeParameters: FsTypeParam list) =
     if typeParameters.IsEmpty then
         ident name
@@ -215,6 +200,22 @@ let private declRef (name: string) (typeParameters: FsTypeParam list) =
     else
         let parameters = typeParameters |> List.map (fun p -> $"'{p.Name}") |> String.concat ", "
         $"{ident name}<{parameters}>"
+
+let private renderMember (m: FsMember) =
+    match m with
+    | FsProperty p ->
+        [ yield! docLines "    " p.Docs p.Tags
+          let mutability = if p.ReadOnly then "" else " with get, set"
+          yield $"    abstract {ident p.Name}: {printType p.Type}{mutability}" ]
+    | FsMethod m ->
+        [ yield! docLines "    " m.Docs m.Tags
+          yield $"    abstract {declHead m.Name m.TypeParameters}: {renderAbstractSignature m.Parameters m.Return}" ]
+    | FsIndexer i ->
+        // `[<EmitIndexer>]` is what makes this reach JavaScript as `bag[key]` rather than a
+        // method call; the member must be named `Item` for F# indexer syntax to bind to it.
+        [ yield "    [<EmitIndexer>]"
+          let mutability = if i.ReadOnly then "" else " with get, set"
+          yield $"    abstract Item: {printType i.Key} -> {printType i.Value}{mutability}" ]
 
 let private renderInterface (decl: FsInterfaceDecl) =
     [ yield! docLines "" decl.Docs decl.Tags
@@ -318,13 +319,15 @@ let private renderExports (packageName: string) (members: FsExportMember list) =
           match m.Body with
           | ExportFunction(parameters, returns) ->
               yield attribute ""
-              yield $"    static member {ident m.Name} {renderParamList parameters} : {printType returns} = jsNative"
+              yield
+                  $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
           | ExportValue reference ->
               yield attribute ""
               yield $"    static member {ident m.Name}: {printType reference} = jsNative"
           | ExportConstructor(parameters, returns) ->
               yield attribute "; EmitConstructor"
-              yield $"    static member {ident m.Name} {renderParamList parameters} : {printType returns} = jsNative" ]
+              yield
+                  $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative" ]
 
 /// The one `.fs` file of the walking skeleton: header, opens, declarations in the order the
 /// shape tier fixed. `module rec` so declaration order never fights reference order.

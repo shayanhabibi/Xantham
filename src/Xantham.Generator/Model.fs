@@ -433,6 +433,15 @@ type FsPropertyMember =
       ReadOnly: bool
       Type: FsTypeRef }
 
+/// A type parameter (§4.9), bound by a declaration or by a generic signature of its own. The
+/// constraint is carried only when F# can express it - a subtype constraint against another
+/// generated interface. TypeScript bounds that have no F# form (`extends string`, `extends
+/// keyof T`) are dropped with a finding rather than approximated, because a wrong constraint
+/// rejects correct code.
+type FsTypeParam =
+    { Name: string
+      Constraint: FsTypeRef option }
+
 type FsParam =
     { Name: string
       Optional: bool
@@ -445,6 +454,9 @@ type FsMethodMember =
     { Name: string
       Docs: string
       Tags: JSDocTagInfo list
+      /// The method's *own* parameters, where it is generic independently of its declaration:
+      /// `read<K extends keyof T>(key: K)` binds `K` here and reads `T` from the interface.
+      TypeParameters: FsTypeParam list
       Parameters: FsParam list
       Return: FsTypeRef }
 
@@ -485,16 +497,11 @@ type FsExportMember =
     { Name: string
       Docs: string
       Tags: JSDocTagInfo list
+      /// A top-level generic function binds its parameters on the member: `Exports` itself is
+      /// not generic, so `get<T>(source: T)` has nowhere else to put `T`.
+      TypeParameters: FsTypeParam list
       Binding: ImportBinding
       Body: FsExportBody }
-
-/// A declaration's type parameter (§4.9). The constraint is carried only when F# can express
-/// it - a subtype constraint against another generated interface. TypeScript bounds that have
-/// no F# form (`extends string`, `extends keyof T`) are dropped with a finding rather than
-/// approximated, because a wrong constraint rejects correct code.
-type FsTypeParam =
-    { Name: string
-      Constraint: FsTypeRef option }
 
 type FsInterfaceDecl =
     { Name: string

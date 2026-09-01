@@ -148,13 +148,13 @@ type ServiceWorkerGlobalScope =
     abstract btoa: data: string -> string
     abstract atob: data: string -> string
     abstract setTimeout: callback: Action<obj[]> * ?msDelay: float -> float
-    abstract setTimeout: callback: Action<obj> * ?msDelay: float * args: obj -> float
+    abstract setTimeout<'Args>: callback: Action<'Args> * ?msDelay: float * args: 'Args -> float
     abstract clearTimeout: ?timeoutId: float -> unit
     abstract setInterval: callback: Action<obj[]> * ?msDelay: float -> float
-    abstract setInterval: callback: Action<obj> * ?msDelay: float * args: obj -> float
+    abstract setInterval<'Args>: callback: Action<'Args> * ?msDelay: float * args: 'Args -> float
     abstract clearInterval: ?timeoutId: float -> unit
     abstract queueMicrotask: task: obj -> unit
-    abstract structuredClone: value: obj * ?options: obj -> obj
+    abstract structuredClone<'T>: value: 'T * ?options: obj -> 'T
     abstract reportError: error: obj -> unit
     abstract fetch: input: obj * ?init: obj -> obj
     abstract self: ServiceWorkerGlobalScope with get, set
@@ -869,7 +869,7 @@ type DurableObjectTransaction =
     abstract get: key: string * ?options: DurableObjectGetOptions -> obj
     abstract get: keys: string[] * ?options: DurableObjectGetOptions -> obj
     abstract list: ?options: DurableObjectListOptions -> obj
-    abstract put: key: string * value: obj * ?options: DurableObjectPutOptions -> obj
+    abstract put<'T>: key: string * value: 'T * ?options: DurableObjectPutOptions -> obj
     abstract put: entries: obj * ?options: DurableObjectPutOptions -> obj
     abstract delete: key: string * ?options: DurableObjectPutOptions -> obj
     abstract delete: keys: string[] * ?options: DurableObjectPutOptions -> obj
@@ -882,7 +882,7 @@ type DurableObjectStorage =
     abstract get: key: string * ?options: DurableObjectGetOptions -> obj
     abstract get: keys: string[] * ?options: DurableObjectGetOptions -> obj
     abstract list: ?options: DurableObjectListOptions -> obj
-    abstract put: key: string * value: obj * ?options: DurableObjectPutOptions -> obj
+    abstract put<'T>: key: string * value: 'T * ?options: DurableObjectPutOptions -> obj
     abstract put: entries: obj * ?options: DurableObjectPutOptions -> obj
     abstract delete: key: string * ?options: DurableObjectPutOptions -> obj
     abstract delete: keys: string[] * ?options: DurableObjectPutOptions -> obj
@@ -894,7 +894,7 @@ type DurableObjectStorage =
     abstract sync: unit -> obj
     abstract sql: SqlStorage with get, set
     abstract kv: SyncKvStorage with get, set
-    abstract transactionSync: closure: Func<obj> -> obj
+    abstract transactionSync<'T>: closure: Func<'T> -> 'T
     abstract getCurrentBookmark: unit -> obj
     abstract getBookmarkForTime: timestamp: obj -> obj
     abstract onNextSessionRestoreBookmark: bookmark: string -> obj
@@ -2511,7 +2511,7 @@ type WebSocketAcceptOptions =
     static member Create (?allowHalfOpen: bool) : WebSocketAcceptOptions = jsNative
 
 type SqlStorage =
-    abstract exec: query: string * bindings: obj[] -> SqlStorageCursor<obj>
+    abstract exec<'T>: query: string * bindings: obj[] -> SqlStorageCursor<'T>
     abstract databaseSize: float
     abstract Cursor: obj with get, set
     abstract Statement: obj with get, set
@@ -2714,9 +2714,9 @@ type LoopbackColoLocalActorNamespace =
     abstract get: actorId: string -> ColoLocalActorNamespaceGetResult
 
 type SyncKvStorage =
-    abstract get: key: string -> obj option
+    abstract get<'T>: key: string -> 'T option
     abstract list: ?options: SyncKvListOptions -> obj
-    abstract put: key: string * value: obj -> unit
+    abstract put<'T>: key: string * value: 'T -> unit
     abstract delete: key: string -> bool
 
 [<Interface>]
@@ -2732,7 +2732,7 @@ type SyncKvListOptions =
 
 type WorkerStub =
     abstract getEntrypoint: ?name: string * ?options: WorkerStubEntrypointOptions -> obj
-    abstract getDurableObjectClass: ?name: string * ?options: WorkerStubEntrypointOptions -> obj
+    abstract getDurableObjectClass<'T>: ?name: string * ?options: WorkerStubEntrypointOptions -> obj
 
 [<Interface>]
 type WorkerStubEntrypointOptions =
@@ -2845,8 +2845,8 @@ type PerformanceObserverObserveOptions =
     static member Create (?buffered: bool, ?durationThreshold: float, ?entryTypes: string[], ?``type``: string) : PerformanceObserverObserveOptions = jsNative
 
 type Tracing =
-    abstract enterSpan: name: string * callback: Func<Span, obj, obj> * args: obj -> obj
-    abstract startActiveSpan: name: string * callback: Func<Span, obj, obj> * args: obj -> obj
+    abstract enterSpan<'T, 'A>: name: string * callback: Func<Span, 'A, 'T> * args: 'A -> 'T
+    abstract startActiveSpan<'T, 'A>: name: string * callback: Func<Span, 'A, 'T> * args: 'A -> 'T
     abstract startSpan: name: string -> Span
     abstract Span: obj with get, set
 
@@ -12342,8 +12342,9 @@ type Ai<'AiModelList when 'AiModelList :> AiModelListType> =
     /// </remarks>
     /// <remarks>@param autoragId Instance ID</remarks>
     abstract autorag: autoragId: string -> AutoRAG
-    abstract run: model: obj * inputs: AiRunInputs * options: obj -> obj
-    abstract run: model: obj * inputs: obj * options: obj -> obj
+    abstract run<'Name>: model: 'Name * inputs: AiRunInputs * options: obj -> obj
+    abstract run<'Name>: model: 'Name * inputs: obj * options: obj -> obj
+    abstract run<'Name>: model: 'Name * inputs: obj * ?options: AiOptions -> obj
     abstract run: model: obj * inputs: obj * ?options: AiOptions -> obj
     abstract models: ?``params``: AiModelsSearchParams -> obj
     abstract toMarkdown: unit -> ToMarkdownService
@@ -16216,7 +16217,7 @@ type Flagship =
     /// <remarks>@param flagKey The key of the flag to evaluate.</remarks>
     /// <remarks>@param defaultValue Default value returned when evaluation fails or the flag type does not match.</remarks>
     /// <remarks>@param context Optional evaluation context for targeting rules.</remarks>
-    abstract getObjectValue: flagKey: string * defaultValue: obj * ?context: FlagshipEvaluationContext -> obj
+    abstract getObjectValue<'T>: flagKey: string * defaultValue: 'T * ?context: FlagshipEvaluationContext -> obj
     /// <summary>
     /// Get a boolean flag value with full evaluation details.
     /// </summary>
@@ -16244,7 +16245,7 @@ type Flagship =
     /// <remarks>@param flagKey The key of the flag to evaluate.</remarks>
     /// <remarks>@param defaultValue Default value returned when evaluation fails or the flag type does not match.</remarks>
     /// <remarks>@param context Optional evaluation context for targeting rules.</remarks>
-    abstract getObjectDetails: flagKey: string * defaultValue: obj * ?context: FlagshipEvaluationContext -> obj
+    abstract getObjectDetails<'T>: flagKey: string * defaultValue: 'T * ?context: FlagshipEvaluationContext -> obj
 
 /// <summary>
 /// Hello World binding to serve as an explanatory example. DO NOT USE
@@ -18979,7 +18980,7 @@ type Exports =
     [<Global("ColoLocalActorNamespace"); EmitConstructor>]
     static member ColoLocalActorNamespace () : ColoLocalActorNamespace = jsNative
     [<Global("DurableObjectNamespace"); EmitConstructor>]
-    static member DurableObjectNamespace () : DurableObjectNamespace<obj> = jsNative
+    static member DurableObjectNamespace<'T> () : DurableObjectNamespace<'T> = jsNative
     [<Global("WebSocketRequestResponsePair"); EmitConstructor>]
     static member WebSocketRequestResponsePair (request: string, response: string) : WebSocketRequestResponsePair = jsNative
     /// <summary>
@@ -19015,7 +19016,7 @@ type Exports =
     [<Global("SqlStorageStatement"); EmitConstructor>]
     static member SqlStorageStatement () : SqlStorageStatement = jsNative
     [<Global("SqlStorageCursor"); EmitConstructor>]
-    static member SqlStorageCursor () : SqlStorageCursor<obj> = jsNative
+    static member SqlStorageCursor<'T> () : SqlStorageCursor<'T> = jsNative
     [<Global("Span"); EmitConstructor>]
     static member Span () : Span = jsNative
     /// <summary>
@@ -19257,7 +19258,7 @@ type Exports =
     [<Global("Base_Ai_Cf_Zai_Org_Glm_5_3_Flash"); EmitConstructor>]
     static member Base_Ai_Cf_Zai_Org_Glm_5_3_Flash () : Base_Ai_Cf_Zai_Org_Glm_5_3_Flash = jsNative
     [<Global("Ai"); EmitConstructor>]
-    static member Ai () : Ai<AiModelListType> = jsNative
+    static member Ai<'AiModelList when 'AiModelList :> AiModelListType> () : Ai<'AiModelList> = jsNative
     [<Global("AiGateway"); EmitConstructor>]
     static member AiGateway () : AiGateway = jsNative
     /// <remarks>
@@ -19356,6 +19357,6 @@ type Exports =
     [<Global("WebSearch"); EmitConstructor>]
     static member WebSearch () : WebSearch = jsNative
     [<Global("Workflow"); EmitConstructor>]
-    static member Workflow () : Workflow<obj> = jsNative
+    static member Workflow<'PARAMS> () : Workflow<'PARAMS> = jsNative
     [<Global("WorkflowInstance"); EmitConstructor>]
     static member WorkflowInstance () : WorkflowInstance = jsNative

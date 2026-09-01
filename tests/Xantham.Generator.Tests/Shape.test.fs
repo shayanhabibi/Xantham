@@ -715,6 +715,31 @@ let shapePassTests =
                 (findings |> List.filter (fun finding -> finding.Message.Contains "constraint"))
                 "a bound F# can state costs nothing"
 
+        testCase "a constraint against a sealed type is dropped, not written" <| fun _ ->
+            // `T extends Renderable` where `Renderable = JSAnimation | Timeline`: the union
+            // renders as an erased `U2`, and F# rejects a subtype constraint against a sealed
+            // type outright (FS0698). A wrong constraint is worse than none.
+            let bounded = { typeParam 20 "T" with Constraint = Some 60 }
+
+            let renderable =
+                { Build.facts (Build.typeResponse 60 TypeFlags.Union) with UnionMembers = [ 1; 2 ] }
+
+            let holder =
+                genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "held" SymbolFlags.Property) 20 ]
+
+            let model =
+                { Build.shapeModel (holder :: bounded :: renderable :: Build.primitives) with
+                    DeclNames = Map.ofList [ 30, "Holder"; 60, "Renderable" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeInterfaces model
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                Expect.equal decl.TypeParameters [ { Name = "T"; Constraint = None } ] "the variable stays, the bound goes"
+            | decls -> failtest $"expected one interface, got %A{decls}"
+
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "a dropped bound is ergonomic, not widening"
+
         testCase "a constraint with no F# form is dropped with a finding" <| fun _ ->
             // `K extends string`: an F# subtype constraint cannot name a primitive, and the
             // nearest approximation would reject code TypeScript accepts.
@@ -735,6 +760,83 @@ let shapePassTests =
             | decls -> failtest $"expected one interface, got %A{decls}"
 
             Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "a dropped bound is ergonomic, not widening"
+
+        testCase "a generic method binds its own parameters over the declaration's" <| fun _ ->
+            // `interface Accessor<T> { read<K>(key: K): T }` - the member's `K` is layered onto
+            // the interface's `T` rather than replacing it, so the signature can read both.
+            let read =
+                { Build.facts (Build.typeResponse 70 TypeFlags.Object) with
+                    CallSignatures =
+                        [ { Build.signature
+                                [ Build.resolvedMember (Build.symbol 700 "key" SymbolFlags.FunctionScopedVariable) 21 ]
+                                20 with
+                              TypeParameters = [ 21 ] } ] }
+
+            let accessor =
+                genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "read" SymbolFlags.Method) 70 ]
+
+            let model =
+                { Build.shapeModel (accessor :: read :: typeParam 20 "T" :: typeParam 21 "K" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 30, "Accessor" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeInterfaces model
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                Expect.equal decl.TypeParameters [ { Name = "T"; Constraint = None } ] "Accessor<'T>"
+
+                match decl.Members with
+                | [ FsMethod m ] ->
+                    Expect.equal m.TypeParameters [ { Name = "K"; Constraint = None } ] "the method binds 'K itself"
+                    Expect.equal (m.Parameters |> List.map _.Type) [ FsTypeVar "K" ] "its own parameter"
+                    Expect.equal m.Return (FsTypeVar "T") "and the declaration's, still in scope"
+                | members -> failtest $"expected one method, got %A{members}"
+            | decls -> failtest $"expected one interface, got %A{decls}"
+
+            Expect.isEmpty findings "both variables are written, so nothing is lost"
+
+        testCase "a signature parameter whose every use widens away is dropped" <| fun _ ->
+            // `read<K extends keyof T>(key: keyof T): void` - `keyof T` has no F# form yet, so
+            // every mention of `K` widens to obj. Writing `<'K>` over a signature that names no
+            // `'K` would claim a generic member where nothing about it is generic.
+            let keyofT = Build.facts (Build.typeResponse 40 TypeFlags.Index)
+
+            let read =
+                { Build.facts (Build.typeResponse 70 TypeFlags.Object) with
+                    CallSignatures =
+                        [ { Build.signature
+                                [ Build.resolvedMember (Build.symbol 700 "key" SymbolFlags.FunctionScopedVariable) 40 ]
+                                4 with
+                              TypeParameters = [ 21 ] } ] }
+
+            let accessor =
+                genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "read" SymbolFlags.Method) 70 ]
+
+            let model =
+                { Build.shapeModel (
+                      accessor :: read :: keyofT :: typeParam 20 "T" :: typeParam 21 "K" :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 30, "Accessor" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeInterfaces model
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                match decl.Members with
+                | [ FsMethod m ] ->
+                    Expect.isEmpty m.TypeParameters "the variable nothing names is not written"
+                    Expect.equal (m.Parameters |> List.map _.Type) [ FsObj ] "its use widened"
+                | members -> failtest $"expected one method, got %A{members}"
+            | decls -> failtest $"expected one interface, got %A{decls}"
+
+            Expect.equal
+                (findings |> List.map _.Tier |> List.distinct)
+                [ Widened ]
+                "the widening and the erasure are both recorded"
+
+            Expect.isTrue
+                (findings |> List.exists (fun f -> f.Message.Contains "'K' is erased"))
+                "the dropped parameter is named in the manifest"
 
         testCase "shape-callbacks binds the parameters the alias carries" <| fun _ ->
             // `type Mapper<T> = (input: T) => T` leaves the function type parameterless; the
@@ -847,6 +949,7 @@ let shapePassTests =
                               { Name = "play"
                                 Docs = ""
                                 Tags = []
+                                TypeParameters = []
                                 Parameters = []
                                 Return = FsUnit } ]
                       CreateOverloads = [] }
@@ -872,6 +975,7 @@ let shapePassTests =
                     { Name = name
                       Docs = ""
                       Tags = []
+                      TypeParameters = []
                       Parameters = parameters
                       Return = FsUnit }
 
@@ -915,7 +1019,8 @@ let shapePassTests =
                     (decl.Members
                      |> List.map (function
                          | FsMethod m -> m.Parameters.Head.Type
-                         | FsProperty p -> p.Type))
+                         | FsProperty p -> p.Type
+                         | FsIndexer i -> i.Value))
                     [ FsNamed "DOMTargets"; FsString ]
                     "first of the obj pair survives; the string overload is distinct"
 
@@ -1046,6 +1151,7 @@ let shapePassTests =
                           { Name = "make"
                             Docs = ""
                             Tags = []
+                            TypeParameters = []
                             Binding = ImportNamed "make"
                             Body = ExportValue FsFloat } ] }
 

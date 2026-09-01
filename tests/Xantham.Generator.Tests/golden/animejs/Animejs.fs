@@ -994,7 +994,7 @@ type Scope =
     /// <remarks>@template T</remarks>
     /// <remarks>@param cb</remarks>
     /// <remarks>@return</remarks>
-    abstract execute: cb: Func<Scope, obj> -> obj
+    abstract execute<'T>: cb: Func<Scope, 'T> -> 'T
     /// <remarks>@return</remarks>
     abstract refresh: unit -> Scope
     /// <remarks>@overload</remarks>
@@ -2429,7 +2429,7 @@ type Exports =
     [<Import("addChild", "animejs")>]
     static member addChild (parent: obj, child: obj, ?sortMethod: obj, ?prevProp: string, ?nextProp: string) : unit = jsNative
     [<Import("cleanInlineStyles", "animejs")>]
-    static member cleanInlineStyles (renderable: Renderable) : Renderable = jsNative
+    static member cleanInlineStyles<'T> (renderable: 'T) : 'T = jsNative
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
@@ -2565,7 +2565,7 @@ type Exports =
     [<Import("createSeededRandom", "animejs")>]
     static member createSeededRandom (?seed: float, ?seededMin: float, ?seededMax: float, ?seededDecimalLength: float) : RandomNumberGenerator = jsNative
     [<Import("randomPick", "animejs")>]
-    static member randomPick (items: U2<string, obj[]>) : obj = jsNative
+    static member randomPick<'T> (items: U2<string, 'T[]>) : U2<string, 'T> = jsNative
     [<Import("shuffle", "animejs")>]
     static member shuffle (items: obj[], ?rnd: RandomNumberGenerator) : obj[] = jsNative
     /// <remarks>@overload</remarks>
@@ -2719,7 +2719,7 @@ type Exports =
     [<Import("sync", "animejs")>]
     static member sync (?callback: Func<Timer, obj>) : Timer = jsNative
     [<Import("keepTime", "animejs")>]
-    static member keepTime (``constructor``: Func<obj[], obj>) : Func<obj[], obj> = jsNative
+    static member keepTime<'T> (``constructor``: Func<obj[], 'T>) : Func<obj[], obj> = jsNative
     [<Import("WAAPIAnimation", "animejs"); EmitConstructor>]
     static member WAAPIAnimation (targets: DOMTargetsParam, ``params``: obj) : WAAPIAnimation = jsNative
     [<Import("waapi", "animejs")>]

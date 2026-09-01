@@ -56,13 +56,13 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags IndexedAccess not mapped yet; widened to obj"
+          "tier": "ergonomic",
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "message": "type flags IndexedAccess not mapped yet; widened to obj"
         }
       ]
     },
@@ -244,18 +244,13 @@
       "findings": [
         {
           "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-exports",
           "tier": "widened",
           "message": "type flags IndexedAccess not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
         }
       ]
     },
@@ -267,11 +262,6 @@
           "pass": "shape-exports",
           "tier": "widened",
           "message": "type flags Index not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
         }
       ]
     },
@@ -283,11 +273,6 @@
           "pass": "shape-exports",
           "tier": "widened",
           "message": "type flags IndexedAccess not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
         }
       ]
     },

@@ -537,7 +537,11 @@ let private typeParamsOf
 
                 None)
 
-    let scope = named |> Map.ofList
+    // Layered onto whatever is already in scope rather than replacing it: a generic *method*
+    // binds its own parameters on top of its declaration's, and `read<K extends keyof T>` has
+    // to see both.
+    let scope =
+        named |> List.fold (fun bound (id, name) -> Map.add id name bound) model.TypeVars
 
     // The constraint is read under the scope being defined, so `T extends Node<T>` resolves
     // its own variable rather than widening it.
@@ -549,7 +553,25 @@ let private typeParamsOf
             let bound =
                 Map.tryFind id model.Types
                 |> Option.bind _.Constraint
-                |> Option.map (fun boundId -> typeRef ctx scoped None owner boundId)
+                |> Option.map (fun boundId ->
+                    // Only something that becomes an interface can be an F# base type. A union
+                    // renders as an erased `U_n` or a StringEnum and both are sealed, so
+                    // `'T :> Renderable` is not merely loose - FS0698 rejects it outright.
+                    // Tuples, arrays and delegates are sealed the same way. `FsObj` here falls
+                    // into the drop below, which is where the finding is written.
+                    let expressible =
+                        match Map.tryFind boundId model.Types with
+                        | Some bound ->
+                            flag TypeFlags.Object bound
+                            && (arrayElement bound).IsNone
+                            && not (isTuple bound)
+                            && not (isPureCallback bound)
+                        | None -> false
+
+                    if expressible then
+                        typeRef ctx scoped None owner boundId
+                    else
+                        FsObj, [])
 
             match bound with
             | Some((FsNamed _ | FsApp _) as reference, boundFindings) ->
@@ -596,14 +618,45 @@ let private aliasTypeParams (ctx: Context) (model: ShapeModel) (owner: string) (
 
     parameters, scope, findings @ hoistFindings
 
+/// The type variables a rendered reference actually names.
+let rec private typeVarsOf (reference: FsTypeRef) : Set<string> =
+    let union = List.fold (fun acc item -> Set.union acc (typeVarsOf item)) Set.empty
+
+    match reference with
+    | FsTypeVar name -> Set.singleton name
+    | FsOption inner
+    | FsArray inner -> typeVarsOf inner
+    | FsTuple items
+    | FsErasedUnion items -> union items
+    | FsDelegate(arguments, returns) -> Set.union (union arguments) (typeVarsOf returns)
+    | FsApp(_, arguments) -> union arguments
+    | _ -> Set.empty
+
 // ---------------------------------------------------------------------------------------------
 // Shared shaping of members and signatures.
 // ---------------------------------------------------------------------------------------------
 
-/// A resolved signature as an F# parameter list and return reference. Rest parameters are
-/// marked from the signature flag; their array types read as-is.
-let private shapeSignature (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (signature: ResolvedSignature) : FsParam list * FsTypeRef * Finding list =
-    let mutable findings = []
+/// A resolved signature as an F# type-parameter list, parameter list and return reference.
+/// Rest parameters are marked from the signature flag; their array types read as-is.
+///
+/// A signature's *own* parameters (§4.9) are bound here rather than at the declaration:
+/// `get<T>(source: T)` is a generic function, and F# writes that on the member. Without this
+/// they were out of scope at every position that used them and the whole signature widened to
+/// obj - `get` read `(source: obj, key: obj) : obj`, which is not a typed accessor at all.
+let private shapeSignature
+    (ctx: Context)
+    (model: ShapeModel)
+    (self: string option)
+    (owner: string)
+    (signature: ResolvedSignature)
+    : FsTypeParam list * FsParam list * FsTypeRef * Finding list =
+    let typeParameters, scope, parameterFindings =
+        match signature.TypeParameters with
+        | [] -> [], model.TypeVars, []
+        | ids -> typeParamsOf ctx model owner ids
+
+    let model = { model with TypeVars = scope }
+    let mutable findings = parameterFindings
     let parameterCount = signature.Parameters.Length
 
     let parameters =
@@ -625,7 +678,23 @@ let private shapeSignature (ctx: Context) (model: ShapeModel) (self: string opti
               Type = optionalRef optional reference })
 
     let returns, returnFindings = typeRef ctx model self $"{owner}()" signature.ReturnTypeId
-    parameters, returns, findings @ returnFindings
+    findings <- findings @ returnFindings
+
+    // A parameter no rendered position names has been erased - every use of it widened to obj
+    // on the way here - and writing `<'T>` over a signature that mentions no `'T` says the
+    // member is generic when nothing about it is. Drop it, and say so.
+    let named =
+        parameters |> List.map _.Type |> List.fold (fun acc t -> Set.union acc (typeVarsOf t)) (typeVarsOf returns)
+
+    let live, erased =
+        typeParameters |> List.partition (fun p -> Set.contains p.Name named)
+
+    for p in erased do
+        findings <-
+            findings
+            @ [ Finding.make Widened owner $"type parameter '{p.Name}' is erased: every use of it widened away" ]
+
+    live, parameters, returns, findings
 
 /// The interface members of an object type: methods for method symbols (each call signature an
 /// overload), properties otherwise, callbacks as delegate-typed properties (D5).
@@ -659,7 +728,7 @@ let private shapeMembers (ctx: Context) (model: ShapeModel) (self: string) (fact
             | Some memberFacts ->
                 memberFacts.CallSignatures
                 |> List.map (fun signature ->
-                    let parameters, returns, signatureFindings =
+                    let typeParameters, parameters, returns, signatureFindings =
                         shapeSignature ctx model (Some self) owner signature
 
                     findings <- findings @ signatureFindings
@@ -668,6 +737,7 @@ let private shapeMembers (ctx: Context) (model: ShapeModel) (self: string) (fact
                         { Name = Naming.memberName m.Symbol.Name
                           Docs = m.Docs
                           Tags = m.Tags
+                          TypeParameters = typeParameters
                           Parameters = parameters
                           Return = returns })
             | None ->
@@ -1101,7 +1171,10 @@ let private delegateRefFor (ctx: Context) (model: ShapeModel) (name: string) (fa
             else
                 [ Finding.make Widened name $"callback with {rest.Length + 1} overloads shaped from the first" ]
 
-        let parameters, returns, signatureFindings = shapeSignature ctx model None name signature
+        // The signature's own parameters are discarded here rather than written: a delegate
+        // type has nowhere to put them. `aliasTypeParams` has already hoisted them onto the
+        // alias around this callback, with the rank-2 finding that records the cost.
+        let _, parameters, returns, signatureFindings = shapeSignature ctx model None name signature
 
         let parameterTypes = parameters |> List.map _.Type
         FsDelegate(parameterTypes, returns), overloadFindings @ signatureFindings
@@ -1450,7 +1523,7 @@ let shapeClasses: Pass<ShapeModel> =
 
                                 facts.ConstructSignatures
                                 |> List.map (fun signature ->
-                                    let parameters, returns, signatureFindings =
+                                    let typeParameters, parameters, returns, signatureFindings =
                                         shapeSignature ctx model (Some name) name signature
 
                                     findings <- findings @ signatureFindings
@@ -1459,6 +1532,7 @@ let shapeClasses: Pass<ShapeModel> =
                                     { Name = name
                                       Docs = export.Docs
                                       Tags = export.Tags
+                                      TypeParameters = typeParameters
                                       Binding = bindingOf export
                                       Body = ExportConstructor(parameters, returns) }))
 
@@ -1512,7 +1586,7 @@ let shapeExports: Pass<ShapeModel> =
                             | Some facts when not facts.CallSignatures.IsEmpty ->
                                 facts.CallSignatures
                                 |> List.map (fun signature ->
-                                    let parameters, returns, signatureFindings =
+                                    let typeParameters, parameters, returns, signatureFindings =
                                         shapeSignature ctx model None name signature
 
                                     findings <- findings @ signatureFindings
@@ -1521,6 +1595,7 @@ let shapeExports: Pass<ShapeModel> =
                                     { Name = name
                                       Docs = export.Docs
                                       Tags = export.Tags
+                                      TypeParameters = typeParameters
                                       Binding = binding
                                       Body = ExportFunction(parameters, returns) })
                             | Some facts ->
@@ -1531,6 +1606,7 @@ let shapeExports: Pass<ShapeModel> =
                                   { Name = name
                                     Docs = export.Docs
                                     Tags = export.Tags
+                                    TypeParameters = []
                                     Binding = binding
                                     Body = ExportValue reference } ])
 
@@ -1738,19 +1814,6 @@ let rec private mapRef (f: FsTypeRef -> FsTypeRef) (reference: FsTypeRef) : FsTy
     | other -> other
 
 /// The type variables a reference mentions.
-let rec private typeVarsOf (reference: FsTypeRef) : Set<string> =
-    let union = List.fold (fun acc item -> Set.union acc (typeVarsOf item)) Set.empty
-
-    match reference with
-    | FsTypeVar name -> Set.singleton name
-    | FsOption inner
-    | FsArray inner -> typeVarsOf inner
-    | FsTuple items
-    | FsErasedUnion items -> union items
-    | FsDelegate(arguments, returns) -> Set.union (union arguments) (typeVarsOf returns)
-    | FsApp(_, arguments) -> union arguments
-    | _ -> Set.empty
-
 /// Every type reference in a declaration, rebuilt through `f`.
 let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
     let reference = mapRef f

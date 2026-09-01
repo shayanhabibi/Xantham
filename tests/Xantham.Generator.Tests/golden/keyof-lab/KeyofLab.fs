@@ -58,7 +58,7 @@ type Selection =
 /// A generic accessor carried as a member rather than a function.
 /// </summary>
 type Accessor<'T> =
-    abstract read: key: obj -> obj
+    abstract read<'K>: key: 'K -> obj
     abstract all: unit -> obj[]
 
 /// <summary>
@@ -198,14 +198,14 @@ type Exports =
     /// `K extends keyof T` plus `T[K]` - the canonical typed accessor.
     /// </summary>
     [<Import("get", "keyof-lab")>]
-    static member get (source: obj, key: obj) : obj = jsNative
+    static member get<'T, 'K> (source: 'T, key: 'K) : obj = jsNative
     /// <summary>
     /// A bare `keyof T` parameter over an unresolved operand.
     /// </summary>
     [<Import("keys", "keyof-lab")>]
-    static member keys (source: obj) : obj[] = jsNative
+    static member keys<'T> (source: 'T) : obj[] = jsNative
     /// <summary>
     /// `T[keyof T]` - the value-of idiom.
     /// </summary>
     [<Import("values", "keyof-lab")>]
-    static member values (source: obj) : obj[] = jsNative
+    static member values<'T> (source: 'T) : obj[] = jsNative

@@ -763,8 +763,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "tier": "ergonomic",
+          "message": "constraint on \u0027Args\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "pass": "shape-interfaces",
@@ -773,11 +773,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -788,8 +783,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "tier": "ergonomic",
+          "message": "constraint on \u0027Args\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "pass": "shape-interfaces",
@@ -798,11 +793,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -810,11 +800,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -825,11 +810,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
         }
       ]
     },
@@ -2711,8 +2691,8 @@
       "findings": [
         {
           "pass": "shape-classes",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "pass": "shape-interfaces",
@@ -2857,6 +2837,11 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "WebSocket is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
@@ -3071,6 +3056,16 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
           "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
@@ -3101,12 +3096,22 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
           "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
@@ -3132,11 +3137,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -3207,6 +3207,16 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
           "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
@@ -3257,6 +3267,11 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
           "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
@@ -3268,6 +3283,11 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
@@ -3297,11 +3317,6 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
@@ -3327,7 +3342,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
@@ -3337,12 +3352,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "message": "Promise is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -3604,6 +3614,16 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "widened",
           "message": "type flags Intersection not mapped yet; widened to obj"
         },
@@ -3611,11 +3631,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -5417,182 +5432,22 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "type parameter \u0027ExpectedValue\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "type parameter \u0027ExpectedValue\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "type parameter \u0027ExpectedValue\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+          "message": "type parameter \u0027ExpectedValue\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
@@ -5696,8 +5551,23 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -5753,6 +5623,266 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027ExpectedValue\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027ExpectedValue\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027ExpectedValue\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027ExpectedValue\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
@@ -6881,6 +7011,11 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
@@ -8562,8 +8697,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "pass": "shape-interfaces",
@@ -8610,8 +8745,8 @@
       "findings": [
         {
           "pass": "shape-classes",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "pass": "shape-interfaces",
@@ -8622,6 +8757,16 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "symbol-keyed member dropped (unrepresentable in F#)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027U\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
@@ -9378,7 +9523,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
@@ -9389,11 +9534,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
         }
       ]
     },
@@ -9479,18 +9619,28 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
@@ -9879,43 +10029,13 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "tier": "ergonomic",
+          "message": "constraint on \u0027A\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "tier": "ergonomic",
+          "message": "constraint on \u0027A\u0027 has no F# form and is dropped (\u00A74.9)"
         }
       ]
     },
@@ -31742,16 +31862,6 @@
           "message": "overload dropped: identical to an earlier one after widening"
         },
         {
-          "pass": "dedupe-overloads",
-          "tier": "widened",
-          "message": "overload dropped: identical to an earlier one after widening"
-        },
-        {
-          "pass": "shape-classes",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to its constraint AiModelListType"
-        },
-        {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
@@ -31765,6 +31875,41 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027Model\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027Name\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027Name\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027Name\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027Name\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027Name\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027Model\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
@@ -31825,31 +31970,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -37272,6 +37392,11 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
           "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
@@ -37330,6 +37455,11 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
           "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
@@ -37346,6 +37476,11 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
           "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
@@ -37356,12 +37491,32 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
           "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
@@ -37377,6 +37532,11 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
@@ -37936,18 +38096,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "pass": "shape-interfaces",
@@ -37961,8 +38111,18 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -40965,6 +41125,46 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "widened",
           "message": "Promise is not among the generated declarations; widened to obj"
         },
@@ -41052,6 +41252,16 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
         },
         {
           "pass": "shape-interfaces",
@@ -44041,11 +44251,6 @@
       "name": "Workflow",
       "tier": "widened",
       "findings": [
-        {
-          "pass": "shape-classes",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
