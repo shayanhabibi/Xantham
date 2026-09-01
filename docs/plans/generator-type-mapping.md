@@ -176,7 +176,7 @@ Format per entry: recommended mapping, tier, alternatives, and what the Wire sup
 | `bigint` | `bigint` | Exact | Fable compiles to JS BigInt. |
 | `symbol` / `unique symbol` | `JS.Symbol` | Exact / Widened | unique symbols lose uniqueness; consider erased brand per unique symbol (open). |
 | `object` | `obj` | Widened | |
-| `unknown` | `obj` | Escape-ish | Safer alternative: an erased `Unknown` wrapper forcing an explicit cast; probably not worth the friction (open). |
+| `unknown` | `obj` | Escape-ish | **Decided (D8):** `obj` for now. An erased `Unknown` wrapper forcing explicit narrowing may become a config toggle if it stays cheap to implement. |
 | `any` | `obj` | Escape | Tier-marked in doc comment. |
 | `void` (return) | `unit` | Exact | |
 | `undefined` / `null` in unions | hoisted to `option` | Ergonomic | See §4.3. |
@@ -190,7 +190,7 @@ Format per entry: recommended mapping, tier, alternatives, and what the Wire sup
   when they are not identifier-shaped (`"utf-8"` → ``` ``utf-8`` ``` or `Utf8` + CompiledName).
 - Union of numeric literals → F# **enum** (`type E = A = 1`) when the values are ints;
   erased type with static members when floats. Exact.
-- Mixed literal unions (string + number) → erased type + static members, or `U2<StringPart, NumPart>`. Open which reads better.
+- Mixed literal unions (string + number) → erased type + static members, or `U2<StringPart, NumPart>`. Not yet decided — tracked in §6's live threads.
 - Single literal type (e.g. `kind: "click"`) → the StringEnum/enum case type where one
   exists; else the literal's base primitive, Widened, with the literal recorded in the doc
   comment. In tagged-union positions the tag is consumed by `[<TypeScriptTaggedUnion>]`
@@ -212,16 +212,16 @@ hands unions of enums back as their member literals, so this reassembly is load-
 
 Policy question with a recommended default:
 
-- `T | undefined`, optional members `x?: T`, optional params → **`'T option`** (or `voption`
-  — pick one repo-wide; open). Fable erases `Some`/`None` to `value | undefined` at the
-  boundary. Ergonomic, and the F# idiom.
+- `T | undefined`, optional members `x?: T`, optional params → **`'T option`**
+  (**Decided (D1):** `option`, not `voption`, repo-wide). Fable erases `Some`/`None` to
+  `value | undefined` at the boundary. Ergonomic, and the F# idiom.
 - `T | null` → also `option` by default (the archive's choice: one `Nullable` bit,
   `undefined`/`null`/`void`/missing all collapse). Widened-by-conflation: a consumer cannot
   *write* an explicit `null` distinct from "absent" through `option`.
 - APIs where the null/undefined distinction is semantic (e.g. React refs, JSON round-trips,
   the Wire protocol itself learned this with virtual-FS callbacks) need an opt-out: keep
   `null` as `'T | null` via Fable's `Null` semantics or an erased `Nullable<'T>` wrapper.
-  **Generator config: per-symbol override list**, default = collapse.
+  **Decided (D1):** generator config with a per-symbol override list; default = collapse.
 - Nested options (`(T | undefined) | undefined` after alias expansion, optional element of
   optional…) — Fable's erased option is unsound when nested; the generator must flatten
   after checker resolution (checker usually already has).
@@ -229,8 +229,8 @@ Policy question with a recommended default:
 ### 4.4 Object types: interfaces, type literals, classes
 
 - **Exported `interface`** → F# interface: `abstract` properties (`with get, set`;
-  `readonly` → get-only), abstract methods, `[<AllowNullLiteral>]` per config (open: default
-  on or off — Glutinum default was on for compat, off is safer). Exact.
+  `readonly` → get-only), abstract methods, `[<AllowNullLiteral>]` per config
+  (**Decided (D2):** default off — Glutinum defaulted on for compat, but off is safer). Exact.
 - **Heritage** — `extends` of a named interface → F# `inherit` on the interface. Where TS
   heritage does surgery F# can't express (extending a mapped type, `Omit`-based heritage),
   flatten via `getApparentPropertiesOfType` and emit the full member set with a doc note.
@@ -238,8 +238,10 @@ Policy question with a recommended default:
   first occurrence emits a generated-name interface (name derived from the path:
   `Foo.Bar.options`-style synthesis existed in the archive's `SyntheticPathAssignment.fs`
   and `NamePath.fs` — reuse the naming scheme, not the code); later occurrences reference it.
-  *Input-position-only, closed, all-data* literals may instead map to **anonymous records**
-  (Ergonomic; open which default).
+  **Decided (D3):** an inline type literal in *parameter position* is additionally flattened
+  into the member's `[<ParamObject>]` argument list, with the F# parameter names matching
+  the literal's member names (that is what `ParamObject` emits, so the call site reproduces
+  the TS object literal exactly). Anonymous records are not the default representation.
 - **Construction ergonomics** — for every "plain data" interface (no methods, no call
   signatures), also emit a `[<ParamObject>]` `Create` static or a companion `create`
   function so consumers don't hand-build objects via `createObj`. This is the single biggest
@@ -264,15 +266,15 @@ Order of preference, decided per union after §4.2's categorization:
    by far the best consumer experience; detect aggressively).
 3. Nullability hoisted + a *single* remaining member → `option`-wrapped member.
 4. Two-to-four heterogeneous members → `U2`–`U4` (Exact for writing; reading requires
-   runtime tests the consumer writes). Beyond ~4, ergonomics collapse.
+   runtime tests the consumer writes). **Decided (D4):** the `U_n` threshold is 4.
 5. Larger / open unions → dedicated erased union type with static constructors per case
    (`[<Erase>] type Shade = static member inline ofString (s:string) : Shade = !!s` …), or
-   `obj` at the Escape tier. Open: threshold and default.
+   `obj` at the Escape tier.
 
-The same union appearing in *input* vs *output* position may deserve different treatment
-(input: overloads or erased-union constructors are pleasant; output: the consumer must
-discriminate, so a tagged union or typed test helpers matter). The generator knows the
-position; use it.
+**Decided (D4):** the same union is treated by position. *Input* (parameter) position:
+prefer overloads and erased-union constructors. *Output* (return/property-read) position:
+prefer tagged unions where detectable, and emit typed test helpers otherwise, since the
+consumer must discriminate. The generator knows the position; use it.
 
 ### 4.6 Intersections
 
@@ -299,11 +301,9 @@ position; use it.
 - Top-level exported functions → `[<Import>]`-bound members on an `Exports` erased type
   (Glutinum convention) — keeps the module surface in one place.
 - **Callback parameters** → the arity problem: F# curried lambdas auto-uncurry at the Fable
-  boundary but this has historical edge cases (unit args, generic arity). Recommendation:
-  **delegates** (`System.Func<..>`/`System.Action<..>`) for anything crossing into JS as a
-  value, `'a -> 'b` only for single-argument callbacks. Open question — Fable 4/5's
-  uncurrying is much more reliable than the ts2fable-era folklore; revisit with a live test
-  before locking this in.
+  boundary, and in Fable 5 this works well in practice. **Decided (D5):** default to
+  **delegates** (`System.Func<..>`/`System.Action<..>`) anyway, for simplicity and
+  guaranteed arity. Curried-lambda emission remains a candidate config toggle later.
 - **Overloads** → overloaded abstract members / static members (legal in F#). Where
   overloads differ only in literal-typed params (the `addEventListener` pattern:
   `on(event: "click", cb: MouseCb)`), emit one member per literal with a synthesized name
@@ -351,9 +351,10 @@ Mapped types over concrete operands (`Partial<Options>`, `Pick<X,"a"|"b">`,
 `Record<string, T>`):
 
 - The checker expands them (`getApparentPropertiesOfType`) — emit the expansion, hash-consed,
-  *named by the alias* when `AliasSymbol` says `Partial<Options>` (name synthesis:
-  `OptionsPartial`? verbatim generic alias `Partial<'T>` cannot be expressed structurally in
-  F#; open question on naming).
+  *named by the alias* when `AliasSymbol` says `Partial<Options>`. **Decided (D6):** simple
+  operand-first synthesis — `Partial<Options>` → `OptionsPartial` — accepted for now;
+  revisit if collisions or readability demand. (A verbatim generic `Partial<'T>` cannot be
+  expressed structurally in F#, so some synthesis is unavoidable.)
 - `Record<string, V>` / `{ [key: string]: V }` (string index signature) → interface with
   `[<EmitIndexer>]` `Item: string -> 'V` (the `PropertyRecord` shape generalized); also
   worth a `JS.Map`-free plain `Dictionary`-like read helper. `getIndexInfosOfType` supplies
@@ -378,10 +379,11 @@ Mapped types over concrete operands (`Partial<Options>`, `Pick<X,"a"|"b">`,
 Fable F# tuples *are* JS arrays — a happy exact match:
 
 - Fixed tuple `[A, B, C]` → F# tuple `A * B * C`. Exact. (Labels are cosmetic → doc comment.)
-- Optional tail elements (`ElementFlags.Optional`, `FixedLength`) → overloaded constructors
-  or option-typed last components; open — F# tuples can't have optional slots, so either
-  emit multiple arities via an erased carrier or `option` the tail (which changes the JS
-  shape: `undefined` slot vs shorter array — **must test what TS APIs actually accept**).
+- Optional tail elements (`ElementFlags.Optional`, `FixedLength`) → **Decided (D7):**
+  `option`-typed tail components (which produce an `undefined` slot rather than a shorter
+  array) — simplicity first. If a real API rejects the `undefined` slot, patch that case
+  with shorter-array overloads or an erased carrier. The behavioral test (what TS APIs
+  actually accept) stays on the list as a watch item.
 - Rest elements (`[A, ...B[]]`) → no F# tuple form; erased type + indexer/head accessors, or
   `obj[]` Escape. Recommend the erased carrier with typed accessors.
 - `readonly` tuples → same mapping; readonly-ness doc-noted.
@@ -433,29 +435,49 @@ Decisions that are not per-construct but shape everything:
 5. **Escape hatch is part of the API.** Every generated interface is erased; document (once,
    in the package README template) that `!!`, `unbox`, and dynamic access are sanctioned
    when the types pinch — safety here is a default, not a prison.
+6. **Target: Fable-only (D10).** Generated bindings assume the Fable compiler; no
+   dual-audience compile-for-JS-and-read-from-.NET constraints on attribute choice.
 
 ---
 
-## 6. Open questions (the iteration list)
+## 6. Decisions (2026-09-01) and remaining threads
 
-1. `option` vs `voption`; and the null-vs-undefined opt-out mechanism (§4.3).
-2. `[<AllowNullLiteral>]` default on generated interfaces (§4.4).
-3. Anonymous records vs synthetic interfaces for closed input-position type literals (§4.4).
-4. Union representation thresholds: when does `U_n` yield to a named erased union; mixed
-   literal unions (§4.2, §4.5).
-5. Curried lambdas vs delegates for callbacks — needs a live Fable test matrix, not
-   folklore (§4.8).
-6. Naming scheme for checker-expanded aliases (`Partial<Options>` → ?) and for hash-consed
-   anonymous types (§4.10, §4.4).
-7. Optional tuple elements: shorter array vs `undefined` slot — behavioral test required
-   (§4.12).
-8. `unknown` as `obj` vs an erased `Unknown` requiring explicit narrowing (§4.1).
-9. How far to chase type-fest-grade utility types before phantom-erasing — the `type-fest`
-   fixture is in the tree precisely to calibrate this.
-10. Whether generated bindings target Fable-only or also aim at compile-for-JS-and-read-
-    from-.NET scenarios (affects nothing above except attribute choice, but decide early).
-11. Protected members, unique-symbol brands, type predicates: drop now, revisit (§4.4,
-    §4.1, §4.8).
+The original eleven open questions, resolved in review. Referenced from the catalogue as
+D1–D11.
+
+1. **D1 — decided.** `option` (not `voption`) repo-wide. Null/undefined collapse into
+   `option` by default; generator config carries a per-symbol override list for APIs where
+   the distinction is semantic (§4.3).
+2. **D2 — decided.** `[<AllowNullLiteral>]` default **off**; config toggle (§4.4).
+3. **D3 — decided.** `[<ParamObject>]` is also applied to inline type literals in parameter
+   position, with F# parameter names matching the literal's member names. Anonymous records
+   are not the default (§4.4).
+4. **D4 — decided.** By position: overloads and erased-union constructors for parameters;
+   tagged unions and typed test helpers for returns. `U_n` threshold stays at 4 (§4.5).
+5. **D5 — decided.** Delegates by default. Curried lambdas work well in Fable 5, so a
+   curried-emission config toggle may come later, but delegates are the simple
+   guaranteed-arity default (§4.8).
+6. **D6 — decided.** Simple synthesis for checker-expanded aliases: `Partial<Options>` →
+   `OptionsPartial`. Revisit if collisions or readability demand (§4.10).
+7. **D7 — decided.** Optional tuple tails are `option`-typed components (`undefined` slot),
+   simplicity first; patch to shorter-array overloads or erased carriers where a real API
+   rejects the slot (§4.12). *Watch item:* the behavioral test of what TS APIs accept.
+8. **D8 — decided.** `unknown` → `obj` for now; an erased `Unknown` wrapper becomes a
+   config toggle only if it stays cheap to implement (§4.1).
+9. **D9 — open by design.** Utility-type depth (type-fest grade) cannot be settled on
+   paper: chase what we can, run the fixtures, and tune the phantom-erasure cutoff from the
+   results.
+10. **D10 — decided.** Generated bindings target **Fable-only**.
+11. **D11 — decided.** Protected members, unique-symbol brands, and type predicates are
+    dropped (with doc notes) now; revisit after the generator exists (§4.4, §4.1, §4.8).
+
+Threads still live after these decisions:
+
+- Mixed literal unions (string + number literals in one union): erased type with static
+  members vs `U2` split — not yet decided (§4.2).
+- D7's runtime acceptance test for `undefined` tuple slots.
+- D9's calibration against the `type-fest`/`three`/`solid-js`/`typescript` fixtures.
+- The D5 and D8 config toggles, if wanted later.
 
 ---
 
