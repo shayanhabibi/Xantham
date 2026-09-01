@@ -379,7 +379,9 @@ restriction F# has no binding for.
 Two absences are deliberate. The *synchronous* iteration protocol (`Iterable`, `Iterator`) has
 no Fable.Core binding, and `seq<'T>` is not one however alike the two look. The DOM
 (`Response`, `EventTarget`, `ReadableStream`, ...) needs `Fable.Browser.*`, which is a
-decision about what generated bindings depend on rather than a row in a table.
+decision about what generated bindings depend on rather than a row in a table. [Default Lib
+Bindings](lib-bindings.md) measures the alternative — generating the DOM ourselves — against
+Fable.Browser, and records what still stands in the way.
 
 What it was worth on the workers-types rung: widened findings 528 -> 451, and 39 "type
 parameter is erased: every use of it widened away" findings gone, because a generic whose only
