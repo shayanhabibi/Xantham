@@ -76,6 +76,9 @@ Opens are ref-counted and persist across snapshots. `Api.release channel { Snaps
 one when you are done with it; `updateSnapshot` with `CloseProjects`/`CloseFiles` unwinds the
 opens themselves.
 
+Either way you end up holding the pair. A [session](#a-session-binds-the-snapshot-and-the-project)
+binds it once so no later call has to repeat it.
+
 ## Three ways to call the same method
 
 All 142 methods exist in each form. Pick one per codebase and stay with it.
@@ -94,6 +97,9 @@ channel.getSourceFile(snapshot = snapshot.Snapshot, project = project, file = fi
 `AsyncApi.*` mirrors `Api.*` over `TscMailbox`, same names and types wrapped in `Async`, with the
 same three forms. The one exception is `batchRequests`, which has no async counterpart — the
 mailbox *is* the batcher.
+
+There is a fourth form, the session, which drops the two arguments that never vary; it gets its
+own section below.
 
 ### Parameter records
 
@@ -115,6 +121,39 @@ channel's cwd.
 - Server-side failures raise `TsGoError(method, message)`.
 - `channel.Diagnostics` returns everything the process has written to stderr — panics and log
   noise. Include it when reporting a failure; it is usually the only explanation.
+
+## A session binds the snapshot and the project
+
+126 of the 142 methods lead with the same two arguments — the snapshot and the project — because
+that pair is what the compiler resolves everything else against. `Session<'T>` holds the pair and
+re-exposes those methods with the two arguments removed, in the named-argument form:
+
+```fsharp
+let session = channel.Session program    // the createProgram response already carries the pair
+
+let symbol = session.getSymbolAtPosition(file "main.ts", 42)
+let diagnostics = session.getSemanticDiagnostics(files = [| file "main.ts" |])
+```
+
+`channel.Session(...)` and `mailbox.Session(...)` each accept the `createProgram` response, an
+`updateSnapshot` response — naming the project when the snapshot holds more than one — or a raw
+snapshot id and project id. `Session<TscChannel>` answers synchronously and `Session<TscMailbox>`
+in `Async`, under the same member names, so a call site changes transport by changing how the
+session was built.
+
+The pair is data, not identity. `WithSnapshot` and `WithProject` rebind one half, and
+`ForSymbol symbol` retargets to the project a symbol was first observed in:
+
+```fsharp
+let updated = session.Sessionless.updateSnapshot(openFiles = [| file "main.ts" |])
+let session = session.WithSnapshot updated.Snapshot
+```
+
+The 16 methods that take neither argument — `initialize`, `updateSnapshot`, `createProgram`, the
+`transpile*` and config-parsing family — precede any snapshot, so they hang off
+`session.Sessionless` rather than being absent. Handles are valid for exactly the pair a session
+holds; [`wire-navigation.md`](wire-navigation.md#a-session-is-the-snapshot-and-the-project-bound-once)
+covers that scope and where the layer is generated from.
 
 ## Common patterns
 
@@ -244,7 +283,8 @@ output.OutputText
 
 ## Where to go next
 
-- [Navigating the AST](wire-navigation.md) — `Node<'Tag>`, views, accessors, node handles.
+- [Navigating the AST](wire-navigation.md) — sessions in depth, `Node<'Tag>`, views, accessors,
+  node handles.
 - [The hand-written register](wire-hand-written.md) — the facts transcribed from upstream rather
   than derived, and how to update them.
 - [The wire protocol](plans/tsgo-protocol.md) — framing, errors, the binary AST format.
