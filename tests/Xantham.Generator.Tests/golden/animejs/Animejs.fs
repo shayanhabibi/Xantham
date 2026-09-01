@@ -1854,7 +1854,7 @@ type AnimationOptions =
 
 type AnimationParams = obj
 
-type TimelinePosition = ScrollThresholdValue
+type TimelinePosition = obj
 
 /// <summary>
 /// Accepts:&lt;br&gt;

@@ -586,6 +586,34 @@ let shapePassTests =
                     [ FsNamed "DOMTargets"; FsString ]
                     "first of the obj pair survives; the string overload is distinct"
 
+        testCase "shape-aliases twin unions chain to the smallest id, never cycle" <| fun _ ->
+            // Two declared unions over the same member set: only the smaller id is canonical.
+            // The larger abbreviates to it; the smaller widens structurally. An A <-> B
+            // abbreviation cycle here sends fsc into non-termination once a generic
+            // instantiation references it, so the chain must strictly decrease.
+            let twin id =
+                { Build.facts (Build.typeResponse id TypeFlags.Union) with
+                    UnionMembers = [ 1; 2 ] }
+
+            let model =
+                { Build.shapeModel (twin 10 :: twin 11 :: Build.primitives) with
+                    DeclNames = Map.ofList [ 10, "ScrollThresholdValue"; 11, "TimelinePosition" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeAliases model
+
+            let targets =
+                shaped.Decls
+                |> List.choose (function
+                    | FsAbbrev d -> Some(d.Name, d.Target)
+                    | _ -> None)
+
+            Expect.equal
+                targets
+                [ "ScrollThresholdValue", FsObj; "TimelinePosition", FsNamed "ScrollThresholdValue" ]
+                "the smaller twin widens, the larger references it"
+
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "only the canonical twin's widening"
+
         testCase "order-declarations puts declarations in source order, Exports last" <| fun _ ->
             let interface' name order =
                 FsInterface

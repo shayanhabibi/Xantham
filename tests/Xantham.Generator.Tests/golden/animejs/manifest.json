@@ -2,9 +2,9 @@
   "package": "animejs",
   "module": "Animejs",
   "counts": {
-    "exact": 32,
+    "exact": 31,
     "ergonomic": 33,
-    "widened": 101,
+    "widened": 102,
     "escape": 50
   },
   "symbols": [
@@ -4176,8 +4176,14 @@
     },
     {
       "name": "TimelinePosition",
-      "tier": "exact",
-      "findings": []
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with several non-null members widened to obj (D4 is phase C)"
+        }
+      ]
     },
     {
       "name": "TimelineAnimationPosition",

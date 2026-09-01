@@ -70,6 +70,15 @@ let private isBooleanPair (model: ShapeModel) (memberIds: int list) =
            | Some m -> flag TypeFlags.BooleanLiteral m
            | None -> false)
 
+/// A union candidate's non-nullish member ids, sorted for member-set comparison.
+let private nonNullishMemberSet (model: ShapeModel) (candidate: TypeFacts) =
+    candidate.UnionMembers
+    |> List.filter (fun id ->
+        match Map.tryFind id model.Types with
+        | Some m -> not (isNullish m)
+        | None -> true)
+    |> List.sort
+
 /// The declared union whose non-nullish member set matches, if any: what lets an
 /// `"ms" | "s" | undefined` member position resolve to the exported `TimeUnit` rather than a
 /// synthesized twin (literal types are interned, so the ids match across positions).
@@ -82,14 +91,7 @@ let private namedUnionByMembers (model: ShapeModel) (memberIds: int list) : stri
     |> Seq.tryPick (fun (typeId, name) ->
         match Map.tryFind typeId model.Types with
         | Some candidate when flag TypeFlags.Union candidate && not (flag TypeFlags.Boolean candidate) ->
-            let nonNullish =
-                candidate.UnionMembers
-                |> List.filter (fun id ->
-                    match Map.tryFind id model.Types with
-                    | Some m -> not (isNullish m)
-                    | None -> true)
-
-            if List.sort nonNullish = wanted then Some name else None
+            if nonNullishMemberSet model candidate = wanted then Some name else None
         | _ -> None)
 
 /// An object type that is only a callback: call signatures and nothing else worth keeping.
@@ -778,11 +780,32 @@ let shapeInterfaces: Pass<ShapeModel> =
             } }
 
 /// `typeRef` with the type's own naming suppressed, for the right side of an abbreviation -
-/// otherwise every abbreviation would just name itself.
+/// otherwise every abbreviation would just name itself. Declared unions with the same member
+/// set may only be matched at a *smaller* type id (the canonical twin), so alias chains
+/// strictly decrease and can never cycle - the smallest twin widens structurally instead.
 let private typeRefIgnoringSelf (ctx: Context) (model: ShapeModel) (name: string) (facts: TypeFacts) : FsTypeRef * Finding list =
+    let largerTwins =
+        if flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) then
+            let wanted = nonNullishMemberSet model facts
+
+            model.DeclNames
+            |> Map.toList
+            |> List.choose (fun (typeId, _) ->
+                if typeId <= facts.Response.Id then
+                    None
+                else
+                    match Map.tryFind typeId model.Types with
+                    | Some candidate when flag TypeFlags.Union candidate && not (flag TypeFlags.Boolean candidate) ->
+                        if nonNullishMemberSet model candidate = wanted then Some typeId else None
+                    | _ -> None)
+        else
+            []
+
     let unnamed =
         { model with
-            DeclNames = Map.remove facts.Response.Id model.DeclNames }
+            DeclNames =
+                largerTwins
+                |> List.fold (fun names id -> Map.remove id names) (Map.remove facts.Response.Id model.DeclNames) }
 
     typeRef ctx unnamed None name facts.Response.Id
 

@@ -256,6 +256,14 @@ Phases — each ends with the compile gate green on its fixtures:
   - *Member-position unions resolve to declared aliases by member set*: literal types
     are interned, so `"ms" | "s" | undefined` at a member matches the exported
     `TimeUnit` union by id set instead of synthesizing a twin.
+  - *Twin declared unions abbreviate toward the smallest type id only*: when two
+    exported unions share a member set (`animejs`'s `TimelinePosition` /
+    `ScrollThresholdValue`), matching each to the other produces `type A = B` /
+    `type B = A` - fsc reports a plain two-type cycle as FS0953, but a *generic
+    instantiation* over the cycle (`Func<obj[], TimelinePosition>`) never terminates.
+    `shape-aliases` therefore hides every same-set twin with a larger id before
+    resolving an alias's right side: chains strictly decrease, the smallest twin
+    widens structurally, and cycles are impossible by construction.
   - *Class statics*: constructors become `[<EmitConstructor>]` members on `Exports`;
     the constructor-object type itself is never declared. Static members beyond the
     constructor are findings until a fixture needs them (`animejs` has none).
