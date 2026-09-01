@@ -152,6 +152,21 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
             let typeArguments =
                 typeArguments |> ValueOption.map Array.toList |> ValueOption.defaultValue []
 
+            // A tuple's per-element flags live on its *target*, not on the reference the
+            // checker hands back (verified live: the reference reports `elementFlags: null`).
+            // The target is read for its flags and then dropped rather than followed - it is
+            // the generic tuple type, so deriving it re-derives all of `Array.prototype` for
+            // every distinct tuple shape.
+            let! tupleElements =
+                if ty.IsTupleType = ValueSome true then
+                    async {
+                        let! target = ctx.Session.getTargetOfType ty.Id
+
+                        return target.ElementFlags |> ValueOption.map Array.toList |> ValueOption.defaultValue []
+                    }
+                else
+                    async.Return []
+
             if GeneratorConfig.disposition ctx.Config origin <> Ship then
                 // Identity only (O7): the shape tier renders references to this group by
                 // templated name or widens them, and either way nothing reads its members.
@@ -159,7 +174,8 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                     { TypeFacts.shallow ty with
                         Origin = origin
                         SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
-                        TypeArguments = typeArguments |> List.map _.Id },
+                        TypeArguments = typeArguments |> List.map _.Id
+                        TupleElements = tupleElements },
                     typeArguments
             else
 
@@ -237,6 +253,7 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                   ConstructSignatures = constructSignatures |> Array.map fst |> Array.toList
                   BaseTypes = baseTypes |> List.map _.Id
                   TypeArguments = typeArguments |> List.map _.Id
+                  TupleElements = tupleElements
                   UnionMembers = [] },
                 discovered
         else

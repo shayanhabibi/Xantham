@@ -20,6 +20,14 @@ let private numberLiteral (id: int) (value: float) =
         { Build.typeResponse id TypeFlags.NumberLiteral with
             Value = JsonValue.Create value }
 
+/// A tuple type over the given component ids, with one element flag each.
+let private tuple (id: int) (components: int list) (flags: ElementFlags list) =
+    { Build.facts
+        { Build.typeResponse id TypeFlags.Object with
+            IsTupleType = ValueSome true } with
+        TypeArguments = components
+        TupleElements = flags }
+
 [<Tests>]
 let typeRefTests =
     testList "shape typeRef" [
@@ -51,19 +59,84 @@ let typeRefTests =
             Expect.equal reference FsUnit "null | undefined"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
 
-        testCase "a union of several non-null members widens to obj" <| fun _ ->
+        testCase "a union of several non-null members is erased (D4)" <| fun _ ->
             let union =
                 { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 1; 2; 5 ] }
 
             let model = Build.shapeModel (union :: Build.primitives)
             let reference, findings = Shape.typeRef Build.context model None "x" 10
 
-            Expect.equal reference (FsOption FsObj) "string | number | undefined"
+            Expect.equal reference (FsOption(FsErasedUnion [ FsString; FsFloat ])) "string | number | undefined"
 
             Expect.equal
                 (findings |> List.map _.Tier)
-                [ Ergonomic; Widened ]
-                "the hoist and the widening are both reported"
+                [ Ergonomic ]
+                "the hoist is reported; the erased union is not a widening"
+
+        testCase "a union wider than the erased arity still widens to obj" <| fun _ ->
+            // Five distinct arms: `U5` exists in Fable, but past four the consumer is doing
+            // runtime tests the type no longer helps them write.
+            let named id name =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with SymbolName = Some name }
+
+            let union =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with
+                    UnionMembers = [ 1; 2; 3; 20; 21; 22 ] }
+
+            let model =
+                Build.shapeModel (union :: named 20 "A" :: named 21 "B" :: named 22 "C" :: Build.primitives)
+
+            let model =
+                { model with DeclNames = [ 20, "A"; 21, "B"; 22, "C" ] |> Map.ofList }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference FsObj "six members, five arms"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
+
+        testCase "a fixed tuple maps to an F# tuple (D7)" <| fun _ ->
+            let model =
+                Build.shapeModel (tuple 10 [ 1; 2 ] [ ElementFlags.Required; ElementFlags.Required ] :: Build.primitives)
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsTuple [ FsString; FsFloat ]) "[string, number]"
+            Expect.isEmpty findings "Fable compiles both to the same JS array"
+
+        testCase "an optional tail element arrives already hoisted to option" <| fun _ ->
+            // The checker hands `[number, number?]` over as `number` and `number | undefined`,
+            // so D1's hoist does the work and D7 imposes nothing of its own.
+            let optionalTail =
+                { Build.facts (Build.typeResponse 11 TypeFlags.Union) with UnionMembers = [ 2; 5 ] }
+
+            let model =
+                Build.shapeModel (
+                    tuple 10 [ 2; 11 ] [ ElementFlags.Required; ElementFlags.Optional ]
+                    :: optionalTail
+                    :: Build.primitives
+                )
+
+            let reference, _ = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsTuple [ FsFloat; FsOption FsFloat ]) "[number, number?]"
+
+        testCase "a rest element leaves no tuple form, so it widens to an array" <| fun _ ->
+            let model =
+                Build.shapeModel (tuple 10 [ 1; 2 ] [ ElementFlags.Required; ElementFlags.Rest ] :: Build.primitives)
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsArray FsObj) "components disagree, so the element is obj"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
+
+        testCase "a one-element tuple has no F# form either" <| fun _ ->
+            let model =
+                Build.shapeModel (tuple 10 [ 1 ] [ ElementFlags.Required ] :: Build.primitives)
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsArray FsString) "widened to its element"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
 
         testCase "a named literal union references its declaration, hoist intact" <| fun _ ->
             let union =
@@ -586,9 +659,85 @@ let shapePassTests =
                     [ FsNamed "DOMTargets"; FsString ]
                     "first of the obj pair survives; the string overload is distinct"
 
+        testCase "detect-tagged-unions reads the arms' fields, not the arm types" <| fun _ ->
+            // The arm properties become the case fields, because that is what Fable's erasure
+            // writes: `Circle(radius = 2.0)` -> `{ kind: "circle", radius: 2 }`. The tag itself
+            // is not a field - Fable writes it from the compiled name.
+            let arm id tag extra =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                    Members =
+                        [ Build.resolvedMember (Build.symbol (id * 10) "kind" SymbolFlags.Property) tag
+                          Build.resolvedMember (Build.symbol (id * 10 + 1) extra SymbolFlags.Property) 2 ] }
+
+            let union =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 20; 21 ] }
+
+            let model =
+                { Build.shapeModel (
+                      union
+                      :: arm 20 7 "radius"
+                      :: arm 21 8 "width"
+                      :: stringLiteral 7 "circle"
+                      :: stringLiteral 8 "round-rect"
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 10, "Shape" ] }
+
+            let shaped, findings = Build.runPass Shape.detectTaggedUnions model
+
+            match shaped.Decls |> List.pick (function FsTaggedUnion d -> Some d | _ -> None) with
+            | decl ->
+                Expect.equal decl.Tag "kind" "the discriminant the checker proved"
+
+                Expect.equal
+                    (decl.Cases |> List.map (fun c -> c.Name, c.CompiledName))
+                    [ "Circle", Some "circle"; "RoundRect", Some "round-rect" ]
+                    "case names derive from the tag values, which keep a CompiledName"
+
+                Expect.equal
+                    (decl.Cases |> List.map (fun c -> c.Fields |> List.map (fun f -> f.Name, f.Type)))
+                    [ [ "radius", FsFloat ]; [ "width", FsFloat ] ]
+                    "the tag is not a field; everything else is"
+
+            Expect.equal (findings |> List.map _.Tier) [ Exact ] "a tagged union costs no fidelity"
+
+        testCase "detect-tagged-unions leaves an arm that is not plain data alone" <| fun _ ->
+            let method' id =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                    CallSignatures = [ Build.signature [] 4 ] }
+
+            let arm id tag =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                    Members =
+                        [ Build.resolvedMember (Build.symbol (id * 10) "kind" SymbolFlags.Property) tag
+                          Build.resolvedMember (Build.symbol (id * 10 + 1) "run" SymbolFlags.Method) 30 ] }
+
+            let union =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 20; 21 ] }
+
+            let model =
+                { Build.shapeModel (
+                      union
+                      :: method' 30
+                      :: arm 20 7
+                      :: arm 21 8
+                      :: stringLiteral 7 "a"
+                      :: stringLiteral 8 "b"
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 10, "Shape" ] }
+
+            let shaped, findings = Build.runPass Shape.detectTaggedUnions model
+
+            Expect.isEmpty
+                (shaped.Decls |> List.choose (function FsTaggedUnion d -> Some d | _ -> None))
+                "a method has no case-field form, so the erased union stands"
+
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the missed match is reported"
+
         testCase "shape-aliases twin unions chain to the smallest id, never cycle" <| fun _ ->
             // Two declared unions over the same member set: only the smaller id is canonical.
-            // The larger abbreviates to it; the smaller widens structurally. An A <-> B
+            // The larger abbreviates to it; the smaller resolves structurally. An A <-> B
             // abbreviation cycle here sends fsc into non-termination once a generic
             // instantiation references it, so the chain must strictly decrease.
             let twin id =
@@ -609,10 +758,11 @@ let shapePassTests =
 
             Expect.equal
                 targets
-                [ "ScrollThresholdValue", FsObj; "TimelinePosition", FsNamed "ScrollThresholdValue" ]
-                "the smaller twin widens, the larger references it"
+                [ "ScrollThresholdValue", FsErasedUnion [ FsString; FsFloat ]
+                  "TimelinePosition", FsNamed "ScrollThresholdValue" ]
+                "the smaller twin resolves structurally, the larger references it"
 
-            Expect.equal (findings |> List.map _.Tier) [ Widened ] "only the canonical twin's widening"
+            Expect.equal (findings |> List.map _.Tier) [] "an erased union costs no fidelity"
 
         testCase "order-declarations puts declarations in source order, Exports last" <| fun _ ->
             let interface' name order =

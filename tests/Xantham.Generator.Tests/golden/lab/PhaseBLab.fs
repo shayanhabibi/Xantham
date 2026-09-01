@@ -57,9 +57,46 @@ type ConfigureSettings =
     [<ParamObject; Emit("$0")>]
     static member Create (fps: float, ?muted: bool) : ConfigureSettings = jsNative
 
-type Coords = float[]
+type Coords = float * float
 
-type Entry = obj[]
+type Entry = string * float
+
+type Span = float * float option
+
+type Segments = obj[]
+
+type Sizeish = U2<string, float>
+
+type Subject = U2<Timer, TimerOptions>
+
+type Anything = obj
+
+/// <summary>
+/// One arm of a discriminated union.
+/// </summary>
+[<Interface>]
+type CircleShape =
+    abstract kind: string with get, set
+    abstract radius: float with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (kind: string, radius: float) : CircleShape = jsNative
+
+/// <summary>
+/// Another arm, whose tag needs a CompiledName.
+/// </summary>
+[<Interface>]
+type RoundRectShape =
+    abstract kind: string with get, set
+    abstract width: float with get, set
+    abstract height: float with get, set
+    abstract radius: float with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (kind: string, width: float, height: float, radius: float) : RoundRectShape = jsNative
+
+[<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
+type Shape =
+    | [<CompiledName("circle")>] Circle of radius: float
+    | [<CompiledName("round-rect")>] RoundRect of width: float * height: float * radius: float
 
 [<Interface>]
 type Utils =

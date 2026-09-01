@@ -287,6 +287,11 @@ type TypeFacts =
       /// Type arguments of a generic reference, resolved for *every* group - an external
       /// `Array<T>` carries entry-package types that must still be reached (O7 note).
       TypeArguments: int list
+      /// A tuple's per-element flags, in element order, copied off its *target* - the wire
+      /// carries them there, not on the reference. The target itself is deliberately left out
+      /// of the table: deriving it drags all of `Array.prototype` in again for every distinct
+      /// tuple shape, and nothing but these flags is wanted from it.
+      TupleElements: ElementFlags list
       UnionMembers: int list }
 
 module TypeFacts =
@@ -300,6 +305,7 @@ module TypeFacts =
           ConstructSignatures = []
           BaseTypes = []
           TypeArguments = []
+          TupleElements = []
           UnionMembers = [] }
 
 /// The type ids an export resolves to. A symbol can be both a type and a value (a class), so
@@ -334,6 +340,14 @@ type FsTypeRef =
     | FsObj
     | FsOption of FsTypeRef
     | FsArray of FsTypeRef
+    /// A fixed-length tuple (D7, §4.12): Fable compiles an F# tuple to a JS array, so the
+    /// mapping is exact. Optional tail elements arrive already `option`-wrapped, because the
+    /// checker hands them over as `T | undefined`.
+    | FsTuple of FsTypeRef list
+    /// A heterogeneous union as Fable's erased `U2`-`U4` (D4, §4.5(4)). The threshold is four;
+    /// wider unions widen to `obj`. Arms are distinct - a union whose arms collapse to one F#
+    /// type is that type instead.
+    | FsErasedUnion of FsTypeRef list
     /// A callback as a delegate (D5): parameter types and return. Renders as
     /// `System.Action`/`System.Func` so the arity is guaranteed at the Fable boundary.
     | FsDelegate of FsTypeRef list * FsTypeRef
@@ -422,6 +436,38 @@ type FsStringEnumDecl =
       Order: DeclOrder option
       Cases: FsUnionCase list }
 
+/// One field of a tagged-union case. The name is the JS property key verbatim: Fable emits the
+/// field under its F# name, and backtick escaping is transparent there (`` ``type`` `` reaches
+/// JS as `type`), so no separate compiled name is needed.
+type FsTaggedField = { Name: string; Type: FsTypeRef }
+
+/// One case of a `[<TypeScriptTaggedUnion>]` DU: the case name, the tag literal when it does
+/// not spell the case name, and the arm's own properties as case fields.
+///
+/// The fields are the arm's properties *other than* the discriminant - Fable writes the tag
+/// itself from the case's compiled name. Verified against Fable 5.13: `Circle(radius = 2.0)`
+/// emits `{ kind: "circle", radius: 2 }`, and a `None` in an optional field omits the key
+/// rather than writing `undefined`, which is exactly TypeScript's optional-property semantics.
+/// Carrying the arm type as a single payload field instead does *not* work - Fable wraps it as
+/// `{ kind: "circle", Item: x }`, an object no TypeScript signature would accept.
+type FsTaggedCase =
+    { Name: string
+      CompiledName: string option
+      Fields: FsTaggedField list }
+
+/// A discriminated union the checker proved is tagged (D4, §4.5(2)): every member is an object
+/// type carrying the same property, and that property's type is a distinct string literal in
+/// each. Fable erases the DU to a plain object literal, so this is Exact *and* pattern-matchable
+/// - by far the best consumer experience, which is why §4.5 says to detect it aggressively.
+type FsTaggedUnionDecl =
+    { Name: string
+      Docs: string
+      Tags: JSDocTagInfo list
+      Order: DeclOrder option
+      /// The discriminant property's name, as TypeScript spells it.
+      Tag: string
+      Cases: FsTaggedCase list }
+
 /// A numeric TS enum as an F# enum - `type E = A = 1` (§4.7).
 type FsEnumDecl =
     { Name: string
@@ -442,6 +488,7 @@ type FsAbbrevDecl =
 type FsDecl =
     | FsInterface of FsInterfaceDecl
     | FsStringEnum of FsStringEnumDecl
+    | FsTaggedUnion of FsTaggedUnionDecl
     | FsEnum of FsEnumDecl
     | FsAbbrev of FsAbbrevDecl
     /// The one `Exports` type gathering the module's value exports.

@@ -25,6 +25,64 @@ let renderTests =
             Expect.equal (Render.ident "type") "``type``" "keyword"
             Expect.equal (Render.ident "utf-8") "``utf-8``" "not identifier-shaped"
             Expect.equal (Render.ident "_tag") "_tag" "leading underscore is fine"
+            Expect.equal (Render.ident "params") "``params``" "reserved for future use"
+            Expect.equal (Render.ident "mod") "``mod``" "inherited from OCaml"
+
+        testCase "tuples parenthesise only where * would reassociate" <| fun _ ->
+            Expect.equal (Render.printType (FsTuple [ FsString; FsFloat ])) "string * float" "top level"
+
+            Expect.equal
+                (Render.printType (FsArray(FsTuple [ FsString; FsFloat ])))
+                "(string * float)[]"
+                "an array of tuples"
+
+            Expect.equal
+                (Render.printType (FsTuple [ FsFloat; FsOption FsFloat ]))
+                "float * float option"
+                "an optional tail element"
+
+        testCase "an erased union prints as the Fable U_n of its arity" <| fun _ ->
+            Expect.equal
+                (Render.printType (FsErasedUnion [ FsString; FsFloat ]))
+                "U2<string, float>"
+                "two arms"
+
+            Expect.equal
+                (Render.printType (FsErasedUnion [ FsString; FsFloat; FsBool ]))
+                "U3<string, float, bool>"
+                "three arms"
+
+        testCase "a tagged union carries the arm's fields, not the arm type" <| fun _ ->
+            // Fable writes the discriminant itself and each field under its own name; carrying
+            // the arm as a single payload would emit `{ kind: "circle", Item: x }` instead.
+            let model =
+                { baseModel with
+                    Decls =
+                        [ FsTaggedUnion
+                            { Name = "Shape"
+                              Docs = ""
+                              Tags = []
+                              Order = None
+                              Tag = "kind"
+                              Cases =
+                                [ { Name = "Circle"
+                                    CompiledName = Some "circle"
+                                    Fields = [ { Name = "radius"; Type = FsFloat } ] }
+                                  { Name = "Blank"; CompiledName = None; Fields = [] } ] } ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+
+            Expect.stringContains
+                source
+                "[<RequireQualifiedAccess; TypeScriptTaggedUnion(\"kind\", CaseRules.None)>]"
+                "the tag drives the attribute"
+
+            Expect.stringContains
+                source
+                "    | [<CompiledName(\"circle\")>] Circle of radius: float"
+                "named field, so the JS key survives"
+
+            Expect.stringContains source "    | Blank\n" "a tag-only arm carries nothing"
 
         testCase "a qualified templated name escapes per segment" <| fun _ ->
             Expect.equal (Render.printType (FsNamed "TypeScript.Lib.RegExp")) "TypeScript.Lib.RegExp" "qualified"
