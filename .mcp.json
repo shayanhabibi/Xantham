@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "fslangmcp": {
+      "type": "stdio",
+      "command": "fslangmcp",
+      "args": ["--project", "Xantham.slnx"],
+      "env": {}
+    }
+  }
+}
