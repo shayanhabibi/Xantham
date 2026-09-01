@@ -7,6 +7,7 @@ module rec GlobalsLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
+open Xantham.Fable.Core
 
 /// <summary>
 /// A global type. A type reads the same wherever its name lives.
@@ -37,6 +38,13 @@ type Branded =
     abstract id: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (id: string) : Branded = jsNative
+
+/// <summary>
+/// A generic alias whose target never mentions its parameter - F# has no such abbreviation.
+/// </summary>
+type Loose<'P> =
+    [<EmitIndexer>]
+    abstract Item: string -> string with get, set
 
 /// <summary>
 /// A user of that alias: the reference has to widen when the alias goes.

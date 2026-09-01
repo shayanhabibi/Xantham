@@ -176,6 +176,73 @@ let private taggedUnionShape (model: ShapeModel) (facts: TypeFacts) : (string * 
             else
                 None)
 
+/// A property that exists only to make a type nominal: keyed by a unique symbol, so nothing
+/// can name it; named with a leading underscore, so nothing is meant to; or typed `never`, so
+/// nothing can construct it. An object whose every property is one of these carries nothing at
+/// runtime, which is what separates a branding intersection from a shape (§4.6).
+let private isMarkerMember (model: ShapeModel) (m: ResolvedMember) =
+    isSymbolKeyed m.Symbol.Name
+    || m.Symbol.Name.StartsWith "_"
+    || (match Map.tryFind m.TypeId model.Types with
+        | Some facts -> flag TypeFlags.Never facts
+        | None -> false)
+
+/// The primitive a branding intersection brands, where it is one (§4.6, D11): exactly one
+/// primitive constituent, intersected with objects that carry markers and nothing else. Two
+/// real shapes intersected, or a primitive intersected with an object that has a usable
+/// member, are ordinary intersections and no brand - reading those as brands would throw
+/// members away and call it exact.
+let rec private brandedPrimitive (model: ShapeModel) (facts: TypeFacts) =
+    // An intersection over anything but a bare primitive distributes: `boolean & Marker` is
+    // handed back as `(true & Marker) | (false & Marker)`, and a branded literal union the same
+    // way. The arms are the checker's own working and carry no names, so a union of anonymous
+    // brands that agree on the primitive is one brand - while a union of *named* brands
+    // (`UserId | SessionId`) is a real union and must stay one.
+    if flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) then
+        let arms = facts.UnionMembers |> List.choose (fun id -> Map.tryFind id model.Types)
+
+        if
+            arms.Length <> facts.UnionMembers.Length
+            || arms.IsEmpty
+            || arms
+               |> List.exists (fun arm ->
+                   not (flag TypeFlags.Intersection arm) || Map.containsKey arm.Response.Id model.DeclNames)
+        then
+            None
+        else
+            match arms |> List.map (brandedPrimitive model) |> List.distinct with
+            | [ single ] -> single
+            | _ -> None
+    else
+
+    let constituents =
+        facts.IntersectionMembers |> List.choose (fun id -> Map.tryFind id model.Types)
+
+    if constituents.Length <> facts.IntersectionMembers.Length then
+        None
+    else
+
+    let objects, primitives = constituents |> List.partition (flag TypeFlags.Object)
+
+    let primitive =
+        match primitives with
+        | [ only ] ->
+            // Boolean first: it is a union of `true | false` wearing the Boolean flag.
+            if flag TypeFlags.Boolean only || flag TypeFlags.BooleanLiteral only then Some FsBool
+            elif flag TypeFlags.String only || flag TypeFlags.StringLiteral only then Some FsString
+            elif flag TypeFlags.Number only || flag TypeFlags.NumberLiteral only then Some FsFloat
+            else None
+        | _ -> None
+
+    match primitive with
+    | Some primitive when
+        not objects.IsEmpty
+        && objects
+           |> List.forall (fun o -> not o.Members.IsEmpty && o.Members |> List.forall (isMarkerMember model))
+        ->
+        Some primitive
+    | _ -> None
+
 /// The widest erased union D4 allows. Fable ships `U2`-`U9`; the decision is four, because
 /// past that the consumer is doing runtime tests the type no longer helps them write.
 [<Literal>]
@@ -245,6 +312,8 @@ let rec typeRef (ctx: Context) (model: ShapeModel) (self: string option) (owner:
 
         if has TypeFlags.Boolean then
             FsBool, []
+        elif has TypeFlags.Union && (brandedPrimitive model facts).IsSome then
+            intersectionRef model owner facts
         elif has TypeFlags.Union then
             unionRef ctx model self owner facts
         elif has TypeFlags.BooleanLiteral then
@@ -273,15 +342,103 @@ let rec typeRef (ctx: Context) (model: ShapeModel) (self: string option) (owner:
                 | Some name -> FsNamed name, [ Finding.make Ergonomic owner "polymorphic this reads as the declaring type" ]
                 | None -> FsObj, [ Finding.make Widened owner "this type outside a declaration; widened to obj" ]
             else
+                // A key variable is not bound as a variable at all: `K extends keyof T` is
+                // written as the support package's idiom over the operand (§4.10).
+                match Map.tryFind typeId model.KeyVars with
+                | Some(KeyOf operand) -> FsApp("keyof", [ FsTypeVar operand ]), []
+                | Some(TypedKeyOf(operand, result)) -> FsApp("typekeyof", [ FsTypeVar operand; FsTypeVar result ]), []
+                | None ->
+
                 // In scope only where the declaration being shaped bound it (§4.9); a
                 // parameter of some *other* declaration has no name here to write.
                 match Map.tryFind typeId model.TypeVars with
                 | Some name -> FsTypeVar name, []
-                | None -> FsObj, [ Finding.make Widened owner "type parameter is not in scope here; widened to obj" ]
+                | None ->
+                    // Its constraint is the tightest thing still true of it, and where the
+                    // declaration bound one, `obj` is not merely loose but wrong: F# rejects
+                    // `Ai<obj>` against `'AiModelList :> AiModelListType`. Only a plain named
+                    // constraint is taken - a generic one would need an arity this position
+                    // cannot supply - and another declaration's parameter can never be
+                    // constrained by this same parameter, so the substitution cannot cycle.
+                    let constraintName =
+                        facts.Constraint
+                        |> Option.filter (fun boundId -> boundId <> typeId)
+                        |> Option.bind (fun boundId ->
+                            match Map.tryFind boundId model.Types with
+                            | Some bound when (ownArguments bound).IsEmpty -> Map.tryFind boundId model.DeclNames
+                            | _ -> None)
+
+                    match constraintName with
+                    | Some name ->
+                        FsNamed name,
+                        [ Finding.make Widened owner $"type parameter is not in scope here; widened to its constraint {name}" ]
+                    | None -> FsObj, [ Finding.make Widened owner "type parameter is not in scope here; widened to obj" ]
         elif has TypeFlags.Object then
             objectRef ctx model self owner facts
+        elif has TypeFlags.Index then
+            keyOfRef model owner facts
+        elif has TypeFlags.IndexedAccess then
+            indexedAccessRef model owner facts
+        elif has TypeFlags.Intersection then
+            intersectionRef model owner facts
         else
             FsObj, [ Finding.make Widened owner $"type flags {facts.Response.Flags} not mapped yet; widened to obj" ]
+
+/// `keyof T` at an operand the checker could not finish (§4.10). A closed `keyof` never gets
+/// here - the checker hands those back already expanded into their union of literal keys, which
+/// shapes as a StringEnum - so this is the open regime, where the only honest carrier is the
+/// support package's `keyof<'T>`: erased to the string it is at runtime, and phantom-typed by
+/// the operand so a key of one type cannot be passed where another's is wanted.
+and private keyOfRef (model: ShapeModel) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
+    let operand =
+        facts.Response.Target
+        |> ValueOption.toOption
+        |> Option.bind (fun id -> Map.tryFind id model.TypeVars)
+
+    match operand with
+    | Some name ->
+        FsApp("keyof", [ FsTypeVar name ]),
+        [ Finding.make Ergonomic owner $"keyof over an open operand reads as keyof<'{name}> (§4.10)" ]
+    | None -> FsObj, [ Finding.make Widened owner "keyof over an operand not in scope here; widened to obj" ]
+
+/// An intersection at a reference position. A brand (§4.6, D11) is the one intersection F# can
+/// state exactly: the measure its declaration emitted, applied to the primitive it brands, which
+/// enforces the same nominality TypeScript was buying and erases the same way. It costs no
+/// finding here - the declaration records the idiom once - but a brand that never got a
+/// declaration has no measure to name, and falls back to the bare primitive loudly. Intersections
+/// of object types are a separate mapping (§4.6's first bullet) and are not shaped yet.
+and private intersectionRef (model: ShapeModel) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
+    match brandedPrimitive model facts with
+    | Some primitive ->
+        match Map.tryFind facts.Response.Id model.DeclNames with
+        | Some name -> FsBranded(primitive, name), []
+        | None ->
+            primitive,
+            [ Finding.make
+                  Ergonomic
+                  owner
+                  "an unnamed brand has no measure to carry; widened to the primitive it brands (§4.6)" ]
+    | None ->
+        FsObj,
+        [ Finding.make Widened owner "intersection of object types has no F# form yet; widened to obj (§4.6)" ]
+
+/// `T[K]`. Where `K` is a key variable this signature bound as `typekeyof<'T,'R>`, the access is
+/// exactly the `'R` that idiom introduced. Everything else - `T[keyof T]`, an access over an
+/// operand not in scope - is a type-level computation with no F# form, and widens loudly.
+and private indexedAccessRef (model: ShapeModel) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
+    let binding =
+        facts.Response.IndexType
+        |> ValueOption.toOption
+        |> Option.bind (fun id -> Map.tryFind id model.KeyVars)
+
+    let objectName =
+        facts.Response.ObjectType
+        |> ValueOption.toOption
+        |> Option.bind (fun id -> Map.tryFind id model.TypeVars)
+
+    match binding, objectName with
+    | Some(TypedKeyOf(operand, result)), Some name when operand = name -> FsTypeVar result, []
+    | _ -> FsObj, [ Finding.make Widened owner "indexed access has no F# form here; widened to obj" ]
 
 and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
     match arrayElement facts with
@@ -305,6 +462,10 @@ and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (
         match instantiationOf model facts with
         | Some(name, arguments) -> appliedRef ctx model self owner name arguments
         | None ->
+            match libBinding ctx model self owner facts with
+            | Some result -> result
+            | None ->
+
             match GeneratorConfig.disposition ctx.Config facts.Origin, facts.SymbolName with
             | Reference, Some typeName ->
                 // The O7 contract: a `ship` run of this group produces exactly this name.
@@ -328,6 +489,44 @@ and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (
 /// element type when every component agrees, `obj[]` otherwise. §4.12 recommends an erased
 /// carrier with typed accessors instead; that waits for a fixture that needs one, the way
 /// class statics do.
+/// A compiler-lib type Fable.Core already binds (`Promise` -> `JS.Promise<'T>`), which is the
+/// compiler-lib group's disposition for the half of `lib.d.ts` that has a shipped binding.
+///
+/// The arity comparison is the safety argument, not a formality: TypeScript's lib made
+/// `Uint8Array` generic in a buffer parameter Fable's abbreviation does not take, so a mapping
+/// that ignored arity would emit code that does not compile. Extra arguments are dropped with
+/// a finding; too few means this is some other type wearing a familiar name, and it widens.
+and private libBinding (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) =
+    match facts.Origin, facts.SymbolName with
+    | CompilerLib, Some name when GeneratorConfig.disposition ctx.Config CompilerLib <> Ship ->
+        match Naming.LibBindings.tryFind name with
+        | Some(fsharpName, arity, loss) ->
+            let arguments = facts.TypeArguments
+
+            if arguments.Length < arity then
+                None
+            else
+                let reference, findings =
+                    match arity with
+                    | 0 -> FsNamed fsharpName, []
+                    | _ -> appliedRef ctx model self owner fsharpName (List.truncate arity arguments)
+
+                let dropped =
+                    if arguments.Length > arity then
+                        [ Finding.make
+                              Ergonomic
+                              owner
+                              $"{name} carries {arguments.Length} type arguments where {fsharpName} takes {arity}; the extras are dropped" ]
+                    else
+                        []
+
+                let lossy =
+                    loss |> Option.map (Finding.make Ergonomic owner) |> Option.toList
+
+                Some(reference, findings @ dropped @ lossy)
+        | None -> None
+    | _ -> None
+
 /// A generic name applied to type arguments, each shaped at this position (§4.9).
 and private appliedRef (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (name: string) (arguments: int list) : FsTypeRef * Finding list =
     let mutable findings = []
@@ -518,7 +717,11 @@ let private typeParamsOf
 
                 None)
 
-    let scope = named |> Map.ofList
+    // Layered onto whatever is already in scope rather than replacing it: a generic *method*
+    // binds its own parameters on top of its declaration's, and `read<K extends keyof T>` has
+    // to see both.
+    let scope =
+        named |> List.fold (fun bound (id, name) -> Map.add id name bound) model.TypeVars
 
     // The constraint is read under the scope being defined, so `T extends Node<T>` resolves
     // its own variable rather than widening it.
@@ -530,7 +733,25 @@ let private typeParamsOf
             let bound =
                 Map.tryFind id model.Types
                 |> Option.bind _.Constraint
-                |> Option.map (fun boundId -> typeRef ctx scoped None owner boundId)
+                |> Option.map (fun boundId ->
+                    // Only something that becomes an interface can be an F# base type. A union
+                    // renders as an erased `U_n` or a StringEnum and both are sealed, so
+                    // `'T :> Renderable` is not merely loose - FS0698 rejects it outright.
+                    // Tuples, arrays and delegates are sealed the same way. `FsObj` here falls
+                    // into the drop below, which is where the finding is written.
+                    let expressible =
+                        match Map.tryFind boundId model.Types with
+                        | Some bound ->
+                            flag TypeFlags.Object bound
+                            && (arrayElement bound).IsNone
+                            && not (isTuple bound)
+                            && not (isPureCallback bound)
+                        | None -> false
+
+                    if expressible then
+                        typeRef ctx scoped None owner boundId
+                    else
+                        FsObj, [])
 
             match bound with
             | Some((FsNamed _ | FsApp _) as reference, boundFindings) ->
@@ -577,14 +798,157 @@ let private aliasTypeParams (ctx: Context) (model: ShapeModel) (owner: string) (
 
     parameters, scope, findings @ hoistFindings
 
+/// The type variables a rendered reference actually names.
+let rec private typeVarsOf (reference: FsTypeRef) : Set<string> =
+    let union = List.fold (fun acc item -> Set.union acc (typeVarsOf item)) Set.empty
+
+    match reference with
+    | FsTypeVar name -> Set.singleton name
+    | FsOption inner
+    | FsArray inner -> typeVarsOf inner
+    | FsTuple items
+    | FsErasedUnion items -> union items
+    | FsDelegate(arguments, returns) -> Set.union (union arguments) (typeVarsOf returns)
+    | FsApp(_, arguments) -> union arguments
+    | _ -> Set.empty
+
+/// The key variables a signature binds (§4.10): each type parameter whose bound is a `keyof`,
+/// paired with the id of the operand that `keyof` was taken over.
+let private keyCandidates (model: ShapeModel) (ids: int list) : (int * int) list =
+    ids
+    |> List.choose (fun id ->
+        match Map.tryFind id model.Types |> Option.bind _.Constraint with
+        | None -> None
+        | Some boundId ->
+            match Map.tryFind boundId model.Types with
+            | Some bound when flag TypeFlags.Index bound ->
+                bound.Response.Target |> ValueOption.toOption |> Option.map (fun operand -> id, operand)
+            | _ -> None)
+
+/// Whether any of `roots` reaches the indexed access `object[key]` - what tells `key: K` apart
+/// from `key: K` *plus* the value it selects. Carriers are followed, members are not: the point
+/// is to find `T[K]` where a signature returns it, bare or wrapped, not to walk object graphs.
+let private mentionsAccess (model: ShapeModel) (objectId: int) (keyId: int) (roots: int list) : bool =
+    let rec go visited pending =
+        match pending with
+        | [] -> false
+        | id :: rest when Set.contains id visited -> go visited rest
+        | id :: rest ->
+            match Map.tryFind id model.Types with
+            | None -> go (Set.add id visited) rest
+            | Some facts ->
+                if
+                    flag TypeFlags.IndexedAccess facts
+                    && facts.Response.ObjectType = ValueSome objectId
+                    && facts.Response.IndexType = ValueSome keyId
+                then
+                    true
+                else
+                    let carried =
+                        [ yield! facts.TypeArguments
+                          yield! facts.UnionMembers
+                          yield! facts.AliasTypeArguments
+                          for info in facts.IndexInfos -> info.ValueTypeId
+                          for signature in facts.CallSignatures do
+                              yield! signature.Parameters |> List.map _.TypeId
+                              yield signature.ReturnTypeId ]
+
+                    go (Set.add id visited) (rest @ carried)
+
+    go Set.empty roots
+
+/// The name to write the value a key selects under: `R`, unless something in scope already
+/// answers to it - a generated variable that shadows one the signature also mentions would
+/// silently retype it.
+let private resultName (taken: Set<string>) =
+    let rec pick n =
+        let candidate = if n = 0 then "R" else $"R{n}"
+        if Set.contains candidate taken then pick (n + 1) else candidate
+
+    pick 0
+
 // ---------------------------------------------------------------------------------------------
 // Shared shaping of members and signatures.
 // ---------------------------------------------------------------------------------------------
 
-/// A resolved signature as an F# parameter list and return reference. Rest parameters are
-/// marked from the signature flag; their array types read as-is.
-let private shapeSignature (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (signature: ResolvedSignature) : FsParam list * FsTypeRef * Finding list =
-    let mutable findings = []
+/// A resolved signature as an F# type-parameter list, parameter list and return reference.
+/// Rest parameters are marked from the signature flag; their array types read as-is.
+///
+/// A signature's *own* parameters (§4.9) are bound here rather than at the declaration:
+/// `get<T>(source: T)` is a generic function, and F# writes that on the member. Without this
+/// they were out of scope at every position that used them and the whole signature widened to
+/// obj - `get` read `(source: obj, key: obj) : obj`, which is not a typed accessor at all.
+let private shapeSignature
+    (ctx: Context)
+    (model: ShapeModel)
+    (self: string option)
+    (owner: string)
+    (signature: ResolvedSignature)
+    : FsTypeParam list * FsParam list * FsTypeRef * Finding list =
+    // §4.10, the open keyof regime: a `K extends keyof T` variable is deliberately *not* bound
+    // as an F# variable. Its bound is the whole of what it means, and F# cannot state it, so a
+    // bare `'K` would be an unconstrained variable that lets any type through and drags `T[K]`
+    // down to obj with it. The support package's idiom is written at its uses instead.
+    let candidates = keyCandidates model signature.TypeParameters
+
+    let plain =
+        signature.TypeParameters
+        |> List.filter (fun id -> candidates |> List.forall (fun (key, _) -> key <> id))
+
+    let typeParameters, scope, parameterFindings =
+        match plain with
+        | [] -> [], model.TypeVars, []
+        | ids -> typeParamsOf ctx model owner ids
+
+    // A key over an operand that is nowhere in scope has no `'T` to be taken over, so it falls
+    // back to an ordinary type parameter and widens like one.
+    let bindable, loose =
+        candidates |> List.partition (fun (_, operand) -> Map.containsKey operand scope)
+
+    let looseParameters, scope, looseFindings =
+        match loose |> List.map fst with
+        | [] -> [], scope, []
+        | ids -> typeParamsOf ctx { model with TypeVars = scope } owner ids
+
+    let roots =
+        (signature.Parameters |> List.map _.TypeId) @ [ signature.ReturnTypeId ]
+
+    let mutable taken = scope |> Map.toList |> List.map snd |> Set.ofList
+    let mutable keyVars = model.KeyVars
+    let mutable resultParameters = []
+    let mutable keyFindings = []
+
+    for key, operand in bindable do
+        let operandName = Map.find operand scope
+
+        if mentionsAccess model operand key roots then
+            let result = resultName taken
+            taken <- Set.add result taken
+            resultParameters <- resultParameters @ [ { Name = result; Constraint = None } ]
+            keyVars <- Map.add key (TypedKeyOf(operandName, result)) keyVars
+
+            keyFindings <-
+                keyFindings
+                @ [ Finding.make
+                        Ergonomic
+                        owner
+                        $"key over '{operandName}' with its indexed access reads as \
+                          typekeyof<'{operandName},'{result}> (§4.10)" ]
+        else
+            keyVars <- Map.add key (KeyOf operandName) keyVars
+
+            keyFindings <-
+                keyFindings
+                @ [ Finding.make Ergonomic owner $"key over '{operandName}' reads as keyof<'{operandName}> (§4.10)" ]
+
+    let typeParameters = typeParameters @ looseParameters @ resultParameters
+
+    let model =
+        { model with
+            TypeVars = scope
+            KeyVars = keyVars }
+
+    let mutable findings = parameterFindings @ looseFindings @ keyFindings
     let parameterCount = signature.Parameters.Length
 
     let parameters =
@@ -606,7 +970,23 @@ let private shapeSignature (ctx: Context) (model: ShapeModel) (self: string opti
               Type = optionalRef optional reference })
 
     let returns, returnFindings = typeRef ctx model self $"{owner}()" signature.ReturnTypeId
-    parameters, returns, findings @ returnFindings
+    findings <- findings @ returnFindings
+
+    // A parameter no rendered position names has been erased - every use of it widened to obj
+    // on the way here - and writing `<'T>` over a signature that mentions no `'T` says the
+    // member is generic when nothing about it is. Drop it, and say so.
+    let named =
+        parameters |> List.map _.Type |> List.fold (fun acc t -> Set.union acc (typeVarsOf t)) (typeVarsOf returns)
+
+    let live, erased =
+        typeParameters |> List.partition (fun p -> Set.contains p.Name named)
+
+    for p in erased do
+        findings <-
+            findings
+            @ [ Finding.make Widened owner $"type parameter '{p.Name}' is erased: every use of it widened away" ]
+
+    live, parameters, returns, findings
 
 /// The interface members of an object type: methods for method symbols (each call signature an
 /// overload), properties otherwise, callbacks as delegate-typed properties (D5).
@@ -640,7 +1020,7 @@ let private shapeMembers (ctx: Context) (model: ShapeModel) (self: string) (fact
             | Some memberFacts ->
                 memberFacts.CallSignatures
                 |> List.map (fun signature ->
-                    let parameters, returns, signatureFindings =
+                    let typeParameters, parameters, returns, signatureFindings =
                         shapeSignature ctx model (Some self) owner signature
 
                     findings <- findings @ signatureFindings
@@ -649,6 +1029,7 @@ let private shapeMembers (ctx: Context) (model: ShapeModel) (self: string) (fact
                         { Name = Naming.memberName m.Symbol.Name
                           Docs = m.Docs
                           Tags = m.Tags
+                          TypeParameters = typeParameters
                           Parameters = parameters
                           Return = returns })
             | None ->
@@ -665,7 +1046,25 @@ let private shapeMembers (ctx: Context) (model: ShapeModel) (self: string) (fact
                         ReadOnly = m.ReadOnly
                         Type = optionalRef m.Optional reference } ])
 
-    members, findings
+    // Index signatures come after the named members, because that is where an `Item` member
+    // reads most naturally and because the order has to be stable for the goldens. A type may
+    // declare both a string and a number signature; each becomes its own `Item` overload.
+    let indexers =
+        facts.IndexInfos
+        |> List.map (fun info ->
+            let owner = $"{self}.[]"
+            let key, keyFindings = typeRef ctx model (Some self) owner info.KeyTypeId
+            let value, valueFindings = typeRef ctx model (Some self) owner info.ValueTypeId
+            findings <- findings @ keyFindings @ valueFindings
+
+            emit (Finding.make Ergonomic owner "index signature reads as an EmitIndexer Item member (§4.10)")
+
+            FsIndexer
+                { Key = key
+                  Value = value
+                  ReadOnly = info.IsReadonly })
+
+    members @ indexers, findings
 
 // ---------------------------------------------------------------------------------------------
 // Passes.
@@ -1064,7 +1463,10 @@ let private delegateRefFor (ctx: Context) (model: ShapeModel) (name: string) (fa
             else
                 [ Finding.make Widened name $"callback with {rest.Length + 1} overloads shaped from the first" ]
 
-        let parameters, returns, signatureFindings = shapeSignature ctx model None name signature
+        // The signature's own parameters are discarded here rather than written: a delegate
+        // type has nowhere to put them. `aliasTypeParams` has already hoisted them onto the
+        // alias around this callback, with the rank-2 finding that records the cost.
+        let _, parameters, returns, signatureFindings = shapeSignature ctx model None name signature
 
         let parameterTypes = parameters |> List.map _.Type
         FsDelegate(parameterTypes, returns), overloadFindings @ signatureFindings
@@ -1140,7 +1542,10 @@ let shapeInterfaces: Pass<ShapeModel> =
                         match Map.tryFind typeId model.Types with
                         | Some facts when
                             flag TypeFlags.Object facts
-                            && not facts.Members.IsEmpty
+                            // An index signature is shape too: `interface Bag { [key: string]:
+                            // number }` has no properties at all, and without this it reaches
+                            // `shape-aliases` looking empty and abbreviates to obj (§4.10).
+                            && not (facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
                             && (arrayElement facts).IsNone
                             && not (isTuple facts)
                             // A named instantiation - `type StringBox = Box<string>` - is an
@@ -1249,6 +1654,8 @@ let shapeAliases: Pass<ShapeModel> =
                         | FsTaggedUnion decl -> [ decl.Name ]
                         | FsEnum decl -> [ decl.Name ]
                         | FsAbbrev decl -> [ decl.Name ]
+                        | FsPhantom decl -> [ decl.Name ]
+                        | FsMeasure decl -> [ decl.Name ]
                         | FsExports _ -> [])
                     |> Set.ofList
 
@@ -1273,6 +1680,7 @@ let shapeAliases: Pass<ShapeModel> =
                     |> List.choose (function
                         | FsInterface decl -> Some(decl.Name, decl.TypeParameters)
                         | FsAbbrev decl -> Some(decl.Name, decl.TypeParameters)
+                        | FsPhantom decl -> Some(decl.Name, decl.TypeParameters)
                         | _ -> None)
                     |> Map.ofList
 
@@ -1320,6 +1728,33 @@ let shapeAliases: Pass<ShapeModel> =
                         else
                             match Map.tryFind typeId model.Types with
                             | Some facts ->
+                                // A branding intersection is a name and nothing else in F#: a
+                                // unit of measure, spelled at the uses as `string<Name>` rather
+                                // than declared as an abbreviation, because the name can only be
+                                // spent once and the measure is what spends it (§4.6, D11).
+                                // Decided before the reference is shaped: shaping one would ask
+                                // this declaration for the measure it has not emitted yet.
+                                let brand = brandedPrimitive model facts
+
+                                if brand.IsSome then
+                                    findings <-
+                                        findings
+                                        @ [ Finding.make
+                                                Ergonomic
+                                                name
+                                                "branding intersection emitted as a unit of measure; uses read \
+                                                 as the branded primitive (§4.6, D11)" ]
+
+                                    Some(
+                                        FsMeasure
+                                            { Name = name
+                                              Docs = Map.tryFind typeId exportDocs |> Option.defaultValue ("", []) |> fst
+                                              Tags = Map.tryFind typeId exportDocs |> Option.defaultValue ("", []) |> snd
+                                              Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+                                              Primitive = brand.Value }
+                                    )
+                                else
+
                                 let typeParameters, scope, parameterFindings =
                                     declTypeParams ctx model name facts
 
@@ -1342,15 +1777,56 @@ let shapeAliases: Pass<ShapeModel> =
                                 let docs, tags =
                                     Map.tryFind typeId exportDocs |> Option.defaultValue ("", [])
 
-                                Some(
-                                    FsAbbrev
-                                        { Name = name
-                                          Docs = docs
-                                          Tags = tags
-                                          Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
-                                          TypeParameters = typeParameters
-                                          Target = reference }
-                                )
+                                let order =
+                                    Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+
+                                // A generic declaration whose right side names none of its
+                                // parameters is a type-level computation the checker could not
+                                // finish: `DeepPartial<T>`, `Unwrap<T>`, `` `x-${T}` ``. F# has
+                                // no unused type variable in an abbreviation, so this used to be
+                                // dropped outright and every use of it widened to obj. An erased
+                                // phantom keeps the name and the arity - enough for uses to stay
+                                // distinct - and admits, by having no members at all, that a cast
+                                // is the only thing anyone can do with it (§4.10, §4.11).
+                                if
+                                    not typeParameters.IsEmpty
+                                    && typeParameters
+                                       |> List.forall (fun p -> not (Set.contains p.Name (typeVarsOf reference)))
+                                then
+                                    findings <-
+                                        findings
+                                        @ [ Finding.make
+                                                Widened
+                                                name
+                                                "type-level computation over an unresolved operand; emitted as an \
+                                                 erased phantom, which casts are the only use of" ]
+
+                                    Some(
+                                        FsPhantom
+                                            { Name = name
+                                              Docs = docs
+                                              Tags = tags
+                                              Order = order
+                                              TypeParameters = typeParameters
+                                              Carrier =
+                                                if
+                                                    flag TypeFlags.TemplateLiteral facts
+                                                    || flag TypeFlags.StringMapping facts
+                                                then
+                                                    FsString
+                                                else
+                                                    FsObj }
+                                    )
+                                else
+                                    Some(
+                                        FsAbbrev
+                                            { Name = name
+                                              Docs = docs
+                                              Tags = tags
+                                              Order = order
+                                              TypeParameters = typeParameters
+                                              Target = reference }
+                                    )
                             | None -> None)
 
                 let model =
@@ -1410,7 +1886,7 @@ let shapeClasses: Pass<ShapeModel> =
 
                                 facts.ConstructSignatures
                                 |> List.map (fun signature ->
-                                    let parameters, returns, signatureFindings =
+                                    let typeParameters, parameters, returns, signatureFindings =
                                         shapeSignature ctx model (Some name) name signature
 
                                     findings <- findings @ signatureFindings
@@ -1419,6 +1895,7 @@ let shapeClasses: Pass<ShapeModel> =
                                     { Name = name
                                       Docs = export.Docs
                                       Tags = export.Tags
+                                      TypeParameters = typeParameters
                                       Binding = bindingOf export
                                       Body = ExportConstructor(parameters, returns) }))
 
@@ -1472,7 +1949,7 @@ let shapeExports: Pass<ShapeModel> =
                             | Some facts when not facts.CallSignatures.IsEmpty ->
                                 facts.CallSignatures
                                 |> List.map (fun signature ->
-                                    let parameters, returns, signatureFindings =
+                                    let typeParameters, parameters, returns, signatureFindings =
                                         shapeSignature ctx model None name signature
 
                                     findings <- findings @ signatureFindings
@@ -1481,6 +1958,7 @@ let shapeExports: Pass<ShapeModel> =
                                     { Name = name
                                       Docs = export.Docs
                                       Tags = export.Tags
+                                      TypeParameters = typeParameters
                                       Binding = binding
                                       Body = ExportFunction(parameters, returns) })
                             | Some facts ->
@@ -1491,6 +1969,7 @@ let shapeExports: Pass<ShapeModel> =
                                   { Name = name
                                     Docs = export.Docs
                                     Tags = export.Tags
+                                    TypeParameters = []
                                     Binding = binding
                                     Body = ExportValue reference } ])
 
@@ -1529,7 +2008,10 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                             && decl.Members
                                |> List.forall (function
                                    | FsProperty _ -> true
-                                   | FsMethod _ -> false)
+                                   // An index signature has no name to bind a Create
+                                   // parameter to, so a type carrying one is not plain data.
+                                   | FsMethod _
+                                   | FsIndexer _ -> false)
                             ->
                             let parameters =
                                 decl.Members
@@ -1544,7 +2026,8 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                           Optional = optional
                                           Rest = false
                                           Type = p.Type }
-                                    | FsMethod _ -> failwith "unreachable: filtered to properties")
+                                    | FsMethod _
+                                    | FsIndexer _ -> failwith "unreachable: filtered to properties")
 
                             let required, optional = parameters |> List.partition (fun p -> not p.Optional)
 
@@ -1604,6 +2087,9 @@ let dedupeOverloads: Pass<ShapeModel> =
                     members
                     |> List.filter (function
                         | FsProperty _ -> true
+                        // Two `Item` overloads differing only in key type are legal and
+                        // wanted - a type may index by both string and number.
+                        | FsIndexer _ -> true
                         | FsMethod m ->
                             let key = (m.Name, signatureKey m.Parameters).ToString()
 
@@ -1691,19 +2177,6 @@ let rec private mapRef (f: FsTypeRef -> FsTypeRef) (reference: FsTypeRef) : FsTy
     | other -> other
 
 /// The type variables a reference mentions.
-let rec private typeVarsOf (reference: FsTypeRef) : Set<string> =
-    let union = List.fold (fun acc item -> Set.union acc (typeVarsOf item)) Set.empty
-
-    match reference with
-    | FsTypeVar name -> Set.singleton name
-    | FsOption inner
-    | FsArray inner -> typeVarsOf inner
-    | FsTuple items
-    | FsErasedUnion items -> union items
-    | FsDelegate(arguments, returns) -> Set.union (union arguments) (typeVarsOf returns)
-    | FsApp(_, arguments) -> union arguments
-    | _ -> Set.empty
-
 /// Every type reference in a declaration, rebuilt through `f`.
 let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
     let reference = mapRef f
@@ -1715,6 +2188,11 @@ let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
     let declMember =
         function
         | FsProperty p -> FsProperty { p with Type = reference p.Type }
+        | FsIndexer i ->
+            FsIndexer
+                { i with
+                    Key = reference i.Key
+                    Value = reference i.Value }
         | FsMethod m ->
             FsMethod
                 { m with
@@ -1734,6 +2212,12 @@ let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
             { d with
                 TypeParameters = d.TypeParameters |> List.map typeParam
                 Target = reference d.Target }
+    | FsPhantom d ->
+        FsPhantom
+            { d with
+                TypeParameters = d.TypeParameters |> List.map typeParam
+                Carrier = reference d.Carrier }
+    | FsMeasure d -> FsMeasure { d with Primitive = reference d.Primitive }
     | FsTaggedUnion d ->
         FsTaggedUnion
             { d with
@@ -1763,6 +2247,8 @@ let private declName =
     function
     | FsInterface d -> Some d.Name
     | FsAbbrev d -> Some d.Name
+    | FsPhantom d -> Some d.Name
+    | FsMeasure d -> Some d.Name
     | FsTaggedUnion d -> Some d.Name
     | FsStringEnum d -> Some d.Name
     | FsEnum d -> Some d.Name
@@ -1808,6 +2294,7 @@ let private repaired (model: ShapeModel) =
             |> List.choose (function
                 | FsInterface d -> Some(d.Name, d.TypeParameters.Length)
                 | FsAbbrev d -> Some(d.Name, d.TypeParameters.Length)
+                | FsPhantom d -> Some(d.Name, d.TypeParameters.Length)
                 | _ -> None)
             |> Map.ofList
 
@@ -1916,6 +2403,8 @@ let orderDeclarations: Pass<ShapeModel> =
                 | FsTaggedUnion decl -> orderKey decl.Order decl.Name
                 | FsEnum decl -> orderKey decl.Order decl.Name
                 | FsAbbrev decl -> orderKey decl.Order decl.Name
+                | FsPhantom decl -> orderKey decl.Order decl.Name
+                | FsMeasure decl -> orderKey decl.Order decl.Name
                 | FsExports _ -> ("￿", System.Int32.MaxValue), "￿")
 
         let exports =
@@ -1946,6 +2435,8 @@ let auditCoverage: Pass<ShapeModel> =
                         | FsTaggedUnion decl -> [ decl.Name ]
                         | FsEnum decl -> [ decl.Name ]
                         | FsAbbrev decl -> [ decl.Name ]
+                        | FsPhantom decl -> [ decl.Name ]
+                        | FsMeasure decl -> [ decl.Name ]
                         | FsExports members -> members |> List.map _.Name)
                     |> Set.ofList
 

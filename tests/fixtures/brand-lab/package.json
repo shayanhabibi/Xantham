@@ -1,0 +1,6 @@
+{
+    "name": "brand-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture exercising the branding intersections of docs/plans/generator-type-mapping.md 4.6 and D11 - branded primitives in both marker styles, brands in signatures, and the intersections that are not brands and must not be read as one. Tracked in git, no npm install, so the goldens pin every idiom under the live compiler."
+}

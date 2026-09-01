@@ -1,0 +1,154 @@
+{
+  "package": "brand-lab",
+  "module": "BrandLab",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 8,
+    "widened": 4,
+    "escape": 0
+  },
+  "symbols": [
+    {
+      "name": "UserId",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"
+        }
+      ]
+    },
+    {
+      "name": "SessionId",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"
+        }
+      ]
+    },
+    {
+      "name": "OrderId",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"
+        }
+      ]
+    },
+    {
+      "name": "Millis",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"
+        }
+      ]
+    },
+    {
+      "name": "Verified",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"
+        }
+      ]
+    },
+    {
+      "name": "Nonce",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"
+        }
+      ]
+    },
+    {
+      "name": "Mode",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"
+        }
+      ]
+    },
+    {
+      "name": "Store",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "Merged",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        }
+      ]
+    },
+    {
+      "name": "Counted",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        }
+      ]
+    },
+    {
+      "name": "Wrapped",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        }
+      ]
+    },
+    {
+      "name": "orderIdTag",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "type flags UniqueESSymbol not mapped yet; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "mint",
+      "tier": "exact",
+      "findings": []
+    }
+  ]
+}

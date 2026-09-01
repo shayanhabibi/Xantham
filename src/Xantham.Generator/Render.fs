@@ -69,6 +69,10 @@ let rec private printTypeIn (atomic: bool) =
     | FsDelegate(args, ret) ->
         args @ [ ret ] |> List.map (printTypeIn true) |> String.concat ", " |> sprintf "Func<%s>"
     | FsTypeVar name -> $"'{name}"
+    // A brand (§4.6, D11): `string<UserId>` for the non-numeric primitives, through the
+    // support package's measure-annotated abbreviations, and an ordinary measure application
+    // for numbers. Both erase to the primitive, which is all the JavaScript ever sees.
+    | FsBranded(primitive, measure) -> $"{printTypeIn true primitive}<{qualified measure}>"
     | FsApp(name, arguments) ->
         let text = arguments |> List.map (printTypeIn true) |> String.concat ", "
         $"{qualified name}<{text}>"
@@ -175,18 +179,9 @@ let private renderAbstractSignature (parameters: FsParam list) (returns: FsTypeR
 
     $"{left} -> {printType returns}"
 
-let private renderMember (m: FsMember) =
-    match m with
-    | FsProperty p ->
-        [ yield! docLines "    " p.Docs p.Tags
-          let mutability = if p.ReadOnly then "" else " with get, set"
-          yield $"    abstract {ident p.Name}: {printType p.Type}{mutability}" ]
-    | FsMethod m ->
-        [ yield! docLines "    " m.Docs m.Tags
-          yield $"    abstract {ident m.Name}: {renderAbstractSignature m.Parameters m.Return}" ]
-
 /// A declaration's name with its type parameters and their constraints (§4.9), as written at
-/// the point of definition: `Box<'T>`, `Node<'T when 'T :> Element>`.
+/// the point of definition: `Box<'T>`, `Node<'T when 'T :> Element>`. A generic *member*
+/// writes its own parameters the same way - `abstract read<'K> : ...`.
 let private declHead (name: string) (typeParameters: FsTypeParam list) =
     if typeParameters.IsEmpty then
         ident name
@@ -209,6 +204,22 @@ let private declRef (name: string) (typeParameters: FsTypeParam list) =
     else
         let parameters = typeParameters |> List.map (fun p -> $"'{p.Name}") |> String.concat ", "
         $"{ident name}<{parameters}>"
+
+let private renderMember (m: FsMember) =
+    match m with
+    | FsProperty p ->
+        [ yield! docLines "    " p.Docs p.Tags
+          let mutability = if p.ReadOnly then "" else " with get, set"
+          yield $"    abstract {ident p.Name}: {printType p.Type}{mutability}" ]
+    | FsMethod m ->
+        [ yield! docLines "    " m.Docs m.Tags
+          yield $"    abstract {declHead m.Name m.TypeParameters}: {renderAbstractSignature m.Parameters m.Return}" ]
+    | FsIndexer i ->
+        // `[<EmitIndexer>]` is what makes this reach JavaScript as `bag[key]` rather than a
+        // method call; the member must be named `Item` for F# indexer syntax to bind to it.
+        [ yield "    [<EmitIndexer>]"
+          let mutability = if i.ReadOnly then "" else " with get, set"
+          yield $"    abstract Item: {printType i.Key} -> {printType i.Value}{mutability}" ]
 
 let private renderInterface (decl: FsInterfaceDecl) =
     [ yield! docLines "" decl.Docs decl.Tags
@@ -288,6 +299,28 @@ let private renderAbbrev (decl: FsAbbrevDecl) =
     [ yield! docLines "" decl.Docs decl.Tags
       yield $"type {declHead decl.Name decl.TypeParameters} = {printType decl.Target}" ]
 
+/// The unit of measure a branding intersection becomes (§4.6, D11). A measure has no body:
+/// the name is the whole of it, and what it brands is written at the uses as `string<Name>`.
+/// The primitive is recorded in the doc comment because the declaration itself cannot say it.
+let private renderMeasure (decl: FsMeasureDecl) =
+    [ yield! docLines "" decl.Docs decl.Tags
+      yield $"/// <remarks>A brand over <c>{printType decl.Primitive}</c>.</remarks>"
+      yield "[<Measure>]"
+      yield $"type {ident decl.Name}" ]
+
+/// A declaration whose right-hand side is a type-level computation F# has no way to reproduce -
+/// a mapped or conditional type, or a template literal over an operand the checker left open
+/// (§4.10, §4.11). The name and the arity survive, so uses of it stay distinct from one another
+/// and from `obj`; the single private case means a cast is the only way in or out.
+let private renderPhantom (decl: FsPhantomDecl) =
+    // Named after the type it carries, so the cases of two phantoms never collide in the one
+    // module a package generates into.
+    let case = ident (decl.Name + "__")
+
+    [ yield! docLines "" decl.Docs decl.Tags
+      yield "[<Erase>]"
+      yield $"type {declHead decl.Name decl.TypeParameters} = private {case} of {printType decl.Carrier}" ]
+
 /// The import name a default export binds under - the JavaScript key, not an F# name.
 let private defaultExportKey = "default"
 
@@ -312,13 +345,15 @@ let private renderExports (packageName: string) (members: FsExportMember list) =
           match m.Body with
           | ExportFunction(parameters, returns) ->
               yield attribute ""
-              yield $"    static member {ident m.Name} {renderParamList parameters} : {printType returns} = jsNative"
+              yield
+                  $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
           | ExportValue reference ->
               yield attribute ""
               yield $"    static member {ident m.Name}: {printType reference} = jsNative"
           | ExportConstructor(parameters, returns) ->
               yield attribute "; EmitConstructor"
-              yield $"    static member {ident m.Name} {renderParamList parameters} : {printType returns} = jsNative" ]
+              yield
+                  $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative" ]
 
 /// The one `.fs` file of the walking skeleton: header, opens, declarations in the order the
 /// shape tier fixed. `module rec` so declaration order never fights reference order.
@@ -332,6 +367,8 @@ let renderSource: Pass<RenderModel> =
                 | FsTaggedUnion decl -> renderTaggedUnion decl
                 | FsEnum decl -> renderEnum decl
                 | FsAbbrev decl -> renderAbbrev decl
+                | FsMeasure decl -> renderMeasure decl
+                | FsPhantom decl -> renderPhantom decl
                 | FsExports members -> renderExports model.PackageName members)
             |> List.map (String.concat "\n")
             |> String.concat "\n\n"
@@ -348,6 +385,7 @@ let renderSource: Pass<RenderModel> =
                   "open System"
                   "open Fable.Core"
                   "open Fable.Core.JsInterop"
+                  "open Xantham.Fable.Core"
                   ""
                   body
                   "" ]
@@ -375,6 +413,8 @@ let symbolTiers (model: RenderModel) : (string * Tier * Finding list) list =
             | FsTaggedUnion decl -> [ decl.Name ]
             | FsEnum decl -> [ decl.Name ]
             | FsAbbrev decl -> [ decl.Name ]
+            | FsMeasure decl -> [ decl.Name ]
+            | FsPhantom decl -> [ decl.Name ]
             | FsExports members -> members |> List.map _.Name)
         |> List.distinct
 

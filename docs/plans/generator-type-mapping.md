@@ -297,6 +297,39 @@ consumer must discriminate. The generator knows the position; use it.
   pattern. Detection: primitive & object-with-only-phantom-members.
 - Nonsensical/`never` intersections → whatever the checker reduces them to (`getReducedType`).
 
+*Landed (2026-09-02, phase D) — the branding half. Object-intersection flattening is still
+open; those stay `obj` with a Widened finding.* The declaration becomes the measure and the
+*uses* carry the brand:
+
+```fsharp
+[<Measure>]
+type UserId
+
+abstract get: id: string<UserId> -> string
+abstract put: id: string<UserId> * at: float<Millis> -> unit
+abstract find: ?id: string<SessionId> -> string<UserId> option
+```
+
+No abbreviation is emitted beside it: measures and type abbreviations share one name
+namespace, so `UserId` can only be spent once and the measure is what spends it. Numeric
+brands are ordinary measure applications; `string`, `bool` and `char` go through the support
+package's `[<MeasureAnnotatedAbbreviation>]` declarations, which is why generated files now
+carry `open Xantham.Fable.Core`. The idiom is recorded once — Ergonomic, at the declaration;
+uses cost nothing further, the mapping being exact in spirit.
+
+One wrinkle the fixture pinned: a brand over anything but a bare primitive *distributes*.
+`boolean & Marker` is handed back as `(true & Marker) | (false & Marker)`, and a branded
+literal union the same way. Those arms are the checker's own working and carry no names of
+their own, so a union of anonymous brands that agree on their primitive is folded back into
+the one brand it was written as — while a union of *named* brands (`UserId | SessionId`)
+stays a union, because that is what it is.
+
+The negatives matter as much: `{ a } & { b }` (no primitive), `string & { count: number }` (a
+member a caller can actually read), and a wrapper over a named type all stay `obj` and record
+the widening. Reading any of them as a brand would throw something usable away and call the
+result exact. `tests/fixtures/brand-lab` pins all of it under the live compiler, negatives
+included, and its golden compiles against the support package in the gate.
+
 ### 4.7 Enums
 
 - Numeric enum → F# `enum` with the checker's `getConstantValue` per member (Exact,
@@ -328,6 +361,33 @@ consumer must discriminate. The generator knows the position; use it.
   iterables → `JS.AsyncIterable`. Promises → `JS.Promise<'T>` (leave `Async` adaptation to
   the consumer or an opt-in wrapper layer; don't bake it into bindings).
 
+*Landed (2026-09-02, phase D) - the compiler-lib group's disposition.* O7 widened everything
+the compiler's own `lib.d.ts` declares to `obj`, "until the shipped compiler-lib package
+exists". For the ECMAScript half of that lib it exists, it is `Fable.Core.JS`, and every
+generated file already opens it - so `Promise<Response>` is now `JS.Promise<obj>` rather than
+a bare `obj`: one honest loss (the DOM name inside) instead of two.
+
+The table is pinned in `Naming.LibBindings`, and each entry carries the *arity* Fable's
+binding takes. That is the safety argument rather than bookkeeping: TypeScript's lib moves -
+it made `Uint8Array` generic in a backing-buffer parameter Fable's abbreviation does not have
+- and a mapping that assumed the arities agreed would emit code that does not compile. So a
+lib type carrying more arguments than the binding maps with the extras dropped and an
+Ergonomic finding; one carrying fewer is some other type wearing a familiar name, and widens
+as before. `PromiseLike`, `ReadonlyMap` and `ReadonlySet` map with a finding for the
+restriction F# has no binding for.
+
+Two absences are deliberate. The *synchronous* iteration protocol (`Iterable`, `Iterator`) has
+no Fable.Core binding, and `seq<'T>` is not one however alike the two look. The DOM
+(`Response`, `EventTarget`, `ReadableStream`, ...) needs `Fable.Browser.*`, which is a
+decision about what generated bindings depend on rather than a row in a table.
+
+What it was worth on the workers-types rung: widened findings 528 -> 451, and 39 "type
+parameter is erased: every use of it widened away" findings gone, because a generic whose only
+use of `'T` was inside a `Promise` now carries it. The escape count *rose* (38 -> 49) for the
+honest reason - an `any` inside a `Promise` used to be invisible inside the widened wrapper
+and is now reported at its own position. `tests/fixtures/lib-lab` pins the bound names, the
+arity rule and both absences under the live compiler.
+
 ### 4.9 Generics
 
 - Type parameters → F# type parameters, names preserved.
@@ -357,6 +417,32 @@ This is where the archived `Xantham.Fable.Core` work pays off. Two regimes:
   genuinely safe — this was the point of that library, and its README's mapping table
   (keyof / K-extends-keyof + T[K] / T[keyof T] / index signature) is adopted as-is.
 
+  *Landed (2026-09-02, phase D).* The open regime turns on one decision: **`K` is not bound
+  as an F# type parameter at all.** Its bound is the whole of what it means and F# cannot
+  state it, so a bare `'K` is an unconstrained variable that accepts anything and drags the
+  `T[K]` it selects down to `obj` with it — which is exactly what the generator emitted
+  before this rung (`get` read `(source: obj, key: obj) : obj`). Instead the key variable is
+  dropped and its uses are written as the idiom:
+
+  | TypeScript | F# |
+  |---|---|
+  | `keyof T`, `T` in scope | `keyof<'T>` |
+  | `K extends keyof T` used only as a key | `keyof<'T>`, `K` unbound |
+  | `K extends keyof T` plus `T[K]` | `typekeyof<'T,'R>` at the key, `'R` at the access, `K` replaced by `'R` |
+  | `T[keyof T]` | `obj`, Widened — nothing names the value type |
+
+  So `get<T, K extends keyof T>(source: T, key: K): T[K]` emits
+  `get<'T, 'R> (source: 'T, key: typekeyof<'T, 'R>) : 'R`, and Cloudflare's
+  `Ai.run<Name extends keyof AiModelList>` reads `model: keyof<'AiModelList>` where it used
+  to bind a `'Name` that meant nothing. Detection is over the checker's own facts — a type
+  parameter whose constraint is an `Index` type, and whether the signature reaches an
+  `IndexedAccess` over the same operand and key — so it is the idiom that is recognised, not
+  a name. The resolve tier now follows index operands and both halves of an indexed access;
+  without that the table was not closed over them.
+
+  `proptypekey`/`proptypelock` and `PropertyRecord` are not emitted yet: no fixture has
+  needed them, and `T[keyof T]` widens loudly rather than guessing.
+
 Mapped types over concrete operands (`Partial<Options>`, `Pick<X,"a"|"b">`,
 `Record<string, T>`):
 
@@ -383,6 +469,36 @@ Mapped types over concrete operands (`Partial<Options>`, `Pick<X,"a"|"b">`,
 - Template literal types (`` `on${Capitalize<E>}` ``) → `string` (Widened) by default;
   measure-tagged `string<brand>` per named alias as opt-in. Closed template literals over
   finite unions expand to literal unions in the checker → StringEnum path applies.
+
+*Landed (2026-09-02, phase D) — the phantom rung, taking option (c) here and the last
+bullet of §4.10 with it.* A declaration whose right-hand side is a type-level computation
+the checker could not finish — a mapped type, a conditional, or a template literal over an
+open operand — used to reach the shape tier looking like a plain alias to nothing, because
+its parameters hang off the *alias* rather than the type. It was then dropped outright
+(F# has no unused type variable in an abbreviation) and every use of it widened to `obj`.
+Now the name and the arity survive:
+
+```fsharp
+[<Erase>]
+type DeepPartial<'T> = private DeepPartial__ of obj
+```
+
+The single private case means a cast is the only way in or out — an honest statement that
+nothing is known about the contents — while the arity keeps `DeepPartial<A>` and
+`DeepPartial<B>` distinct from each other and from `obj`. The carrier is `string` for
+template literals and intrinsic string mappings, which are strings at runtime whatever they
+interpolate, and `obj` otherwise. Every phantom is Widened and says so in the manifest.
+Option (a), the union of both conditional branches, is not taken: a phantom is loud where a
+branch union quietly looks precise.
+
+Two supporting changes made it work. The resolve tier now reads alias type arguments for
+these types — without them the declaration binds nothing and there is no arity to keep — and
+a template literal, interned by its texts and operands and so carrying no alias at all, falls
+back to its own operands. The gain is not confined to the lab fixture: in
+`@cloudflare/workers-types` this recovered `DurableObjectClass<'T>`, `Fetcher<'T,'Reserved>`,
+`D1Result<'T>`, `Service<'T>`, `IncomingRequestCfProperties<'HostMetadata>` and others, and
+`WorkerStub.getDurableObjectClass<'T>` now returns `DurableObjectClass<'T>` where it returned
+`obj`.
 
 ### 4.12 Tuples
 
@@ -469,6 +585,30 @@ from the catalogue as D1–D12.
    guaranteed-arity default (§4.8).
 6. **D6 — decided.** Simple synthesis for checker-expanded aliases: `Partial<Options>` →
    `OptionsPartial`. Revisit if collisions or readability demand (§4.10).
+
+   *Landed (2026-09-02, phase D).* No synthesis was needed in the end: the expansion is
+   declared under the **alias's own exported name**, so `type PartialOptions =
+   Partial<Options>` emits `PartialOptions` and the collision question never arises. The
+   name only had to be invented for an expansion with no export to hang it on, and no
+   fixture has produced one yet.
+
+   What did have to change was the resolve tier. `Partial`, `Pick`, `Omit`, `Readonly` and
+   `Record` are written in `lib.es5.d.ts`, so O7 groups them as the compiler lib and the
+   identity-only shortcut skipped their members - every one of them reached the shape tier
+   looking empty and abbreviated to `obj`. But that shortcut's justification is that the
+   shape tier renders the group's types *by templated name*, and a mapped type has no name:
+   it is a type-level function with no runtime identity, and what it stands for is the
+   entry package's own operand, transformed. So an anonymous shape is now resolved by
+   content whatever group it was written in. `Partial` hoists to `option`, `Readonly` drops
+   the setter, `Pick`/`Omit` select, `Record` becomes an `[<EmitIndexer>]`, and JSDoc
+   carries through from the operand. 14 `= obj` abbreviations across the fixture ladder
+   became real shapes.
+
+   One latent bug surfaced with it, caught by the compile gate rather than by review: an
+   out-of-scope type parameter widened to `obj`, and `Ai<obj>` does not compile against
+   `'AiModelList :> AiModelListType` once the constraint is a real type rather than a
+   vanished one. It now widens to its constraint where the constraint is a plain named
+   type - still a widening, just a sound one.
 7. **D7 — decided.** Optional tuple tails are `option`-typed components (`undefined` slot),
    simplicity first; patch to shorter-array overloads or erased carriers where a real API
    rejects the slot (§4.12). *Watch item:* the behavioral test of what TS APIs accept.
@@ -480,6 +620,28 @@ from the catalogue as D1–D12.
 10. **D10 — decided.** Generated bindings target **Fable-only**.
 11. **D11 — decided.** Protected members, unique-symbol brands, and type predicates are
     dropped (with doc notes) now; revisit after the generator exists (§4.4, §4.1, §4.8).
+
+    **Revisited (2026-09-01, phase D) for brands: they render to units of measure.** A
+    measure is exactly a compile-time nominal distinction over a shared runtime
+    representation — which is what an intersection brand (`type UserId = string & {
+    __brand: "UserId" }`) is — and Fable erases it, so a branded value costs nothing on the
+    JavaScript side. Numeric brands are ordinary measure applications (`float<Millis>`) and
+    need no support package at all. Non-numeric primitives use
+    `[<MeasureAnnotatedAbbreviation>]` (the FSharp.UMX mechanism) to carry a measure on
+    `string`/`bool`/`char`; `Xantham.Fable.Core`'s `Brands` module declares those and
+    `Brand.tag*`/`untag*` are the only ways across the boundary. Two properties were
+    verified rather than recalled, because the emission depends on both: the brand is
+    enforced in *both* directions (`string<UserId>` ≠ `string<OrderId>`, and a raw `string`
+    is neither), and the abbreviation does not shadow the primitive — `string` with no
+    measure argument still resolves — which is what lets generated code `open` the support
+    package at the top of a file that then uses `string` on every line.
+
+    **Landed (2026-09-02, phase D): detection too, so D11 closes.** A brand is recognised
+    structurally, never by name — exactly one primitive constituent, intersected with objects
+    whose every property is a marker: keyed by a unique symbol, so nothing can name it; named
+    with a leading underscore, so nothing is meant to; or typed `never`, so nothing can
+    construct it. Anything else is an ordinary intersection and keeps saying so. See §4.6 for
+    what the pass emits and the wrinkle that cost the most: brands distribute over unions.
 
 12. **D12 — decided (added after review).** Mixed literal unions (string + number literals
     in one union) map to a single `[<StringEnum>]` DU: Fable 5 respects

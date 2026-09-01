@@ -7,6 +7,7 @@ module rec AnsiRegex
 open System
 open Fable.Core
 open Fable.Core.JsInterop
+open Xantham.Fable.Core
 
 [<Interface>]
 type Options =

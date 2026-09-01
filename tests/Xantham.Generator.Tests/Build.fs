@@ -83,6 +83,7 @@ let shapeModel (table: TypeFacts list) : ShapeModel =
       DeclOrders = Map.empty
       ExportMembers = []
       TypeVars = Map.empty
+      KeyVars = Map.empty
       Decls = [] }
 
 /// A call or construct signature over the given parameters, no rest tail.

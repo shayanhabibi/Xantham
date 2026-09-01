@@ -156,6 +156,68 @@ module Naming =
         | CompilerLib -> CompilerLibModule
         | Dependency name -> packageModule name
 
+    /// The compiler-lib names Fable.Core already binds, and the F# spelling of each.
+    ///
+    /// O7 left the compiler-lib group widening to `obj` "until the shipped compiler-lib
+    /// package exists". For the ECMAScript half of `lib.d.ts` it already does, and every
+    /// generated file opens it: `Fable.Core.JS` is that package. So `Promise<Response>` is
+    /// `JS.Promise<obj>` rather than a bare `obj`, which is one honest loss (the DOM name
+    /// inside) instead of two.
+    ///
+    /// Each entry is the F# name and the arity that name takes. The arity is here rather than
+    /// inferred because it is the whole safety argument: TypeScript's own lib moves - it made
+    /// `Uint8Array` generic in a buffer parameter that Fable's abbreviation does not have -
+    /// and a mapping that guessed would emit code that does not compile. Arities that agree
+    /// map exactly; a lib type carrying *more* arguments than Fable's binding maps with the
+    /// extras dropped and a finding; one carrying fewer is not this type at all and widens.
+    ///
+    /// The DOM half (`Response`, `HTMLElement`, `ReadableStream`, ...) is deliberately absent:
+    /// binding it needs `Fable.Browser.*`, which is a dependency decision, not a table entry.
+    module LibBindings =
+        /// Name, F# arity, and the loss to record - `None` when the mapping gives up nothing.
+        let private table =
+            [ "Promise", ("JS.Promise", 1, None)
+              // A thenable is not a promise: TypeScript's `PromiseLike` is the structural
+              // supertype, and reading one as `JS.Promise` claims methods it may not have.
+              "PromiseLike", ("JS.Promise", 1, Some "PromiseLike reads as JS.Promise; a bare thenable is not one")
+              "Map", ("JS.Map", 2, None)
+              "ReadonlyMap", ("JS.Map", 2, Some "ReadonlyMap reads as JS.Map; the readonly restriction is not carried")
+              "WeakMap", ("JS.WeakMap", 2, None)
+              "Set", ("JS.Set", 1, None)
+              "ReadonlySet", ("JS.Set", 1, Some "ReadonlySet reads as JS.Set; the readonly restriction is not carried")
+              "WeakSet", ("JS.WeakSet", 1, None)
+              "Date", ("JS.Date", 0, None)
+              "Function", ("JS.Function", 0, None)
+              "Object", ("JS.Object", 0, None)
+              "Math", ("JS.Math", 0, None)
+              "JSON", ("JS.JSON", 0, None)
+              "Console", ("JS.Console", 0, None)
+              "PropertyDescriptor", ("JS.PropertyDescriptor", 0, None)
+              "ArrayBuffer", ("JS.ArrayBuffer", 0, None)
+              "ArrayBufferView", ("JS.ArrayBufferView", 0, None)
+              "DataView", ("JS.DataView", 0, None)
+              "Int8Array", ("JS.Int8Array", 0, None)
+              "Uint8Array", ("JS.Uint8Array", 0, None)
+              "Uint8ClampedArray", ("JS.Uint8ClampedArray", 0, None)
+              "Int16Array", ("JS.Int16Array", 0, None)
+              "Uint16Array", ("JS.Uint16Array", 0, None)
+              "Int32Array", ("JS.Int32Array", 0, None)
+              "Uint32Array", ("JS.Uint32Array", 0, None)
+              "Float32Array", ("JS.Float32Array", 0, None)
+              "Float64Array", ("JS.Float64Array", 0, None)
+              "BigInt64Array", ("JS.BigInt64Array", 0, None)
+              "AsyncIterable", ("JS.AsyncIterable", 1, None)
+              "AsyncIterator", ("JS.AsyncIterator", 1, None)
+              "AsyncGenerator", ("JS.AsyncGenerator", 1, None)
+              "IteratorResult", ("JS.IteratorResult", 1, None) ]
+            |> Map.ofList
+
+        /// The binding for a lib name, if Fable.Core has one: its F# name, its arity, and the
+        /// loss to record. `seq`-shaped names (`Iterable`, `Iterator`) are absent on purpose -
+        /// Fable.Core binds only the async ones, and pretending `seq<'T>` interoperates with a
+        /// JS iterable is exactly the kind of claim this table exists not to make.
+        let tryFind (name: string) = Map.tryFind name table
+
     /// The JavaScript key a member symbol stands for. The checker escapes a name that begins
     /// with two underscores by prepending a third, so that a real `__html` cannot collide with
     /// the internal names it invents (`__type`, `__call`); undoing that is what turns the
@@ -295,6 +357,15 @@ type ResolvedMember =
       ReadOnly: bool
       TypeId: int }
 
+/// One index signature (`[key: string]: V`) as the resolve tier records it. These are
+/// invisible to property enumeration - `getPropertiesOfType` returns nothing for a type whose
+/// only content is an index signature - so a type can carry these and no members at all, and
+/// the shape tier has to consult both before deciding a type has no shape worth declaring.
+type ResolvedIndex =
+    { KeyTypeId: int
+      ValueTypeId: int
+      IsReadonly: bool }
+
 type ResolvedSignature =
     { Parameters: ResolvedMember list
       /// The signature's last parameter is a rest parameter (`...args`).
@@ -315,6 +386,9 @@ type TypeFacts =
       /// templates with, and what a widening finding names.
       SymbolName: string option
       Members: ResolvedMember list
+      /// Index signatures (§4.10). Kept apart from `Members` because they are not properties:
+      /// they have no name, and a type may carry one with no members at all.
+      IndexInfos: ResolvedIndex list
       CallSignatures: ResolvedSignature list
       ConstructSignatures: ResolvedSignature list
       /// `extends` bases of an interface or class instance type, by id.
@@ -331,6 +405,10 @@ type TypeFacts =
       /// form of a generic alias these are its own parameters - `type Mapper<T> = (t: T) => T`
       /// leaves the function type itself parameterless, so this is the only place `T` appears.
       AliasTypeArguments: int list
+      /// The constituents of an intersection, in the checker's order. Separate from
+      /// `UnionMembers` because the two mean opposite things and the passes that read one
+      /// must never see the other.
+      IntersectionMembers: int list
       /// A type parameter's `extends` bound, by id (§4.9). Only type parameters carry one.
       Constraint: int option
       /// A type parameter's default type argument, by id (§4.9).
@@ -344,12 +422,14 @@ module TypeFacts =
           Origin = Unclassified
           SymbolName = None
           Members = []
+          IndexInfos = []
           CallSignatures = []
           ConstructSignatures = []
           BaseTypes = []
           TypeArguments = []
           TupleElements = []
           AliasTypeArguments = []
+          IntersectionMembers = []
           Constraint = None
           Default = None
           UnionMembers = [] }
@@ -404,6 +484,11 @@ type FsTypeRef =
     /// substitutes members eagerly, so this is written only when the instantiation's target is
     /// itself a declaration this run generates; otherwise the expansion stands on its own.
     | FsApp of string * FsTypeRef list
+    /// A primitive carrying a unit of measure: the F# rendering of a TypeScript branding
+    /// intersection (§4.6, D11). `string & { __brand: "UserId" }` is a value that is a string
+    /// at runtime and refuses to substitute for another string at compile time, which is what
+    /// a measure is. The measure name is a declaration this run emits.
+    | FsBranded of primitive: FsTypeRef * measure: string
     | FsNamed of string
 
 /// A literal payload carried by a StringEnum case (D12: mixed literal unions keep their
@@ -420,6 +505,15 @@ type FsPropertyMember =
       ReadOnly: bool
       Type: FsTypeRef }
 
+/// A type parameter (§4.9), bound by a declaration or by a generic signature of its own. The
+/// constraint is carried only when F# can express it - a subtype constraint against another
+/// generated interface. TypeScript bounds that have no F# form (`extends string`, `extends
+/// keyof T`) are dropped with a finding rather than approximated, because a wrong constraint
+/// rejects correct code.
+type FsTypeParam =
+    { Name: string
+      Constraint: FsTypeRef option }
+
 type FsParam =
     { Name: string
       Optional: bool
@@ -432,14 +526,26 @@ type FsMethodMember =
     { Name: string
       Docs: string
       Tags: JSDocTagInfo list
+      /// The method's *own* parameters, where it is generic independently of its declaration:
+      /// `read<K extends keyof T>(key: K)` binds `K` here and reads `T` from the interface.
+      TypeParameters: FsTypeParam list
       Parameters: FsParam list
       Return: FsTypeRef }
+
+/// A TypeScript index signature rendered as F#: an `Item` member under `[<EmitIndexer>]`, so
+/// `bag["key"]` is what reaches JavaScript rather than a `.Item(...)` call (§4.10). A readonly
+/// signature drops the setter.
+type FsIndexerMember =
+    { Key: FsTypeRef
+      Value: FsTypeRef
+      ReadOnly: bool }
 
 /// An interface member. Overloads are consecutive `FsMethod` entries sharing a name -
 /// overloaded abstract members are legal F#.
 type FsMember =
     | FsProperty of FsPropertyMember
     | FsMethod of FsMethodMember
+    | FsIndexer of FsIndexerMember
 
 /// How a value export is bound to its JavaScript module.
 type ImportBinding =
@@ -463,16 +569,11 @@ type FsExportMember =
     { Name: string
       Docs: string
       Tags: JSDocTagInfo list
+      /// A top-level generic function binds its parameters on the member: `Exports` itself is
+      /// not generic, so `get<T>(source: T)` has nowhere else to put `T`.
+      TypeParameters: FsTypeParam list
       Binding: ImportBinding
       Body: FsExportBody }
-
-/// A declaration's type parameter (§4.9). The constraint is carried only when F# can express
-/// it - a subtype constraint against another generated interface. TypeScript bounds that have
-/// no F# form (`extends string`, `extends keyof T`) are dropped with a finding rather than
-/// approximated, because a wrong constraint rejects correct code.
-type FsTypeParam =
-    { Name: string
-      Constraint: FsTypeRef option }
 
 type FsInterfaceDecl =
     { Name: string
@@ -553,14 +654,57 @@ type FsAbbrevDecl =
       TypeParameters: FsTypeParam list
       Target: FsTypeRef }
 
+/// A declaration TypeScript *computes* and F# cannot reproduce: a mapped type, a conditional or
+/// a template literal at an operand the checker could not resolve (§4.10, §4.11). There is no
+/// structure to emit - the structure is a function of an argument not yet supplied - so the
+/// declaration is erased and keeps only its name and arity, which is enough for uses of it to
+/// stay distinct from each other and from `obj`. Its single case is private, so the only way in
+/// or out is a cast, which is exactly the guarantee the generator can honestly make.
+type FsPhantomDecl =
+    { Name: string
+      Docs: string
+      Tags: JSDocTagInfo list
+      Order: DeclOrder option
+      TypeParameters: FsTypeParam list
+      /// What the value is at runtime once erased: `string` for a template literal or an
+      /// intrinsic string mapping, `obj` for everything else.
+      Carrier: FsTypeRef }
+
+/// A unit of measure standing for a branding intersection (§4.6, D11). It has no body: a
+/// measure is a name and nothing else, and the brand it marks is written at the *uses*, as
+/// `string<UserId>`, rather than as an abbreviation - the name can only be spent once, and a
+/// measure is what spends it.
+type FsMeasureDecl =
+    { Name: string
+      Docs: string
+      Tags: JSDocTagInfo list
+      Order: DeclOrder option
+      /// The primitive the brand is over, kept for the manifest and the doc comment: a
+      /// measure itself says nothing about what it annotates.
+      Primitive: FsTypeRef }
+
 type FsDecl =
     | FsInterface of FsInterfaceDecl
     | FsStringEnum of FsStringEnumDecl
+    | FsPhantom of FsPhantomDecl
+    | FsMeasure of FsMeasureDecl
     | FsTaggedUnion of FsTaggedUnionDecl
     | FsEnum of FsEnumDecl
     | FsAbbrev of FsAbbrevDecl
     /// The one `Exports` type gathering the module's value exports.
     | FsExports of FsExportMember list
+
+/// How a `K extends keyof T` variable is written in F# (§4.10, the open keyof regime).
+/// TypeScript's key variable has no F# counterpart of its own: a bare `'K` would be an
+/// unconstrained variable saying nothing about T's keys, and every use of it - including the
+/// `T[K]` it selects - would have to widen to obj. The support package carries the idiom
+/// instead, so `'K` is not bound at all; its uses are written as one of these.
+type KeyBinding =
+    /// `keyof<'T>`: the key is only ever a key, so nothing needs the type it selects.
+    | KeyOf of operand: string
+    /// `typekeyof<'T,'R>` at the key's uses and `'R` at `T[K]`: the signature reads the value
+    /// the key selects, so `'K` is replaced by the result variable that names it.
+    | TypedKeyOf of operand: string * result: string
 
 type ShapeModel =
     { Harvest: HarvestModel
@@ -582,6 +726,10 @@ type ShapeModel =
       /// it is a property of *where* the reference is written, not of the reference: a pass
       /// binds it once around a declaration and every nested `typeRef` inherits it.
       TypeVars: Map<int, string>
+      /// Type-parameter id -> the support-package idiom its uses are written as, for the
+      /// signature currently being shaped (§4.10). Scoped like `TypeVars`, and for the same
+      /// reason: `K extends keyof T` binds nothing outside the signature that declared it.
+      KeyVars: Map<int, KeyBinding>
       Decls: FsDecl list }
 
 // ---------------------------------------------------------------------------------------------

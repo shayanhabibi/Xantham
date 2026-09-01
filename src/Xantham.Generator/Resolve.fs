@@ -95,6 +95,29 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                 { TypeFacts.shallow ty with
                     UnionMembers = members |> List.map _.Id },
                 members
+        elif has TypeFlags.Intersection then
+            // The constituents, followed into the table. A branding intersection (§4.6) is
+            // decided by what its object operands *contain* - a marker property or a real
+            // one - so the operands are resolved in full rather than identified.
+            let! members = ctx.Session.getTypesOfType ty.Id
+            let members = members |> ValueOption.map Array.toList |> ValueOption.defaultValue []
+
+            // The alias's arguments, for the same reason a conditional needs them: an
+            // intersection that is not a brand is a shape F# cannot write, and the phantom it
+            // becomes is worth nothing without the arity.
+            let! aliasTypeArguments = ctx.Session.getAliasTypeArgumentsOfType ty.Id
+
+            let aliasTypeArguments =
+                aliasTypeArguments
+                |> ValueOption.defaultValue [||]
+                |> Array.filter (fun argument -> argument.Flags.HasFlag TypeFlags.TypeParameter)
+                |> Array.toList
+
+            return
+                { TypeFacts.shallow ty with
+                    IntersectionMembers = members |> List.map _.Id
+                    AliasTypeArguments = aliasTypeArguments |> List.map _.Id },
+                members @ aliasTypeArguments
         elif has TypeFlags.EnumLiteral then
             // An enum member: its symbol names the F# enum case (§4.7); the value is already
             // on the response.
@@ -152,7 +175,22 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                 |> Array.filter (fun argument -> argument.Flags.HasFlag TypeFlags.TypeParameter)
                 |> Array.toList
 
-            if GeneratorConfig.disposition ctx.Config origin <> Ship then
+            // The O7 shortcut below rests on the group's types having names to be referenced
+            // by. A mapped type has none: `Partial<Options>` is written in lib.es5.d.ts, so it
+            // groups as the compiler lib, but it is a type-level *function* with no runtime
+            // identity - what it stands for is the entry package's own operand, transformed.
+            // Deferring to a name that does not exist widens the whole expansion to obj and
+            // loses the operand with it (D6), so an anonymous shape is resolved by content
+            // whatever group it was written in.
+            let isAnonymousShape =
+                let objectFlags = ty.ObjectFlags |> ValueOption.defaultValue ObjectFlags.None
+
+                objectFlags.HasFlag ObjectFlags.Mapped
+                || match symbol with
+                   | ValueSome s -> s.Name.StartsWith "__"
+                   | ValueNone -> true
+
+            if GeneratorConfig.disposition ctx.Config origin <> Ship && not isAnonymousShape then
                 // Identity only (O7): the shape tier renders references to this group by
                 // templated name or widens them, and either way nothing reads its members.
                 return
@@ -232,25 +270,44 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
             let! baseTypes = ctx.Session.getBaseTypes ty.Id
             let baseTypes = baseTypes |> ValueOption.map Array.toList |> ValueOption.defaultValue []
 
+            // An index signature is not a property: `getPropertiesOfType` returns nothing at
+            // all for `interface Bag { [key: string]: number }`, so without this the type
+            // reaches the shape tier looking empty and is never declared. Key and value are
+            // followed into the table like any other referenced type.
+            let! indexInfos = ctx.Session.getIndexInfosOfType ty.Id
+
+            let indexInfos =
+                indexInfos |> ValueOption.defaultValue [||] |> Array.toList
+
             let discovered =
                 [ yield! members |> Array.map snd
                   yield! callSignatures |> Array.collect (snd >> List.toArray)
                   yield! constructSignatures |> Array.collect (snd >> List.toArray)
                   yield! baseTypes
                   yield! typeArguments
-                  yield! aliasTypeArguments ]
+                  yield! aliasTypeArguments
+                  for info in indexInfos do
+                      info.KeyType
+                      info.ValueType ]
 
             return
                 { Response = ty
                   Origin = origin
                   SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
                   Members = members |> Array.map fst |> Array.toList
+                  IndexInfos =
+                    indexInfos
+                    |> List.map (fun info ->
+                        { KeyTypeId = info.KeyType.Id
+                          ValueTypeId = info.ValueType.Id
+                          IsReadonly = info.IsReadonly = ValueSome true })
                   CallSignatures = callSignatures |> Array.map fst |> Array.toList
                   ConstructSignatures = constructSignatures |> Array.map fst |> Array.toList
                   BaseTypes = baseTypes |> List.map _.Id
                   TypeArguments = typeArguments |> List.map _.Id
                   TupleElements = tupleElements
                   AliasTypeArguments = aliasTypeArguments |> List.map _.Id
+                  IntersectionMembers = []
                   Constraint = None
                   Default = None
                   UnionMembers = [] },
@@ -271,8 +328,53 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                     Constraint = bound |> ValueOption.map _.Id |> ValueOption.toOption
                     Default = fallback |> ValueOption.map _.Id |> ValueOption.toOption },
                 [ yield! ValueOption.toList bound; yield! ValueOption.toList fallback ]
+        elif has TypeFlags.Index then
+            // `keyof T` at an operand the checker could not finish (§4.10). The operand is the
+            // index type's target, and it is what the whole idiom is about - `keyof<'T>` needs
+            // a `'T` - so it is followed rather than left dangling.
+            let! operand = ctx.Session.getTargetOfType ty.Id
+            return TypeFacts.shallow ty, [ operand ]
+        elif has TypeFlags.IndexedAccess then
+            // `T[K]`. Both halves are followed: the index is usually a key variable whose
+            // constraint names the object, and reading one without the other cannot tell
+            // `T[K]` apart from `T[keyof T]`.
+            let! objectType = ctx.Session.getObjectTypeOfType ty.Id
+            let! indexType = ctx.Session.getIndexTypeOfType ty.Id
+            return TypeFacts.shallow ty, [ objectType; indexType ]
         else
-            return TypeFacts.shallow ty, []
+            // A conditional, a template literal or an intrinsic string mapping. None of these
+            // has a structure to read - each is a type-level computation over an argument the
+            // checker could not supply - but the *arguments* are what the declaration binds,
+            // and without them `type Unwrap<T> = ...` reaches the shape tier looking like a
+            // plain alias with nothing generic about it.
+            let! aliasTypeArguments = ctx.Session.getAliasTypeArgumentsOfType ty.Id
+
+            let aliasTypeArguments =
+                aliasTypeArguments
+                |> ValueOption.defaultValue [||]
+                |> Array.filter (fun argument -> argument.Flags.HasFlag TypeFlags.TypeParameter)
+                |> Array.toList
+
+            // A template literal type is interned by its texts and operands, so it carries no
+            // alias of its own: `` type Prefixed<T extends string> = `x-${T}` `` reports no
+            // alias arguments at all. Its operands are the parameters it binds, and those it
+            // does report.
+            let! operands =
+                if has TypeFlags.TemplateLiteral && List.isEmpty aliasTypeArguments then
+                    ctx.Session.getTypesOfType ty.Id
+                else
+                    async.Return ValueNone
+
+            let operands =
+                operands
+                |> ValueOption.defaultValue [||]
+                |> Array.filter (fun operand -> operand.Flags.HasFlag TypeFlags.TypeParameter)
+                |> Array.toList
+
+            let bound = aliasTypeArguments @ operands
+
+            return
+                { TypeFacts.shallow ty with AliasTypeArguments = bound |> List.map _.Id }, bound
     }
 
 /// Builds the closed type table: derive the current frontier (sorted by id, so the fold is

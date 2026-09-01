@@ -228,12 +228,18 @@ let pipelineTests =
                       Expect.stringContains source "[<Global(\"Gadget\"); EmitConstructor>]" "so does a global class"
                       Expect.isFalse (source.Contains "[<Import(") "a global library imports nothing"
 
-                      // repair-arity, end to end: a brand holds no value, so it has no setter,
-                      // and an alias that widened away its parameter takes its uses with it.
+                      // repair-arity, end to end: a brand holds no value, so it has no setter.
                       // `__brand` reaches the checker escaped to `___brand`; the emitted member
                       // has to name the key the object actually carries.
                       Expect.stringContains source "abstract __brand: unit\n" "the brand reads but does not write"
-                      Expect.isFalse (source.Contains "type Loose") "the unusable generic alias is gone"
+
+                      // `Loose<P> = { [key: string]: string }` used to widen away its parameter
+                      // and be dropped by repair-arity, because an index signature is not a
+                      // property and the type read as empty. Now that §4.10's signatures are
+                      // shaped, it has a body - and a declaration keeps an unused parameter
+                      // happily, where the abbreviation it used to become could not (FS0035).
+                      Expect.stringContains source "type Loose<'P> =" "the alias survives once its index signature is shape"
+                      Expect.stringContains source "abstract Item: string -> string with get, set" "and carries an EmitIndexer"
 
                   testCase "an ambient module declaration is dropped loudly" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -246,6 +252,182 @@ let pipelineTests =
                            |> List.map (fun finding -> finding.Tier, finding.Symbol))
                           (Escape, "\"globals-lab:extra\"")
                           "the ambient module is an escape, not a silence" ])
+
+        yield!
+            fixtureTests "keyof-lab" (handFixture "keyof-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a mapped type over a concrete operand is expanded, not widened (D6)" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `Partial`, `Pick`, `Omit`, `Readonly` and `Record` are written in
+                    // lib.es5.d.ts, so they group as the compiler lib - but they are type-level
+                    // functions with no runtime identity, and what they stand for is the entry
+                    // package's own operand transformed. Deferring to a name that does not
+                    // exist would widen every one of these to obj.
+                    Expect.stringContains source "abstract duration: float option with get, set" "Partial hoists to option"
+                    Expect.stringContains source "static member Create (duration: float, label: string) : OptionsHead" "Pick selects"
+                    Expect.stringContains source "static member Create (label: string, loop: bool) : OptionsTail" "Omit removes"
+                    Expect.stringContains source "abstract duration: float\n" "Readonly drops the setter"
+
+                    for widened in [ "type Registry = obj"; "type PartialOptions = obj"; "type FrozenOptions = obj" ] do
+                        Expect.isFalse (source.Contains widened) $"{widened} is no longer the emission"
+
+                  testCase "the closed keyof regime resolves without the support package" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // §4.10's first regime: the checker finishes these on its own, so they need
+                    // nothing beyond the union and literal machinery phase C already landed.
+                    Expect.stringContains source "type Duration = float" "a concrete indexed access"
+                    Expect.stringContains source "type DurationOrLabel = U2<string, float>" "over a union of keys"
+                    Expect.stringContains source "| [<CompiledName(\"duration\")>] Duration" "keyof Options is a StringEnum"
+
+                  testCase "the open keyof regime is carried by the support package" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // §4.10's second regime: the checker cannot finish these, and F# cannot
+                    // state `K extends keyof T` at all. The key variable is dropped and its
+                    // uses are written as the erased idioms instead - which is the whole
+                    // reason the support package exists.
+                    Expect.stringContains
+                        source
+                        "static member get<'T, 'R> (source: 'T, key: typekeyof<'T, 'R>) : 'R = jsNative"
+                        "K extends keyof T plus T[K] is the typed accessor"
+
+                    Expect.stringContains
+                        source
+                        "static member keys<'T> (source: 'T) : keyof<'T>[] = jsNative"
+                        "a bare keyof T"
+
+                    Expect.stringContains
+                        source
+                        "abstract read<'R>: key: typekeyof<'T, 'R> -> 'R"
+                        "the same idiom on a member, over the interface's own operand"
+
+                    Expect.stringContains source "abstract all: unit -> keyof<'T>[]" "keyof T in return position"
+
+                    // `T[keyof T]` is a different animal: no key variable selects it, so there
+                    // is nothing to name the value type. It stays widened, and says so.
+                    Expect.stringContains
+                        source
+                        "static member values<'T> (source: 'T) : obj[] = jsNative"
+                        "the value-of idiom has no F# form"
+
+                    Expect.isTrue
+                        (rendered.Findings
+                         |> List.exists (fun f -> f.Symbol.StartsWith "values" && f.Tier = Widened))
+                        "and the widening is recorded"
+
+                  testCase "a type-level computation over an open operand emits an erased phantom" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // §4.10/§4.11: mapped, conditional and template-literal declarations whose
+                    // operand the checker could not supply. F# can express none of them and has
+                    // no unused type variable in an abbreviation either, so the name and arity
+                    // survive as a phantom with a private case - a cast is the only use of it.
+                    Expect.stringContains
+                        source
+                        "type DeepPartial<'T> = private DeepPartial__ of obj"
+                        "a mapped type over an open operand"
+
+                    Expect.stringContains
+                        source
+                        "type Unwrap<'T> = private Unwrap__ of obj"
+                        "a conditional over an open operand"
+
+                    // A template literal is still a string at runtime whatever it interpolates,
+                    // so the phantom carries one.
+                    Expect.stringContains
+                        source
+                        "type Prefixed<'T> = private Prefixed__ of string"
+                        "a template literal over an open operand"
+
+                    Expect.stringContains source "[<Erase>]" "and each is erased"
+
+                    // The concrete siblings are unaffected: the checker finished those, so they
+                    // are ordinary declarations rather than phantoms.
+                    Expect.stringContains source "type ConcreteBranch = string" "a resolved conditional"
+                    Expect.isFalse (source.Contains "EventName__") "a resolved template literal is a StringEnum"
+
+                    for name in [ "DeepPartial"; "Flags"; "Unwrap"; "Prefixed" ] do
+                        Expect.isTrue
+                            (rendered.Findings
+                             |> List.exists (fun f ->
+                                 f.Symbol = name && f.Tier = Widened && f.Message.Contains "erased phantom"))
+                            $"{name} says in the manifest that it is a phantom" ])
+
+        yield!
+            fixtureTests "lib-lab" (handFixture "lib-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "the compiler-lib names Fable.Core binds are referenced, not widened" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // O7's compiler-lib group widened to obj for want of a shipped binding.
+                      // For the ECMAScript half of the lib there is one, and every generated
+                      // file already opens it.
+                      Expect.stringContains source "static member fetchOne (url: string) : JS.Promise<string>" "a promise is a promise"
+                      Expect.stringContains source "JS.Map<string, string[]>" "both parameters carried"
+                      Expect.stringContains source "at: JS.Date) : JS.Date" "and the non-generic names too"
+
+                      // The argument is shaped at its own position, which is the half the old
+                      // wholesale widening cost most: `Promise<T>` used to erase T with it.
+                      Expect.stringContains source "abstract load: key: string -> JS.Promise<JS.Uint8Array>" "nested through a member"
+                      Expect.stringContains source "abstract boxed: Box<JS.Date>" "and through a generic this run declares"
+
+                      // Names Fable.Core does not bind keep widening. `seq<'T>` is not a JS
+                      // iterable, and the DOM needs a dependency this generator does not take.
+                      Expect.stringContains source "static member each (values: obj)" "the sync iteration protocol is unbound"
+                      Expect.stringContains source "static member handle (target: obj)" "and so is the DOM"
+
+                      // Every loss is in the manifest: the arity the lib drifted away from, and
+                      // the restrictions the readonly views express and F# has no binding for.
+                      let says fragment =
+                          rendered.Findings |> List.exists (fun f -> f.Message.Contains(fragment: string))
+
+                      Expect.isTrue (says "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0") "the dropped buffer parameter"
+                      Expect.isTrue (says "PromiseLike reads as JS.Promise") "a thenable is not a promise"
+                      Expect.isTrue (says "ReadonlyMap reads as JS.Map") "and readonly is not carried" ])
+
+
+        yield!
+            fixtureTests "brand-lab" (handFixture "brand-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a branding intersection becomes a measure its uses carry" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // §4.6/D11: a brand is a compile-time-only nominal distinction over a
+                      // shared runtime representation, which is what a unit of measure is - and
+                      // Fable erases both, so the JavaScript sees the primitive either way.
+                      Expect.stringContains source "[<Measure>]\ntype UserId" "the brand declares a measure"
+                      Expect.stringContains source "abstract get: id: string<UserId> -> string" "and its uses carry it"
+
+                      // Numbers take a measure natively; the other primitives go through the
+                      // support package's abbreviations, which is why the open is emitted.
+                      Expect.stringContains source "at: float<Millis>" "a numeric brand needs no support"
+                      Expect.stringContains source "open Xantham.Fable.Core" "the abbreviations are in scope"
+
+                      // Under an array, under an option, and on a bare exported function.
+                      Expect.stringContains source "abstract ids: unit -> string<UserId>[]" "a brand under an array"
+                      Expect.stringContains source "?id: string<SessionId> -> string<UserId> option" "and under an option"
+                      Expect.stringContains source "static member mint (seed: string) : string<UserId>" "and on an export"
+
+                      // `boolean & Marker` and `(\"read\" | \"write\") & Marker` are handed back
+                      // distributed, as a union of intersections. Each is still one brand.
+                      Expect.stringContains source "type Verified" "a branded boolean survives distribution"
+                      Expect.stringContains source "type Mode" "so does a branded literal union"
+
+                      // The negatives. None of these is a brand and none may be read as one.
+                      for name in [ "Merged"; "Counted"; "Wrapped" ] do
+                          Expect.isTrue
+                              (rendered.Findings
+                               |> List.exists (fun f ->
+                                   f.Symbol = name && f.Tier = Widened && f.Message.Contains "intersection of object types"))
+                              $"{name} is an ordinary intersection, and says so"
+
+                      Expect.isFalse (source.Contains "Merged>") "and none of them is written as a measure" ])
+
 
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 

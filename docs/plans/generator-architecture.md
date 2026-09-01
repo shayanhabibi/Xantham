@@ -99,6 +99,14 @@ Wire-driven inventory, no mapping decisions at all.
   `getAliasedSymbol` to origin) appears exactly once; declaration merging is already done
   because we harvest *symbols*, not declaration nodes.
 
+- **An ambient declaration in a `.d.ts` module is exported without the keyword**, and the
+  harvest is right to take it. `declare const secret: number` beside an `export declare
+  function` looks local and is not: `getExportsOfModule` returns it, and `import { secret }`
+  from the module type-checks with no diagnostic. Verified against stock TypeScript 5.9.3 as
+  well as the 7.x dev compiler the wire drives, because it reads like over-collection and the
+  "fix" - filtering the harvest to declarations carrying an `export` modifier - would quietly
+  delete real bindings. Written down here so it is not fixed twice.
+
 ### Tier 2 — Resolve (what the checker says everything is)
 
 - **Artifacts:** type table `Map<TypeId, TypeFacts>` where `TypeFacts` wraps `TypeResponse`
@@ -390,6 +398,60 @@ Phases — each ends with the compile gate green on its fixtures:
     because F# cannot overload a type name by arity.
 - **D — the erased-idiom zone.** Revive `Xantham.Fable.Core`; keyof regimes, mapped/
   conditional handling, alias naming (D6), brand detection. Fixtures: `solid-js`, `type-fest`.
+  Two items phase C deferred here rather than to E: the group dispositions that would give
+  the six widened `workers-types` aliases their shape back, and the Fable *run* gate that
+  turns `[<Global>]` and the tagged-union erasure from compile-checked claims into
+  behavioural ones.
+  **Support package landed (2026-09-01):** `src/Xantham.Fable.Core` is revived from the
+  archive near-verbatim per the mapping document's §7, and the compile gate now references
+  it so the goldens and the idioms they may cite are proven to compile together. What the
+  revival settled:
+  - *The archive source needed no edits.* It was written against `Fable.Core` 5.0.0-beta.4
+    and compiles unchanged against **5.2.0**, which the support package and the compile gate
+    are both pinned to - the gate moved up from 4.5.0 to meet it. One Fable.Core across the
+    gate and generated output is the invariant; a version seam between them is not allowed,
+    which is why the pin is stated in both projects rather than floated.
+  - *The package multi-targets `netstandard2.1;net8.0`.* netstandard2.1 is the Fable library
+    convention; net8.0 exists only so the gate — held at net8.0 by phase B's `Create` static
+    interface members — can reference the package without a downgrade.
+  - *Brands render to units of measure* (`src/Xantham.Fable.Core/Brand.fs`, new work - the
+    archive had no brand helpers, D11 having dropped them until the generator existed). A
+    measure is precisely a compile-time-only nominal distinction over a shared runtime
+    representation, which is what a TypeScript intersection brand is, and Fable erases it to
+    nothing. Numeric brands need no support at all - `float<Millis>` is an ordinary measure
+    application. Non-numeric primitives go through `[<MeasureAnnotatedAbbreviation>]`, the
+    mechanism FSharp.UMX is built on, which carries a measure on `string`/`bool`/`char`.
+    Verified rather than assumed: the brand is enforced in *both* directions (a
+    `string<UserId>` is not a `string<OrderId>`, and a raw `string` is neither), and the
+    abbreviation does **not** shadow the primitive - an application with no measure argument
+    still resolves to `string`. That last property is what makes it safe to put the
+    abbreviation in scope over generated code, and it is gated rather than assumed:
+    `tests/Xantham.Generator.CompileGate/BrandIdioms.fs` compiles plain and branded
+    primitives side by side under `open Xantham.Fable.Core`.
+  **Rungs landed since (each verified end to end and committed on its own):**
+  - *Keyof regimes (2026-09-01).* The shape tier emits `keyof<'T>` and `typekeyof<'T,'U>`,
+    so generated output references the support package for the first time.
+  - *Phantoms (2026-09-02).* A declaration whose right-hand side is a type-level computation
+    keeps its name and arity as `[<Erase>] type X<'T> = private X__ of obj`, rather than
+    vanishing into an escape. `keyof-lab` went from two escapes to none and `workers-types`
+    from 41 to 38, recovering `DurableObjectClass<'T>`, `Fetcher<'T,'Reserved>`,
+    `D1Result<'T>` and friends.
+  - *Brands (2026-09-02).* Detection in the checker's output, structural rather than by
+    name, so a branding intersection emits `[<Measure>] type UserId` and its uses read
+    `string<UserId>`. Generated files now `open Xantham.Fable.Core`; `tests/fixtures/brand-
+    lab` pins the idiom and its negatives under the live compiler. D11 closes.
+  - *The compiler-lib disposition (2026-09-02).* O7's compiler-lib group widened to `obj`
+    for want of a shipped binding; for the ECMAScript half of `lib.d.ts` that binding is
+    `Fable.Core.JS`, which every generated file already opens. `Naming.LibBindings` is the
+    pinned table, keyed by name and carrying each binding's arity, because TypeScript's lib
+    drifts (it made `Uint8Array` generic in a parameter Fable's abbreviation lacks) and a
+    mapping that guessed would emit code that does not compile. On `workers-types` this took
+    widened findings from 528 to 451 and removed 39 "type parameter is erased" findings, a
+    generic whose only use of `'T` was inside a `Promise` now carrying it. The DOM half is
+    still `obj` on purpose: binding it means depending on `Fable.Browser.*`.
+  **Still ahead in D:** the *reference* disposition for the DOM half (a dependency decision,
+  not a table entry), the Fable *run* gate, and the `type-fest` and `solid-js` rungs D9 wants
+  for calibration.
 - **E — hardening.** Dedup/naming at scale, fidelity-manifest UX, determinism under the
   full litmus ladder, `@types/three` and `typescript` rungs.
 

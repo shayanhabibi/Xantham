@@ -1,0 +1,6 @@
+{
+    "name": "keyof-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture exercising the erased-idiom zone of docs/plans/generator-type-mapping.md 4.10 and 4.11 - keyof in both regimes, indexed access, index signatures, mapped types over concrete and generic operands, conditional and template-literal types. Tracked in git, no npm install, so the goldens pin every idiom under the live compiler."
+}
