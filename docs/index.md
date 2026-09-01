@@ -35,6 +35,7 @@ Targets `net10.0`, `net8.0` and `netstandard2.1`. See the
 
 ### Documentation
 
+- [Using the client](wire-usage.md) — install, lifecycle, calling conventions and common patterns.
 - [Navigating the AST](wire-navigation.md) — tags, `Node<'Tag>`, views and the escape hatches.
 - [The hand-written register](wire-hand-written.md) — every fact transcribed from upstream
   rather than derived from its schema, and how to update each one.
