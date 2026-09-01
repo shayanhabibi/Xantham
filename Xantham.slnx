@@ -53,6 +53,7 @@
   <Folder Name="/src/">
     <Project Path="src/Xantham.TypeScript.Wire/Xantham.TypeScript.Wire.fsproj" />
     <Project Path="src/Xantham.Generator/Xantham.Generator.fsproj" />
+    <Project Path="src/Xantham.Fable.Core/Xantham.Fable.Core.fsproj" />
   </Folder>
   <Folder Name="/tests/">
     <File Path="tests/Test.fsx" />

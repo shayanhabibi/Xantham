@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- The support package of docs/plans/generator-type-mapping.md §5.4: the one
+         runtime-less dependency of generated output. Erased keyof idioms, PropertyRecord
+         and the proptypekey machinery, revived near-verbatim from the archive per §7.
+         It knows nothing about the generator; the generator only emits references to it. -->
+
+    <PropertyGroup>
+        <!-- netstandard2.1 is the Fable library convention; net8.0 joins it so the
+             net8.0 compile gate can reference the package without a downgrade. -->
+        <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Library.fs"/>
+        <Content Include="README.md" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- Pinned to the version the compile gate already resolves, so generated
+             bindings and the gate agree on one Fable.Core. -->
+        <PackageReference Include="Fable.Core" Version="4.5.0" />
+    </ItemGroup>
+
+</Project>

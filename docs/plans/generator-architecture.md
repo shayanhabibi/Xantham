@@ -390,6 +390,27 @@ Phases — each ends with the compile gate green on its fixtures:
     because F# cannot overload a type name by arity.
 - **D — the erased-idiom zone.** Revive `Xantham.Fable.Core`; keyof regimes, mapped/
   conditional handling, alias naming (D6), brand detection. Fixtures: `solid-js`, `type-fest`.
+  Two items phase C deferred here rather than to E: the group dispositions that would give
+  the six widened `workers-types` aliases their shape back, and the Fable *run* gate that
+  turns `[<Global>]` and the tagged-union erasure from compile-checked claims into
+  behavioural ones.
+  **Support package landed (2026-09-01):** `src/Xantham.Fable.Core` is revived from the
+  archive near-verbatim per the mapping document's §7, and the compile gate now references
+  it so the goldens and the idioms they may cite are proven to compile together. What the
+  revival settled:
+  - *The archive source needed no edits.* It was written against `Fable.Core` 5.0.0-beta.4,
+    but every construct it uses (`U2`-`U8`, `DynamicExtensions`, `Experimental.nameofLambda`,
+    `[<Erase>]`, `[<EmitIndexer>]`) is present in the 4.5.0 the gate already resolves, so the
+    package is pinned there instead: one Fable.Core across the gate and generated output
+    beats a newer one on either side of a version seam.
+  - *The package multi-targets `netstandard2.1;net8.0`.* netstandard2.1 is the Fable library
+    convention; net8.0 exists only so the gate — held at net8.0 by phase B's `Create` static
+    interface members — can reference the package without a downgrade.
+  - **Not yet done, and the rest of phase D is what does it:** nothing *generated* references
+    the package. The revival makes the idioms available and gated; teaching the shape tier to
+    emit `keyof<'T>` / `typekeyof<'T,'U>` for the keyof regimes is the next rung, and brand
+    helpers do not exist in the archive at all (D11 dropped unique-symbol brands), so those
+    are new work rather than a revival.
 - **E — hardening.** Dedup/naming at scale, fidelity-manifest UX, determinism under the
   full litmus ladder, `@types/three` and `typescript` rungs.
 
