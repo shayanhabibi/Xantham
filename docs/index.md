@@ -27,6 +27,8 @@ A standalone NuGet package, usable on its own with no dependency on the rest of 
 - **The binary AST, read in place.** A node is a struct over the blob and an index, not an object
   graph, and the typed layer gives each one a tag — `Node<FunctionDeclaration>` — so narrowing is a
   compile-time question.
+- **`Session<'T>`**, which binds the snapshot and project that 126 of the 142 calls repeat, so a
+  call site carries only what varies.
 - **A batching mailbox** that collects overlapping calls into one `batchRequests` round trip.
 - **A virtual filesystem**, so the compiler can be pointed at sources that exist only in memory.
 
