@@ -60,6 +60,7 @@
     <Project Path="tests/Xantham.TypeScript.Wire.Tests/Xantham.TypeScript.Wire.Tests.fsproj" />
     <Project Path="tests/Xantham.Generator.Tests/Xantham.Generator.Tests.fsproj" />
     <Project Path="tests/Xantham.Generator.CompileGate/Xantham.Generator.CompileGate.fsproj" />
+    <Project Path="tests/Xantham.Generator.RunGate/Xantham.Generator.RunGate.fsproj" />
   </Folder>
   <Folder Name="/tools/">
     <File Path="tools/generate-wire.fsx" />
@@ -69,6 +70,9 @@
   </Folder>
   <Folder Name="/tools/proto-gen/">
     <File Path="tools/proto-gen/generate.mjs" />
+  </Folder>
+  <Folder Name="/tools/session-gen/">
+    <File Path="tools/session-gen/generate.mjs" />
   </Folder>
   <Folder Name="/tools/tsc-ast/">
     <File Path="tools/tsc-ast/enums.mts" />

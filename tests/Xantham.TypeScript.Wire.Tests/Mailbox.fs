@@ -1,4 +1,4 @@
-module Xantham.TypeScript.Wire.Tests.Mailbox
+﻿module Xantham.TypeScript.Wire.Tests.Mailbox
 
 open System.IO
 open Expecto
@@ -104,6 +104,53 @@ let mailboxTests =
             |> Async.Parallel
             |> Async.RunSynchronously
             |> Array.iter (fun ast -> nodes ast |> Flip.Expect.equal "the batched AST matches the solo one" solo))
+
+        // A batch response is marshalled by the server in one piece, so one result it cannot
+        // encode refuses every request travelling with it. `infinity.ts` declares `1e999`, which
+        // is `+Inf` to Go's JSON encoder (upstream, at the pinned compiler); the agent replays a
+        // refused batch member by member, so only the requests for the two unencodable types
+        // fail and their fellow travellers still get answers.
+        testCase "a result the server cannot encode fails its own request, not its batch" <| withMailbox (fun mailbox ->
+            let program =
+                mailbox.createProgram(Proto.CreateProgramOptions.Default, rootFiles = [| file "infinity.ts" |])
+                |> Async.RunSynchronously
+
+            let session = mailbox.Session program
+
+            let moduleSymbol =
+                session.getSymbolOfSourceFile(file "infinity.ts")
+                |> Async.RunSynchronously
+                |> ValueOption.defaultWith (fun () -> failtest "infinity.ts is a module")
+
+            let exports =
+                session.getExportsOfModule moduleSymbol.Id
+                |> Async.RunSynchronously
+                |> ValueOption.defaultValue [||]
+
+            exports.Length |> Flip.Expect.equal "the fixture's exports" 8
+
+            // All in flight at once, so that the unencodable pair shares a batch with the rest.
+            let outcomes =
+                exports
+                |> Array.map (fun export ->
+                    async {
+                        try
+                            let! _ = session.getDeclaredTypeOfSymbol export.Id
+                            return export.Name, None
+                        with TsGoError(_, message) ->
+                            return export.Name, Some message
+                    })
+                |> Async.Parallel
+                |> Async.RunSynchronously
+                |> Map.ofArray
+
+            let refused = outcomes |> Map.filter (fun _ message -> message.IsSome) |> Map.keys |> List.ofSeq
+
+            refused
+            |> Flip.Expect.equal "exactly the non-finite literals are refused" [ "Infinite"; "NegativeInfinite" ]
+
+            for message in outcomes |> Map.values |> Seq.choose id do
+                Expect.stringContains message "Inf" "and the refusal names the encoder's complaint")
 
         testCase "disposal is idempotent, and the channel goes with it" <| withMailbox (fun mailbox ->
             mailbox.Dispose()

@@ -199,6 +199,14 @@ module Stages =
             when' (not skipTests)
             run (cmd $"dotnet build {Repo.Project.SolutionFile} -c {config} -v q")
             run (cmd $"dotnet test {Repo.Project.SolutionFile} -c {config} --no-build")
+            // The Fable *run* gate (§5 of the architecture plan): the linked goldens compiled
+            // by Fable and executed under node against the fixtures' JavaScript runtimes.
+            // `--noCache` because Fable's up-to-date check missed a changed linked golden once,
+            // and a gate that skips its compile is not a gate.
+            stage "run gate" {
+                workingDir "tests/Xantham.Generator.RunGate"
+                run "dotnet fable . -o fable-out --noCache --run node --import ./register.mjs fable-out/Program.js"
+            }
         }
     }
     

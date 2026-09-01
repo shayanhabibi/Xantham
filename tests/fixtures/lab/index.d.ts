@@ -62,6 +62,10 @@ export interface RoundRectShape {
 }
 /** A union the checker proves is discriminated (D4). */
 export type Shape = CircleShape | RoundRectShape;
+/** Reads a discriminated union off its tag - the run gate's proof the erasure agrees with JavaScript. */
+export declare function area(shape: Shape): number;
+/** Hands back a tagged object built on the JavaScript side, for the F# side to match on. */
+export declare function makeRoundRect(width: number, height: number, radius: number): Shape;
 /** A generic declaration, referenced from its own members (§4.9). */
 export interface Box<T> {
     value: T;

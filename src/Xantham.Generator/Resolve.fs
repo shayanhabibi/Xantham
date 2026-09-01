@@ -15,6 +15,34 @@ let private FollowDepth = 12
 
 let private hasAny (mask: SymbolFlags) (flags: SymbolFlags) = uint32 (flags &&& mask) <> 0u
 
+/// The server's complaint without the Go stack it arrives with: the first line, minus the
+/// `panic: ` its recovery handler prefixes. The one refusal seen live is restated in fixed
+/// words rather than quoted: Go's encoder says "cannot marshal" on one run and "unable to
+/// marshal" on the next for the same value, and a finding is golden text.
+let private complaint (message: string) =
+    let line = message.Split('\n').[0].Trim()
+    let line = if line.StartsWith "panic: " then line.Substring 7 else line
+    let marker = "unsupported value: "
+
+    match line.IndexOf marker with
+    | -1 -> line
+    | at -> $"its answer holds a value JSON cannot carry: {line.Substring(at + marker.Length)}"
+
+/// Runs one request, turning the server's refusal into a reason rather than a raised
+/// exception. Only `TsGoError` is caught: that is the server declining to answer *this*
+/// request while the channel lives on. The one case seen live is a result it cannot encode -
+/// a number literal type whose value is `1e999` is `+Inf` to Go's JSON encoder, and the
+/// refusal is the whole answer (`type-fest`'s `PositiveInfinity`). Anything else still
+/// raises: a dead channel has nothing trustworthy left to say.
+let private attempt (work: Async<'T>) : Async<Result<'T, string>> =
+    async {
+        try
+            let! value = work
+            return Ok value
+        with TsGoError(method, message) ->
+            return Error $"the compiler could not answer {method} ({complaint message})"
+    }
+
 /// The type ids each export resolves to: the declared type for type-like symbols, the value
 /// type for value-like ones, both for symbols that are both (a class). The responses land in
 /// the table shallow; `resolveTypeTable` derives them.
@@ -27,25 +55,21 @@ let resolveExportTypes: Pass<ResolveModel> =
                     model.Harvest.Exports
                     |> List.map (fun export ->
                         async {
+                            let ask relevant (request: int -> Async<TypeResponse>) =
+                                if relevant then
+                                    async {
+                                        let! ty = attempt (request export.Symbol.Id)
+                                        return Some ty
+                                    }
+                                else
+                                    async.Return None
+
                             let! declared =
-                                if hasAny SymbolFlags.Type export.Symbol.Flags then
-                                    async {
-                                        let! ty = ctx.Session.getDeclaredTypeOfSymbol export.Symbol.Id
-                                        return Some ty
-                                    }
-                                else
-                                    async.Return None
+                                ask (hasAny SymbolFlags.Type export.Symbol.Flags) ctx.Session.getDeclaredTypeOfSymbol
 
-                            let! value =
-                                if hasAny SymbolFlags.Value export.Symbol.Flags then
-                                    async {
-                                        let! ty = ctx.Session.getTypeOfSymbol export.Symbol.Id
-                                        return Some ty
-                                    }
-                                else
-                                    async.Return None
+                            let! value = ask (hasAny SymbolFlags.Value export.Symbol.Flags) ctx.Session.getTypeOfSymbol
 
-                            return export.Symbol.Id, declared, value
+                            return export, declared, value
                         })
                     // Sequential, unlike every other fan-out in this tier: asking for a
                     // declared type is what *creates* it in the checker, and a type alias
@@ -56,28 +80,48 @@ let resolveExportTypes: Pass<ResolveModel> =
                     // pool, so the same package generated two different files.
                     |> Async.Sequential
 
+                let answered (response: Result<TypeResponse, string> option) =
+                    response |> Option.bind Result.toOption
+
                 let exportTypes =
                     resolved
                     |> Array.fold
-                        (fun map (symbolId, declared, value) ->
+                        (fun map (export, declared, value) ->
                             Map.add
-                                symbolId
-                                { Declared = declared |> Option.map _.Id
-                                  Value = value |> Option.map _.Id }
+                                export.Symbol.Id
+                                { Declared = answered declared |> Option.map _.Id
+                                  Value = answered value |> Option.map _.Id }
                                 map)
                         model.ExportTypes
 
                 let types =
                     resolved
                     |> Array.collect (fun (_, declared, value) ->
-                        [| yield! Option.toArray declared; yield! Option.toArray value |])
+                        [| yield! Option.toArray (answered declared)
+                           yield! Option.toArray (answered value) |])
                     |> Array.fold (fun map ty -> Map.add ty.Id (TypeFacts.shallow ty) map) model.Types
 
+                // An export whose type the compiler would not hand over has nothing to shape.
+                // It drops here, loudly: the finding is what tells `audit-coverage` that the
+                // absence is owned.
+                let findings =
+                    [ for export, declared, value in resolved do
+                          for facet, response in [ "declared type", declared; "value type", value ] do
+                              match response with
+                              | Some(Error reason) ->
+                                  Finding.make Escape export.ExportName $"{facet} not resolved: {reason}"
+                              | _ -> () ]
+
+                let model =
+                    { model with
+                        ExportTypes = exportTypes
+                        Types = types }
+
                 return
-                    Advanced
-                        { model with
-                            ExportTypes = exportTypes
-                            Types = types }
+                    if List.isEmpty findings then
+                        Advanced model
+                    else
+                        Degraded(model, findings)
             } }
 
 /// Derives one type's facts and reports the responses it discovered, for the next frontier.
@@ -91,10 +135,23 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
             let! members = ctx.Session.getTypesOfType ty.Id
             let members = members |> ValueOption.map Array.toList |> ValueOption.defaultValue []
 
+            // A generic union alias binds its parameter on the alias, exactly as an object or
+            // conditional alias does: `type Ref<T> = T | ((value: T) => void)` has nowhere
+            // else to put `T`, and without it the shape tier reads the arms under no scope
+            // and widens every one to obj.
+            let! aliasTypeArguments = ctx.Session.getAliasTypeArgumentsOfType ty.Id
+
+            let aliasTypeArguments =
+                aliasTypeArguments
+                |> ValueOption.defaultValue [||]
+                |> Array.filter (fun argument -> argument.Flags.HasFlag TypeFlags.TypeParameter)
+                |> Array.toList
+
             return
                 { TypeFacts.shallow ty with
-                    UnionMembers = members |> List.map _.Id },
-                members
+                    UnionMembers = members |> List.map _.Id
+                    AliasTypeArguments = aliasTypeArguments |> List.map _.Id },
+                members @ aliasTypeArguments
         elif has TypeFlags.Intersection then
             // The constituents, followed into the table. A branding intersection (§4.6) is
             // decided by what its object operands *contain* - a marker property or a real
@@ -203,6 +260,22 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                     typeArguments @ aliasTypeArguments
             else
 
+            // The generic declaration behind an instantiation (§4.9). `Ready<T>` reached only
+            // through `Resource<T> = Ready<T> | ...` is a reference whose target is the
+            // declaration itself; with only the reference in the table the shape tier has
+            // nothing to name but the instantiation, and its members read a parameter that
+            // is not theirs. Entry group only: a lib or dependency target is identity at
+            // most, and the reference already carries that. A tuple's target is its generic
+            // carrier and is deliberately read for its flags and dropped, above.
+            let! target =
+                match ty.Target with
+                | ValueSome target when isReference && target <> ty.Id && ty.IsTupleType <> ValueSome true ->
+                    async {
+                        let! target = ctx.Session.getTargetOfType ty.Id
+                        return [ target ]
+                    }
+                | _ -> async.Return []
+
             let! properties = ctx.Session.getPropertiesOfType ty.Id
             let properties = properties |> ValueOption.defaultValue [||]
 
@@ -286,6 +359,7 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                   yield! baseTypes
                   yield! typeArguments
                   yield! aliasTypeArguments
+                  yield! target
                   for info in indexInfos do
                       info.KeyType
                       info.ValueType ]
@@ -412,14 +486,54 @@ let resolveTypeTable: Pass<ResolveModel> =
 
                             return table, notFollowed, findings
                         | fresh ->
-                            let! results = fresh |> List.map (deriveFacts ctx) |> Async.Parallel
+                            let! results =
+                                fresh
+                                |> List.map (fun ty ->
+                                    async {
+                                        let! result = attempt (deriveFacts ctx ty)
+                                        return ty, result
+                                    })
+                                |> Async.Parallel
 
+                            // A type the compiler would not describe is recorded beside the
+                            // depth cutoff's: not in the table, but with its reason, so the
+                            // shape tier widens a reference to it and says why rather than
+                            // reporting a hole in the closure.
                             let table =
                                 results
-                                |> Array.fold (fun map (facts, _) -> Map.add facts.Response.Id facts map) table
+                                |> Array.fold
+                                    (fun map (_, result) ->
+                                        match result with
+                                        | Ok(facts, _) -> Map.add facts.Response.Id facts map
+                                        | Error _ -> map)
+                                    table
+
+                            let notFollowed =
+                                results
+                                |> Array.fold
+                                    (fun map (ty, result) ->
+                                        match result with
+                                        | Error reason -> Map.add ty.Id reason map
+                                        | Ok _ -> map)
+                                    notFollowed
+
+                            let findings =
+                                findings
+                                @ [ for ty, result in results do
+                                        match result with
+                                        | Error reason -> Finding.make Widened $"type#{ty.Id}" $"not resolved: {reason}"
+                                        | Ok _ -> () ]
 
                             let derived = fresh |> List.fold (fun set ty -> Set.add ty.Id set) derived
-                            let discovered = results |> Array.toList |> List.collect snd
+
+                            let discovered =
+                                results
+                                |> Array.toList
+                                |> List.collect (fun (_, result) ->
+                                    match result with
+                                    | Ok(_, discovered) -> discovered
+                                    | Error _ -> [])
+
                             return! walk table derived notFollowed findings discovered (depth + 1)
                     }
 

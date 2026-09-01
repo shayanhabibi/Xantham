@@ -81,6 +81,7 @@ let shapeModel (table: TypeFacts list) : ShapeModel =
       NotFollowed = Map.empty
       DeclNames = Map.empty
       DeclOrders = Map.empty
+      DeclParams = Map.empty
       ExportMembers = []
       TypeVars = Map.empty
       KeyVars = Map.empty

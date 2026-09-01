@@ -636,6 +636,13 @@ to work around in this build, and nothing for the generator to filter — the 14
 emits are all real. (The async surface emits 141: `batchRequests` has no counterpart, because the
 mailbox is the batcher.)
 
+One batching hazard, found 2026-09-02 and pinned by `fixtures/infinity.ts` in the Wire suite: a
+batch response is marshalled by the server in one piece, so a single result it cannot encode
+refuses the whole frame with an error - every request in the batch fails, while the same requests
+sent alone fail only for the guilty one. The case seen is a number literal type whose `value` is
+`±Inf` (`type X = 1e999`), which Go's JSON encoder rejects; the channel survives it. `TscMailbox`
+replays a refused batch member by member for that reason.
+
 The probe is the same technique `probe4.mjs` used — an unknown method produces the distinctive
 `unknown API method "..."` error, so existence is cheaply testable — but driven off the schema's own
 method list rather than a hand-collected one, and re-running it after an npm bump is how this stays

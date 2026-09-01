@@ -11,6 +11,9 @@ riderModule.iml
 /_ReSharper.Caches/
 *.fs.js
 /fable_modules/
+fable_modules/
+# The Fable run gate compiles into its own output directory (see its fsproj).
+tests/Xantham.Generator.RunGate/fable-out/
 node_modules/
 
 # Decoder-era ephemeral run artifacts (per-run temp.d.ts written into .xantham/run_<id>/).
@@ -37,6 +40,9 @@ tests/fixtures/brand-lab/node_modules/
 !tests/fixtures/lib-lab/
 !tests/fixtures/lib-lab/**
 tests/fixtures/lib-lab/node_modules/
+!tests/fixtures/generics-lab/
+!tests/fixtures/generics-lab/**
+tests/fixtures/generics-lab/node_modules/
 # ... and except the pins, which are the tracked half of every npm rung: the install is
 # untracked, so the version it was generated against has to be written down somewhere.
 !tests/fixtures/pins.json

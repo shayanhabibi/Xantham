@@ -2,10 +2,10 @@
   "package": "@cloudflare/workers-types",
   "module": "Cloudflare.WorkersTypes",
   "counts": {
-    "exact": 198,
-    "ergonomic": 713,
-    "widened": 447,
-    "escape": 49
+    "exact": 197,
+    "ergonomic": 710,
+    "widened": 441,
+    "escape": 44
   },
   "symbols": [
     {
@@ -1134,7 +1134,7 @@
     },
     {
       "name": "ExportedHandlerTailStreamHandler",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-callbacks",
@@ -1145,12 +1145,42 @@
           "pass": "shape-callbacks",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
     {
       "name": "ExportedHandlerTailStreamHandlerResultItem",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -1211,6 +1241,16 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -1708,132 +1748,13 @@
       ]
     },
     {
-      "name": "TailEvent10",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "TailEvent11",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
       "name": "TailEvent2",
       "tier": "ergonomic",
       "findings": [
         {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "TailEvent3",
-      "tier": "widened",
-      "findings": [
-        {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "TailEvent4",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "TailEvent5",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "TailEvent6",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "TailEvent7",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "TailEvent8",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "TailEvent9",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "constraint on \u0027Event\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -2082,6 +2003,36 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -2637,8 +2588,13 @@
     },
     {
       "name": "SqlStorageCursorNextResult",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -2650,11 +2606,6 @@
           "message": "optional member reads as option"
         },
         {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "message": "ParamObject Create synthesized (D3)"
@@ -2662,59 +2613,7 @@
       ]
     },
     {
-      "name": "SqlStorageCursorPrototypeNextResult",
-      "tier": "escape",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "SqlStorageExecResultNextResult",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "SqlStorageExecResultNextResult2",
+      "name": "SqlStorageCursorNextResult2",
       "tier": "ergonomic",
       "findings": [
         {
@@ -4645,27 +4544,28 @@
     },
     {
       "name": "KVNamespaceListResult",
-      "tier": "exact",
-      "findings": []
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027Key\u0027 has no F# form and is dropped (\u00A74.9)"
+        }
+      ]
     },
     {
       "name": "KVNamespaceListResult2",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "constraint on \u0027Key\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to its constraint Ai_Cf_Leonardo_Phoenix_1_0_Output"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -4676,22 +4576,17 @@
     },
     {
       "name": "KVNamespaceListResult3",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "constraint on \u0027Key\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to its constraint Ai_Cf_Leonardo_Phoenix_1_0_Output"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -5081,11 +4976,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -5113,22 +5003,17 @@
     },
     {
       "name": "KVNamespaceListResultItem",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "constraint on \u0027Key\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to its constraint Ai_Cf_Leonardo_Phoenix_1_0_Output"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -5139,22 +5024,17 @@
     },
     {
       "name": "KVNamespaceListResultItem2",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "constraint on \u0027Key\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to its constraint Ai_Cf_Leonardo_Phoenix_1_0_Output"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -17610,6 +17490,11 @@
           "pass": "shape-aliases",
           "tier": "widened",
           "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         }
       ]
     },
@@ -30640,22 +30525,6 @@
       ]
     },
     {
-      "name": "AiPrototypeRunInputs",
-      "tier": "escape",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
       "name": "AiRunInputs",
       "tier": "widened",
       "findings": [
@@ -35741,6 +35610,11 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
@@ -38880,22 +38754,6 @@
     },
     {
       "name": "DurableObject2",
-      "tier": "escape",
-      "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "escape",
-          "message": "any maps to obj"
-        }
-      ]
-    },
-    {
-      "name": "DurableObject3",
       "tier": "widened",
       "findings": [
         {
@@ -39043,22 +38901,6 @@
     },
     {
       "name": "WorkerEntrypoint",
-      "tier": "escape",
-      "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "escape",
-          "message": "any maps to obj"
-        }
-      ]
-    },
-    {
-      "name": "WorkerEntrypoint2",
       "tier": "widened",
       "findings": [
         {
@@ -39198,6 +39040,36 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -39235,22 +39107,6 @@
     },
     {
       "name": "WorkflowEntrypoint",
-      "tier": "escape",
-      "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "escape",
-          "message": "any maps to obj"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowEntrypoint2",
       "tier": "widened",
       "findings": [
         {
@@ -42155,7 +42011,7 @@
       ]
     },
     {
-      "name": "WorkflowCreateOptionsRetention",
+      "name": "WorkflowInstanceCreateOptionsRetention",
       "tier": "ergonomic",
       "findings": [
         {

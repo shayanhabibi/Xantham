@@ -1,4 +1,4 @@
-/// End-to-end against the live compiler: fixtures through the whole pipeline, diffed against
+﻿/// End-to-end against the live compiler: fixtures through the whole pipeline, diffed against
 /// the committed goldens, plus the run-twice determinism property.
 ///
 /// The npm fixture packages are installed and therefore untracked: a linked worktree carries
@@ -181,6 +181,17 @@ let private fixtureTests (fixture: string) (package: string option) (config: Gen
 
           yield! extra package ]
 
+/// The exports `audit-coverage` reported missing that no other pass explained. A rung cannot
+/// always claim zero escapes, but it can claim the safety net never fires alone: some pass owns
+/// every drop and named the reason.
+let private unexplainedDrops (rendered: RenderModel) =
+    let symbolsOf predicate =
+        rendered.Findings |> List.filter predicate |> List.map _.Symbol |> Set.ofList
+
+    let audited = symbolsOf (fun finding -> finding.Pass = "audit-coverage")
+    let explained = symbolsOf (fun finding -> finding.Pass <> "audit-coverage")
+    Set.difference audited explained |> Set.toList
+
 [<Tests>]
 let pipelineTests =
     testList "generator e2e" [
@@ -252,6 +263,48 @@ let pipelineTests =
                            |> List.map (fun finding -> finding.Tier, finding.Symbol))
                           (Escape, "\"globals-lab:extra\"")
                           "the ambient module is an escape, not a silence" ])
+
+        yield!
+            fixtureTests "generics-lab" (handFixture "generics-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a generic declaration reached only through instantiations is declared once, generically" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `Ready<T>` is not exported; `Resource<T>` and `StringResource` reach two
+                    // instantiations of it. The generic declaration is what gets named - once -
+                    // and each instantiation is written as an application of it.
+                    Expect.stringContains source "type Ready<'T> =" "the generic target is the declaration"
+                    Expect.stringContains source "abstract latest: 'T with get, set" "its members read its own parameter"
+                    Expect.stringContains source "type Resource<'T> = U2<Pending<'T>, Ready<'T>>" "instantiations are applications"
+                    Expect.stringContains source "type StringResource = Ready<string>" "a concrete instantiation too"
+                    Expect.isFalse (source.Contains "type Ready2") "no second copy of the expansion under a made-up name"
+
+                  testCase "a generic union alias keeps its parameter" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+                    Expect.stringContains source "type Ref<'T> = U2<'T, Action<'T>>" "the arms read the alias's parameter"
+                    Expect.stringContains source "type Source<'S> = U2<'S, Func<'S>> option" "so does one with a nullish arm hoisted"
+
+                  testCase "an anonymous object type nested in a generic scope is declared over the variables it reads" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `each<T, U>(props: { items: T[]; ... render: (item: T, index: number) => U })`
+                    // hoists the parameter object to a declaration; that declaration binds
+                    // nothing of its own, so it is declared over the free variables its members
+                    // mention and the parameter position applies them back.
+                    Expect.stringContains source "type EachProps<'T, 'U> =" "the hoisted declaration is generic over what it reads"
+                    Expect.stringContains source "abstract items: 'T[] with get, set" "a member reads the outer variable"
+                    Expect.stringContains source "abstract render: Func<'T, float, 'U> with get, set" "so does a callback member"
+                    Expect.stringContains source "static member each<'T, 'U> (props: EachProps<'T, 'U>) : 'U[] = jsNative" "the use applies them back"
+                    Expect.stringContains source "type Handle<'T> = Func<'T> * HandleItem<'T>" "the same inside a generic alias"
+
+                  testCase "nothing in the lab widens a type parameter out of scope" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                    Expect.isEmpty
+                        (rendered.Findings |> List.filter (fun finding -> finding.Message.Contains "not in scope here"))
+                        "every type parameter the lab writes is in scope where it is read" ])
 
         yield!
             fixtureTests "keyof-lab" (handFixture "keyof-lab") GeneratorConfig.Default (fun package ->
@@ -474,24 +527,50 @@ let pipelineTests =
 
                       testCase "no declaration of workers-types is dropped without saying why" <| fun _ ->
                           // This rung cannot claim zero escapes - ambient module declarations and
-                          // generic aliases whose parameters all widened away do get dropped. The
-                          // claim it does make is that `audit-coverage`, the safety net, never
-                          // fires alone: some pass owns every drop and named the reason.
+                          // generic aliases whose parameters all widened away do get dropped.
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
 
-                          let byPass pass =
-                              rendered.Findings
-                              |> List.filter (fun finding -> finding.Pass = pass)
-                              |> List.map _.Symbol
-                              |> Set.ofList
-
-                          let explained =
-                              rendered.Findings
-                              |> List.filter (fun finding -> finding.Pass <> "audit-coverage")
-                              |> List.map _.Symbol
-                              |> Set.ofList
-
                           Expect.isEmpty
-                              (Set.difference (byPass "audit-coverage") explained |> Set.toList)
+                              (unexplainedDrops rendered)
                               "every export missing from the output is the subject of an explaining finding" ])
+
+        // D9's calibration rungs: utility-type depth (`type-fest`) and a reactive UI library
+        // whose surface is mostly generic callbacks (`solid-js`). Neither claims zero escapes;
+        // what each pins is that the pipeline survives the package and owns every drop.
+        yield!
+            fixtureTests "solid-js" (npmFixture "solid-js") GeneratorConfig.Default (fun package ->
+                [ testCase "no declaration of solid-js is dropped without saying why" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      Expect.isEmpty (unexplainedDrops rendered) "every drop is owned by a pass that named its reason" ])
+
+        yield!
+            fixtureTests "type-fest" (npmFixture "type-fest") GeneratorConfig.Default (fun package ->
+                [ testCase "a type the compiler cannot encode is an owned escape, not a crash" <| fun _ ->
+                      // `PositiveInfinity = 1e999` is `+Inf` to the server's JSON encoder, which
+                      // refuses the response outright. The resolve tier turns that refusal into a
+                      // finding on the export and carries on with the other 247.
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                      for name in [ "PositiveInfinity"; "NegativeInfinity" ] do
+                          Expect.isTrue
+                              (rendered.Findings
+                               |> List.exists (fun f ->
+                                   f.Symbol = name
+                                   && f.Pass = "resolve-export-types"
+                                   && f.Tier = Escape
+                                   && f.Message.Contains "Inf"))
+                              $"{name} is escaped by the resolve tier with the encoder's complaint"
+
+                      Expect.isEmpty (unexplainedDrops rendered) "every drop is owned by a pass that named its reason"
+
+                  testCase "typeof globalThis is widened rather than declared as the whole global scope" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.isFalse (source.Contains "abstract setTimeout") "the global scope's members are not inlined"
+
+                      Expect.isTrue
+                          (rendered.Findings
+                           |> List.exists (fun f -> f.Symbol = "GlobalThis" && f.Message.Contains "globalThis"))
+                          "and the widening names the global scope" ])
     ]

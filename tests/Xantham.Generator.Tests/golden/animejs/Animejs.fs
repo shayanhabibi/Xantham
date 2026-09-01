@@ -857,7 +857,7 @@ type LayoutSnapshot =
     abstract getComputedValue: ``$el``: DOMTarget * prop: string -> TimelinePosition
     /// <remarks>@param rootNode</remarks>
     /// <remarks>@param cb</remarks>
-    abstract forEach: ?rootNode: LayoutNode * cb: LayoutNodeIterator -> unit
+    abstract forEach: rootNode: LayoutNode option * cb: LayoutNodeIterator -> unit
     /// <remarks>@param cb</remarks>
     abstract forEachRootNode: cb: LayoutNodeIterator -> unit
     /// <remarks>@param cb</remarks>

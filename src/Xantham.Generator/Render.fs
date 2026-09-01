@@ -236,10 +236,13 @@ let private renderParamList (parameters: FsParam list) =
     | [] -> "()"
     | parameters -> parameters |> List.map renderParam |> String.concat ", " |> sprintf "(%s)"
 
-/// A parameter inside an abstract member's signature, where attribute syntax is unavailable -
-/// a rest parameter reads as its plain array.
+/// A parameter inside an abstract member's signature. A rest tail carries `[<ParamArray>]`
+/// here too: F# admits parameter attributes in a slot signature, and without it Fable passes
+/// the array as one argument - the run gate's `tween(...values)` arrived as `[[1, 2, 3]]`.
 let private renderAbstractParam (parameter: FsParam) =
-    if parameter.Optional && not parameter.Rest then
+    if parameter.Rest then
+        $"[<ParamArray>] {ident parameter.Name}: {printType parameter.Type}"
+    elif parameter.Optional then
         let element =
             match parameter.Type with
             | FsOption inner -> inner

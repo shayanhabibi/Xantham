@@ -280,8 +280,16 @@ let private tupleElementFlags (facts: TypeFacts) =
 /// read perfectly well as a structure of its own; writing it as an application instead keeps
 /// the two spellings tied together, which is what §4.9 asks for.
 let private instantiationOf (model: ShapeModel) (facts: TypeFacts) =
+    // Only a *reference* - `Ready<T>` over an interface or class - is an application. An
+    // anonymous object type instantiated in some other scope also carries its original as a
+    // target, but no arguments to write it with, so it is declared on its own as before.
+    let isReference =
+        facts.Response.ObjectFlags
+        |> ValueOption.map (fun flags -> flags.HasFlag ObjectFlags.Reference)
+        |> ValueOption.defaultValue false
+
     match facts.Response.Target with
-    | ValueSome target when target <> facts.Response.Id ->
+    | ValueSome target when isReference && target <> facts.Response.Id ->
         Map.tryFind target model.DeclNames |> Option.map (fun name -> name, facts.TypeArguments)
     | _ -> None
 
@@ -292,6 +300,12 @@ let private ownArguments (facts: TypeFacts) =
     match facts.Response.Target with
     | ValueSome target when target = facts.Response.Id -> facts.TypeArguments
     | _ -> []
+
+/// The parameters a hoisted anonymous declaration reads from the scope it was written in
+/// (§4.9, `DeclParams`) - what a reference to it applies back, and what its declaration binds
+/// beside any parameters of its own.
+let private freeParamsOf (model: ShapeModel) (typeId: int) =
+    Map.tryFind typeId model.DeclParams |> Option.defaultValue []
 
 // ---------------------------------------------------------------------------------------------
 // Type references.
@@ -479,7 +493,7 @@ and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (
 
     match Map.tryFind facts.Response.Id model.DeclNames with
     | Some name ->
-        match ownArguments facts with
+        match ownArguments facts @ freeParamsOf model facts.Response.Id with
         | [] -> FsNamed name, []
         | arguments -> appliedRef ctx model self owner name arguments
     | None ->
@@ -503,6 +517,8 @@ and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (
             | Reference, None ->
                 FsObj,
                 [ Finding.make Widened owner "anonymous type in a referenced group cannot be templated; widened to obj" ]
+            | (Ship | Widen), Some "globalThis" ->
+                FsObj, [ Finding.make Widened owner "typeof globalThis is the whole global scope; widened to obj" ]
             | (Ship | Widen), _ ->
                 let shown = facts.SymbolName |> Option.defaultValue "an anonymous object type"
                 FsObj, [ Finding.make Widened owner $"{shown} is not among the generated declarations; widened to obj" ]
@@ -824,7 +840,9 @@ let private declParamIds (facts: TypeFacts) =
 
 /// The parameters a declaration binds on its left side.
 let private declTypeParams (ctx: Context) (model: ShapeModel) (owner: string) (facts: TypeFacts) =
-    declParamIds facts |> typeParamsOf ctx model owner
+    declParamIds facts @ freeParamsOf model facts.Response.Id
+    |> List.distinct
+    |> typeParamsOf ctx model owner
 
 /// The parameters a callback alias binds, which include the signature's own. F# has no rank-2
 /// form, so a generic *function type* - `type F = <T>(t: T) => T`, where each caller picks `T`
@@ -996,15 +1014,33 @@ let private shapeSignature
     let mutable findings = parameterFindings @ looseFindings @ keyFindings
     let parameterCount = signature.Parameters.Length
 
-    let parameters =
+    let referenced =
         signature.Parameters
         |> List.mapi (fun i p ->
             let paramOwner = $"{owner}({p.Symbol.Name})"
             let reference, refFindings = typeRef ctx model self paramOwner p.TypeId
             findings <- findings @ refFindings
-
             let rest = signature.HasRest && i = parameterCount - 1
-            let optional = not rest && isOptionalParam p reference
+            p, paramOwner, reference, rest, (not rest && isOptionalParam p reference))
+
+    // F# optional parameters are a tail: `?a: T, b: U` is FS1212. TypeScript forbids a `?`
+    // before a required parameter too, but `undefined` in a parameter's type is admitted
+    // anywhere (`createResource(source: S | undefined, fetcher, options?)`), and that is
+    // what `isOptionalParam` reads as optional. Only the trailing run gets the `?`; an
+    // admitting parameter ahead of a required one stays required, of `option` type - which
+    // is what the union hoist already made it, so nothing is lost.
+    let optionalTail =
+        referenced
+        |> List.rev
+        |> List.takeWhile (fun (_, _, _, rest, admitsOptional) -> rest || admitsOptional)
+        |> List.filter (fun (_, _, _, rest, _) -> not rest)
+        |> List.length
+
+    let parameters =
+        referenced
+        |> List.mapi (fun i (p, paramOwner, reference, rest, admitsOptional) ->
+            let inTail = i >= parameterCount - (if signature.HasRest then 1 else 0) - optionalTail
+            let optional = admitsOptional && inTail
 
             if p.Optional then
                 findings <- findings @ [ Finding.make Ergonomic paramOwner "optional parameter reads as option" ]
@@ -1012,7 +1048,7 @@ let private shapeSignature
             { Name = Naming.memberName p.Symbol.Name
               Optional = optional
               Rest = rest
-              Type = optionalRef optional reference })
+              Type = optionalRef admitsOptional reference })
 
     let returns, returnFindings = typeRef ctx model self $"{owner}()" signature.ReturnTypeId
     findings <- findings @ returnFindings
@@ -1207,6 +1243,16 @@ let synthesizeAnonymous: Pass<ShapeModel> =
                 match Map.tryFind typeId model.Types with
                 | None -> ()
                 | Some facts ->
+                    // The generic declaration behind an instantiation is named ahead of it,
+                    // so that `Ready<T>` reached only through `Resource<T> = Ready<T> | ...`
+                    // declares `Ready<'T>` once and every instantiation is written as an
+                    // application of it (§4.9) - never a second copy of the expansion under
+                    // a made-up name.
+                    match facts.Response.Target with
+                    | ValueSome target when target <> typeId && Map.containsKey target model.Types ->
+                        walk path order target
+                    | _ -> ()
+
                     if needsName facts then
                         let preferred =
                             match facts.SymbolName with
@@ -1219,6 +1265,15 @@ let synthesizeAnonymous: Pass<ShapeModel> =
                     // union members, then structural identity (element, arguments, bases).
                     let named = Map.tryFind typeId names
                     let into segment = (named |> Option.defaultValue path) + segment
+
+                    // An instantiation of a named declaration reads only its arguments: its
+                    // members are the declaration's, substituted, and shaping happens there.
+                    // Walking them would claim names for substituted anonymous member types
+                    // that nothing then references.
+                    if (instantiationOf { model with DeclNames = names } facts).IsSome then
+                        for argument in facts.TypeArguments do
+                            walk (into "Item") order argument
+                    else
 
                     // A tuple declaration reads only its components, so its members - `length`
                     // and the numeric indices - are not part of the shape and must not claim
@@ -1259,6 +1314,98 @@ let synthesizeAnonymous: Pass<ShapeModel> =
         { model with
             DeclNames = names
             DeclOrders = orders })
+
+/// The type-parameter ids a declaration reads without binding, in first-use order (§4.9).
+/// A signature's own parameters are bound inside it; another *named* declaration binds its
+/// own, so the walk stops there and reads only the arguments it is applied with. A hoisted
+/// anonymous declaration is walked into: what it reads, its parent reads through it.
+let private freeTypeParams (model: ShapeModel) (root: int) : int list =
+    let mutable found = []
+    let mutable visited = Set.empty
+
+    let rec go (bound: Set<int>) (typeId: int) =
+        if not (Set.contains typeId visited) then
+            visited <- Set.add typeId visited
+
+            match Map.tryFind typeId model.Types with
+            | None -> ()
+            | Some facts ->
+                if flag TypeFlags.TypeParameter facts then
+                    if facts.Response.IsThisType <> ValueSome true
+                       && not (Set.contains typeId bound)
+                       && not (List.contains typeId found) then
+                        found <- found @ [ typeId ]
+                elif typeId <> root
+                     && Map.containsKey typeId model.DeclNames
+                     && (facts.SymbolName |> Option.exists (isSyntheticName >> not)) then
+                    // A declaration of its own: it binds what it declares. Only an
+                    // instantiation carries arguments worth reading; the declared form's
+                    // arguments are its own parameters.
+                    if (ownArguments facts).IsEmpty then
+                        for argument in facts.TypeArguments do
+                            go bound argument
+                else
+                    for m in facts.Members do
+                        go bound m.TypeId
+
+                    for info in facts.IndexInfos do
+                        go bound info.KeyTypeId
+                        go bound info.ValueTypeId
+
+                    for signature in facts.CallSignatures @ facts.ConstructSignatures do
+                        let inner = signature.TypeParameters |> List.fold (fun set id -> Set.add id set) bound
+
+                        for p in signature.Parameters do
+                            go inner p.TypeId
+
+                        go inner signature.ReturnTypeId
+
+                    for id in
+                        facts.UnionMembers
+                        @ facts.IntersectionMembers
+                        @ facts.TypeArguments
+                        @ facts.BaseTypes
+                        @ facts.AliasTypeArguments do
+                        go bound id
+
+                    if flag TypeFlags.Index facts then
+                        facts.Response.Target |> ValueOption.iter (go bound)
+
+    match Map.tryFind root model.Types with
+    | Some facts -> go (Set.ofList (declParamIds facts)) root
+    | None -> ()
+
+    found
+
+/// Declares each hoisted object type over the type parameters it reads from the scope it was
+/// written in (§4.9, `DeclParams`). `each<T, U>(props: { items: T[]; render: (item: T) => U })`
+/// names `EachProps` for the parameter, and `EachProps` binds nothing - so it is declared as
+/// `EachProps<'T, 'U>` and the parameter position applies them back, where `'T` and `'U` are
+/// in scope. Without this every such member widened its parameter to obj.
+let bindFreeTypeParams: Pass<ShapeModel> =
+    Pass.pure' "bind-free-type-params" (fun ctx model ->
+        let bound =
+            model.DeclNames
+            |> Map.toList
+            |> List.sortBy fst
+            |> List.choose (fun (typeId, _) ->
+                match Map.tryFind typeId model.Types with
+                | Some facts when
+                    flag TypeFlags.Object facts
+                    && GeneratorConfig.disposition ctx.Config facts.Origin = Ship
+                    && (arrayElement facts).IsNone
+                    && not (isTuple facts)
+                    && not (isPureCallback facts)
+                    ->
+                    let own = declParamIds facts
+
+                    match freeTypeParams model typeId |> List.filter (fun id -> not (List.contains id own)) with
+                    | [] -> None
+                    | free -> Some(typeId, free)
+                | _ -> None)
+            |> Map.ofList
+
+        { model with DeclParams = bound })
 
 /// Case names must be unique within one DU; a later duplicate takes a numeric suffix in member
 /// order, deterministically.
@@ -2504,6 +2651,7 @@ let auditCoverage: Pass<ShapeModel> =
 let passes: Pass<ShapeModel> list =
     [ nameExports
       synthesizeAnonymous
+      bindFreeTypeParams
       classifyLiteralUnions
       detectTaggedUnions
       shapeCallbacks

@@ -1,4 +1,4 @@
-{
+﻿{
     // The litmus ladder of docs/plans/generator-architecture.md §5, pinned.
     //
     // An npm fixture install is untracked, so this file is the tracked half: every committed
@@ -13,5 +13,7 @@
     // change, and land both together.
     "ansi-regex": "6.3.0",
     "animejs": "4.5.0",
-    "@cloudflare/workers-types": "5.20260901.1"
+    "@cloudflare/workers-types": "5.20260901.1",
+    "solid-js": "1.9.15",
+    "type-fest": "5.9.0"
 }

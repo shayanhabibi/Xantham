@@ -1,4 +1,4 @@
-namespace Xantham.TypeScript.Wire
+﻿namespace Xantham.TypeScript.Wire
 
 open System
 open System.Collections.Generic
@@ -75,9 +75,24 @@ type TscMailbox(exePath, cwd, ?callbacks: IDictionary<string, TsGoCallback>) =
                         let results =
                             try
                                 if requests.Length = 1 then [| Ok(one requests[0]) |] else many requests
-                            with error ->
-                                // The channel is dead or the whole batch failed; nobody in this
-                                // group gets an answer, so tell all of them the same thing.
+                            with
+                            | TsGoError _ when requests.Length > 1 ->
+                                // The server refused the batch as a whole, not one member of it:
+                                // a batch response is marshalled in one piece, so a single
+                                // result that cannot be encoded (verified live: a number literal
+                                // type whose value is `1e999` is `+Inf` to Go's JSON encoder)
+                                // fails every request travelling with it. The channel survived -
+                                // the refusal is an ordinary error frame - so replay the members
+                                // one by one and let only the guilty one fail.
+                                requests
+                                |> Array.map (fun request ->
+                                    try
+                                        Ok(one request)
+                                    with error ->
+                                        Error error)
+                            | error ->
+                                // The channel is dead; nobody in this group gets an answer, so
+                                // tell all of them the same thing.
                                 Array.create requests.Length (Error error)
 
                         Seq.iteri (fun i (_, reply: AsyncReplyChannel<_>) -> reply.Reply results[i]) batch

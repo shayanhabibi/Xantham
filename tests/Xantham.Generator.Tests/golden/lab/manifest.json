@@ -2,7 +2,7 @@
   "package": "phase-b-lab",
   "module": "PhaseBLab",
   "counts": {
-    "exact": 16,
+    "exact": 18,
     "ergonomic": 9,
     "widened": 4,
     "escape": 0
@@ -300,6 +300,16 @@
     },
     {
       "name": "configure",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "area",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "makeRoundRect",
       "tier": "exact",
       "findings": []
     },

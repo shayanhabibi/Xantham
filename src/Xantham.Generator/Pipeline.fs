@@ -40,6 +40,7 @@ let toShape (resolve: ResolveModel) : ShapeModel =
       NotFollowed = resolve.NotFollowed
       DeclNames = Map.empty
       DeclOrders = Map.empty
+      DeclParams = Map.empty
       ExportMembers = []
       TypeVars = Map.empty
       KeyVars = Map.empty

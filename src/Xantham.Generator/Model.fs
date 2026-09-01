@@ -1,4 +1,4 @@
-namespace Xantham.Generator
+﻿namespace Xantham.Generator
 
 open System.IO
 open System.Text.Json
@@ -491,8 +491,9 @@ type ResolveModel =
       /// The type table. Closed: every id referenced by a `TypeFacts` is a key here or in
       /// `NotFollowed` - that closure is the tier's invariant.
       Types: Map<int, TypeFacts>
-      /// Ids deliberately not resolved, with the reason (depth cutoff), so a reader of the
-      /// table can tell "not followed" from "missing".
+      /// Ids deliberately not resolved, with the reason - the depth cutoff, or a response the
+      /// compiler could not encode - so a reader of the table can tell "not followed" from
+      /// "missing".
       NotFollowed: Map<int, string> }
 
 // ---------------------------------------------------------------------------------------------
@@ -561,8 +562,8 @@ type FsTypeParam =
 type FsParam =
     { Name: string
       Optional: bool
-      /// A rest parameter; static emissions render `[<ParamArray>]`, abstract members read as
-      /// a plain array (attribute syntax is not available there).
+      /// A rest parameter: rendered `[<ParamArray>]` on static emissions and abstract members
+      /// alike, so Fable spreads the array at the call.
       Rest: bool
       Type: FsTypeRef }
 
@@ -762,6 +763,11 @@ type ShapeModel =
       /// Type id -> the source order its declaration sorts under: the export's own order, or
       /// for a synthesized declaration the order of the export that first reached it.
       DeclOrders: Map<int, DeclOrder option>
+      /// Type id -> the type-parameter ids a declaration reads without binding, in first-use
+      /// order (§4.9). An anonymous object type hoisted out of a generic scope - the `props`
+      /// of `each<T, U>(props: { items: T[]; render: (item: T) => U })` - binds nothing of
+      /// its own, so it is declared over these and every reference applies them back.
+      DeclParams: Map<int, int list>
       /// `Exports` members accumulated by the class/function/value passes, keyed by harvest
       /// position so `order-declarations` can assemble them in source order.
       ExportMembers: (int * FsExportMember) list
@@ -839,6 +845,12 @@ module Grouping =
     /// finding.
     let classify (packageDir: string) (symbol: SymbolResponse voption) : PackageId =
         match symbol |> ValueOption.bind (fun s -> declOrder s.Declarations |> ValueOption.ofOption) with
+        // `typeof globalThis` (type-fest's `GlobalThis`) is the checker's own symbol for the
+        // global scope: it declares nothing anywhere, so by path it would be unclassified and
+        // shipped - as one interface carrying every global there is, a third of the file
+        // for a type whose members nobody would call through it. The scope is the compiler's,
+        // so it groups with the compiler lib and widens with a name, identity only.
+        | ValueNone when symbol |> ValueOption.exists (fun s -> s.Name = "globalThis") -> CompilerLib
         | ValueNone -> Unclassified
         | ValueSome order ->
             let path = order.File.Replace('\\', '/')

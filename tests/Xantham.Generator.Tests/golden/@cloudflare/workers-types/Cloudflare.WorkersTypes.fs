@@ -149,10 +149,10 @@ type ServiceWorkerGlobalScope =
     abstract btoa: data: string -> string
     abstract atob: data: string -> string
     abstract setTimeout: callback: Action<obj[]> * ?msDelay: float -> float
-    abstract setTimeout<'Args>: callback: Action<'Args> * ?msDelay: float * args: 'Args -> float
+    abstract setTimeout<'Args>: callback: Action<'Args> * ?msDelay: float * [<ParamArray>] args: 'Args -> float
     abstract clearTimeout: ?timeoutId: float -> unit
     abstract setInterval: callback: Action<obj[]> * ?msDelay: float -> float
-    abstract setInterval<'Args>: callback: Action<'Args> * ?msDelay: float * args: 'Args -> float
+    abstract setInterval<'Args>: callback: Action<'Args> * ?msDelay: float * [<ParamArray>] args: 'Args -> float
     abstract clearInterval: ?timeoutId: float -> unit
     abstract queueMicrotask: task: JS.Function -> unit
     abstract structuredClone<'T>: value: 'T * ?options: obj -> 'T
@@ -195,7 +195,7 @@ type ServiceWorkerGlobalScope =
     abstract Buffer: obj with get, set
     abstract ``process``: obj with get, set
     abstract ``global``: ServiceWorkerGlobalScope with get, set
-    abstract setImmediate: ``$function``: Action<obj[]> * args: obj[] -> Immediate
+    abstract setImmediate: ``$function``: Action<obj[]> * [<ParamArray>] args: obj[] -> Immediate
     abstract clearImmediate: ?immediate: Immediate -> unit
     abstract CompressionStream: obj with get, set
     abstract DecompressionStream: obj with get, set
@@ -367,20 +367,20 @@ type Exception =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, name: string, message: string, ?stack: string) : Exception = jsNative
 
-type ExportedHandlerTailStreamHandler<'Env, 'Props> = Func<TailEvent2, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>
+type ExportedHandlerTailStreamHandler<'Env, 'Props> = Func<TailEvent2<Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>
 
 [<Interface>]
 type ExportedHandlerTailStreamHandlerResultItem =
-    abstract outcome: Func<TailEvent4, JS.Promise<unit> option> option with get, set
-    abstract spanOpen: Func<TailEvent5, JS.Promise<unit> option> option with get, set
-    abstract spanClose: Func<TailEvent6, JS.Promise<unit> option> option with get, set
-    abstract diagnosticChannel: Func<TailEvent7, JS.Promise<unit> option> option with get, set
-    abstract ``exception``: Func<TailEvent8, JS.Promise<unit> option> option with get, set
-    abstract log: Func<TailEvent9, JS.Promise<unit> option> option with get, set
-    abstract ``return``: Func<TailEvent10, JS.Promise<unit> option> option with get, set
-    abstract attributes: Func<TailEvent11, JS.Promise<unit> option> option with get, set
+    abstract outcome: Func<TailEvent2<Outcome>, JS.Promise<unit> option> option with get, set
+    abstract spanOpen: Func<TailEvent2<SpanOpen>, JS.Promise<unit> option> option with get, set
+    abstract spanClose: Func<TailEvent2<SpanClose>, JS.Promise<unit> option> option with get, set
+    abstract diagnosticChannel: Func<TailEvent2<DiagnosticChannelEvent>, JS.Promise<unit> option> option with get, set
+    abstract ``exception``: Func<TailEvent2<Exception>, JS.Promise<unit> option> option with get, set
+    abstract log: Func<TailEvent2<obj>, JS.Promise<unit> option> option with get, set
+    abstract ``return``: Func<TailEvent2<Return>, JS.Promise<unit> option> option with get, set
+    abstract attributes: Func<TailEvent2<Attributes>, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?outcome: Func<TailEvent4, JS.Promise<unit> option>, ?spanOpen: Func<TailEvent5, JS.Promise<unit> option>, ?spanClose: Func<TailEvent6, JS.Promise<unit> option>, ?diagnosticChannel: Func<TailEvent7, JS.Promise<unit> option>, ?``exception``: Func<TailEvent8, JS.Promise<unit> option>, ?log: Func<TailEvent9, JS.Promise<unit> option>, ?``return``: Func<TailEvent10, JS.Promise<unit> option>, ?attributes: Func<TailEvent11, JS.Promise<unit> option>) : ExportedHandlerTailStreamHandlerResultItem = jsNative
+    static member Create (?outcome: Func<TailEvent2<Outcome>, JS.Promise<unit> option>, ?spanOpen: Func<TailEvent2<SpanOpen>, JS.Promise<unit> option>, ?spanClose: Func<TailEvent2<SpanClose>, JS.Promise<unit> option>, ?diagnosticChannel: Func<TailEvent2<DiagnosticChannelEvent>, JS.Promise<unit> option>, ?``exception``: Func<TailEvent2<Exception>, JS.Promise<unit> option>, ?log: Func<TailEvent2<obj>, JS.Promise<unit> option>, ?``return``: Func<TailEvent2<Return>, JS.Promise<unit> option>, ?attributes: Func<TailEvent2<Attributes>, JS.Promise<unit> option>) : ExportedHandlerTailStreamHandlerResultItem = jsNative
 
 [<Interface>]
 type FetchEventInfo =
@@ -545,104 +545,14 @@ type StreamDiagnostic =
     static member Create (``type``: string, diagnostic: DroppedEventsDiagnostic) : StreamDiagnostic = jsNative
 
 [<Interface>]
-type TailEvent10 =
+type TailEvent2<'Event> =
     abstract invocationId: string
     abstract spanContext: SpanContext
     abstract timestamp: JS.Date
     abstract sequence: float
-    abstract ``event``: Return
+    abstract ``event``: 'Event
     [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: Return) : TailEvent10 = jsNative
-
-[<Interface>]
-type TailEvent11 =
-    abstract invocationId: string
-    abstract spanContext: SpanContext
-    abstract timestamp: JS.Date
-    abstract sequence: float
-    abstract ``event``: Attributes
-    [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: Attributes) : TailEvent11 = jsNative
-
-[<Interface>]
-type TailEvent2 =
-    abstract invocationId: string
-    abstract spanContext: SpanContext
-    abstract timestamp: JS.Date
-    abstract sequence: float
-    abstract ``event``: Onset
-    [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: Onset) : TailEvent2 = jsNative
-
-[<Interface>]
-type TailEvent3 =
-    abstract invocationId: string
-    abstract spanContext: SpanContext
-    abstract timestamp: JS.Date
-    abstract sequence: float
-    abstract ``event``: obj
-    [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: obj) : TailEvent3 = jsNative
-
-[<Interface>]
-type TailEvent4 =
-    abstract invocationId: string
-    abstract spanContext: SpanContext
-    abstract timestamp: JS.Date
-    abstract sequence: float
-    abstract ``event``: Outcome
-    [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: Outcome) : TailEvent4 = jsNative
-
-[<Interface>]
-type TailEvent5 =
-    abstract invocationId: string
-    abstract spanContext: SpanContext
-    abstract timestamp: JS.Date
-    abstract sequence: float
-    abstract ``event``: SpanOpen
-    [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: SpanOpen) : TailEvent5 = jsNative
-
-[<Interface>]
-type TailEvent6 =
-    abstract invocationId: string
-    abstract spanContext: SpanContext
-    abstract timestamp: JS.Date
-    abstract sequence: float
-    abstract ``event``: SpanClose
-    [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: SpanClose) : TailEvent6 = jsNative
-
-[<Interface>]
-type TailEvent7 =
-    abstract invocationId: string
-    abstract spanContext: SpanContext
-    abstract timestamp: JS.Date
-    abstract sequence: float
-    abstract ``event``: DiagnosticChannelEvent
-    [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: DiagnosticChannelEvent) : TailEvent7 = jsNative
-
-[<Interface>]
-type TailEvent8 =
-    abstract invocationId: string
-    abstract spanContext: SpanContext
-    abstract timestamp: JS.Date
-    abstract sequence: float
-    abstract ``event``: Exception
-    [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: Exception) : TailEvent8 = jsNative
-
-[<Interface>]
-type TailEvent9 =
-    abstract invocationId: string
-    abstract spanContext: SpanContext
-    abstract timestamp: JS.Date
-    abstract sequence: float
-    abstract ``event``: obj
-    [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: obj) : TailEvent9 = jsNative
+    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: 'Event) : TailEvent2<'Event> = jsNative
 
 [<Interface>]
 type TraceEventInfo =
@@ -691,13 +601,13 @@ type ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> =
     abstract connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
-    abstract tailStream: Func<TailEvent2, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>> option with get, set
+    abstract tailStream: Func<TailEvent2<Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>> option with get, set
     abstract scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract test: Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?fetch: Func<obj, 'Env, ExecutionContext<'Props>, obj>, ?connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tailStream: Func<TailEvent2, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?test: Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>) : ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> = jsNative
+    static member Create (?fetch: Func<obj, 'Env, ExecutionContext<'Props>, obj>, ?connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tailStream: Func<TailEvent2<Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?test: Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>) : ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> = jsNative
 
 [<Interface>]
 type AlarmInvocationInfo =
@@ -843,32 +753,18 @@ type DurableObjectState<'Props> =
     abstract abort: ?reason: string * ?options: DurableObjectAbortOptions -> unit
 
 [<Interface>]
-type SqlStorageCursorNextResult =
+type SqlStorageCursorNextResult<'T> =
     abstract ``done``: bool option with get, set
-    abstract value: obj with get, set
+    abstract value: 'T with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (value: obj, ?``done``: bool) : SqlStorageCursorNextResult = jsNative
+    static member Create (value: 'T, ?``done``: bool) : SqlStorageCursorNextResult<'T> = jsNative
 
 [<Interface>]
-type SqlStorageCursorPrototypeNextResult =
-    abstract ``done``: bool option with get, set
-    abstract value: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (value: obj, ?``done``: bool) : SqlStorageCursorPrototypeNextResult = jsNative
-
-[<Interface>]
-type SqlStorageExecResultNextResult =
-    abstract ``done``: bool option with get, set
-    abstract value: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (value: obj, ?``done``: bool) : SqlStorageExecResultNextResult = jsNative
-
-[<Interface>]
-type SqlStorageExecResultNextResult2 =
+type SqlStorageCursorNextResult2 =
     abstract ``done``: bool with get, set
     abstract value: unit option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``done``: bool, ?value: unit) : SqlStorageExecResultNextResult2 = jsNative
+    static member Create (``done``: bool, ?value: unit) : SqlStorageCursorNextResult2 = jsNative
 
 type DurableObjectTransaction =
     abstract get<'T>: key: string * ?options: DurableObjectGetOptions -> JS.Promise<'T option>
@@ -1513,24 +1409,24 @@ type KVNamespaceListKey<'Metadata, 'Key> =
     [<ParamObject; Emit("$0")>]
     static member Create (name: 'Key, ?expiration: float, ?metadata: 'Metadata) : KVNamespaceListKey<'Metadata, 'Key> = jsNative
 
-type KVNamespaceListResult = U2<KVNamespaceListResult2, KVNamespaceListResult3>
+type KVNamespaceListResult<'Metadata, 'Key> = U2<KVNamespaceListResult2<'Key, 'Metadata>, KVNamespaceListResult3<'Key, 'Metadata>>
 
 [<Interface>]
-type KVNamespaceListResult2 =
+type KVNamespaceListResult2<'Key, 'Metadata> =
     abstract list_complete: bool with get, set
-    abstract keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[] with get, set
+    abstract keys: KVNamespaceListKey<'Metadata, 'Key>[] with get, set
     abstract cursor: string with get, set
     abstract cacheStatus: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (list_complete: bool, keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[], cursor: string, ?cacheStatus: string) : KVNamespaceListResult2 = jsNative
+    static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], cursor: string, ?cacheStatus: string) : KVNamespaceListResult2<'Key, 'Metadata> = jsNative
 
 [<Interface>]
-type KVNamespaceListResult3 =
+type KVNamespaceListResult3<'Key, 'Metadata> =
     abstract list_complete: bool with get, set
-    abstract keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[] with get, set
+    abstract keys: KVNamespaceListKey<'Metadata, 'Key>[] with get, set
     abstract cacheStatus: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (list_complete: bool, keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[], ?cacheStatus: string) : KVNamespaceListResult3 = jsNative
+    static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], ?cacheStatus: string) : KVNamespaceListResult3<'Key, 'Metadata> = jsNative
 
 type KVNamespace<'Key> =
     abstract get: key: 'Key * ?options: obj -> JS.Promise<string option>
@@ -1539,7 +1435,7 @@ type KVNamespace<'Key> =
     abstract get: key: 'Key[] * ``type``: string -> JS.Promise<JS.Map<string, string option>>
     abstract get: key: 'Key[] * ?options: obj -> JS.Promise<JS.Map<string, string option>>
     abstract get: key: 'Key[] * ?options: KVNamespaceGetOptions<string> -> JS.Promise<JS.Map<string, string option>>
-    abstract list: ?options: KVNamespaceListOptions -> JS.Promise<U2<KVNamespaceListResultItem, KVNamespaceListResultItem2>>
+    abstract list<'Metadata>: ?options: KVNamespaceListOptions -> JS.Promise<U2<KVNamespaceListResultItem<'Key, 'Metadata>, KVNamespaceListResultItem2<'Key, 'Metadata>>>
     abstract put: key: 'Key * value: obj * ?options: KVNamespacePutOptions -> JS.Promise<unit>
     abstract getWithMetadata<'Metadata>: key: 'Key * ?options: obj -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
     abstract getWithMetadata<'Metadata>: key: 'Key * ``type``: string -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
@@ -1550,21 +1446,21 @@ type KVNamespace<'Key> =
     abstract delete: key: 'Key -> JS.Promise<unit>
 
 [<Interface>]
-type KVNamespaceListResultItem =
+type KVNamespaceListResultItem<'Key, 'Metadata> =
     abstract list_complete: bool with get, set
-    abstract keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[] with get, set
+    abstract keys: KVNamespaceListKey<'Metadata, 'Key>[] with get, set
     abstract cursor: string with get, set
     abstract cacheStatus: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (list_complete: bool, keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[], cursor: string, ?cacheStatus: string) : KVNamespaceListResultItem = jsNative
+    static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], cursor: string, ?cacheStatus: string) : KVNamespaceListResultItem<'Key, 'Metadata> = jsNative
 
 [<Interface>]
-type KVNamespaceListResultItem2 =
+type KVNamespaceListResultItem2<'Key, 'Metadata> =
     abstract list_complete: bool with get, set
-    abstract keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[] with get, set
+    abstract keys: KVNamespaceListKey<'Metadata, 'Key>[] with get, set
     abstract cacheStatus: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (list_complete: bool, keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[], ?cacheStatus: string) : KVNamespaceListResultItem2 = jsNative
+    static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], ?cacheStatus: string) : KVNamespaceListResultItem2<'Key, 'Metadata> = jsNative
 
 [<Interface>]
 type KVNamespaceListOptions =
@@ -2518,7 +2414,7 @@ type WebSocketAcceptOptions =
     static member Create (?allowHalfOpen: bool) : WebSocketAcceptOptions = jsNative
 
 type SqlStorage =
-    abstract exec<'T>: query: string * bindings: obj[] -> SqlStorageCursor<'T>
+    abstract exec<'T>: query: string * [<ParamArray>] bindings: obj[] -> SqlStorageCursor<'T>
     abstract databaseSize: float
     abstract Cursor: obj with get, set
     abstract Statement: obj with get, set
@@ -2528,7 +2424,7 @@ type SqlStorageStatement = obj
 type SqlStorageValue = U3<string, float, JS.ArrayBuffer> option
 
 type SqlStorageCursor<'T> =
-    abstract next: unit -> U2<SqlStorageCursorNextResult, SqlStorageExecResultNextResult2>
+    abstract next: unit -> U2<SqlStorageCursorNextResult<'T>, SqlStorageCursorNextResult2>
     abstract toArray: unit -> 'T[]
     abstract one: unit -> 'T
     abstract raw: unit -> obj
@@ -2752,7 +2648,7 @@ type WorkerStubEntrypointOptions =
     static member Create (?props: obj, ?limits: workerdResourceLimits) : WorkerStubEntrypointOptions = jsNative
 
 type WorkerLoader =
-    abstract get: ?name: string * getCode: Func<U2<JS.Promise<WorkerLoaderWorkerCode>, WorkerLoaderWorkerCode>> -> WorkerStub
+    abstract get: name: string option * getCode: Func<U2<JS.Promise<WorkerLoaderWorkerCode>, WorkerLoaderWorkerCode>> -> WorkerStub
     abstract load: code: WorkerLoaderWorkerCode -> WorkerStub
 
 [<Interface>]
@@ -2855,8 +2751,8 @@ type PerformanceObserverObserveOptions =
     static member Create (?buffered: bool, ?durationThreshold: float, ?entryTypes: string[], ?``type``: string) : PerformanceObserverObserveOptions = jsNative
 
 type Tracing =
-    abstract enterSpan<'T, 'A>: name: string * callback: Func<Span, 'A, 'T> * args: 'A -> 'T
-    abstract startActiveSpan<'T, 'A>: name: string * callback: Func<Span, 'A, 'T> * args: 'A -> 'T
+    abstract enterSpan<'T, 'A>: name: string * callback: Func<Span, 'A, 'T> * [<ParamArray>] args: 'A -> 'T
+    abstract startActiveSpan<'T, 'A>: name: string * callback: Func<Span, 'A, 'T> * [<ParamArray>] args: 'A -> 'T
     abstract startSpan: name: string -> Span
     abstract Span: obj with get, set
 
@@ -6225,7 +6121,8 @@ type Without<'T, 'U> = private Without__ of obj
 /// <summary>
 /// Either T or U, but not both (mutually exclusive)
 /// </summary>
-type XOR = obj
+[<Erase>]
+type XOR<'T, 'U> = private XOR__ of obj
 
 type Ai_Cf_Baai_Bge_Base_En_V1_5_Input = U2<Ai_Cf_Baai_Bge_Base_En_V1_5_Input2, Ai_Cf_Baai_Bge_Base_En_V1_5_Input3>
 
@@ -12380,12 +12277,6 @@ type AiGatewayRunOptions =
     static member Create (?gateway: obj, ?extraHeaders: obj, ?signal: obj) : AiGatewayRunOptions = jsNative
 
 [<Interface>]
-type AiPrototypeRunInputs =
-    abstract requests: obj[] with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (requests: obj[]) : AiPrototypeRunInputs = jsNative
-
-[<Interface>]
 type AiRunInputs =
     abstract requests: obj[] with get, set
     [<ParamObject; Emit("$0")>]
@@ -15783,7 +15674,8 @@ type ContinentCode =
     | OC
     | SA
 
-type CfProperties = obj
+[<Erase>]
+type CfProperties<'HostMetadata> = private CfProperties__ of obj
 
 [<Interface>]
 type D1Meta =
@@ -15886,7 +15778,7 @@ type D1DatabaseSession =
     abstract getBookmark: unit -> string option
 
 type D1PreparedStatement =
-    abstract bind: values: obj[] -> D1PreparedStatement
+    abstract bind: [<ParamArray>] values: obj[] -> D1PreparedStatement
     abstract first<'T>: colName: string -> JS.Promise<'T option>
     abstract first<'T>: unit -> JS.Promise<'T option>
     abstract run: unit -> JS.Promise<obj>
@@ -17090,10 +16982,8 @@ type CloudflareWorkersModule =
     [<ParamObject; Emit("$0")>]
     static member Create (RpcStub: obj, RpcTarget: obj, WorkerEntrypoint: obj, DurableObject: obj, WorkflowStep: obj, WorkflowEntrypoint: obj, waitUntil: Action<JS.Promise<obj>>, withEnv: Func<obj, Func<obj>, obj>, withExports: Func<obj, Func<obj>, obj>, withEnvAndExports: Func<obj, obj, Func<obj>, obj>, env: obj, exports: obj, cache: CacheContext, tracing: Tracing) : CloudflareWorkersModule = jsNative
 
-type DurableObject2 = DurableObject3<obj, obj>
-
 [<Interface>]
-type DurableObject3<'Env, 'Props> =
+type DurableObject2<'Env, 'Props> =
     abstract __DURABLE_OBJECT_BRAND: unit
     abstract ctx: DurableObjectState<'Props> with get, set
     abstract env: 'Env with get, set
@@ -17104,7 +16994,7 @@ type DurableObject3<'Env, 'Props> =
     abstract webSocketClose: Func<Browser.Types.WebSocket, float, string, bool, JS.Promise<unit> option> option with get, set
     abstract webSocketError: Func<Browser.Types.WebSocket, obj, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: DurableObjectState<'Props>, env: 'Env, ?alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option>, ?fetch: Func<obj, obj>, ?connect: Func<Socket, JS.Promise<unit> option>, ?webSocketMessage: Func<Browser.Types.WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<Browser.Types.WebSocket, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<Browser.Types.WebSocket, obj, JS.Promise<unit> option>) : DurableObject3<'Env, 'Props> = jsNative
+    static member Create (ctx: DurableObjectState<'Props>, env: 'Env, ?alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option>, ?fetch: Func<obj, obj>, ?connect: Func<Socket, JS.Promise<unit> option>, ?webSocketMessage: Func<Browser.Types.WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<Browser.Types.WebSocket, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<Browser.Types.WebSocket, obj, JS.Promise<unit> option>) : DurableObject2<'Env, 'Props> = jsNative
 
 [<Interface>]
 type RpcTarget =
@@ -17112,10 +17002,8 @@ type RpcTarget =
     [<ParamObject; Emit("$0")>]
     static member Create () : RpcTarget = jsNative
 
-type WorkerEntrypoint = WorkerEntrypoint2<obj, obj>
-
 [<Interface>]
-type WorkerEntrypoint2<'Env, 'Props> =
+type WorkerEntrypoint<'Env, 'Props> =
     abstract __WORKER_ENTRYPOINT_BRAND: unit
     abstract ctx: ExecutionContext<'Props> with get, set
     abstract env: 'Env with get, set
@@ -17125,15 +17013,13 @@ type WorkerEntrypoint2<'Env, 'Props> =
     abstract queue: Func<MessageBatch<obj>, JS.Promise<unit> option> option with get, set
     abstract scheduled: Func<ScheduledController, JS.Promise<unit> option> option with get, set
     abstract tail: Func<TraceItem[], JS.Promise<unit> option> option with get, set
-    abstract tailStream: Func<TailEvent2, U3<JS.Promise<U2<Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>> option with get, set
+    abstract tailStream: Func<TailEvent2<Onset>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>> option with get, set
     abstract test: Func<TestController, JS.Promise<unit> option> option with get, set
     abstract trace: Func<TraceItem[], JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: ExecutionContext<'Props>, env: 'Env, ?email: Func<ForwardableEmailMessage, JS.Promise<unit> option>, ?fetch: Func<obj, obj>, ?connect: Func<Socket, JS.Promise<unit> option>, ?queue: Func<MessageBatch<obj>, JS.Promise<unit> option>, ?scheduled: Func<ScheduledController, JS.Promise<unit> option>, ?tail: Func<TraceItem[], JS.Promise<unit> option>, ?tailStream: Func<TailEvent2, U3<JS.Promise<U2<Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?test: Func<TestController, JS.Promise<unit> option>, ?trace: Func<TraceItem[], JS.Promise<unit> option>) : WorkerEntrypoint2<'Env, 'Props> = jsNative
+    static member Create (ctx: ExecutionContext<'Props>, env: 'Env, ?email: Func<ForwardableEmailMessage, JS.Promise<unit> option>, ?fetch: Func<obj, obj>, ?connect: Func<Socket, JS.Promise<unit> option>, ?queue: Func<MessageBatch<obj>, JS.Promise<unit> option>, ?scheduled: Func<ScheduledController, JS.Promise<unit> option>, ?tail: Func<TraceItem[], JS.Promise<unit> option>, ?tailStream: Func<TailEvent2<Onset>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?test: Func<TestController, JS.Promise<unit> option>, ?trace: Func<TraceItem[], JS.Promise<unit> option>) : WorkerEntrypoint<'Env, 'Props> = jsNative
 
-type WorkflowEntrypoint = WorkflowEntrypoint2<obj, obj>
-
-type WorkflowEntrypoint2<'Env, 'T> =
+type WorkflowEntrypoint<'Env, 'T> =
     abstract __WORKFLOW_ENTRYPOINT_BRAND: unit
     abstract ctx: ExecutionContext<obj> with get, set
     abstract env: 'Env with get, set
@@ -18819,11 +18705,11 @@ type WorkflowBatchDeleteResultErrorsItem =
     static member Create (id: string, code: float, message: string) : WorkflowBatchDeleteResultErrorsItem = jsNative
 
 [<Interface>]
-type WorkflowCreateOptionsRetention =
+type WorkflowInstanceCreateOptionsRetention =
     abstract successRetention: WorkflowSleepDuration option with get, set
     abstract errorRetention: WorkflowSleepDuration option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?successRetention: WorkflowSleepDuration, ?errorRetention: WorkflowSleepDuration) : WorkflowCreateOptionsRetention = jsNative
+    static member Create (?successRetention: WorkflowSleepDuration, ?errorRetention: WorkflowSleepDuration) : WorkflowInstanceCreateOptionsRetention = jsNative
 
 [<Interface>]
 type WorkflowInstanceRestartOptionsFrom =
@@ -18905,14 +18791,14 @@ type WorkflowInstanceCreateOptions<'PARAMS> =
     /// The retention policy for Workflow instance.
     /// Defaults to the maximum retention period available for the owner's account.
     /// </summary>
-    abstract retention: WorkflowCreateOptionsRetention option with get, set
+    abstract retention: WorkflowInstanceCreateOptionsRetention option with get, set
     /// <summary>
     /// A best-effort geographic placement preference for the Workflow instance.
     /// See <c>WorkflowInstanceLocationHint</c> for supported regions.
     /// </summary>
     abstract locationHint: DurableObjectLocationHint option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: string, ?``params``: 'PARAMS, ?retention: WorkflowCreateOptionsRetention, ?locationHint: DurableObjectLocationHint) : WorkflowInstanceCreateOptions<'PARAMS> = jsNative
+    static member Create (?id: string, ?``params``: 'PARAMS, ?retention: WorkflowInstanceCreateOptionsRetention, ?locationHint: DurableObjectLocationHint) : WorkflowInstanceCreateOptions<'PARAMS> = jsNative
 
 [<Interface>]
 type InstanceStatus =

@@ -259,9 +259,13 @@ let typeRefTests =
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "and said so"
 
         testCase "an instantiation of a declared generic is written as an application" <| fun _ ->
+            // A reference, as the wire reports an instantiation of an interface or class; an
+            // anonymous type instantiated elsewhere carries a target too, but no arguments.
             let instantiation =
                 { Build.facts
-                    { Build.typeResponse 31 TypeFlags.Object with Target = ValueSome 30 } with
+                    { Build.typeResponse 31 TypeFlags.Object with
+                        ObjectFlags = ValueSome ObjectFlags.Reference
+                        Target = ValueSome 30 } with
                     TypeArguments = [ 1 ] }
 
             let model =
@@ -616,6 +620,85 @@ let shapePassTests =
             let named, _ = Build.runPass Shape.synthesizeAnonymous model
 
             Expect.equal (Map.tryFind 40 named.DeclNames) (Some "Globals") "its own name, not the path"
+
+        testCase "synthesize-anonymous names the generic declaration behind an instantiation, not the instantiation" <| fun _ ->
+            // `Ready<T>` is not exported and is reached only as `Ready<U>` from some generic
+            // export. The declaration (30) is what gets the name; the instantiation (31) is
+            // an application of it and claims nothing.
+            let declaration =
+                genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 301 "latest" SymbolFlags.Property) 20 ]
+
+            let declaration = { declaration with SymbolName = Some "Ready" }
+
+            let instantiation =
+                { Build.facts
+                    { Build.typeResponse 31 TypeFlags.Object with
+                        ObjectFlags = ValueSome ObjectFlags.Reference
+                        Target = ValueSome 30 } with
+                    SymbolName = Some "Ready"
+                    TypeArguments = [ 21 ]
+                    Members = [ Build.resolvedMember (Build.symbol 301 "latest" SymbolFlags.Property) 21 ] }
+
+            let model =
+                { Build.shapeModel (declaration :: instantiation :: typeParam 20 "T" :: typeParam 21 "U" :: Build.primitives) with
+                    Harvest = { Exports = [ Build.export "current" (Build.symbol 400 "current" SymbolFlags.BlockScopedVariable) ] }
+                    ExportTypes = Map.ofList [ 400, { Declared = None; Value = Some 31 } ] }
+
+            let named, _ = Build.runPass Shape.synthesizeAnonymous model
+
+            Expect.equal (Map.tryFind 30 named.DeclNames) (Some "Ready") "the declaration is named"
+            Expect.equal (Map.tryFind 31 named.DeclNames) None "the instantiation is written as an application"
+
+        testCase "bind-free-type-params declares a hoisted object over the parameters it reads" <| fun _ ->
+            // `each<T, U>(props: { items: T[]; render: (item: T) => U })`: the hoisted
+            // `EachProps` binds nothing of its own, so it is declared over `T` and `U` in
+            // first-use order, and a reference under that scope applies them back.
+            let render =
+                { Build.facts (Build.typeResponse 42 TypeFlags.Object) with
+                    CallSignatures =
+                        [ Build.signature [ Build.resolvedMember (Build.symbol 403 "item" SymbolFlags.FunctionScopedVariable) 20 ] 21 ] }
+
+            let props =
+                { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                    Members =
+                        [ Build.resolvedMember (Build.symbol 401 "items" SymbolFlags.Property) 20
+                          Build.resolvedMember (Build.symbol 402 "render" SymbolFlags.Property) 42 ] }
+
+            let model =
+                { Build.shapeModel (props :: render :: typeParam 20 "T" :: typeParam 21 "U" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 40, "EachProps" ] }
+
+            let bound, _ = Build.runPass Shape.bindFreeTypeParams model
+
+            Expect.equal (Map.tryFind 40 bound.DeclParams) (Some [ 20; 21 ]) "T then U, as first read"
+
+            let reference, findings =
+                Shape.typeRef Build.context { bound with TypeVars = Map.ofList [ 20, "T"; 21, "U" ] } None "x" 40
+
+            Expect.equal reference (FsApp("EachProps", [ FsTypeVar "T"; FsTypeVar "U" ])) "applied back where they are in scope"
+            Expect.isEmpty findings "an application over in-scope variables is exact"
+
+        testCase "bind-free-type-params leaves a signature's own parameters to the signature" <| fun _ ->
+            // `interface Store { read<K>(key: K): string }` reads `K` only inside the method
+            // that binds it - the declaration owes nothing to any outer scope.
+            let read =
+                { Build.facts (Build.typeResponse 42 TypeFlags.Object) with
+                    CallSignatures =
+                        [ { Build.signature [ Build.resolvedMember (Build.symbol 403 "key" SymbolFlags.FunctionScopedVariable) 20 ] 1 with
+                              TypeParameters = [ 20 ] } ] }
+
+            let store =
+                { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                    SymbolName = Some "Store"
+                    Members = [ Build.resolvedMember (Build.symbol 402 "read" SymbolFlags.Method) 42 ] }
+
+            let model =
+                { Build.shapeModel (store :: read :: typeParam 20 "K" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 40, "Store" ] }
+
+            let bound, _ = Build.runPass Shape.bindFreeTypeParams model
+
+            Expect.equal (Map.tryFind 40 bound.DeclParams) None "nothing free"
 
         testCase "classify-literal-unions makes a StringEnum with CompiledName per case" <| fun _ ->
             let union =

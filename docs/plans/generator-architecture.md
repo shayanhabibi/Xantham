@@ -217,7 +217,13 @@ Layered, mirroring the tiers:
    compile are not bindings. It is an ordinary project rather than a test
    (`tests/Xantham.Generator.CompileGate`), so it runs on every build; it carries the same
    `Fable.Core` pin as `src/Xantham.Fable.Core` and references the whole `Fable.Browser.*`
-   family, which is what the goldens may cite. The Fable *run* gate is still outstanding.
+   family, which is what the goldens may cite. The Fable *run* gate
+   (`tests/Xantham.Generator.RunGate`, landed 2026-09-02) is the behavioural half: Fable
+   compiles the linked goldens and a program of checks, and node runs it against hand-written
+   JavaScript runtimes of the same fixtures (`tests/fixtures/<lab>/index.js`), so `[<Global>]`,
+   `[<EmitConstructor>]`, `TypeScriptTaggedUnion`, `ParamObject` and `[<Import>]` are proven
+   by what the erasure did rather than by what type-checked. It runs from `build.fsx -- test`
+   after the suites; it grows by linking another golden and adding checks.
 5. **Pipeline properties:** run-twice determinism; `audit-coverage` findings empty for
    fixtures we declare fully-supported; manifest tier counts monotonic (a PR that turns
    Exacts into Escapes must say so).
@@ -396,10 +402,10 @@ Phases — each ends with the compile gate green on its fixtures:
     but it is why six workers-types aliases (`PagesFunction`, `ExportedHandlerFetch-
     Handler`, ...) lose their whole shape - the phase D work on group dispositions is
     what improves them, not more shaping.
-  - Still deferred, and findings say so at every site: method- and function-level
-    generics (F# can spell generic abstract members, but nothing needed it yet),
-    instantiations of generic *aliases* written as applications (they re-expand
-    inline today), and default type arguments, whose §4.9 wording needs revisiting
+  - Still deferred, and findings say so at every site: instantiations of generic
+    *aliases* written as applications (they re-expand inline today; instantiations of
+    generic *interfaces* have been applications since phase E's first step), and default
+    type arguments, whose §4.9 wording needs revisiting
     because F# cannot overload a type name by arity.
 - **D — the erased-idiom zone.** Revive `Xantham.Fable.Core`; keyof regimes, mapped/
   conditional handling, alias naming (D6), brand detection. Fixtures: `solid-js`, `type-fest`.
@@ -411,11 +417,14 @@ Phases — each ends with the compile gate green on its fixtures:
   archive near-verbatim per the mapping document's §7, and the compile gate now references
   it so the goldens and the idioms they may cite are proven to compile together. What the
   revival settled:
-  - *The archive source needed no edits.* It was written against `Fable.Core` 5.0.0-beta.4
-    and compiles unchanged against **5.2.0**, which the support package and the compile gate
+  - *The archive source needed one edit.* It was written against `Fable.Core` 5.0.0-beta.4
+    and type-checks unchanged against **5.2.0**, which the support package and the compile gate
     are both pinned to - the gate moved up from 4.5.0 to meet it. One Fable.Core across the
     gate and generated output is the invariant; a version seam between them is not allowed,
-    which is why the pin is stated in both projects rather than floated.
+    which is why the pin is stated in both projects rather than floated. The one edit came
+    from the run gate: `KeyOf.access` and `TypeKeyOf.access` were `let access = item`, a value
+    binding over an `inline` function, which fsc accepts and Fable refuses ("is not supported")
+    - the compile gate could never have seen it. They are inline functions now.
   - *The package multi-targets `netstandard2.1;net8.0`.* netstandard2.1 is the Fable library
     convention; net8.0 exists only so the gate — held at net8.0 by phase B's `Create` static
     interface members — can reference the package without a downgrade.
@@ -485,10 +494,99 @@ Phases — each ends with the compile gate green on its fixtures:
       `workers-types` lost 53, mostly `EventTarget` and `WebSocket`. What is still `obj` is now
       a statement about coverage rather than about dependencies: `fetch`'s types (`Response`,
       `Request`) live in `Fable.Fetch`, a different family, and remain widened.
-  **Still ahead in D:** the Fable *run* gate, and the `type-fest` and `solid-js` rungs D9 wants
-  for calibration.
+  - *The D9 calibration rungs (2026-09-02).* `type-fest` (5.9.0, 249 exports → 270
+    declarations) and `solid-js` (1.9.15, 119 exports → 119 declarations) are goldens and gate
+    entries. Neither claims zero escapes; each pins that the pipeline survives the package,
+    generates it deterministically, and owns every drop. What landing them cost:
+    - *The compiler's API server refuses a response it cannot encode.* `type-fest` declares
+      `PositiveInfinity = 1e999`, whose literal type carries `+Inf` in `value`, and Go's JSON
+      encoder cannot write that - the server answers with an error frame instead of the type
+      (an upstream bug at the pinned compiler; the channel survives it). Two things had to
+      change. The mailbox's batch is marshalled in one piece, so one such result refused every
+      request travelling with it - verified live, with the same requests answering singly - and
+      `TscMailbox` now replays a refused batch member by member, so only the guilty request
+      fails (`tests/Xantham.TypeScript.Wire.Tests/fixtures/infinity.ts` pins it). Above that,
+      the resolve tier's `attempt` turns a `TsGoError` on one request into a reason: an export
+      whose type the server would not hand over is an `Escape` finding on the export, and a type
+      whose derivation was refused joins `NotFollowed` with its reason, which the shape tier
+      already reads. The refusal is restated in fixed words rather than quoted - the encoder says
+      "cannot marshal" on one run and "unable to marshal" on the next for the same value, which
+      was the third determinism failure the e2e property caught.
+    - *`typeof globalThis` groups with the compiler lib.* The checker's symbol for the global
+      scope declares nothing anywhere, so by path it was unclassified and shipped: one interface
+      of 700 members, a third of the file, for `type GlobalThis = typeof globalThis`. It is now
+      identity-only and widens with a finding that names the scope.
+    - *F# optional parameters are a tail.* `undefined` in a parameter's type is admitted anywhere
+      (`createResource(source: S | undefined, fetcher, options?)`) and read as optional, which is
+      FS1212 ahead of a required parameter. Only the trailing run gets the `?`; a parameter ahead
+      of a required one stays required, of `option` type. The gate caught this on a *static*
+      member; two abstract members in the `animejs` and `workers-types` goldens had the same
+      shape and fsc had accepted it silently, so those goldens changed too.
+    - What the rungs measure, to tune against: `type-fest` is 183 phantoms and 172 "Conditional
+      not mapped" widenings out of 220 - the utility-type surface is type-level computation
+      almost entirely, and the phantom-erasure cutoff D9 wanted calibrating is the question of
+      which of those two forms each alias should take. `solid-js` is dominated by method-level
+      generics ("type parameter is not in scope here", 53) and callable-and-properties hybrids
+      (19), both already on the deferred list.
+  - *The Fable run gate (2026-09-02).* `tests/Xantham.Generator.RunGate` links the
+    `globals-lab` and `lab` goldens, and `build.fsx -- test` compiles it with Fable and runs it
+    under node against `tests/fixtures/{globals-lab,lab}/index.js` - hand-written runtimes of
+    the same declarations, kept deliberately small and checkable (a timer that records its
+    calls). A node preload (`register.mjs`) installs the ambient globals and resolves the
+    fixture package names to those runtimes, so the gate needs no install. Thirty checks
+    cover the claims phase C and D made on paper: `[<Global>]` reaches `globalThis`,
+    `[<Global; EmitConstructor>]` produces an `instanceof` the global class, a tagged-union
+    case is the tagged object JavaScript reads and a JavaScript-built one matches the F# case
+    with its fields, `Create` is the bare literal with omitted optionals absent, imports and
+    overloads land on the module's exports, an options-object callback is invoked. What the
+    first run found:
+    - *Rest parameters on abstract members did not spread.* The render tier read a rest tail
+      as a plain array on abstract members on the belief that attribute syntax is unavailable
+      in a slot signature, so `tween(...values)` arrived as `[[1, 2, 3]]`. F# admits
+      `[<ParamArray>]` there, fsc compiles it, and Fable spreads it; the `lab`,
+      `workers-types` (eight members) goldens changed accordingly.
+    - *The support package did not compile under Fable* (the `access` aliases, above).
+    - *Fable's up-to-date check missed a changed linked golden*, so the stage passes
+      `--noCache`.
+    - Two things to know rather than fix: `[<Global("x")>]` emits the bare identifier, so a
+      caller's local named `x` shadows it (`const registry = registry`); and Fable compiles a
+      `float[]` literal to a `Float64Array`, which `JSON.stringify` prints as an object - the
+      gate spreads or reads such arrays element-wise, and a binding that hands a `float[]` to
+      a library expecting `Array.isArray` is a consumer-side `--typedArrays false` matter.
+  **Still ahead in D:** nothing named; the `three` and `typescript` rungs stay in E.
 - **E — hardening.** Dedup/naming at scale, fidelity-manifest UX, determinism under the
   full litmus ladder, `@types/three` and `typescript` rungs.
+  - *Type parameters in scope where they are read (2026-09-02).* The largest single
+    finding the D9 rungs measured - "type parameter is not in scope here", 62 sites in
+    `solid-js` - was not method-level generics after all (those were already spelled);
+    it was three ways a parameter's declaration and its use came apart, and
+    `tests/fixtures/generics-lab` pins each:
+    - *A generic declaration reached only through instantiations.* `Ready<T>` is not
+      exported; `Resource<T> = Ready<T> | ...` reaches `Ready<T_Resource>`, a reference
+      whose target is the declaration. The resolve tier never followed the target, so the
+      shape tier named the instantiation and its members read a parameter that was not
+      theirs; a second instantiation became `Ready2`, and `workers-types` carried ten
+      copies of `TailEvent`. The target is now followed for entry-group references, named
+      ahead of the instantiation, and every instantiation is written as an application -
+      `TailEvent<'Event>` once, `SqlStorageCursorNextResult<'T>` once.
+    - *A generic union alias.* The union branch of derivation never asked for alias
+      type arguments, so `type Ref<T> = T | ((value: T) => void)` reached shaping with no
+      scope and rendered `obj`. It asks now, as the object and conditional branches
+      already did.
+    - *An anonymous object type hoisted out of a generic scope.* `each<T, U>(props: {
+      items: T[]; render: (item: T) => U })` names `EachProps` for the parameter, and
+      `EachProps` binds nothing of its own. A new pass (`bind-free-type-params`) walks
+      each hoisted declaration for the type parameters it reads without binding - a
+      signature's own stay inside it, another named declaration's stop at its arguments
+      - and records them as `DeclParams`; the declaration is then written over them
+      (`EachProps<'T, 'U>`) and every reference applies them back, in scope. First-use
+      order, so the arity is deterministic.
+    Measured: `solid-js` widened 97 → 67 and the finding 62 → 4 (all four on one rank-2
+    callback, `untrack?: <V>(fn: () => V) => V`, which F# cannot spell); `type-fest` 16 →
+    11 (`ReadonlyTuple`'s mapped body and `KeysOfUnion`, both conditional territory).
+    What the compile gate had to prove: a generic interface with `[<ParamObject>]`
+    `Create` over `'T`, and an application of a hoisted declaration from inside a generic
+    `Exports` member - both compile under Fable.Core 5.2.0.
 
 ## 7. Decisions (2026-09-01)
 

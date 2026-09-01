@@ -49,7 +49,7 @@ type Timer =
     abstract speed: float with get, set
     abstract play: unit -> Timer
     abstract seek: time: float * ?muteCallbacks: bool -> Timer
-    abstract tween: values: float[] -> Timer
+    abstract tween: [<ParamArray>] values: float[] -> Timer
 
 [<Interface>]
 type ConfigureSettings =
@@ -203,5 +203,15 @@ type Exports =
     /// </summary>
     [<Import("configure", "phase-b-lab")>]
     static member configure (settings: ConfigureSettings) : unit = jsNative
+    /// <summary>
+    /// Reads a discriminated union off its tag - the run gate's proof the erasure agrees with JavaScript.
+    /// </summary>
+    [<Import("area", "phase-b-lab")>]
+    static member area (shape: Shape) : float = jsNative
+    /// <summary>
+    /// Hands back a tagged object built on the JavaScript side, for the F# side to match on.
+    /// </summary>
+    [<Import("makeRoundRect", "phase-b-lab")>]
+    static member makeRoundRect (width: float, height: float, radius: float) : Shape = jsNative
     [<Import("utils", "phase-b-lab")>]
     static member utils: Utils = jsNative

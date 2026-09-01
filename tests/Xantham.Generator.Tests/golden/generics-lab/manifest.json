@@ -1,0 +1,101 @@
+{
+  "package": "generics-lab",
+  "module": "GenericsLab",
+  "counts": {
+    "exact": 6,
+    "ergonomic": 4,
+    "widened": 0,
+    "escape": 0
+  },
+  "symbols": [
+    {
+      "name": "Ready",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Pending",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Resource",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "StringResource",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "Ref",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "Source",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "EachProps",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Handle",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "HandleItem",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "each",
+      "tier": "exact",
+      "findings": []
+    }
+  ]
+}

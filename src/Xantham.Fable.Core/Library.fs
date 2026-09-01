@@ -196,9 +196,10 @@ module KeyOf =
     let inline value (key: keyof<'T>): string = !!key
     let inline item (key: keyof<'T>) (obj: 'T): obj option = obj.Access(key)
     /// <summary>
-    /// Alias for <c>item</c>
+    /// Alias for <c>item</c>. An inline function rather than a value binding: Fable cannot
+    /// take an inline function as a first-class value, and the run gate is where that showed.
     /// </summary>
-    let access = item
+    let inline access (key: keyof<'T>) (obj: 'T): obj option = item key obj
     
     let inline unsafeUnbox<'T, 'ReturnType> (key: keyof<'T>): typekeyof<'T, 'ReturnType> = !!key
     /// <summary>
@@ -225,9 +226,9 @@ module TypeKeyOf =
     /// <param name="obj">Object being accessed</param>
     let inline item (key: typekeyof<'T, 'ReturnType>) (obj: 'T): 'ReturnType = obj.Access(key)
     /// <summary>
-    /// Alias for <c>item</c>
+    /// Alias for <c>item</c>; inline for the reason <c>KeyOf.access</c> is.
     /// </summary>
-    let access = item
+    let inline access (key: typekeyof<'T, 'ReturnType>) (obj: 'T): 'ReturnType = item key obj
 
 /// <summary>
 /// Get a property key from a mapping function for the given type.

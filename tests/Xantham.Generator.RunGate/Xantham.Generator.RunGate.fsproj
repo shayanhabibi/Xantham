@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- The Fable *run* gate of docs/plans/generator-architecture.md §5: where the compile gate
+         proves the goldens type-check, this one proves the erased idioms they lean on *behave* -
+         `[<Global>]` reaches the global it names, `[<EmitConstructor>]` news the right class, a
+         `TypeScriptTaggedUnion` case is the tagged object JavaScript expects and matches one
+         JavaScript built, a `ParamObject` Create is the object literal, an `Import` lands on the
+         module's export. Fable compiles this program against the linked goldens and node runs it
+         against hand-written runtimes of the same fixtures (`tests/fixtures/<lab>/index.js`);
+         `register.mjs` installs the ambient globals and resolves the fixture package names.
+
+         It is an executable, not a test project: `dotnet build` type-checks it, and
+         `build.fsx test` runs `dotnet fable` on it after the suites; the exact command is the
+         `run gate` stage there (an XML comment cannot spell a double-dash flag), and it runs
+         from this directory.
+
+         Every golden the gate exercises is linked below; the gate grows by linking another and
+         adding its checks to Program.fs. -->
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <!-- net8.0 for the same reason as the compile gate: the ParamObject Create members are
+             static interface members with bodies. Fable erases them. -->
+        <TargetFramework>net8.0</TargetFramework>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <IsPackable>false</IsPackable>
+        <NoWarn>$(NoWarn);FS1104</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="..\Xantham.Generator.Tests\golden\globals-lab\GlobalsLab.fs" Link="globals-lab\GlobalsLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\lab\PhaseBLab.fs" Link="lab\PhaseBLab.fs" />
+        <Compile Include="Program.fs" />
+        <None Include="register.mjs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- One Fable.Core across the support package, the compile gate and this gate. -->
+        <PackageReference Include="Fable.Core" Version="5.2.0" />
+        <ProjectReference Include="..\..\src\Xantham.Fable.Core\Xantham.Fable.Core.fsproj" />
+    </ItemGroup>
+
+</Project>

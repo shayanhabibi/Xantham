@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <!-- The compile gate of docs/plans/generator-architecture.md §5: the committed golden
          bindings are compiled as F# against Fable.Core on every build, because bindings that
@@ -30,11 +30,14 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\lab\PhaseBLab.fs" Link="lab\PhaseBLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\globals-lab\GlobalsLab.fs" Link="globals-lab\GlobalsLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\keyof-lab\KeyofLab.fs" Link="keyof-lab\KeyofLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\generics-lab\GenericsLab.fs" Link="generics-lab\GenericsLab.fs" />
     <Compile Include="..\Xantham.Generator.Tests\golden\brand-lab\BrandLab.fs" Link="brand-lab\BrandLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\lib-lab\LibLab.fs" Link="lib-lab\LibLab.fs" />
     <Compile Include="..\Xantham.Generator.Tests\golden\animejs\Animejs.fs" Link="animejs\Animejs.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\@cloudflare\workers-types\Cloudflare.WorkersTypes.fs"
                  Link="workers-types\Cloudflare.WorkersTypes.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\solid-js\SolidJs.fs" Link="solid-js\SolidJs.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\type-fest\TypeFest.fs" Link="type-fest\TypeFest.fs" />
     </ItemGroup>
 
     <ItemGroup>

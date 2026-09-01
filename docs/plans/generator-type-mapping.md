@@ -683,7 +683,14 @@ from the catalogue as D1–D12.
 Threads still live after these decisions:
 
 - D7's runtime acceptance test for `undefined` tuple slots.
-- D9's calibration against the `type-fest`/`three`/`solid-js`/`typescript` fixtures.
+- D9's calibration against the `three`/`typescript` fixtures. `type-fest` and `solid-js`
+  landed as rungs on 2026-09-02 (architecture plan, phase D); what they measured is recorded
+  there, and the phantom-versus-conditional split they expose is the cutoff still to tune.
+  The other thing they measured - type parameters read out of scope - closed the same day
+  (phase E, first entry): generic declarations are followed behind their instantiations,
+  union aliases keep their parameters, and a hoisted anonymous type is declared over the
+  variables it reads (§4.9). Still open under §4.9: rank-2 callbacks in parameter position
+  (`untrack?: <V>(fn: () => V) => V`), which have no F# form at all.
 - The D5 and D8 config toggles, if wanted later.
 
 ---
