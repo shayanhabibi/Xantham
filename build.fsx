@@ -62,7 +62,7 @@ module Options =
         |> Input.description "Skip running tests"
     let generateOnly =
         Input.option<string> "--only"
-        |> Input.description "Limit generation to one layer: ast | proto. Both by default."
+        |> Input.description "Limit generation to one layer: ast | proto | session. All three by default."
         |> Input.def ""
     let syncUpstream =
         Input.option<bool> "--sync"
@@ -148,13 +148,22 @@ module Stages =
                 when' sync
                 run "dotnet fsi tools/generate-wire.fsx -- sync tsc-ast"
             }
+            // Named rather than excluded, so a third layer does not turn `--only` into a list of
+            // everything it is not.
+            let wanted layer = only = "" || only = layer
             stage "generate ast" {
-                when' (only <> "proto")
+                when' (wanted "ast")
                 run "dotnet fsi tools/generate-wire.fsx -- generate ast"
             }
             stage "generate proto" {
-                when' (only <> "ast")
+                when' (wanted "proto")
                 run "dotnet fsi tools/generate-wire.fsx -- generate proto"
+            }
+            // After proto: it reads the same schema, but the file it emits compiles against the
+            // surface proto emits.
+            stage "generate session" {
+                when' (wanted "session")
+                run "dotnet fsi tools/generate-wire.fsx -- generate session"
             }
         }
     }
