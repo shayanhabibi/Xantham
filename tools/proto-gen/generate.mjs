@@ -8,7 +8,11 @@
  * the run - a silently dropped field would surface much later as a null result.
  *
  * TypeScript 7 no longer ships the JS compiler API (`require("typescript")` there
- * exposes only `version`), so the parser is a separate TypeScript 5.x install.
+ * exposes only `version`), so the parser is a separate TypeScript 5.x install: the
+ * root `package.json` pins it as `typescript-5`, an npm alias, so both compilers
+ * can sit in one `node_modules`. `<parser-dir>` is the checkout to resolve that
+ * alias from, which is not necessarily this file's own - an agent worktree has no
+ * `node_modules` and borrows the main checkout's.
  *
  *   node tools/proto-gen/generate.mjs <typescript-pkg-dir> <parser-dir> <out.generated.fs>
  */
@@ -21,7 +25,19 @@ if (!tsPkgDir || !parserDir || !outFile) {
   console.error("usage: generate.mjs <typescript-pkg-dir> <parser-dir> <out.generated.fs>");
   process.exit(2);
 }
-const ts = createRequire(path.resolve(parserDir, "noop.js"))("typescript");
+const ts = (() => {
+  const require = createRequire(path.resolve(parserDir, "noop.js"));
+  try {
+    return require("typescript-5");
+  } catch (e) {
+    if (e.code !== "MODULE_NOT_FOUND") throw e;
+    console.error(
+      `cannot resolve the \`typescript-5\` parser from ${parserDir} - run \`npm install\` there. ` +
+        "It is the aliased TypeScript 5.x compiler API; the 7.x package cannot parse.",
+    );
+    process.exit(2);
+  }
+})();
 
 const DTS = path.join(tsPkgDir, "dist/api/proto.generated.d.ts");
 const ENUM_DIR = path.join(tsPkgDir, "dist/enums");

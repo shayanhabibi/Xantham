@@ -19,6 +19,13 @@ open System.IO
 [<Literal>]
 let TscEnvVar = "XANTHAM_TSGO_EXE"
 
+/// Turns the live suite's "no compiler, so skip" into a failure. The suite skips itself when
+/// `Tsc.locate` comes back empty, which is right for a working copy with no `npm install` and
+/// wrong anywhere a compiler is known to be present - a run that skipped everything is a green
+/// build that tested nothing.
+[<Literal>]
+let RequireTscEnvVar = "XANTHAM_REQUIRE_TSC"
+
 /// The `.git` entry of a linked worktree is a file holding `gitdir: <path>`; in the main
 /// checkout it is a directory. Detection rides on that rather than on the worktree living
 /// under `.claude/worktrees/`, so it survives a worktree parked anywhere.
@@ -110,9 +117,20 @@ let typescriptPackage (root: string) =
 ///
 /// Only a worktree gets the redirect. The main checkout has its own install and `Tsc.locate`
 /// finds it unaided; pinning the variable there would outlive the next bump of the pin.
+///
+/// Borrowing also sets `XANTHAM_REQUIRE_TSC`, because once a compiler is known to be on disk a
+/// skipped live suite is a broken run rather than an unconfigured one. Export
+/// `XANTHAM_REQUIRE_TSC=0` before the command to opt back out.
 let ensureTsc (root: string) : string option =
+    let requireTsc () =
+        if String.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable RequireTscEnvVar) then
+            Environment.SetEnvironmentVariable(RequireTscEnvVar, "1")
+            printfn $"worktree: %s{RequireTscEnvVar}=1 - live tests must run, not skip"
+
     match Environment.GetEnvironmentVariable TscEnvVar with
-    | existing when not (String.IsNullOrWhiteSpace existing) && File.Exists existing -> Some existing
+    | existing when not (String.IsNullOrWhiteSpace existing) && File.Exists existing ->
+        requireTsc ()
+        Some existing
     | _ when not (isLinkedWorktree root) -> None
     | _ ->
         match searchRoots root |> List.tryPick tscExeIn with
@@ -121,4 +139,5 @@ let ensureTsc (root: string) : string option =
             Environment.SetEnvironmentVariable(TscEnvVar, exe)
             printfn $"worktree: borrowing %s{exe}"
             printfn $"worktree: %s{TscEnvVar} exported for this run"
+            requireTsc ()
             Some exe

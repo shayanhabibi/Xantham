@@ -41,6 +41,21 @@
   vendored `ast.json` and `enums/`.
 - `dotnet fsi tools/generate-wire.fsx generate proto` — emit the `Proto*.generated.fs` files.
 
+## Working in an agent worktree
+
+A worktree under `.claude/worktrees/` has tracked files only — no `node_modules`, no
+`tools/tsc-ast/upstream/`. Do not run `npm install` to compensate:
+
+- `build.fsx` and `tools/generate-wire.fsx` borrow the main checkout's install and export
+  `XANTHAM_TSGO_EXE`, so the live suite and both generators work unchanged. See
+  `.claude/rules/build.md`.
+- They also set `XANTHAM_REQUIRE_TSC=1`, which turns a skipped live suite into a failure. **A run
+  reporting `native tsc not found - live tests skipped` in a worktree is a broken run, not a
+  pass.** Running `dotnet test` directly bypasses this, so set it yourself, or go through
+  `dotnet fsi build.fsx -- test`.
+- `tools/tsc-ast/upstream/` is vendored per checkout and on demand; `generate ast` tells you the
+  command. Never copy it between worktrees. See `.claude/rules/upstream.md`.
+
 ## F# semantics — use `fslangmcp`, not grep
 
 The repo ships an `fslangmcp` MCP server (`.mcp.json`, FsLangMCP 0.16.0 over FSAC +

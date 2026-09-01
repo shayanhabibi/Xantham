@@ -2,8 +2,9 @@
   "name": "xantham",
   "private": true,
   "type": "module",
-  "description": "Repository-level tooling dependencies, and the single pin of the `typescript` 7.x compiler. tools/proto-gen reads the shipped schema out of this package, and its platform `@typescript/typescript-<rid>` package is the `tsc --api` server the live tests drive - `Tsc.locate` walks parent directories, so the test project resolves this install. `dotnet fsi build.fsx -- <generate|test>` installs it.",
+  "description": "Repository-level tooling dependencies, and the single pin of the `typescript` 7.x compiler. tools/proto-gen reads the shipped schema out of this package, and its platform `@typescript/typescript-<rid>` package is the `tsc --api` server the live tests drive - `Tsc.locate` walks parent directories, so the test project resolves this install. `typescript-5` is the aliased 5.x compiler API that tools/proto-gen parses that schema with, since 7.x exposes only `version` to `require`. `dotnet fsi build.fsx -- <generate|test>` installs both.",
   "devDependencies": {
-    "typescript": "7.1.0-dev.20260830.1"
+    "typescript": "7.1.0-dev.20260830.1",
+    "typescript-5": "npm:typescript@^5.9.3"
   }
 }

@@ -60,8 +60,12 @@ inputs the same way — worktree first, then the main checkout.
   nothing, so a pin bump is picked up normally.
 - An `XANTHAM_TSGO_EXE` already in the environment always wins.
 - Generated output still goes to the worktree — only *inputs* are borrowed.
-- Consequence: with the override set, the `tsc` layout test skips itself by design. CI installs
-  normally and sets `XANTHAM_REQUIRE_TSC`, so that assertion still runs there.
+- Borrowing also exports `XANTHAM_REQUIRE_TSC=1`. Once a compiler is known to be on disk, a live
+  suite that skipped itself is a broken run, not an unconfigured one, and silence there would
+  make a worktree look green while testing nothing. Export `XANTHAM_REQUIRE_TSC=0` to opt out.
+- Consequence: with the override set, the `tsc` layout test skips itself by design — it asserts
+  the package layout, which an explicit path says nothing about. CI installs normally, so that
+  assertion still runs there.
 
 ## General Patterns
 
