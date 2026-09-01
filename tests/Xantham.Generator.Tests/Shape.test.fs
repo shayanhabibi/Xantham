@@ -1310,16 +1310,55 @@ let shapePassTests =
             Expect.equal reference FsObj "no binding is claimed"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "and the widening is the ordinary one"
 
-        testCase "a lib name Fable.Core does not bind keeps widening" <| fun _ ->
+        testCase "a lib name nothing shipped binds keeps widening" <| fun _ ->
             // The synchronous iteration protocol has no Fable.Core binding, and `seq<'T>` is not
-            // one however alike the two look. The DOM is absent for the same reason: binding it
-            // is a dependency decision, not a table entry.
-            let model = Build.shapeModel (libType 10 "Iterable" [ 1 ] :: libType 11 "EventTarget" [] :: Build.primitives)
+            // one however alike the two look. `Response` is the DOM's version of the same
+            // situation: it is a lib name, but `fetch` lives in `Fable.Fetch` rather than in the
+            // `Fable.Browser.*` family this generator's table is built from.
+            let model = Build.shapeModel (libType 10 "Iterable" [ 1 ] :: libType 11 "Response" [] :: Build.primitives)
 
             for id in [ 10; 11 ] do
                 let reference, findings = Shape.typeRef Build.context model None "x" id
                 Expect.equal reference FsObj "still obj"
                 Expect.equal (findings |> List.map _.Tier) [ Widened ] "and still says so"
+
+        testCase "a lib name a Fable.Browser package binds is referenced, not widened" <| fun _ ->
+            // The DOM half of the same disposition. The table is generated from the family's
+            // assemblies, so this asserts the rule that reads it, not the entry: a DOM name in
+            // an ordinary position writes its `Browser.Types` spelling and loses nothing.
+            let model = Build.shapeModel (libType 10 "EventTarget" [] :: Build.primitives)
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsNamed "Browser.Types.EventTarget") "the binding is written"
+            Expect.isEmpty findings "and nothing is lost saying it that way"
+
+        testCase "a DOM name bound at two arities takes the one the reference fits" <| fun _ ->
+            // `CustomEvent` is in `Browser.Event` both bare and generic, so arity is part of the
+            // table's key rather than a property of the name. A reference carrying an argument
+            // reaches the generic binding; a bare one reaches the other.
+            let model =
+                Build.shapeModel (libType 10 "CustomEvent" [ 1 ] :: libType 11 "CustomEvent" [] :: Build.primitives)
+
+            let generic, genericFindings = Shape.typeRef Build.context model None "x" 10
+            let bare, bareFindings = Shape.typeRef Build.context model None "x" 11
+
+            Expect.equal generic (FsApp("Browser.Types.CustomEvent", [ FsString ])) "the argument is carried"
+            Expect.isEmpty genericFindings "exactly"
+            Expect.equal bare (FsNamed "Browser.Types.CustomEvent") "and the bare form is the bare binding"
+            Expect.isEmpty bareFindings "also exactly"
+
+        testCase "a DOM name two packages of the family both define widens" <| fun _ ->
+            // `Browser.Types.Range` is declared by `Browser.IndexedDB` and by
+            // `Browser.MediaStream`, and no qualification picks one. The ambiguity is resolved
+            // when the table is generated - by leaving the name out - so what reaches here is
+            // an ordinary miss.
+            let model = Build.shapeModel (libType 10 "Range" [] :: Build.primitives)
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference FsObj "an ambiguous name is not written"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "and the widening is the ordinary one"
 
         testCase "a package's own type named like a lib type is untouched" <| fun _ ->
             // The table is keyed by name, so what keeps it from hijacking a package's own

@@ -2,9 +2,9 @@
   "package": "lib-lab",
   "module": "LibLab",
   "counts": {
-    "exact": 6,
+    "exact": 10,
     "ergonomic": 7,
-    "widened": 3,
+    "widened": 4,
     "escape": 0
   },
   "symbols": [
@@ -162,6 +162,26 @@
       ]
     },
     {
+      "name": "handle",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "mount",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "upload",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "emit",
+      "tier": "exact",
+      "findings": []
+    },
+    {
       "name": "each",
       "tier": "widened",
       "findings": [
@@ -173,13 +193,24 @@
       ]
     },
     {
-      "name": "handle",
+      "name": "select",
       "tier": "widened",
       "findings": [
         {
           "pass": "shape-exports",
           "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
+          "message": "Range is not among the generated declarations; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "respond",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "Response is not among the generated declarations; widened to obj"
         }
       ]
     }

@@ -52,7 +52,7 @@ type Clock =
 
 type ScrollContainer =
     /// <remarks>@type {HTMLElement}</remarks>
-    abstract element: obj with get, set
+    abstract element: Browser.Types.HTMLElement with get, set
     /// <remarks>@type {Boolean}</remarks>
     abstract useWin: bool with get, set
     /// <remarks>@type {Number}</remarks>
@@ -109,7 +109,7 @@ type ScrollContainer =
     abstract refresh: unit -> unit
     abstract handleScroll: unit -> unit
     /// <remarks>@param e</remarks>
-    abstract handleEvent: e: obj -> unit
+    abstract handleEvent: e: Browser.Types.Event -> unit
     abstract revert: unit -> unit
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -322,12 +322,12 @@ type DOMProxyGetBoundingClientRectResult =
 
 type Draggable =
     abstract containerArray: float[] with get, set
-    abstract ``$container``: obj with get, set
+    abstract ``$container``: Browser.Types.HTMLElement with get, set
     abstract useWin: bool with get, set
     /// <remarks>@type {Window | HTMLElement}</remarks>
-    abstract ``$scrollContainer``: obj with get, set
-    abstract ``$target``: obj with get, set
-    abstract ``$trigger``: obj with get, set
+    abstract ``$scrollContainer``: U2<Browser.Types.HTMLElement, Browser.Types.Window> with get, set
+    abstract ``$target``: Browser.Types.HTMLElement with get, set
+    abstract ``$trigger``: Browser.Types.HTMLElement with get, set
     abstract ``fixed``: bool with get, set
     abstract isFinePointer: bool with get, set
     /// <remarks>@type {[Number, Number, Number, Number]}</remarks>
@@ -484,16 +484,16 @@ type Draggable =
     /// <remarks>@return</remarks>
     abstract animateInView: ?duration: float * ?gap: float * ?ease: EasingParam -> Draggable
     /// <remarks>@param e</remarks>
-    abstract handleDown: e: obj -> unit
+    abstract handleDown: e: U2<Browser.Types.MouseEvent, Browser.Types.TouchEvent> -> unit
     /// <remarks>@param e</remarks>
-    abstract handleMove: e: obj -> unit
+    abstract handleMove: e: U2<Browser.Types.MouseEvent, Browser.Types.TouchEvent> -> unit
     abstract handleUp: unit -> unit
     abstract reset: unit -> Draggable
     abstract enable: unit -> Draggable
     abstract disable: unit -> Draggable
     abstract revert: unit -> Draggable
     /// <remarks>@param e</remarks>
-    abstract handleEvent: e: obj -> unit
+    abstract handleEvent: e: Browser.Types.Event -> unit
 
 [<Interface>]
 type DraggableOvershootCoords =
@@ -510,7 +510,7 @@ type DraggableScroll =
     static member Create (x: float, y: float) : DraggableScroll = jsNative
 
 type Transforms =
-    abstract ``$el``: obj with get, set
+    abstract ``$el``: U3<DOMProxy, Browser.Types.HTMLElement, Browser.Types.SVGElement> with get, set
     abstract inlineTransforms: obj[] with get, set
     abstract point: obj with get, set
     abstract inversedMatrix: obj with get, set
@@ -680,7 +680,7 @@ type ScrollObserver =
     /// <remarks>@type {ScrollContainer}</remarks>
     abstract container: ScrollContainer with get, set
     /// <remarks>@type {HTMLElement}</remarks>
-    abstract target: obj with get, set
+    abstract target: Browser.Types.HTMLElement with get, set
     /// <remarks>@type {Tickable|WAAPIAnimation}</remarks>
     abstract linked: U4<JSAnimation, Timeline, Timer, WAAPIAnimation> with get, set
     /// <remarks>@type {Boolean}</remarks>
@@ -758,7 +758,7 @@ type ScrollObserver =
     /// <remarks>@type {JSAnimation}</remarks>
     abstract debugStyles: JSAnimation with get, set
     /// <remarks>@type {HTMLElement}</remarks>
-    abstract ``$debug``: obj with get, set
+    abstract ``$debug``: Browser.Types.HTMLElement with get, set
     /// <remarks>@type {ScrollObserverParams}</remarks>
     abstract _params: ScrollObserverParams with get, set
     /// <remarks>@type {Boolean}</remarks>
@@ -965,7 +965,7 @@ type Scope =
     /// <remarks>@type {DefaultsParams}</remarks>
     abstract defaults: DefaultsParams with get, set
     /// <remarks>@type {Document|DOMTarget}</remarks>
-    abstract root: obj with get, set
+    abstract root: U3<Browser.Types.Document, Browser.Types.HTMLElement, Browser.Types.SVGElement> with get, set
     /// <remarks>@type {Array&lt;ScopeConstructorCallback&gt;}</remarks>
     abstract constructors: ScopeConstructorCallback[] with get, set
     /// <remarks>@type {Array&lt;ScopeCleanupCallback&gt;}</remarks>
@@ -1023,7 +1023,7 @@ type Scope =
     /// <remarks>@return</remarks>
     abstract keepTime: cb: Func<Scope, Tickable> -> Tickable
     /// <remarks>@param e</remarks>
-    abstract handleEvent: e: obj -> unit
+    abstract handleEvent: e: Browser.Types.Event -> unit
     abstract revert: unit -> unit
 
 [<Interface>]
@@ -1069,11 +1069,11 @@ type Text =
     /// </summary>
     /// <remarks>@class</remarks>
     abstract TextSplitter: obj with get, set
-    abstract splitText: Func<obj, TextSplitterParams option, TextSplitter> with get, set
-    abstract split: Func<obj, TextSplitterParams option, TextSplitter> with get, set
+    abstract splitText: Func<U4<string, Browser.Types.Element[], Browser.Types.Element, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter> with get, set
+    abstract split: Func<U4<string, Browser.Types.HTMLElement[], Browser.Types.HTMLElement, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter> with get, set
     abstract scrambleText: Func<ScrambleTextParams option, Func<Target option, float option, Target[] option, Tween option, ScrambleTextTween>> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (TextSplitter: obj, splitText: Func<obj, TextSplitterParams option, TextSplitter>, split: Func<obj, TextSplitterParams option, TextSplitter>, scrambleText: Func<ScrambleTextParams option, Func<Target option, float option, Target[] option, Tween option, ScrambleTextTween>>) : Text = jsNative
+    static member Create (TextSplitter: obj, splitText: Func<U4<string, Browser.Types.Element[], Browser.Types.Element, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter>, split: Func<U4<string, Browser.Types.HTMLElement[], Browser.Types.HTMLElement, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter>, scrambleText: Func<ScrambleTextParams option, Func<Target option, float option, Target[] option, Tween option, ScrambleTextTween>>) : Text = jsNative
 
 [<Interface>]
 type ScrambleTextTween =
@@ -1101,7 +1101,7 @@ type TextSplitter =
     abstract wordTemplate: U3<string, bool, SplitFunctionValue> with get, set
     /// <remarks>@type {String|false|SplitFunctionValue}</remarks>
     abstract charTemplate: U3<string, bool, SplitFunctionValue> with get, set
-    abstract ``$target``: obj with get, set
+    abstract ``$target``: Browser.Types.HTMLElement with get, set
     abstract html: string with get, set
     abstract lines: obj[] with get, set
     abstract words: obj[] with get, set
@@ -1121,7 +1121,7 @@ type TextSplitter =
     /// Recursively processes a node and its children
     /// </summary>
     /// <remarks>@param node</remarks>
-    abstract splitNode: node: obj -> unit
+    abstract splitNode: node: Browser.Types.Node -> unit
     /// <remarks>@param clearCache</remarks>
     /// <remarks>@return</remarks>
     abstract split: ?clearCache: bool -> TextSplitter
@@ -1600,17 +1600,17 @@ type StaggerParamsAxis =
     | [<CompiledName("y")>] Y
     | [<CompiledName("z")>] Z
 
-type DOMTarget = obj
+type DOMTarget = U2<Browser.Types.HTMLElement, Browser.Types.SVGElement>
 
 type JSTarget =
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
-type Target = obj
+type Target = U3<Browser.Types.HTMLElement, JSTarget, Browser.Types.SVGElement>
 
 type TargetSelector = obj
 
-type DOMTargetSelector = obj
+type DOMTargetSelector = U4<string, Browser.Types.HTMLElement, Browser.Types.NodeList, Browser.Types.SVGElement>
 
 type DOMTargetsParam = obj
 
@@ -2150,7 +2150,7 @@ type SplitTemplateParams =
 
 type SplitValue = U2<string, bool>
 
-type SplitFunctionValue = Func<obj option, obj>
+type SplitFunctionValue = Func<U2<Browser.Types.HTMLElement, Browser.Types.Node> option, obj>
 
 [<Interface>]
 type TextSplitterParams =
@@ -2515,11 +2515,11 @@ type Exports =
     /// </summary>
     /// <remarks>@class</remarks>
     [<Import("TextSplitter", "animejs"); EmitConstructor>]
-    static member TextSplitter (target: obj, ?parameters: TextSplitterParams) : TextSplitter = jsNative
+    static member TextSplitter (target: U4<string, Browser.Types.Element[], Browser.Types.Element, Browser.Types.NodeList>, ?parameters: TextSplitterParams) : TextSplitter = jsNative
     [<Import("splitText", "animejs")>]
-    static member splitText (target: obj, ?parameters: TextSplitterParams) : TextSplitter = jsNative
+    static member splitText (target: U4<string, Browser.Types.Element[], Browser.Types.Element, Browser.Types.NodeList>, ?parameters: TextSplitterParams) : TextSplitter = jsNative
     [<Import("split", "animejs")>]
-    static member split (target: obj, ?parameters: TextSplitterParams) : TextSplitter = jsNative
+    static member split (target: U4<string, Browser.Types.HTMLElement[], Browser.Types.HTMLElement, Browser.Types.NodeList>, ?parameters: TextSplitterParams) : TextSplitter = jsNative
     [<Import("Timeline", "animejs"); EmitConstructor>]
     static member Timeline (?parameters: obj) : Timeline = jsNative
     [<Import("createTimeline", "animejs")>]

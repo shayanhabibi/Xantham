@@ -2,9 +2,9 @@
   "package": "animejs",
   "module": "Animejs",
   "counts": {
-    "exact": 43,
-    "ergonomic": 53,
-    "widened": 88,
+    "exact": 46,
+    "ergonomic": 55,
+    "widened": 83,
     "escape": 36
   },
   "symbols": [
@@ -38,16 +38,6 @@
       "name": "ScrollContainer",
       "tier": "widened",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Event is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -308,31 +298,6 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Window is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
@@ -349,31 +314,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "MouseEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "TouchEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Event is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "MouseEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "TouchEvent is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -478,21 +418,6 @@
       "name": "Transforms",
       "tier": "escape",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "SVGElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -644,11 +569,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
         },
@@ -721,11 +641,6 @@
           "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -833,22 +748,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "NodeList is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "SVGElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
         }
       ]
     },
@@ -1768,11 +1668,6 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Event is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "__type is not among the generated declarations; widened to obj"
         },
         {
@@ -1784,21 +1679,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Document is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "SVGElement is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -2002,48 +1882,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "NodeList is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Element is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Element is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "NodeList is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -2071,31 +1911,6 @@
           "pass": "shape-classes",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-classes",
-          "tier": "widened",
-          "message": "Element is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-classes",
-          "tier": "widened",
-          "message": "Element is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-classes",
-          "tier": "widened",
-          "message": "NodeList is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-classes",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2141,11 +1956,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Node is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -3306,19 +3116,8 @@
     },
     {
       "name": "DOMTarget",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "SVGElement is not among the generated declarations; widened to obj"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "JSTarget",
@@ -3338,24 +3137,8 @@
     },
     {
       "name": "Target",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "SVGElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "TargetSelector",
@@ -3364,50 +3147,14 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "NodeList is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "SVGElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
         }
       ]
     },
     {
       "name": "DOMTargetSelector",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "NodeList is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "SVGElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "DOMTargetsParam",
@@ -3416,22 +3163,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "NodeList is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "SVGElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
         }
       ]
     },
@@ -3457,22 +3189,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "NodeList is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "SVGElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 6 distinct types widened to obj (D4 caps the erased union at 4)"
         }
       ]
     },
@@ -6189,21 +5906,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "NodeList is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "SVGElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -6215,7 +5917,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 6 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -6718,21 +6420,6 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "NodeList is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "SVGElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -6744,27 +6431,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 6 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "NodeList is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "SVGElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
           "pass": "shape-interfaces",
@@ -7142,16 +6814,6 @@
           "pass": "shape-callbacks",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "Node is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-callbacks",
@@ -8405,63 +8067,23 @@
     },
     {
       "name": "splitText",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-exports",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "Element is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "Element is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "NodeList is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
     {
       "name": "split",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-exports",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "HTMLElement is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "NodeList is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },

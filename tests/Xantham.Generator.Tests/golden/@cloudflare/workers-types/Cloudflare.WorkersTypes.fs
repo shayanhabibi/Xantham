@@ -162,7 +162,7 @@ type ServiceWorkerGlobalScope =
     abstract crypto: obj with get, set
     abstract caches: obj with get, set
     abstract scheduler: obj with get, set
-    abstract performance: obj with get, set
+    abstract performance: Browser.Types.Performance with get, set
     abstract Cloudflare: Cloudflare with get, set
     abstract origin: string
     abstract Event: obj with get, set
@@ -212,7 +212,7 @@ type ServiceWorkerGlobalScope =
     abstract AbortSignal: obj with get, set
     abstract TextDecoder: obj with get, set
     abstract TextEncoder: obj with get, set
-    abstract navigator: obj with get, set
+    abstract navigator: Browser.Types.Navigator with get, set
     abstract Navigator: obj with get, set
     abstract URL: obj with get, set
     abstract URLSearchParams: obj with get, set
@@ -245,10 +245,10 @@ type ServiceWorkerGlobalScopeCompressionStreamFormat =
 
 [<Interface>]
 type ServiceWorkerGlobalScopeWebSocketPairResult =
-    abstract ``0``: obj with get, set
-    abstract ``1``: obj with get, set
+    abstract ``0``: Browser.Types.WebSocket with get, set
+    abstract ``1``: Browser.Types.WebSocket with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``0``: obj, ``1``: obj) : ServiceWorkerGlobalScopeWebSocketPairResult = jsNative
+    static member Create (``0``: Browser.Types.WebSocket, ``1``: Browser.Types.WebSocket) : ServiceWorkerGlobalScopeWebSocketPairResult = jsNative
 
 [<Interface>]
 type Cloudflare =
@@ -752,9 +752,9 @@ type DurableObject =
     abstract fetch: request: obj -> obj
     abstract connect: Func<Socket, JS.Promise<unit> option> option with get, set
     abstract alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option> option with get, set
-    abstract webSocketMessage: Func<obj, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
-    abstract webSocketClose: Func<obj, float, string, bool, JS.Promise<unit> option> option with get, set
-    abstract webSocketError: Func<obj, obj, JS.Promise<unit> option> option with get, set
+    abstract webSocketMessage: Func<Browser.Types.WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
+    abstract webSocketClose: Func<Browser.Types.WebSocket, float, string, bool, JS.Promise<unit> option> option with get, set
+    abstract webSocketError: Func<Browser.Types.WebSocket, obj, JS.Promise<unit> option> option with get, set
 
 [<Erase>]
 type DurableObjectStub<'T> = private DurableObjectStub__ of obj
@@ -832,14 +832,14 @@ type DurableObjectState<'Props> =
     abstract container: Container option with get, set
     abstract facets: DurableObjectFacets with get, set
     abstract blockConcurrencyWhile<'T>: callback: Func<JS.Promise<'T>> -> JS.Promise<'T>
-    abstract acceptWebSocket: ws: obj * ?tags: string[] -> unit
-    abstract getWebSockets: ?tag: string -> obj[]
+    abstract acceptWebSocket: ws: Browser.Types.WebSocket * ?tags: string[] -> unit
+    abstract getWebSockets: ?tag: string -> Browser.Types.WebSocket[]
     abstract setWebSocketAutoResponse: ?maybeReqResp: WebSocketRequestResponsePair -> unit
     abstract getWebSocketAutoResponse: unit -> WebSocketRequestResponsePair option
-    abstract getWebSocketAutoResponseTimestamp: ws: obj -> JS.Date option
+    abstract getWebSocketAutoResponseTimestamp: ws: Browser.Types.WebSocket -> JS.Date option
     abstract setHibernatableWebSocketEventTimeout: ?timeoutMs: float -> unit
     abstract getHibernatableWebSocketEventTimeout: unit -> float option
-    abstract getTags: ws: obj -> string[]
+    abstract getTags: ws: Browser.Types.WebSocket -> string[]
     abstract abort: ?reason: string * ?options: DurableObjectAbortOptions -> unit
 
 [<Interface>]
@@ -999,9 +999,9 @@ type EventTargetAddEventListenerOptions =
 
 [<Interface>]
 type EventTargetHandlerObject =
-    abstract handleEvent: Func<obj, obj> with get, set
+    abstract handleEvent: Func<Browser.Types.Event, obj> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (handleEvent: Func<obj, obj>) : EventTargetHandlerObject = jsNative
+    static member Create (handleEvent: Func<Browser.Types.Event, obj>) : EventTargetHandlerObject = jsNative
 
 [<Interface>]
 type SchedulerWaitOptions =
@@ -1049,7 +1049,7 @@ type ExtendableEvent =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
-    abstract currentTarget: obj option
+    abstract currentTarget: Browser.Types.EventTarget option
     /// <summary>
     /// The **`defaultPrevented`** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
     ///
@@ -1077,13 +1077,13 @@ type ExtendableEvent =
     /// The deprecated **`Event.srcElement`** is an alias for the Event.target property. Use Event.target instead.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: obj option
+    abstract srcElement: Browser.Types.EventTarget option
     /// <summary>
     /// The read-only **`target`** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
-    abstract target: obj option
+    abstract target: Browser.Types.EventTarget option
     /// <summary>
     /// The **`timeStamp`** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
@@ -1333,20 +1333,20 @@ type HTMLRewriter =
 
 [<Interface>]
 type HTMLRewriterElementContentHandlers =
-    abstract element: Func<obj, JS.Promise<unit> option> option with get, set
-    abstract comments: Func<obj, JS.Promise<unit> option> option with get, set
-    abstract text: Func<obj, JS.Promise<unit> option> option with get, set
+    abstract element: Func<Browser.Types.Element, JS.Promise<unit> option> option with get, set
+    abstract comments: Func<Browser.Types.Comment, JS.Promise<unit> option> option with get, set
+    abstract text: Func<Browser.Types.Text, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?element: Func<obj, JS.Promise<unit> option>, ?comments: Func<obj, JS.Promise<unit> option>, ?text: Func<obj, JS.Promise<unit> option>) : HTMLRewriterElementContentHandlers = jsNative
+    static member Create (?element: Func<Browser.Types.Element, JS.Promise<unit> option>, ?comments: Func<Browser.Types.Comment, JS.Promise<unit> option>, ?text: Func<Browser.Types.Text, JS.Promise<unit> option>) : HTMLRewriterElementContentHandlers = jsNative
 
 [<Interface>]
 type HTMLRewriterDocumentContentHandlers =
     abstract doctype: Func<Doctype, JS.Promise<unit> option> option with get, set
-    abstract comments: Func<obj, JS.Promise<unit> option> option with get, set
-    abstract text: Func<obj, JS.Promise<unit> option> option with get, set
+    abstract comments: Func<Browser.Types.Comment, JS.Promise<unit> option> option with get, set
+    abstract text: Func<Browser.Types.Text, JS.Promise<unit> option> option with get, set
     abstract ``end``: Func<DocumentEnd, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?doctype: Func<Doctype, JS.Promise<unit> option>, ?comments: Func<obj, JS.Promise<unit> option>, ?text: Func<obj, JS.Promise<unit> option>, ?``end``: Func<DocumentEnd, JS.Promise<unit> option>) : HTMLRewriterDocumentContentHandlers = jsNative
+    static member Create (?doctype: Func<Doctype, JS.Promise<unit> option>, ?comments: Func<Browser.Types.Comment, JS.Promise<unit> option>, ?text: Func<Browser.Types.Text, JS.Promise<unit> option>, ?``end``: Func<DocumentEnd, JS.Promise<unit> option>) : HTMLRewriterDocumentContentHandlers = jsNative
 
 [<Interface>]
 type Doctype =
@@ -1412,7 +1412,7 @@ type FetchEvent =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
-    abstract currentTarget: obj option
+    abstract currentTarget: Browser.Types.EventTarget option
     /// <summary>
     /// The **`defaultPrevented`** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
     ///
@@ -1440,13 +1440,13 @@ type FetchEvent =
     /// The deprecated **`Event.srcElement`** is an alias for the Event.target property. Use Event.target instead.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: obj option
+    abstract srcElement: Browser.Types.EventTarget option
     /// <summary>
     /// The read-only **`target`** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
-    abstract target: obj option
+    abstract target: Browser.Types.EventTarget option
     /// <summary>
     /// The **`timeStamp`** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
@@ -1740,7 +1740,7 @@ type QueueEvent<'Body> =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
-    abstract currentTarget: obj option
+    abstract currentTarget: Browser.Types.EventTarget option
     /// <summary>
     /// The **`defaultPrevented`** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
     ///
@@ -1768,13 +1768,13 @@ type QueueEvent<'Body> =
     /// The deprecated **`Event.srcElement`** is an alias for the Event.target property. Use Event.target instead.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: obj option
+    abstract srcElement: Browser.Types.EventTarget option
     /// <summary>
     /// The read-only **`target`** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
-    abstract target: obj option
+    abstract target: Browser.Types.EventTarget option
     /// <summary>
     /// The **`timeStamp`** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
@@ -1928,7 +1928,7 @@ type R2ObjectBody =
     abstract bytes: unit -> JS.Promise<JS.Uint8Array>
     abstract text: unit -> JS.Promise<string>
     abstract json<'T>: unit -> JS.Promise<'T>
-    abstract blob: unit -> JS.Promise<obj>
+    abstract blob: unit -> JS.Promise<Browser.Types.Blob>
     abstract key: string
     abstract version: string
     abstract size: float
@@ -2056,7 +2056,7 @@ type ScheduledEvent =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
-    abstract currentTarget: obj option
+    abstract currentTarget: Browser.Types.EventTarget option
     /// <summary>
     /// The **`defaultPrevented`** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
     ///
@@ -2084,13 +2084,13 @@ type ScheduledEvent =
     /// The deprecated **`Event.srcElement`** is an alias for the Event.target property. Use Event.target instead.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: obj option
+    abstract srcElement: Browser.Types.EventTarget option
     /// <summary>
     /// The read-only **`target`** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
-    abstract target: obj option
+    abstract target: Browser.Types.EventTarget option
     /// <summary>
     /// The **`timeStamp`** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
@@ -2254,7 +2254,7 @@ type TailEvent =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
-    abstract currentTarget: obj option
+    abstract currentTarget: Browser.Types.EventTarget option
     /// <summary>
     /// The **`defaultPrevented`** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
     ///
@@ -2282,13 +2282,13 @@ type TailEvent =
     /// The deprecated **`Event.srcElement`** is an alias for the Event.target property. Use Event.target instead.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: obj option
+    abstract srcElement: Browser.Types.EventTarget option
     /// <summary>
     /// The read-only **`target`** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
-    abstract target: obj option
+    abstract target: Browser.Types.EventTarget option
     /// <summary>
     /// The **`timeStamp`** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
@@ -16063,7 +16063,7 @@ type EmailEvent =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
-    abstract currentTarget: obj option
+    abstract currentTarget: Browser.Types.EventTarget option
     /// <summary>
     /// The **`defaultPrevented`** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
     ///
@@ -16091,13 +16091,13 @@ type EmailEvent =
     /// The deprecated **`Event.srcElement`** is an alias for the Event.target property. Use Event.target instead.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: obj option
+    abstract srcElement: Browser.Types.EventTarget option
     /// <summary>
     /// The read-only **`target`** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
-    abstract target: obj option
+    abstract target: Browser.Types.EventTarget option
     /// <summary>
     /// The **`timeStamp`** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
@@ -17100,11 +17100,11 @@ type DurableObject3<'Env, 'Props> =
     abstract alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option> option with get, set
     abstract fetch: Func<obj, obj> option with get, set
     abstract connect: Func<Socket, JS.Promise<unit> option> option with get, set
-    abstract webSocketMessage: Func<obj, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
-    abstract webSocketClose: Func<obj, float, string, bool, JS.Promise<unit> option> option with get, set
-    abstract webSocketError: Func<obj, obj, JS.Promise<unit> option> option with get, set
+    abstract webSocketMessage: Func<Browser.Types.WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
+    abstract webSocketClose: Func<Browser.Types.WebSocket, float, string, bool, JS.Promise<unit> option> option with get, set
+    abstract webSocketError: Func<Browser.Types.WebSocket, obj, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: DurableObjectState<'Props>, env: 'Env, ?alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option>, ?fetch: Func<obj, obj>, ?connect: Func<Socket, JS.Promise<unit> option>, ?webSocketMessage: Func<obj, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<obj, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<obj, obj, JS.Promise<unit> option>) : DurableObject3<'Env, 'Props> = jsNative
+    static member Create (ctx: DurableObjectState<'Props>, env: 'Env, ?alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option>, ?fetch: Func<obj, obj>, ?connect: Func<Socket, JS.Promise<unit> option>, ?webSocketMessage: Func<Browser.Types.WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<Browser.Types.WebSocket, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<Browser.Types.WebSocket, obj, JS.Promise<unit> option>) : DurableObject3<'Env, 'Props> = jsNative
 
 [<Interface>]
 type RpcTarget =
@@ -18220,9 +18220,9 @@ type TooManyWatermarksError =
 [<Interface>]
 type MarkdownDocument =
     abstract name: string with get, set
-    abstract blob: obj with get, set
+    abstract blob: Browser.Types.Blob with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, blob: obj) : MarkdownDocument = jsNative
+    static member Create (name: string, blob: Browser.Types.Blob) : MarkdownDocument = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type OutputFormat =
@@ -19010,7 +19010,7 @@ type Exports =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent)
     /// </summary>
     [<Global("ExtendableEvent"); EmitConstructor>]
-    static member ExtendableEvent (``type``: string, ?eventInitDict: obj) : ExtendableEvent = jsNative
+    static member ExtendableEvent (``type``: string, ?eventInitDict: Browser.Types.EventInit) : ExtendableEvent = jsNative
     [<Global("DigestStream"); EmitConstructor>]
     static member DigestStream (algorithm: U2<string, SubtleCryptoHashAlgorithm>, ?options: DigestStreamOptions) : DigestStream = jsNative
     [<Global("HTMLRewriter"); EmitConstructor>]
@@ -19021,17 +19021,17 @@ type Exports =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FetchEvent)
     /// </summary>
     [<Global("FetchEvent"); EmitConstructor>]
-    static member FetchEvent (``type``: string, ?eventInitDict: obj) : FetchEvent = jsNative
+    static member FetchEvent (``type``: string, ?eventInitDict: Browser.Types.EventInit) : FetchEvent = jsNative
     [<Global("R2Object"); EmitConstructor>]
     static member R2Object () : R2Object = jsNative
     [<Global("ScheduledEvent"); EmitConstructor>]
-    static member ScheduledEvent (``type``: string, ?eventInitDict: obj) : ScheduledEvent = jsNative
+    static member ScheduledEvent (``type``: string, ?eventInitDict: Browser.Types.EventInit) : ScheduledEvent = jsNative
     [<Global("FixedLengthStream"); EmitConstructor>]
     static member FixedLengthStream (expectedLength: obj, ?queuingStrategy: IdentityTransformStreamQueuingStrategy) : FixedLengthStream = jsNative
     [<Global("IdentityTransformStream"); EmitConstructor>]
     static member IdentityTransformStream (?queuingStrategy: IdentityTransformStreamQueuingStrategy) : IdentityTransformStream = jsNative
     [<Global("TailEvent"); EmitConstructor>]
-    static member TailEvent (``type``: string, ?eventInitDict: obj) : TailEvent = jsNative
+    static member TailEvent (``type``: string, ?eventInitDict: Browser.Types.EventInit) : TailEvent = jsNative
     [<Global("WebSocketPair")>]
     static member WebSocketPair: obj = jsNative
     [<Global("SqlStorageStatement"); EmitConstructor>]
@@ -19302,7 +19302,7 @@ type Exports =
     [<Global("D1PreparedStatement"); EmitConstructor>]
     static member D1PreparedStatement () : D1PreparedStatement = jsNative
     [<Global("EmailEvent"); EmitConstructor>]
-    static member EmailEvent (``type``: string, ?eventInitDict: obj) : EmailEvent = jsNative
+    static member EmailEvent (``type``: string, ?eventInitDict: Browser.Types.EventInit) : EmailEvent = jsNative
     /// <summary>
     /// Feature flags binding for evaluating feature flags from a Cloudflare Workers script.
     /// </summary>

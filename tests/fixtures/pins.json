@@ -1,12 +1,13 @@
 {
     // The litmus ladder of docs/plans/generator-architecture.md §5, pinned.
     //
-    // An npm fixture install is untracked (a worktree carries tracked files only, and
-    // AGENTS.md forbids `npm install` there), so this file is the tracked half: every
-    // committed golden was generated against exactly these versions. The e2e suite reads it
-    // and reports a mismatched install as fixture drift rather than as a golden diff - a
-    // floating `"*"` install turns a 400-line diff into a puzzle about whether the generator
-    // regressed or the package moved.
+    // An npm fixture install is untracked, so this file is the tracked half: every committed
+    // golden was generated against exactly these versions. A worktree carries tracked files
+    // only and installs the fixtures for itself - `build.fsx -- test` runs the stage, or
+    // `xantham-fixtures.fsx -- init` does it alone. The e2e suite reads this file and reports
+    // a mismatched install as fixture drift rather than as a golden diff - a floating `"*"`
+    // install turns a 400-line diff into a puzzle about whether the generator regressed or the
+    // package moved.
     //
     // Bumping a rung means: reinstall, regenerate its golden, review the diff as a *package*
     // change, and land both together.

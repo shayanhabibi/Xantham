@@ -6,18 +6,50 @@
 * Mid-rebuild sitting on top of `Xantham.TypeScript.Wire`
   * .NET client for TypeScript 7 compiler's own API server (`tsc --api`)
   * Generated typed layer reading binary AST
+* Emits bindings for **Fable 5.x only** — see below
 * Coordinated build pipelines through `build.fsx`
+
+## Fable 5.x only
+
+Generated bindings target **Fable 5.x and nothing else**. There is no compatibility path for
+Fable 4, no version-conditional emission, and no question to answer about an older toolchain: if
+a mapping needs something Fable 5 provides, use it. When a mapping is lossy it is lossy because
+of F# or because nothing shipped binds the name — never because of the Fable version.
+
+The bindings a generated file leans on are pinned in three places that must agree, because the
+compile gate is only evidence if it compiles against what a consumer will:
+
+- `Fable.Core` 5.2.0, in `src/Xantham.Fable.Core` and in `tests/Xantham.Generator.CompileGate`.
+- The `Fable.Browser.*` family, in `tools/browser-gen/generate.fsx` and in the gate's
+  `PackageReference` list. Bump both, then regenerate — the generated table is an intersection
+  with those exact versions.
+- The `typescript` 7.x pin in `package.json`, which supplies the `lib.*.d.ts` the table is
+  intersected against.
 
 ## Project Structure
 
-- `src/Xantham.TypeScript.Wire` — the only live source project. Generated API surface, binary AST
-  reader, typed node layer, batching mailbox, virtual filesystem. Published to NuGet.
+- `src/Xantham.TypeScript.Wire` — the compiler client. Generated API surface, binary AST reader,
+  typed node layer, batching mailbox, virtual filesystem. Published to NuGet.
+- `src/Xantham.Generator` — the bindings generator. Harvest → Resolve → Shape → Render, one
+  linear pass per tier, sequenced by `Pipeline.fs`; emits a binding file plus a `manifest.json`
+  of per-symbol findings. `BrowserBindingTable.generated.fs` is generated, not hand-written.
+- `src/Xantham.Fable.Core` — the hand-written support library generated bindings open.
 - `tests/Xantham.TypeScript.Wire.Tests` — Expecto suite. No `package.json` of its own: the live
   tests call `Tsc.locate`, which walks parents and finds the root `node_modules`.
+- `tests/Xantham.Generator.Tests` — Expecto suite for the generator, including the golden corpus
+  under `golden/`. `XANTHAM_UPDATE_GOLDEN=1` rewrites it; read the diff before committing it.
+- `tests/Xantham.Generator.CompileGate` — not a test project. An ordinary F# project that
+  compiles the committed goldens against `Fable.Core` and the `Fable.Browser.*` family on every
+  build, so a binding that does not compile fails the build rather than a review.
+- `tests/fixtures` — the real `.d.ts` packages the generator runs against, pinned in
+  `tests/fixtures/pins.json` and installed by `tools/xantham-fixtures.fsx`.
 - `tests/Test.fsx` — scratch script driving Wire against `tests/fixtures/` via the packed nupkg
   in `bin/`.
 - `tools/tsc-ast` — vendors upstream compiler sources and emits the AST/enum F# layers.
 - `tools/proto-gen` — emits the protocol F# layers from the `typescript` package's shipped schema.
+- `tools/session-gen` — emits the session layer over the surface `proto` emits.
+- `tools/browser-gen` — emits the generator's DOM binding table and the gate that proves it, from
+  the pinned `Fable.Browser.*` packages intersected with the pinned compiler's `lib.*.d.ts`.
 - `build.fsx` — the current build pipeline (Partas.Build).
 - `package.json` — root manifest, tooling only. The single pin of the `typescript` 7.x compiler,
   used both as generation input and as the live `tsc --api` server. Nothing else pins it.
@@ -28,9 +60,9 @@
 - `dotnet build Xantham.slnx` — build. `dotnet test` — run the Expecto suite.
 - `dotnet fsi build.fsx -- <build|test|generate|docs|pack|publish|bump>` — the full pipeline; the
   commands that need the compiler run `npm install` at the repository root first.
-- `dotnet fsi build.fsx -- generate [--only ast|proto] [--sync]` — installs the root `typescript`
-  pin, then routes to `tools/generate-wire.fsx` for both generated layers with repository defaults.
-  `--sync` re-vendors the upstream sources first (network).
+- `dotnet fsi build.fsx -- generate [--only ast|proto|session|browser] [--sync]` — installs the
+  root `typescript` pin, then routes to `tools/generate-wire.fsx` for every generated layer with
+  repository defaults. `--sync` re-vendors the upstream sources first (network).
 - `dotnet fsi tools/generate-wire.fsx sync tsc-ast [--check]` — vendor (or verify) the upstream
   sources pinned in `tools/tsc-ast/upstream.json` into `tools/tsc-ast/upstream/`, against the
   per-file digests in `upstream.lock.json`. The lock is committed; the tree is not.
@@ -40,19 +72,33 @@
   (tags, `Node<'Tag>`, typed accessors, views) into `src/Xantham.TypeScript.Wire/`, from the
   vendored `ast.json` and `enums/`.
 - `dotnet fsi tools/generate-wire.fsx generate proto` — emit the `Proto*.generated.fs` files.
+- `dotnet fsi tools/generate-wire.fsx generate browser` — emit
+  `src/Xantham.Generator/BrowserBindingTable.generated.fs` and the gate file
+  `tests/Xantham.Generator.CompileGate/BrowserBindings.fs`. Reads NuGet and the pinned compiler's
+  `lib/`, so it needs neither `--sync` nor the other layers.
+- `dotnet fsi tools/xantham-fixtures.fsx -- init` — install `tests/fixtures/` from
+  `tests/fixtures/pins.json`. Also runs as a stage of `build.fsx -- test|pack|publish`.
 
 ## Working in an agent worktree
 
 A worktree under `.claude/worktrees/` has tracked files only — no `node_modules`, no
-`tools/tsc-ast/upstream/`. Do not run `npm install` to compensate:
+`tools/tsc-ast/upstream/`, no installed fixtures. Two of those three are borrowed rather than
+installed, and the third is downloaded:
 
-- `build.fsx` and `tools/generate-wire.fsx` borrow the main checkout's install and export
-  `XANTHAM_TSGO_EXE`, so the live suite and both generators work unchanged. See
-  `.claude/rules/build.md`.
+- **Do not run `npm install` at the repository root.** `build.fsx` and
+  `tools/generate-wire.fsx` borrow the main checkout's install and export `XANTHAM_TSGO_EXE`, so
+  the live suite and every generator work unchanged. See `.claude/rules/build.md`.
 - They also set `XANTHAM_REQUIRE_TSC=1`, which turns a skipped live suite into a failure. **A run
   reporting `native tsc not found - live tests skipped` in a worktree is a broken run, not a
   pass.** Running `dotnet test` directly bypasses this, so set it yourself, or go through
   `dotnet fsi build.fsx -- test`.
+- **Fixtures are downloaded in the worktree, and that is allowed.** They are the generator's
+  inputs, they are pinned exactly, and a worktree that borrowed them would be reading a tree the
+  main checkout can change underneath it. Run `dotnet fsi build.fsx -- test` — its
+  `initialise fixtures` stage installs them here — or `dotnet fsi tools/xantham-fixtures.fsx --
+  init` on its own. Both are verified to work from a worktree. Installed packages under
+  `tests/fixtures/` are gitignored — only the hand-authored `*-lab/` fixtures and `pins.json` are
+  tracked — so the install does not dirty the branch.
 - `tools/tsc-ast/upstream/` is vendored per checkout and on demand; `generate ast` tells you the
   command. Never copy it between worktrees. See `.claude/rules/upstream.md`.
 
@@ -104,7 +150,7 @@ not edit the deny list to unblock itself.
 ## F# semantics — use `fslangmcp`, not grep
 
 The repo ships an `fslangmcp` MCP server (`.mcp.json`, FsLangMCP 0.16.0 over FSAC +
-FSharp.Compiler.Service). It loads `Xantham.slnx`, so it sees exactly the two projects the
+FSharp.Compiler.Service). It loads `Xantham.slnx`, so it sees exactly the projects the
 solution references — `.archive/` is invisible to it, which is the behaviour this repo wants.
 Requires the `fslangmcp`, `fsautocomplete` and `fantomas` global tools; `fslangmcp
 --bootstrap-tools` installs the pinned set.
@@ -143,8 +189,21 @@ its language server fails on `.archive/` and on `Library.fs`. Use `fslangmcp` in
 
 - Nothing is hand-transcribed that can be generated. Facts that must be transcribed are
   catalogued in `docs/wire-hand-written.md` with how each was derived and how to update it.
+  This is why the 439-entry DOM binding table is generated from the packages themselves and
+  `Naming.LibBindings` — the short, hand-pinned ECMAScript half — is not.
+- A generated table earns a generated gate. `tools/browser-gen` emits its compile-gate file
+  alongside the table, so a claim about a name or an arity that the pinned packages do not
+  support fails the build rather than a golden diff.
 - The AST is read in place out of the blob; `Node<'Tag>` is a struct over a blob index.
-- Expecto for .NET tests.
+- The generator is nano-passes over accumulating per-tier records, in linear lists — source
+  order is execution order. `docs/plans/generator-architecture.md` carries the decisions
+  (O1–O7) and what each phase landed; `docs/plans/generator-type-mapping.md` carries the
+  per-construct mapping. Update the phase record in the same commit as the behaviour.
+- A mapping that loses something says so. Findings are graded `Exact | Ergonomic | Widened |
+  Escape` per symbol and land in `manifest.json`; silently widening is the failure mode the
+  manifest exists to prevent.
+- Expecto for .NET tests. The compile gate is deliberately *not* one — it is a plain project,
+  so it runs on every build rather than only under `dotnet test`.
 
 ## TypeScript 7 compiler sources — READ BEFORE RESEARCHING THE COMPILER
 

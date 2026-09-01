@@ -489,8 +489,14 @@ and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (
 /// element type when every component agrees, `obj[]` otherwise. §4.12 recommends an erased
 /// carrier with typed accessors instead; that waits for a fixture that needs one, the way
 /// class statics do.
-/// A compiler-lib type Fable.Core already binds (`Promise` -> `JS.Promise<'T>`), which is the
-/// compiler-lib group's disposition for the half of `lib.d.ts` that has a shipped binding.
+/// A compiler-lib type a shipped Fable package already binds - `Promise` -> `JS.Promise<'T>`
+/// from `Fable.Core`, `EventTarget` -> `Browser.Types.EventTarget` from the `Fable.Browser.*`
+/// family - which is the compiler-lib group's disposition for the half of `lib.d.ts` that has
+/// a binding at all.
+///
+/// The two tables are consulted in that order and do not fall through to each other: a name the
+/// ECMAScript table knows is answered by it, arity rule included, because that table's `None`
+/// means "this is not that type" rather than "look elsewhere".
 ///
 /// The arity comparison is the safety argument, not a formality: TypeScript's lib made
 /// `Uint8Array` generic in a buffer parameter Fable's abbreviation does not take, so a mapping
@@ -499,32 +505,41 @@ and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (
 and private libBinding (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) =
     match facts.Origin, facts.SymbolName with
     | CompilerLib, Some name when GeneratorConfig.disposition ctx.Config CompilerLib <> Ship ->
-        match Naming.LibBindings.tryFind name with
-        | Some(fsharpName, arity, loss) ->
-            let arguments = facts.TypeArguments
+        let arguments = facts.TypeArguments
 
-            if arguments.Length < arity then
-                None
-            else
-                let reference, findings =
-                    match arity with
-                    | 0 -> FsNamed fsharpName, []
-                    | _ -> appliedRef ctx model self owner fsharpName (List.truncate arity arguments)
+        // (F# name, arity it takes, the loss the mapping itself costs). A DOM binding costs
+        // nothing beyond the arity rule below, so its loss list is always empty.
+        let bound =
+            match Naming.LibBindings.tryFind name with
+            | Some(fsharpName, arity, loss) ->
+                if arguments.Length < arity then
+                    None
+                else
+                    Some(fsharpName, arity, Option.toList loss)
+            | None ->
+                Naming.BrowserBindings.tryFind name arguments.Length
+                |> Option.map (fun (fsharpName, arity) -> fsharpName, arity, [])
 
-                let dropped =
-                    if arguments.Length > arity then
-                        [ Finding.make
-                              Ergonomic
-                              owner
-                              $"{name} carries {arguments.Length} type arguments where {fsharpName} takes {arity}; the extras are dropped" ]
-                    else
-                        []
-
-                let lossy =
-                    loss |> Option.map (Finding.make Ergonomic owner) |> Option.toList
-
-                Some(reference, findings @ dropped @ lossy)
+        match bound with
         | None -> None
+        | Some(fsharpName, arity, loss) ->
+            let reference, findings =
+                match arity with
+                | 0 -> FsNamed fsharpName, []
+                | _ -> appliedRef ctx model self owner fsharpName (List.truncate arity arguments)
+
+            let dropped =
+                if arguments.Length > arity then
+                    [ Finding.make
+                          Ergonomic
+                          owner
+                          $"{name} carries {arguments.Length} type arguments where {fsharpName} takes {arity}; the extras are dropped" ]
+                else
+                    []
+
+            let lossy = loss |> List.map (Finding.make Ergonomic owner)
+
+            Some(reference, findings @ dropped @ lossy)
     | _ -> None
 
 /// A generic name applied to type arguments, each shaped at this position (§4.9).

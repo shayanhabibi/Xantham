@@ -171,8 +171,9 @@ module Naming =
     /// map exactly; a lib type carrying *more* arguments than Fable's binding maps with the
     /// extras dropped and a finding; one carrying fewer is not this type at all and widens.
     ///
-    /// The DOM half (`Response`, `HTMLElement`, `ReadableStream`, ...) is deliberately absent:
-    /// binding it needs `Fable.Browser.*`, which is a dependency decision, not a table entry.
+    /// The DOM half (`HTMLElement`, `EventTarget`, `Blob`, ...) is not here: it is four hundred
+    /// names, so it is generated rather than transcribed, and it lives in `BrowserBindings`
+    /// below. What stays hand-written here is what has a hand-judged loss note attached.
     module LibBindings =
         /// Name, F# arity, and the loss to record - `None` when the mapping gives up nothing.
         let private table =
@@ -217,6 +218,49 @@ module Naming =
         /// Fable.Core binds only the async ones, and pretending `seq<'T>` interoperates with a
         /// JS iterable is exactly the kind of claim this table exists not to make.
         let tryFind (name: string) = Map.tryFind name table
+
+    /// The compiler-lib names the `Fable.Browser.*` family binds - the DOM half of the same
+    /// disposition `LibBindings` covers for the ECMAScript half.
+    ///
+    /// The table itself is generated (`BrowserBindingTable`, from
+    /// `tools/browser-gen/generate.fsx`), because it is four hundred names read off two
+    /// authorities that both move: what the referenced `Browser.*` assemblies export, and what
+    /// the pinned compiler's `lib.*.d.ts` files declare. Only their intersection is here, so an
+    /// entry is by construction a real lib name with a real binding. The *rule* below is
+    /// hand-written and tested, next to the one it mirrors.
+    ///
+    /// Arity is a lookup key rather than a property of the name, which is where this rule and
+    /// `LibBindings` differ: `CustomEvent` is bound both bare and generic, so a reference
+    /// carrying one type argument should reach the generic binding and a bare one the other.
+    /// Failing an exact match, the widest binding the reference has arguments for wins and the
+    /// extras are dropped with a finding - `LibBindings`' rule, generalised. A reference with
+    /// fewer arguments than the narrowest binding is some other type wearing a familiar name,
+    /// and widens.
+    ///
+    /// Unlike `LibBindings` no entry carries a loss note: a `Browser.Types` name is the same
+    /// type under a different spelling, so the mapping is Exact. Whether Fable's binding has
+    /// caught up with the member the caller wants is that package's business, exactly as it is
+    /// for `JS.Promise`.
+    module BrowserBindings =
+        /// Every arity a lib name is bound at, widest first, so the first entry that fits is
+        /// the widest that fits.
+        let private byName =
+            BrowserBindingTable.entries
+            |> List.groupBy (fun (name, _, _) -> name)
+            |> List.map (fun (name, bound) ->
+                name,
+                bound
+                |> List.map (fun (_, arity, fsharpName) -> arity, fsharpName)
+                |> List.sortByDescending fst)
+            |> Map.ofList
+
+        /// The binding for a lib name at a reference carrying `argumentCount` type arguments:
+        /// its F# name and the arity that name takes.
+        let tryFind (name: string) (argumentCount: int) : (string * int) option =
+            byName
+            |> Map.tryFind name
+            |> Option.bind (List.tryFind (fun (arity, _) -> arity <= argumentCount))
+            |> Option.map (fun (arity, fsharpName) -> fsharpName, arity)
 
     /// The JavaScript key a member symbol stands for. The checker escapes a name that begins
     /// with two underscores by prepending a third, so that a real `__html` cannot collide with

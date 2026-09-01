@@ -107,12 +107,41 @@ type Exports =
     [<Import("frozen", "lib-lab")>]
     static member frozen (entries: JS.Map<string, float>, values: JS.Set<string>) : unit = jsNative
     /// <summary>
+    /// The one the group's widening used to cost most: a DOM name in an ordinary position.
+    /// </summary>
+    [<Import("handle", "lib-lab")>]
+    static member handle (target: Browser.Types.EventTarget) : unit = jsNative
+    /// <summary>
+    /// Elements and events, which is most of what a browser-facing `.d.ts` traffics in.
+    /// </summary>
+    [<Import("mount", "lib-lab")>]
+    static member mount (host: Browser.Types.HTMLElement, on: Browser.Types.Event) : unit = jsNative
+    /// <summary>
+    /// Binary and URL types, which come from separate packages of the same family.
+    /// </summary>
+    [<Import("upload", "lib-lab")>]
+    static member upload (body: Browser.Types.Blob, ``to``: Browser.Types.URL) : Browser.Types.FormData = jsNative
+    /// <summary>
+    /// Bound at two arities: `CustomEvent` is in the family both bare and generic.
+    /// </summary>
+    [<Import("emit", "lib-lab")>]
+    static member emit (detail: Browser.Types.CustomEvent<string>) : unit = jsNative
+    /// <summary>
     /// `seq&lt;'T&gt;` is not a JS iterable, whatever the two have in common. Widened, and noted.
     /// </summary>
     [<Import("each", "lib-lab")>]
     static member each (values: obj) : unit = jsNative
     /// <summary>
-    /// A DOM name. Real, ubiquitous in `.d.ts` files, and still `obj` here.
+    /// A DOM name two packages of the family both define (`Browser.IndexedDB` and
+    /// `Browser.MediaStream` each declare a `Range`). There is no qualification that picks one, so
+    /// the table drops it and this widens - the honest outcome, and the reason ambiguity is
+    /// resolved when the table is generated rather than when the reference is emitted.
     /// </summary>
-    [<Import("handle", "lib-lab")>]
-    static member handle (target: obj) : unit = jsNative
+    [<Import("select", "lib-lab")>]
+    static member ``select`` (over: obj) : unit = jsNative
+    /// <summary>
+    /// A DOM name the family does not bind at all. `Response` and the rest of `fetch` live in
+    /// `Fable.Fetch`, a different package family, so this is still `obj`.
+    /// </summary>
+    [<Import("respond", "lib-lab")>]
+    static member respond () : obj = jsNative

@@ -19,6 +19,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <!-- Generated beside the table it gates: one type abbreviation per entry of
+             `BrowserBindings.generated.fs`, so a table that names something the referenced
+             `Fable.Browser.*` versions do not have is a build failure here rather than a
+             mystery in someone else's generated bindings. Regenerate both together with
+             `generate-wire.fsx generate browser`. -->
+        <Compile Include="BrowserBindings.fs" />
         <Compile Include="BrandIdioms.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\ansi-regex\AnsiRegex.fs" Link="ansi-regex\AnsiRegex.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\lab\PhaseBLab.fs" Link="lab\PhaseBLab.fs" />
@@ -36,6 +42,37 @@
         <!-- The support package is gated with the goldens: generated bindings are allowed to
              reference its erased idioms, so the gate has to prove the two compile together. -->
         <ProjectReference Include="..\..\src\Xantham.Fable.Core\Xantham.Fable.Core.fsproj" />
+    </ItemGroup>
+
+    <!-- The `Fable.Browser.*` family, which is what a generated binding's DOM references
+         resolve against. The pins are the same ones `tools/browser-gen/generate.fsx` reflects
+         over; the two cannot drift, because the generated gate file above is compiled against
+         whatever is listed here. Every one is an interface-only assembly Fable erases, which is
+         why the set is the whole family rather than a subset; see the script's header. -->
+    <ItemGroup>
+        <PackageReference Include="Fable.Browser.Blob" Version="1.4.0" />
+        <PackageReference Include="Fable.Browser.Css" Version="2.5.0" />
+        <PackageReference Include="Fable.Browser.Dom" Version="2.20.0" />
+        <PackageReference Include="Fable.Browser.Event" Version="1.7.0" />
+        <PackageReference Include="Fable.Browser.EventSource" Version="1.0.0" />
+        <PackageReference Include="Fable.Browser.Gamepad" Version="1.3.0" />
+        <PackageReference Include="Fable.Browser.Geolocation" Version="1.3.0" />
+        <PackageReference Include="Fable.Browser.IndexedDB" Version="2.2.0" />
+        <PackageReference Include="Fable.Browser.IntersectionObserver" Version="1.0.0" />
+        <PackageReference Include="Fable.Browser.MediaQueryList" Version="1.5.0" />
+        <PackageReference Include="Fable.Browser.MediaRecorder" Version="2.2.0" />
+        <PackageReference Include="Fable.Browser.MediaStream" Version="3.4.0" />
+        <PackageReference Include="Fable.Browser.Navigator" Version="2.5.0" />
+        <PackageReference Include="Fable.Browser.Performance" Version="1.3.0" />
+        <PackageReference Include="Fable.Browser.ResizeObserver" Version="1.0.0" />
+        <PackageReference Include="Fable.Browser.Svg" Version="2.4.0" />
+        <PackageReference Include="Fable.Browser.Url" Version="1.4.0" />
+        <PackageReference Include="Fable.Browser.WebGL" Version="1.3.0" />
+        <PackageReference Include="Fable.Browser.WebRTC" Version="1.6.0" />
+        <PackageReference Include="Fable.Browser.WebSocket" Version="1.4.0" />
+        <PackageReference Include="Fable.Browser.WebStorage" Version="1.3.0" />
+        <PackageReference Include="Fable.Browser.Worker" Version="1.4.0" />
+        <PackageReference Include="Fable.Browser.XMLHttpRequest" Version="1.4.0" />
     </ItemGroup>
 
 </Project>

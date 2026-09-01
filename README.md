@@ -41,6 +41,10 @@ Targets `net10.0`, `net8.0` and `netstandard2.1`. See the
 - [The wire protocol](docs/plans/tsgo-protocol.md) — framing, error model and the binary AST
   format, verified against live byte traces.
 - [Remaining work](docs/plans/wire-remaining-work.md) — what is still outstanding, in phases.
+- [Generator architecture](docs/plans/generator-architecture.md) — the nano-pass pipeline, its
+  decisions, and what each phase landed.
+- [Type mapping](docs/plans/generator-type-mapping.md) — how each TypeScript construct becomes
+  F#, and what it costs when it cannot.
 
 ---
 
@@ -48,10 +52,16 @@ Targets `net10.0`, `net8.0` and `netstandard2.1`. See the
 
 | Path | Role |
 |------|------|
-| `src/Xantham.TypeScript.Wire` | The client. The only live source project. |
-| `tests/Xantham.TypeScript.Wire.Tests` | Expecto suite, with its own pinned `typescript` 7.x package. |
+| `src/Xantham.TypeScript.Wire` | The client. Published to NuGet, usable on its own. |
+| `src/Xantham.Generator` | The bindings generator: Harvest → Resolve → Shape → Render over Wire. |
+| `src/Xantham.Fable.Core` | The support library generated bindings open (erased `keyof`, brands). |
+| `tests/Xantham.TypeScript.Wire.Tests` | Expecto suite against the root pinned `typescript` 7.x package. |
+| `tests/Xantham.Generator.Tests` | Expecto suite plus the golden corpus the generator is pinned against. |
+| `tests/Xantham.Generator.CompileGate` | Compiles the committed goldens as F# on every build. |
 | `tools/tsc-ast` | Vendors upstream compiler sources and emits the AST and enum F# layers. |
 | `tools/proto-gen` | Emits the protocol F# layers from the shipped `typescript` schema. |
+| `tools/session-gen` | Emits the session layer over the protocol surface. |
+| `tools/browser-gen` | Emits the generator's DOM binding table from the `Fable.Browser.*` family. |
 | `build.fsx` | The build pipeline. |
 | `.archive/` | **Obsolete pre-Wire work. Nothing in here is live.** |
 
@@ -70,7 +80,18 @@ Xantham works today.
 | Component | Status | Notes |
 |-----------|:------:|-------|
 | **Wire** (`Xantham.TypeScript.Wire`) | 🟢 Shipped | Generated from the compiler's own schema; packaged for NuGet. |
-| **Generator** | ⚪ Not started | Being redesigned on top of Wire. The pre-Wire generator is archived. |
+| **Generator** (`Xantham.Generator`) | 🟡 In progress | Phases A–C landed; phase D (erased idioms) is most of the way through. Not yet packaged. |
+| **Support** (`Xantham.Fable.Core`) | 🟡 In progress | Erased `keyof`/`typekeyof` and brand helpers, revived from the archive. Not yet packaged. |
+
+Generated bindings target **Fable 5.x only**, and depend on `Fable.Core` plus the
+`Fable.Browser.*` family. Every committed golden is compiled against those packages on each
+build, so a binding that does not compile fails the build rather than a review.
+
+The generator's progress is tracked as a ladder of real npm packages (`ansi-regex`, `animejs`,
+`@cloudflare/workers-types`, ...), each pinned by version, generated into a committed golden,
+and accompanied by a `manifest.json` grading every symbol `Exact`, `Ergonomic`, `Widened` or
+`Escape`. See [the architecture plan](docs/plans/generator-architecture.md) for where each
+phase stands.
 
 ---
 

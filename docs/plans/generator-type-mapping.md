@@ -376,17 +376,39 @@ Ergonomic finding; one carrying fewer is some other type wearing a familiar name
 as before. `PromiseLike`, `ReadonlyMap` and `ReadonlySet` map with a finding for the
 restriction F# has no binding for.
 
-Two absences are deliberate. The *synchronous* iteration protocol (`Iterable`, `Iterator`) has
-no Fable.Core binding, and `seq<'T>` is not one however alike the two look. The DOM
-(`Response`, `EventTarget`, `ReadableStream`, ...) needs `Fable.Browser.*`, which is a
-decision about what generated bindings depend on rather than a row in a table.
+One absence is deliberate: the *synchronous* iteration protocol (`Iterable`, `Iterator`) has
+no Fable.Core binding, and `seq<'T>` is not one however alike the two look.
 
 What it was worth on the workers-types rung: widened findings 528 -> 451, and 39 "type
 parameter is erased: every use of it widened away" findings gone, because a generic whose only
 use of `'T` was inside a `Promise` now carries it. The escape count *rose* (38 -> 49) for the
 honest reason - an `any` inside a `Promise` used to be invisible inside the widened wrapper
-and is now reported at its own position. `tests/fixtures/lib-lab` pins the bound names, the
-arity rule and both absences under the live compiler.
+and is now reported at its own position.
+
+*Landed (2026-09-02, phase D) - the DOM half of the same group.* `EventTarget`, `HTMLElement`,
+`Blob` and the rest are bound by the `Fable.Browser.*` family, so generated bindings now
+depend on it. That was the open question here - a decision about what generated output depends
+on rather than a row in a table - and the answer is that the family is already an implicit
+dependency of most Fable libraries, so taking it costs less than the widening did.
+
+Unlike `LibBindings`, this table is *generated*: `tools/browser-gen/generate.fsx` intersects
+the `Browser.Types` namespace of the 23 pinned packages with the names the pinned compiler's
+`lib.*.d.ts` declares, and emits `Naming.BrowserBindings`' backing data (439 entries) plus a
+compile gate that abbreviates every one of them. Two rules differ from the ECMAScript half:
+
+- **Arity is part of the key.** The family binds some names at two arities (`CustomEvent` and
+  `CustomEvent<'T>`), so the lookup takes the largest arity the reference can fill rather than
+  holding one arity per name. Where both tables have a name, `LibBindings` wins - `JS` is
+  already open, so it is the shorter spelling.
+- **Ambiguous names are dropped at generation time.** Two packages of the family each export a
+  `Browser.Types.Range`; F# resolves the name before the arity, so nothing at the emission
+  site could pick one. `Range` therefore widens, and it is the only name affected.
+
+What is still `obj` is now a coverage statement rather than a dependency one: `fetch`'s types
+(`Response`, `Request`) live in `Fable.Fetch`, a different family. On the rungs, `animejs` lost
+82 widening findings and got 15 erased unions back that had collapsed to `obj`;
+`workers-types` lost 53. `tests/fixtures/lib-lab` pins both halves, the arity rule and every
+absence under the live compiler.
 
 ### 4.9 Generics
 

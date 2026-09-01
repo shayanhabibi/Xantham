@@ -2,11 +2,12 @@
 // document's 4.8.
 //
 // Every name below is declared by the compiler's own `lib.*.d.ts`, not by this package. O7
-// widens that group to `obj` for want of a shipped binding - but for the ECMAScript half of
-// the lib there is one, it is `Fable.Core.JS`, and every generated file already opens it.
-// What this fixture pins is where that line falls: which lib names come back as `JS.*`, what
-// the arity rule does when TypeScript's lib and Fable's binding disagree, and which names are
-// still honestly `obj` because binding them would mean taking a dependency.
+// widens that group to `obj` for want of a shipped binding - but both halves of the lib have
+// one: `Fable.Core.JS` for the ECMAScript half, which every generated file already opens, and
+// the `Fable.Browser.*` family for the DOM half. What this fixture pins is where those lines
+// fall: which lib names come back as `JS.*`, which as `Browser.Types.*`, what the arity rule
+// does when TypeScript's lib and Fable's binding disagree, and which names are still honestly
+// `obj` because nothing shipped binds them.
 
 // ---------------------------------------------------------------------------
 // Bound by Fable.Core, arities agreeing. These are exact: same runtime object,
@@ -61,17 +62,44 @@ export declare function thenable(): PromiseLike<string>;
 export declare function frozen(entries: ReadonlyMap<string, number>, values: ReadonlySet<string>): void;
 
 // ---------------------------------------------------------------------------
-// Not bound, and this fixture exists partly to hold that line. Fable.Core binds
-// the async iteration protocol but not the synchronous one, and the DOM has no
-// binding here at all without a `Fable.Browser.*` dependency - which is a
-// decision about what this generator depends on, not a table entry.
+// The DOM half, bound by the `Fable.Browser.*` family. The table is generated -
+// the intersection of what those assemblies export with what the pinned
+// compiler's `lib.*.d.ts` declares - so what this section pins is the *rule*,
+// not the entries: where a DOM name lands, and what happens at the edges.
+// ---------------------------------------------------------------------------
+
+/** The one the group's widening used to cost most: a DOM name in an ordinary position. */
+export declare function handle(target: EventTarget): void;
+
+/** Elements and events, which is most of what a browser-facing `.d.ts` traffics in. */
+export declare function mount(host: HTMLElement, on: Event): void;
+
+/** Binary and URL types, which come from separate packages of the same family. */
+export declare function upload(body: Blob, to: URL): FormData;
+
+/** Bound at two arities: `CustomEvent` is in the family both bare and generic. */
+export declare function emit(detail: CustomEvent<string>): void;
+
+// ---------------------------------------------------------------------------
+// Not bound, and this fixture exists partly to hold that line.
 // ---------------------------------------------------------------------------
 
 /** `seq<'T>` is not a JS iterable, whatever the two have in common. Widened, and noted. */
 export declare function each(values: Iterable<string>): void;
 
-/** A DOM name. Real, ubiquitous in `.d.ts` files, and still `obj` here. */
-export declare function handle(target: EventTarget): void;
+/**
+ * A DOM name two packages of the family both define (`Browser.IndexedDB` and
+ * `Browser.MediaStream` each declare a `Range`). There is no qualification that picks one, so
+ * the table drops it and this widens - the honest outcome, and the reason ambiguity is
+ * resolved when the table is generated rather than when the reference is emitted.
+ */
+export declare function select(over: Range): void;
+
+/**
+ * A DOM name the family does not bind at all. `Response` and the rest of `fetch` live in
+ * `Fable.Fetch`, a different package family, so this is still `obj`.
+ */
+export declare function respond(): Response;
 
 // ---------------------------------------------------------------------------
 // The lib names in the positions a binding actually puts them: on members, under

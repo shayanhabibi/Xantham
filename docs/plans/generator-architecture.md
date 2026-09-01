@@ -209,10 +209,15 @@ Layered, mirroring the tiers:
    against and the suite reports a mismatch as fixture drift *instead of* the golden diff:
    a package that moved and a pass that regressed otherwise produce the same diff. Rungs
    that exercise a feature rather than a package are hand-authored and tracked whole
-   (`tests/fixtures/lab`, `tests/fixtures/globals-lab`), so they need no install and no pin.
+   (`tests/fixtures/lab`, `globals-lab`, `keyof-lab`, `brand-lab`, `lib-lab`), so they need no
+   install and no pin. Everything else is installed on demand — `build.fsx -- test` runs the
+   fixtures stage, in an agent worktree as much as in the main checkout.
 4. **Compile gate:** generated output for the golden fixtures is compiled (F# type-check;
    Fable compile once the support package exists) in the test suite. Bindings that do not
-   compile are not bindings.
+   compile are not bindings. It is an ordinary project rather than a test
+   (`tests/Xantham.Generator.CompileGate`), so it runs on every build; it carries the same
+   `Fable.Core` pin as `src/Xantham.Fable.Core` and references the whole `Fable.Browser.*`
+   family, which is what the goldens may cite. The Fable *run* gate is still outstanding.
 5. **Pipeline properties:** run-twice determinism; `audit-coverage` findings empty for
    fixtures we declare fully-supported; manifest tier counts monotonic (a PR that turns
    Exacts into Escapes must say so).
@@ -447,10 +452,40 @@ Phases — each ends with the compile gate green on its fixtures:
     drifts (it made `Uint8Array` generic in a parameter Fable's abbreviation lacks) and a
     mapping that guessed would emit code that does not compile. On `workers-types` this took
     widened findings from 528 to 451 and removed 39 "type parameter is erased" findings, a
-    generic whose only use of `'T` was inside a `Promise` now carrying it. The DOM half is
-    still `obj` on purpose: binding it means depending on `Fable.Browser.*`.
-  **Still ahead in D:** the *reference* disposition for the DOM half (a dependency decision,
-  not a table entry), the Fable *run* gate, and the `type-fest` and `solid-js` rungs D9 wants
+    generic whose only use of `'T` was inside a `Promise` now carrying it.
+  - *The DOM half of the compiler lib (2026-09-02).* The other half of the same group, and the
+    dependency decision phase C deferred. Generated bindings now take the `Fable.Browser.*`
+    family and a DOM name resolves to `Browser.Types.*` instead of widening. The family is
+    close to a universal implicit dependency of Fable libraries already, which is what makes
+    the added dependency cheaper than what the widening was destroying. What the work settled:
+    - *The table is generated, not transcribed.* `tools/browser-gen/generate.fsx`
+      (`build.fsx -- generate browser`) reflects over the `Browser.Types` namespace of all 23
+      pinned `Fable.Browser.*` assemblies and intersects it with the names the pinned
+      compiler's own `lib.*.d.ts` declares. 439 entries — well past what stays correct by hand
+      — and it re-derives whenever either pin moves.
+    - *Arity is part of the key here, rather than a property of the name.* `LibBindings` carries
+      one arity per name and declines to bind below it; the DOM family binds several names at
+      two arities (`CustomEvent` and `CustomEvent<'T>` are both real), so the lookup takes the
+      largest arity the reference can fill. `LibBindings` stays authoritative wherever both
+      tables have a name: every generated file already opens `Fable.Core.JS`, so preferring it
+      keeps the shorter spelling.
+    - *Ambiguity is resolved when the table is generated, not when a reference is emitted.* Two
+      packages of the family each export a `Browser.Types.Range`, and F# resolves the name
+      before the arity, so no qualification picks one. Such names are dropped from the table
+      and widen honestly at the site. `Range` is the only one affected today.
+    - *The table's own proof is a generated compile gate.*
+      `tests/Xantham.Generator.CompileGate/BrowserBindings.fs` abbreviates all 439 entries
+      (`type private T1_CustomEvent<'T1> = Browser.Types.CustomEvent<'T1>`), so a table
+      claiming a name or an arity the pinned packages do not have fails the build rather than
+      surfacing as a golden diff. Abbreviations rather than values, because they prove name
+      *and* arity without instantiating a parameter that may be constrained.
+    - What it bought: `animejs` went from 88 widened symbols to 83 and lost 82 widening
+      findings — `HTMLElement`, `NodeList` and `SVGElement` are most of them — and with those
+      `obj` arms gone, 15 unions that had collapsed to `obj` are erased unions again.
+      `workers-types` lost 53, mostly `EventTarget` and `WebSocket`. What is still `obj` is now
+      a statement about coverage rather than about dependencies: `fetch`'s types (`Response`,
+      `Request`) live in `Fable.Fetch`, a different family, and remain widened.
+  **Still ahead in D:** the Fable *run* gate, and the `type-fest` and `solid-js` rungs D9 wants
   for calibration.
 - **E — hardening.** Dedup/naming at scale, fidelity-manifest UX, determinism under the
   full litmus ladder, `@types/three` and `typescript` rungs.
@@ -496,6 +531,15 @@ section above.
   point the default flips to `reference` — a `reference` emission is Exact, no finding.
   Groups are addressed in `xantham.json` under `"groups"` by npm name, the compiler lib
   as `"typescript/lib"`.
+
+  *Status (2026-09-02):* `ship`, `reference` and `widen` are implemented; `map` and `inline`
+  are not. The compiler lib is the one group where a `map` already happens in practice, and it
+  happens *below* the disposition rather than through it — the group is still configured
+  `widen`, and `Shape.libBinding` intercepts any name the pinned tables bind
+  (`Naming.LibBindings` → `Fable.Core.JS.*`, `Naming.BrowserBindings` → `Browser.Types.*`)
+  before the widening applies. Two tables of known-good names are not a configurable
+  redirection of a whole group, so `map` stays future work; what they do establish is that
+  the destination of such a redirection has to carry arity, not just a name.
 
   Two consequences are the point of the design. First, generation order stops
   mattering: a `reference` group templates exactly the names a real `ship` run of that

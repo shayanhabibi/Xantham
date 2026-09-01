@@ -3,8 +3,8 @@
   "module": "Cloudflare.WorkersTypes",
   "counts": {
     "exact": 198,
-    "ergonomic": 709,
-    "widened": 451,
+    "ergonomic": 713,
+    "widened": 447,
     "escape": 49
   },
   "symbols": [
@@ -719,22 +719,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "URL is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Navigator is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Performance is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -820,18 +805,8 @@
     },
     {
       "name": "ServiceWorkerGlobalScopeWebSocketPairResult",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "WebSocket is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "WebSocket is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -2277,11 +2252,6 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "URL is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
@@ -2362,11 +2332,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "WebSocket is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -2387,11 +2352,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "WebSocket is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -2404,11 +2364,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "WebSocket is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -2630,11 +2585,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "WebSocket is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -2655,11 +2605,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "WebSocket is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -2667,16 +2612,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "WebSocket is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "WebSocket is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -3394,11 +3329,6 @@
           "message": "any maps to obj"
         },
         {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Event is not among the generated declarations; widened to obj"
-        },
-        {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "message": "ParamObject Create synthesized (D3)"
@@ -3435,11 +3365,6 @@
       "name": "ExtendableEvent",
       "tier": "escape",
       "findings": [
-        {
-          "pass": "shape-classes",
-          "tier": "widened",
-          "message": "EventInit is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-classes",
           "tier": "ergonomic",
@@ -3497,11 +3422,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -3517,11 +3437,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -3534,11 +3449,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "stopPropagation is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -4321,7 +4231,7 @@
     },
     {
       "name": "HTMLRewriterElementContentHandlers",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -4340,11 +4250,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Comment is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4360,11 +4265,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Element is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4377,11 +4277,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Text is not among the generated declarations; widened to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -4392,7 +4287,7 @@
     },
     {
       "name": "HTMLRewriterDocumentContentHandlers",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -4411,11 +4306,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Comment is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4458,11 +4348,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Text is not among the generated declarations; widened to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -4560,11 +4445,6 @@
       "findings": [
         {
           "pass": "shape-classes",
-          "tier": "widened",
-          "message": "EventInit is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-classes",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4620,11 +4500,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4660,11 +4535,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4677,11 +4547,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "stopPropagation is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -5743,11 +5608,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -5768,11 +5628,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -5785,11 +5640,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "stopPropagation is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -5993,16 +5843,6 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Blob is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Blob is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "ReadableStream is not among the generated declarations; widened to obj"
         },
         {
@@ -6102,11 +5942,6 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Blob is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "ReadableStream is not among the generated declarations; widened to obj"
         },
         {
@@ -6191,11 +6026,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "base members flattened into the interface (the is-a relation is not emitted)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Blob is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -6844,11 +6674,6 @@
       "findings": [
         {
           "pass": "shape-classes",
-          "tier": "widened",
-          "message": "EventInit is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-classes",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -6904,11 +6729,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -6924,11 +6744,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -6941,11 +6756,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "stopPropagation is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -7198,11 +7008,6 @@
       "findings": [
         {
           "pass": "shape-classes",
-          "tier": "widened",
-          "message": "EventInit is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-classes",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -7258,11 +7063,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -7278,11 +7078,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -7295,11 +7090,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "stopPropagation is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -12312,11 +12102,6 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Blob is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "ReadableStream is not among the generated declarations; widened to obj"
         },
         {
@@ -12328,11 +12113,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Blob is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -34002,11 +33782,6 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "URL is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
@@ -36445,11 +36220,6 @@
       "findings": [
         {
           "pass": "shape-classes",
-          "tier": "widened",
-          "message": "EventInit is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-classes",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -36505,11 +36275,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -36525,11 +36290,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -36542,11 +36302,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "stopPropagation is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -39230,11 +38985,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "WebSocket is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -39255,11 +39005,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "WebSocket is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -39272,11 +39017,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "WebSocket is not among the generated declarations; widened to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -41574,13 +41314,8 @@
     },
     {
       "name": "MarkdownDocument",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Blob is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",

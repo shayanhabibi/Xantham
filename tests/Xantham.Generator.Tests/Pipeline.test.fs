@@ -360,7 +360,7 @@ let pipelineTests =
 
         yield!
             fixtureTests "lib-lab" (handFixture "lib-lab") GeneratorConfig.Default (fun package ->
-                [ testCase "the compiler-lib names Fable.Core binds are referenced, not widened" <| fun _ ->
+                [ testCase "the compiler-lib names a shipped Fable package binds are referenced, not widened" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                       let source = rendered.Files |> List.head |> snd
 
@@ -376,10 +376,35 @@ let pipelineTests =
                       Expect.stringContains source "abstract load: key: string -> JS.Promise<JS.Uint8Array>" "nested through a member"
                       Expect.stringContains source "abstract boxed: Box<JS.Date>" "and through a generic this run declares"
 
-                      // Names Fable.Core does not bind keep widening. `seq<'T>` is not a JS
-                      // iterable, and the DOM needs a dependency this generator does not take.
+                      // The DOM half, from the `Fable.Browser.*` family. The table is generated,
+                      // so these pin the rule that reads it: an ordinary position, the packages
+                      // of the family other than `Dom`, and a name bound at two arities.
+                      Expect.stringContains
+                          source
+                          "static member handle (target: Browser.Types.EventTarget)"
+                          "a DOM name is written, not widened"
+
+                      Expect.stringContains
+                          source
+                          "mount (host: Browser.Types.HTMLElement, on: Browser.Types.Event)"
+                          "elements and events together"
+
+                      Expect.stringContains
+                          source
+                          "upload (body: Browser.Types.Blob, ``to``: Browser.Types.URL) : Browser.Types.FormData"
+                          "across three packages of the family"
+
+                      Expect.stringContains
+                          source
+                          "emit (detail: Browser.Types.CustomEvent<string>)"
+                          "and the generic arity wins where the reference has an argument"
+
+                      // Names nothing shipped binds keep widening. `seq<'T>` is not a JS
+                      // iterable; `Range` is in two packages of the family at once and no
+                      // qualification picks one; `Response` belongs to `Fable.Fetch`.
                       Expect.stringContains source "static member each (values: obj)" "the sync iteration protocol is unbound"
-                      Expect.stringContains source "static member handle (target: obj)" "and so is the DOM"
+                      Expect.stringContains source "static member ``select`` (over: obj)" "an ambiguous DOM name is not guessed at"
+                      Expect.stringContains source "static member respond () : obj" "and fetch is a different family"
 
                       // Every loss is in the manifest: the arity the lib drifted away from, and
                       // the restrictions the readonly views express and F# has no binding for.

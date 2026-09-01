@@ -13,11 +13,13 @@ repair; it is completion, ergonomics, packaging and coverage.
 Phases are ordered by what unblocks what. Phase 1 gates the library's usability, phases 2-4 are
 independent of each other and of phase 1, phase 6 depends on phase 1.
 
-**Status (2026-09-01).** Phases 1, 2, 3, 4, 5, 7 and 8 are done; the suite is 74 tests, all passing
-against the live compiler, and the library builds on all three target frameworks with no warnings.
-Phase 6 is the only one left, and it is not a task so much as a project: nothing live generates
-bindings today, and what a Wire-based generator should emit has not been decided. It needs a
-direction before it needs code.
+**Status (2026-09-02).** Every phase is done. Phases 1, 2, 3, 4, 5, 7 and 8 closed on 2026-09-01
+with the library building on all three target frameworks with no warnings; phase 6 — generator
+integration, the one that was "not a task so much as a project" — has since become a project of
+its own and moved out of this document. `src/Xantham.Generator` exists, generates bindings
+against the live compiler, and is tracked in
+[the generator architecture plan](generator-architecture.md). This document is now a record of
+how the Wire got to shipped rather than a list of what is left.
 
 ---
 
@@ -200,14 +202,30 @@ Two corrections fell out of the reading, both now in the document and one in the
 
 ---
 
-## Phase 6 — Generator integration (depends on phase 1)
+## Phase 6 — Generator integration (depends on phase 1) — DONE, and moved
 
-The pre-Wire generator and the Fable/Decoder extraction path it sat on have been retired to
-`.archive/` — see `.archive/README.md`. Nothing live generates bindings today. Building a
-generator on the Wire's typed layer is the outstanding architectural step, and it starts from
-scratch rather than from the archived `Xantham.Generator`.
-`tests/Test.fsx` — the cloudflare `workers-types` dogfood script — is the current scratch work
-toward it.
+The pre-Wire generator and the Fable/Decoder extraction path it sat on were retired to
+`.archive/` — see `.archive/README.md` — and a generator was built on the Wire's typed layer
+from scratch rather than from the archived `Xantham.Generator`.
+
+**Outcome.** `src/Xantham.Generator` runs a four-tier nano-pass pipeline (Harvest → Resolve →
+Shape → Render) over the Wire and emits an F# binding file plus a fidelity manifest, with
+`src/Xantham.Fable.Core` as the support library its output opens. It is exercised against a
+ladder of real npm packages pinned by version, each committed as a golden and compiled as F#
+on every build by `tests/Xantham.Generator.CompileGate`.
+
+Everything about it — the tier invariants, the resolution-group dispositions, and what each
+phase landed — is tracked in [the generator architecture plan](generator-architecture.md) and
+[the type mapping document](generator-type-mapping.md). Nothing about the generator belongs in
+this document any more; the two things it proved about the *Wire* are worth keeping here:
+
+- Asking for a declared type is what *creates* it in the checker, so parallel fan-out over
+  declarations is not free of observable order. Seed resolution has to be sequential.
+- The wire flags neither optional parameters nor declared `readonly` on symbols: `?`
+  optionality is derived from the hoisted `undefined`, and readonly comes from
+  `isReadonlySymbol`.
+
+`tests/Test.fsx` — the cloudflare `workers-types` dogfood script — remains as scratch.
 
 ---
 

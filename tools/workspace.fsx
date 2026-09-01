@@ -94,6 +94,24 @@ let tscExeIn (root: string) =
         let path = Path.Combine(root, "node_modules", "@typescript", package, "lib", stem + extension)
         if File.Exists path then Some path else None)
 
+/// The directory the compiler's `lib.*.d.ts` files ship in. TypeScript 7 keeps them in the
+/// platform package beside the executable rather than in the `typescript` package, so this is
+/// the executable's directory - resolved from `XANTHAM_TSGO_EXE` when an agent or CI has pinned
+/// one, otherwise from the nearest checkout that has an install.
+///
+/// `tools/browser-gen` reads them: the DOM binding table is the intersection of what the
+/// `Fable.Browser.*` family exports with what the *pinned* compiler declares, so it has to be
+/// the same compiler everything else in the repository runs against.
+let tscLibDir (root: string) =
+    let pinned =
+        match Environment.GetEnvironmentVariable TscEnvVar with
+        | exe when not (String.IsNullOrWhiteSpace exe) && File.Exists exe -> Some exe
+        | _ -> None
+
+    match pinned |> Option.orElseWith (fun () -> searchRoots root |> List.tryPick tscExeIn) with
+    | Some exe -> Path.GetDirectoryName exe
+    | None -> Path.Combine(Path.GetFullPath root, "node_modules", "@typescript", $"typescript-{rid}", "lib")
+
 /// The nearest checkout carrying an `npm install`. Node would find it anyway by walking parents
 /// out of a worktree, since worktrees are nested under the repository - this makes the choice
 /// explicit, and keeps a worktree resolving the same install the main checkout does.

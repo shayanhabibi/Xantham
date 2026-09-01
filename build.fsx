@@ -62,7 +62,7 @@ module Options =
         |> Input.description "Skip running tests"
     let generateOnly =
         Input.option<string> "--only"
-        |> Input.description "Limit generation to one layer: ast | proto | session. All three by default."
+        |> Input.description "Limit generation to one layer: ast | proto | session | browser. All four by default."
         |> Input.def ""
     let syncUpstream =
         Input.option<bool> "--sync"
@@ -174,19 +174,31 @@ module Stages =
                 when' (wanted "session")
                 run "dotnet fsi tools/generate-wire.fsx -- generate session"
             }
+            // The generator's own table rather than a wire layer, and it reads a NuGet family
+            // instead of the vendored sources - so it needs neither `sync` nor the others.
+            stage "generate browser" {
+                when' (wanted "browser")
+                run "dotnet fsi tools/generate-wire.fsx -- generate browser"
+            }
         }
     }
     
     /// Compose with `deps`: the live tests resolve the compiler with `Tsc.locate`, which walks
     /// parents from the test project, so the root install is what they find. Solution-driven so
-    /// a new test project is in the run the moment the solution references it - `dotnet test`
-    /// only executes projects that carry the test SDK, so the compile gate just builds.
+    /// a new test project is in the run the moment the solution references it.
+    ///
+    /// The explicit build is not redundant with `dotnet test`. `dotnet test` on a solution
+    /// builds the test projects and what they reference, and nothing references the compile
+    /// gate - so without this the gate silently sat out every `build.fsx -- test` run and the
+    /// goldens went unchecked. Building the solution first is what makes "bindings that do not
+    /// compile are not bindings" true of this command.
     let test = input {
         let! skipTests = Options.skipTests
         and! config = Options.config
         return stage "test" {
             when' (not skipTests)
-            run (cmd $"dotnet test {Repo.Project.SolutionFile} -c {config}")
+            run (cmd $"dotnet build {Repo.Project.SolutionFile} -c {config} -v q")
+            run (cmd $"dotnet test {Repo.Project.SolutionFile} -c {config} --no-build")
         }
     }
     
