@@ -28,7 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Fable.Core" Version="4.5.0" />
+        <PackageReference Include="Fable.Core" Version="5.2.0" />
         <!-- The support package is gated with the goldens: generated bindings are allowed to
              reference its erased idioms, so the gate has to prove the two compile together. -->
         <ProjectReference Include="..\..\src\Xantham.Fable.Core\Xantham.Fable.Core.fsproj" />

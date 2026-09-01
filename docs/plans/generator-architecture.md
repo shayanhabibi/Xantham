@@ -398,11 +398,11 @@ Phases — each ends with the compile gate green on its fixtures:
   archive near-verbatim per the mapping document's §7, and the compile gate now references
   it so the goldens and the idioms they may cite are proven to compile together. What the
   revival settled:
-  - *The archive source needed no edits.* It was written against `Fable.Core` 5.0.0-beta.4,
-    but every construct it uses (`U2`-`U8`, `DynamicExtensions`, `Experimental.nameofLambda`,
-    `[<Erase>]`, `[<EmitIndexer>]`) is present in the 4.5.0 the gate already resolves, so the
-    package is pinned there instead: one Fable.Core across the gate and generated output
-    beats a newer one on either side of a version seam.
+  - *The archive source needed no edits.* It was written against `Fable.Core` 5.0.0-beta.4
+    and compiles unchanged against **5.2.0**, which the support package and the compile gate
+    are both pinned to - the gate moved up from 4.5.0 to meet it. One Fable.Core across the
+    gate and generated output is the invariant; a version seam between them is not allowed,
+    which is why the pin is stated in both projects rather than floated.
   - *The package multi-targets `netstandard2.1;net8.0`.* netstandard2.1 is the Fable library
     convention; net8.0 exists only so the gate — held at net8.0 by phase B's `Create` static
     interface members — can reference the package without a downgrade.

@@ -18,9 +18,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <!-- Pinned to the version the compile gate already resolves, so generated
+        <!-- Fable.Core 5+, pinned: the compile gate carries the same pin, because generated
              bindings and the gate agree on one Fable.Core. -->
-        <PackageReference Include="Fable.Core" Version="4.5.0" />
+        <PackageReference Include="Fable.Core" Version="5.2.0" />
     </ItemGroup>
 
 </Project>
