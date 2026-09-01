@@ -13,7 +13,8 @@ Its usual cost — dozens of near-identical IR definitions and traversal boilerp
 evaporates here because of one observation: **a pass does not have to be a traversal. It is
 an async operation sequenced after the previous one.**
 
-Concretely: a pass is a named `Context -> Model -> Async<Model>` step. Some passes walk
+Concretely: a pass is a named `Context -> 'Model -> Async<'Model>` step over its tier's
+model type (O1). Some passes walk
 declarations; some fire one batched Wire request and fold the answers into a table; some are
 pure rewrites lifted into `Async`; some only *check* and emit findings. `Async` is the
 uniform shape because roughly half the passes talk to the compiler through the mailbox
@@ -22,12 +23,13 @@ asks 500 small questions is one wire exchange), and uniformity is what makes the
 plain fold:
 
 ```fsharp
-type PassOutcome =
-    | Advanced of Model
-    | Degraded of Model * Finding list   // pass applied partially; findings say where
-type Pass = { Name: string; Run: Context -> Model -> Async<PassOutcome> }
+type PassOutcome<'Model> =
+    | Advanced of 'Model
+    | Degraded of 'Model * Finding list   // pass applied partially; findings say where
+type Pass<'Model> = { Name: string; Run: Context -> 'Model -> Async<PassOutcome<'Model>> }
 
-let pipeline : Pass list = [ ... ]      // the whole generator, in order, in one place
+// per tier, the pipeline is a plain fold over a list; tiers join via total transitions
+let shapePasses : Pass<ShapeModel> list = [ ... ]
 ```
 
 What "nano" buys us, in this repo's terms:
@@ -69,9 +71,14 @@ package entry (.d.ts, package.json, tsconfig)  +  generator config
   output directory: *.fs files, manifest.json, report
 ```
 
-The `Model` is a record with one slot per tier artifact; tiers fill their slot and later
-passes read earlier slots. (Alternative considered: four separate model types threaded
-through typed tier boundaries — stronger, noisier; see open question O1.)
+**Decided (O1): accumulating records.** Each tier has its own model type whose fields
+*include the earlier tiers' artifacts as required fields* — `ShapeModel` carries the harvest
+tables and the type table alongside the growing `FsDecl` set, with no `option` wrapping.
+Within a tier, passes are uniform endomorphisms on that tier's model; between tiers, a total
+transition function constructs the next record from the previous. Reading an artifact that
+does not exist yet is therefore a compile error (the field is not on your tier's type), the
+accumulation is by composition rather than copying, and the pass list stays homogeneous per
+tier. The cost is four model types instead of one, which the four-tier structure justifies.
 
 ## 3. Tiers and their invariants
 
@@ -134,10 +141,13 @@ rewrites could fuse — do not fuse them; the seam is the test point.
 
 ### Tier 4 — Render
 
-- F# declaration IR → source text. Backend open (O2): Fantomas.Core / Fabulous.AST /
-  direct text emission. Leaning direct text emission with golden-file tests (the archive's
-  renderer worked this way; formatting churn from a formatter dependency is a real cost, and
-  generated code needs stable diffs more than it needs configurable style).
+- F# declaration IR → source text. **Decided (O2): direct text emission** — a small
+  indent-aware printer owned by the generator, no Fantomas/Fabulous.AST dependency. The
+  decisive argument is golden-file stability: golden diffs are this plan's review surface,
+  and a formatter dependency makes them churn on formatter upgrades for reasons unrelated
+  to the generator. Output is almost entirely declarations (interfaces, DUs, abbreviations,
+  `jsNative` stubs, tiny inline bodies), which is the easy 95% of F# printing; the compile
+  gate (§5) absorbs the correctness risk on every fixture.
 - Also renders `manifest.json` — the fidelity report: per-symbol tier, findings, pass
   provenance — and the run report (counts of Exact/Ergonomic/Widened/Escape).
 - **Invariant:** byte-identical output for identical input (model ordering already fixed by
@@ -148,8 +158,14 @@ rewrites could fuse — do not fuse them; the seam is the test point.
 - Within a pass, fan out per-symbol/per-type wire queries freely — the mailbox coalesces
   them — but **fold results in a sorted order, never arrival order**. Determinism outranks
   latency.
-- Between passes, strictly sequential. The pipeline is a fold; there is no pass DAG until a
-  measured need appears (O3).
+- Between passes, strictly sequential. **Decided (O3): linear lists, no pass DAG.** The
+  per-tier source order *is* the documentation of what runs when; tier boundaries are the
+  only hard ordering constraints and O1's accumulating records make those compile-checked.
+  The parallelism a DAG would buy is weak here — latency lives in Wire round trips, which
+  the mailbox already batches *within* a pass — and per-pass unit tests construct their
+  input models directly, so nothing needs a scheduler to run subsets. If a within-tier
+  ordering bug ever bites, the patch is a debug-build well-formedness assertion between
+  passes, not a scheduler.
 - The Wire session (snapshot, project, program) lives in `Context`, created once per run.
   Passes never create programs; a pass that needs a throwaway program (e.g. future
   verify-by-compile checks) gets a factory in `Context` so tests can stub it.
@@ -162,9 +178,17 @@ Layered, mirroring the tiers:
    matter here; invest in a terse model-construction DSL early — run one pass, assert the
    output model and findings. No Wire, no fixtures, milliseconds.
 2. **Tier tests against live tsc:** harvest/resolve over the small fixtures (`ansi-regex`
-   is one declaration; `animejs` mid-size), asserting the model snapshot. This repo's
-   culture is live-compiler tests (`XANTHAM_REQUIRE_TSC=1` makes skips loud), and the Wire
-   is fast enough; no mock server.
+   is one declaration; `animejs` mid-size), asserting a snapshot. This repo's culture is
+   live-compiler tests (`XANTHAM_REQUIRE_TSC=1` makes skips loud), and the Wire is fast
+   enough; no mock server. **Decided (O5): snapshots are golden-prints** — a purpose-built
+   human-readable textual projection of the model (exports outline, resolved types and
+   relationships, shaped declarations with fidelity tiers), not serialized model JSON. The
+   printer shows what is behaviorally meaningful, so internal model refactors don't rewrite
+   the corpus, and the diff a pass change produces is legible. It pays rent twice more: as
+   the between-pass debugging dump, and as documentation of what each tier promises.
+   Golden-prints are not machine-round-trippable, and nothing needs them to be — per-pass
+   tests build models through the construction DSL; a test that someday wants a big
+   recorded model gets one bespoke JSON dump, not a corpus format.
 3. **End-to-end golden files:** fixture package → generated `.fs` + manifest, committed and
    diffed. A golden diff is the review surface for any pass change.
 4. **Compile gate:** generated output for the golden fixtures is compiled (F# type-check;
@@ -187,7 +211,13 @@ New projects (names step around the archive, which is invisible to the solution 
 - `src/Xantham.Fable.Core` — revived support package (erased `keyof`/`typekeyof`/
   `PropertyRecord`, brand helpers). Fable library, no dependency on the generator.
 - `tests/Xantham.Generator.Tests` — Expecto, same conventions as the Wire suite.
-- CLI/packaging deferred until the pipeline generates something worth invoking (open O4).
+- **Decided (O4):** configuration is a JSON file next to the target `package.json`
+  (`xantham.json`), deserialized with `System.Text.Json` (JSONC-tolerant via
+  `ReadCommentHandling.Skip` — comments matter in per-symbol override lists), validated by
+  a **JSON Schema generated from the config record itself** so the file self-documents and
+  editors check it. The generator core is a library function taking the config record; the
+  CLI (`xantham generate <package-dir> [-o <out>] [--config <path>]`) and the scratch
+  harness are both thin shells over it, and the CLI is deferred to phase C.
 
 Phases — each ends with the compile gate green on its fixtures:
 
@@ -203,19 +233,29 @@ Phases — each ends with the compile gate green on its fixtures:
 - **E — hardening.** Dedup/naming at scale, fidelity-manifest UX, determinism under the
   full litmus ladder, `@types/three` and `typescript` rungs.
 
-## 7. Open questions
+## 7. Decisions (2026-09-01)
 
-- **O1 — model shape:** one `Model` record with per-tier slots (proposed) vs distinct typed
-  models per tier boundary. The record is simpler and passes stay uniform; the typed
-  boundary catches "read before written" at compile time. Start with the record + runtime
-  slot assertions; revisit if slot misuse actually bites.
-- **O2 — render backend:** direct text emission (leaning) vs Fantomas.Core vs Fabulous.AST.
-  Decide in phase A with a spike on the skeleton's output.
-- **O3 — pass sequencing:** linear list (proposed) vs dependency DAG. Linear until a
-  measured need says otherwise.
-- **O4 — CLI shape and config file format** (the mapping doc's §5 config surface): decide
-  when phase B makes the config real; likely JSON next to the target `package.json`.
-- **O5 — snapshot format for tier tests:** serialize the model (JSON?) vs golden-print it.
-  Affects test ergonomics more than architecture.
-- **O6 — where `tests/Test.fsx` goes:** it stays the scratch harness through phase A, then
-  its role is absorbed by the generator's own CLI/e2e tests.
+All six original open questions were resolved in review; each is also inlined at its
+section above.
+
+- **O1 — accumulating records.** Per-tier model types that include earlier tiers' artifacts
+  as required fields; passes are per-tier endomorphisms, tier transitions are total
+  constructors. Compile-time "read before written" safety without option-unwrapping or
+  model copying (§2).
+- **O2 — direct text emission.** Generator-owned printer, no formatter dependency; golden
+  stability over delegated style; compile gate absorbs the correctness risk (§3, Tier 4).
+- **O3 — linear pass lists.** No DAG; source order documents execution order; debug-build
+  well-formedness assertions are the escape hatch if ordering bugs appear (§4).
+- **O4 — JSON config with generated schema.** `xantham.json` beside the target
+  `package.json`, JSONC-tolerant, JSON Schema generated from the config record; generator
+  core is a library function, CLI a thin shell deferred to phase C (§6).
+- **O5 — golden-print snapshots.** Human-readable textual projection of the model as the
+  tier-test corpus and the between-pass debug dump; no machine round-tripping required
+  anywhere in the strategy (§5).
+- **O6 — `tests/Test.fsx` retires after phase A.** It remains the ad-hoc live-compiler
+  probe until the walking skeleton runs end to end, then is deleted (not archived — its
+  lessons are already recorded in `wire-remaining-work.md` phase 1).
+
+Watch items rather than open questions: the debug assertion pass (O3) and the bespoke
+JSON model dump (O5) are named escape hatches, built only when their triggering need
+appears.
