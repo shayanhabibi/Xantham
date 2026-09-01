@@ -190,7 +190,11 @@ Format per entry: recommended mapping, tier, alternatives, and what the Wire sup
   when they are not identifier-shaped (`"utf-8"` → ``` ``utf-8`` ``` or `Utf8` + CompiledName).
 - Union of numeric literals → F# **enum** (`type E = A = 1`) when the values are ints;
   erased type with static members when floats. Exact.
-- Mixed literal unions (string + number) → erased type + static members, or `U2<StringPart, NumPart>`. Not yet decided — tracked in §6's live threads.
+- Mixed literal unions (string + number) → **Decided (D12):** a single `[<StringEnum>]` DU —
+  Fable 5 respects `[<CompiledValue(_)>]` on individual cases inside a StringEnum union, so
+  non-string literal members become cases carrying `[<CompiledValue>]` with the numeric (or
+  boolean) payload while the string cases compile as string literals. Exact, and
+  pattern-matchable like any other literal union.
 - Single literal type (e.g. `kind: "click"`) → the StringEnum/enum case type where one
   exists; else the literal's base primitive, Widened, with the literal recorded in the doc
   comment. In tagged-union positions the tag is consumed by `[<TypeScriptTaggedUnion>]`
@@ -442,8 +446,8 @@ Decisions that are not per-construct but shape everything:
 
 ## 6. Decisions (2026-09-01) and remaining threads
 
-The original eleven open questions, resolved in review. Referenced from the catalogue as
-D1–D11.
+The original open questions, resolved in review, plus decisions added since. Referenced
+from the catalogue as D1–D12.
 
 1. **D1 — decided.** `option` (not `voption`) repo-wide. Null/undefined collapse into
    `option` by default; generator config carries a per-symbol override list for APIs where
@@ -471,10 +475,13 @@ D1–D11.
 11. **D11 — decided.** Protected members, unique-symbol brands, and type predicates are
     dropped (with doc notes) now; revisit after the generator exists (§4.4, §4.1, §4.8).
 
+12. **D12 — decided (added after review).** Mixed literal unions (string + number literals
+    in one union) map to a single `[<StringEnum>]` DU: Fable 5 respects
+    `[<CompiledValue(_)>]` on cases within a StringEnum union, so non-string literal
+    members are cases annotated with their compiled value (§4.2).
+
 Threads still live after these decisions:
 
-- Mixed literal unions (string + number literals in one union): erased type with static
-  members vs `U2` split — not yet decided (§4.2).
 - D7's runtime acceptance test for `undefined` tuple slots.
 - D9's calibration against the `type-fest`/`three`/`solid-js`/`typescript` fixtures.
 - The D5 and D8 config toggles, if wanted later.
