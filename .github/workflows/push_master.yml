@@ -33,4 +33,4 @@ jobs:
           # without this the build fails before any test runs.
           dotnet-version: '10.0.x'
       - name: Run CI
-        run: dotnet fsi build.fsx -- test
+        run: dotnet fsi build.fsx -- publish --nuget-key ${{ secrets.NUGET_KEY }}
