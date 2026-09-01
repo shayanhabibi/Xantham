@@ -6,7 +6,10 @@
          here. A Fable compile joins once the support package exists (phase D). -->
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <!-- net8.0 rather than netstandard2.0: the ParamObject Create members (D3) are static
+             interface members with bodies, which need default-interface-member runtime support
+             to type-check. Fable erases them; the gate only proves the F# compiles. -->
+        <TargetFramework>net8.0</TargetFramework>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
         <IsPackable>false</IsPackable>
     </PropertyGroup>

@@ -79,7 +79,15 @@ let shapeModel (table: TypeFacts list) : ShapeModel =
       Types = table |> List.map (fun facts -> facts.Response.Id, facts) |> Map.ofList
       NotFollowed = Map.empty
       DeclNames = Map.empty
+      DeclOrders = Map.empty
+      ExportMembers = []
       Decls = [] }
+
+/// A call or construct signature over the given parameters, no rest tail.
+let signature (parameters: ResolvedMember list) (returnTypeId: int) : ResolvedSignature =
+    { Parameters = parameters
+      HasRest = false
+      ReturnTypeId = returnTypeId }
 
 /// Runs one pass to completion under the wire-less context and splits the outcome.
 let runPass (pass: Pass<'Model>) (model: 'Model) : 'Model * Finding list =

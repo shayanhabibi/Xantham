@@ -42,9 +42,38 @@ let rec printType =
     | FsUnit -> "unit"
     | FsObj -> "obj"
     | FsOption inner -> $"{printType inner} option"
+    | FsArray element -> $"{printType element}[]"
+    // Delegates guarantee arity at the Fable boundary (D5): `Action` when nothing is
+    // returned, `Func` otherwise.
+    | FsDelegate([], FsUnit) -> "Action"
+    | FsDelegate(args, FsUnit) -> args |> List.map printType |> String.concat ", " |> sprintf "Action<%s>"
+    | FsDelegate(args, ret) ->
+        args @ [ ret ] |> List.map printType |> String.concat ", " |> sprintf "Func<%s>"
     // A name may be qualified into another group's templated module (O7); each segment
     // escapes on its own.
     | FsNamed name -> name.Split '.' |> Array.map ident |> String.concat "."
+
+/// An F# string literal with the escapes source text needs.
+let stringLit (text: string) =
+    let escaped =
+        text
+            .Replace("\\", "\\\\")
+            .Replace("\"", "\\\"")
+            .Replace("\n", "\\n")
+            .Replace("\r", "\\r")
+            .Replace("\t", "\\t")
+
+    $"\"{escaped}\""
+
+/// A literal as attribute-argument source text: `CompiledName`/`CompiledValue` payloads.
+let printLiteral =
+    function
+    | LitString text -> stringLit text
+    | LitBool true -> "true"
+    | LitBool false -> "false"
+    | LitNumber value when System.Double.IsInteger value && abs value < 2147483648.0 ->
+        string (int value)
+    | LitNumber value -> value.ToString("R", System.Globalization.CultureInfo.InvariantCulture)
 
 let private xmlEscape (text: string) =
     text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;")
@@ -80,8 +109,12 @@ let private docLines (indent: string) (docs: string) (tags: JSDocTagInfo list) =
 
               yield $"{indent}/// </remarks>" ]
 
+/// A parameter of a static emission (`Exports` members, `Create` overloads): F# optional
+/// syntax, `[<ParamArray>]` on a rest tail.
 let private renderParam (parameter: FsParam) =
-    if parameter.Optional then
+    if parameter.Rest then
+        $"[<ParamArray>] {ident parameter.Name}: {printType parameter.Type}"
+    elif parameter.Optional then
         let element =
             match parameter.Type with
             | FsOption inner -> inner
@@ -91,20 +124,97 @@ let private renderParam (parameter: FsParam) =
     else
         $"{ident parameter.Name}: {printType parameter.Type}"
 
+let private renderParamList (parameters: FsParam list) =
+    match parameters with
+    | [] -> "()"
+    | parameters -> parameters |> List.map renderParam |> String.concat ", " |> sprintf "(%s)"
+
+/// A parameter inside an abstract member's signature, where attribute syntax is unavailable -
+/// a rest parameter reads as its plain array.
+let private renderAbstractParam (parameter: FsParam) =
+    if parameter.Optional && not parameter.Rest then
+        let element =
+            match parameter.Type with
+            | FsOption inner -> inner
+            | other -> other
+
+        $"?{ident parameter.Name}: {printType element}"
+    else
+        $"{ident parameter.Name}: {printType parameter.Type}"
+
+let private renderAbstractSignature (parameters: FsParam list) (returns: FsTypeRef) =
+    let left =
+        match parameters with
+        | [] -> "unit"
+        | parameters -> parameters |> List.map renderAbstractParam |> String.concat " * "
+
+    $"{left} -> {printType returns}"
+
+let private renderMember (m: FsMember) =
+    match m with
+    | FsProperty p ->
+        [ yield! docLines "    " p.Docs p.Tags
+          let mutability = if p.ReadOnly then "" else " with get, set"
+          yield $"    abstract {ident p.Name}: {printType p.Type}{mutability}" ]
+    | FsMethod m ->
+        [ yield! docLines "    " m.Docs m.Tags
+          yield $"    abstract {ident m.Name}: {renderAbstractSignature m.Parameters m.Return}" ]
+
 let private renderInterface (decl: FsInterfaceDecl) =
     [ yield! docLines "" decl.Docs decl.Tags
 
-      match decl.Members with
-      | [] ->
+      // A static Create with a body makes F# infer a class; the attribute keeps the type an
+      // interface (and needs default-interface-member runtime support to type-check).
+      if not decl.CreateOverloads.IsEmpty then
+          yield "[<Interface>]"
+
+      match decl.Inherits, decl.Members, decl.CreateOverloads with
+      | [], [], [] ->
           yield $"type {ident decl.Name} ="
           yield "    interface end"
-      | members ->
+      | inherits, members, creates ->
           yield $"type {ident decl.Name} ="
 
+          for baseRef in inherits do
+              yield $"    inherit {printType baseRef}"
+
           for m in members do
-              yield! docLines "    " m.Docs m.Tags
-              let mutability = if m.ReadOnly then "" else " with get, set"
-              yield $"    abstract {ident m.Name}: {printType m.Type}{mutability}" ]
+              yield! renderMember m
+
+          // D3/§4.4 construction ergonomics: the ParamObject Create compiles a call into the
+          // object literal the TS API expects; `$0` emits the (erased) argument object itself.
+          for overload in creates do
+              yield "    [<ParamObject; Emit(\"$0\")>]"
+              yield $"    static member Create {renderParamList overload} : {ident decl.Name} = jsNative" ]
+
+let private renderStringEnum (decl: FsStringEnumDecl) =
+    [ yield! docLines "" decl.Docs decl.Tags
+      yield "[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]"
+      yield $"type {ident decl.Name} ="
+
+      for case in decl.Cases do
+          let attributes =
+              [ match case.CompiledName with
+                | Some name -> $"CompiledName({stringLit name})"
+                | None -> ()
+                match case.CompiledValue with
+                | Some value -> $"CompiledValue({printLiteral value})"
+                | None -> () ]
+
+          match attributes with
+          | [] -> yield $"    | {ident case.Name}"
+          | attributes -> yield $"""    | [<{String.concat "; " attributes}>] {ident case.Name}""" ]
+
+let private renderEnum (decl: FsEnumDecl) =
+    [ yield! docLines "" decl.Docs decl.Tags
+      yield $"type {ident decl.Name} ="
+
+      for name, value in decl.Cases do
+          yield $"    | {ident name} = {value}" ]
+
+let private renderAbbrev (decl: FsAbbrevDecl) =
+    [ yield! docLines "" decl.Docs decl.Tags
+      yield $"type {ident decl.Name} = {printType decl.Target}" ]
 
 let private renderExports (packageName: string) (members: FsExportMember list) =
     [ yield "/// <summary>The package's value exports, each bound to its import.</summary>"
@@ -114,17 +224,21 @@ let private renderExports (packageName: string) (members: FsExportMember list) =
       for m in members do
           yield! docLines "    " m.Docs m.Tags
 
-          yield
+          let importName =
               match m.Binding with
-              | ImportDefault -> $"    [<Import(\"default\", \"{packageName}\")>]"
-              | ImportNamed name -> $"    [<Import(\"{name}\", \"{packageName}\")>]"
+              | ImportDefault -> "default"
+              | ImportNamed name -> name
 
-          let parameters =
-              match m.Parameters with
-              | [] -> "()"
-              | parameters -> parameters |> List.map renderParam |> String.concat ", " |> sprintf "(%s)"
-
-          yield $"    static member {ident m.Name} {parameters} : {printType m.Return} = jsNative" ]
+          match m.Body with
+          | ExportFunction(parameters, returns) ->
+              yield $"    [<Import({stringLit importName}, {stringLit packageName})>]"
+              yield $"    static member {ident m.Name} {renderParamList parameters} : {printType returns} = jsNative"
+          | ExportValue reference ->
+              yield $"    [<Import({stringLit importName}, {stringLit packageName})>]"
+              yield $"    static member {ident m.Name}: {printType reference} = jsNative"
+          | ExportConstructor(parameters, returns) ->
+              yield $"    [<Import({stringLit importName}, {stringLit packageName}); EmitConstructor>]"
+              yield $"    static member {ident m.Name} {renderParamList parameters} : {printType returns} = jsNative" ]
 
 /// The one `.fs` file of the walking skeleton: header, opens, declarations in the order the
 /// shape tier fixed. `module rec` so declaration order never fights reference order.
@@ -134,6 +248,9 @@ let renderSource: Pass<RenderModel> =
             model.Decls
             |> List.map (function
                 | FsInterface decl -> renderInterface decl
+                | FsStringEnum decl -> renderStringEnum decl
+                | FsEnum decl -> renderEnum decl
+                | FsAbbrev decl -> renderAbbrev decl
                 | FsExports members -> renderExports model.PackageName members)
             |> List.map (String.concat "\n")
             |> String.concat "\n\n"
@@ -147,6 +264,7 @@ let renderSource: Pass<RenderModel> =
                   "// </auto-generated>"
                   $"module rec {model.ModuleName}"
                   ""
+                  "open System"
                   "open Fable.Core"
                   "open Fable.Core.JsInterop"
                   ""
@@ -172,7 +290,11 @@ let symbolTiers (model: RenderModel) : (string * Tier * Finding list) list =
         model.Decls
         |> List.collect (function
             | FsInterface decl -> [ decl.Name ]
+            | FsStringEnum decl -> [ decl.Name ]
+            | FsEnum decl -> [ decl.Name ]
+            | FsAbbrev decl -> [ decl.Name ]
             | FsExports members -> members |> List.map _.Name)
+        |> List.distinct
 
     let row name =
         let findings = grouped |> Map.tryFind name |> Option.defaultValue []
