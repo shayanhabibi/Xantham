@@ -39,6 +39,8 @@ let toShape (resolve: ResolveModel) : ShapeModel =
       Types = resolve.Types
       NotFollowed = resolve.NotFollowed
       DeclNames = Map.empty
+      DeclOrders = Map.empty
+      ExportMembers = []
       Decls = [] }
 
 /// The generated module's name: the config override, or the entry package's name under the

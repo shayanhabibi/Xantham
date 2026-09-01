@@ -122,9 +122,35 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                 { TypeFacts.shallow ty with
                     UnionMembers = members |> List.map _.Id },
                 members
+        elif has TypeFlags.EnumLiteral then
+            // An enum member: its symbol names the F# enum case (§4.7); the value is already
+            // on the response.
+            let! symbol = ctx.Session.getSymbolOfType ty.Id
+
+            return
+                { TypeFacts.shallow ty with
+                    Origin = classify ctx.PackageDir symbol
+                    SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption },
+                []
         elif has TypeFlags.Object then
             let! symbol = ctx.Session.getSymbolOfType ty.Id
             let origin = classify ctx.PackageDir symbol
+
+            // Type arguments resolve for every group (O7 note): an external `Array<T>` or
+            // `Promise<T>` carries entry-package types the walk must still reach.
+            let isReference =
+                ty.ObjectFlags
+                |> ValueOption.map (fun flags -> flags.HasFlag ObjectFlags.Reference)
+                |> ValueOption.defaultValue false
+
+            let! typeArguments =
+                if isReference then
+                    ctx.Session.getTypeArguments ty.Id
+                else
+                    async.Return ValueNone
+
+            let typeArguments =
+                typeArguments |> ValueOption.map Array.toList |> ValueOption.defaultValue []
 
             if GeneratorConfig.disposition ctx.Config origin <> Ship then
                 // Identity only (O7): the shape tier renders references to this group by
@@ -132,8 +158,9 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                 return
                     { TypeFacts.shallow ty with
                         Origin = origin
-                        SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption },
-                    []
+                        SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
+                        TypeArguments = typeArguments |> List.map _.Id },
+                    typeArguments
             else
 
             let! properties = ctx.Session.getPropertiesOfType ty.Id
@@ -166,34 +193,50 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                 }
 
             let! members = properties |> Array.map (resolveMember true) |> Async.Parallel
-            let! signatures = ctx.Session.getSignaturesOfType (ty.Id, SignatureKind.Call)
 
-            let! signatureFacts =
-                signatures
-                |> Array.map (fun signature ->
-                    async {
-                        let! parameters = ctx.Session.getParametersOfSignature signature.Id
-                        let parameters = parameters |> ValueOption.defaultValue [||]
-                        let! parameterFacts = parameters |> Array.map (resolveMember false) |> Async.Parallel
-                        let! returnType = ctx.Session.getReturnTypeOfSignature signature.Id
+            let resolveSignatures kind =
+                async {
+                    let! signatures = ctx.Session.getSignaturesOfType (ty.Id, kind)
 
-                        return
-                            { Parameters = parameterFacts |> Array.map fst |> Array.toList
-                              ReturnTypeId = returnType.Id },
-                            [ yield! parameterFacts |> Array.map snd; returnType ]
-                    })
-                |> Async.Parallel
+                    return!
+                        signatures
+                        |> Array.map (fun signature ->
+                            async {
+                                let! parameters = ctx.Session.getParametersOfSignature signature.Id
+                                let parameters = parameters |> ValueOption.defaultValue [||]
+                                let! parameterFacts = parameters |> Array.map (resolveMember false) |> Async.Parallel
+                                let! returnType = ctx.Session.getReturnTypeOfSignature signature.Id
+
+                                return
+                                    { Parameters = parameterFacts |> Array.map fst |> Array.toList
+                                      HasRest = signature.Flags.HasFlag SignatureFlags.HasRestParameter
+                                      ReturnTypeId = returnType.Id },
+                                    [ yield! parameterFacts |> Array.map snd; returnType ]
+                            })
+                        |> Async.Parallel
+                }
+
+            let! callSignatures = resolveSignatures SignatureKind.Call
+            let! constructSignatures = resolveSignatures SignatureKind.Construct
+            let! baseTypes = ctx.Session.getBaseTypes ty.Id
+            let baseTypes = baseTypes |> ValueOption.map Array.toList |> ValueOption.defaultValue []
 
             let discovered =
                 [ yield! members |> Array.map snd
-                  yield! signatureFacts |> Array.collect (snd >> List.toArray) ]
+                  yield! callSignatures |> Array.collect (snd >> List.toArray)
+                  yield! constructSignatures |> Array.collect (snd >> List.toArray)
+                  yield! baseTypes
+                  yield! typeArguments ]
 
             return
                 { Response = ty
                   Origin = origin
                   SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
                   Members = members |> Array.map fst |> Array.toList
-                  CallSignatures = signatureFacts |> Array.map fst |> Array.toList
+                  CallSignatures = callSignatures |> Array.map fst |> Array.toList
+                  ConstructSignatures = constructSignatures |> Array.map fst |> Array.toList
+                  BaseTypes = baseTypes |> List.map _.Id
+                  TypeArguments = typeArguments |> List.map _.Id
                   UnionMembers = [] },
                 discovered
         else

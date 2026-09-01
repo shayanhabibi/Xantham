@@ -241,6 +241,43 @@ Phases — each ends with the compile gate green on its fixtures:
   hoisted `undefined`; readonly comes from `isReadonlySymbol`).
 - **B — the common 90%.** Literal unions (D12), enums, ParamObject synthesis (D3),
   callbacks (D5), classes/statics, naming pass hardening. Fixture: `animejs`.
+  **Landed (2026-09-01):** the shape tier grew to eleven passes (`name-exports`,
+  `synthesize-anonymous`, `classify-literal-unions`, `shape-callbacks`,
+  `shape-interfaces`, `shape-aliases`, `shape-classes`, `shape-exports`,
+  `synthesize-paramobjects`, `order-declarations`, `audit-coverage`); `DeclNames` is
+  keyed by *type id* so exported and synthesized declarations share one naming table.
+  A hand-authored tracked fixture (`tests/fixtures/lab`) pins each feature under the
+  live compiler alongside the `animejs` rung. Decisions the fixtures forced, recorded
+  here rather than re-derived later:
+  - *Arrays* are `'T[]` (undecided in the mapping doc until now); the element resolves
+    for every group disposition because `Array<T>`'s type arguments are followed even
+    in identity-only groups.
+  - *Tuples* read as arrays until D7's pass (phase C) - without this, a tuple alias
+    flattens into an interface carrying the whole `Array.prototype`.
+  - *Symbol-keyed members* (`__@iterator@1469`) are dropped with a finding: they are
+    unrepresentable, and the checker id embedded in the name breaks run-to-run
+    determinism (the first determinism failure the e2e property caught).
+  - *`true | false` inside bigger unions* reads back as `bool` - the checker re-expands
+    `boolean` in unions, so `boolean | undefined` is a two-literal union at the wire.
+  - *Member-position unions resolve to declared aliases by member set*: literal types
+    are interned, so `"ms" | "s" | undefined` at a member matches the exported
+    `TimeUnit` union by id set instead of synthesizing a twin.
+  - *Twin declared unions abbreviate toward the smallest type id only*: when two
+    exported unions share a member set (`animejs`'s `TimelinePosition` /
+    `ScrollThresholdValue`), matching each to the other produces `type A = B` /
+    `type B = A` - fsc reports a plain two-type cycle as FS0953, but a *generic
+    instantiation* over the cycle (`Func<obj[], TimelinePosition>`) never terminates.
+    `shape-aliases` therefore hides every same-set twin with a larger id before
+    resolving an alias's right side: chains strictly decrease, the smallest twin
+    widens structurally, and cycles are impossible by construction.
+  - *Class statics*: constructors become `[<EmitConstructor>]` members on `Exports`;
+    the constructor-object type itself is never declared. Static members beyond the
+    constructor are findings until a fixture needs them (`animejs` has none).
+  - *ParamObject Create* is capped (24 parameters): wider is unusable and measurably
+    quadratic for the F# typechecker - the uncapped `animejs` golden took the compile
+    gate from seconds to many minutes. Create statics also moved the gate's TFM to
+    net8.0 (static interface members need default-interface-member runtime support;
+    Fable erases them).
 - **C — unions and generics.** Position-aware unions (D4), tagged-union detection, tuples
   (D7), generics/constraints/default-args. Fixture: `@cloudflare/workers-types`.
 - **D — the erased-idiom zone.** Revive `Xantham.Fable.Core`; keyof regimes, mapped/

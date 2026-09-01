@@ -156,6 +156,28 @@ module Naming =
         | CompilerLib -> CompilerLibModule
         | Dependency name -> packageModule name
 
+    /// The DU case name for a string-literal union member: PascalCased over separator
+    /// segments (`"utf-8"` -> `Utf8`), prefixed when the result cannot start an F# case.
+    /// Pinned like the module scheme - StringEnum case names are part of a binding's surface.
+    let enumCaseOfString (text: string) =
+        let cleaned =
+            text
+            |> Seq.map (fun c -> if System.Char.IsLetterOrDigit c then c else '-')
+            |> System.String.Concat
+
+        match pascalSegment cleaned with
+        | "" -> "Empty"
+        | name when System.Char.IsLetter name[0] -> name
+        | name -> "N" + name
+
+    /// The DU case name for a numeric-literal union member (D12): `1` -> `N1`,
+    /// `1.5` -> `N1_5`, `-1` -> `NMinus1`.
+    let enumCaseOfNumber (value: float) =
+        let text =
+            value.ToString("R", System.Globalization.CultureInfo.InvariantCulture)
+
+        "N" + text.Replace("-", "Minus").Replace(".", "_")
+
     /// The name a default export falls back to when its symbol is itself named `default`:
     /// the package name's last segment, camelCased (`ansi-regex` -> `ansiRegex`).
     let defaultExport (packageName: string) =
@@ -243,6 +265,8 @@ type ResolvedMember =
 
 type ResolvedSignature =
     { Parameters: ResolvedMember list
+      /// The signature's last parameter is a rest parameter (`...args`).
+      HasRest: bool
       ReturnTypeId: int }
 
 /// A `TypeResponse` plus the derived facts of the kinds the skeleton resolves: object members,
@@ -257,6 +281,12 @@ type TypeFacts =
       SymbolName: string option
       Members: ResolvedMember list
       CallSignatures: ResolvedSignature list
+      ConstructSignatures: ResolvedSignature list
+      /// `extends` bases of an interface or class instance type, by id.
+      BaseTypes: int list
+      /// Type arguments of a generic reference, resolved for *every* group - an external
+      /// `Array<T>` carries entry-package types that must still be reached (O7 note).
+      TypeArguments: int list
       UnionMembers: int list }
 
 module TypeFacts =
@@ -267,6 +297,9 @@ module TypeFacts =
           SymbolName = None
           Members = []
           CallSignatures = []
+          ConstructSignatures = []
+          BaseTypes = []
+          TypeArguments = []
           UnionMembers = [] }
 
 /// The type ids an export resolves to. A symbol can be both a type and a value (a class), so
@@ -291,9 +324,9 @@ type ResolveModel =
 // Tier 3 - Shape: F#-shaped declarations. The minimal IR the walking skeleton renders.
 // ---------------------------------------------------------------------------------------------
 
-/// The F# type written at a reference position. Phase A covers primitives, `option`, and
-/// references to declarations this run generates; everything else widens to `FsObj` with a
-/// finding saying so.
+/// The F# type written at a reference position. Phase B covers primitives, `option`, arrays,
+/// delegates (D5) and references to declarations this run generates; everything else widens to
+/// `FsObj` with a finding saying so.
 type FsTypeRef =
     | FsBool
     | FsString
@@ -301,9 +334,20 @@ type FsTypeRef =
     | FsUnit
     | FsObj
     | FsOption of FsTypeRef
+    | FsArray of FsTypeRef
+    /// A callback as a delegate (D5): parameter types and return. Renders as
+    /// `System.Action`/`System.Func` so the arity is guaranteed at the Fable boundary.
+    | FsDelegate of FsTypeRef list * FsTypeRef
     | FsNamed of string
 
-type FsMember =
+/// A literal payload carried by a StringEnum case (D12: mixed literal unions keep their
+/// non-string members as `[<CompiledValue>]` cases).
+type FsLiteral =
+    | LitString of string
+    | LitNumber of float
+    | LitBool of bool
+
+type FsPropertyMember =
     { Name: string
       Docs: string
       Tags: JSDocTagInfo list
@@ -313,7 +357,23 @@ type FsMember =
 type FsParam =
     { Name: string
       Optional: bool
+      /// A rest parameter; static emissions render `[<ParamArray>]`, abstract members read as
+      /// a plain array (attribute syntax is not available there).
+      Rest: bool
       Type: FsTypeRef }
+
+type FsMethodMember =
+    { Name: string
+      Docs: string
+      Tags: JSDocTagInfo list
+      Parameters: FsParam list
+      Return: FsTypeRef }
+
+/// An interface member. Overloads are consecutive `FsMethod` entries sharing a name -
+/// overloaded abstract members are legal F#.
+type FsMember =
+    | FsProperty of FsPropertyMember
+    | FsMethod of FsMethodMember
 
 /// How a value export is bound to its JavaScript module.
 [<Struct>]
@@ -321,24 +381,71 @@ type ImportBinding =
     | ImportDefault
     | ImportNamed of name: string
 
-/// One member of the `Exports` erased type: a top-level exported function.
+/// What one member of the `Exports` erased type is.
+type FsExportBody =
+    /// A top-level exported function; overloads are consecutive members sharing a name.
+    | ExportFunction of FsParam list * FsTypeRef
+    /// An exported value (`const`/`let`, or a namespace object): a get-only property.
+    | ExportValue of FsTypeRef
+    /// A class constructor: `[<EmitConstructor>]`, so `Exports.Name(...)` is `new Name(...)`.
+    | ExportConstructor of FsParam list * FsTypeRef
+
+/// One member of the `Exports` erased type.
 type FsExportMember =
     { Name: string
       Docs: string
       Tags: JSDocTagInfo list
       Binding: ImportBinding
-      Parameters: FsParam list
-      Return: FsTypeRef }
+      Body: FsExportBody }
 
 type FsInterfaceDecl =
     { Name: string
       Docs: string
       Tags: JSDocTagInfo list
       Order: DeclOrder option
-      Members: FsMember list }
+      /// Base interfaces (`extends`, or a class base) - rendered as `inherit` lines.
+      Inherits: FsTypeRef list
+      Members: FsMember list
+      /// `[<ParamObject; Emit("$0")>]` Create overloads for plain-data interfaces (D3) -
+      /// parameter lists mirroring the members, so consumers never hand-build objects.
+      CreateOverloads: FsParam list list }
+
+/// One case of a `[<StringEnum>]` DU. `CompiledName` carries the literal when it differs from
+/// the case name; `CompiledValue` carries a non-string literal (D12).
+type FsUnionCase =
+    { Name: string
+      CompiledName: string option
+      CompiledValue: FsLiteral option }
+
+type FsStringEnumDecl =
+    { Name: string
+      Docs: string
+      Tags: JSDocTagInfo list
+      Order: DeclOrder option
+      Cases: FsUnionCase list }
+
+/// A numeric TS enum as an F# enum - `type E = A = 1` (§4.7).
+type FsEnumDecl =
+    { Name: string
+      Docs: string
+      Tags: JSDocTagInfo list
+      Order: DeclOrder option
+      Cases: (string * int) list }
+
+/// A type abbreviation: an exported alias whose right side is a reference, not a shape of its
+/// own (callback aliases to delegates, alias-of-alias, primitive aliases).
+type FsAbbrevDecl =
+    { Name: string
+      Docs: string
+      Tags: JSDocTagInfo list
+      Order: DeclOrder option
+      Target: FsTypeRef }
 
 type FsDecl =
     | FsInterface of FsInterfaceDecl
+    | FsStringEnum of FsStringEnumDecl
+    | FsEnum of FsEnumDecl
+    | FsAbbrev of FsAbbrevDecl
     /// The one `Exports` type gathering the module's value exports.
     | FsExports of FsExportMember list
 
@@ -347,9 +454,16 @@ type ShapeModel =
       ExportTypes: Map<int, ExportTypeIds>
       Types: Map<int, TypeFacts>
       NotFollowed: Map<int, string>
-      /// Export symbol id -> the F# type name this run generates for it. What lets a type
-      /// reference to an exported alias come out as `FsNamed` rather than an expansion.
+      /// Type id -> the F# type name this run declares for it - exports named first, then
+      /// synthesized names for reachable anonymous shapes (hash-consing by id, §4.4). What
+      /// lets a reference come out as `FsNamed` rather than an expansion.
       DeclNames: Map<int, string>
+      /// Type id -> the source order its declaration sorts under: the export's own order, or
+      /// for a synthesized declaration the order of the export that first reached it.
+      DeclOrders: Map<int, DeclOrder option>
+      /// `Exports` members accumulated by the class/function/value passes, keyed by harvest
+      /// position so `order-declarations` can assemble them in source order.
+      ExportMembers: (int * FsExportMember) list
       Decls: FsDecl list }
 
 // ---------------------------------------------------------------------------------------------

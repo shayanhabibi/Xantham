@@ -2,16 +2,22 @@
   "package": "ansi-regex",
   "module": "AnsiRegex",
   "counts": {
-    "exact": 1,
-    "ergonomic": 0,
+    "exact": 0,
+    "ergonomic": 1,
     "widened": 1,
     "escape": 0
   },
   "symbols": [
     {
       "name": "Options",
-      "tier": "exact",
-      "findings": []
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
     },
     {
       "name": "ansiRegex",

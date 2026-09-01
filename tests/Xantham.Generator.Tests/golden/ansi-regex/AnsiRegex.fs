@@ -4,15 +4,19 @@
 // </auto-generated>
 module rec AnsiRegex
 
+open System
 open Fable.Core
 open Fable.Core.JsInterop
 
+[<Interface>]
 type Options =
     /// <summary>
     /// Match only the first ANSI escape.
     /// </summary>
     /// <remarks>@default false</remarks>
     abstract onlyFirst: bool
+    [<ParamObject; Emit("$0")>]
+    static member Create (onlyFirst: bool) : Options = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

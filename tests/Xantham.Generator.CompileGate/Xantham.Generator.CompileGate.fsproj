@@ -6,13 +6,18 @@
          here. A Fable compile joins once the support package exists (phase D). -->
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <!-- net8.0 rather than netstandard2.0: the ParamObject Create members (D3) are static
+             interface members with bodies, which need default-interface-member runtime support
+             to type-check. Fable erases them; the gate only proves the F# compiles. -->
+        <TargetFramework>net8.0</TargetFramework>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
         <Compile Include="..\Xantham.Generator.Tests\golden\ansi-regex\AnsiRegex.fs" Link="ansi-regex\AnsiRegex.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\lab\PhaseBLab.fs" Link="lab\PhaseBLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\animejs\Animejs.fs" Link="animejs\Animejs.fs" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,0 +1,196 @@
+{
+  "package": "phase-b-lab",
+  "module": "PhaseBLab",
+  "counts": {
+    "exact": 8,
+    "ergonomic": 6,
+    "widened": 2,
+    "escape": 0
+  },
+  "symbols": [
+    {
+      "name": "TimeUnit",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "Direction",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "Mixed",
+      "tier": "exact",
+      "findings": [
+        {
+          "pass": "classify-literal-unions",
+          "tier": "exact",
+          "message": "non-string literal case carries CompiledValue (D12)"
+        },
+        {
+          "pass": "classify-literal-unions",
+          "tier": "exact",
+          "message": "non-string literal case carries CompiledValue (D12)"
+        }
+      ]
+    },
+    {
+      "name": "TickCallback",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "TimerOptions",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Timer",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-classes",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "ConfigureSettings",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Coords",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "tuple reads as an array (D7 tuples are phase C)"
+        }
+      ]
+    },
+    {
+      "name": "Entry",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "heterogeneous tuple widened to obj[] (D7 tuples are phase C)"
+        }
+      ]
+    },
+    {
+      "name": "Utils",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "createTimer",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "round",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "version",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "defaults",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "configure",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "utils",
+      "tier": "exact",
+      "findings": []
+    }
+  ]
+}
