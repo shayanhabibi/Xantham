@@ -1,14 +1,4 @@
-﻿<!--
-Exclude Fable projects from the root build. This is primarily to allow
-naive AI tooling to not pick up errors on building fable projects and running
-rampant.
--->
-<Project>
-    <!--    Xantham.Fable.Core properties    -->
-    <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Xantham.Fable.Core'">
-        <IsExcludedFromRootBuild>true</IsExcludedFromRootBuild>
-    </PropertyGroup>
-    
+﻿<Project>
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <FsDocsAllowExecutableProject>true</FsDocsAllowExecutableProject>

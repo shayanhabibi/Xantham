@@ -1,105 +1,79 @@
 # Xantham
 
-[![NPM Version](https://img.shields.io/npm/v/xantham?label=npm%20xantham)](https://www.npmjs.com/package/xantham)
+[![NuGet](https://img.shields.io/nuget/v/Xantham.TypeScript.Wire?label=nuget%20Xantham.TypeScript.Wire)](https://www.nuget.org/packages/Xantham.TypeScript.Wire)
 
-> A schema-driven TypeScript → F# bindings generator.
+> A TypeScript → F# bindings generator, built on the TypeScript 7 compiler's own API server.
 
-Xantham is a hard fork of [Glutinum](https://github.com/glutinum-org/cli) that tackles the TypeScript-to-.NET bindings problem differently. Instead of a single end-to-end pipeline it separates concerns into **extract**, **encode/decode**, and **generate** phases across Fable and .NET boundaries. The common JSON schema is the only hand-off point; generators consume `Xantham.Decoder` and never touch the extraction layer.
+Xantham is a hard fork of [Glutinum](https://github.com/glutinum-org/cli). It is mid-rebuild.
 
----
+The whole project now sits on **`Xantham.TypeScript.Wire`** — a .NET client that runs the Go `tsc`
+binary as `tsc --api`, speaks its msgpack protocol over stdio, and reads the binary AST it returns
+in place, without JSON in the middle. The compiler's own schema generates the API surface, the
+kinds, the child slots and the typed node layer, so the client tracks upstream rather than
+paraphrasing it.
 
-## Glutinum vs Xantham
-
-Both tools read `.d.ts` files and emit F# bindings. They make different trade-offs.
-
-| | Glutinum | Xantham |
-|---|---|---|
-| **Try it now** | [Web playground](https://glutinum.net) — browser, no install | CLI only — requires Node.js + .NET SDK |
-| **Setup** | Zero | Moderate |
-| **Input scope** | One `.d.ts` entry point | Entire type graph, recursively across all referenced files |
-| **Import statements** | Not generated — wired by hand | Generated automatically; provenance is tracked through the full type tree |
-| **Output style** | Single built-in format | User-defined — bring your own strategy (string concat, Fabulous.AST, SyntaxOak, …) |
-| **Encoder replaceability** | N/A — monolithic | TSC can be swapped (e.g. TSGO) without touching decoders or generators |
-| **Decoder reuse** | N/A | Any consumer takes a dependency on `Xantham.Decoder` independently |
-| **Complexity** | Low | Higher — three distinct phases |
-
-**Choose Glutinum** when you need a quick answer for a single file and want zero friction.
-
-**Choose Xantham** when you need the full picture: multi-file type graphs, generated imports, and control over how the output looks.
+The earlier design — a Fable extractor crawling the TypeScript 5 JavaScript compiler API, a common
+JSON schema as the hand-off point, and a .NET decoder plus generator — has been retired. See
+[`.archive/`](https://github.com/shayanhabibi/Xantham/blob/master/.archive/README.md) below.
 
 ---
 
-## How It Works
+## Xantham.TypeScript.Wire
 
-### Glutinum
+A standalone NuGet package, usable on its own with no dependency on the rest of Xantham.
 
-<div class="mermaid">
-flowchart LR
-    A[.d.ts Input] --> B[TypeScript Compiler API]
-    subgraph Fable / Glutinum
-        B --> C[GlueAST]
-        C --> D[FSharpAST]
-        D --> E[String Concatenation]
-    end
-    E --> F[F# Bindings]
-</div>
+- **The full API surface**, generated from the compiler's shipped schema: 142 synchronous calls,
+  the same set again as `Async`, and typed records for every parameter and response.
+- **The binary AST, read in place.** A node is a struct over the blob and an index, not an object
+  graph, and the typed layer gives each one a tag — `Node<FunctionDeclaration>` — so narrowing is a
+  compile-time question.
+- **A batching mailbox** that collects overlapping calls into one `batchRequests` round trip.
+- **A virtual filesystem**, so the compiler can be pointed at sources that exist only in memory.
 
-### Xantham
+Targets `net10.0`, `net8.0` and `netstandard2.1`. See the
+[package README](https://github.com/shayanhabibi/Xantham/blob/master/src/Xantham.TypeScript.Wire/README.md) to get started.
 
-<div class="mermaid">
-flowchart LR
-    input[".d.ts entry point"] --> tsc
-    subgraph Fable / Xantham.Fable
-        tsc["TypeScript Compiler API"]
-        crawler["Recursive AST Crawler"]
-        thoth_enc["Thoth Encoder"]
-        tsc --> crawler
-        crawler --> thoth_enc
-    end
-    subgraph Common
-        schema["JSON Schema"]
-    end
-    subgraph .NET / Xantham.Decoder
-        thoth_dec["Thoth Decoder"]
-        util["Utility Layer"]
-        thoth_dec --> util
-    end
-    subgraph Userland Generators
-        gen1["Xantham.SimpleGenerator — Fabulous.AST"]
-        gen2["Your Generator — String Concat / SyntaxOak / …"]
-    end
-    schema -.-> thoth_enc
-    schema -.-> thoth_dec
-    thoth_enc --> json["JSON"]
-    json --> thoth_dec
-    util --> types["F# Types"]
-    types --> gen1
-    types --> gen2
-    gen1 --> out["F# Bindings"]
-    gen2 --> out
-</div>
+### Documentation
 
-Xantham's extractor follows every type reference recursively. By the time the decoder receives the schema it has the complete type graph — all the information needed to resolve cross-file references and emit accurate `open` / import statements.
+- [Navigating the AST](wire-navigation.md) — tags, `Node<'Tag>`, views and the escape hatches.
+- [The hand-written register](wire-hand-written.md) — every fact transcribed from upstream
+  rather than derived from its schema, and how to update each one.
+- [The wire protocol](plans/tsgo-protocol.md) — framing, error model and the binary AST
+  format, verified against live byte traces.
+- [Remaining work](plans/wire-remaining-work.md) — what is still outstanding, in phases.
 
 ---
 
-## Modules
+## Repository layout
 
-| Module | Role |
-|--------|------|
-| **Xantham.Common** | Shared discriminated union schema (`Common.Types.fs`) — the contract between extractor and generators. Included directly as a source file in both `Xantham.Fable` and `Xantham.Decoder`; not a separate assembly. |
-| **Xantham.Fable** | TypeScript extractor compiled to JS via Fable. Crawls `.d.ts` files via ts-morph, merges overloads by `TypeKey`, and emits JSON conforming to the common schema. |
-| **Xantham.Fable.Core** | Minimal Fable bindings stub. Provides F# representations of TypeScript type-system idioms (`keyof`, indexed access types, heterogeneous property unions). |
-| **Xantham.Decoder** | .NET library. Decodes the JSON schema into strongly-typed F# structures and provides a utility layer for generator consumption. |
-| **Xantham.Generator** | Core rendering library — path system, type-ref model, and F# AST helpers. |
+| Path | Role |
+|------|------|
+| `src/Xantham.TypeScript.Wire` | The client. The only live source project. |
+| `tests/Xantham.TypeScript.Wire.Tests` | Expecto suite, with its own pinned `typescript` 7.x package. |
+| `tools/tsc-ast` | Vendors upstream compiler sources and emits the AST and enum F# layers. |
+| `tools/proto-gen` | Emits the protocol F# layers from the shipped `typescript` schema. |
+| `build.fsx` | The build pipeline. |
+| `.archive/` | **Obsolete pre-Wire work. Nothing in here is live.** |
+
+## `.archive/`
+
+Everything under [`.archive/`](https://github.com/shayanhabibi/Xantham/blob/master/.archive/README.md) is retired: `Xantham.Common`, `Xantham.Fable`,
+`Xantham.Decoder`, `Xantham.Generator` and their tests and docs, the superseded plans, and the old
+build system. It is kept as a record of obstacles already met, not as a source of truth — it does
+not build, is not referenced by the solution, and should not be read as a description of how
+Xantham works today.
 
 ---
 
 ## Current Status
 
-| Component                           |     Status     | Notes                                                                                       |
-|-------------------------------------|:--------------:|---------------------------------------------------------------------------------------------|
-| **Schema** (`Xantham.Common`)       |     🟡 RC      | Near-stable; breaking changes require coordinated updates across all layers.                |
-| **Reader** (`Xantham.Fable`)        |     🟡 RC      | Handles large hierarchies (e.g. solid-js). Stack-based traversal avoids JS stack overflows. |
-| **Decoder** (`Xantham.Decoder`)     |     🟡 RC      | Review documentation and testing.                                                           |
-| **Generator** (`Xantham.Generator`) | 🟠 In progress | Structural output works.                                                                    |
+| Component | Status | Notes |
+|-----------|:------:|-------|
+| **Wire** (`Xantham.TypeScript.Wire`) | 🟢 Shipped | Generated from the compiler's own schema; packaged for NuGet. |
+| **Generator** | ⚪ Not started | Being redesigned on top of Wire. The pre-Wire generator is archived. |
+
+---
+
+## See the Docs
+
+[Docs are generated from the source.](https://shayanhabibi.github.io/Xantham)

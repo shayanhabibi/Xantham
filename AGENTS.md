@@ -1,65 +1,74 @@
 # AGENTS.md
 
 ## Project Overview
-Xantham is a TypeScript-to-F# bindings generator that separates concerns into three phases:
-1. Extract (Fable/JavaScript) - Crawls TypeScript AST and serializes as JSON
-2. Transport - Common JSON schema 
-3. Decode & Generate (.NET) - Deserializes JSON into F# structures and runs generators
 
-## Key Commands
-- `npm run prestart` - Compile Fable extractor
-- `npm start` - Run extractor against .d.ts file 
-- `npm run watch` - Development watch mode (Fable + Node)
-- `npm run test:signal` - Run standalone Fable tests
-- `dotnet build` - Build .NET projects
-- `dotnet test` - Run .NET tests
-- `dotnet fsi tools/generate-wire.fsx sync tsc-ast [--check]` - Vendor (or verify) the upstream
-  sources pinned in `tools/tsc-ast/upstream.json`, grouped by upstream directory
-- `dotnet fsi tools/generate-wire.fsx generate ast` - Emit `Enums.generated.fs` (the compiler's
-  flag and kind enums), `Ast.generated.fs` (`SyntaxKind`, its guards, the node-alias guards, and
-  the `Slot` numbers), `AstNode.generated.fs` (named child and data accessors) and
-  `Typed.generated.fs` (tags, `Node<'Tag>`, typed accessors, views) into
-  `src/Xantham.TypeScript.Wire/`, from the vendored `ast.json` and `enums/`
-- `dotnet fsi tools/generate-wire.fsx generate proto` - Emit the `Proto*.generated.fs` files
+Xantham is a TypeScript-to-F# bindings generator. It is mid-rebuild: the whole project now sits on
+top of `Xantham.TypeScript.Wire`, a .NET client for the TypeScript 7 compiler's own API server
+(`tsc --api`). Wire speaks the compiler's msgpack protocol and reads its binary AST in place
+through a generated typed layer.
+
+The previous design — a Fable extractor crawling the TypeScript 5 JavaScript compiler API, a
+common JSON schema as the hand-off point, and a .NET decoder plus generator — has been retired.
+
+## `.archive/` holds obsolete work only — do not read it as current
+
+**Everything under `.archive/` is dead. Do not cite it, build it, grep it for how the project
+works today, or copy patterns out of it without first confirming they still apply.** It is kept
+because the obstacles it documents are worth consulting deliberately, not because any of it is
+live. Read `.archive/README.md` for the inventory.
+
+Archived: `Xantham.Common`, `Xantham.Fable`, `Xantham.Fable.Core`, `Xantham.Fable.Utils`,
+`Xantham.Decoder`, `Xantham.Generator`, `Xantham.TypeScript`, `Xantham.Mocha`, their tests and
+docs, the superseded plans (including the `tsgo-*` route documents), the old FAKE/EasyBuild
+pipeline (`Build.fsproj`, `ci/`), the npm package manifest and `index.js`, the retired
+`.claude/rules/`, and untracked scratch under `.archive/scratch/`.
+
+Two archived traps in particular: `.archive/docs/plans/tsgo-fsharp-client.md` and
+`tsgo-native-route.md` predate the compiler merge and use stale names throughout — translate via
+the table below first. `.archive/scratch/tmp/tsgo-native` is a checkout of the dead
+`microsoft/typescript-go` repository and is not ground truth for anything.
 
 ## Project Structure
-- `Xantham.Fable` - TypeScript extractor (Fable/F# to JS)
-- `Xantham.Decoder` - .NET library for decoding JSON schema
-- `Xantham.Generator` - Core rendering library
-- `Xantham.Common` - Shared schema definitions (included directly, not compiled separately)
-- `tests/Xantham.Fable.Tests` - Fable/Mocha integration tests with .d.ts fixtures
 
-## Development Workflow
-1. Extract: `npm run prestart && npm start <path/to/index.d.ts>`
-2. Decode & Generate: `dotnet run --project src/Xantham.SimpleGenerator`
-3. Watch mode: `npm run watch` for development
+- `src/Xantham.TypeScript.Wire` — the only live source project. Generated API surface, binary AST
+  reader, typed node layer, batching mailbox, virtual filesystem. Published to NuGet.
+- `tests/Xantham.TypeScript.Wire.Tests` — Expecto suite. Has its own `package.json` /
+  `node_modules` pinning the `typescript` 7.x package used as ground truth and as the live server.
+- `tests/Test.fsx` — scratch script driving Wire against `tests/fixtures/` via the packed nupkg
+  in `bin/`.
+- `tools/tsc-ast` — vendors upstream compiler sources and emits the AST/enum F# layers.
+- `tools/proto-gen` — emits the protocol F# layers from the `typescript` package's shipped schema.
+- `build.fsx` — the current build pipeline (Partas.Build). There is no root `package.json`.
 
-## Important Details
-- All projects target `net10.0`
-- Test fixtures are actual `.d.ts` files in `tests/Xantham.Fable.Tests/TypeFiles/`
-- `Xantham.Common/Common.Types.fs` is included directly in both Fable and Decoder projects
-- Generated code uses Thoth.Json for serialization
-- Fable 5.0.0-rc.# is used for F# to JS compilation
-- Fable.Mocha is used for Fable tests, Expecto for .NET tests
-- Computed signals start dirty - always read `.Value` before subscribing to `.Invalidated` in tests
+## Key Commands
 
-## Key Files
-- `src/Xantham.Fable/Program.fs.js` - Entry point for extractor
-- `src/Xantham.Common/Common.Types.fs` - Core schema definitions
-- `src/Xantham.SimpleGenerator/Program.fs` - Example generator implementation
-- `tests/Signal.test.fsx` - Standalone Fable test script
+- `dotnet build Xantham.slnx` — build. `dotnet test` — run the Expecto suite.
+- `dotnet fsi build.fsx -- <build|test|docs|pack|publish|bump>` — the full pipeline; `test` runs
+  `npm install` in the Wire test project first.
+- `dotnet fsi tools/generate-wire.fsx sync tsc-ast [--check]` — vendor (or verify) the upstream
+  sources pinned in `tools/tsc-ast/upstream.json` into `tools/tsc-ast/upstream/`, against the
+  per-file digests in `upstream.lock.json`. The lock is committed; the tree is not.
+- `dotnet fsi tools/generate-wire.fsx generate ast` — emit `Enums.generated.fs` (the compiler's
+  flag and kind enums), `Ast.generated.fs` (`SyntaxKind`, guards, node-alias guards, `Slot`
+  numbers), `AstNode.generated.fs` (named child and data accessors) and `Typed.generated.fs`
+  (tags, `Node<'Tag>`, typed accessors, views) into `src/Xantham.TypeScript.Wire/`, from the
+  vendored `ast.json` and `enums/`.
+- `dotnet fsi tools/generate-wire.fsx generate proto` — emit the `Proto*.generated.fs` files.
 
 ## Architecture Notes
-- Schema is the single hand-off point between extractor and generators
-- Generators consume `Xantham.Decoder` and never touch the extraction pipeline
-- Overload support added via `IOverloadable` / `TsOverloadableConstruct<'T>`
-- Stack-based traversal avoids JS stack overflows
+
+- Nothing is hand-transcribed that can be generated. Facts that must be transcribed are
+  catalogued in `docs/wire-hand-written.md` with how each was derived and how to update it.
+- The AST is read in place out of the blob; `Node<'Tag>` is a struct over a blob index.
+- Expecto for .NET tests.
+
 ## TypeScript 7 compiler sources — READ BEFORE RESEARCHING THE COMPILER
 
 **`microsoft/typescript-go` is dead. Never clone it, never cite it, never `gh api` it.**
 The Go compiler was merged into `microsoft/TypeScript@main`, and that repository is the only
-valid source of truth. The old checkout under `tmp/tsgo-native/typescript-go` has been deleted
-and must not be recreated.
+valid source of truth. The old checkout of it survives only as dead weight under
+`.archive/scratch/tmp/tsgo-native`; it is not ground truth, must not be cited, and must not be
+recreated anywhere live.
 
 Read every historical mention of "tsgo", "native", or "native-preview" as **TypeScript 7+**:
 
@@ -81,7 +90,7 @@ Paths moved in the merge. Translate before looking anything up:
 | `_tools/gen-proto` | `tools/gen-proto` |
 
 Ground truth, in order of preference:
-1. The installed npm package — `tests/Xantham.TsGo.Tests/node_modules/typescript` (currently
+1. The installed npm package — `tests/Xantham.TypeScript.Wire.Tests/node_modules/typescript` (currently
    `7.1.0-dev.20260830.1`). This is what our code actually runs against; `dist/` wins over
    upstream `main` whenever the two disagree, because upstream is always ahead of the release.
 2. `tools/tsc-ast/upstream/` — vendored at a pinned commit and checksummed in

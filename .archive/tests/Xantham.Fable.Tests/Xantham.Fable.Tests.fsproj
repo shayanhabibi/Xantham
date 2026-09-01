@@ -1,0 +1,81 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TestProject>true</TestProject>
+        <DefineConstants>FABLE_TEST</DefineConstants>
+        <TargetFramework>net10.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Program.fs"/>
+        <TypeScriptCompile Include="TypeFiles\basic.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\merge.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\extends.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\multiple-extends.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\extends-with-type-args.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\enum.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\members.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\function.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\generics.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\multi-file\shapes.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\multi-file\vectors.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\overloads.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\optional-readonly.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\index-access.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\class.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\tuple.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\union.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\variable.d.ts" />
+        <Content Include="TypeFiles\package.json" />
+        <TypeScriptCompile Include="TypeFiles\intersection.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\utility-types.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\type-operators.d.ts" />
+        <Content Include="TypeFiles\node_modules\ui-kit\package.json" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\ui-kit\index.d.ts" />
+        <Content Include="TypeFiles\node_modules\validators\package.json" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\validators\index.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\framework\plugins\dist\index.d.ts" />
+        <Content Include="TypeFiles\node_modules\framework\plugins\package.json" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\framework\dist\index.d.ts" />
+        <Content Include="TypeFiles\node_modules\data-layer\package.json" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\data-layer\index.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\app\views\dashboard.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\app\components\widget.d.ts" />
+        <Content Include="TypeFiles\node_modules\app\package.json" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\app\index.d.ts" />
+        <Content Include="TypeFiles\node_modules\solid-js\package.json" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\solid-js\types\index.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\solid-js\types\jsx.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\node_modules\three\constants.d.ts" />
+        <Content Include="TypeFiles\node_modules\multi-file\package.json" />
+        <TypeScriptCompile Include="TypeFiles\accessors.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\namespace.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\conditional.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\enum-string.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\template-literal.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\enum-nonsequential.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\function-ref.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\ref-enum.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\import-package.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\aliases.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\nested-generics.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\type-args.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\plan-a-test.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\intrinsic.d.ts" />
+        <TypeScriptCompile Include="TypeFiles\cloudflare-export.d.ts" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\Xantham.Fable\Xantham.Fable.fsproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Fable.Mocha" Version="2.17.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="TypeFiles\node_modules\framework\@app\**" />
+      <EmbeddedResource Remove="TypeFiles\node_modules\framework\framework\**" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,781 @@
+﻿[<AutoOpen>]
+module Xantham.Generator.Types.Prelude
+
+open System
+open System.Collections.Generic
+open Fabulous.AST
+open Fantomas.Core.SyntaxOak
+open Xantham
+open Xantham.Decoder.ArenaInterner
+open Xantham.Generator.NamePath
+open Xantham.Decoder
+
+// of transient path tracking
+[<CustomEquality; NoComparison>]
+type TypeRefAtom =
+    private
+    | Widget_ of WidgetBuilder<Type>
+    | Intrinsic_ of string
+    | ConcretePath_ of TypePath 
+    | TransientPath_ of TransientTypePath
+    override this.GetHashCode() =
+        match this with
+        | Widget_ w -> w.Compile().GetHashCode()
+        | Intrinsic_ s -> s.GetHashCode()
+        | ConcretePath_ p -> p.GetHashCode()
+        | TransientPath_ p -> p.GetHashCode()
+    override this.Equals(other) =
+        match this, other with
+        | Widget_ w1, (:? TypeRefAtom as (Widget_ w2)) ->
+            w1.Compile() = w2.Compile()
+        | Intrinsic_ s1, (:? TypeRefAtom as (Intrinsic_ s2)) ->
+            s1 = s2
+        | ConcretePath_ p1, (:? TypeRefAtom as (ConcretePath_ p2)) ->
+            p1 = p2
+        | TransientPath_ p1, (:? TypeRefAtom as (TransientPath_ p2)) ->
+            p1 = p2
+        | _ -> false
+
+type TypeRefMolecule =
+    private
+    | Tuple_ of TypeRefRender list 
+    | Union_ of TypeRefRender list 
+    | Function_ of parameters: TypeRefRender list * returnType: TypeRefRender
+    | Prefix_ of prefix: TypeRefRender * args: TypeRefRender list
+
+and TypeRefKind =
+    private
+    // nullability is stored on the atom
+    | Atom_ of TypeRefAtom
+    // nullability is computed once
+    | Molecule_ of TypeRefMolecule 
+
+and TypeRefRender = {
+    Kind: TypeRefKind
+    Nullable: bool
+}
+
+module TypeRefAtom =
+    let (|Widget|ConcretePath|TransientPath|Intrinsic|) (atom: TypeRefAtom) =
+        match atom with
+        | Widget_(widgetBuilder) -> Widget(widgetBuilder)
+        | ConcretePath_(typePath) -> ConcretePath(typePath)
+        | TransientPath_(transientTypePath) -> TransientPath(transientTypePath)
+        | Intrinsic_ s -> Intrinsic(s)
+
+module TypeRefMolecule =
+    let (|Tuple|Union|Function|Prefix|) (molecule: TypeRefMolecule) =
+        match molecule with
+        | Tuple_ typeRefs -> Tuple(typeRefs)
+        | Union_ typeRefs -> Union(typeRefs)
+        | Function_(parameters, returnType) -> Function(parameters, returnType)
+        | Prefix_(prefix, args) -> Prefix(prefix, args)
+
+module TypeRefKind =
+    let (|Atom|Molecule|) (typeRef: TypeRefKind) =
+        match typeRef with
+        | Atom_ atom -> Atom(atom)
+        | Molecule_ molecule -> Molecule(molecule)
+
+module TypeRefRender =
+    let rec private flatten (render: TypeRefRender list) : TypeRefRender list =
+        render
+        |> List.collect (function
+            | { Kind = TypeRefKind.Molecule (TypeRefMolecule.Union atoms); Nullable = true } ->
+                { Kind = TypeRefKind.Atom_ (TypeRefAtom.Widget_ (Ast.Unit())); Nullable = false }
+                :: flatten atoms
+            | { Kind = TypeRefKind.Molecule (TypeRefMolecule.Union atoms); Nullable = false } ->
+                flatten atoms
+            | { Nullable = true } as render ->
+                [ { render with Nullable = false }
+                  { Kind = TypeRefKind.Atom_ (TypeRefAtom.Widget_ (Ast.Unit()))
+                    Nullable = false } ]
+            | render -> [ render ]
+            )
+    let rec replace (old: TypeRefRender) (new': TypeRefRender) (render: TypeRefRender) =
+        if old = new' then render
+        elif render = old then new'
+        elif render.Kind.IsMolecule_ then
+            let kind =
+                match render.Kind with
+                | TypeRefKind.Molecule_ molecule ->
+                    match molecule with
+                    | TypeRefMolecule.Tuple_ typeRefs ->
+                        typeRefs
+                        |> List.map (replace old new')
+                        |> TypeRefMolecule.Tuple_
+                        |> TypeRefKind.Molecule_
+                    | TypeRefMolecule.Union_ typeRefs ->
+                        typeRefs
+                        |> List.map (replace old new')
+                        |> TypeRefMolecule.Union_
+                        |> TypeRefKind.Molecule_
+                    | TypeRefMolecule.Function_ (parameters, returnType) ->
+                        TypeRefMolecule.Function_ (
+                            parameters
+                            |> List.map (replace old new'),
+                            replace old new' returnType
+                            )
+                        |> TypeRefKind.Molecule_
+                    | TypeRefMolecule.Prefix_ (prefix, args) ->
+                        TypeRefMolecule.Prefix_ (
+                            replace old new' prefix,
+                            args
+                            |> List.map (replace old new')
+                            )
+                        |> TypeRefKind.Molecule_
+                | atom -> atom
+            { render with Kind = kind }
+        else render
+    /// Fold over every atom in a TypeRefRender, descending through
+    /// molecules. Used for read-only inspection (e.g. collecting typars
+    /// referenced inside a resolved alias body so unused declared typars
+    /// can be dropped — F# rejects type abbreviations whose declared
+    /// typars aren't used in the body with FS0035).
+    let rec foldAtoms (f: 'State -> TypeRefAtom -> 'State) (state: 'State) (render: TypeRefRender) : 'State =
+        match render.Kind with
+        | TypeRefKind.Atom_ atom -> f state atom
+        | TypeRefKind.Molecule_ molecule ->
+            match molecule with
+            | TypeRefMolecule.Tuple_ typeRefs
+            | TypeRefMolecule.Union_ typeRefs ->
+                typeRefs |> List.fold (foldAtoms f) state
+            | TypeRefMolecule.Function_ (parameters, returnType) ->
+                let state = parameters |> List.fold (foldAtoms f) state
+                foldAtoms f state returnType
+            | TypeRefMolecule.Prefix_ (prefix, args) ->
+                let state = foldAtoms f state prefix
+                args |> List.fold (foldAtoms f) state
+
+    /// Walk every atom in a TypeRefRender (descending through molecules)
+    /// and apply a mapping function. Used to rewrite atoms inside composite
+    /// renders without exposing the private molecule constructors.
+    let rec mapAtoms (f: TypeRefAtom -> TypeRefAtom) (render: TypeRefRender) =
+        match render.Kind with
+        | TypeRefKind.Atom_ atom ->
+            { render with Kind = TypeRefKind.Atom_ (f atom) }
+        | TypeRefKind.Molecule_ molecule ->
+            let newMolecule =
+                match molecule with
+                | TypeRefMolecule.Tuple_ typeRefs ->
+                    typeRefs |> List.map (mapAtoms f) |> TypeRefMolecule.Tuple_
+                | TypeRefMolecule.Union_ typeRefs ->
+                    typeRefs |> List.map (mapAtoms f) |> TypeRefMolecule.Union_
+                | TypeRefMolecule.Function_ (parameters, returnType) ->
+                    TypeRefMolecule.Function_ (
+                        parameters |> List.map (mapAtoms f),
+                        mapAtoms f returnType)
+                | TypeRefMolecule.Prefix_ (prefix, args) ->
+                    TypeRefMolecule.Prefix_ (
+                        mapAtoms f prefix,
+                        args |> List.map (mapAtoms f))
+            { render with Kind = TypeRefKind.Molecule_ newMolecule }
+
+    /// Like `mapAtoms`, but when an atom rewrite produces an atom matching
+    /// `collapsesPrefix`, collapse any enclosing `Prefix(rewritten, args)`
+    /// molecule to just the rewritten atom (dropping args). Used when an
+    /// atom replacement (e.g. with a non-generic placeholder like `obj`)
+    /// would otherwise leave invalid `obj<X, Y>` self-applications.
+    let rec mapAtomsWithPrefixCollapse
+        (f: TypeRefAtom -> TypeRefAtom)
+        (collapsesPrefix: TypeRefAtom -> bool)
+        (render: TypeRefRender) =
+        let recur = mapAtomsWithPrefixCollapse f collapsesPrefix
+        match render.Kind with
+        | TypeRefKind.Atom_ atom ->
+            { render with Kind = TypeRefKind.Atom_ (f atom) }
+        | TypeRefKind.Molecule_ (TypeRefMolecule.Prefix_ (prefix, args)) ->
+            let newPrefix = recur prefix
+            match newPrefix.Kind with
+            | TypeRefKind.Atom_ atom when collapsesPrefix atom ->
+                { render with Kind = TypeRefKind.Atom_ atom }
+            | _ ->
+                let newArgs = args |> List.map recur
+                { render with
+                    Kind = TypeRefKind.Molecule_ (TypeRefMolecule.Prefix_ (newPrefix, newArgs)) }
+        | TypeRefKind.Molecule_ molecule ->
+            let newMolecule =
+                match molecule with
+                | TypeRefMolecule.Tuple_ typeRefs ->
+                    typeRefs |> List.map recur |> TypeRefMolecule.Tuple_
+                | TypeRefMolecule.Union_ typeRefs ->
+                    typeRefs |> List.map recur |> TypeRefMolecule.Union_
+                | TypeRefMolecule.Function_ (parameters, returnType) ->
+                    TypeRefMolecule.Function_ (
+                        parameters |> List.map recur,
+                        recur returnType)
+                | TypeRefMolecule.Prefix_ _ -> molecule
+            { render with Kind = TypeRefKind.Molecule_ newMolecule }
+    let orNullable (value: bool) (typeRefRender: TypeRefRender) = { typeRefRender with Nullable = value || typeRefRender.Nullable }
+    let setNullable (value: bool) (typeRefRender: TypeRefRender) = { typeRefRender with Nullable = value }
+    let nullable (typeRefRender: TypeRefRender) = setNullable true typeRefRender
+    let nonNullable (typeRefRender: TypeRefRender) = setNullable false typeRefRender
+
+    let substituteForHeritage (inScopeTyparNames: Set<string>) (render: TypeRefRender) : TypeRefRender =
+        let rec walk (render: TypeRefRender) : TypeRefRender =
+            match render.Kind with
+            | TypeRefKind.Atom_ atom ->
+                let newAtom =
+                    match atom with
+                    | TypeRefAtom.Intrinsic_ "_" ->
+                        TypeRefAtom.Intrinsic_ "obj"
+                    | TypeRefAtom.Intrinsic_ s when s.StartsWith("'") ->
+                        if Set.contains s inScopeTyparNames then
+                            atom
+                        else
+                            TypeRefAtom.Intrinsic_ "obj"
+                    | TypeRefAtom.Widget_ _ ->
+                        // Phase B used to emit typar refs as Widget atoms;
+                        // after the change to render typars as Intrinsic
+                        // atoms, this branch is a safety pass-through.
+                        atom
+                    | _ -> atom
+                { render with Kind = TypeRefKind.Atom_ newAtom }
+            | TypeRefKind.Molecule_ molecule ->
+                let newMolecule =
+                    match molecule with
+                    | TypeRefMolecule.Tuple_ typeRefs ->
+                        typeRefs
+                        |> List.map walk
+                        |> TypeRefMolecule.Tuple_
+                    | TypeRefMolecule.Union_ typeRefs ->
+                        typeRefs
+                        |> List.map walk
+                        |> TypeRefMolecule.Union_
+                    | TypeRefMolecule.Function_ (parameters, returnType) ->
+                        TypeRefMolecule.Function_ (
+                            parameters |> List.map walk,
+                            walk returnType
+                        )
+                    | TypeRefMolecule.Prefix_ (prefix, args) ->
+                        TypeRefMolecule.Prefix_ (
+                            walk prefix,
+                            args |> List.map walk
+                        )
+                { render with Kind = TypeRefKind.Molecule_ newMolecule }
+        walk render
+
+type RenderScopeStore = {
+    PathContext: TransientPath
+    /// Multi-valued: each ResolvedType accumulates the *set* of
+    /// `TransientTypePath`s it was reached from within this scope. The
+    /// downstream anchor pass emits one body per path so that all
+    /// reference sites in this scope's body resolve to existing types.
+    ///
+    /// Previously single-valued (`TransientTypePath`) with first-wins
+    /// TryAdd semantics. Empirically this dropped 15-of-16 paths in
+    /// shapes like `IncomingRequestCfPropertiesTLSClientAuthPlaceholder`'s
+    /// 16 `: ""` fields, and ~80% of paths in shapes like
+    /// `_Lit10`'s `BUBBLING_PHASE: 3 | AT_TARGET: 2 | CAPTURING_PHASE: 1`
+    /// where shared interned literals appear at multiple property
+    /// positions. See `docs/plans/multi-valued-typestore.md` for the
+    /// full forensic trace.
+    TypeStore: Dictionary<ResolvedType, HashSet<TransientTypePath>>
+}
+
+/// <summary>
+/// The strategy here is to force references being created with a contract that would
+/// recognise and register any transient type paths that are defined.
+/// </summary>
+module RenderScopeStore =
+    let create () = {
+            PathContext = TransientPath.create TransientTypePath.Anchored
+            TypeStore = Dictionary<ResolvedType, HashSet<TransientTypePath>>()
+        }
+    /// Add a path to the rt's path-set in this scope's TypeStore.
+    /// Creates the set on first encounter; subsequent calls accumulate.
+    let internal addTypeStorePath (scope: RenderScopeStore) (resolvedType: ResolvedType) (path: TransientTypePath) =
+        match scope.TypeStore.TryGetValue(resolvedType) with
+        | true, set ->
+            set.Add(path) |> ignore
+        | _ ->
+            let set = HashSet<TransientTypePath>()
+            set.Add(path) |> ignore
+            scope.TypeStore[resolvedType] <- set
+    let mapPathContext (fn: TransientPath -> TransientPath) (scope: RenderScopeStore) = { scope with PathContext = fn scope.PathContext }
+    let appendStringToPathContext scope (str: string) =
+        mapPathContext (
+            TransientPath.toTransientModulePath
+            >> TransientTypePath.createOnTransientModule str
+            >> TransientPath.create
+            ) scope
+    let appendNameToPathContext scope (name: Name<_>) =
+        Name.Case.valueOrSource name
+        |> appendStringToPathContext scope
+    module TypeRefAtom =
+        module Unsafe =
+            let createWidget (widget: WidgetBuilder<Type>) =
+                TypeRefAtom.Widget_(widget)
+            let createConcretePath (path: TypePath) =
+                TypeRefAtom.ConcretePath_(path)
+            let createTransientPath  (path: TransientTypePath) =
+                TypeRefAtom.TransientPath_(path)
+            let createIntrinsic (intrinsic: string) =
+                TypeRefAtom.Intrinsic_(intrinsic)
+            
+        let inline createWidget (_scope: RenderScopeStore) (_resolvedType: ResolvedType) (widget: WidgetBuilder<Type>) =
+            Unsafe.createWidget widget
+        let inline createConcretePath (_scope: RenderScopeStore) (_resolvedType: ResolvedType) (path: TypePath) =
+            Unsafe.createConcretePath path
+        let inline createIntrinsic (_scope: RenderScopeStore) (_resolvedType: ResolvedType) (intrinsic: string) =
+            Unsafe.createIntrinsic intrinsic
+        let createTransientPath (scope: RenderScopeStore) (resolvedType: ResolvedType) (path: TransientTypePath) =
+            // Path computation. Match input shape, produce a transient
+            // path rooted in this scope's PathContext.
+            //
+            // Special case for Literal rts: IGNORE the input path's leaf
+            // name and always compute fresh from current scope.PathContext
+            // (as if input were `TransientTypePath.Anchored`). Reason:
+            // the input on cache-hit is the cached Root.path baked in
+            // first-call's leaf. Combining baked-leaf with current
+            // PathContext produces a DOUBLED path like
+            // `<placeholder>.CertRevoked.CertPresented` (where
+            // CertPresented was the first-call's leaf). Baseline
+            // discarded the doubled path via first-wins TryAdd, so it
+            // didn't matter. With multi-valued accumulation we'd
+            // emit a body at the wrong nesting — producing
+            // `module rec CertRevoked { type CertPresented }` instead
+            // of `type CertRevoked = ...`. Stripping the cached leaf
+            // for Literals fixes the nesting and gives each property's
+            // reference a matching body.
+            // Multi-emission target: Literal rts only. These are leaves
+            // (single StringEnum case body) — cloning per path is cheap
+            // and produces no further recursion. Extending to TypeLiteral
+            // (tried) breaks: TypeLiteral bodies have member recursion
+            // that compounds per-path emission, and tipped agents into
+            // a 60s+ hang via DeepPartialInternal-style reach paths.
+            let computedPath =
+                match resolvedType, path with
+                | ResolvedType.Literal _, _ ->
+                    TransientPath.toTransientModulePath scope.PathContext
+                    |> TransientTypePath.graft
+                | _, TransientTypePath.Anchored ->
+                    TransientPath.toTransientModulePath scope.PathContext
+                    |> TransientTypePath.graft
+                | _, TransientTypePath.Moored(parent, name) ->
+                    parent
+                    |> TransientModulePath.graft (TransientPath.toTransientModulePath scope.PathContext)
+                    |> TransientTypePath.createOnTransientModuleWithName name
+                | _, TransientTypePath.AnchoredAndMoored name ->
+                    TransientPath.toTransientModulePath scope.PathContext
+                    |> TransientTypePath.createOnTransientModuleWithName name
+            match resolvedType with
+            | ResolvedType.Literal _ ->
+                addTypeStorePath scope resolvedType computedPath
+            | _ ->
+                if not (scope.TypeStore.ContainsKey resolvedType) then
+                    addTypeStorePath scope resolvedType computedPath
+            // Return: baseline used the OUTER `path` parameter. Preserved.
+            Unsafe.createTransientPath path
+        
+        type SRTPHelper =
+            static member inline Create(scope, resolvedType, widget) = createWidget scope resolvedType widget
+            static member inline Create(scope, resolvedType, path) = createConcretePath scope resolvedType path
+            static member inline Create(scope, resolvedType, path) = createTransientPath scope resolvedType path
+            static member inline Create(scope, resolvedType, _, widget) = createWidget scope resolvedType widget
+            static member inline Create(scope, resolvedType, _, path) = createConcretePath scope resolvedType path
+            static member inline Create(scope, resolvedType, _, path) = createTransientPath scope resolvedType path
+            static member inline Create(scope, resolvedType, intrinsic) = createIntrinsic scope resolvedType intrinsic
+            static member inline Create(scope, resolvedType, _, intrinsic) = createIntrinsic scope resolvedType intrinsic
+        
+    let tryAdd (resolvedType: ResolvedType) (transientTypePath: TransientTypePath) (scope: RenderScopeStore) =
+        TypeRefAtom.createTransientPath scope resolvedType transientTypePath |> ignore
+            
+    module TypeRefMolecule =
+        module Unsafe =
+            let createTuple (typeRefs: TypeRefRender list) =
+                TypeRefMolecule.Tuple_(typeRefs)
+            let createUnion (typeRefs: TypeRefRender list) =
+                TypeRefMolecule.Union_(typeRefs)
+            let createFunction (parameters: TypeRefRender list) (returnType: TypeRefRender) =
+                TypeRefMolecule.Function_(parameters, returnType)
+            let createPrefix (prefix: TypeRefRender) (args: TypeRefRender list) =
+                TypeRefMolecule.Prefix_(prefix, args)
+        
+        let inline createTuple (_scope: RenderScopeStore) (typeRefs: TypeRefRender list) =
+            Unsafe.createTuple typeRefs
+        let inline createUnion (_scope: RenderScopeStore) (typeRefs: TypeRefRender list) =
+            Unsafe.createUnion typeRefs
+        let inline createFunction (_scope: RenderScopeStore) (parameters: TypeRefRender list) (returnType: TypeRefRender) =
+            Unsafe.createFunction parameters returnType
+        let inline createPrefix (_scope: RenderScopeStore) (prefix: TypeRefRender) (args: TypeRefRender list) =
+            Unsafe.createPrefix prefix args
+        
+        type SRTPHelper =
+            static member inline Create(scope, _resolvedType: ResolvedType, typeRefs) = createTuple scope (Array.toList typeRefs)
+            static member inline Create(scope, _resolvedType: ResolvedType, typeRefs) = createUnion scope typeRefs
+            static member inline Create(scope, _resolvedType: ResolvedType, (parameters, returnType)) = createFunction scope parameters returnType
+            static member inline Create(scope, _resolvedType: ResolvedType, (prefix, args)) = createPrefix scope prefix args
+            static member inline Create(scope, _resolvedType: ResolvedType, _, typeRefs) = createTuple scope (Array.toList typeRefs)
+            static member inline Create(scope, _resolvedType: ResolvedType, _, typeRefs) = createUnion scope typeRefs
+            static member inline Create(scope, _resolvedType: ResolvedType, _, (parameters, returnType)) = createFunction scope parameters returnType
+            static member inline Create(scope, _resolvedType: ResolvedType, _, (prefix, args)) = createPrefix scope prefix args
+            
+    
+    module TypeRef =
+        module Unsafe =
+            let createAtom (atom: TypeRefAtom) =
+                TypeRefKind.Atom_(atom)
+            let createMolecule (molecule: TypeRefMolecule) =
+                TypeRefKind.Molecule_(molecule)
+        type SRTPHelper =
+            static member inline Create(_scope: RenderScopeStore, _resolvedType: ResolvedType, atom) = Unsafe.createAtom atom
+            static member inline Create(_scope: RenderScopeStore, _resolvedType: ResolvedType, molecule) = Unsafe.createMolecule molecule
+            static member inline Create(_scope: RenderScopeStore, _resolvedType: ResolvedType, typeRef: TypeRefKind) = typeRef
+            static member inline Create(_scope: RenderScopeStore, _resolvedType: ResolvedType, _, atom) = Unsafe.createAtom atom
+            static member inline Create(_scope: RenderScopeStore, _resolvedType: ResolvedType, _, molecule) = Unsafe.createMolecule molecule
+            static member inline Create(_scope: RenderScopeStore, _resolvedType: ResolvedType, _, typeRef: TypeRefKind) = typeRef
+        let inline createAtom (scope: RenderScopeStore) (resolvedType: ResolvedType) nullable value =
+            ((^T or TypeRefAtom.SRTPHelper):(static member Create: RenderScopeStore * ResolvedType * (bool * ^T) -> TypeRefAtom) scope, resolvedType, (nullable, value))
+        let inline create<
+            ^T, ^U when
+                (^T or TypeRefAtom.SRTPHelper or TypeRefMolecule.SRTPHelper or SRTPHelper):(static member Create: RenderScopeStore * ResolvedType * ^T -> ^U)
+                and (^U or SRTPHelper):(static member Create: RenderScopeStore * ResolvedType * ^U -> TypeRefKind
+            )
+        > (scope: RenderScopeStore) (resolvedType: ResolvedType) (widgetConcreteTransientAtomOrMolecule: ^T) =
+            let ir = ((^T or TypeRefAtom.SRTPHelper or TypeRefMolecule.SRTPHelper or SRTPHelper):(static member Create: RenderScopeStore * ResolvedType * ^T -> ^U) scope, resolvedType, widgetConcreteTransientAtomOrMolecule)
+            ((^U or SRTPHelper):(static member Create: RenderScopeStore * ResolvedType * ^U -> TypeRefKind) scope, resolvedType, ir)
+            
+    module TypeRefRender =
+        
+        module Unsafe =
+            let createFromKind (nullable: bool) (typeRef: TypeRefKind) =
+                { Kind = typeRef; Nullable = nullable }
+                
+        let createKind (_scope: RenderScopeStore) (_resolvedType: ResolvedType) (nullable: bool) (typeRef: TypeRefKind) =
+            Unsafe.createFromKind nullable typeRef
+            
+        type SRTPHelper =
+            static member inline Create(scope: RenderScopeStore, resolvedType: ResolvedType, nullable: bool, typeRef: TypeRefKind) = createKind scope resolvedType nullable typeRef
+            static member inline Create(_scope: RenderScopeStore, _resolvedType: ResolvedType, nullable: bool, typeRef: TypeRefRender) = { typeRef with Nullable = nullable }
+        
+        /// <summary>
+        /// <code>
+        /// let inline srtpFunc value =
+        ///     RenderScopeStore.TypeRefRender.create scope resolvedType nullable value
+        /// 
+        /// // Tuple type
+        /// typeRefs : TypeRefRender array
+        /// |> srtpFunc
+        ///
+        /// 
+        ///  // Union type
+        /// typeRefs : TypeRefRender list
+        /// |> srtpFunc
+        ///
+        /// 
+        ///  // Function type
+        /// (parameters, returnType) : (TypeRefRender list * TypeRefRender)
+        /// |> srtpFunc
+        ///
+        /// 
+        ///  // Prefix type
+        /// (prefix, typeArgs) : (TypeRefRender * TypeRefRender list)
+        /// |> srtpFunc
+        ///
+        /// 
+        ///  // Transient path ref
+        /// path : TransientTypePath
+        /// |> srtpFunc
+        ///
+        /// 
+        ///  // Concrete path ref
+        /// path: TypePath
+        /// |> srtpFunc
+        ///
+        /// 
+        ///  // Widget
+        /// widget: WidgetBuilder&lt;Type>
+        /// |> srtpFunc
+        ///
+        /// 
+        ///  // an atom
+        /// atom: TypeRefAtom
+        /// |> srtpFunc
+        /// 
+        ///
+        ///  // a molecule
+        /// molecule: TypeRefMolecule
+        /// |> srtpFunc
+        /// 
+        ///
+        ///  // a type ref
+        /// typeRef: TypeRef
+        /// |> srtpFunc
+        /// </code>
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <param name="resolvedType"></param>
+        /// <param name="nullable"></param>
+        /// <param name="data">
+        /// </param>
+        let inline create (scope: RenderScopeStore) (resolvedType: ResolvedType) (nullable: bool) (data: ^T) =
+            let irAtomMoleculeMaybe = (
+                (^T or TypeRefAtom.SRTPHelper or TypeRefMolecule.SRTPHelper or TypeRef.SRTPHelper or SRTPHelper):(
+                static member Create: RenderScopeStore * ResolvedType * bool * ^T -> ^U
+                ) scope, resolvedType, nullable, data)
+            let irRefMaybe = (
+                (^U or TypeRef.SRTPHelper or SRTPHelper):(
+                static member Create: RenderScopeStore * ResolvedType * bool * ^U -> ^V
+                ) scope, resolvedType, nullable, irAtomMoleculeMaybe)
+            (
+                (^V or SRTPHelper):(
+                static member Create: RenderScopeStore * ResolvedType * bool * ^V -> TypeRefRender
+            ) scope, resolvedType, nullable, irRefMaybe)
+
+type RenderScope<'RootPathType, 'RenderType> = {
+    Type: ResolvedType
+    Root: 'RootPathType
+    TypeRef: TypeRefRender
+    // we calculate the render lazily
+    Render: 'RenderType
+    TransientChildren: RenderScopeStore voption
+}
+
+[<Struct>]
+type RenderTraits =
+    | Optional
+    | ParamArray
+    | Static
+    | Readable
+    | Writable
+    | Literal
+    | JSGetter
+    | JSSetter
+    | JSIndexer
+    | JSConstructor
+    | JSCallSignature
+    | EmitSelf
+    | Inline
+    | StringBuilder
+
+    
+
+[<Struct>]
+type RenderMetadata = {
+    Path: Path
+    Original: Path
+    /// Provenance for the declaration this render came from. `ValueNone` is
+    /// reserved for synthetic anonymous renders (parameters, inline call
+    /// signatures, etc.) that inherit provenance from a parent; named
+    /// exports always populate this.
+    Source: ArenaInterner.Source voption
+    FullyQualifiedName: ArenaInterner.QualifiedNamePart list voption
+}
+
+type TypeParameterRender<'RenderType, 'TyparName> = {
+    Metadata: RenderMetadata
+    Name: 'TyparName
+    Constraint: 'RenderType voption
+    Default: 'RenderType voption
+    Documentation: TsComment list
+}
+
+type TypedNameRender<'RenderType, 'MemberName, 'TyparName> = {
+    Metadata: RenderMetadata
+    Name: 'MemberName
+    Type: 'RenderType
+    Traits: RenderTraits Set
+    TypeParameters: TypeParameterRender<'RenderType, 'TyparName> list
+    Documentation: TsComment list
+}
+
+type FunctionLikeSignature<'RenderType, 'MemberName, 'TyparName> = {
+    Metadata: RenderMetadata
+    Parameters: TypedNameRender<'RenderType, 'MemberName, 'TyparName> list
+    ReturnType: 'RenderType
+    Traits: RenderTraits Set
+    Documentation: TsComment list
+    TypeParameters: TypeParameterRender<'RenderType, 'TyparName> list
+}
+
+type FunctionLikeRender<'RenderType, 'MemberName, 'TyparName> = {
+    Metadata: RenderMetadata
+    Name: 'MemberName
+    Signatures: FunctionLikeSignature<'RenderType, 'MemberName, 'TyparName> list
+    Traits: RenderTraits Set
+    TypeParameters: TypeParameterRender<'RenderType, 'TyparName> list
+    Documentation: TsComment list
+}
+
+type LiteralCaseRender<'Value, 'TypeName> = {
+    Metadata: RenderMetadata
+    Name: 'TypeName
+    Value: 'Value
+    Documentation: TsComment list
+}
+
+type LiteralUnionRender<'Value, 'TypeName> = {
+    Metadata: RenderMetadata
+    Name: 'TypeName
+    Cases: LiteralCaseRender<'Value, 'TypeName> list
+    Documentation: TsComment list
+}
+
+type TypeLikeRender<'RenderType, 'TypeName, 'MemberName, 'TyparName> = {
+    Metadata: RenderMetadata
+    Name: 'TypeName
+    TypeParameters: TypeParameterRender<'RenderType, 'TyparName> list
+    /// TS `extends` targets. For interfaces these are multi-interface
+    /// extension (F# accepts multiple `inherit X` in interface bodies).
+    /// For classes this is at most one entry (the class base) — F#
+    /// allows only one `inherit X()` per class.
+    Inheritance: 'RenderType list
+    /// TS `implements` targets (class-only). Emitted as
+    /// `interface X with` blocks inside the class body — F# rejects
+    /// `inherit X()` when X is an interface (FS0946). Empty for
+    /// interfaces and synthetic type literals.
+    Implements: 'RenderType list
+    Members: TypedNameRender<'RenderType, 'MemberName, 'TyparName> list
+    Functions: FunctionLikeRender<'RenderType, 'MemberName, 'TyparName> list
+    Constructors: TypedNameRender<'RenderType, 'MemberName, 'TyparName> list list
+    Documentation: TsComment list
+    // True when the source declaration was a TS `class` (vs. interface,
+    // type literal, intersection). Drives dispatch to `renderAbstractClass`
+    // (vs. `renderInterface`) and `[<AbstractClass>]`/`[<AllowNullLiteral>]`
+    // attribute emission. F# rejects `inherit Y` inside an `interface ... end`
+    // body when Y is a class; the abstract-class form (`type X private () =`
+    // with `inherit Y()`) lets the same shape participate in class inheritance.
+    IsClass: bool
+}
+
+type TypeAliasRender<'RenderType, 'TypeName, 'MemberName, 'TyparName> =
+    | Alias of TypeAliasRenderRef<'RenderType, 'TypeName, 'TyparName>
+    | TypeDefn of TypeLikeRender<'RenderType, 'TypeName, 'MemberName, 'TyparName>
+    | StringUnion of LiteralUnionRender<TsLiteral, 'TypeName>
+    | EnumUnion of LiteralUnionRender<int, 'TypeName>
+    | Function of FunctionLikeRender<'RenderType, 'MemberName, 'TyparName>
+
+and TypeAliasRenderRef<'RenderType, 'TypeName, 'TyparName> = {
+    Metadata: RenderMetadata
+    Name: 'TypeName
+    TypeParameters: TypeParameterRender<'RenderType, 'TyparName> list
+    Documentation: TsComment list
+    Type: 'RenderType
+}
+
+type TypeRender<'RenderType, 'TypeName, 'MemberName, 'TyparName> =
+    | TypeDefn of TypeLikeRender<'RenderType, 'TypeName, 'MemberName, 'TyparName>
+    | TypeAlias of TypeAliasRender<'RenderType, 'TypeName, 'MemberName, 'TyparName>
+    | StringUnion of LiteralUnionRender<TsLiteral, 'TypeName>
+    | EnumUnion of LiteralUnionRender<int, 'TypeName>
+    | Function of FunctionLikeRender<'RenderType, 'MemberName, 'TyparName>
+    | Variable of TypedNameRender<'RenderType, 'MemberName, 'TyparName>
+
+type MemberRender<'RenderType, 'MemberName, 'TyparName> =
+    | Property of TypedNameRender<'RenderType, 'MemberName, 'TyparName>
+    | Method of FunctionLikeRender<'RenderType, 'MemberName, 'TyparName>
+
+type RenderKind<'RenderType, 'TypeName, 'MemberName, 'TyparName> = 'RenderType * Lazy<TypeRender<'RenderType, 'TypeName, 'MemberName, 'TyparName>>
+
+module Transient =
+    type TypeName = Name<Case.pascal> voption
+    type MemberName = Name<Case.camel>
+    type TyparName = Name<Case.typar>
+    type TypeParameterRender = TypeParameterRender<TypeRefRender, TyparName>
+    type TypedNameRender = TypedNameRender<TypeRefRender, MemberName, TyparName>
+    type FunctionLikeSignature = FunctionLikeSignature<TypeRefRender, MemberName, TyparName>
+    type FunctionLikeRender = FunctionLikeRender<TypeRefRender, MemberName, TyparName>
+    type LiteralCaseRender<'T> = LiteralCaseRender<'T, TypeName>
+    type LiteralUnionRender<'T> = LiteralUnionRender<'T, TypeName>
+    type TypeLikeRender = TypeLikeRender<TypeRefRender, TypeName, MemberName, TyparName>
+    type TypeAliasRender = TypeAliasRender<TypeRefRender, TypeName, MemberName, TyparName>
+    type TypeAliasRenderRef = TypeAliasRenderRef<TypeRefRender, TypeName, TyparName>
+    type TypeRender = TypeRender<TypeRefRender, TypeName, MemberName, TyparName>
+    type MemberRender = MemberRender<TypeRefRender, MemberName, TyparName>
+    type Render = RenderKind<TypeRefRender, TypeName, MemberName, TyparName>
+    type RenderScope = RenderScope<TransientTypePath, Render>
+    type RenderScopeFunc = ResolvedType -> RenderScope voption
+
+module Concrete =
+    type TypeName = Name<Case.pascal>
+    type MemberName = Name<Case.camel>
+    type TyparName = Name<Case.typar>
+    type TypeParameterRender = TypeParameterRender<TypeRefRender, TyparName>
+    type TypedNameRender = TypedNameRender<TypeRefRender, MemberName, TyparName>
+    type FunctionLikeSignature = FunctionLikeSignature<TypeRefRender, MemberName, TyparName>
+    type FunctionLikeRender = FunctionLikeRender<TypeRefRender, MemberName, TyparName>
+    type LiteralCaseRender<'T> = LiteralCaseRender<'T, TypeName>
+    type LiteralUnionRender<'T> = LiteralUnionRender<'T, TypeName>
+    type TypeLikeRender = TypeLikeRender<TypeRefRender, TypeName, MemberName, TyparName>
+    type TypeAliasRender = TypeAliasRender<TypeRefRender, TypeName, MemberName, TyparName>
+    type TypeAliasRenderRef = TypeAliasRenderRef<TypeRefRender, TypeName, TyparName>
+    type TypeRender = TypeRender<TypeRefRender, TypeName, MemberName, TyparName>
+    type MemberRender = MemberRender<TypeRefRender, MemberName, TyparName>
+    type Render = RenderKind<TypeRefRender, TypeName, MemberName, TyparName>
+
+type Render =
+    | RefOnly of TypeRefRender
+    | Concrete of Concrete.Render
+    | Transient of Transient.Render
+
+type RenderScope = RenderScope<TypeLikePath voption, Render>
+
+module Render =
+    type SRTPHelper =
+        static member Create(typeRef: TypeRefRender, render) = Render.Concrete(typeRef, render)
+        static member Create(typeRef: TypeRefRender, render) = Render.Transient(typeRef, render)
+        static member Create(typeRef: TypeRefRender, renderer) = Render.Concrete(typeRef, lazy renderer())
+        static member Create(typeRef: TypeRefRender, renderer) = Render.Transient(typeRef, lazy renderer())
+        static member Create(typeRef: TypeRefRender, render) = Render.Concrete(typeRef, lazy render)
+        static member Create(typeRef: TypeRefRender, render) = Render.Transient(typeRef, lazy render)
+        static member Create(typeRef: TypeRefRender) = Render.RefOnly(typeRef)
+    let inline createRefOnly (typeRef: TypeRefRender) = SRTPHelper.Create(typeRef)
+    let inline createFromConcreteLazy (typeRef: TypeRefRender) (render: Lazy<Concrete.TypeRender>) = SRTPHelper.Create(typeRef, render)
+    let inline createFromTransientLazy (typeRef: TypeRefRender) (render: Lazy<Transient.TypeRender>) = SRTPHelper.Create(typeRef, render)
+    let inline createFromConcrete (typeRef: TypeRefRender) (render: Concrete.TypeRender) = SRTPHelper.Create(typeRef, render)
+    let inline createFromTransient (typeRef: TypeRefRender) (render: Transient.TypeRender) = SRTPHelper.Create(typeRef, render)
+    let inline create (typeRef: TypeRefRender) renderOrRenderer =
+        ((^T or SRTPHelper):(static member Create: TypeRefRender * ^T -> Render) typeRef, renderOrRenderer)
+
+module RenderScope =
+    let private dummyStore = RenderScopeStore.create()
+    let createRootless resolvedType (typeRef: TypeRefRender): RenderScope =
+        {
+            Type = resolvedType
+            Root = ValueNone
+            TypeRef = typeRef
+            Render = Render.RefOnly typeRef
+            TransientChildren = ValueNone
+        }
+
+module RenderMetadata =
+    let withSourceOption (source: ArenaInterner.Source option) metadata =
+        { metadata with RenderMetadata.Source = ValueOption.ofOption source }
+    let withSource (source: ArenaInterner.Source) metadata =
+        { metadata with RenderMetadata.Source = ValueSome source }
+    let withFullyQualifiedName (fullyQualifiedName: ArenaInterner.QualifiedNamePart list) metadata =
+        { metadata with RenderMetadata.FullyQualifiedName = ValueSome fullyQualifiedName }
+    let withFullyQualifiedNameStrings (fullyQualifiedName: string list) (metadata: RenderMetadata) =
+        withFullyQualifiedName (fullyQualifiedName |> List.map ArenaInterner.QualifiedNamePart.Normal) metadata
+    let create (path: Path) (original: Path) (source: ArenaInterner.Source voption) (fullyQualifiedName: ArenaInterner.QualifiedNamePart list voption) =
+        {
+            Path = path
+            Original = original
+            Source = source
+            FullyQualifiedName = fullyQualifiedName
+        }
+    let createWithPath (path: Path) =
+        create path path ValueNone ValueNone
+    let createWithOriginalPath (original: Path) (path: Path) =
+        create path original ValueNone ValueNone
+    let createWithTransientPath = Path.createTransient >> createWithPath
+    let createWithAnchorPath = Path.createAnchor >> createWithPath
+    let createWithOriginalTransientPath original = Path.createTransient >> createWithOriginalPath (Path.createTransient original)
+    let createWithOriginalAnchorPath original = Path.createAnchor >> createWithOriginalPath (Path.createAnchor original)
+    /// Build metadata for a named-export declaration. Carries the export's
+    /// `Source` and `FullyQualifiedName` through to consumers. Lib.es-sourced
+    /// declarations (TS standard library files) skip the FullyQualifiedName
+    /// population — those names aren't useful for Import attributes and the
+    /// path-prune interceptor will drop their Typescript-rooted parents anyway.
+    let inline createWithPathFromExport<^T
+        when ^T: (member FullyQualifiedName: ArenaInterner.QualifiedNamePart list)
+        and ^T: (member Source: ArenaInterner.Source)
+        > (path: Path) (export: ^T) =
+        match export.Source with
+        | ArenaInterner.Source.LibEs _ ->
+            createWithPath path
+            |> withFullyQualifiedName export.FullyQualifiedName
+        | source ->
+            create path path (ValueSome source) (ValueSome export.FullyQualifiedName)
+            

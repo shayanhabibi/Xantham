@@ -1,0 +1,174 @@
+﻿namespace Xantham.Decoder
+open Thoth.Json.Net
+open Xantham
+open System.IO
+
+/// <summary>
+/// Diagnostics for the Decoder.
+/// </summary>
+module private Diagnostics =
+    open Schema
+    let healthCheck (encodedResult: EncodedResult) =
+        let typeMap = encodedResult.Types
+        let exportStore = encodedResult.ExportedDeclarations
+        let trueTypeKeys =
+            typeMap
+            |> Map.toArray
+            |> Array.Parallel.collect (fun (_, value) -> Utils.getKeys value)
+        let trueTypeMissingKeys =
+            typeMap.Keys
+            |> Set
+            |> Set.difference (Set trueTypeKeys)
+        let foundKeysInNodeStore =
+            trueTypeMissingKeys
+            |> Set.intersect (Set exportStore.Keys)
+        let unemittedKeys =
+            Set.difference
+                trueTypeMissingKeys
+                foundKeysInNodeStore
+            |> Set.toList
+            |> List.sort
+        let trueTypeMissingKeys = trueTypeMissingKeys |> Set.toList |> List.sort
+        let foundKeysInNodeStore = foundKeysInNodeStore |> Set.toList |> List.sort
+        
+        {| MissingTypeKeys = trueTypeMissingKeys; FoundKeysInNodeStore = foundKeysInNodeStore; UnemittedKeys = unemittedKeys |}
+    let inline isHealthy (healthCheck: {| FoundKeysInNodeStore: TypeKey list; MissingTypeKeys: TypeKey list; UnemittedKeys: TypeKey list |}) =
+        healthCheck.UnemittedKeys |> List.isEmpty
+    let printHealthCheck (healthCheck: {| FoundKeysInNodeStore: TypeKey list; MissingTypeKeys: TypeKey list; UnemittedKeys: TypeKey list |}) =
+        let missingTypeKeys = {| Keys = healthCheck.MissingTypeKeys; Length = healthCheck.MissingTypeKeys.Length |}
+        let foundKeysInNodeStore = {| Keys = healthCheck.FoundKeysInNodeStore; Length = healthCheck.FoundKeysInNodeStore.Length |}
+        if healthCheck.UnemittedKeys |> List.isEmpty then
+            [
+                "✔️ All TypeKeys are accounted for."
+                if missingTypeKeys.Length > 0 then
+                    $"   %i{missingTypeKeys.Length} Type Keys are found in the NodeStore: %A{missingTypeKeys.Keys}"
+                    ""
+                    "   Generation using this type-set should still be safe."
+            ]
+            |> String.concat "\n"
+        else
+            let unemittedKeys = {| Keys = healthCheck.UnemittedKeys; Length = healthCheck.UnemittedKeys.Length |}
+            [
+                $"❌ Missing %i{unemittedKeys.Length} TypeKeys: %A{unemittedKeys.Keys}"
+                $"   %i{missingTypeKeys.Length} Type Keys were missing from the TypeStore: %A{missingTypeKeys.Keys}"
+                $"   %i{foundKeysInNodeStore.Length} Type Keys are found in the NodeStore: %A{foundKeysInNodeStore.Keys}"
+                ""
+                "   Generation using this type-set may cause errors."
+            ]
+            |> String.concat "\n"
+        |> System.Console.WriteLine
+        
+
+module Decoder =
+    /// <summary>
+    /// Settings for the Decoder.
+    /// </summary>
+    /// <category index="6">Runtime</category>
+    type Settings = {
+        /// <summary>
+        /// The path to the <c>.json</c> file to decode.
+        /// </summary>
+        InputFile: string
+        /// <summary>
+        /// Whether to perform a health check on the decoded data and determine
+        /// if there are any missing or dangling TypeKeys. Defaults to <c>true</c> in debug builds.
+        /// </summary>
+        PerformHealthCheck: bool
+        /// <summary>
+        /// Whether to compress the output TypeMap before passing to consumers.
+        /// Defaults to <c>true</c>.
+        /// </summary>
+        Compress: bool
+        /// <summary>
+        /// Whether to sanitize the typemap by replacing cyclical keys with obj.
+        /// Defaults to <c>true</c>.
+        /// </summary>
+        Sanitize: bool
+    }
+    type Settings with
+        static member Create(inputFile: string, ?performHealthCheck: bool, ?compress: bool, ?sanitize: bool) =
+            let performHealthCheck =
+                defaultArg
+                    performHealthCheck
+                    #if DEBUG
+                    true
+                    #else
+                    false
+                    #endif
+            let compress = defaultArg compress true
+            let sanitize = defaultArg sanitize true
+            {
+                InputFile = inputFile
+                PerformHealthCheck = performHealthCheck
+                Compress = compress
+                Sanitize = sanitize
+            }
+    let private getExportMetadata = function
+        | TsExportDeclaration.Variable { Metadata = metadata } 
+        | TsExportDeclaration.Interface { Metadata = metadata } 
+        | TsExportDeclaration.TypeAlias { Metadata = metadata } 
+        | TsExportDeclaration.Class { Metadata = metadata } 
+        | TsExportDeclaration.Enum { Metadata = metadata } 
+        | TsExportDeclaration.Module { Metadata = metadata } -> metadata
+        | TsExportDeclaration.Function funs -> funs.ValueOrHead.Metadata
+    let private getSource = getExportMetadata >> _.Source
+    /// <summary>
+    /// Decode a xantham produced <c>.json</c> file with the settings provided.
+    /// </summary>
+    let readWithSettings (settings: Settings) =
+        File.ReadAllText(settings.InputFile)
+        |> Decode.fromString Schema.EncodedResult.decode
+        // |> Decode.Auto.fromString<Schema.EncodedResult>
+        |> Result.map (
+            if settings.Compress then Utils.compress else id
+            >> if settings.Sanitize then Utils.sanitize else id
+            >> fun result ->
+                if settings.PerformHealthCheck then Diagnostics.healthCheck result |> Diagnostics.printHealthCheck
+                {
+                    TypeMap = result.Types
+                    ExportTypeMap = result.ExportedDeclarations
+                    ExportMap =
+                        result.ExportedDeclarations
+                        |> Seq.collect (fun kv ->
+                            match getSource kv.Value with
+                            | Source.LibEs _ -> seq { ValueNone, kv.Key }
+                            | Source.PackageInternal package -> seq { ValueSome package, kv.Key }
+                            | Source.Package { Aliases = aliases } ->
+                                aliases
+                                |> Seq.map (fun { SubModule = subModule } -> ValueSome subModule, kv.Key)
+                            // `UnknownDeclared` is the encoder's fallback (PR #3, commit
+                            // e97bd70) for declarations that don't classify into a known
+                            // package or submodule. Treat as orphaned for ExportMap
+                            // purposes — same shape as `LibEs` (no submodule key). This
+                            // is round-trip codec completeness, not a downstream-semantic
+                            // claim: the case carries no package attribution, so it
+                            // cannot legitimately key into the package-grouped ExportMap.
+                            // Filed back upstream alongside the encoder-side codec fix
+                            // in src/Xantham.Common/Common.Types.fs (PR pending review).
+                            | Source.UnknownDeclared _ -> seq { ValueNone, kv.Key }
+                            )
+                        |> Seq.groupBy fst
+                        |> Seq.map (fun (key, values) -> key, values |> Seq.map snd |> Set.ofSeq)
+                        |> Map.ofSeq
+                    SourceDependencyMap =
+                        result.PackageMap.SubModuleRelations
+                        |> List.groupBy _.Dependent
+                        |> Map.ofList
+                    SourceDependeeMap =
+                        result.PackageMap.SubModuleRelations
+                        |> List.groupBy _.Dependency
+                        |> Map.ofList
+                    SubModuleMap = result.PackageMap.SubModules
+                    PackageMap = result.PackageMap.Packages
+                    TopLevelExports = result.TopLevelExports |> List.distinct
+                    LibEsExports = result.LibEsExports
+                }
+           )
+    /// <summary>
+    /// Decode a xantham produced <c>.json</c> file.
+    /// This is a proxy function that creates a <c>Settings</c> object using the default values and
+    /// the supplied <c>fileName</c> which is then passed to <c>readWithSettings</c>.
+    /// </summary>
+    let read fileName =
+        Settings.Create(fileName)
+        |> readWithSettings

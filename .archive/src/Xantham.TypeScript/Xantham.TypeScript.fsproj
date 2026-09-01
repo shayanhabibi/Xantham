@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <DefineConstants>FABLE_COMPILER</DefineConstants>
+        <RootNamespace>Xantham.TypeScript</RootNamespace>
+    </PropertyGroup>
+
+
+    <ItemGroup>
+        <Compile Include="TypeScript.fs" />
+        <Compile Include="Extensions.fs" />
+        <Compile Include="XanTagKind.fs" />
+        <Compile Include="Types.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Fable.Core" Version="5.0.0" />
+      <PackageReference Include="Fable.FSharp.Logf" Version="1.2.2" />
+      <PackageReference Include="Fable.Node" Version="1.6.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="..\..\..\..\.nuget\packages\fable.core\5.0.0\contentFiles\any\netstandard2.0\CHANGELOG.md" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Xantham.Fable.Utils\Xantham.Fable.Utils.fsproj" />
+    </ItemGroup>
+
+</Project>
+

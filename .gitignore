@@ -1,4 +1,3 @@
-
 bin/
 obj/
 
@@ -14,19 +13,23 @@ riderModule.iml
 /fable_modules/
 node_modules/
 
+# Decoder-era ephemeral run artifacts (per-run temp.d.ts written into .xantham/run_<id>/).
+.xantham/
+
 # Tests
-!tests/Xantham.Fable.Tests/TypeFiles/node_modules/
 tests/**/output.json
 tests/**/package-lock.json
 tests/fixtures/**/*
-tests/Xantham.EndToEnd/verify/**.*
-tests/Xantham.EndToEnd/output/**.*
-tests/Xantham.EndToEnd/fixtures/**/*
 
-# Decoder test ephemeral run artifacts (per-run temp.d.ts files written
-# into .xantham/run_<id>/temp.d.ts during decoder fixture encoding).
-.xantham/
 # Vendored microsoft/TypeScript AST generator sources, fetched by
 # `dotnet fsi tools/generate-wire.fsx sync tsc-ast` and verified against the per-file
 # digests in tools/tsc-ast/upstream.lock.json. The lock is committed; the tree is not.
 tools/tsc-ast/upstream/
+
+# Obsolete pre-Wire work parked under .archive/ (see .archive/README.md). The sources
+# are committed so nothing is lost; the build artifacts and scratch piles are not.
+.archive/scratch/
+.archive/tests/Xantham.EndToEnd/fixtures/
+.archive/tests/Xantham.EndToEnd/output/
+.archive/tests/Xantham.EndToEnd/verify/
+*.fs.js.map

@@ -1,24 +1,20 @@
 <Solution>
+<!--    Everything under .archive/ is obsolete pre-Wire work and is deliberately    -->
+<!--    absent from this solution. See .archive/README.md.                          -->
   <Folder Name="/ci/">
     <File Path=".github/workflows/docs.yml" />
     <File Path=".github/workflows/push_master.yml" />
-    <File Path=".github/workflows/regressions_test.yml" />
     <File Path="build.fsx" />
-    <Project Path="Build.fsproj" />
   </Folder>
   <Folder Name="/ai/">
     <File Path="AGENTS.md" />
   </Folder>
-  <Folder Name="/ai/rules/">
-    <File Path=".claude/rules/fable.core.md" />
-    <File Path=".claude/rules/fable.md" />
-    <File Path=".claude/rules/decoder.md" />
-    <File Path=".claude/rules/common.types.md" />
-    <File Path=".claude/rules/generator.md" />
-  </Folder>
   <Folder Name="/ai/skills/" />
   <Folder Name="/ai/skills/spec-tests/">
     <File Path=".claude/skills/spec-tests/SKILL.md" />
+  </Folder>
+  <Folder Name="/ai/skills/xml-documentation/">
+    <File Path=".claude/skills/xml-documentation/SKILL.md" />
   </Folder>
 <!--          DOCUMENTATION         -->
   <Folder Name="/docs/">
@@ -28,32 +24,11 @@
     <File Path="docs/_head.html" />
   </Folder>
   <Folder Name="/docs/plans/">
-    <File Path="docs/plans/generator-extensibility-refactor.md" />
-    <File Path="docs/plans/multi-valued-typestore.md" />
-    <File Path="docs/plans/post-pr1-progress.md" />
-    <File Path="docs/plans/post-pr2-progress.md" />
-    <File Path="docs/plans/post-pr3-progress.md" />
-    <File Path="docs/plans/post-pr3-re-engineering.md" />
-    <File Path="docs/plans/prevent-silent-drops-progress.md" />
-    <File Path="docs/plans/tsgo-fsharp-client.md" />
-    <File Path="docs/plans/tsgo-native-route.md" />
     <File Path="docs/plans/tsgo-protocol.md" />
+    <File Path="docs/plans/wire-remaining-work.md" />
   </Folder>
-  <Folder Name="/docs/Overview/">
-    <File Path="docs/Overview/litmus-tests.md" />
-    <File Path="docs/Overview/overview.md" />
-    <File Path="docs/Overview/usage.md" />
-  </Folder>
-  <Folder Name="/docs/Documentation/" />
   <Folder Name="/docs/content/">
     <File Path="docs/content/fsdocs-theme.css" />
-  </Folder>
-  <Folder Name="/docs/Xantham.Generator/">
-    <File Path="docs/Xantham.Generator/generator-context.md" />
-    <File Path="docs/Xantham.Generator/index.md" />
-    <File Path="docs/Xantham.Generator/paths.md" />
-    <File Path="docs/Xantham.Generator/pipeline.fsx" />
-    <File Path="docs/Xantham.Generator/typeref-render.md" />
   </Folder>
   <Folder Name="/docs/content/assets/">
     <File Path="docs/content/assets/favicon-16x16.png" />
@@ -67,22 +42,16 @@
     <File Path="Directory.Build.targets" />
   </Folder>
   <Folder Name="/misc/">
-    <File Path="package.json" />
     <File Path="README.md" />
+    <File Path="RELEASE_NOTES.md" />
+    <File Path=".archive/README.md" />
   </Folder>
-  <Folder Name="/scripts/" />
 <!--    ===================    -->
   <Folder Name="/src/">
-    <Project Path="src/Xantham.Generator/Xantham.Generator.fsproj" />
     <Project Path="src/Xantham.TypeScript.Wire/Xantham.TypeScript.Wire.fsproj" />
   </Folder>
   <Folder Name="/tests/">
-    <File Path="tests/Fixtures.Setup.fsx" />
-    <File Path="tests/Fixtures.Teardown.fsx" />
-    <File Path="tests/Logging.test.fsx" />
-    <File Path="tests/Signal.test.fsx" />
-    <Project Path="tests/Xantham.EndToEnd/Xantham.EndToEnd.fsproj" />
-    <Project Path="tests/Xantham.Generator.Tests/Xantham.Generator.Tests.fsproj" />
+    <File Path="tests/Test.fsx" />
     <Project Path="tests/Xantham.TypeScript.Wire.Tests/Xantham.TypeScript.Wire.Tests.fsproj" />
   </Folder>
   <Folder Name="/tools/">

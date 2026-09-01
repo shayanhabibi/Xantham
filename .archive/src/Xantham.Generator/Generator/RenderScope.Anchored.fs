@@ -1,0 +1,816 @@
+﻿[<AutoOpen>]
+module Xantham.Generator.Generator.RenderScope_Anchored
+
+open System.Collections.Generic
+open Xantham
+open Xantham.Decoder
+open Xantham.Decoder.ArenaInterner
+open Xantham.Generator
+open Xantham.Generator.Generator.Path
+open Xantham.Generator.Types
+open Xantham.Generator.NamePath
+open Xantham.Generator.Generator
+open Anchored
+
+module Render =
+    let anchorMetadataPath (_ctx: GeneratorContext) (anchorPath: AnchorPath) (path: Path) =
+        match path with
+        | Path.Transient transientPath ->
+            transientPath
+            |> TransientPath.anchor anchorPath
+        | Path.Anchor anchorPath -> anchorPath
+    let anchorMetadata (ctx: GeneratorContext) (anchorPath: AnchorPath) (metadata: RenderMetadata) =
+        if metadata.Path.IsAnchor then metadata else
+        { Path = anchorMetadataPath ctx anchorPath metadata.Path |> Path.create
+          Original = metadata.Original
+          Source = ValueNone; FullyQualifiedName = ValueNone }
+    module Transient =
+        let inline anchorUnionCase (ctx: GeneratorContext) (parentPath: AnchorPath) (enumUnion: Transient.LiteralCaseRender<'T>) =
+            let anchoredPath =
+                enumUnion.Metadata.Path
+                |> anchorMetadataPath ctx parentPath
+            {
+                LiteralCaseRender.Name =
+                    enumUnion.Name
+                    |> ValueOption.defaultValue (
+                        match anchoredPath with
+                        | AnchorPath.Type typePath -> typePath.Name
+                        | AnchorPath.Member memberPath -> Name.Pascal.fromCase memberPath.Name
+                        | _ -> failwith "Unreachable branch"
+                        )
+                Metadata = {
+                    Path = Path.create anchoredPath
+                    Original = enumUnion.Metadata.Original
+                    Source = enumUnion.Metadata.Source
+                    FullyQualifiedName = enumUnion.Metadata.FullyQualifiedName
+                }
+                Value = enumUnion.Value
+                Documentation = enumUnion.Documentation
+            }
+        let inline anchorUnion (ctx: GeneratorContext) (parentPath: AnchorPath) (enumUnion: Transient.LiteralUnionRender<'T>) =
+            let anchoredPath =
+                enumUnion.Metadata.Path
+                |> anchorMetadataPath ctx parentPath
+            {
+                Metadata = {
+                    Path = Path.create anchoredPath
+                    Original = enumUnion.Metadata.Original
+                    Source = enumUnion.Metadata.Source
+                    FullyQualifiedName = enumUnion.Metadata.FullyQualifiedName
+                }
+                LiteralUnionRender.Name =
+                    enumUnion.Name
+                    |> ValueOption.defaultWith (fun () ->
+                        match anchoredPath with
+                        | AnchorPath.Type typePath -> typePath.Name
+                        | AnchorPath.Member memberPath -> Name.Pascal.fromCase memberPath.Name
+                        | _ -> failwith "Unreachable branch"
+                        )
+                Cases =
+                    enumUnion.Cases
+                    |> List.map (anchorUnionCase ctx anchoredPath)
+                Documentation = enumUnion.Documentation
+            }
+        let anchorTypeParameters (ctx: GeneratorContext) (anchorPath: AnchorPath) (typeParameter: Transient.TypeParameterRender) =
+            let anchorPath =
+                typeParameter.Metadata.Path
+                |> anchorMetadataPath ctx anchorPath
+            {
+                Metadata = {
+                    Path = Path.create anchorPath
+                    Original = typeParameter.Metadata.Original
+                    Source = typeParameter.Metadata.Source
+                    FullyQualifiedName = typeParameter.Metadata.FullyQualifiedName
+                }
+                TypeParameterRender.Name =
+                    typeParameter.Name
+                Constraint =
+                    typeParameter.Constraint
+                    |> ValueOption.map (TypeRefRender.anchorAndLocalise anchorPath)
+                Default =
+                    typeParameter.Default
+                    |> ValueOption.map (TypeRefRender.anchorAndLocalise anchorPath)
+                Documentation = typeParameter.Documentation
+            }
+        let anchorTypedNameRender (ctx: GeneratorContext) (anchorPath: AnchorPath) (typedName: Transient.TypedNameRender) =
+            let anchorPath =
+                typedName.Metadata.Path
+                |> anchorMetadataPath ctx anchorPath
+            {
+                Metadata = {
+                    Path = Path.create anchorPath
+                    Original = typedName.Metadata.Original
+                    Source = typedName.Metadata.Source
+                    FullyQualifiedName = typedName.Metadata.FullyQualifiedName
+                }
+                TypedNameRender.Name = typedName.Name
+                Type = typedName.Type |> TypeRefRender.anchorAndLocalise anchorPath 
+                Traits = typedName.Traits
+                TypeParameters = typedName.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
+                Documentation = typedName.Documentation
+            }
+        let anchorFunctionSignature (ctx: GeneratorContext) (anchorPath: AnchorPath) (functionSignature: Transient.FunctionLikeSignature) =
+            {
+                FunctionLikeSignature.Metadata = {
+                    Path = Path.create anchorPath
+                    Original = functionSignature.Metadata.Original
+                    Source = functionSignature.Metadata.Source
+                    FullyQualifiedName = functionSignature.Metadata.FullyQualifiedName
+                }
+                Parameters =
+                    functionSignature.Parameters
+                    |> List.map (anchorTypedNameRender ctx anchorPath)
+                ReturnType =
+                    functionSignature.ReturnType
+                    |> TypeRefRender.anchorAndLocalise anchorPath
+                Traits = functionSignature.Traits
+                Documentation = functionSignature.Documentation
+                TypeParameters = functionSignature.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
+            }
+        let anchorFunction (ctx: GeneratorContext) (anchorPath: AnchorPath) (functionLike: Transient.FunctionLikeRender) =
+            let anchorPath =
+                functionLike.Metadata.Path
+                |> anchorMetadataPath ctx anchorPath
+            {
+                Metadata = {
+                    Path = Path.create anchorPath
+                    Original = functionLike.Metadata.Original
+                    Source = functionLike.Metadata.Source
+                    FullyQualifiedName = functionLike.Metadata.FullyQualifiedName
+                }
+                FunctionLikeRender.Name = functionLike.Name
+                Signatures = functionLike.Signatures |> List.map (anchorFunctionSignature ctx anchorPath)
+                Traits = functionLike.Traits
+                TypeParameters = functionLike.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
+                Documentation = functionLike.Documentation
+            }
+        let anchorTypeDefn (ctx: GeneratorContext) (anchorPath: AnchorPath) (typeDefn: Transient.TypeLikeRender) =
+            let anchorPath =
+                typeDefn.Metadata.Path
+                |> anchorMetadataPath ctx anchorPath
+            {
+                TypeLikeRender.Metadata = {
+                    Path = Path.create anchorPath
+                    Original = typeDefn.Metadata.Original
+                    Source = typeDefn.Metadata.Source
+                    FullyQualifiedName = typeDefn.Metadata.FullyQualifiedName
+                }
+                Name =
+                    typeDefn.Name
+                    |> ValueOption.defaultWith (fun () ->
+                        match anchorPath with
+                        | AnchorPath.Type typePath -> typePath.Name
+                        | AnchorPath.Member memberPath -> Name.Pascal.fromCase memberPath.Name
+                        | _ -> failwith "Unreachable branch"
+                        )
+                TypeParameters =
+                    typeDefn.TypeParameters
+                    |> List.map (anchorTypeParameters ctx anchorPath)
+                Inheritance =
+                    typeDefn.Inheritance
+                    |> List.map (TypeRefRender.anchorAndLocalise anchorPath)
+                Implements =
+                    typeDefn.Implements
+                    |> List.map (TypeRefRender.anchorAndLocalise anchorPath)
+                Members =
+                    typeDefn.Members
+                    |> List.map (anchorTypedNameRender ctx anchorPath)
+                Functions =
+                    typeDefn.Functions
+                    |> List.map (anchorFunction ctx anchorPath)
+                Constructors =
+                    typeDefn.Constructors
+                    |> List.map (List.map (anchorTypedNameRender ctx anchorPath))
+                Documentation = typeDefn.Documentation
+                IsClass = typeDefn.IsClass
+            }
+        let anchorTypeAlias (ctx: GeneratorContext) (anchorPath: AnchorPath) (typeAlias: Transient.TypeAliasRender) =
+            match typeAlias with
+            | Transient.TypeAliasRender.Alias alias ->
+                let anchorPath =
+                    alias.Metadata.Path
+                    |> anchorMetadataPath ctx anchorPath
+                {
+                    TypeAliasRenderRef.Metadata = {
+                        Path = Path.create anchorPath
+                        Original = alias.Metadata.Original
+                        Source = alias.Metadata.Source
+                        FullyQualifiedName = alias.Metadata.FullyQualifiedName
+                    }
+                    Name = alias.Name |> ValueOption.defaultWith (fun () ->
+                        match anchorPath with
+                        | AnchorPath.Type typePath -> typePath.Name
+                        | AnchorPath.Member memberPath -> Name.Pascal.fromCase memberPath.Name
+                        | _ -> failwith "Unreachable branch"
+                        )
+                    TypeParameters = alias.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
+                    Documentation = alias.Documentation
+                    Type = alias.Type |> TypeRefRender.anchorAndLocalise anchorPath
+                }
+                |> TypeAliasRender.Alias
+            | Transient.TypeAliasRender.TypeDefn typeLikeRender ->
+                anchorTypeDefn ctx anchorPath typeLikeRender
+                |> TypeAliasRender.TypeDefn
+            | Transient.TypeAliasRender.StringUnion literalUnionRender ->
+                anchorUnion ctx anchorPath literalUnionRender
+                |> TypeAliasRender.StringUnion
+            | Transient.TypeAliasRender.EnumUnion literalUnionRender ->
+                anchorUnion ctx anchorPath literalUnionRender
+                |> TypeAliasRender.EnumUnion
+            | Transient.TypeAliasRender.Function functionLikeRender ->
+                anchorFunction ctx anchorPath functionLikeRender
+                |> TypeAliasRender.Function
+
+        let anchor (ctx: GeneratorContext) (anchorPath: AnchorPath) (render: Transient.Render) =
+            let ref, render = render
+            match render.Value with
+            | Transient.TypeRender.EnumUnion enumUnion ->
+                anchorUnion ctx anchorPath enumUnion
+                |> TypeRender.EnumUnion
+            | Transient.TypeRender.StringUnion enumUnion ->
+                anchorUnion ctx anchorPath enumUnion
+                |> TypeRender.StringUnion
+            | Transient.TypeRender.TypeDefn typeLikeRender ->
+                anchorTypeDefn ctx anchorPath typeLikeRender
+                |> TypeRender.TypeDefn
+            | Transient.TypeRender.TypeAlias typeAliasRender ->
+                anchorTypeAlias ctx anchorPath typeAliasRender
+                |> TypeRender.TypeAlias
+            | Transient.TypeRender.Function functionLikeRender ->
+                anchorFunction ctx anchorPath functionLikeRender
+                |> TypeRender.Function
+            | Transient.TypeRender.Variable typedNameRender ->
+                anchorTypedNameRender ctx anchorPath typedNameRender
+                |> TypeRender.Variable
+            |> fun typeRender ->
+                Anchored.Render( TypeRefRender.anchorAndLocalise anchorPath ref, lazy typeRender )
+    module Concrete =
+        let inline anchorEnumCase (enumUnion: Concrete.LiteralCaseRender<'T>) =
+            {
+                Metadata = enumUnion.Metadata
+                LiteralCaseRender.Name = enumUnion.Name
+                Value = enumUnion.Value
+                Documentation = enumUnion.Documentation
+            }
+        let inline anchorEnum (enumUnion: Concrete.LiteralUnionRender<'T>) =
+            {
+                Metadata = enumUnion.Metadata
+                LiteralUnionRender.Name = enumUnion.Name
+                Cases = enumUnion.Cases |> List.map anchorEnumCase
+                Documentation = enumUnion.Documentation
+            }
+        let anchorTypeParameters (ctx: GeneratorContext) (anchorPath: AnchorPath) (typeParameter: Concrete.TypeParameterRender) =
+            let anchorPath =
+                typeParameter.Metadata.Path
+                |> anchorMetadataPath ctx anchorPath
+            {
+                Metadata = {
+                    Path = Path.create anchorPath
+                    Original = typeParameter.Metadata.Original
+                    Source = typeParameter.Metadata.Source
+                    FullyQualifiedName = typeParameter.Metadata.FullyQualifiedName
+                }
+                TypeParameterRender.Name =
+                    typeParameter.Name
+                Constraint =
+                    typeParameter.Constraint
+                    |> ValueOption.map (TypeRefRender.anchorAndLocalise anchorPath)
+                Default =
+                    typeParameter.Default
+                    |> ValueOption.map (TypeRefRender.anchorAndLocalise anchorPath)
+                Documentation = typeParameter.Documentation
+            }
+        let anchorTypedNameRender (ctx: GeneratorContext) (anchorPath: AnchorPath) (typedName: Concrete.TypedNameRender) =
+            let anchorPath =
+                typedName.Metadata.Path
+                |> anchorMetadataPath ctx anchorPath
+            {
+                Metadata = {
+                    Path = Path.create anchorPath
+                    Original = typedName.Metadata.Original
+                    Source = typedName.Metadata.Source
+                    FullyQualifiedName = typedName.Metadata.FullyQualifiedName
+                }
+                TypedNameRender.Name = typedName.Name
+                Type = typedName.Type |> TypeRefRender.anchorAndLocalise anchorPath
+                Traits = typedName.Traits
+                TypeParameters = typedName.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
+                Documentation = typedName.Documentation
+            }
+        let anchorFunctionSignature (ctx: GeneratorContext) (anchorPath: AnchorPath) (functionSignature: Concrete.FunctionLikeSignature) =
+            {
+                FunctionLikeSignature.Metadata = {
+                    Path = Path.create anchorPath
+                    Original = functionSignature.Metadata.Original
+                    Source = functionSignature.Metadata.Source
+                    FullyQualifiedName = functionSignature.Metadata.FullyQualifiedName
+                }
+                Parameters =
+                    functionSignature.Parameters
+                    |> List.map (anchorTypedNameRender ctx anchorPath)
+                ReturnType =
+                    functionSignature.ReturnType
+                    |> TypeRefRender.anchorAndLocalise anchorPath
+                Traits = functionSignature.Traits
+                Documentation = functionSignature.Documentation
+                TypeParameters = functionSignature.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
+            }
+        let anchorFunction (ctx: GeneratorContext) (anchorPath: AnchorPath) (functionLike: Concrete.FunctionLikeRender) =
+            let anchorPath =
+                functionLike.Metadata.Path
+                |> anchorMetadataPath ctx anchorPath
+            {
+                Metadata = {
+                    Path = Path.create anchorPath
+                    Original = functionLike.Metadata.Original
+                    Source = functionLike.Metadata.Source
+                    FullyQualifiedName = functionLike.Metadata.FullyQualifiedName
+                }
+                FunctionLikeRender.Name = functionLike.Name
+                Signatures = functionLike.Signatures |> List.map (anchorFunctionSignature ctx anchorPath)
+                Traits = functionLike.Traits
+                TypeParameters = functionLike.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
+                Documentation = functionLike.Documentation
+            }
+        let anchorTypeDefn (ctx: GeneratorContext) (typeDefn: Concrete.TypeLikeRender) =
+            let anchorPath =
+                match typeDefn.Metadata.Path with
+                | Path.Anchor anchorPath -> anchorPath
+                | _ -> failwith "UNREACHABLE"
+            {
+                TypeLikeRender.Metadata = {
+                    Path = Path.create anchorPath
+                    Original = typeDefn.Metadata.Original
+                    Source = typeDefn.Metadata.Source
+                    FullyQualifiedName = typeDefn.Metadata.FullyQualifiedName
+                }
+                Name = typeDefn.Name
+                TypeParameters =
+                    typeDefn.TypeParameters
+                    |> List.map (anchorTypeParameters ctx anchorPath)
+                Inheritance =
+                    typeDefn.Inheritance
+                    |> List.map (TypeRefRender.anchorAndLocalise anchorPath)
+                Implements =
+                    typeDefn.Implements
+                    |> List.map (TypeRefRender.anchorAndLocalise anchorPath)
+                Members =
+                    typeDefn.Members
+                    |> List.map (anchorTypedNameRender ctx anchorPath)
+                Functions =
+                    typeDefn.Functions
+                    |> List.map (anchorFunction ctx anchorPath)
+                Constructors =
+                    typeDefn.Constructors
+                    |> List.map (List.map (anchorTypedNameRender ctx anchorPath))
+                Documentation = typeDefn.Documentation
+                IsClass = typeDefn.IsClass
+            }
+        let anchorTypeAlias (ctx: GeneratorContext) (typeAlias: Concrete.TypeAliasRender) =
+            match typeAlias with
+            | Concrete.TypeAliasRender.Alias alias ->
+                let anchorPath =
+                    match alias.Metadata.Path with
+                    | Path.Anchor anchorPath -> anchorPath
+                    | _ -> failwith "UNREACHABLE"
+                {
+                    TypeAliasRenderRef.Metadata = {
+                        Path = Path.create anchorPath
+                        Original = alias.Metadata.Original
+                        Source = alias.Metadata.Source
+                        FullyQualifiedName = alias.Metadata.FullyQualifiedName
+                    }
+                    Name = alias.Name 
+                    TypeParameters = alias.TypeParameters |> List.map (anchorTypeParameters ctx anchorPath)
+                    Documentation = alias.Documentation
+                    Type = alias.Type |> TypeRefRender.anchorAndLocalise anchorPath
+                }
+                |> TypeAliasRender.Alias
+            | Concrete.TypeAliasRender.TypeDefn typeLikeRender ->
+                anchorTypeDefn ctx typeLikeRender
+                |> TypeAliasRender.TypeDefn
+            | Concrete.TypeAliasRender.StringUnion literalUnionRender ->
+                anchorEnum literalUnionRender
+                |> TypeAliasRender.StringUnion
+            | Concrete.TypeAliasRender.EnumUnion literalUnionRender ->
+                anchorEnum literalUnionRender
+                |> TypeAliasRender.EnumUnion
+            | Concrete.TypeAliasRender.Function functionLikeRender ->
+                let anchorPath =
+                    match functionLikeRender.Metadata.Path with
+                    | Path.Anchor anchorPath -> anchorPath
+                    | _ -> failwith "UNREACHABLE"
+                anchorFunction ctx anchorPath functionLikeRender
+                |> TypeAliasRender.Function
+
+        let anchor (ctx: GeneratorContext) (render: Concrete.Render) =
+            let ref, render = render
+            match render.Value with
+            | Concrete.TypeRender.EnumUnion enumUnion ->
+                anchorEnum enumUnion
+                |> TypeRender.EnumUnion
+            | Concrete.TypeRender.StringUnion literalUnionRender ->
+                anchorEnum literalUnionRender
+                |> TypeRender.StringUnion
+            | Concrete.TypeRender.TypeDefn typeLikeRender ->
+                anchorTypeDefn ctx typeLikeRender
+                |> TypeRender.TypeDefn
+            | Concrete.TypeRender.TypeAlias typeAliasRender ->
+                anchorTypeAlias ctx typeAliasRender
+                |> TypeRender.TypeAlias
+            | Concrete.TypeRender.Function functionLikeRender ->
+                let anchorPath =
+                    match functionLikeRender.Metadata.Path with
+                    | Path.Anchor anchorPath -> anchorPath
+                    | _ -> failwith "UNREACHABLE"
+                anchorFunction ctx anchorPath functionLikeRender
+                |> TypeRender.Function
+            | Concrete.TypeRender.Variable typedNameRender ->
+                let anchorPath =
+                    match typedNameRender.Metadata.Path with
+                    | Path.Anchor anchorPath -> anchorPath
+                    | _ -> failwith "UNREACHABLE"
+                anchorTypedNameRender ctx anchorPath typedNameRender
+                |> TypeRender.Variable
+            |> fun typeRender ->
+                let ref =
+                    ModulePath.init ""
+                    |> AnchorPath.create
+                    |> TypeRefRender.anchorAndLocalise
+                    |> funApply ref
+                Anchored.Render(ref, lazy typeRender)
+
+let inline addOrReplace (ctx: GeneratorContext) (key: ResolvedType) (value: Choice<Anchored.TypeRefRender, Anchored.RenderScope>) =
+    GeneratorContext.Anchored.addResolvedType ctx key value
+
+
+// Cycle prevention: the `anchor` recursion can reach the same
+// `ResolvedType` through different paths within one export. The
+// visited tracker is keyed by `(ResolvedType, AnchorPath, TransientTypePath)`
+// so:
+//   - same `(rt, anchor)` pair *with a different path* is allowed
+//     (multi-path emission for shared interned literals — see
+//     `docs/plans/multi-valued-typestore.md`).
+//   - same `(rt, anchor, path)` tuple is skipped, stopping cycles.
+//
+// The HashSet uses default structural equality on the 3-tuple; F#
+// combines each side's equality. `ResolvedType` is reference-eq,
+// `AnchorPath` and `TransientTypePath` are structural-eq DUs.
+//
+// `currentPath` carries the per-reference-site transient path to
+// emit at. For non-Transient root arms (Concrete, Anchored-synthetic,
+// RefOnly) this value is ignored — those arms use their cached Root's
+// absolute path. For the Transient arm it replaces what was previously
+// the cached Root path, so multiple references to the same rt within
+// one parent each emit a body at their own anchored location.
+let rec anchor (ctx: GeneratorContext) (visited: HashSet<ResolvedType * AnchorPath * TransientTypePath>) anchors anchorPath (resolvedType: ResolvedType) (currentPath: TransientTypePath) =
+    // Visited keying:
+    //   Literal rts: (rt, anchor, currentPath) — distinct paths allowed,
+    //     each generates its own body emission. Multi-emission engaged.
+    //   Other rts: (rt, anchor, sentinel=Anchored) — sentinel keeps
+    //     cardinality identical to baseline 2-tuple (no per-path
+    //     blowup). DeepPartialInternal-style recursion terminates.
+    let visitedKey =
+        match resolvedType with
+        | ResolvedType.Literal _ -> (resolvedType, anchorPath, currentPath)
+        | _ -> (resolvedType, anchorPath, TransientTypePath.Anchored)
+    if visited.Add visitedKey then
+        GeneratorContext.Prelude.tryGet ctx resolvedType
+        |> ValueOption.iter (anchorPreludeAnchorScope ctx visited (Some anchors) anchorPath currentPath)
+
+and anchorPreludeAnchorScope (ctx: GeneratorContext) visited anchors anchorPath (currentPath: TransientTypePath) renderScope =
+    let anchors = defaultArg anchors (Dictionary<TypePath, Render>())
+    match renderScope with
+    | { Root = ValueSome (TypeLikePath.Anchored path); Render = Render.Concrete(renderTuple); TransientChildren = ValueSome transientChildren } ->
+        let anchorPath = AnchorPath.create path
+        let anchors = Dictionary<TypePath, Render>()
+        let render = Render.Concrete.anchor ctx renderTuple
+        {
+            RenderScope.Type = renderScope.Type
+            Root = Choice1Of2 path
+            TypeRef =
+                renderScope.TypeRef
+                |> TypeRefRender.anchor anchorPath
+            Render = render
+            Anchors = anchors
+        }
+        |> Choice2Of2
+        |> GeneratorContext.Anchored.addResolvedType ctx renderScope.Type
+        for KeyValue(childRt, childPaths) in transientChildren.TypeStore do
+            match childRt with
+            | ResolvedType.Literal _ ->
+                for childPath in childPaths do
+                    anchor ctx visited anchors anchorPath childRt childPath
+            | _ ->
+                anchor ctx visited anchors anchorPath childRt TransientTypePath.Anchored
+    | { Root = ValueSome (TypeLikePath.Anchored path); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren }
+        when ctx.SyntheticPaths.ContainsKey renderScope.Type ->
+        // Synthetic-reference audit site #6 (see
+        // `createAssignedSyntheticRef` in RenderScope.Prelude.fs for the
+        // universe map). Re-anchors a synthetic body at the consuming
+        // export's anchor path. Reads the helper-assigned absolute path;
+        // does not reconstruct the TypeRef.
+        let render = Render.Transient.anchor ctx (AnchorPath.create path) renderTuple
+        anchors
+        |> Dictionary.tryAdd path render
+        for KeyValue(childRt, childPaths) in transientChildren.TypeStore do
+            match childRt with
+            | ResolvedType.Literal _ ->
+                for childPath in childPaths do
+                    anchor ctx visited anchors (AnchorPath.create path) childRt childPath
+            | _ ->
+                anchor ctx visited anchors (AnchorPath.create path) childRt TransientTypePath.Anchored
+    | { Root = ValueSome (TypeLikePath.Transient cachedPath); Render = Render.Transient(renderTuple); TransientChildren = ValueSome transientChildren } ->
+        // Path used for THIS rt's emission:
+        //   Literal rt: use currentPath (per-call) — multi-emission.
+        //     Each call from a distinct property position emits at its own
+        //     anchored location, giving each reference a matching body.
+        //   Other rt: use cachedPath (baseline) — single emission at
+        //     first-prerender's location. Avoids DeepPartialInternal-style
+        //     non-termination through recursive type aliases.
+        let path =
+            match renderScope.Type with
+            | ResolvedType.Literal _ -> TransientTypePath.anchor anchorPath currentPath
+            | _ -> TransientTypePath.anchor anchorPath cachedPath
+        let render = Render.Transient.anchor ctx (AnchorPath.create path) renderTuple
+        anchors
+        |> Dictionary.tryAdd path render
+        for KeyValue(childRt, childPaths) in transientChildren.TypeStore do
+            match childRt with
+            | ResolvedType.Literal _ ->
+                for childPath in childPaths do
+                    anchor ctx visited anchors (AnchorPath.create path) childRt childPath
+            | _ ->
+                anchor ctx visited anchors (AnchorPath.create path) childRt TransientTypePath.Anchored
+    | { Root = ValueNone; Render = Render.RefOnly typeRef } ->
+        typeRef
+        |> TypeRefRender.anchor anchorPath
+        |> Choice1Of2
+        |> GeneratorContext.Anchored.addResolvedType ctx renderScope.Type
+    | badScope ->
+        printfn $"Bad scope: %A{badScope}"
+and anchorPreludeExportScope (ctx: GeneratorContext) export (renderScopeStore: RenderScopeStore) =
+    let anchors = Dictionary<TypePath, Render>()
+    let visited = HashSet<ResolvedType * AnchorPath * TransientTypePath>()
+    let anchorPath = Interceptors.pipeExport ctx export
+    for KeyValue(key, paths) in renderScopeStore.TypeStore do
+        let renderScope =
+            GeneratorContext.Prelude.tryGet ctx key
+            |> ValueOption.orElseWith (fun () ->
+                prerender ctx renderScopeStore (LazyContainer.CreateTypeKeyDummy<ResolvedType> key)
+                |> ignore
+                GeneratorContext.Prelude.tryGet ctx key
+                )
+            |> ValueOption.defaultWith (fun () ->
+                failwith "Could not find render scope for key")
+        // Multi-path emission target: Literal rts only. These are leaf
+        // types (single StringEnum case body) — cloning per path is
+        // cheap and produces no further recursion. Extending to
+        // TypeLiteral was tried but hits a 60s+ hang via Zod V3's
+        // DeepPartialInternal recursive type alias: TypeLiteral bodies
+        // have member-level recursion that compounds when emitted
+        // per-path. For other rt kinds: single call with sentinel
+        // (baseline behavior).
+        match key with
+        | ResolvedType.Literal _ ->
+            for path in paths do
+                anchorPreludeAnchorScope ctx visited (Some anchors) anchorPath path renderScope
+        | _ ->
+            anchorPreludeAnchorScope ctx visited (Some anchors) anchorPath TransientTypePath.Anchored renderScope
+    anchors
+
+let rec registerAnchorFromExport (ctx: GeneratorContext) (export: ResolvedExport): unit =
+    let scope = RenderScopeStore.create()
+    match export with
+    | ResolvedExport.Class value ->
+        let path = Interceptors.pipeClass ctx value
+        let ref = TypeRefRender.create false path
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
+            ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
+        else
+        let render =
+            Class.render ctx scope value
+            |> Render.Concrete.anchorTypeDefn ctx
+            |> TypeRender.TypeDefn
+        {
+            Type = ResolvedType.Class value
+            Root = Choice1Of2 path
+            TypeRef = ref
+            Render = Anchored.Render( ref, lazy render )
+            Anchors = anchorPreludeExportScope ctx export scope
+        }
+        |> Choice2Of2
+        |> GeneratorContext.Anchored.addResolvedExport ctx export
+    | ResolvedExport.Variable value ->
+        let path = Interceptors.pipeVariable ctx value
+        let anchorPath = AnchorPath.create path
+        let typeRef =
+            value.Type
+            |> prerender ctx scope
+            |> TypeRefRender.anchorAndLocalise anchorPath
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
+            typeRef |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
+        else
+        let render =
+            {
+                Metadata = {
+                    Path = Path.create path
+                    Original = Path.create path
+                    Source = ValueSome value.Source
+                    FullyQualifiedName = ValueSome value.FullyQualifiedName
+                }
+                TypedNameRender.Name = value.Name
+                Type = typeRef
+                Traits = Set []
+                TypeParameters = []
+                Documentation = value.Documentation
+            }
+            |> TypeRender.Variable
+        {
+            Type = value.Type.Value
+            Root = Choice2Of2 path 
+            TypeRef = typeRef
+            Render = Anchored.Render( typeRef, lazy render )
+            Anchors = anchorPreludeExportScope ctx export scope
+        }
+        |> Choice2Of2
+        |> GeneratorContext.Anchored.addResolvedExport ctx export
+    | ResolvedExport.Interface value ->
+        let path = Interceptors.pipeInterface ctx value
+        let ref = TypeRefRender.create false path
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
+            ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
+        else
+        let render =
+            Interface.render ctx scope value
+            |> Render.Concrete.anchorTypeDefn ctx
+            |> TypeRender.TypeDefn
+        {
+            Type = ResolvedType.Interface value
+            Root = Choice1Of2 path
+            TypeRef = ref
+            Render = Anchored.Render( ref, lazy render )
+            Anchors = anchorPreludeExportScope ctx export scope
+        }
+        |> Choice2Of2
+        |> GeneratorContext.Anchored.addResolvedExport ctx export
+    | ResolvedExport.TypeAlias value ->
+        let path = Interceptors.pipeTypeAlias ctx value
+        let ref = TypeRefRender.create false path
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
+            ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
+        else
+        let render =
+            TypeAlias.render ctx scope value
+            |> Render.Concrete.anchorTypeAlias ctx
+            |> TypeRender.TypeAlias
+        {
+            Type = value.Type.Value
+            Root = Choice1Of2 path
+            TypeRef = ref
+            Render = Anchored.Render( ref, lazy render )
+            Anchors = anchorPreludeExportScope ctx export scope
+        }
+        |> Choice2Of2
+        |> GeneratorContext.Anchored.addResolvedExport ctx export
+    | ResolvedExport.Enum value ->
+        let path = Interceptors.pipeEnum ctx value
+        let ref = TypeRefRender.create false path
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors value then
+            ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
+        else
+        let render =
+            match Enum.render ctx value with
+            | Concrete.TypeRender.EnumUnion enumUnion ->
+                enumUnion
+                |> Render.Concrete.anchorEnum
+                |> TypeRender.EnumUnion
+            | Concrete.TypeRender.StringUnion literalUnionRender ->
+                literalUnionRender
+                |> Render.Concrete.anchorEnum
+                |> TypeRender.StringUnion
+            | _ -> failwith "Unreachable branch"
+        {
+            Type = ResolvedType.Enum value
+            Root = Choice1Of2 path
+            TypeRef = ref
+            Render = Anchored.Render( ref, lazy render )
+            Anchors = anchorPreludeExportScope ctx export scope
+        }
+        |> Choice2Of2
+        |> GeneratorContext.Anchored.addResolvedExport ctx export
+    | ResolvedExport.Function [] -> failwith "Empty function list"
+    | ResolvedExport.Function (headFunc :: rest) ->
+        let path = Interceptors.pipeFunction ctx headFunc
+        let anchorPath = AnchorPath.create path
+        let ref =
+            headFunc.SignatureKey.Value
+            |> ResolvedType.TypeLiteral
+            |> LazyContainer.CreateTypeKeyDummy<ResolvedType>
+            |> prerender ctx scope
+            |> TypeRefRender.anchor anchorPath
+        if Interceptors.shouldIgnoreRender ctx.Customisation.Interceptors headFunc then
+            ref |> Choice1Of2 |> GeneratorContext.Anchored.addResolvedExport ctx export
+        else
+        let render =
+            {
+                FunctionLikeRender.Name = headFunc.Name
+                Metadata = {
+                    Path = Path.create path
+                    Original = Path.create path
+                    Source = ValueSome headFunc.Source
+                    FullyQualifiedName = ValueSome headFunc.FullyQualifiedName
+                }
+                Signatures =
+                    (headFunc :: rest)
+                    |> List.map (fun func ->
+                        {
+                            FunctionLikeSignature.Metadata = {
+                                Path = Path.create path
+                                Original = Path.create path
+                                Source = ValueSome func.Source
+                                FullyQualifiedName = ValueSome func.FullyQualifiedName
+                            }
+                            Parameters =
+                                func.Parameters
+                                |> List.map (
+                                    Parameter.render ctx scope
+                                    >> Render.Concrete.anchorTypedNameRender ctx anchorPath
+                                    )
+                            ReturnType =
+                                func.Type
+                                |> prerender ctx scope
+                                |> TypeRefRender.anchorAndLocalise anchorPath
+                            Traits = Set [ RenderTraits.Static ]
+                            Documentation = func.Documentation
+                            TypeParameters =
+                                func.TypeParameters
+                                |> List.map (
+                                    _.Value
+                                    >> TypeParameter.render ctx scope
+                                    >> Render.Concrete.anchorTypeParameters ctx anchorPath
+                                    )
+                        }
+                        )
+                    |> List.distinct
+                Traits = Set []
+                TypeParameters =
+                    headFunc.TypeParameters
+                    |> List.map (fun typeParameter ->
+                        let typeParameter = typeParameter.Value
+                        let path =
+                            path
+                            |> TypeParamPath.createOnMember typeParameter.Name
+                        {
+                            TypeParameterRender.Metadata = {
+                                Path = Path.create path
+                                Original = Path.create path
+                                Source = ValueNone
+                                FullyQualifiedName = ValueNone
+                            }
+                            Name = typeParameter.Name
+                            Constraint =
+                                typeParameter.Constraint
+                                |> Option.filter (TypeParameter.isVacuousLazyConstraint >> not)
+                                |> Option.toValueOption
+                                |> ValueOption.map (prerender ctx scope >> TypeRefRender.anchorAndLocalise anchorPath)
+                            Default = 
+                                typeParameter.Default
+                                |> Option.toValueOption
+                                |> ValueOption.map (prerender ctx scope >> TypeRefRender.anchorAndLocalise anchorPath)
+                            Documentation = typeParameter.Documentation
+                        }
+                        )
+                Documentation = headFunc.Documentation
+            }
+            |> TypeRender.Function
+        {
+            Type = headFunc.SignatureKey.Value |> ResolvedType.TypeLiteral
+            Root = Choice2Of2 path
+            TypeRef = ref 
+            Render = Anchored.Render( ref, lazy render )
+            Anchors = anchorPreludeExportScope ctx export scope
+        }
+        |> Choice2Of2
+        |> GeneratorContext.Anchored.addResolvedExport ctx export
+    | ResolvedExport.Module value ->
+        value.Exports
+        |> List.iter (registerAnchorFromExport ctx)
+
+module ArenaInterner =
+    let processExports (ctx: GeneratorContext) (interner: ArenaInterner) =
+        // Nanopass-adjacent: assign stable concrete TypePaths to interned
+        // synthetic literals before the export-anchor pass forces their
+        // bodies. See `Generator/SyntheticPathAssignment.fs`.
+        SyntheticPathAssignment.run ctx interner
+        // ExportMap is `Map<Xantham.Source, LazyResolvedExport list>` post
+        // PR #2 (prevent-silent-drops-in-export-map). The list-valued
+        // form preserves multiple exports that share a Source bucket —
+        // singletons under `Source.IsPackage`, multi-entry under
+        // `Source.LibEs` / `Source.PackageInternal`. Iterate each bucket's
+        // contents so no export is silently dropped.
+        interner.ExportMap
+        |> Map.iter (fun _ lazyExports ->
+            lazyExports
+            |> List.iter (fun lazyExport ->
+                registerAnchorFromExport ctx lazyExport.Value))

@@ -1,0 +1,163 @@
+[<AutoOpen>]
+module Xantham.Generator.Generator.TypeRefRender
+
+open System.ComponentModel
+open Fabulous.AST
+open Fantomas.Core.SyntaxOak
+open Xantham.Generator.Types
+open Xantham.Generator
+open Xantham.Generator.NamePath
+open Xantham.Decoder
+
+module private Implementation =
+    let rec isFunctionRender (render: TypeRefRender) =
+        match render.Kind with
+        | TypeRefKind.Molecule (TypeRefMolecule.Function _) -> true
+        | _ -> false
+    let renderAtom (atom: TypeRefAtom) =
+        match atom with
+        | TypeRefAtom.Intrinsic s ->
+            Ast.LongIdent [ s ]
+        | TypeRefAtom.Widget widgetBuilder ->
+            widgetBuilder
+        | TypeRefAtom.ConcretePath typePath ->
+            TypePath.flatten typePath
+            |> List.map Name.Case.valueOrModified
+            |> Ast.LongIdent
+        | TypeRefAtom.TransientPath transientTypePath ->
+            TransientTypePath.toAnchored transientTypePath
+            |> List.map Name.Case.valueOrModified
+            |> Ast.LongIdent
+    let rec renderMolecule (molecule: TypeRefMolecule) =
+        match molecule with
+        | TypeRefMolecule.Tuple typeRefRenders ->
+            typeRefRenders
+            |> List.map render
+            |> function
+                // TS `[]` (empty tuple) and single-element tuples don't have
+                // direct F# tuple syntax — emitting `Ast.Tuple` with 0 or 1
+                // elements produces malformed output (e.g. trailing-comma
+                // generics like `U2<A * B, >` where the second arg is an
+                // empty tuple). Fall back to `unit` and the bare element
+                // respectively, matching how Union handles its empty case.
+                | [] -> Ast.Unit()
+                | [ widget ] -> widget
+                | types -> Ast.Tuple types
+        | TypeRefMolecule.Union typeRefRenders ->
+            typeRefRenders
+            |> List.map render
+            |> function
+                | [] -> Ast.Unit()
+                | [ widget ] -> widget
+                | types ->
+                    erasedUnion { yield! types }
+        // if we have no parameters, then we render a unit function
+        | TypeRefMolecule.Function([], returnType) ->
+            let returnType = render returnType
+            Ast.Funs(Ast.Unit(), returnType)
+        | TypeRefMolecule.Function(parameters, returnType) ->
+            let parameters =
+                parameters
+                |> List.map (fun ref ->
+                    render ref
+                    |> if isFunctionRender ref
+                        then Ast.Paren
+                        else id)
+            let returnType = render returnType
+            Ast.Funs(parameters, returnType)
+        | TypeRefMolecule.Prefix(prefix, args) ->
+            let isNullable = prefix.Nullable
+            let prefix = render { prefix with Nullable = false }
+            let args = args |> List.map render
+            
+            Ast.AppPrefix(prefix, args)
+            |> if isNullable then Ast.OptionPrefix else id
+
+    and render (typeRefRender: TypeRefRender): WidgetBuilder<Type> =
+        match typeRefRender.Kind with
+        | TypeRefKind.Atom typeRefAtom ->
+            renderAtom typeRefAtom
+        | TypeRefKind.Molecule typeRefMolecule ->
+            renderMolecule typeRefMolecule
+        |> if typeRefRender.Nullable then
+            Ast.OptionPrefix 
+            else id
+    module Anchored =
+        let renderAtom (atom: Anchored.TypeRefAtom) =
+            match atom with
+            | Anchored.TypeRefAtom.Widget widget -> widget
+            | Anchored.TypeRefAtom.Path path ->
+                TypePath.flatten path
+                |> List.map Name.Case.valueOrModified
+                |> Ast.LongIdent
+            | Anchored.TypeRefAtom.Intrinsic s ->
+                // An intrinsic name (e.g. "obj", "string") renders as a
+                // bare long identifier — matches the sibling `localise`
+                // function in `Types/RenderScope.Anchored.fs`.
+                Ast.LongIdent s
+        let rec renderMolecule (molecule: Anchored.TypeRefMolecule) =
+            match molecule with
+            | Anchored.TypeRefMolecule.Function([], returnType) ->
+                let returnType = render returnType
+                Ast.Funs(Ast.Unit(), returnType)
+            | Anchored.TypeRefMolecule.Function(parameters, returnType) ->
+                Ast.Funs(
+                    parameters |> List.map render,
+                    render returnType
+                    )
+            | Anchored.TypeRefMolecule.Prefix(prefix, args) ->
+                let isNullable = prefix.Nullable
+                let prefix = render { prefix with Nullable = false }
+                let args = args |> List.map render
+                
+                Ast.AppPrefix(prefix, args)
+                |> if isNullable then Ast.OptionPrefix else id
+            | Anchored.TypeRefMolecule.Tuple typeRefRenders ->
+                // Same empty/single-element handling as the unanchored
+                // renderMolecule above — TS `[]` (empty tuple) and one-
+                // element tuples don't have direct F# syntax.
+                typeRefRenders
+                |> List.map render
+                |> function
+                    | [] -> Ast.Unit()
+                    | [ widget ] -> widget
+                    | types -> Ast.Tuple types
+            | Anchored.TypeRefMolecule.Union typeRefRenders ->
+                typeRefRenders
+                |> List.map render
+                |> function
+                    | [] -> Ast.Unit()
+                    | [ widget ] -> widget
+                    | types ->
+                        erasedUnion { yield! types }
+                
+        and render (typeRefRender: Anchored.TypeRefRender): WidgetBuilder<Type> =
+            match typeRefRender.Kind with
+            | Anchored.TypeRefKind.Atom typeRefAtom ->
+                renderAtom typeRefAtom
+            | Anchored.TypeRefKind.Molecule typeRefMolecule ->
+                renderMolecule typeRefMolecule
+            |> if typeRefRender.Nullable then
+                Ast.OptionPrefix 
+                else id
+        let localisedRender (anchorPath: AnchorPath) (typeRefRender: Anchored.TypeRefRender) =
+            Anchored.TypeRefRender.localise anchorPath typeRefRender
+
+[<EditorBrowsable(EditorBrowsableState.Never)>]
+module TestHelpers =
+    let simpleRender (typeRefRender: TypeRefRender): WidgetBuilder<Type> = Implementation.render typeRefRender
+
+module TypeRefAtom =
+    let render value = Implementation.renderAtom value
+
+module TypeRefMolecule =
+    let render value = Implementation.renderMolecule value
+
+module TypeRefRender =
+    type SRTPHelper =
+        static member Render (value: TypeRefRender) = Implementation.render value
+        static member Render (value: Anchored.TypeRefRender) = Implementation.Anchored.render value
+    let inline render value = ((^T or SRTPHelper):(static member Render: ^T -> WidgetBuilder<Type>) value)
+    module Anchored =
+        let render value = Implementation.Anchored.render value
+        let localiseRender (anchorPath: AnchorPath) (typeRefRender: Anchored.TypeRefRender) = Implementation.Anchored.localisedRender anchorPath typeRefRender
