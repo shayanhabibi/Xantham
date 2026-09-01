@@ -462,6 +462,10 @@ and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (
         match instantiationOf model facts with
         | Some(name, arguments) -> appliedRef ctx model self owner name arguments
         | None ->
+            match libBinding ctx model self owner facts with
+            | Some result -> result
+            | None ->
+
             match GeneratorConfig.disposition ctx.Config facts.Origin, facts.SymbolName with
             | Reference, Some typeName ->
                 // The O7 contract: a `ship` run of this group produces exactly this name.
@@ -485,6 +489,44 @@ and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (
 /// element type when every component agrees, `obj[]` otherwise. §4.12 recommends an erased
 /// carrier with typed accessors instead; that waits for a fixture that needs one, the way
 /// class statics do.
+/// A compiler-lib type Fable.Core already binds (`Promise` -> `JS.Promise<'T>`), which is the
+/// compiler-lib group's disposition for the half of `lib.d.ts` that has a shipped binding.
+///
+/// The arity comparison is the safety argument, not a formality: TypeScript's lib made
+/// `Uint8Array` generic in a buffer parameter Fable's abbreviation does not take, so a mapping
+/// that ignored arity would emit code that does not compile. Extra arguments are dropped with
+/// a finding; too few means this is some other type wearing a familiar name, and it widens.
+and private libBinding (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) =
+    match facts.Origin, facts.SymbolName with
+    | CompilerLib, Some name when GeneratorConfig.disposition ctx.Config CompilerLib <> Ship ->
+        match Naming.LibBindings.tryFind name with
+        | Some(fsharpName, arity, loss) ->
+            let arguments = facts.TypeArguments
+
+            if arguments.Length < arity then
+                None
+            else
+                let reference, findings =
+                    match arity with
+                    | 0 -> FsNamed fsharpName, []
+                    | _ -> appliedRef ctx model self owner fsharpName (List.truncate arity arguments)
+
+                let dropped =
+                    if arguments.Length > arity then
+                        [ Finding.make
+                              Ergonomic
+                              owner
+                              $"{name} carries {arguments.Length} type arguments where {fsharpName} takes {arity}; the extras are dropped" ]
+                    else
+                        []
+
+                let lossy =
+                    loss |> Option.map (Finding.make Ergonomic owner) |> Option.toList
+
+                Some(reference, findings @ dropped @ lossy)
+        | None -> None
+    | _ -> None
+
 /// A generic name applied to type arguments, each shaped at this position (§4.9).
 and private appliedRef (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (name: string) (arguments: int list) : FsTypeRef * Finding list =
     let mutable findings = []

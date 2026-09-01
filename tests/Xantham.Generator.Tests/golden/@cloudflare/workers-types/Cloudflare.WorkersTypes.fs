@@ -154,10 +154,10 @@ type ServiceWorkerGlobalScope =
     abstract setInterval: callback: Action<obj[]> * ?msDelay: float -> float
     abstract setInterval<'Args>: callback: Action<'Args> * ?msDelay: float * args: 'Args -> float
     abstract clearInterval: ?timeoutId: float -> unit
-    abstract queueMicrotask: task: obj -> unit
+    abstract queueMicrotask: task: JS.Function -> unit
     abstract structuredClone<'T>: value: 'T * ?options: obj -> 'T
     abstract reportError: error: obj -> unit
-    abstract fetch: input: obj * ?init: obj -> obj
+    abstract fetch: input: obj * ?init: obj -> JS.Promise<obj>
     abstract self: ServiceWorkerGlobalScope with get, set
     abstract crypto: obj with get, set
     abstract caches: obj with get, set
@@ -280,7 +280,7 @@ type CloudflareAccessIdentityIdp =
     static member Create (id: string, ``type``: string) : CloudflareAccessIdentityIdp = jsNative
 
 type ExecutionContext<'Props> =
-    abstract waitUntil: promise: obj -> unit
+    abstract waitUntil: promise: JS.Promise<obj> -> unit
     abstract passThroughOnException: unit -> unit
     abstract exports: obj
     abstract props: 'Props
@@ -289,7 +289,7 @@ type ExecutionContext<'Props> =
     abstract tracing: Tracing with get, set
     abstract abort: reason: obj -> unit
 
-type ExportedHandlerConnectHandler<'Env, 'Props> = Func<Socket, 'Env, ExecutionContext<'Props>, obj option>
+type ExportedHandlerConnectHandler<'Env, 'Props> = Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type SocketSecureTransport =
@@ -297,16 +297,16 @@ type SocketSecureTransport =
     | [<CompiledName("on")>] On
     | [<CompiledName("starttls")>] Starttls
 
-type ExportedHandlerTailHandler<'Env, 'Props> = Func<TraceItem[], 'Env, ExecutionContext<'Props>, obj option>
+type ExportedHandlerTailHandler<'Env, 'Props> = Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
 
-type ExportedHandlerTraceHandler<'Env, 'Props> = Func<TraceItem[], 'Env, ExecutionContext<'Props>, obj option>
+type ExportedHandlerTraceHandler<'Env, 'Props> = Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
 
 [<Interface>]
 type AlarmEventInfo =
     abstract ``type``: string
-    abstract scheduledTime: obj
+    abstract scheduledTime: JS.Date
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, scheduledTime: obj) : AlarmEventInfo = jsNative
+    static member Create (``type``: string, scheduledTime: JS.Date) : AlarmEventInfo = jsNative
 
 [<Interface>]
 type Attribute =
@@ -367,20 +367,20 @@ type Exception =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, name: string, message: string, ?stack: string) : Exception = jsNative
 
-type ExportedHandlerTailStreamHandler<'Env, 'Props> = Func<TailEvent2, 'Env, ExecutionContext<'Props>, obj>
+type ExportedHandlerTailStreamHandler<'Env, 'Props> = Func<TailEvent2, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>
 
 [<Interface>]
 type ExportedHandlerTailStreamHandlerResultItem =
-    abstract outcome: Func<TailEvent4, obj option> option with get, set
-    abstract spanOpen: Func<TailEvent5, obj option> option with get, set
-    abstract spanClose: Func<TailEvent6, obj option> option with get, set
-    abstract diagnosticChannel: Func<TailEvent7, obj option> option with get, set
-    abstract ``exception``: Func<TailEvent8, obj option> option with get, set
-    abstract log: Func<TailEvent9, obj option> option with get, set
-    abstract ``return``: Func<TailEvent10, obj option> option with get, set
-    abstract attributes: Func<TailEvent11, obj option> option with get, set
+    abstract outcome: Func<TailEvent4, JS.Promise<unit> option> option with get, set
+    abstract spanOpen: Func<TailEvent5, JS.Promise<unit> option> option with get, set
+    abstract spanClose: Func<TailEvent6, JS.Promise<unit> option> option with get, set
+    abstract diagnosticChannel: Func<TailEvent7, JS.Promise<unit> option> option with get, set
+    abstract ``exception``: Func<TailEvent8, JS.Promise<unit> option> option with get, set
+    abstract log: Func<TailEvent9, JS.Promise<unit> option> option with get, set
+    abstract ``return``: Func<TailEvent10, JS.Promise<unit> option> option with get, set
+    abstract attributes: Func<TailEvent11, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?outcome: Func<TailEvent4, obj option>, ?spanOpen: Func<TailEvent5, obj option>, ?spanClose: Func<TailEvent6, obj option>, ?diagnosticChannel: Func<TailEvent7, obj option>, ?``exception``: Func<TailEvent8, obj option>, ?log: Func<TailEvent9, obj option>, ?``return``: Func<TailEvent10, obj option>, ?attributes: Func<TailEvent11, obj option>) : ExportedHandlerTailStreamHandlerResultItem = jsNative
+    static member Create (?outcome: Func<TailEvent4, JS.Promise<unit> option>, ?spanOpen: Func<TailEvent5, JS.Promise<unit> option>, ?spanClose: Func<TailEvent6, JS.Promise<unit> option>, ?diagnosticChannel: Func<TailEvent7, JS.Promise<unit> option>, ?``exception``: Func<TailEvent8, JS.Promise<unit> option>, ?log: Func<TailEvent9, JS.Promise<unit> option>, ?``return``: Func<TailEvent10, JS.Promise<unit> option>, ?attributes: Func<TailEvent11, JS.Promise<unit> option>) : ExportedHandlerTailStreamHandlerResultItem = jsNative
 
 [<Interface>]
 type FetchEventInfo =
@@ -500,10 +500,10 @@ type Return =
 [<Interface>]
 type ScheduledEventInfo =
     abstract ``type``: string
-    abstract scheduledTime: obj
+    abstract scheduledTime: JS.Date
     abstract cron: string
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, scheduledTime: obj, cron: string) : ScheduledEventInfo = jsNative
+    static member Create (``type``: string, scheduledTime: JS.Date, cron: string) : ScheduledEventInfo = jsNative
 
 [<Interface>]
 type ScriptVersion2 =
@@ -548,101 +548,101 @@ type StreamDiagnostic =
 type TailEvent10 =
     abstract invocationId: string
     abstract spanContext: SpanContext
-    abstract timestamp: obj
+    abstract timestamp: JS.Date
     abstract sequence: float
     abstract ``event``: Return
     [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: obj, sequence: float, ``event``: Return) : TailEvent10 = jsNative
+    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: Return) : TailEvent10 = jsNative
 
 [<Interface>]
 type TailEvent11 =
     abstract invocationId: string
     abstract spanContext: SpanContext
-    abstract timestamp: obj
+    abstract timestamp: JS.Date
     abstract sequence: float
     abstract ``event``: Attributes
     [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: obj, sequence: float, ``event``: Attributes) : TailEvent11 = jsNative
+    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: Attributes) : TailEvent11 = jsNative
 
 [<Interface>]
 type TailEvent2 =
     abstract invocationId: string
     abstract spanContext: SpanContext
-    abstract timestamp: obj
+    abstract timestamp: JS.Date
     abstract sequence: float
     abstract ``event``: Onset
     [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: obj, sequence: float, ``event``: Onset) : TailEvent2 = jsNative
+    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: Onset) : TailEvent2 = jsNative
 
 [<Interface>]
 type TailEvent3 =
     abstract invocationId: string
     abstract spanContext: SpanContext
-    abstract timestamp: obj
+    abstract timestamp: JS.Date
     abstract sequence: float
     abstract ``event``: obj
     [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: obj, sequence: float, ``event``: obj) : TailEvent3 = jsNative
+    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: obj) : TailEvent3 = jsNative
 
 [<Interface>]
 type TailEvent4 =
     abstract invocationId: string
     abstract spanContext: SpanContext
-    abstract timestamp: obj
+    abstract timestamp: JS.Date
     abstract sequence: float
     abstract ``event``: Outcome
     [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: obj, sequence: float, ``event``: Outcome) : TailEvent4 = jsNative
+    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: Outcome) : TailEvent4 = jsNative
 
 [<Interface>]
 type TailEvent5 =
     abstract invocationId: string
     abstract spanContext: SpanContext
-    abstract timestamp: obj
+    abstract timestamp: JS.Date
     abstract sequence: float
     abstract ``event``: SpanOpen
     [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: obj, sequence: float, ``event``: SpanOpen) : TailEvent5 = jsNative
+    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: SpanOpen) : TailEvent5 = jsNative
 
 [<Interface>]
 type TailEvent6 =
     abstract invocationId: string
     abstract spanContext: SpanContext
-    abstract timestamp: obj
+    abstract timestamp: JS.Date
     abstract sequence: float
     abstract ``event``: SpanClose
     [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: obj, sequence: float, ``event``: SpanClose) : TailEvent6 = jsNative
+    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: SpanClose) : TailEvent6 = jsNative
 
 [<Interface>]
 type TailEvent7 =
     abstract invocationId: string
     abstract spanContext: SpanContext
-    abstract timestamp: obj
+    abstract timestamp: JS.Date
     abstract sequence: float
     abstract ``event``: DiagnosticChannelEvent
     [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: obj, sequence: float, ``event``: DiagnosticChannelEvent) : TailEvent7 = jsNative
+    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: DiagnosticChannelEvent) : TailEvent7 = jsNative
 
 [<Interface>]
 type TailEvent8 =
     abstract invocationId: string
     abstract spanContext: SpanContext
-    abstract timestamp: obj
+    abstract timestamp: JS.Date
     abstract sequence: float
     abstract ``event``: Exception
     [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: obj, sequence: float, ``event``: Exception) : TailEvent8 = jsNative
+    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: Exception) : TailEvent8 = jsNative
 
 [<Interface>]
 type TailEvent9 =
     abstract invocationId: string
     abstract spanContext: SpanContext
-    abstract timestamp: obj
+    abstract timestamp: JS.Date
     abstract sequence: float
     abstract ``event``: obj
     [<ParamObject; Emit("$0")>]
-    static member Create (invocationId: string, spanContext: SpanContext, timestamp: obj, sequence: float, ``event``: obj) : TailEvent9 = jsNative
+    static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: obj) : TailEvent9 = jsNative
 
 [<Interface>]
 type TraceEventInfo =
@@ -659,11 +659,11 @@ type TracePreviewInfo2 =
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, slug: string, name: string) : TracePreviewInfo2 = jsNative
 
-type ExportedHandlerScheduledHandler<'Env, 'Props> = Func<ScheduledController, 'Env, ExecutionContext<'Props>, obj option>
+type ExportedHandlerScheduledHandler<'Env, 'Props> = Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
 
-type ExportedHandlerQueueHandler<'Env, 'Message, 'Props> = Func<MessageBatch<'Message>, 'Env, ExecutionContext<'Props>, obj option>
+type ExportedHandlerQueueHandler<'Env, 'Message, 'Props> = Func<MessageBatch<'Message>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
 
-type ExportedHandlerTestHandler<'Env, 'Props> = Func<TestController, 'Env, ExecutionContext<'Props>, obj option>
+type ExportedHandlerTestHandler<'Env, 'Props> = Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
 
 [<Interface>]
 type EmailAttachment2 =
@@ -671,9 +671,9 @@ type EmailAttachment2 =
     abstract contentId: string with get, set
     abstract filename: string with get, set
     abstract ``type``: string with get, set
-    abstract content: obj with get, set
+    abstract content: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (disposition: string, contentId: string, filename: string, ``type``: string, content: obj) : EmailAttachment2 = jsNative
+    static member Create (disposition: string, contentId: string, filename: string, ``type``: string, content: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>) : EmailAttachment2 = jsNative
 
 [<Interface>]
 type EmailAttachment3 =
@@ -681,23 +681,23 @@ type EmailAttachment3 =
     abstract contentId: unit option with get, set
     abstract filename: string with get, set
     abstract ``type``: string with get, set
-    abstract content: obj with get, set
+    abstract content: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (disposition: string, filename: string, ``type``: string, content: obj, ?contentId: unit) : EmailAttachment3 = jsNative
+    static member Create (disposition: string, filename: string, ``type``: string, content: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?contentId: unit) : EmailAttachment3 = jsNative
 
 [<Interface>]
 type ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> =
     abstract fetch: Func<obj, 'Env, ExecutionContext<'Props>, obj> option with get, set
-    abstract connect: Func<Socket, 'Env, ExecutionContext<'Props>, obj option> option with get, set
-    abstract tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, obj option> option with get, set
-    abstract trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, obj option> option with get, set
-    abstract tailStream: Func<TailEvent2, 'Env, ExecutionContext<'Props>, obj> option with get, set
-    abstract scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, obj option> option with get, set
-    abstract test: Func<TestController, 'Env, ExecutionContext<'Props>, obj option> option with get, set
-    abstract email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, obj option> option with get, set
-    abstract queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, obj option> option with get, set
+    abstract connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
+    abstract tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
+    abstract trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
+    abstract tailStream: Func<TailEvent2, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>> option with get, set
+    abstract scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
+    abstract test: Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
+    abstract email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
+    abstract queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?fetch: Func<obj, 'Env, ExecutionContext<'Props>, obj>, ?connect: Func<Socket, 'Env, ExecutionContext<'Props>, obj option>, ?tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, obj option>, ?trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, obj option>, ?tailStream: Func<TailEvent2, 'Env, ExecutionContext<'Props>, obj>, ?scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, obj option>, ?test: Func<TestController, 'Env, ExecutionContext<'Props>, obj option>, ?email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, obj option>, ?queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, obj option>) : ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> = jsNative
+    static member Create (?fetch: Func<obj, 'Env, ExecutionContext<'Props>, obj>, ?connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tailStream: Func<TailEvent2, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?test: Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>) : ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> = jsNative
 
 [<Interface>]
 type AlarmInvocationInfo =
@@ -735,26 +735,26 @@ type CachePurgeOptions =
     static member Create (?tags: string[], ?pathPrefixes: string[], ?purgeEverything: bool) : CachePurgeOptions = jsNative
 
 type CacheContext =
-    abstract purge: options: CachePurgeOptions -> obj
+    abstract purge: options: CachePurgeOptions -> JS.Promise<CachePurgeResult>
 
 type CloudflareAccessContext =
     abstract aud: string
-    abstract getIdentity: unit -> obj
+    abstract getIdentity: unit -> JS.Promise<CloudflareAccessIdentity option>
 
 type ColoLocalActorNamespace =
     abstract get: actorId: string -> ColoLocalActorNamespaceGetResult
 
 type ColoLocalActorNamespaceGetResult =
-    abstract fetch: input: obj * ?init: obj -> obj
+    abstract fetch: input: obj * ?init: obj -> JS.Promise<obj>
     abstract connect: address: U2<string, SocketAddress> * ?options: SocketOptions -> Socket
 
 type DurableObject =
     abstract fetch: request: obj -> obj
-    abstract connect: Func<Socket, obj option> option with get, set
-    abstract alarm: Func<AlarmInvocationInfo option, obj option> option with get, set
-    abstract webSocketMessage: Func<obj, obj, obj option> option with get, set
-    abstract webSocketClose: Func<obj, float, string, bool, obj option> option with get, set
-    abstract webSocketError: Func<obj, obj, obj option> option with get, set
+    abstract connect: Func<Socket, JS.Promise<unit> option> option with get, set
+    abstract alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option> option with get, set
+    abstract webSocketMessage: Func<obj, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
+    abstract webSocketClose: Func<obj, float, string, bool, JS.Promise<unit> option> option with get, set
+    abstract webSocketError: Func<obj, obj, JS.Promise<unit> option> option with get, set
 
 [<Erase>]
 type DurableObjectStub<'T> = private DurableObjectStub__ of obj
@@ -824,19 +824,19 @@ type ContainerExecOptionsStdout =
     | [<CompiledName("pipe")>] Pipe
 
 type DurableObjectState<'Props> =
-    abstract waitUntil: promise: obj -> unit
+    abstract waitUntil: promise: JS.Promise<obj> -> unit
     abstract exports: obj
     abstract props: 'Props
     abstract id: DurableObjectId
     abstract storage: DurableObjectStorage
     abstract container: Container option with get, set
     abstract facets: DurableObjectFacets with get, set
-    abstract blockConcurrencyWhile: callback: Func<obj> -> obj
+    abstract blockConcurrencyWhile<'T>: callback: Func<JS.Promise<'T>> -> JS.Promise<'T>
     abstract acceptWebSocket: ws: obj * ?tags: string[] -> unit
     abstract getWebSockets: ?tag: string -> obj[]
     abstract setWebSocketAutoResponse: ?maybeReqResp: WebSocketRequestResponsePair -> unit
     abstract getWebSocketAutoResponse: unit -> WebSocketRequestResponsePair option
-    abstract getWebSocketAutoResponseTimestamp: ws: obj -> obj option
+    abstract getWebSocketAutoResponseTimestamp: ws: obj -> JS.Date option
     abstract setHibernatableWebSocketEventTimeout: ?timeoutMs: float -> unit
     abstract getHibernatableWebSocketEventTimeout: unit -> float option
     abstract getTags: ws: obj -> string[]
@@ -871,38 +871,38 @@ type SqlStorageExecResultNextResult2 =
     static member Create (``done``: bool, ?value: unit) : SqlStorageExecResultNextResult2 = jsNative
 
 type DurableObjectTransaction =
-    abstract get: key: string * ?options: DurableObjectGetOptions -> obj
-    abstract get: keys: string[] * ?options: DurableObjectGetOptions -> obj
-    abstract list: ?options: DurableObjectListOptions -> obj
-    abstract put<'T>: key: string * value: 'T * ?options: DurableObjectPutOptions -> obj
-    abstract put: entries: obj * ?options: DurableObjectPutOptions -> obj
-    abstract delete: key: string * ?options: DurableObjectPutOptions -> obj
-    abstract delete: keys: string[] * ?options: DurableObjectPutOptions -> obj
+    abstract get<'T>: key: string * ?options: DurableObjectGetOptions -> JS.Promise<'T option>
+    abstract get<'T>: keys: string[] * ?options: DurableObjectGetOptions -> JS.Promise<JS.Map<string, 'T>>
+    abstract list<'T>: ?options: DurableObjectListOptions -> JS.Promise<JS.Map<string, 'T>>
+    abstract put<'T>: key: string * value: 'T * ?options: DurableObjectPutOptions -> JS.Promise<unit>
+    abstract put: entries: obj * ?options: DurableObjectPutOptions -> JS.Promise<unit>
+    abstract delete: key: string * ?options: DurableObjectPutOptions -> JS.Promise<bool>
+    abstract delete: keys: string[] * ?options: DurableObjectPutOptions -> JS.Promise<float>
     abstract rollback: unit -> unit
-    abstract getAlarm: ?options: DurableObjectGetAlarmOptions -> obj
-    abstract setAlarm: scheduledTime: obj * ?options: DurableObjectSetAlarmOptions -> obj
-    abstract deleteAlarm: ?options: DurableObjectSetAlarmOptions -> obj
+    abstract getAlarm: ?options: DurableObjectGetAlarmOptions -> JS.Promise<float option>
+    abstract setAlarm: scheduledTime: U2<float, JS.Date> * ?options: DurableObjectSetAlarmOptions -> JS.Promise<unit>
+    abstract deleteAlarm: ?options: DurableObjectSetAlarmOptions -> JS.Promise<unit>
 
 type DurableObjectStorage =
-    abstract get: key: string * ?options: DurableObjectGetOptions -> obj
-    abstract get: keys: string[] * ?options: DurableObjectGetOptions -> obj
-    abstract list: ?options: DurableObjectListOptions -> obj
-    abstract put<'T>: key: string * value: 'T * ?options: DurableObjectPutOptions -> obj
-    abstract put: entries: obj * ?options: DurableObjectPutOptions -> obj
-    abstract delete: key: string * ?options: DurableObjectPutOptions -> obj
-    abstract delete: keys: string[] * ?options: DurableObjectPutOptions -> obj
-    abstract deleteAll: ?options: DurableObjectPutOptions -> obj
-    abstract transaction: closure: Func<DurableObjectTransaction, obj> -> obj
-    abstract getAlarm: ?options: DurableObjectGetAlarmOptions -> obj
-    abstract setAlarm: scheduledTime: obj * ?options: DurableObjectSetAlarmOptions -> obj
-    abstract deleteAlarm: ?options: DurableObjectSetAlarmOptions -> obj
-    abstract sync: unit -> obj
+    abstract get<'T>: key: string * ?options: DurableObjectGetOptions -> JS.Promise<'T option>
+    abstract get<'T>: keys: string[] * ?options: DurableObjectGetOptions -> JS.Promise<JS.Map<string, 'T>>
+    abstract list<'T>: ?options: DurableObjectListOptions -> JS.Promise<JS.Map<string, 'T>>
+    abstract put<'T>: key: string * value: 'T * ?options: DurableObjectPutOptions -> JS.Promise<unit>
+    abstract put: entries: obj * ?options: DurableObjectPutOptions -> JS.Promise<unit>
+    abstract delete: key: string * ?options: DurableObjectPutOptions -> JS.Promise<bool>
+    abstract delete: keys: string[] * ?options: DurableObjectPutOptions -> JS.Promise<float>
+    abstract deleteAll: ?options: DurableObjectPutOptions -> JS.Promise<unit>
+    abstract transaction<'T>: closure: Func<DurableObjectTransaction, JS.Promise<'T>> -> JS.Promise<'T>
+    abstract getAlarm: ?options: DurableObjectGetAlarmOptions -> JS.Promise<float option>
+    abstract setAlarm: scheduledTime: U2<float, JS.Date> * ?options: DurableObjectSetAlarmOptions -> JS.Promise<unit>
+    abstract deleteAlarm: ?options: DurableObjectSetAlarmOptions -> JS.Promise<unit>
+    abstract sync: unit -> JS.Promise<unit>
     abstract sql: SqlStorage with get, set
     abstract kv: SyncKvStorage with get, set
     abstract transactionSync<'T>: closure: Func<'T> -> 'T
-    abstract getCurrentBookmark: unit -> obj
-    abstract getBookmarkForTime: timestamp: obj -> obj
-    abstract onNextSessionRestoreBookmark: bookmark: string -> obj
+    abstract getCurrentBookmark: unit -> JS.Promise<string>
+    abstract getBookmarkForTime: timestamp: U2<float, JS.Date> -> JS.Promise<string>
+    abstract onNextSessionRestoreBookmark: bookmark: string -> JS.Promise<string>
 
 [<Interface>]
 type DurableObjectAbortOptions =
@@ -959,7 +959,7 @@ type WebSocketRequestResponsePair =
     static member Create (request: string, response: string) : WebSocketRequestResponsePair = jsNative
 
 type DurableObjectFacets =
-    abstract get: name: string * getStartupOptions: Func<obj> -> obj
+    abstract get<'T>: name: string * getStartupOptions: Func<U2<FacetStartupOptions<'T>, JS.Promise<FacetStartupOptions<'T>>>> -> obj
     abstract abort: name: string * reason: obj -> unit
     abstract delete: name: string -> unit
     abstract clone: src: string * dst: string -> unit
@@ -976,11 +976,11 @@ type AnalyticsEngineDataset =
 
 [<Interface>]
 type AnalyticsEngineDataPoint =
-    abstract indexes: obj option[] option with get, set
+    abstract indexes: U2<string, JS.ArrayBuffer> option[] option with get, set
     abstract doubles: float[] option with get, set
-    abstract blobs: obj option[] option with get, set
+    abstract blobs: U2<string, JS.ArrayBuffer> option[] option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?indexes: obj option[], ?doubles: float[], ?blobs: obj option[]) : AnalyticsEngineDataPoint = jsNative
+    static member Create (?indexes: U2<string, JS.ArrayBuffer> option[], ?doubles: float[], ?blobs: U2<string, JS.ArrayBuffer> option[]) : AnalyticsEngineDataPoint = jsNative
 
 [<Interface>]
 type EventTargetEventListenerOptions =
@@ -1020,7 +1020,7 @@ type ExtendableEvent =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
-    abstract waitUntil: promise: obj -> unit
+    abstract waitUntil: promise: JS.Promise<obj> -> unit
     /// <summary>
     /// The **`bubbles`** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
     ///
@@ -1155,36 +1155,36 @@ type FileOptions =
 [<Interface>]
 type SubtleCryptoDeriveKeyAlgorithm =
     abstract name: string with get, set
-    abstract salt: obj option with get, set
+    abstract salt: U2<JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
     abstract iterations: float option with get, set
     abstract hash: U2<string, SubtleCryptoHashAlgorithm> option with get, set
     abstract ``$public``: obj option with get, set
-    abstract info: obj option with get, set
+    abstract info: U2<JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, ?salt: obj, ?iterations: float, ?hash: U2<string, SubtleCryptoHashAlgorithm>, ?``$public``: obj, ?info: obj) : SubtleCryptoDeriveKeyAlgorithm = jsNative
+    static member Create (name: string, ?salt: U2<JS.ArrayBuffer, JS.ArrayBufferView>, ?iterations: float, ?hash: U2<string, SubtleCryptoHashAlgorithm>, ?``$public``: obj, ?info: U2<JS.ArrayBuffer, JS.ArrayBufferView>) : SubtleCryptoDeriveKeyAlgorithm = jsNative
 
 [<Interface>]
 type SubtleCryptoEncryptAlgorithm =
     abstract name: string with get, set
-    abstract iv: obj option with get, set
-    abstract additionalData: obj option with get, set
+    abstract iv: U2<JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
+    abstract additionalData: U2<JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
     abstract tagLength: float option with get, set
-    abstract counter: obj option with get, set
+    abstract counter: U2<JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
     abstract length: float option with get, set
-    abstract label: obj option with get, set
+    abstract label: U2<JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, ?iv: obj, ?additionalData: obj, ?tagLength: float, ?counter: obj, ?length: float, ?label: obj) : SubtleCryptoEncryptAlgorithm = jsNative
+    static member Create (name: string, ?iv: U2<JS.ArrayBuffer, JS.ArrayBufferView>, ?additionalData: U2<JS.ArrayBuffer, JS.ArrayBufferView>, ?tagLength: float, ?counter: U2<JS.ArrayBuffer, JS.ArrayBufferView>, ?length: float, ?label: U2<JS.ArrayBuffer, JS.ArrayBufferView>) : SubtleCryptoEncryptAlgorithm = jsNative
 
 [<Interface>]
 type SubtleCryptoGenerateKeyAlgorithm =
     abstract name: string with get, set
     abstract hash: U2<string, SubtleCryptoHashAlgorithm> option with get, set
     abstract modulusLength: float option with get, set
-    abstract publicExponent: obj option with get, set
+    abstract publicExponent: U2<JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
     abstract length: float option with get, set
     abstract namedCurve: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, ?hash: U2<string, SubtleCryptoHashAlgorithm>, ?modulusLength: float, ?publicExponent: obj, ?length: float, ?namedCurve: string) : SubtleCryptoGenerateKeyAlgorithm = jsNative
+    static member Create (name: string, ?hash: U2<string, SubtleCryptoHashAlgorithm>, ?modulusLength: float, ?publicExponent: U2<JS.ArrayBuffer, JS.ArrayBufferView>, ?length: float, ?namedCurve: string) : SubtleCryptoGenerateKeyAlgorithm = jsNative
 
 [<Interface>]
 type SubtleCryptoHashAlgorithm =
@@ -1236,10 +1236,10 @@ type CryptoKeyHmacKeyAlgorithm =
 type CryptoKeyRsaKeyAlgorithm =
     abstract name: string with get, set
     abstract modulusLength: float with get, set
-    abstract publicExponent: obj with get, set
+    abstract publicExponent: U2<JS.ArrayBuffer, JS.ArrayBufferView> with get, set
     abstract hash: CryptoKeyKeyAlgorithm option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, modulusLength: float, publicExponent: obj, ?hash: CryptoKeyKeyAlgorithm) : CryptoKeyRsaKeyAlgorithm = jsNative
+    static member Create (name: string, modulusLength: float, publicExponent: U2<JS.ArrayBuffer, JS.ArrayBufferView>, ?hash: CryptoKeyKeyAlgorithm) : CryptoKeyRsaKeyAlgorithm = jsNative
 
 [<Interface>]
 type CryptoKeyEllipticKeyAlgorithm =
@@ -1259,7 +1259,7 @@ type CryptoKeyArbitraryKeyAlgorithm =
 
 [<Interface>]
 type DigestStream =
-    abstract digest: obj
+    abstract digest: JS.Promise<JS.ArrayBuffer>
     abstract bytesWritten: obj
     /// <summary>
     /// The **`locked`** read-only property of the WritableStream interface returns a boolean indicating whether the WritableStream is locked to a writer.
@@ -1286,7 +1286,7 @@ type DigestStream =
     /// </summary>
     abstract getWriter: obj with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (digest: obj, bytesWritten: obj, locked: bool, abort: obj, close: obj, getWriter: obj) : DigestStream = jsNative
+    static member Create (digest: JS.Promise<JS.ArrayBuffer>, bytesWritten: obj, locked: bool, abort: obj, close: obj, getWriter: obj) : DigestStream = jsNative
 
 [<Interface>]
 type DigestStreamOptions =
@@ -1333,20 +1333,20 @@ type HTMLRewriter =
 
 [<Interface>]
 type HTMLRewriterElementContentHandlers =
-    abstract element: Func<obj, obj option> option with get, set
-    abstract comments: Func<obj, obj option> option with get, set
-    abstract text: Func<obj, obj option> option with get, set
+    abstract element: Func<obj, JS.Promise<unit> option> option with get, set
+    abstract comments: Func<obj, JS.Promise<unit> option> option with get, set
+    abstract text: Func<obj, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?element: Func<obj, obj option>, ?comments: Func<obj, obj option>, ?text: Func<obj, obj option>) : HTMLRewriterElementContentHandlers = jsNative
+    static member Create (?element: Func<obj, JS.Promise<unit> option>, ?comments: Func<obj, JS.Promise<unit> option>, ?text: Func<obj, JS.Promise<unit> option>) : HTMLRewriterElementContentHandlers = jsNative
 
 [<Interface>]
 type HTMLRewriterDocumentContentHandlers =
-    abstract doctype: Func<Doctype, obj option> option with get, set
-    abstract comments: Func<obj, obj option> option with get, set
-    abstract text: Func<obj, obj option> option with get, set
-    abstract ``end``: Func<DocumentEnd, obj option> option with get, set
+    abstract doctype: Func<Doctype, JS.Promise<unit> option> option with get, set
+    abstract comments: Func<obj, JS.Promise<unit> option> option with get, set
+    abstract text: Func<obj, JS.Promise<unit> option> option with get, set
+    abstract ``end``: Func<DocumentEnd, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?doctype: Func<Doctype, obj option>, ?comments: Func<obj, obj option>, ?text: Func<obj, obj option>, ?``end``: Func<DocumentEnd, obj option>) : HTMLRewriterDocumentContentHandlers = jsNative
+    static member Create (?doctype: Func<Doctype, JS.Promise<unit> option>, ?comments: Func<obj, JS.Promise<unit> option>, ?text: Func<obj, JS.Promise<unit> option>, ?``end``: Func<DocumentEnd, JS.Promise<unit> option>) : HTMLRewriterDocumentContentHandlers = jsNative
 
 [<Interface>]
 type Doctype =
@@ -1497,7 +1497,7 @@ type FetchEvent =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
-    abstract waitUntil: promise: obj -> unit
+    abstract waitUntil: promise: JS.Promise<obj> -> unit
 
 [<Erase>]
 type Service<'T> = private Service__ of obj
@@ -1533,21 +1533,21 @@ type KVNamespaceListResult3 =
     static member Create (list_complete: bool, keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[], ?cacheStatus: string) : KVNamespaceListResult3 = jsNative
 
 type KVNamespace<'Key> =
-    abstract get: key: 'Key * ?options: obj -> obj
-    abstract get: key: 'Key * ``type``: string -> obj
-    abstract get: key: 'Key * ?options: KVNamespaceGetOptions<string> -> obj
-    abstract get: key: 'Key[] * ``type``: string -> obj
-    abstract get: key: 'Key[] * ?options: obj -> obj
-    abstract get: key: 'Key[] * ?options: KVNamespaceGetOptions<string> -> obj
-    abstract list: ?options: KVNamespaceListOptions -> obj
-    abstract put: key: 'Key * value: obj * ?options: KVNamespacePutOptions -> obj
-    abstract getWithMetadata: key: 'Key * ?options: obj -> obj
-    abstract getWithMetadata: key: 'Key * ``type``: string -> obj
-    abstract getWithMetadata: key: 'Key * options: KVNamespaceGetOptions<string> -> obj
-    abstract getWithMetadata: key: 'Key[] * ``type``: string -> obj
-    abstract getWithMetadata: key: 'Key[] * ?options: obj -> obj
-    abstract getWithMetadata: key: 'Key[] * ?options: KVNamespaceGetOptions<string> -> obj
-    abstract delete: key: 'Key -> obj
+    abstract get: key: 'Key * ?options: obj -> JS.Promise<string option>
+    abstract get: key: 'Key * ``type``: string -> JS.Promise<string option>
+    abstract get: key: 'Key * ?options: KVNamespaceGetOptions<string> -> JS.Promise<string option>
+    abstract get: key: 'Key[] * ``type``: string -> JS.Promise<JS.Map<string, string option>>
+    abstract get: key: 'Key[] * ?options: obj -> JS.Promise<JS.Map<string, string option>>
+    abstract get: key: 'Key[] * ?options: KVNamespaceGetOptions<string> -> JS.Promise<JS.Map<string, string option>>
+    abstract list: ?options: KVNamespaceListOptions -> JS.Promise<U2<KVNamespaceListResultItem, KVNamespaceListResultItem2>>
+    abstract put: key: 'Key * value: obj * ?options: KVNamespacePutOptions -> JS.Promise<unit>
+    abstract getWithMetadata<'Metadata>: key: 'Key * ?options: obj -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
+    abstract getWithMetadata<'Metadata>: key: 'Key * ``type``: string -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
+    abstract getWithMetadata<'Metadata>: key: 'Key * options: KVNamespaceGetOptions<string> -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
+    abstract getWithMetadata<'Metadata>: key: 'Key[] * ``type``: string -> JS.Promise<JS.Map<string, KVNamespaceGetWithMetadataResult<string, 'Metadata>>>
+    abstract getWithMetadata<'Metadata>: key: 'Key[] * ?options: obj -> JS.Promise<JS.Map<string, KVNamespaceGetWithMetadataResult<string, 'Metadata>>>
+    abstract getWithMetadata<'Metadata>: key: 'Key[] * ?options: KVNamespaceGetOptions<string> -> JS.Promise<JS.Map<string, KVNamespaceGetWithMetadataResult<string, 'Metadata>>>
+    abstract delete: key: 'Key -> JS.Promise<unit>
 
 [<Interface>]
 type KVNamespaceListResultItem =
@@ -1605,17 +1605,17 @@ type QueueContentType =
     | [<CompiledName("v8")>] V8
 
 type Queue<'Body> =
-    abstract metrics: unit -> obj
-    abstract send: message: 'Body * ?options: QueueSendOptions -> obj
-    abstract sendBatch: messages: obj * ?options: QueueSendBatchOptions -> obj
+    abstract metrics: unit -> JS.Promise<QueueMetrics>
+    abstract send: message: 'Body * ?options: QueueSendOptions -> JS.Promise<QueueSendResponse>
+    abstract sendBatch: messages: obj * ?options: QueueSendBatchOptions -> JS.Promise<QueueSendBatchResponse>
 
 [<Interface>]
 type QueueSendMetrics =
     abstract backlogCount: float with get, set
     abstract backlogBytes: float with get, set
-    abstract oldestMessageTimestamp: obj option with get, set
+    abstract oldestMessageTimestamp: JS.Date option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (backlogCount: float, backlogBytes: float, ?oldestMessageTimestamp: obj) : QueueSendMetrics = jsNative
+    static member Create (backlogCount: float, backlogBytes: float, ?oldestMessageTimestamp: JS.Date) : QueueSendMetrics = jsNative
 
 [<Interface>]
 type QueueSendMetadata =
@@ -1633,9 +1633,9 @@ type QueueSendResponse =
 type QueueSendBatchMetrics =
     abstract backlogCount: float with get, set
     abstract backlogBytes: float with get, set
-    abstract oldestMessageTimestamp: obj option with get, set
+    abstract oldestMessageTimestamp: JS.Date option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (backlogCount: float, backlogBytes: float, ?oldestMessageTimestamp: obj) : QueueSendBatchMetrics = jsNative
+    static member Create (backlogCount: float, backlogBytes: float, ?oldestMessageTimestamp: JS.Date) : QueueSendBatchMetrics = jsNative
 
 [<Interface>]
 type QueueSendBatchMetadata =
@@ -1674,17 +1674,17 @@ type MessageSendRequest<'Body> =
 type QueueMetrics =
     abstract backlogCount: float with get, set
     abstract backlogBytes: float with get, set
-    abstract oldestMessageTimestamp: obj option with get, set
+    abstract oldestMessageTimestamp: JS.Date option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (backlogCount: float, backlogBytes: float, ?oldestMessageTimestamp: obj) : QueueMetrics = jsNative
+    static member Create (backlogCount: float, backlogBytes: float, ?oldestMessageTimestamp: JS.Date) : QueueMetrics = jsNative
 
 [<Interface>]
 type MessageBatchMetrics =
     abstract backlogCount: float with get, set
     abstract backlogBytes: float with get, set
-    abstract oldestMessageTimestamp: obj option with get, set
+    abstract oldestMessageTimestamp: JS.Date option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (backlogCount: float, backlogBytes: float, ?oldestMessageTimestamp: obj) : MessageBatchMetrics = jsNative
+    static member Create (backlogCount: float, backlogBytes: float, ?oldestMessageTimestamp: JS.Date) : MessageBatchMetrics = jsNative
 
 [<Interface>]
 type MessageBatchMetadata =
@@ -1700,7 +1700,7 @@ type QueueRetryOptions =
 
 type Message<'Body> =
     abstract id: string
-    abstract timestamp: obj
+    abstract timestamp: JS.Date
     abstract body: 'Body
     abstract attempts: float
     abstract retry: ?options: QueueRetryOptions -> unit
@@ -1825,7 +1825,7 @@ type QueueEvent<'Body> =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
-    abstract waitUntil: promise: obj -> unit
+    abstract waitUntil: promise: JS.Promise<obj> -> unit
 
 type MessageBatch<'Body> =
     abstract messages: Message<'Body>[]
@@ -1862,15 +1862,15 @@ type R2ListOptionsIncludeItem =
     | [<CompiledName("httpMetadata")>] HttpMetadata
 
 type R2Bucket =
-    abstract head: key: string -> obj
-    abstract get: key: string * options: obj -> obj
-    abstract get: key: string * ?options: R2GetOptions -> obj
-    abstract put: key: string * ?value: obj * ?options: obj -> obj
-    abstract put: key: string * ?value: obj * ?options: R2PutOptions -> obj
-    abstract createMultipartUpload: key: string * ?options: R2MultipartOptions -> obj
+    abstract head: key: string -> JS.Promise<R2Object option>
+    abstract get: key: string * options: obj -> JS.Promise<U2<R2Object, R2ObjectBody> option>
+    abstract get: key: string * ?options: R2GetOptions -> JS.Promise<R2ObjectBody option>
+    abstract put: key: string * ?value: obj * ?options: obj -> JS.Promise<R2Object option>
+    abstract put: key: string * ?value: obj * ?options: R2PutOptions -> JS.Promise<R2Object>
+    abstract createMultipartUpload: key: string * ?options: R2MultipartOptions -> JS.Promise<R2MultipartUpload>
     abstract resumeMultipartUpload: key: string * uploadId: string -> R2MultipartUpload
-    abstract delete: keys: U2<string, string[]> -> obj
-    abstract list: ?options: R2ListOptions -> obj
+    abstract delete: keys: U2<string, string[]> -> JS.Promise<unit>
+    abstract list: ?options: R2ListOptions -> JS.Promise<R2Objects>
 
 [<Interface>]
 type R2ObjectRange =
@@ -1895,9 +1895,9 @@ type R2ObjectRange3 =
 type R2MultipartUpload =
     abstract key: string
     abstract uploadId: string
-    abstract uploadPart: partNumber: float * value: obj * ?options: R2UploadPartOptions -> obj
-    abstract abort: unit -> obj
-    abstract complete: uploadedParts: R2UploadedPart[] -> obj
+    abstract uploadPart: partNumber: float * value: obj * ?options: R2UploadPartOptions -> JS.Promise<R2UploadedPart>
+    abstract abort: unit -> JS.Promise<unit>
+    abstract complete: uploadedParts: R2UploadedPart[] -> JS.Promise<R2Object>
 
 [<Interface>]
 type R2UploadedPart =
@@ -1913,7 +1913,7 @@ type R2Object =
     abstract etag: string
     abstract httpEtag: string
     abstract checksums: R2Checksums
-    abstract uploaded: obj
+    abstract uploaded: JS.Date
     abstract httpMetadata: R2HTTPMetadata option
     abstract customMetadata: obj option
     abstract range: R2Range option
@@ -1924,18 +1924,18 @@ type R2Object =
 type R2ObjectBody =
     abstract body: obj
     abstract bodyUsed: bool
-    abstract arrayBuffer: unit -> obj
-    abstract bytes: unit -> obj
-    abstract text: unit -> obj
-    abstract json: unit -> obj
-    abstract blob: unit -> obj
+    abstract arrayBuffer: unit -> JS.Promise<JS.ArrayBuffer>
+    abstract bytes: unit -> JS.Promise<JS.Uint8Array>
+    abstract text: unit -> JS.Promise<string>
+    abstract json<'T>: unit -> JS.Promise<'T>
+    abstract blob: unit -> JS.Promise<obj>
     abstract key: string
     abstract version: string
     abstract size: float
     abstract etag: string
     abstract httpEtag: string
     abstract checksums: R2Checksums
-    abstract uploaded: obj
+    abstract uploaded: JS.Date
     abstract httpMetadata: R2HTTPMetadata option
     abstract customMetadata: obj option
     abstract range: R2Range option
@@ -1949,50 +1949,50 @@ type R2Range = U3<R2ObjectRange, R2ObjectRange2, R2ObjectRange3>
 type R2Conditional =
     abstract etagMatches: string option with get, set
     abstract etagDoesNotMatch: string option with get, set
-    abstract uploadedBefore: obj option with get, set
-    abstract uploadedAfter: obj option with get, set
+    abstract uploadedBefore: JS.Date option with get, set
+    abstract uploadedAfter: JS.Date option with get, set
     abstract secondsGranularity: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: obj, ?uploadedAfter: obj, ?secondsGranularity: bool) : R2Conditional = jsNative
+    static member Create (?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : R2Conditional = jsNative
 
 [<Interface>]
 type R2GetOptions =
     abstract onlyIf: obj option with get, set
     abstract range: obj option with get, set
-    abstract ssecKey: obj option with get, set
+    abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?onlyIf: obj, ?range: obj, ?ssecKey: obj) : R2GetOptions = jsNative
+    static member Create (?onlyIf: obj, ?range: obj, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2GetOptions = jsNative
 
 [<Interface>]
 type R2PutOptions =
     abstract onlyIf: obj option with get, set
     abstract httpMetadata: obj option with get, set
     abstract customMetadata: obj option with get, set
-    abstract md5: obj option with get, set
-    abstract sha1: obj option with get, set
-    abstract sha256: obj option with get, set
-    abstract sha384: obj option with get, set
-    abstract sha512: obj option with get, set
+    abstract md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
+    abstract sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
+    abstract sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
+    abstract sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
+    abstract sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
     abstract storageClass: string option with get, set
-    abstract ssecKey: obj option with get, set
+    abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?onlyIf: obj, ?httpMetadata: obj, ?customMetadata: obj, ?md5: obj, ?sha1: obj, ?sha256: obj, ?sha384: obj, ?sha512: obj, ?storageClass: string, ?ssecKey: obj) : R2PutOptions = jsNative
+    static member Create (?onlyIf: obj, ?httpMetadata: obj, ?customMetadata: obj, ?md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2PutOptions = jsNative
 
 [<Interface>]
 type R2MultipartOptions =
     abstract httpMetadata: obj option with get, set
     abstract customMetadata: obj option with get, set
     abstract storageClass: string option with get, set
-    abstract ssecKey: obj option with get, set
+    abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?httpMetadata: obj, ?customMetadata: obj, ?storageClass: string, ?ssecKey: obj) : R2MultipartOptions = jsNative
+    static member Create (?httpMetadata: obj, ?customMetadata: obj, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2MultipartOptions = jsNative
 
 type R2Checksums =
-    abstract md5: obj option
-    abstract sha1: obj option
-    abstract sha256: obj option
-    abstract sha384: obj option
-    abstract sha512: obj option
+    abstract md5: JS.ArrayBuffer option
+    abstract sha1: JS.ArrayBuffer option
+    abstract sha256: JS.ArrayBuffer option
+    abstract sha384: JS.ArrayBuffer option
+    abstract sha512: JS.ArrayBuffer option
     abstract toJSON: unit -> R2StringChecksums
 
 [<Interface>]
@@ -2012,17 +2012,17 @@ type R2HTTPMetadata =
     abstract contentDisposition: string option with get, set
     abstract contentEncoding: string option with get, set
     abstract cacheControl: string option with get, set
-    abstract cacheExpiry: obj option with get, set
+    abstract cacheExpiry: JS.Date option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?contentType: string, ?contentLanguage: string, ?contentDisposition: string, ?contentEncoding: string, ?cacheControl: string, ?cacheExpiry: obj) : R2HTTPMetadata = jsNative
+    static member Create (?contentType: string, ?contentLanguage: string, ?contentDisposition: string, ?contentEncoding: string, ?cacheControl: string, ?cacheExpiry: JS.Date) : R2HTTPMetadata = jsNative
 
 type R2Objects = obj
 
 [<Interface>]
 type R2UploadPartOptions =
-    abstract ssecKey: obj option with get, set
+    abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?ssecKey: obj) : R2UploadPartOptions = jsNative
+    static member Create (?ssecKey: U2<string, JS.ArrayBuffer>) : R2UploadPartOptions = jsNative
 
 type ScheduledEvent =
     abstract scheduledTime: float
@@ -2141,7 +2141,7 @@ type ScheduledEvent =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
-    abstract waitUntil: promise: obj -> unit
+    abstract waitUntil: promise: JS.Promise<obj> -> unit
 
 type ScheduledController =
     abstract scheduledTime: float
@@ -2339,7 +2339,7 @@ type TailEvent =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
-    abstract waitUntil: promise: obj -> unit
+    abstract waitUntil: promise: JS.Promise<obj> -> unit
 
 [<Interface>]
 type TraceItem =
@@ -2366,9 +2366,9 @@ type TraceItem =
 
 [<Interface>]
 type TraceItemAlarmEventInfo =
-    abstract scheduledTime: obj
+    abstract scheduledTime: JS.Date
     [<ParamObject; Emit("$0")>]
-    static member Create (scheduledTime: obj) : TraceItemAlarmEventInfo = jsNative
+    static member Create (scheduledTime: JS.Date) : TraceItemAlarmEventInfo = jsNative
 
 type TraceItemConnectEventInfo = obj
 
@@ -2525,7 +2525,7 @@ type SqlStorage =
 
 type SqlStorageStatement = obj
 
-type SqlStorageValue = obj option
+type SqlStorageValue = U3<string, float, JS.ArrayBuffer> option
 
 type SqlStorageCursor<'T> =
     abstract next: unit -> U2<SqlStorageCursorNextResult, SqlStorageExecResultNextResult2>
@@ -2539,11 +2539,11 @@ type SqlStorageCursor<'T> =
 type Socket =
     abstract readable: obj
     abstract writable: obj
-    abstract closed: obj
-    abstract opened: obj
+    abstract closed: JS.Promise<unit>
+    abstract opened: JS.Promise<SocketInfo>
     abstract upgraded: bool
     abstract secureTransport: SocketSecureTransport
-    abstract close: unit -> obj
+    abstract close: unit -> JS.Promise<unit>
     abstract startTls: ?options: TlsOptions -> Socket
 
 [<Interface>]
@@ -2583,11 +2583,11 @@ type EventSourceEventSourceInit =
 
 [<Interface>]
 type ExecOutput =
-    abstract stdout: obj
-    abstract stderr: obj
+    abstract stdout: JS.ArrayBuffer
+    abstract stderr: JS.ArrayBuffer
     abstract exitCode: float
     [<ParamObject; Emit("$0")>]
-    static member Create (stdout: obj, stderr: obj, exitCode: float) : ExecOutput = jsNative
+    static member Create (stdout: JS.ArrayBuffer, stderr: JS.ArrayBuffer, exitCode: float) : ExecOutput = jsNative
 
 [<Interface>]
 type ContainerExecOptions =
@@ -2615,25 +2615,25 @@ type ExecProcess =
     abstract stderr: obj option
     abstract pid: float
     abstract isPty: bool
-    abstract exitCode: obj
-    abstract output: unit -> obj
+    abstract exitCode: JS.Promise<float>
+    abstract output: unit -> JS.Promise<ExecOutput>
     abstract kill: ?signal: float -> unit
     abstract resize: cols: float * rows: float -> unit
 
 type Container =
     abstract running: bool
     abstract start: ?options: ContainerStartupOptions -> unit
-    abstract monitor: unit -> obj
-    abstract destroy: error: obj -> obj
+    abstract monitor: unit -> JS.Promise<unit>
+    abstract destroy: error: obj -> JS.Promise<unit>
     abstract signal: signo: float -> unit
     abstract getTcpPort: port: float -> ColoLocalActorNamespaceGetResult
-    abstract setInactivityTimeout: durationMs: obj -> obj
-    abstract interceptOutboundHttp: addr: string * binding: ColoLocalActorNamespaceGetResult -> obj
-    abstract interceptAllOutboundHttp: binding: ColoLocalActorNamespaceGetResult -> obj
-    abstract snapshotDirectory: options: ContainerDirectorySnapshotOptions -> obj
-    abstract snapshotContainer: options: ContainerSnapshotOptions -> obj
-    abstract interceptOutboundHttps: addr: string * binding: ColoLocalActorNamespaceGetResult -> obj
-    abstract exec: cmd: string[] * ?options: ContainerExecOptions -> obj
+    abstract setInactivityTimeout: durationMs: obj -> JS.Promise<unit>
+    abstract interceptOutboundHttp: addr: string * binding: ColoLocalActorNamespaceGetResult -> JS.Promise<unit>
+    abstract interceptAllOutboundHttp: binding: ColoLocalActorNamespaceGetResult -> JS.Promise<unit>
+    abstract snapshotDirectory: options: ContainerDirectorySnapshotOptions -> JS.Promise<ContainerDirectorySnapshot>
+    abstract snapshotContainer: options: ContainerSnapshotOptions -> JS.Promise<ContainerSnapshot>
+    abstract interceptOutboundHttps: addr: string * binding: ColoLocalActorNamespaceGetResult -> JS.Promise<unit>
+    abstract exec: cmd: string[] * ?options: ContainerExecOptions -> JS.Promise<ExecProcess>
 
 [<Interface>]
 type ContainerDirectorySnapshot =
@@ -2752,7 +2752,7 @@ type WorkerStubEntrypointOptions =
     static member Create (?props: obj, ?limits: workerdResourceLimits) : WorkerStubEntrypointOptions = jsNative
 
 type WorkerLoader =
-    abstract get: ?name: string * getCode: Func<obj> -> WorkerStub
+    abstract get: ?name: string * getCode: Func<U2<JS.Promise<WorkerLoaderWorkerCode>, WorkerLoaderWorkerCode>> -> WorkerStub
     abstract load: code: WorkerLoaderWorkerCode -> WorkerStub
 
 [<Interface>]
@@ -2760,12 +2760,12 @@ type WorkerLoaderModule =
     abstract js: string option with get, set
     abstract cjs: string option with get, set
     abstract text: string option with get, set
-    abstract data: obj option with get, set
+    abstract data: JS.ArrayBuffer option with get, set
     abstract json: obj option with get, set
     abstract py: string option with get, set
     abstract wasm: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?js: string, ?cjs: string, ?text: string, ?data: obj, ?json: obj, ?py: string, ?wasm: obj) : WorkerLoaderModule = jsNative
+    static member Create (?js: string, ?cjs: string, ?text: string, ?data: JS.ArrayBuffer, ?json: obj, ?py: string, ?wasm: obj) : WorkerLoaderModule = jsNative
 
 [<Interface>]
 type WorkerLoaderWorkerCode =
@@ -2959,9 +2959,9 @@ type AgentMemoryMessage =
     /// <summary>
     /// Optional message timestamp.
     /// </summary>
-    abstract timestamp: obj option with get, set
+    abstract timestamp: JS.Date option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (role: AgentMemoryMessageRole, content: string, ?timestamp: obj) : AgentMemoryMessage = jsNative
+    static member Create (role: AgentMemoryMessageRole, content: string, ?timestamp: JS.Date) : AgentMemoryMessage = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type AgentMemoryMessageRole =
@@ -3013,13 +3013,13 @@ type AgentMemoryMemory =
     /// <summary>
     /// Memory creation time.
     /// </summary>
-    abstract createdAt: obj with get, set
+    abstract createdAt: JS.Date with get, set
     /// <summary>
     /// Memory last-update time.
     /// </summary>
-    abstract updatedAt: obj with get, set
+    abstract updatedAt: JS.Date with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, ``type``: AgentMemoryMemoryType, summary: string, content: string, createdAt: obj, updatedAt: obj, ?sessionId: string) : AgentMemoryMemory = jsNative
+    static member Create (id: string, ``type``: AgentMemoryMemoryType, summary: string, content: string, createdAt: JS.Date, updatedAt: JS.Date, ?sessionId: string) : AgentMemoryMemory = jsNative
 
 /// <summary>
 /// Single entry in a list() response. Same shape as Memory minus full content.
@@ -3045,13 +3045,13 @@ type AgentMemoryMemoryListEntry =
     /// <summary>
     /// Memory creation time.
     /// </summary>
-    abstract createdAt: obj with get, set
+    abstract createdAt: JS.Date with get, set
     /// <summary>
     /// Memory last-update time.
     /// </summary>
-    abstract updatedAt: obj with get, set
+    abstract updatedAt: JS.Date with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, ``type``: AgentMemoryMemoryType, summary: string, createdAt: obj, updatedAt: obj, ?sessionId: string) : AgentMemoryMemoryListEntry = jsNative
+    static member Create (id: string, ``type``: AgentMemoryMemoryType, summary: string, createdAt: JS.Date, updatedAt: JS.Date, ?sessionId: string) : AgentMemoryMemoryListEntry = jsNative
 
 /// <summary>
 /// A scored memory candidate in a recall result.
@@ -3134,9 +3134,9 @@ type AgentMemoryRecallOptions =
     /// <summary>
     /// Temporal anchor for date arithmetic.
     /// </summary>
-    abstract referenceDate: obj option with get, set
+    abstract referenceDate: U2<string, JS.Date> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?thinkingLevel: AgentMemoryThinkingLevel, ?responseLength: AgentMemoryResponseLength, ?referenceDate: obj) : AgentMemoryRecallOptions = jsNative
+    static member Create (?thinkingLevel: AgentMemoryThinkingLevel, ?responseLength: AgentMemoryResponseLength, ?referenceDate: U2<string, JS.Date>) : AgentMemoryRecallOptions = jsNative
 
 /// <summary>
 /// Response from the recall() method.
@@ -3210,7 +3210,7 @@ type AgentMemoryProfile =
     /// </summary>
     /// <remarks>@param memoryId - ULID of the memory to retrieve.</remarks>
     /// <remarks>@throws if the memory does not exist.</remarks>
-    abstract get: memoryId: string -> obj
+    abstract get: memoryId: string -> JS.Promise<AgentMemoryMemory>
     /// <summary>
     /// Delete a memory by ID.
     ///
@@ -3219,31 +3219,31 @@ type AgentMemoryProfile =
     /// </summary>
     /// <remarks>@param memoryId - ULID of the memory to delete.</remarks>
     /// <remarks>@throws if the memory does not exist.</remarks>
-    abstract delete: memoryId: string -> obj
+    abstract delete: memoryId: string -> JS.Promise<AgentMemoryMemory>
     /// <summary>
     /// Store a memory in this profile. The content is automatically classified,
     /// summarized, and indexed.
     /// </summary>
     /// <remarks>@param memory - Raw memory content to persist.</remarks>
-    abstract remember: memory: AgentMemoryIncomingMemory -> obj
+    abstract remember: memory: AgentMemoryIncomingMemory -> JS.Promise<AgentMemoryMemory>
     /// <summary>
     /// Extract memories from a conversation.
     /// </summary>
     /// <remarks>@param messages - Conversation messages to extract memories from.</remarks>
     /// <remarks>@param options - Optional ingest options.</remarks>
-    abstract ingest: messages: obj * ?options: AgentMemoryIngestOptions -> obj
+    abstract ingest: messages: obj * ?options: AgentMemoryIngestOptions -> JS.Promise<unit>
     /// <summary>
     /// Get a profile summary.
     /// </summary>
     /// <remarks>@param options - Optional getSummary options.</remarks>
-    abstract getSummary: ?options: AgentMemoryGetSummaryOptions -> obj
+    abstract getSummary: ?options: AgentMemoryGetSummaryOptions -> JS.Promise<AgentMemoryGetSummaryResponse>
     /// <summary>
     /// Recall memories in this profile.
     /// </summary>
     /// <remarks>@param query - Recall query matched against memory content and keywords.</remarks>
     /// <remarks>@param options - Optional recall parameters.</remarks>
     /// <remarks>@returns Matching memories with relevance scores and a synthesized answer.</remarks>
-    abstract recall: query: string * ?options: AgentMemoryRecallOptions -> obj
+    abstract recall: query: string * ?options: AgentMemoryRecallOptions -> JS.Promise<AgentMemoryRecallResult>
     /// <summary>
     /// List active memories in this profile.
     ///
@@ -3252,7 +3252,7 @@ type AgentMemoryProfile =
     /// fetch the next page.
     /// </summary>
     /// <remarks>@param options - Optional pagination and filter options.</remarks>
-    abstract list: ?options: AgentMemoryListMemoriesOptions -> obj
+    abstract list: ?options: AgentMemoryListMemoriesOptions -> JS.Promise<AgentMemoryListMemoriesResult>
     /// <summary>
     /// Soft-delete every memory and message in this profile that is tagged
     /// with `sessionId`.
@@ -3260,7 +3260,7 @@ type AgentMemoryProfile =
     /// Idempotent: deleting a sessionId that has no rows is a no-op.
     /// </summary>
     /// <remarks>@param sessionId - Session to delete.</remarks>
-    abstract deleteSession: sessionId: string -> obj
+    abstract deleteSession: sessionId: string -> JS.Promise<unit>
 
 /// <summary>
 /// Namespace-level Agent Memory binding.
@@ -3287,13 +3287,13 @@ type AgentMemoryNamespace =
     /// </summary>
     /// <remarks>@param profileName - Profile name (validated against naming rules).</remarks>
     /// <remarks>@returns RPC target for interacting with the profile.</remarks>
-    abstract getProfile: profileName: string -> obj
+    abstract getProfile: profileName: string -> JS.Promise<AgentMemoryProfile>
     /// <summary>
     /// Soft-delete a profile and schedule deferred purge. Marks all
     /// memories and messages as deleted.
     /// </summary>
     /// <remarks>@param profileName - Name of the profile to delete.</remarks>
-    abstract deleteProfile: profileName: string -> obj
+    abstract deleteProfile: profileName: string -> JS.Promise<unit>
 
 [<Interface>]
 type AiSearchInternalError =
@@ -4199,29 +4199,29 @@ type AiSearchItem =
     /// <summary>
     /// Get metadata about this item.
     /// </summary>
-    abstract info: unit -> obj
+    abstract info: unit -> JS.Promise<AiSearchItemInfo>
     /// <summary>
     /// Download the item's content.
     /// </summary>
     /// <remarks>@returns Object with body stream, content type, filename, and size.</remarks>
-    abstract download: unit -> obj
+    abstract download: unit -> JS.Promise<AiSearchItemContentResult>
     /// <summary>
     /// Trigger re-indexing of this item.
     /// </summary>
     /// <remarks>@returns The updated item info.</remarks>
-    abstract sync: unit -> obj
+    abstract sync: unit -> JS.Promise<AiSearchItemInfo>
     /// <summary>
     /// Retrieve processing logs for this item (cursor-based pagination).
     /// </summary>
     /// <remarks>@param params Optional pagination parameters (limit, cursor).</remarks>
     /// <remarks>@returns Paginated log entries for this item.</remarks>
-    abstract logs: ?``params``: AiSearchItemLogsParams -> obj
+    abstract logs: ?``params``: AiSearchItemLogsParams -> JS.Promise<AiSearchItemLogsResponse>
     /// <summary>
     /// List indexed chunks for this item (offset-based pagination).
     /// </summary>
     /// <remarks>@param params Optional pagination parameters (limit, offset).</remarks>
     /// <remarks>@returns Paginated chunk entries for this item.</remarks>
-    abstract chunks: ?``params``: AiSearchItemChunksParams -> obj
+    abstract chunks: ?``params``: AiSearchItemChunksParams -> JS.Promise<AiSearchItemChunksResponse>
 
 /// <summary>
 /// Items collection service for an AI Search instance.
@@ -4231,7 +4231,7 @@ type AiSearchItems =
     /// <summary>
     /// List items in this instance.
     /// </summary>
-    abstract list: ?``params``: AiSearchListItemsParams -> obj
+    abstract list: ?``params``: AiSearchListItemsParams -> JS.Promise<AiSearchListItemsResponse>
     /// <summary>
     /// Upload a file as an item. Behaves as an upsert: if an item with the same
     /// filename already exists, it is overwritten and re-indexed.
@@ -4240,7 +4240,7 @@ type AiSearchItems =
     /// <remarks>@param content File content as a ReadableStream, Blob, or string.</remarks>
     /// <remarks>@param options Optional metadata to attach to the item.</remarks>
     /// <remarks>@returns The created item info.</remarks>
-    abstract upload: name: string * content: obj * ?options: AiSearchUploadItemOptions -> obj
+    abstract upload: name: string * content: obj * ?options: AiSearchUploadItemOptions -> JS.Promise<AiSearchItemInfo>
     /// <summary>
     /// Upload a file and poll until processing completes.
     /// Behaves as an upsert: if an item with the same filename already exists,
@@ -4250,7 +4250,7 @@ type AiSearchItems =
     /// <remarks>@param content File content as a ReadableStream, Blob, or string.</remarks>
     /// <remarks>@param options Optional metadata and polling configuration.</remarks>
     /// <remarks>@returns The item info after processing completes (or timeout).</remarks>
-    abstract uploadAndPoll: name: string * content: obj * ?options: obj -> obj
+    abstract uploadAndPoll: name: string * content: obj * ?options: obj -> JS.Promise<AiSearchItemInfo>
     /// <summary>
     /// Get an item by ID.
     /// </summary>
@@ -4261,7 +4261,7 @@ type AiSearchItems =
     /// Delete an item from the instance.
     /// </summary>
     /// <remarks>@param itemId The item identifier.</remarks>
-    abstract delete: itemId: string -> obj
+    abstract delete: itemId: string -> JS.Promise<unit>
 
 /// <summary>
 /// Single job service for an AI Search instance.
@@ -4271,17 +4271,17 @@ type AiSearchJob =
     /// <summary>
     /// Get metadata about this job.
     /// </summary>
-    abstract info: unit -> obj
+    abstract info: unit -> JS.Promise<AiSearchJobInfo>
     /// <summary>
     /// Get logs for this job.
     /// </summary>
-    abstract logs: ?``params``: AiSearchJobLogsParams -> obj
+    abstract logs: ?``params``: AiSearchJobLogsParams -> JS.Promise<AiSearchJobLogsResponse>
     /// <summary>
     /// Cancel a running job.
     /// </summary>
     /// <remarks>@returns The updated job info.</remarks>
     /// <remarks>@throws AiSearchNotFoundError if the job does not exist.</remarks>
-    abstract cancel: unit -> obj
+    abstract cancel: unit -> JS.Promise<AiSearchJobInfo>
 
 /// <summary>
 /// Jobs collection service for an AI Search instance.
@@ -4291,13 +4291,13 @@ type AiSearchJobs =
     /// <summary>
     /// List jobs for this instance.
     /// </summary>
-    abstract list: ?``params``: AiSearchListJobsParams -> obj
+    abstract list: ?``params``: AiSearchListJobsParams -> JS.Promise<AiSearchListJobsResponse>
     /// <summary>
     /// Create a new indexing job.
     /// </summary>
     /// <remarks>@param params Optional job parameters.</remarks>
     /// <remarks>@returns The created job info.</remarks>
-    abstract create: ?``params``: AiSearchCreateJobParams -> obj
+    abstract create: ?``params``: AiSearchCreateJobParams -> JS.Promise<AiSearchJobInfo>
     /// <summary>
     /// Get a job by ID.
     /// </summary>
@@ -4335,7 +4335,7 @@ type AiSearchInstance =
     /// </summary>
     /// <remarks>@param params Search request with query or messages and optional AI search options.</remarks>
     /// <remarks>@returns Search response with matching chunks and search query.</remarks>
-    abstract search: ``params``: AiSearchSearchRequest -> obj
+    abstract search: ``params``: AiSearchSearchRequest -> JS.Promise<AiSearchSearchResponse>
     /// <summary>
     /// Generate chat completions with AI Search context (streaming).
     /// Generate chat completions with AI Search context.
@@ -4344,7 +4344,7 @@ type AiSearchInstance =
     /// <remarks>@returns ReadableStream of server-sent events.</remarks>
     /// <remarks>@param params Chat completions request.</remarks>
     /// <remarks>@returns Chat completion response with choices and RAG chunks.</remarks>
-    abstract chatCompletions: ``params``: obj -> obj
+    abstract chatCompletions: ``params``: obj -> JS.Promise<obj>
     /// <summary>
     /// Generate chat completions with AI Search context (streaming).
     /// Generate chat completions with AI Search context.
@@ -4353,22 +4353,22 @@ type AiSearchInstance =
     /// <remarks>@returns ReadableStream of server-sent events.</remarks>
     /// <remarks>@param params Chat completions request.</remarks>
     /// <remarks>@returns Chat completion response with choices and RAG chunks.</remarks>
-    abstract chatCompletions: ``params``: AiSearchChatCompletionsRequest -> obj
+    abstract chatCompletions: ``params``: AiSearchChatCompletionsRequest -> JS.Promise<AiSearchChatCompletionsResponse>
     /// <summary>
     /// Update the instance configuration.
     /// </summary>
     /// <remarks>@param config Partial configuration to update.</remarks>
     /// <remarks>@returns Updated instance info.</remarks>
-    abstract update: config: obj -> obj
+    abstract update: config: obj -> JS.Promise<AiSearchInstanceInfo>
     /// <summary>
     /// Get metadata about this instance.
     /// </summary>
-    abstract info: unit -> obj
+    abstract info: unit -> JS.Promise<AiSearchInstanceInfo>
     /// <summary>
     /// Get instance statistics (item count, indexing status, etc.).
     /// </summary>
     /// <remarks>@returns Statistics with counts per status, last activity time, and engine details.</remarks>
-    abstract stats: unit -> obj
+    abstract stats: unit -> JS.Promise<AiSearchStatsResponse>
     /// <summary>
     /// Items collection — list, upload, and manage items in this instance.
     /// </summary>
@@ -4423,7 +4423,7 @@ type AiSearchNamespace =
     /// </summary>
     /// <remarks>@param params Optional pagination, search, and ordering parameters.</remarks>
     /// <remarks>@returns Array of instance metadata with pagination info.</remarks>
-    abstract list: ?``params``: AiSearchListInstancesParams -> obj
+    abstract list: ?``params``: AiSearchListInstancesParams -> JS.Promise<AiSearchListResponse>
     /// <summary>
     /// Create a new instance within the bound namespace.
     /// </summary>
@@ -4443,19 +4443,19 @@ type AiSearchNamespace =
     /// });
     /// ```
     /// </remarks>
-    abstract create: config: AiSearchConfig -> obj
+    abstract create: config: AiSearchConfig -> JS.Promise<AiSearchInstance>
     /// <summary>
     /// Delete an instance from the bound namespace.
     /// </summary>
     /// <remarks>@param name Instance name to delete.</remarks>
-    abstract delete: name: string -> obj
+    abstract delete: name: string -> JS.Promise<unit>
     /// <summary>
     /// Search across multiple instances within the bound namespace.
     /// Fans out to the specified instance_ids and merges results.
     /// </summary>
     /// <remarks>@param params Search request with required `ai_search_options.instance_ids`.</remarks>
     /// <remarks>@returns Search response with chunks tagged by instance_id and optional partial-failure errors.</remarks>
-    abstract search: ``params``: AiSearchMultiSearchRequest -> obj
+    abstract search: ``params``: AiSearchMultiSearchRequest -> JS.Promise<AiSearchMultiSearchResponse>
     /// <summary>
     /// Generate chat completions across multiple instances within the bound namespace (streaming).
     /// Fans out to the specified instance_ids, merges context, and generates a response.
@@ -4466,7 +4466,7 @@ type AiSearchNamespace =
     /// <remarks>@returns ReadableStream of server-sent events.</remarks>
     /// <remarks>@param params Chat completions request with required `ai_search_options.instance_ids`.</remarks>
     /// <remarks>@returns Chat completion response with choices, chunks tagged by instance_id, and optional partial-failure errors.</remarks>
-    abstract chatCompletions: ``params``: obj -> obj
+    abstract chatCompletions: ``params``: obj -> JS.Promise<obj>
 
 [<Interface>]
 type AiImageClassificationInput =
@@ -4834,7 +4834,7 @@ type AiTextToSpeechInput =
     [<ParamObject; Emit("$0")>]
     static member Create (prompt: string, ?lang: string) : AiTextToSpeechInput = jsNative
 
-type AiTextToSpeechOutput = obj
+type AiTextToSpeechOutput = U2<JS.Uint8Array, AiTextToSpeechOutput2>
 
 [<Interface>]
 type AiTextToSpeechOutput2 =
@@ -12358,14 +12358,14 @@ type Ai<'AiModelList when 'AiModelList :> AiModelListType> =
     /// </remarks>
     /// <remarks>@param autoragId Instance ID</remarks>
     abstract autorag: autoragId: string -> AutoRAG
-    abstract run: model: keyof<'AiModelList> * inputs: AiRunInputs * options: obj -> obj
-    abstract run: model: keyof<'AiModelList> * inputs: obj * options: obj -> obj
-    abstract run: model: keyof<'AiModelList> * inputs: obj * ?options: AiOptions -> obj
-    abstract run: model: obj * inputs: obj * ?options: AiOptions -> obj
-    abstract models: ?``params``: AiModelsSearchParams -> obj
+    abstract run: model: keyof<'AiModelList> * inputs: AiRunInputs * options: obj -> JS.Promise<AiAsyncBatchResponse>
+    abstract run: model: keyof<'AiModelList> * inputs: obj * options: obj -> JS.Promise<obj>
+    abstract run: model: keyof<'AiModelList> * inputs: obj * ?options: AiOptions -> JS.Promise<obj>
+    abstract run: model: obj * inputs: obj * ?options: AiOptions -> JS.Promise<obj>
+    abstract models: ?``params``: AiModelsSearchParams -> JS.Promise<AiModelsSearchObject[]>
     abstract toMarkdown: unit -> ToMarkdownService
-    abstract toMarkdown: files: MarkdownDocument[] * ?options: ConversionRequestOptions -> obj
-    abstract toMarkdown: files: MarkdownDocument * ?options: ConversionRequestOptions -> obj
+    abstract toMarkdown: files: MarkdownDocument[] * ?options: ConversionRequestOptions -> JS.Promise<ConversionResponse[]>
+    abstract toMarkdown: files: MarkdownDocument * ?options: ConversionRequestOptions -> JS.Promise<ConversionResponse>
 
 type AiGatewayPatchLogFeedback =
     | NMinus1 = -1
@@ -12551,7 +12551,7 @@ type AiGatewayLog =
     abstract response_size: float with get, set
     abstract response_head: string option with get, set
     abstract response_head_complete: bool with get, set
-    abstract created_at: obj with get, set
+    abstract created_at: JS.Date with get, set
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type AIGatewayProviders =
@@ -12621,10 +12621,10 @@ type AiGatewayLogNotFound =
     static member Create (name: string, message: string, ?stack: string, ?cause: obj) : AiGatewayLogNotFound = jsNative
 
 type AiGateway =
-    abstract patchLog: logId: string * data: AiGatewayPatchLog -> obj
-    abstract getLog: logId: string -> obj
-    abstract run: data: U2<AIGatewayUniversalRequest, AIGatewayUniversalRequest[]> * ?options: AiGatewayRunOptions -> obj
-    abstract getUrl: ?provider: string -> obj
+    abstract patchLog: logId: string * data: AiGatewayPatchLog -> JS.Promise<unit>
+    abstract getLog: logId: string -> JS.Promise<AiGatewayLog>
+    abstract run: data: U2<AIGatewayUniversalRequest, AIGatewayUniversalRequest[]> * ?options: AiGatewayRunOptions -> JS.Promise<obj>
+    abstract getUrl: ?provider: string -> JS.Promise<string>
 
 /// <summary>
 /// Information about a repository.
@@ -12821,18 +12821,18 @@ type ArtifactsRepo =
     /// <remarks>@param scope Token scope: "write" (default) or "read".</remarks>
     /// <remarks>@param ttl Time-to-live in seconds (default 86400, min 60, max 31536000).</remarks>
     /// <remarks>@throws {ArtifactsError} with code `INVALID_TTL` if ttl is out of range.</remarks>
-    abstract createToken: ?scope: ArtifactsCreateTokenResultScope * ?ttl: float -> obj
+    abstract createToken: ?scope: ArtifactsCreateTokenResultScope * ?ttl: float -> JS.Promise<ArtifactsCreateTokenResult>
     /// <summary>
     /// List tokens for this repo (metadata only, no plaintext).
     /// </summary>
-    abstract listTokens: unit -> obj
+    abstract listTokens: unit -> JS.Promise<ArtifactsTokenListResult>
     /// <summary>
     /// Revoke a token by plaintext or ID.
     /// </summary>
     /// <remarks>@param tokenOrId Plaintext token or token ID.</remarks>
     /// <remarks>@returns true if revoked, false if not found.</remarks>
     /// <remarks>@throws {ArtifactsError} with code `INVALID_INPUT` if tokenOrId is empty.</remarks>
-    abstract revokeToken: tokenOrId: string -> obj
+    abstract revokeToken: tokenOrId: string -> JS.Promise<bool>
     /// <summary>
     /// Fork this repo to a new repo.
     /// </summary>
@@ -12841,7 +12841,7 @@ type ArtifactsRepo =
     /// <remarks>@throws {ArtifactsError} with code `INVALID_REPO_NAME` if name is invalid.</remarks>
     /// <remarks>@throws {ArtifactsError} with code `ALREADY_EXISTS` if the target repo already exists.</remarks>
     /// <remarks>@throws {ArtifactsError} with code `FORK_IN_PROGRESS` if a fork is already running.</remarks>
-    abstract fork: name: string * ?opts: ArtifactsRepoForkOpts -> obj
+    abstract fork: name: string * ?opts: ArtifactsRepoForkOpts -> JS.Promise<ArtifactsCreateRepoResult>
     /// <summary>
     /// Unique repository ID.
     /// </summary>
@@ -12944,7 +12944,7 @@ type Artifacts =
     /// <remarks>@returns Repo metadata with initial token.</remarks>
     /// <remarks>@throws {ArtifactsError} with code `INVALID_REPO_NAME` if name is invalid.</remarks>
     /// <remarks>@throws {ArtifactsError} with code `ALREADY_EXISTS` if the repo already exists.</remarks>
-    abstract create: name: string * ?opts: ArtifactsCreateOpts -> obj
+    abstract create: name: string * ?opts: ArtifactsCreateOpts -> JS.Promise<ArtifactsCreateRepoResult>
     /// <summary>
     /// Get a handle to an existing repository.
     /// </summary>
@@ -12953,7 +12953,7 @@ type Artifacts =
     /// <remarks>@throws {ArtifactsError} with code `NOT_FOUND` if the repo does not exist.</remarks>
     /// <remarks>@throws {ArtifactsError} with code `IMPORT_IN_PROGRESS` if the repo is still importing.</remarks>
     /// <remarks>@throws {ArtifactsError} with code `FORK_IN_PROGRESS` if the repo is still forking.</remarks>
-    abstract get: name: string -> obj
+    abstract get: name: string -> JS.Promise<ArtifactsRepo>
     /// <summary>
     /// Import a repository from an external git remote.
     /// </summary>
@@ -12967,19 +12967,19 @@ type Artifacts =
     /// <remarks>@throws {ArtifactsError} with code `UPSTREAM_UNAVAILABLE` if the remote cannot be reached.</remarks>
     /// <remarks>@throws {ArtifactsError} with code `MEMORY_LIMIT` if the import exceeds service memory limits.</remarks>
     /// <remarks>@throws {ArtifactsError} with code `ALREADY_EXISTS` if the target repo already exists.</remarks>
-    abstract import: ``params``: ArtifactsImportParams -> obj
+    abstract import: ``params``: ArtifactsImportParams -> JS.Promise<ArtifactsCreateRepoResult>
     /// <summary>
     /// List repositories with cursor-based pagination.
     /// </summary>
     /// <remarks>@param opts Optional: limit (1–200, default 50), cursor for next page.</remarks>
-    abstract list: ?opts: ArtifactsListOpts -> obj
+    abstract list: ?opts: ArtifactsListOpts -> JS.Promise<ArtifactsRepoListResult>
     /// <summary>
     /// Delete a repository and all associated tokens.
     /// </summary>
     /// <remarks>@param name Repository name.</remarks>
     /// <remarks>@returns true if deleted, false if not found.</remarks>
     /// <remarks>@throws {ArtifactsError} with code `INVALID_REPO_NAME` if name is invalid.</remarks>
-    abstract delete: name: string -> obj
+    abstract delete: name: string -> JS.Promise<bool>
 
 [<Interface>]
 type ArtifactsCreateOpts =
@@ -13166,13 +13166,13 @@ type AutoRAG =
     /// Use the standalone AI Search Workers binding instead.
     /// See https://developers.cloudflare.com/ai-search/usage/workers-binding/
     /// </remarks>
-    abstract list: unit -> obj
+    abstract list: unit -> JS.Promise<AutoRagListResponseItem[]>
     /// <remarks>
     /// @deprecated
     /// Use the standalone AI Search Workers binding instead.
     /// See https://developers.cloudflare.com/ai-search/usage/workers-binding/
     /// </remarks>
-    abstract search: ``params``: AutoRagSearchRequest -> obj
+    abstract search: ``params``: AutoRagSearchRequest -> JS.Promise<AutoRagSearchResponse>
     /// <remarks>
     /// @deprecated
     /// Use the standalone AI Search Workers binding instead.
@@ -13188,7 +13188,7 @@ type AutoRAG =
     /// Use the standalone AI Search Workers binding instead.
     /// See https://developers.cloudflare.com/ai-search/usage/workers-binding/
     /// </remarks>
-    abstract aiSearch: ``params``: obj -> obj
+    abstract aiSearch: ``params``: obj -> JS.Promise<obj>
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type BrowserRunLifecycleEvent =
@@ -13872,7 +13872,7 @@ type BrowserRun =
     /// Used by libraries like `@cloudflare/puppeteer` to acquire and connect to a browser instance.
     /// </summary>
     /// <remarks>@see https://developers.cloudflare.com/browser-run/</remarks>
-    abstract fetch: input: obj * ?init: obj -> obj
+    abstract fetch: input: obj * ?init: obj -> JS.Promise<obj>
     /// <summary>
     /// Take a screenshot of a web page.
     /// Generate a PDF of a web page.
@@ -14034,7 +14034,7 @@ type BrowserRun =
     /// **Headers:**
     /// - `X-Browser-Ms-Used`: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    abstract quickAction: action: string * options: BrowserRunScreenshotOptions -> obj
+    abstract quickAction: action: string * options: BrowserRunScreenshotOptions -> JS.Promise<obj>
 
 /// <summary>
 /// In addition to the properties you can set in the RequestInit dict
@@ -15851,8 +15851,8 @@ type D1SessionBookmark = Ai_Cf_Leonardo_Phoenix_1_0_Output
 
 type D1Database =
     abstract prepare: query: string -> D1PreparedStatement
-    abstract batch: statements: D1PreparedStatement[] -> obj
-    abstract exec: query: string -> obj
+    abstract batch: statements: D1PreparedStatement[] -> JS.Promise<obj[]>
+    abstract exec: query: string -> JS.Promise<D1ExecResult>
     /// <summary>
     /// Creates a new D1 Session anchored at the given constraint or the bookmark.
     /// All queries executed using the created session will have sequential consistency,
@@ -15861,7 +15861,7 @@ type D1Database =
     /// <remarks>@param constraintOrBookmark Either the session constraint or the explicit bookmark to anchor the created session.</remarks>
     abstract withSession: ?constraintOrBookmark: string -> D1DatabaseSession
     /// <remarks>@deprecated dump() will be removed soon, only applies to deprecated alpha v1 databases.</remarks>
-    abstract dump: unit -> obj
+    abstract dump: unit -> JS.Promise<JS.ArrayBuffer>
 
 [<Interface>]
 type D1PreparedStatementRawOptions =
@@ -15877,7 +15877,7 @@ type D1PreparedStatementRawOptions2 =
 
 type D1DatabaseSession =
     abstract prepare: query: string -> D1PreparedStatement
-    abstract batch: statements: D1PreparedStatement[] -> obj
+    abstract batch: statements: D1PreparedStatement[] -> JS.Promise<obj[]>
     /// <remarks>
     /// @returns
     /// The latest session bookmark across all executed queries on the session.
@@ -15887,12 +15887,12 @@ type D1DatabaseSession =
 
 type D1PreparedStatement =
     abstract bind: values: obj[] -> D1PreparedStatement
-    abstract first: colName: string -> obj
-    abstract first: unit -> obj
-    abstract run: unit -> obj
-    abstract all: unit -> obj
-    abstract raw: options: D1PreparedStatementRawOptions -> obj
-    abstract raw: ?options: D1PreparedStatementRawOptions2 -> obj
+    abstract first<'T>: colName: string -> JS.Promise<'T option>
+    abstract first<'T>: unit -> JS.Promise<'T option>
+    abstract run: unit -> JS.Promise<obj>
+    abstract all: unit -> JS.Promise<obj>
+    abstract raw: options: D1PreparedStatementRawOptions -> JS.Promise<obj[]>
+    abstract raw<'T>: ?options: D1PreparedStatementRawOptions2 -> JS.Promise<'T[]>
 
 type Disposable = obj
 
@@ -15952,7 +15952,7 @@ type ForwardableEmailMessage =
     /// <remarks>@param rcptTo Verified destination address.</remarks>
     /// <remarks>@param headers A [Headers object](https://developer.mozilla.org/en-US/docs/Web/API/Headers).</remarks>
     /// <remarks>@returns A promise that resolves when the email message is forwarded.</remarks>
-    abstract forward: rcptTo: string * ?headers: obj -> obj
+    abstract forward: rcptTo: string * ?headers: obj -> JS.Promise<EmailSendResult>
     /// <summary>
     /// Reply to the sender of this email message with a new EmailMessage object.
     /// Reply to the sender of this email message with a message built from the given
@@ -15962,7 +15962,7 @@ type ForwardableEmailMessage =
     /// <remarks>@returns A promise that resolves when the email message is replied.</remarks>
     /// <remarks>@param builder The reply message contents.</remarks>
     /// <remarks>@returns A promise that resolves when the email message is replied.</remarks>
-    abstract reply: message: EmailMessage -> obj
+    abstract reply: message: EmailMessage -> JS.Promise<EmailSendResult>
     /// <summary>
     /// Reply to the sender of this email message with a new EmailMessage object.
     /// Reply to the sender of this email message with a message built from the given
@@ -15972,7 +15972,7 @@ type ForwardableEmailMessage =
     /// <remarks>@returns A promise that resolves when the email message is replied.</remarks>
     /// <remarks>@param builder The reply message contents.</remarks>
     /// <remarks>@returns A promise that resolves when the email message is replied.</remarks>
-    abstract reply: builder: EmailReplyMessageBuilder -> obj
+    abstract reply: builder: EmailReplyMessageBuilder -> JS.Promise<EmailSendResult>
     /// <summary>
     /// Envelope From attribute of the email message.
     /// </summary>
@@ -15984,8 +15984,8 @@ type ForwardableEmailMessage =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("disposition", CaseRules.None)>]
 type EmailAttachment =
-    | [<CompiledName("inline")>] Inline of contentId: string * filename: string * ``type``: string * content: obj
-    | [<CompiledName("attachment")>] Attachment of contentId: unit option * filename: string * ``type``: string * content: obj
+    | [<CompiledName("inline")>] Inline of contentId: string * filename: string * ``type``: string * content: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>
+    | [<CompiledName("attachment")>] Attachment of contentId: unit option * filename: string * ``type``: string * content: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>
 
 /// <summary>
 /// An Email Address
@@ -16030,8 +16030,8 @@ type EmailMessageBuilder = obj
 /// A binding that allows a Worker to send email messages.
 /// </summary>
 type SendEmail =
-    abstract send: message: EmailMessage -> obj
-    abstract send: builder: EmailMessageBuilder -> obj
+    abstract send: message: EmailMessage -> JS.Promise<EmailSendResult>
+    abstract send: builder: EmailMessageBuilder -> JS.Promise<EmailSendResult>
 
 type EmailEvent =
     abstract message: ForwardableEmailMessage
@@ -16148,9 +16148,9 @@ type EmailEvent =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
-    abstract waitUntil: promise: obj -> unit
+    abstract waitUntil: promise: JS.Promise<obj> -> unit
 
-type EmailExportedHandler<'Env, 'Props> = Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, obj option>
+type EmailExportedHandler<'Env, 'Props> = Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
 
 /// <summary>
 /// Evaluation context for targeting rules.
@@ -16207,63 +16207,63 @@ type Flagship =
     /// <remarks>@param flagKey The key of the flag to evaluate.</remarks>
     /// <remarks>@param defaultValue Optional default value returned when evaluation fails.</remarks>
     /// <remarks>@param context Optional evaluation context for targeting rules.</remarks>
-    abstract get: flagKey: string * defaultValue: obj * ?context: FlagshipEvaluationContext -> obj
+    abstract get: flagKey: string * defaultValue: obj * ?context: FlagshipEvaluationContext -> JS.Promise<obj>
     /// <summary>
     /// Get a boolean flag value.
     /// </summary>
     /// <remarks>@param flagKey The key of the flag to evaluate.</remarks>
     /// <remarks>@param defaultValue Default value returned when evaluation fails or the flag type does not match.</remarks>
     /// <remarks>@param context Optional evaluation context for targeting rules.</remarks>
-    abstract getBooleanValue: flagKey: string * defaultValue: bool * ?context: FlagshipEvaluationContext -> obj
+    abstract getBooleanValue: flagKey: string * defaultValue: bool * ?context: FlagshipEvaluationContext -> JS.Promise<bool>
     /// <summary>
     /// Get a string flag value.
     /// </summary>
     /// <remarks>@param flagKey The key of the flag to evaluate.</remarks>
     /// <remarks>@param defaultValue Default value returned when evaluation fails or the flag type does not match.</remarks>
     /// <remarks>@param context Optional evaluation context for targeting rules.</remarks>
-    abstract getStringValue: flagKey: string * defaultValue: string * ?context: FlagshipEvaluationContext -> obj
+    abstract getStringValue: flagKey: string * defaultValue: string * ?context: FlagshipEvaluationContext -> JS.Promise<string>
     /// <summary>
     /// Get a number flag value.
     /// </summary>
     /// <remarks>@param flagKey The key of the flag to evaluate.</remarks>
     /// <remarks>@param defaultValue Default value returned when evaluation fails or the flag type does not match.</remarks>
     /// <remarks>@param context Optional evaluation context for targeting rules.</remarks>
-    abstract getNumberValue: flagKey: string * defaultValue: float * ?context: FlagshipEvaluationContext -> obj
+    abstract getNumberValue: flagKey: string * defaultValue: float * ?context: FlagshipEvaluationContext -> JS.Promise<float>
     /// <summary>
     /// Get an object flag value.
     /// </summary>
     /// <remarks>@param flagKey The key of the flag to evaluate.</remarks>
     /// <remarks>@param defaultValue Default value returned when evaluation fails or the flag type does not match.</remarks>
     /// <remarks>@param context Optional evaluation context for targeting rules.</remarks>
-    abstract getObjectValue<'T>: flagKey: string * defaultValue: 'T * ?context: FlagshipEvaluationContext -> obj
+    abstract getObjectValue<'T>: flagKey: string * defaultValue: 'T * ?context: FlagshipEvaluationContext -> JS.Promise<'T>
     /// <summary>
     /// Get a boolean flag value with full evaluation details.
     /// </summary>
     /// <remarks>@param flagKey The key of the flag to evaluate.</remarks>
     /// <remarks>@param defaultValue Default value returned when evaluation fails or the flag type does not match.</remarks>
     /// <remarks>@param context Optional evaluation context for targeting rules.</remarks>
-    abstract getBooleanDetails: flagKey: string * defaultValue: bool * ?context: FlagshipEvaluationContext -> obj
+    abstract getBooleanDetails: flagKey: string * defaultValue: bool * ?context: FlagshipEvaluationContext -> JS.Promise<FlagshipEvaluationDetails<bool>>
     /// <summary>
     /// Get a string flag value with full evaluation details.
     /// </summary>
     /// <remarks>@param flagKey The key of the flag to evaluate.</remarks>
     /// <remarks>@param defaultValue Default value returned when evaluation fails or the flag type does not match.</remarks>
     /// <remarks>@param context Optional evaluation context for targeting rules.</remarks>
-    abstract getStringDetails: flagKey: string * defaultValue: string * ?context: FlagshipEvaluationContext -> obj
+    abstract getStringDetails: flagKey: string * defaultValue: string * ?context: FlagshipEvaluationContext -> JS.Promise<FlagshipEvaluationDetails<string>>
     /// <summary>
     /// Get a number flag value with full evaluation details.
     /// </summary>
     /// <remarks>@param flagKey The key of the flag to evaluate.</remarks>
     /// <remarks>@param defaultValue Default value returned when evaluation fails or the flag type does not match.</remarks>
     /// <remarks>@param context Optional evaluation context for targeting rules.</remarks>
-    abstract getNumberDetails: flagKey: string * defaultValue: float * ?context: FlagshipEvaluationContext -> obj
+    abstract getNumberDetails: flagKey: string * defaultValue: float * ?context: FlagshipEvaluationContext -> JS.Promise<FlagshipEvaluationDetails<float>>
     /// <summary>
     /// Get an object flag value with full evaluation details.
     /// </summary>
     /// <remarks>@param flagKey The key of the flag to evaluate.</remarks>
     /// <remarks>@param defaultValue Default value returned when evaluation fails or the flag type does not match.</remarks>
     /// <remarks>@param context Optional evaluation context for targeting rules.</remarks>
-    abstract getObjectDetails<'T>: flagKey: string * defaultValue: 'T * ?context: FlagshipEvaluationContext -> obj
+    abstract getObjectDetails<'T>: flagKey: string * defaultValue: 'T * ?context: FlagshipEvaluationContext -> JS.Promise<FlagshipEvaluationDetails<'T>>
 
 /// <summary>
 /// Hello World binding to serve as an explanatory example. DO NOT USE
@@ -16272,11 +16272,11 @@ type HelloWorldBinding =
     /// <summary>
     /// Retrieve the current stored value
     /// </summary>
-    abstract get: unit -> obj
+    abstract get: unit -> JS.Promise<HelloWorldBindingGetResultItem>
     /// <summary>
     /// Set a new stored value
     /// </summary>
-    abstract set: value: string -> obj
+    abstract set: value: string -> JS.Promise<unit>
 
 [<Interface>]
 type HelloWorldBindingGetResultItem =
@@ -16319,13 +16319,13 @@ type HyperdriveDynamic =
     /// <summary>
     /// The database name to use when connecting through this Hyperdrive.
     /// </summary>
-    abstract database: obj
-    abstract user: obj
-    abstract password: obj
+    abstract database: JS.Promise<string>
+    abstract user: JS.Promise<string>
+    abstract password: JS.Promise<string>
     /// <summary>
     /// Open a TCP socket to the target database through this Hyperdrive.
     /// </summary>
-    abstract connect: unit -> obj
+    abstract connect: unit -> JS.Promise<Socket>
 
 /// <summary>
 /// Binding that provisions Hyperdrive connections at request time, rather than
@@ -16335,11 +16335,11 @@ type HyperdriveDynamicApi =
     /// <summary>
     /// Provision a connection for the database described by `args`.
     /// </summary>
-    abstract get: args: HyperdriveDynamicConfig -> obj
+    abstract get: args: HyperdriveDynamicConfig -> JS.Promise<HyperdriveDynamic>
     /// <summary>
     /// Get a pre-generated connection string used for connecting to dynamic Hyperdrive.
     /// </summary>
-    abstract getHyperdriveConnectionString: connectionString: string -> obj
+    abstract getHyperdriveConnectionString: connectionString: string -> JS.Promise<string>
 
 /// <summary>
 /// Parameters identifying the database that a dynamically-provisioned
@@ -16664,12 +16664,12 @@ type ImageHandle =
     /// Get metadata for a hosted image
     /// </summary>
     /// <remarks>@returns Image metadata, or null if not found</remarks>
-    abstract details: unit -> obj
+    abstract details: unit -> JS.Promise<ImageMetadata option>
     /// <summary>
     /// Get the raw image data for a hosted image
     /// </summary>
     /// <remarks>@returns ReadableStream of image bytes, or null if not found</remarks>
-    abstract bytes: unit -> obj
+    abstract bytes: unit -> JS.Promise<obj option>
     /// <summary>
     /// Generate a signed delivery URL for this hosted image.
     /// </summary>
@@ -16677,7 +16677,7 @@ type ImageHandle =
     /// <remarks>@returns A signed image delivery URL</remarks>
     /// <remarks>@throws {</remarks>
     /// <remarks>@link ImagesError} if signing fails</remarks>
-    abstract signedUrl: options: ImageSignedUrlOptions -> obj
+    abstract signedUrl: options: ImageSignedUrlOptions -> JS.Promise<string>
     /// <summary>
     /// Update hosted image metadata
     /// </summary>
@@ -16685,12 +16685,12 @@ type ImageHandle =
     /// <remarks>@returns Updated image metadata</remarks>
     /// <remarks>@throws {</remarks>
     /// <remarks>@link ImagesError} if update fails</remarks>
-    abstract update: options: ImageUpdateOptions -> obj
+    abstract update: options: ImageUpdateOptions -> JS.Promise<ImageMetadata>
     /// <summary>
     /// Delete a hosted image
     /// </summary>
     /// <remarks>@returns True if deleted, false if not found</remarks>
-    abstract delete: unit -> obj
+    abstract delete: unit -> JS.Promise<bool>
 
 type HostedImagesBinding =
     /// <summary>
@@ -16707,7 +16707,7 @@ type HostedImagesBinding =
     /// <remarks>@returns Metadata for the uploaded image</remarks>
     /// <remarks>@throws {</remarks>
     /// <remarks>@link ImagesError} if upload fails</remarks>
-    abstract upload: image: obj * ?options: ImageUploadOptions -> obj
+    abstract upload: image: obj * ?options: ImageUploadOptions -> JS.Promise<ImageMetadata>
     /// <summary>
     /// List hosted images with pagination
     /// </summary>
@@ -16715,7 +16715,7 @@ type HostedImagesBinding =
     /// <remarks>@returns List of images with pagination info</remarks>
     /// <remarks>@throws {</remarks>
     /// <remarks>@link ImagesError} if list fails</remarks>
-    abstract list: ?options: ImageListOptions -> obj
+    abstract list: ?options: ImageListOptions -> JS.Promise<ImageList>
     /// <summary>
     /// Create a Direct Creator Upload link, letting an end user upload an
     /// image straight to Cloudflare without exposing an API token
@@ -16724,7 +16724,7 @@ type HostedImagesBinding =
     /// <remarks>@returns The new image ID and the upload URL to hand to the end user</remarks>
     /// <remarks>@throws {</remarks>
     /// <remarks>@link ImagesError} if creation fails</remarks>
-    abstract createDirectUpload: ?options: ImageDirectUploadOptions -> obj
+    abstract createDirectUpload: ?options: ImageDirectUploadOptions -> JS.Promise<ImageDirectUploadResult>
 
 type ImagesBinding =
     /// <summary>
@@ -16733,7 +16733,7 @@ type ImagesBinding =
     /// <remarks>@throws {</remarks>
     /// <remarks>@link ImagesError} with code 9412 if input is not an image</remarks>
     /// <remarks>@param stream The image bytes</remarks>
-    abstract info: stream: obj * ?options: ImageInputOptions -> obj
+    abstract info: stream: obj * ?options: ImageInputOptions -> JS.Promise<ImageInfoResponse>
     /// <summary>
     /// Begin applying a series of transformations to an image
     /// </summary>
@@ -16771,7 +16771,7 @@ type ImageTransformer =
     /// provided input
     /// </summary>
     /// <remarks>@param options Options that apply to the output e.g. output format</remarks>
-    abstract output: options: ImageOutputOptions -> obj
+    abstract output: options: ImageOutputOptions -> JS.Promise<ImageTransformationResult>
 
 [<Interface>]
 type ImageTransformationOutputOptions =
@@ -16880,17 +16880,17 @@ type MediaTransformationResult =
     /// Returns the transformed media as a readable stream of bytes.
     /// </summary>
     /// <remarks>@returns A promise containing a readable stream with the transformed media</remarks>
-    abstract media: unit -> obj
+    abstract media: unit -> JS.Promise<obj>
     /// <summary>
     /// Returns the transformed media as an HTTP response object.
     /// </summary>
     /// <remarks>@returns The transformed media as a Promise&lt;Response&gt;, ready to store in cache or return to users</remarks>
-    abstract response: unit -> obj
+    abstract response: unit -> JS.Promise<obj>
     /// <summary>
     /// Returns the MIME type of the transformed media.
     /// </summary>
     /// <remarks>@returns A promise containing the content type string (e.g., 'image/jpeg', 'video/mp4')</remarks>
-    abstract contentType: unit -> obj
+    abstract contentType: unit -> JS.Promise<string>
 
 /// <summary>
 /// Configuration options for transforming media input.
@@ -16953,55 +16953,55 @@ type Params<'P> = private Params__ of obj
 type EventContext<'Env, 'P, 'Data> =
     abstract request: obj with get, set
     abstract functionPath: string with get, set
-    abstract waitUntil: Action<obj> with get, set
+    abstract waitUntil: Action<JS.Promise<obj>> with get, set
     abstract passThroughOnException: Action with get, set
-    abstract next: Func<obj option, obj option, obj> with get, set
+    abstract next: Func<obj option, obj option, JS.Promise<obj>> with get, set
     abstract env: obj with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: obj, functionPath: string, waitUntil: Action<obj>, passThroughOnException: Action, next: Func<obj option, obj option, obj>, env: obj, ``params``: obj, data: 'Data) : EventContext<'Env, 'P, 'Data> = jsNative
+    static member Create (request: obj, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<obj option, obj option, JS.Promise<obj>>, env: obj, ``params``: obj, data: 'Data) : EventContext<'Env, 'P, 'Data> = jsNative
 
 [<Interface>]
 type PagesFunctionContext<'Env, 'Params, 'Data> =
     abstract request: obj with get, set
     abstract functionPath: string with get, set
-    abstract waitUntil: Action<obj> with get, set
+    abstract waitUntil: Action<JS.Promise<obj>> with get, set
     abstract passThroughOnException: Action with get, set
-    abstract next: Func<obj option, obj option, obj> with get, set
+    abstract next: Func<obj option, obj option, JS.Promise<obj>> with get, set
     abstract env: obj with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: obj, functionPath: string, waitUntil: Action<obj>, passThroughOnException: Action, next: Func<obj option, obj option, obj>, env: obj, ``params``: obj, data: 'Data) : PagesFunctionContext<'Env, 'Params, 'Data> = jsNative
+    static member Create (request: obj, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<obj option, obj option, JS.Promise<obj>>, env: obj, ``params``: obj, data: 'Data) : PagesFunctionContext<'Env, 'Params, 'Data> = jsNative
 
 [<Interface>]
 type EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> =
     abstract request: obj with get, set
     abstract functionPath: string with get, set
-    abstract waitUntil: Action<obj> with get, set
+    abstract waitUntil: Action<JS.Promise<obj>> with get, set
     abstract passThroughOnException: Action with get, set
-    abstract next: Func<obj option, obj option, obj> with get, set
+    abstract next: Func<obj option, obj option, JS.Promise<obj>> with get, set
     abstract env: obj with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     abstract pluginArgs: 'PluginArgs with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: obj, functionPath: string, waitUntil: Action<obj>, passThroughOnException: Action, next: Func<obj option, obj option, obj>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> = jsNative
+    static member Create (request: obj, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<obj option, obj option, JS.Promise<obj>>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> = jsNative
 
 [<Interface>]
 type PagesPluginFunctionContext<'Env, 'Params, 'Data, 'PluginArgs> =
     abstract request: obj with get, set
     abstract functionPath: string with get, set
-    abstract waitUntil: Action<obj> with get, set
+    abstract waitUntil: Action<JS.Promise<obj>> with get, set
     abstract passThroughOnException: Action with get, set
-    abstract next: Func<obj option, obj option, obj> with get, set
+    abstract next: Func<obj option, obj option, JS.Promise<obj>> with get, set
     abstract env: obj with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     abstract pluginArgs: 'PluginArgs with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: obj, functionPath: string, waitUntil: Action<obj>, passThroughOnException: Action, next: Func<obj option, obj option, obj>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : PagesPluginFunctionContext<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
+    static member Create (request: obj, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<obj option, obj option, JS.Promise<obj>>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : PagesPluginFunctionContext<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
 
 [<Interface>]
 type PubSubMessage =
@@ -17013,9 +17013,9 @@ type PubSubMessage =
     abstract receivedAt: float
     abstract contentType: string
     abstract payloadFormatIndicator: float
-    abstract payload: obj with get, set
+    abstract payload: U2<string, JS.Uint8Array> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (mid: float, broker: string, topic: string, clientId: string, receivedAt: float, contentType: string, payloadFormatIndicator: float, payload: obj, ?jti: string) : PubSubMessage = jsNative
+    static member Create (mid: float, broker: string, topic: string, clientId: string, receivedAt: float, contentType: string, payloadFormatIndicator: float, payload: U2<string, JS.Uint8Array>, ?jti: string) : PubSubMessage = jsNative
 
 [<Interface>]
 type JsonWebKeyWithKid =
@@ -17059,7 +17059,7 @@ type RateLimit =
     /// </summary>
     /// <remarks>@see https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/</remarks>
     /// <remarks>@returns A promise that resolves with the outcome of the rate limit.</remarks>
-    abstract limit: options: RateLimitOptions -> obj
+    abstract limit: options: RateLimitOptions -> JS.Promise<RateLimitOutcome>
 
 [<Interface>]
 type Rpc =
@@ -17079,7 +17079,7 @@ type CloudflareWorkersModule =
     abstract DurableObject: obj with get, set
     abstract WorkflowStep: obj with get, set
     abstract WorkflowEntrypoint: obj with get, set
-    abstract waitUntil: Action<obj> with get, set
+    abstract waitUntil: Action<JS.Promise<obj>> with get, set
     abstract withEnv: Func<obj, Func<obj>, obj> with get, set
     abstract withExports: Func<obj, Func<obj>, obj> with get, set
     abstract withEnvAndExports: Func<obj, obj, Func<obj>, obj> with get, set
@@ -17088,7 +17088,7 @@ type CloudflareWorkersModule =
     abstract cache: CacheContext
     abstract tracing: Tracing
     [<ParamObject; Emit("$0")>]
-    static member Create (RpcStub: obj, RpcTarget: obj, WorkerEntrypoint: obj, DurableObject: obj, WorkflowStep: obj, WorkflowEntrypoint: obj, waitUntil: Action<obj>, withEnv: Func<obj, Func<obj>, obj>, withExports: Func<obj, Func<obj>, obj>, withEnvAndExports: Func<obj, obj, Func<obj>, obj>, env: obj, exports: obj, cache: CacheContext, tracing: Tracing) : CloudflareWorkersModule = jsNative
+    static member Create (RpcStub: obj, RpcTarget: obj, WorkerEntrypoint: obj, DurableObject: obj, WorkflowStep: obj, WorkflowEntrypoint: obj, waitUntil: Action<JS.Promise<obj>>, withEnv: Func<obj, Func<obj>, obj>, withExports: Func<obj, Func<obj>, obj>, withEnvAndExports: Func<obj, obj, Func<obj>, obj>, env: obj, exports: obj, cache: CacheContext, tracing: Tracing) : CloudflareWorkersModule = jsNative
 
 type DurableObject2 = DurableObject3<obj, obj>
 
@@ -17097,14 +17097,14 @@ type DurableObject3<'Env, 'Props> =
     abstract __DURABLE_OBJECT_BRAND: unit
     abstract ctx: DurableObjectState<'Props> with get, set
     abstract env: 'Env with get, set
-    abstract alarm: Func<AlarmInvocationInfo option, obj option> option with get, set
+    abstract alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option> option with get, set
     abstract fetch: Func<obj, obj> option with get, set
-    abstract connect: Func<Socket, obj option> option with get, set
-    abstract webSocketMessage: Func<obj, obj, obj option> option with get, set
-    abstract webSocketClose: Func<obj, float, string, bool, obj option> option with get, set
-    abstract webSocketError: Func<obj, obj, obj option> option with get, set
+    abstract connect: Func<Socket, JS.Promise<unit> option> option with get, set
+    abstract webSocketMessage: Func<obj, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
+    abstract webSocketClose: Func<obj, float, string, bool, JS.Promise<unit> option> option with get, set
+    abstract webSocketError: Func<obj, obj, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: DurableObjectState<'Props>, env: 'Env, ?alarm: Func<AlarmInvocationInfo option, obj option>, ?fetch: Func<obj, obj>, ?connect: Func<Socket, obj option>, ?webSocketMessage: Func<obj, obj, obj option>, ?webSocketClose: Func<obj, float, string, bool, obj option>, ?webSocketError: Func<obj, obj, obj option>) : DurableObject3<'Env, 'Props> = jsNative
+    static member Create (ctx: DurableObjectState<'Props>, env: 'Env, ?alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option>, ?fetch: Func<obj, obj>, ?connect: Func<Socket, JS.Promise<unit> option>, ?webSocketMessage: Func<obj, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<obj, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<obj, obj, JS.Promise<unit> option>) : DurableObject3<'Env, 'Props> = jsNative
 
 [<Interface>]
 type RpcTarget =
@@ -17119,17 +17119,17 @@ type WorkerEntrypoint2<'Env, 'Props> =
     abstract __WORKER_ENTRYPOINT_BRAND: unit
     abstract ctx: ExecutionContext<'Props> with get, set
     abstract env: 'Env with get, set
-    abstract email: Func<ForwardableEmailMessage, obj option> option with get, set
+    abstract email: Func<ForwardableEmailMessage, JS.Promise<unit> option> option with get, set
     abstract fetch: Func<obj, obj> option with get, set
-    abstract connect: Func<Socket, obj option> option with get, set
-    abstract queue: Func<MessageBatch<obj>, obj option> option with get, set
-    abstract scheduled: Func<ScheduledController, obj option> option with get, set
-    abstract tail: Func<TraceItem[], obj option> option with get, set
-    abstract tailStream: Func<TailEvent2, obj> option with get, set
-    abstract test: Func<TestController, obj option> option with get, set
-    abstract trace: Func<TraceItem[], obj option> option with get, set
+    abstract connect: Func<Socket, JS.Promise<unit> option> option with get, set
+    abstract queue: Func<MessageBatch<obj>, JS.Promise<unit> option> option with get, set
+    abstract scheduled: Func<ScheduledController, JS.Promise<unit> option> option with get, set
+    abstract tail: Func<TraceItem[], JS.Promise<unit> option> option with get, set
+    abstract tailStream: Func<TailEvent2, U3<JS.Promise<U2<Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>> option with get, set
+    abstract test: Func<TestController, JS.Promise<unit> option> option with get, set
+    abstract trace: Func<TraceItem[], JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: ExecutionContext<'Props>, env: 'Env, ?email: Func<ForwardableEmailMessage, obj option>, ?fetch: Func<obj, obj>, ?connect: Func<Socket, obj option>, ?queue: Func<MessageBatch<obj>, obj option>, ?scheduled: Func<ScheduledController, obj option>, ?tail: Func<TraceItem[], obj option>, ?tailStream: Func<TailEvent2, obj>, ?test: Func<TestController, obj option>, ?trace: Func<TraceItem[], obj option>) : WorkerEntrypoint2<'Env, 'Props> = jsNative
+    static member Create (ctx: ExecutionContext<'Props>, env: 'Env, ?email: Func<ForwardableEmailMessage, JS.Promise<unit> option>, ?fetch: Func<obj, obj>, ?connect: Func<Socket, JS.Promise<unit> option>, ?queue: Func<MessageBatch<obj>, JS.Promise<unit> option>, ?scheduled: Func<ScheduledController, JS.Promise<unit> option>, ?tail: Func<TraceItem[], JS.Promise<unit> option>, ?tailStream: Func<TailEvent2, U3<JS.Promise<U2<Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent3, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?test: Func<TestController, JS.Promise<unit> option>, ?trace: Func<TraceItem[], JS.Promise<unit> option>) : WorkerEntrypoint2<'Env, 'Props> = jsNative
 
 type WorkflowEntrypoint = WorkflowEntrypoint2<obj, obj>
 
@@ -17137,7 +17137,7 @@ type WorkflowEntrypoint2<'Env, 'T> =
     abstract __WORKFLOW_ENTRYPOINT_BRAND: unit
     abstract ctx: ExecutionContext<obj> with get, set
     abstract env: 'Env with get, set
-    abstract run: ``event``: obj * step: WorkflowStep -> obj
+    abstract run: ``event``: obj * step: WorkflowStep -> JS.Promise<obj>
 
 [<Interface>]
 type WorkflowEntrypointRunEventSchedule =
@@ -17153,13 +17153,13 @@ type WorkflowEntrypointRunEventSchedule =
     static member Create (cron: string, scheduledTime: float) : WorkflowEntrypointRunEventSchedule = jsNative
 
 type WorkflowStep =
-    abstract ``do``: name: string * callback: Func<WorkflowStepDoCallbackCtx, obj> * ?rollbackOptions: obj -> obj
-    abstract ``do``: name: string * config: obj * callback: Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx, obj> * ?rollbackOptions: obj -> obj
-    abstract ``do``: name: string * config: obj * callback: Func<WorkflowStepDoCallbackCtx, obj> * ?rollbackOptions: obj -> obj
-    abstract ``do``: name: string * config: WorkflowStepDoConfig * callback: Func<WorkflowStepDoCallbackCtx, obj> * ?rollbackOptions: obj -> obj
-    abstract sleep: Func<string, WorkflowSleepDuration, obj> with get, set
-    abstract sleepUntil: Func<string, obj, obj> with get, set
-    abstract waitForEvent: name: string * options: WorkflowStepWaitForEventOptions -> obj
+    abstract ``do``<'T>: name: string * callback: Func<WorkflowStepDoCallbackCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
+    abstract ``do``<'T>: name: string * config: obj * callback: Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
+    abstract ``do``<'T>: name: string * config: obj * callback: Func<WorkflowStepDoCallbackCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
+    abstract ``do``<'T>: name: string * config: WorkflowStepDoConfig * callback: Func<WorkflowStepDoCallbackCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
+    abstract sleep: Func<string, WorkflowSleepDuration, JS.Promise<unit>> with get, set
+    abstract sleepUntil: Func<string, U2<float, JS.Date>, JS.Promise<unit>> with get, set
+    abstract waitForEvent: name: string * options: WorkflowStepWaitForEventOptions -> JS.Promise<obj>
 
 [<Interface>]
 type WorkflowStepDoCallbackCtx =
@@ -17194,17 +17194,17 @@ type WorkflowStepDoConfig =
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions<'T> =
-    abstract rollback: Func<obj, obj> with get, set
+    abstract rollback: Func<obj, JS.Promise<unit>> with get, set
     abstract rollbackConfig: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (rollback: Func<obj, obj>, ?rollbackConfig: obj) : WorkflowStepDoRollbackOptions<'T> = jsNative
+    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: obj) : WorkflowStepDoRollbackOptions<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions2<'T> =
-    abstract rollback: Func<obj, obj> with get, set
+    abstract rollback: Func<obj, JS.Promise<unit>> with get, set
     abstract rollbackConfig: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (rollback: Func<obj, obj>, ?rollbackConfig: obj) : WorkflowStepDoRollbackOptions2<'T> = jsNative
+    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: obj) : WorkflowStepDoRollbackOptions2<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions2RollbackCtx<'T> =
@@ -17218,10 +17218,10 @@ type WorkflowStepDoRollbackOptions2RollbackCtx<'T> =
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions3<'T> =
-    abstract rollback: Func<obj, obj> with get, set
+    abstract rollback: Func<obj, JS.Promise<unit>> with get, set
     abstract rollbackConfig: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (rollback: Func<obj, obj>, ?rollbackConfig: obj) : WorkflowStepDoRollbackOptions3<'T> = jsNative
+    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: obj) : WorkflowStepDoRollbackOptions3<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions3RollbackCtx<'T> =
@@ -17235,10 +17235,10 @@ type WorkflowStepDoRollbackOptions3RollbackCtx<'T> =
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions4<'T> =
-    abstract rollback: Func<obj, obj> with get, set
+    abstract rollback: Func<obj, JS.Promise<unit>> with get, set
     abstract rollbackConfig: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (rollback: Func<obj, obj>, ?rollbackConfig: obj) : WorkflowStepDoRollbackOptions4<'T> = jsNative
+    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: obj) : WorkflowStepDoRollbackOptions4<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions4RollbackCtx<'T> =
@@ -17308,18 +17308,18 @@ type WorkflowStepWaitForEventOptions =
 [<Interface>]
 type WorkflowStepWaitForEventResultItem<'T> =
     abstract payload: obj with get, set
-    abstract timestamp: obj with get, set
+    abstract timestamp: JS.Date with get, set
     abstract ``type``: string with get, set
     abstract sensitive: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (payload: obj, timestamp: obj, ``type``: string, ?sensitive: string) : WorkflowStepWaitForEventResultItem<'T> = jsNative
+    static member Create (payload: obj, timestamp: JS.Date, ``type``: string, ?sensitive: string) : WorkflowStepWaitForEventResultItem<'T> = jsNative
 
 type SecretsStoreSecret =
     /// <summary>
     /// Get a secret from the Secrets Store, returning a string of the secret value
     /// if it exists, or throws an error if it does not exist
     /// </summary>
-    abstract get: unit -> obj
+    abstract get: unit -> JS.Promise<string>
 
 /// <summary>
 /// Binding entrypoint for Cloudflare Stream.
@@ -17362,7 +17362,7 @@ type StreamBinding =
     /// <remarks>@throws {RateLimitedError} if the server received too many requests</remarks>
     /// <remarks>@throws {AlreadyUploadedError} if a video was already uploaded to this URL</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract upload: url: string * ?``params``: StreamUrlUploadParams -> obj
+    abstract upload: url: string * ?``params``: StreamUrlUploadParams -> JS.Promise<StreamVideo>
     /// <summary>
     /// Creates a direct upload that allows video uploads without an API key.
     /// </summary>
@@ -17371,7 +17371,7 @@ type StreamBinding =
     /// <remarks>@throws {BadRequestError} if the parameters are invalid</remarks>
     /// <remarks>@throws {RateLimitedError} if the server received too many requests</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract createDirectUpload: ``params``: StreamDirectUploadCreateParams -> obj
+    abstract createDirectUpload: ``params``: StreamDirectUploadCreateParams -> JS.Promise<StreamDirectUpload>
     abstract videos: StreamVideos with get, set
     abstract watermarks: StreamWatermarks with get, set
 
@@ -17389,7 +17389,7 @@ type StreamVideoHandle =
     /// <remarks>@returns The full video details.</remarks>
     /// <remarks>@throws {NotFoundError} if the video is not found</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract details: unit -> obj
+    abstract details: unit -> JS.Promise<StreamVideo>
     /// <summary>
     /// Update details for a single video.
     /// </summary>
@@ -17398,20 +17398,20 @@ type StreamVideoHandle =
     /// <remarks>@throws {NotFoundError} if the video is not found</remarks>
     /// <remarks>@throws {BadRequestError} if the parameters are invalid</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract update: ``params``: StreamUpdateVideoParams -> obj
+    abstract update: ``params``: StreamUpdateVideoParams -> JS.Promise<StreamVideo>
     /// <summary>
     /// Deletes a video and its copies from Cloudflare Stream.
     /// </summary>
     /// <remarks>@returns A promise that resolves when deletion completes.</remarks>
     /// <remarks>@throws {NotFoundError} if the video is not found</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract delete: unit -> obj
+    abstract delete: unit -> JS.Promise<unit>
     /// <summary>
     /// Creates a signed URL token for a video.
     /// </summary>
     /// <remarks>@returns The signed token that was created.</remarks>
     /// <remarks>@throws {InternalError} if the signing key cannot be retrieved or the token cannot be signed</remarks>
-    abstract generateToken: unit -> obj
+    abstract generateToken: unit -> JS.Promise<string>
     abstract downloads: StreamScopedDownloads with get, set
     abstract captions: StreamScopedCaptions with get, set
 
@@ -17711,7 +17711,7 @@ type StreamScopedCaptions =
     /// <remarks>@throws {NotFoundError} if the video is not found</remarks>
     /// <remarks>@throws {BadRequestError} if the language or file is invalid</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract upload: language: string * input: obj -> obj
+    abstract upload: language: string * input: obj -> JS.Promise<StreamCaption>
     /// <summary>
     /// Generate captions or subtitles for the provided language via AI.
     /// </summary>
@@ -17724,7 +17724,7 @@ type StreamScopedCaptions =
     /// <remarks>@throws {StreamError} if the video is missing audio</remarks>
     /// <remarks>@throws {StreamError} if the requested language is not supported</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract generate: language: string -> obj
+    abstract generate: language: string -> JS.Promise<StreamCaption>
     /// <summary>
     /// Lists the captions or subtitles.
     /// Use the language parameter to filter by a specific language.
@@ -17733,7 +17733,7 @@ type StreamScopedCaptions =
     /// <remarks>@returns The list of captions or subtitles.</remarks>
     /// <remarks>@throws {NotFoundError} if the video or caption is not found</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract list: ?language: string -> obj
+    abstract list: ?language: string -> JS.Promise<StreamCaption[]>
     /// <summary>
     /// Removes the captions or subtitles from a video.
     /// </summary>
@@ -17741,7 +17741,7 @@ type StreamScopedCaptions =
     /// <remarks>@returns A promise that resolves when deletion completes.</remarks>
     /// <remarks>@throws {NotFoundError} if the video or caption is not found</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract delete: language: string -> obj
+    abstract delete: language: string -> JS.Promise<unit>
 
 type StreamScopedDownloads =
     /// <summary>
@@ -17755,14 +17755,14 @@ type StreamScopedDownloads =
     /// <remarks>@throws {StreamError} if the video duration is too long to generate a download</remarks>
     /// <remarks>@throws {StreamError} if the video is not ready to stream</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract generate: ?downloadType: StreamDownloadType -> obj
+    abstract generate: ?downloadType: StreamDownloadType -> JS.Promise<StreamDownloadGetResponse>
     /// <summary>
     /// Lists the downloads created for a video.
     /// </summary>
     /// <remarks>@returns The current downloads for the video.</remarks>
     /// <remarks>@throws {NotFoundError} if the video or downloads are not found</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract get: unit -> obj
+    abstract get: unit -> JS.Promise<StreamDownloadGetResponse>
     /// <summary>
     /// Delete the downloads for a video. Available types are `default` and `audio`.
     /// Defaults to `default` when omitted.
@@ -17771,7 +17771,7 @@ type StreamScopedDownloads =
     /// <remarks>@returns A promise that resolves when deletion completes.</remarks>
     /// <remarks>@throws {NotFoundError} if the video or downloads are not found</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract delete: ?downloadType: StreamDownloadType -> obj
+    abstract delete: ?downloadType: StreamDownloadType -> JS.Promise<unit>
 
 type StreamVideos =
     /// <summary>
@@ -17780,7 +17780,7 @@ type StreamVideos =
     /// <remarks>@returns The list of videos.</remarks>
     /// <remarks>@throws {BadRequestError} if the parameters are invalid</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract list: ?``params``: StreamVideosListParams -> obj
+    abstract list: ?``params``: StreamVideosListParams -> JS.Promise<StreamVideo[]>
 
 type StreamWatermarks =
     /// <summary>
@@ -17800,7 +17800,7 @@ type StreamWatermarks =
     /// <remarks>@throws {InvalidURLError} if the URL is invalid</remarks>
     /// <remarks>@throws {TooManyWatermarksError} if the number of allowed watermarks is reached</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract generate: input: obj * ``params``: StreamWatermarkCreateParams -> obj
+    abstract generate: input: obj * ``params``: StreamWatermarkCreateParams -> JS.Promise<StreamWatermark>
     /// <summary>
     /// Generate a new watermark profile
     /// </summary>
@@ -17818,13 +17818,13 @@ type StreamWatermarks =
     /// <remarks>@throws {InvalidURLError} if the URL is invalid</remarks>
     /// <remarks>@throws {TooManyWatermarksError} if the number of allowed watermarks is reached</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract generate: url: string * ``params``: StreamWatermarkCreateParams -> obj
+    abstract generate: url: string * ``params``: StreamWatermarkCreateParams -> JS.Promise<StreamWatermark>
     /// <summary>
     /// Lists all watermark profiles for an account.
     /// </summary>
     /// <remarks>@returns The list of watermark profiles.</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract list: unit -> obj
+    abstract list: unit -> JS.Promise<StreamWatermark[]>
     /// <summary>
     /// Retrieves details for a single watermark profile.
     /// </summary>
@@ -17832,7 +17832,7 @@ type StreamWatermarks =
     /// <remarks>@returns The watermark profile details.</remarks>
     /// <remarks>@throws {NotFoundError} if the watermark is not found</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract get: watermarkId: string -> obj
+    abstract get: watermarkId: string -> JS.Promise<StreamWatermark>
     /// <summary>
     /// Deletes a watermark profile.
     /// </summary>
@@ -17840,7 +17840,7 @@ type StreamWatermarks =
     /// <remarks>@returns A promise that resolves when deletion completes.</remarks>
     /// <remarks>@throws {NotFoundError} if the watermark is not found</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract delete: watermarkId: string -> obj
+    abstract delete: watermarkId: string -> JS.Promise<unit>
 
 [<Interface>]
 type StreamUpdateVideoParams =
@@ -18271,9 +18271,9 @@ type SupportedFileFormat =
     static member Create (mimeType: string, extension: string) : SupportedFileFormat = jsNative
 
 type ToMarkdownService =
-    abstract transform: files: MarkdownDocument[] * ?options: ConversionRequestOptions -> obj
-    abstract transform: files: MarkdownDocument * ?options: ConversionRequestOptions -> obj
-    abstract supported: unit -> obj
+    abstract transform: files: MarkdownDocument[] * ?options: ConversionRequestOptions -> JS.Promise<ConversionResponse[]>
+    abstract transform: files: MarkdownDocument * ?options: ConversionRequestOptions -> JS.Promise<ConversionResponse>
+    abstract supported: unit -> JS.Promise<SupportedFileFormat[]>
 
 /// <summary>
 /// Data types supported for holding vector metadata.
@@ -18285,7 +18285,7 @@ type VectorizeVectorMetadataValue = U4<string, float, bool, string[]>
 /// </summary>
 type VectorizeVectorMetadata = obj
 
-type VectorFloatArray = obj
+type VectorFloatArray = U2<JS.Float32Array, JS.Float64Array>
 
 [<Interface>]
 type VectorizeError =
@@ -18430,7 +18430,7 @@ type VectorizeVector =
     /// <summary>
     /// The vector values
     /// </summary>
-    abstract values: obj with get, set
+    abstract values: U3<float[], JS.Float32Array, JS.Float64Array> with get, set
     /// <summary>
     /// The namespace this vector belongs to.
     /// </summary>
@@ -18440,7 +18440,7 @@ type VectorizeVector =
     /// </summary>
     abstract metadata: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, values: obj, ?``namespace``: string, ?metadata: obj) : VectorizeVector = jsNative
+    static member Create (id: string, values: U3<float[], JS.Float32Array, JS.Float64Array>, ?``namespace``: string, ?metadata: obj) : VectorizeVector = jsNative
 
 /// <summary>
 /// Represents a matched vector for a query along with its score and (if specified) the matching vector information.
@@ -18495,38 +18495,38 @@ type VectorizeIndex =
     /// Get information about the currently bound index.
     /// </summary>
     /// <remarks>@returns A promise that resolves with information about the current index.</remarks>
-    abstract describe: unit -> obj
+    abstract describe: unit -> JS.Promise<VectorizeIndexDetails>
     /// <summary>
     /// Use the provided vector to perform a similarity search across the index.
     /// </summary>
     /// <remarks>@param vector Input vector that will be used to drive the similarity search.</remarks>
     /// <remarks>@param options Configuration options to massage the returned data.</remarks>
     /// <remarks>@returns A promise that resolves with matched and scored vectors.</remarks>
-    abstract query: vector: obj * ?options: VectorizeQueryOptions -> obj
+    abstract query: vector: U3<float[], JS.Float32Array, JS.Float64Array> * ?options: VectorizeQueryOptions -> JS.Promise<VectorizeMatches>
     /// <summary>
     /// Insert a list of vectors into the index dataset. If a provided id exists, an error will be thrown.
     /// </summary>
     /// <remarks>@param vectors List of vectors that will be inserted.</remarks>
     /// <remarks>@returns A promise that resolves with the ids &amp; count of records that were successfully processed.</remarks>
-    abstract insert: vectors: VectorizeVector[] -> obj
+    abstract insert: vectors: VectorizeVector[] -> JS.Promise<VectorizeVectorMutation>
     /// <summary>
     /// Upsert a list of vectors into the index dataset. If a provided id exists, it will be replaced with the new values.
     /// </summary>
     /// <remarks>@param vectors List of vectors that will be upserted.</remarks>
     /// <remarks>@returns A promise that resolves with the ids &amp; count of records that were successfully processed.</remarks>
-    abstract upsert: vectors: VectorizeVector[] -> obj
+    abstract upsert: vectors: VectorizeVector[] -> JS.Promise<VectorizeVectorMutation>
     /// <summary>
     /// Delete a list of vectors with a matching id.
     /// </summary>
     /// <remarks>@param ids List of vector ids that should be deleted.</remarks>
     /// <remarks>@returns A promise that resolves with the ids &amp; count of records that were successfully processed (and thus deleted).</remarks>
-    abstract deleteByIds: ids: string[] -> obj
+    abstract deleteByIds: ids: string[] -> JS.Promise<VectorizeVectorMutation>
     /// <summary>
     /// Get a list of vectors with a matching id.
     /// </summary>
     /// <remarks>@param ids List of vector ids that should be returned.</remarks>
     /// <remarks>@returns A promise that resolves with the raw unscored vectors matching the id set.</remarks>
-    abstract getByIds: ids: string[] -> obj
+    abstract getByIds: ids: string[] -> JS.Promise<VectorizeVector[]>
 
 /// <summary>
 /// A Vectorize Vector Search Index for querying vectors/embeddings.
@@ -18538,45 +18538,45 @@ type Vectorize =
     /// Get information about the currently bound index.
     /// </summary>
     /// <remarks>@returns A promise that resolves with information about the current index.</remarks>
-    abstract describe: unit -> obj
+    abstract describe: unit -> JS.Promise<VectorizeIndexInfo>
     /// <summary>
     /// Use the provided vector to perform a similarity search across the index.
     /// </summary>
     /// <remarks>@param vector Input vector that will be used to drive the similarity search.</remarks>
     /// <remarks>@param options Configuration options to massage the returned data.</remarks>
     /// <remarks>@returns A promise that resolves with matched and scored vectors.</remarks>
-    abstract query: vector: obj * ?options: VectorizeQueryOptions -> obj
+    abstract query: vector: U3<float[], JS.Float32Array, JS.Float64Array> * ?options: VectorizeQueryOptions -> JS.Promise<VectorizeMatches>
     /// <summary>
     /// Use the provided vector-id to perform a similarity search across the index.
     /// </summary>
     /// <remarks>@param vectorId Id for a vector in the index against which the index should be queried.</remarks>
     /// <remarks>@param options Configuration options to massage the returned data.</remarks>
     /// <remarks>@returns A promise that resolves with matched and scored vectors.</remarks>
-    abstract queryById: vectorId: string * ?options: VectorizeQueryOptions -> obj
+    abstract queryById: vectorId: string * ?options: VectorizeQueryOptions -> JS.Promise<VectorizeMatches>
     /// <summary>
     /// Insert a list of vectors into the index dataset. If a provided id exists, an error will be thrown.
     /// </summary>
     /// <remarks>@param vectors List of vectors that will be inserted.</remarks>
     /// <remarks>@returns A promise that resolves with a unique identifier of a mutation containing the insert changeset.</remarks>
-    abstract insert: vectors: VectorizeVector[] -> obj
+    abstract insert: vectors: VectorizeVector[] -> JS.Promise<VectorizeAsyncMutation>
     /// <summary>
     /// Upsert a list of vectors into the index dataset. If a provided id exists, it will be replaced with the new values.
     /// </summary>
     /// <remarks>@param vectors List of vectors that will be upserted.</remarks>
     /// <remarks>@returns A promise that resolves with a unique identifier of a mutation containing the upsert changeset.</remarks>
-    abstract upsert: vectors: VectorizeVector[] -> obj
+    abstract upsert: vectors: VectorizeVector[] -> JS.Promise<VectorizeAsyncMutation>
     /// <summary>
     /// Delete a list of vectors with a matching id.
     /// </summary>
     /// <remarks>@param ids List of vector ids that should be deleted.</remarks>
     /// <remarks>@returns A promise that resolves with a unique identifier of a mutation containing the delete changeset.</remarks>
-    abstract deleteByIds: ids: string[] -> obj
+    abstract deleteByIds: ids: string[] -> JS.Promise<VectorizeAsyncMutation>
     /// <summary>
     /// Get a list of vectors with a matching id.
     /// </summary>
     /// <remarks>@param ids List of vector ids that should be returned.</remarks>
     /// <remarks>@returns A promise that resolves with the raw unscored vectors matching the id set.</remarks>
-    abstract getByIds: ids: string[] -> obj
+    abstract getByIds: ids: string[] -> JS.Promise<VectorizeVector[]>
 
 /// <summary>
 /// The interface for "version_metadata" binding
@@ -18720,7 +18720,7 @@ type WebSearch =
     /// </summary>
     /// <remarks>@param options Search options. Only `query` is required.</remarks>
     /// <remarks>@returns The matching results plus per-response metadata.</remarks>
-    abstract search: options: WebSearchSearchOptions -> obj
+    abstract search: options: WebSearchSearchOptions -> JS.Promise<WebSearchSearchResponse>
 
 [<Interface>]
 type DynamicDispatchLimits =
@@ -18781,20 +18781,20 @@ type Workflow<'PARAMS> =
     /// </summary>
     /// <remarks>@param id Id for the instance of this Workflow</remarks>
     /// <remarks>@returns A promise that resolves with a handle for the Instance</remarks>
-    abstract get: id: string -> obj
+    abstract get: id: string -> JS.Promise<WorkflowInstance>
     /// <summary>
     /// Create a new instance and return a handle to it. If a provided id exists, an error will be thrown.
     /// </summary>
     /// <remarks>@param options Options when creating an instance including id and params</remarks>
     /// <remarks>@returns A promise that resolves with a handle for the Instance</remarks>
-    abstract create: ?options: WorkflowInstanceCreateOptions<'PARAMS> -> obj
+    abstract create: ?options: WorkflowInstanceCreateOptions<'PARAMS> -> JS.Promise<WorkflowInstance>
     /// <summary>
     /// Create a batch of instances and return handle for all of them. If a provided id exists, an error will be thrown.
     /// `createBatch` is limited at 100 instances at a time or when the RPC limit for the batch (1MiB) is reached.
     /// </summary>
     /// <remarks>@param batch List of Options when creating an instance including name and params</remarks>
     /// <remarks>@returns A promise that resolves with a list of handles for the created instances.</remarks>
-    abstract createBatch: batch: WorkflowInstanceCreateOptions<'PARAMS>[] -> obj
+    abstract createBatch: batch: WorkflowInstanceCreateOptions<'PARAMS>[] -> JS.Promise<WorkflowInstance[]>
     /// <summary>
     /// Delete a batch of Workflow instances and their stored state.
     /// `deleteBatch` is limited to 100 instances at a time. Duplicate IDs are deleted once.
@@ -18802,7 +18802,7 @@ type Workflow<'PARAMS> =
     /// </summary>
     /// <remarks>@param instanceIds IDs of the Workflow instances to delete</remarks>
     /// <remarks>@returns A promise that resolves with the successfully deleted instances and any per-instance errors.</remarks>
-    abstract deleteBatch: instanceIds: string[] -> obj
+    abstract deleteBatch: instanceIds: string[] -> JS.Promise<WorkflowBatchDeleteResult>
 
 [<Interface>]
 type WorkflowBatchDeleteResultDeletedItem =
@@ -18954,34 +18954,34 @@ type WorkflowInstance =
     /// <summary>
     /// Pause the instance.
     /// </summary>
-    abstract pause: unit -> obj
+    abstract pause: unit -> JS.Promise<unit>
     /// <summary>
     /// Resume the instance. If it is already running, an error will be thrown.
     /// </summary>
-    abstract resume: unit -> obj
+    abstract resume: unit -> JS.Promise<unit>
     /// <summary>
     /// Terminate the instance. If it is errored, terminated or complete, an error will be thrown.
     /// </summary>
     /// <remarks>@param options Options for termination, including whether registered rollback handlers should run.</remarks>
-    abstract terminate: ?options: WorkflowInstanceTerminateOptions -> obj
+    abstract terminate: ?options: WorkflowInstanceTerminateOptions -> JS.Promise<unit>
     /// <summary>
     /// Restart the instance. Optionally restart from a specific step, preserving
     /// cached results for all steps before it.
     /// </summary>
     /// <remarks>@param options Options for the restart, including an optional step to restart from.</remarks>
-    abstract restart: ?options: WorkflowInstanceRestartOptions -> obj
+    abstract restart: ?options: WorkflowInstanceRestartOptions -> JS.Promise<unit>
     /// <summary>
     /// Delete the instance and its stored state.
     /// </summary>
-    abstract delete: unit -> obj
+    abstract delete: unit -> JS.Promise<unit>
     /// <summary>
     /// Returns the current status of the instance.
     /// </summary>
-    abstract status: unit -> obj
+    abstract status: unit -> JS.Promise<InstanceStatus>
     /// <summary>
     /// Send an event to this instance.
     /// </summary>
-    abstract sendEvent: __0: WorkflowInstanceSendEvent0 -> obj
+    abstract sendEvent: __0: WorkflowInstanceSendEvent0 -> JS.Promise<unit>
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

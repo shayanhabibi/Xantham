@@ -432,9 +432,18 @@ Phases — each ends with the compile gate green on its fixtures:
     name, so a branding intersection emits `[<Measure>] type UserId` and its uses read
     `string<UserId>`. Generated files now `open Xantham.Fable.Core`; `tests/fixtures/brand-
     lab` pins the idiom and its negatives under the live compiler. D11 closes.
-  **Still ahead in D:** the group dispositions that would give the six widened
-  `workers-types` aliases their shape back, the Fable *run* gate, and the `type-fest` and
-  `solid-js` rungs D9 wants for calibration.
+  - *The compiler-lib disposition (2026-09-02).* O7's compiler-lib group widened to `obj`
+    for want of a shipped binding; for the ECMAScript half of `lib.d.ts` that binding is
+    `Fable.Core.JS`, which every generated file already opens. `Naming.LibBindings` is the
+    pinned table, keyed by name and carrying each binding's arity, because TypeScript's lib
+    drifts (it made `Uint8Array` generic in a parameter Fable's abbreviation lacks) and a
+    mapping that guessed would emit code that does not compile. On `workers-types` this took
+    widened findings from 528 to 451 and removed 39 "type parameter is erased" findings, a
+    generic whose only use of `'T` was inside a `Promise` now carrying it. The DOM half is
+    still `obj` on purpose: binding it means depending on `Fable.Browser.*`.
+  **Still ahead in D:** the *reference* disposition for the DOM half (a dependency decision,
+  not a table entry), the Fable *run* gate, and the `type-fest` and `solid-js` rungs D9 wants
+  for calibration.
 - **E — hardening.** Dedup/naming at scale, fidelity-manifest UX, determinism under the
   full litmus ladder, `@types/three` and `typescript` rungs.
 

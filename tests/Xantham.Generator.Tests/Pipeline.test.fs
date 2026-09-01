@@ -359,6 +359,39 @@ let pipelineTests =
                             $"{name} says in the manifest that it is a phantom" ])
 
         yield!
+            fixtureTests "lib-lab" (handFixture "lib-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "the compiler-lib names Fable.Core binds are referenced, not widened" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // O7's compiler-lib group widened to obj for want of a shipped binding.
+                      // For the ECMAScript half of the lib there is one, and every generated
+                      // file already opens it.
+                      Expect.stringContains source "static member fetchOne (url: string) : JS.Promise<string>" "a promise is a promise"
+                      Expect.stringContains source "JS.Map<string, string[]>" "both parameters carried"
+                      Expect.stringContains source "at: JS.Date) : JS.Date" "and the non-generic names too"
+
+                      // The argument is shaped at its own position, which is the half the old
+                      // wholesale widening cost most: `Promise<T>` used to erase T with it.
+                      Expect.stringContains source "abstract load: key: string -> JS.Promise<JS.Uint8Array>" "nested through a member"
+                      Expect.stringContains source "abstract boxed: Box<JS.Date>" "and through a generic this run declares"
+
+                      // Names Fable.Core does not bind keep widening. `seq<'T>` is not a JS
+                      // iterable, and the DOM needs a dependency this generator does not take.
+                      Expect.stringContains source "static member each (values: obj)" "the sync iteration protocol is unbound"
+                      Expect.stringContains source "static member handle (target: obj)" "and so is the DOM"
+
+                      // Every loss is in the manifest: the arity the lib drifted away from, and
+                      // the restrictions the readonly views express and F# has no binding for.
+                      let says fragment =
+                          rendered.Findings |> List.exists (fun f -> f.Message.Contains(fragment: string))
+
+                      Expect.isTrue (says "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0") "the dropped buffer parameter"
+                      Expect.isTrue (says "PromiseLike reads as JS.Promise") "a thenable is not a promise"
+                      Expect.isTrue (says "ReadonlyMap reads as JS.Map") "and readonly is not carried" ])
+
+
+        yield!
             fixtureTests "brand-lab" (handFixture "brand-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "a branding intersection becomes a measure its uses carry" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)

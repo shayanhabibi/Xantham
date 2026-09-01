@@ -1,0 +1,187 @@
+{
+  "package": "lib-lab",
+  "module": "LibLab",
+  "counts": {
+    "exact": 6,
+    "ergonomic": 7,
+    "widened": 3,
+    "escape": 0
+  },
+  "symbols": [
+    {
+      "name": "Store",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0; the extras are dropped"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        }
+      ]
+    },
+    {
+      "name": "Box",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "fetchOne",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "fetchAll",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "index",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "unique",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "cache",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "type flags NonPrimitive not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "type flags NonPrimitive not mapped yet; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "stamp",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "view",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "DataView carries 1 type arguments where JS.DataView takes 0; the extras are dropped"
+        }
+      ]
+    },
+    {
+      "name": "stream",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "AsyncIterator carries 3 type arguments where JS.AsyncIterator takes 1; the extras are dropped"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "AsyncIterable carries 3 type arguments where JS.AsyncIterable takes 1; the extras are dropped"
+        }
+      ]
+    },
+    {
+      "name": "invoke",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "bytes",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "Float64Array carries 1 type arguments where JS.Float64Array takes 0; the extras are dropped"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0; the extras are dropped"
+        }
+      ]
+    },
+    {
+      "name": "thenable",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "PromiseLike reads as JS.Promise; a bare thenable is not one"
+        }
+      ]
+    },
+    {
+      "name": "frozen",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "ReadonlyMap reads as JS.Map; the readonly restriction is not carried"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "ReadonlySet reads as JS.Set; the readonly restriction is not carried"
+        }
+      ]
+    },
+    {
+      "name": "each",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "Iterable is not among the generated declarations; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "handle",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "EventTarget is not among the generated declarations; widened to obj"
+        }
+      ]
+    }
+  ]
+}

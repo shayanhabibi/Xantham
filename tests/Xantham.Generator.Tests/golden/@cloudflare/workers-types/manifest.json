@@ -2,10 +2,10 @@
   "package": "@cloudflare/workers-types",
   "module": "Cloudflare.WorkersTypes",
   "counts": {
-    "exact": 189,
-    "ergonomic": 652,
-    "widened": 528,
-    "escape": 38
+    "exact": 198,
+    "ergonomic": 709,
+    "widened": 451,
+    "escape": 49
   },
   "symbols": [
     {
@@ -267,8 +267,8 @@
       "findings": [
         {
           "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "BigInt64Array is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "BigInt64Array carries 1 type arguments where JS.BigInt64Array takes 0; the extras are dropped"
         },
         {
           "pass": "shape-aliases",
@@ -277,48 +277,53 @@
         },
         {
           "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "Float32Array is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "Float32Array carries 1 type arguments where JS.Float32Array takes 0; the extras are dropped"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "Float64Array carries 1 type arguments where JS.Float64Array takes 0; the extras are dropped"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "Int16Array carries 1 type arguments where JS.Int16Array takes 0; the extras are dropped"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "Int32Array carries 1 type arguments where JS.Int32Array takes 0; the extras are dropped"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "Int8Array carries 1 type arguments where JS.Int8Array takes 0; the extras are dropped"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "Uint16Array carries 1 type arguments where JS.Uint16Array takes 0; the extras are dropped"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "Uint32Array carries 1 type arguments where JS.Uint32Array takes 0; the extras are dropped"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0; the extras are dropped"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "Uint8ClampedArray carries 1 type arguments where JS.Uint8ClampedArray takes 0; the extras are dropped"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "Float64Array is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "Int16Array is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "Int32Array is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "Int8Array is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "Uint16Array is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "Uint32Array is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "Uint8Array is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "Uint8ClampedArray is not among the generated declarations; widened to obj"
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -694,7 +699,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -735,11 +740,6 @@
           "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -945,20 +945,15 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
         }
       ]
     },
     {
       "name": "ExportedHandlerConnectHandler",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-callbacks",
           "tier": "ergonomic",
@@ -973,13 +968,8 @@
     },
     {
       "name": "ExportedHandlerTailHandler",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-callbacks",
           "tier": "ergonomic",
@@ -989,13 +979,8 @@
     },
     {
       "name": "ExportedHandlerTraceHandler",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-callbacks",
           "tier": "ergonomic",
@@ -1007,11 +992,6 @@
       "name": "AlarmEventInfo",
       "tier": "widened",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -1179,22 +1159,12 @@
     },
     {
       "name": "ExportedHandlerTailStreamHandler",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-callbacks",
@@ -1205,7 +1175,7 @@
     },
     {
       "name": "ExportedHandlerTailStreamHandlerResultItem",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -1219,8 +1189,18 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         },
         {
           "pass": "shape-interfaces",
@@ -1239,8 +1219,18 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         },
         {
           "pass": "shape-interfaces",
@@ -1259,8 +1249,18 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         },
         {
           "pass": "shape-interfaces",
@@ -1279,11 +1279,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -1296,71 +1291,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -1673,11 +1603,6 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
@@ -1809,13 +1734,8 @@
     },
     {
       "name": "TailEvent10",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -1825,13 +1745,8 @@
     },
     {
       "name": "TailEvent11",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -1841,13 +1756,8 @@
     },
     {
       "name": "TailEvent2",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -1875,11 +1785,6 @@
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
-        {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "message": "ParamObject Create synthesized (D3)"
@@ -1888,13 +1793,8 @@
     },
     {
       "name": "TailEvent4",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -1904,13 +1804,8 @@
     },
     {
       "name": "TailEvent5",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -1920,13 +1815,8 @@
     },
     {
       "name": "TailEvent6",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -1936,13 +1826,8 @@
     },
     {
       "name": "TailEvent7",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -1952,13 +1837,8 @@
     },
     {
       "name": "TailEvent8",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -1979,11 +1859,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -2026,13 +1901,8 @@
     },
     {
       "name": "ExportedHandlerScheduledHandler",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-callbacks",
           "tier": "ergonomic",
@@ -2042,13 +1912,8 @@
     },
     {
       "name": "ExportedHandlerQueueHandler",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-callbacks",
           "tier": "ergonomic",
@@ -2058,13 +1923,8 @@
     },
     {
       "name": "ExportedHandlerTestHandler",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-callbacks",
           "tier": "ergonomic",
@@ -2078,18 +1938,8 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -2109,18 +1959,8 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -2155,11 +1995,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -2175,11 +2010,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -2192,16 +2022,21 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "Response is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Response is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -2220,8 +2055,18 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         },
         {
           "pass": "shape-interfaces",
@@ -2240,8 +2085,23 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -2260,11 +2120,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -2277,61 +2132,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2426,23 +2226,17 @@
     },
     {
       "name": "CacheContext",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "CloudflareAccessContext",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -2463,7 +2257,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2508,11 +2302,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -2533,23 +2322,23 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "Response is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -2565,11 +2354,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2590,11 +2374,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2623,23 +2402,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -2847,7 +2611,7 @@
     },
     {
       "name": "DurableObjectState",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -2868,21 +2632,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "WebSocket is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2916,11 +2665,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -2951,8 +2695,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
         }
       ]
     },
@@ -3056,13 +2800,13 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3076,33 +2820,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -3116,8 +2835,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3128,31 +2847,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -3171,23 +2865,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -3197,13 +2876,13 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3217,8 +2896,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3227,8 +2906,18 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3239,96 +2928,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -3347,43 +2946,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -3651,22 +3215,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -3709,15 +3258,10 @@
     },
     {
       "name": "AnalyticsEngineDataPoint",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -3733,11 +3277,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -3745,11 +3284,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -3765,11 +3299,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -3904,7 +3433,7 @@
     },
     {
       "name": "ExtendableEvent",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
           "pass": "shape-classes",
@@ -4018,8 +3547,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
         }
       ]
     },
@@ -4157,13 +3686,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -4187,13 +3711,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -4214,17 +3733,12 @@
     },
     {
       "name": "SubtleCryptoEncryptAlgorithm",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -4238,13 +3752,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -4258,13 +3767,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -4278,13 +3782,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -4325,7 +3824,7 @@
     },
     {
       "name": "SubtleCryptoGenerateKeyAlgorithm",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -4369,13 +3868,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -4532,7 +4026,7 @@
     },
     {
       "name": "CryptoKeyRsaKeyAlgorithm",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -4546,13 +4040,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -4646,11 +4135,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "close is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -4851,11 +4335,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4876,11 +4355,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4898,11 +4372,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -4937,11 +4406,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4962,11 +4426,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4982,11 +4441,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4999,11 +4453,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -5107,7 +4556,7 @@
     },
     {
       "name": "FetchEvent",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
           "pass": "shape-classes",
@@ -5197,12 +4646,17 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "Response is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -5236,8 +4690,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
         }
       ]
     },
@@ -5473,97 +4927,82 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "ReadableStream is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter \u0027ExpectedValue\u0027 is erased: every use of it widened away"
+          "message": "ReadableStream is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027ExpectedValue\u0027 is erased: every use of it widened away"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027ExpectedValue\u0027 is erased: every use of it widened away"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027ExpectedValue\u0027 is erased: every use of it widened away"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -5678,162 +5117,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter \u0027ExpectedValue\u0027 is erased: every use of it widened away"
+          "message": "ReadableStream is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter \u0027ExpectedValue\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027ExpectedValue\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027ExpectedValue\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027Metadata\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "ReadableStream is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -5932,8 +5221,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -5942,23 +5231,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -6164,23 +5438,8 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -6196,13 +5455,8 @@
     },
     {
       "name": "QueueSendMetrics",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -6244,13 +5498,8 @@
     },
     {
       "name": "QueueSendBatchMetrics",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -6375,13 +5624,8 @@
     },
     {
       "name": "QueueMetrics",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -6401,13 +5645,8 @@
     },
     {
       "name": "MessageBatchMetrics",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -6459,23 +5698,18 @@
     },
     {
       "name": "Message",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
         }
       ]
     },
     {
       "name": "QueueEvent",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -6564,8 +5798,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
         }
       ]
     },
@@ -6693,8 +5927,8 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -6703,53 +5937,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -6768,23 +5957,38 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -6887,33 +6091,13 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -6995,11 +6179,6 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "Headers is not among the generated declarations; widened to obj"
         }
       ]
@@ -7016,12 +6195,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Blob is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -7030,8 +6204,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -7060,16 +6234,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -7087,16 +6251,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -7112,7 +6266,7 @@
     },
     {
       "name": "R2Conditional",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -7146,11 +6300,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -7158,11 +6307,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -7227,11 +6371,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -7239,11 +6378,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -7293,13 +6427,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -7310,11 +6439,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -7338,13 +6462,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -7358,18 +6477,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -7383,18 +6492,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -7408,18 +6507,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -7433,16 +6522,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -7450,11 +6529,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -7514,11 +6588,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -7526,11 +6595,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -7551,12 +6615,17 @@
     },
     {
       "name": "R2Checksums",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         },
         {
           "pass": "shape-interfaces",
@@ -7570,11 +6639,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -7585,11 +6649,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -7597,26 +6656,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -7693,7 +6732,7 @@
     },
     {
       "name": "R2HTTPMetadata",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -7704,11 +6743,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -7785,13 +6819,8 @@
     },
     {
       "name": "R2UploadPartOptions",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -7803,11 +6832,6 @@
           "message": "optional member reads as option"
         },
         {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "message": "ParamObject Create synthesized (D3)"
@@ -7816,7 +6840,7 @@
     },
     {
       "name": "ScheduledEvent",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
           "pass": "shape-classes",
@@ -7930,8 +6954,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
         }
       ]
     },
@@ -8170,7 +7194,7 @@
     },
     {
       "name": "TailEvent",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
           "pass": "shape-classes",
@@ -8284,8 +7308,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
         }
       ]
     },
@@ -8397,13 +7421,8 @@
     },
     {
       "name": "TraceItemAlarmEventInfo",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -8766,22 +7785,12 @@
     },
     {
       "name": "SqlStorageValue",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-aliases",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -8825,21 +7834,6 @@
       "name": "Socket",
       "tier": "widened",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -8994,18 +7988,8 @@
     },
     {
       "name": "ExecOutput",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -9166,18 +8150,8 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -9217,48 +8191,13 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -9269,16 +8208,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -9763,18 +8692,8 @@
     },
     {
       "name": "WorkerLoader",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -9795,11 +8714,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -9853,13 +8767,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
@@ -9875,6 +8784,11 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -10294,13 +9208,8 @@
     },
     {
       "name": "AgentMemoryMessage",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -10346,22 +9255,12 @@
     },
     {
       "name": "AgentMemoryMemory",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -10372,22 +9271,12 @@
     },
     {
       "name": "AgentMemoryMemoryListEntry",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -10467,13 +9356,8 @@
     },
     {
       "name": "AgentMemoryRecallOptions",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -10483,11 +9367,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -10605,33 +9484,8 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -10645,46 +9499,20 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         }
       ]
     },
     {
       "name": "AgentMemoryNamespace",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "AiSearchInternalError",
@@ -13458,42 +12286,17 @@
     },
     {
       "name": "AiSearchItem",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -13503,23 +12306,8 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -13540,11 +12328,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -13575,23 +12358,8 @@
     },
     {
       "name": "AiSearchJob",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -13601,22 +12369,12 @@
     },
     {
       "name": "AiSearchJobs",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -13632,37 +12390,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "ReadableStream is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -13683,12 +12416,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "ReadableStream is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -13703,27 +12431,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -14925,17 +13638,12 @@
     },
     {
       "name": "AiTextToSpeechOutput",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "Uint8Array is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "tier": "ergonomic",
+          "message": "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0; the extras are dropped"
         }
       ]
     },
@@ -31955,11 +30663,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -32001,32 +30704,27 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "ReadableStream is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "__type is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "indexed access has no F# form here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -32087,16 +30785,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -32663,11 +31351,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -32918,28 +31601,13 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -33061,7 +31729,7 @@
     },
     {
       "name": "ArtifactsRepo",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -33070,11 +31738,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -33090,11 +31753,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -33102,16 +31760,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -33209,37 +31857,12 @@
     },
     {
       "name": "Artifacts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -33717,17 +32340,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -33747,12 +32365,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -35364,7 +33982,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -35394,47 +34012,47 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -37494,17 +36112,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -37557,7 +36165,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -37578,7 +36186,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -37587,43 +36195,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -37638,7 +36211,22 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "tuple with a rest element widened to an array (\u00A74.12 leaves the erased carrier to a fixture)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -37687,11 +36275,6 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "Headers is not among the generated declarations; widened to obj"
         },
         {
@@ -37708,22 +36291,12 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "ReadableStream is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         }
       ]
     },
     {
       "name": "EmailAttachment",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "detect-tagged-unions",
@@ -37732,33 +36305,13 @@
         },
         {
           "pass": "detect-tagged-unions",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "pass": "detect-tagged-unions",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "detect-tagged-unions",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "detect-tagged-unions",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "detect-tagged-unions",
-          "tier": "widened",
-          "message": "ArrayBufferView is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "detect-tagged-unions",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "tier": "ergonomic",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         }
       ]
     },
@@ -37883,23 +36436,12 @@
     },
     {
       "name": "SendEmail",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "EmailEvent",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
           "pass": "shape-classes",
@@ -38013,20 +36555,15 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
         }
       ]
     },
     {
       "name": "EmailExportedHandler",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-callbacks",
           "tier": "ergonomic",
@@ -38139,7 +36676,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "unknown maps to obj (D8)"
         },
         {
           "pass": "shape-interfaces",
@@ -38153,8 +36690,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -38163,28 +36700,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -38198,11 +36715,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -38213,28 +36725,13 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -38245,19 +36742,8 @@
     },
     {
       "name": "HelloWorldBinding",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "HelloWorldBindingGetResultItem",
@@ -38287,50 +36773,19 @@
     },
     {
       "name": "HyperdriveDynamic",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "base members flattened into the interface (the is-a relation is not emitted)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         }
       ]
     },
     {
       "name": "HyperdriveDynamicApi",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "HyperdriveDynamicConfig",
@@ -39580,27 +38035,17 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "ReadableStream is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -39610,38 +38055,23 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "ReadableStream is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -39654,11 +38084,6 @@
       "name": "ImagesBinding",
       "tier": "widened",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -39699,11 +38124,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -39891,17 +38311,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "ReadableStream is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -40040,7 +38455,7 @@
     },
     {
       "name": "EventContext",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -40055,7 +38470,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -40094,8 +38509,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -40106,7 +38521,7 @@
     },
     {
       "name": "PagesFunctionContext",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -40126,7 +38541,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -40165,8 +38580,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -40177,7 +38592,7 @@
     },
     {
       "name": "EventPluginContext",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -40192,7 +38607,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -40231,8 +38646,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -40243,7 +38658,7 @@
     },
     {
       "name": "PagesPluginFunctionContext",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -40263,7 +38678,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -40302,8 +38717,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -40314,7 +38729,7 @@
     },
     {
       "name": "PubSubMessage",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -40328,13 +38743,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Uint8Array is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "tier": "ergonomic",
+          "message": "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0; the extras are dropped"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -40568,14 +38978,8 @@
     },
     {
       "name": "RateLimit",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "Rpc",
@@ -40660,7 +39064,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "unknown maps to obj (D8)"
         },
         {
           "pass": "shape-interfaces",
@@ -40756,11 +39160,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -40781,11 +39180,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -40798,16 +39192,21 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "Response is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Response is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -40823,11 +39222,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -40848,11 +39242,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -40881,23 +39270,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "ArrayBuffer is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -40964,11 +39338,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -40984,11 +39353,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -41001,16 +39365,21 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "Response is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Response is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -41026,11 +39395,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -41054,8 +39418,18 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         },
         {
           "pass": "shape-interfaces",
@@ -41074,38 +39448,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -41124,11 +39468,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -41141,11 +39480,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -41197,7 +39531,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "unknown maps to obj (D8)"
         },
         {
           "pass": "shape-interfaces",
@@ -41242,6 +39576,11 @@
           "message": "WorkflowStepDoRollbackOptions4 is generic and this position has no arguments to apply; widened to obj"
         },
         {
+          "pass": "repair-arity",
+          "tier": "widened",
+          "message": "WorkflowStepWaitForEventResultItem is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
@@ -41260,66 +39599,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -41353,26 +39632,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
@@ -41380,11 +39639,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -41529,11 +39783,6 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "__type is not among the generated declarations; widened to obj"
         },
         {
@@ -41571,11 +39820,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -41647,11 +39891,6 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "__type is not among the generated declarations; widened to obj"
         },
         {
@@ -41715,11 +39954,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -41857,11 +40091,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -42116,11 +40345,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Date is not among the generated declarations; widened to obj"
-        },
-        {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "message": "ParamObject Create synthesized (D3)"
@@ -42129,29 +40353,13 @@
     },
     {
       "name": "SecretsStoreSecret",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "StreamBinding",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -42161,29 +40369,8 @@
     },
     {
       "name": "StreamVideoHandle",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "StreamVideo",
@@ -42564,28 +40751,8 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -42596,44 +40763,24 @@
     },
     {
       "name": "StreamScopedDownloads",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         }
       ]
     },
     {
       "name": "StreamVideos",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -42648,32 +40795,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "ReadableStream is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -43649,23 +41771,8 @@
     },
     {
       "name": "ToMarkdownService",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -43701,17 +41808,17 @@
     },
     {
       "name": "VectorFloatArray",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "Float32Array is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "Float32Array carries 1 type arguments where JS.Float32Array takes 0; the extras are dropped"
         },
         {
           "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "Float64Array is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "Float64Array carries 1 type arguments where JS.Float64Array takes 0; the extras are dropped"
         }
       ]
     },
@@ -43954,18 +42061,13 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Float32Array is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "Float32Array carries 1 type arguments where JS.Float32Array takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Float64Array is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "tier": "ergonomic",
+          "message": "Float64Array carries 1 type arguments where JS.Float64Array takes 0; the extras are dropped"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -44025,33 +42127,8 @@
     },
     {
       "name": "VectorizeIndex",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -44059,89 +42136,39 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Float32Array is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "Float32Array carries 1 type arguments where JS.Float32Array takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Float64Array is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "Float64Array carries 1 type arguments where JS.Float64Array takes 0; the extras are dropped"
         }
       ]
     },
     {
       "name": "Vectorize",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Float32Array is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "Float32Array carries 1 type arguments where JS.Float32Array takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Float64Array is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "Float64Array carries 1 type arguments where JS.Float64Array takes 0; the extras are dropped"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -44252,14 +42279,8 @@
     },
     {
       "name": "WebSearch",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "DynamicDispatchLimits",
@@ -44367,32 +42388,12 @@
     },
     {
       "name": "Workflow",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -44755,47 +42756,12 @@
     },
     {
       "name": "WorkflowInstance",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -44963,12 +42929,17 @@
         {
           "pass": "shape-callbacks",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-callbacks",
           "tier": "widened",
           "message": "Response is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-callbacks",
@@ -45004,12 +42975,17 @@
         {
           "pass": "shape-callbacks",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-callbacks",
           "tier": "widened",
           "message": "Response is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -45040,12 +43016,17 @@
         {
           "pass": "shape-callbacks",
           "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "Response is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-callbacks",
           "tier": "widened",
           "message": "Response is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     }

@@ -361,6 +361,33 @@ included, and its golden compiles against the support package in the gate.
   iterables → `JS.AsyncIterable`. Promises → `JS.Promise<'T>` (leave `Async` adaptation to
   the consumer or an opt-in wrapper layer; don't bake it into bindings).
 
+*Landed (2026-09-02, phase D) - the compiler-lib group's disposition.* O7 widened everything
+the compiler's own `lib.d.ts` declares to `obj`, "until the shipped compiler-lib package
+exists". For the ECMAScript half of that lib it exists, it is `Fable.Core.JS`, and every
+generated file already opens it - so `Promise<Response>` is now `JS.Promise<obj>` rather than
+a bare `obj`: one honest loss (the DOM name inside) instead of two.
+
+The table is pinned in `Naming.LibBindings`, and each entry carries the *arity* Fable's
+binding takes. That is the safety argument rather than bookkeeping: TypeScript's lib moves -
+it made `Uint8Array` generic in a backing-buffer parameter Fable's abbreviation does not have
+- and a mapping that assumed the arities agreed would emit code that does not compile. So a
+lib type carrying more arguments than the binding maps with the extras dropped and an
+Ergonomic finding; one carrying fewer is some other type wearing a familiar name, and widens
+as before. `PromiseLike`, `ReadonlyMap` and `ReadonlySet` map with a finding for the
+restriction F# has no binding for.
+
+Two absences are deliberate. The *synchronous* iteration protocol (`Iterable`, `Iterator`) has
+no Fable.Core binding, and `seq<'T>` is not one however alike the two look. The DOM
+(`Response`, `EventTarget`, `ReadableStream`, ...) needs `Fable.Browser.*`, which is a
+decision about what generated bindings depend on rather than a row in a table.
+
+What it was worth on the workers-types rung: widened findings 528 -> 451, and 39 "type
+parameter is erased: every use of it widened away" findings gone, because a generic whose only
+use of `'T` was inside a `Promise` now carries it. The escape count *rose* (38 -> 49) for the
+honest reason - an `any` inside a `Promise` used to be invisible inside the widened wrapper
+and is now reported at its own position. `tests/fixtures/lib-lab` pins the bound names, the
+arity rule and both absences under the live compiler.
+
 ### 4.9 Generics
 
 - Type parameters → F# type parameters, names preserved.

@@ -156,6 +156,68 @@ module Naming =
         | CompilerLib -> CompilerLibModule
         | Dependency name -> packageModule name
 
+    /// The compiler-lib names Fable.Core already binds, and the F# spelling of each.
+    ///
+    /// O7 left the compiler-lib group widening to `obj` "until the shipped compiler-lib
+    /// package exists". For the ECMAScript half of `lib.d.ts` it already does, and every
+    /// generated file opens it: `Fable.Core.JS` is that package. So `Promise<Response>` is
+    /// `JS.Promise<obj>` rather than a bare `obj`, which is one honest loss (the DOM name
+    /// inside) instead of two.
+    ///
+    /// Each entry is the F# name and the arity that name takes. The arity is here rather than
+    /// inferred because it is the whole safety argument: TypeScript's own lib moves - it made
+    /// `Uint8Array` generic in a buffer parameter that Fable's abbreviation does not have -
+    /// and a mapping that guessed would emit code that does not compile. Arities that agree
+    /// map exactly; a lib type carrying *more* arguments than Fable's binding maps with the
+    /// extras dropped and a finding; one carrying fewer is not this type at all and widens.
+    ///
+    /// The DOM half (`Response`, `HTMLElement`, `ReadableStream`, ...) is deliberately absent:
+    /// binding it needs `Fable.Browser.*`, which is a dependency decision, not a table entry.
+    module LibBindings =
+        /// Name, F# arity, and the loss to record - `None` when the mapping gives up nothing.
+        let private table =
+            [ "Promise", ("JS.Promise", 1, None)
+              // A thenable is not a promise: TypeScript's `PromiseLike` is the structural
+              // supertype, and reading one as `JS.Promise` claims methods it may not have.
+              "PromiseLike", ("JS.Promise", 1, Some "PromiseLike reads as JS.Promise; a bare thenable is not one")
+              "Map", ("JS.Map", 2, None)
+              "ReadonlyMap", ("JS.Map", 2, Some "ReadonlyMap reads as JS.Map; the readonly restriction is not carried")
+              "WeakMap", ("JS.WeakMap", 2, None)
+              "Set", ("JS.Set", 1, None)
+              "ReadonlySet", ("JS.Set", 1, Some "ReadonlySet reads as JS.Set; the readonly restriction is not carried")
+              "WeakSet", ("JS.WeakSet", 1, None)
+              "Date", ("JS.Date", 0, None)
+              "Function", ("JS.Function", 0, None)
+              "Object", ("JS.Object", 0, None)
+              "Math", ("JS.Math", 0, None)
+              "JSON", ("JS.JSON", 0, None)
+              "Console", ("JS.Console", 0, None)
+              "PropertyDescriptor", ("JS.PropertyDescriptor", 0, None)
+              "ArrayBuffer", ("JS.ArrayBuffer", 0, None)
+              "ArrayBufferView", ("JS.ArrayBufferView", 0, None)
+              "DataView", ("JS.DataView", 0, None)
+              "Int8Array", ("JS.Int8Array", 0, None)
+              "Uint8Array", ("JS.Uint8Array", 0, None)
+              "Uint8ClampedArray", ("JS.Uint8ClampedArray", 0, None)
+              "Int16Array", ("JS.Int16Array", 0, None)
+              "Uint16Array", ("JS.Uint16Array", 0, None)
+              "Int32Array", ("JS.Int32Array", 0, None)
+              "Uint32Array", ("JS.Uint32Array", 0, None)
+              "Float32Array", ("JS.Float32Array", 0, None)
+              "Float64Array", ("JS.Float64Array", 0, None)
+              "BigInt64Array", ("JS.BigInt64Array", 0, None)
+              "AsyncIterable", ("JS.AsyncIterable", 1, None)
+              "AsyncIterator", ("JS.AsyncIterator", 1, None)
+              "AsyncGenerator", ("JS.AsyncGenerator", 1, None)
+              "IteratorResult", ("JS.IteratorResult", 1, None) ]
+            |> Map.ofList
+
+        /// The binding for a lib name, if Fable.Core has one: its F# name, its arity, and the
+        /// loss to record. `seq`-shaped names (`Iterable`, `Iterator`) are absent on purpose -
+        /// Fable.Core binds only the async ones, and pretending `seq<'T>` interoperates with a
+        /// JS iterable is exactly the kind of claim this table exists not to make.
+        let tryFind (name: string) = Map.tryFind name table
+
     /// The JavaScript key a member symbol stands for. The checker escapes a name that begins
     /// with two underscores by prepending a third, so that a real `__html` cannot collide with
     /// the internal names it invents (`__type`, `__call`); undoing that is what turns the

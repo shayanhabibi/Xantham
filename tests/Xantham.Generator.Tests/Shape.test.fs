@@ -44,6 +44,13 @@ let private indexedAccess (id: int) (objectId: int) (keyId: int) =
             ObjectType = ValueSome objectId
             IndexType = ValueSome keyId }
 
+/// A type the compiler's own lib declares, under the name and arguments it declares it with.
+let private libType (id: int) (name: string) (arguments: int list) =
+    { Build.facts (Build.typeResponse id TypeFlags.Object) with
+        Origin = CompilerLib
+        SymbolName = Some name
+        TypeArguments = arguments }
+
 /// `P & { marker }`: a branding intersection, given the ids of its constituents.
 let private intersection (id: int) (members: int list) =
     { Build.facts (Build.typeResponse id TypeFlags.Intersection) with IntersectionMembers = members }
@@ -1270,6 +1277,64 @@ let shapePassTests =
                 "the smaller twin resolves structurally, the larger references it"
 
             Expect.equal (findings |> List.map _.Tier) [] "an erased union costs no fidelity"
+
+        testCase "a lib type Fable.Core binds is referenced, not widened" <| fun _ ->
+            // O7 widens the compiler-lib group for want of a shipped binding. For `Promise`
+            // there is one, every generated file opens it, and the argument is shaped at its
+            // own position rather than disappearing with the wrapper.
+            let model = Build.shapeModel (libType 10 "Promise" [ 1 ] :: Build.primitives)
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsApp("JS.Promise", [ FsString ])) "the binding is written"
+            Expect.isEmpty findings "and nothing is lost saying it that way"
+
+        testCase "a lib type carrying more arguments than Fable's binding drops the extras, loudly" <| fun _ ->
+            // TypeScript's lib made the typed arrays generic in their backing buffer; Fable's
+            // abbreviation is not. Naming the type is still worth more than `obj`, and the
+            // parameter that goes missing is exactly what a finding is for.
+            let model = Build.shapeModel (libType 10 "Uint8Array" [ 1 ] :: Build.primitives)
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsNamed "JS.Uint8Array") "the name survives the lib's drift"
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "and the dropped argument is recorded"
+
+        testCase "a lib type with too few arguments is some other type wearing the name" <| fun _ ->
+            // A `Map` of one argument is not the `Map` this table is about. Guessing here would
+            // emit code that does not compile, so it widens the way it always did.
+            let model = Build.shapeModel (libType 10 "Map" [ 1 ] :: Build.primitives)
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference FsObj "no binding is claimed"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "and the widening is the ordinary one"
+
+        testCase "a lib name Fable.Core does not bind keeps widening" <| fun _ ->
+            // The synchronous iteration protocol has no Fable.Core binding, and `seq<'T>` is not
+            // one however alike the two look. The DOM is absent for the same reason: binding it
+            // is a dependency decision, not a table entry.
+            let model = Build.shapeModel (libType 10 "Iterable" [ 1 ] :: libType 11 "EventTarget" [] :: Build.primitives)
+
+            for id in [ 10; 11 ] do
+                let reference, findings = Shape.typeRef Build.context model None "x" id
+                Expect.equal reference FsObj "still obj"
+                Expect.equal (findings |> List.map _.Tier) [ Widened ] "and still says so"
+
+        testCase "a package's own type named like a lib type is untouched" <| fun _ ->
+            // The table is keyed by name, so what keeps it from hijacking a package's own
+            // `Promise` is the group: this one is the entry package's, and it ships.
+            let model =
+                { Build.shapeModel (
+                      { Build.facts (Build.typeResponse 10 TypeFlags.Object) with SymbolName = Some "Promise" }
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 10, "Promise" ] }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsNamed "Promise") "the declaration this run generates wins"
+            Expect.isEmpty findings "and no lib binding is invented over it"
 
         testCase "a primitive intersected with a marker object reads as a branded primitive" <| fun _ ->
             // `type UserId = string & { __brand: "UserId" }`. The marker exists only to make the

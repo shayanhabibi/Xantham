@@ -2,10 +2,10 @@
   "package": "animejs",
   "module": "Animejs",
   "counts": {
-    "exact": 41,
-    "ergonomic": 52,
-    "widened": 92,
-    "escape": 35
+    "exact": 43,
+    "ergonomic": 53,
+    "widened": 88,
+    "escape": 36
   },
   "symbols": [
     {
@@ -101,11 +101,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -166,8 +161,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -215,46 +210,6 @@
           "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -821,27 +776,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "WeakSet is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Set is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Set is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Map is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -857,7 +797,7 @@
     },
     {
       "name": "LayoutSnapshot",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -866,21 +806,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Set is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Map is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -896,8 +821,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Set is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -2288,11 +2213,6 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
@@ -2442,8 +2362,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2493,11 +2413,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -2553,8 +2468,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -4580,11 +4495,6 @@
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4597,11 +4507,6 @@
           "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -4660,25 +4565,13 @@
     },
     {
       "name": "TweenReplaceLookups",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "WeakMap is not among the generated declarations; widened to obj"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "TweenAdditiveLookups",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "Map is not among the generated declarations; widened to obj"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "TweenParamValue",
@@ -7746,11 +7639,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -7798,11 +7686,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -8044,11 +7927,6 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "Animation is not among the generated declarations; widened to obj"
         },
         {
@@ -8078,8 +7956,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -8157,11 +8035,6 @@
       "findings": [
         {
           "pass": "shape-exports",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-exports",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -8231,11 +8104,6 @@
           "pass": "shape-exports",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "Function is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-exports",
@@ -8379,12 +8247,17 @@
     },
     {
       "name": "scrollContainers",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
           "pass": "shape-exports",
-          "tier": "widened",
-          "message": "Map is not among the generated declarations; widened to obj"
+          "tier": "escape",
+          "message": "any maps to obj"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "escape",
+          "message": "any maps to obj"
         }
       ]
     },

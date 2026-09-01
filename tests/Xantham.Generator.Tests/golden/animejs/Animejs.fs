@@ -140,7 +140,7 @@ type JSAnimation =
     abstract revert: unit -> JSAnimation
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
-    abstract ``then``: ?callback: Func<obj, obj> -> obj
+    abstract ``then``: ?callback: Func<obj, obj> -> JS.Promise<obj>
     /// <remarks>@type {Number}</remarks>
     abstract deltaTime: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -209,7 +209,7 @@ type JSAnimation =
     /// <remarks>@type {Number}</remarks>
     abstract _currentIteration: float with get, set
     /// <remarks>@type {Function}</remarks>
-    abstract _resolve: obj with get, set
+    abstract _resolve: JS.Function with get, set
     /// <remarks>@type {Boolean}</remarks>
     abstract _running: bool with get, set
     /// <remarks>@type {Number}</remarks>
@@ -280,18 +280,18 @@ type Globals =
 [<Interface>]
 type GlobalsEditor =
     abstract showPanel: bool with get, set
-    abstract addAnimation: obj with get, set
-    abstract addSet: obj with get, set
-    abstract addTimeline: obj with get, set
-    abstract addTimelineChild: obj with get, set
-    abstract addTimelineLabel: obj with get, set
-    abstract addTimelineCall: obj with get, set
-    abstract addTimelineSync: obj with get, set
-    abstract resolveStagger: obj with get, set
+    abstract addAnimation: JS.Function with get, set
+    abstract addSet: JS.Function with get, set
+    abstract addTimeline: JS.Function with get, set
+    abstract addTimelineChild: JS.Function with get, set
+    abstract addTimelineLabel: JS.Function with get, set
+    abstract addTimelineCall: JS.Function with get, set
+    abstract addTimelineSync: JS.Function with get, set
+    abstract resolveStagger: JS.Function with get, set
     abstract _head: obj with get, set
     abstract _tail: obj with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (showPanel: bool, addAnimation: obj, addSet: obj, addTimeline: obj, addTimelineChild: obj, addTimelineLabel: obj, addTimelineCall: obj, addTimelineSync: obj, resolveStagger: obj, _head: obj, _tail: obj) : GlobalsEditor = jsNative
+    static member Create (showPanel: bool, addAnimation: JS.Function, addSet: JS.Function, addTimeline: JS.Function, addTimelineChild: JS.Function, addTimelineLabel: JS.Function, addTimelineCall: JS.Function, addTimelineSync: JS.Function, resolveStagger: JS.Function, _head: obj, _tail: obj) : GlobalsEditor = jsNative
 
 type DOMProxy =
     abstract el: obj with get, set
@@ -798,13 +798,13 @@ type AutoLayout =
     /// <remarks>@type {LayoutStateParams}</remarks>
     abstract leaveToParams: obj with get, set
     /// <remarks>@type {Set&lt;String&gt;}</remarks>
-    abstract properties: obj with get, set
+    abstract properties: JS.Set<string> with get, set
     /// <remarks>@type {Set&lt;String&gt;}</remarks>
-    abstract recordedProperties: obj with get, set
+    abstract recordedProperties: JS.Set<string> with get, set
     /// <remarks>@type {WeakSet&lt;DOMTarget&gt;}</remarks>
-    abstract pendingRemoval: obj with get, set
+    abstract pendingRemoval: JS.WeakSet<DOMTarget> with get, set
     /// <remarks>@type {Map&lt;DOMTarget, String|null&gt;}</remarks>
-    abstract transitionMuteStore: obj with get, set
+    abstract transitionMuteStore: JS.Map<DOMTarget, string option> with get, set
     /// <remarks>@type {LayoutSnapshot}</remarks>
     abstract oldState: LayoutSnapshot with get, set
     /// <remarks>@type {LayoutSnapshot}</remarks>
@@ -839,9 +839,9 @@ type LayoutSnapshot =
     /// <remarks>@type {LayoutNode|null}</remarks>
     abstract rootNode: LayoutNode option with get, set
     /// <remarks>@type {Set&lt;LayoutNode&gt;}</remarks>
-    abstract rootNodes: obj with get, set
+    abstract rootNodes: JS.Set<LayoutNode> with get, set
     /// <remarks>@type {Map&lt;String, LayoutNode&gt;}</remarks>
-    abstract nodes: obj with get, set
+    abstract nodes: JS.Map<string, LayoutNode> with get, set
     /// <remarks>@type {Number}</remarks>
     abstract scrollX: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -869,7 +869,7 @@ type LayoutSnapshot =
     /// <remarks>@param $el</remarks>
     /// <remarks>@param candidates</remarks>
     /// <remarks>@return</remarks>
-    abstract ensureDetachedNode: ``$el``: DOMTarget * candidates: obj -> LayoutNode option
+    abstract ensureDetachedNode: ``$el``: DOMTarget * candidates: JS.Set<DOMTarget> -> LayoutNode option
     /// <remarks>@return</remarks>
     abstract record: unit -> LayoutSnapshot
 
@@ -1246,7 +1246,7 @@ type Timeline =
     abstract revert: unit -> Timeline
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
-    abstract ``then``: ?callback: Func<obj, obj> -> obj
+    abstract ``then``: ?callback: Func<obj, obj> -> JS.Promise<obj>
     /// <remarks>@type {Number}</remarks>
     abstract deltaTime: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -1319,7 +1319,7 @@ type Timeline =
     /// <remarks>@type {Number}</remarks>
     abstract _currentIteration: float with get, set
     /// <remarks>@type {Function}</remarks>
-    abstract _resolve: obj with get, set
+    abstract _resolve: JS.Function with get, set
     /// <remarks>@type {Boolean}</remarks>
     abstract _running: bool with get, set
     /// <remarks>@type {Number}</remarks>
@@ -1453,7 +1453,7 @@ type Timer =
     /// <remarks>@type {Number}</remarks>
     abstract _currentIteration: float with get, set
     /// <remarks>@type {Function}</remarks>
-    abstract _resolve: obj with get, set
+    abstract _resolve: JS.Function with get, set
     /// <remarks>@type {Boolean}</remarks>
     abstract _running: bool with get, set
     /// <remarks>@type {Number}</remarks>
@@ -1520,7 +1520,7 @@ type Timer =
     abstract complete: ?muteCallbacks: U2<float, bool> -> Timer
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
-    abstract ``then``: ?callback: Func<obj, obj> -> obj
+    abstract ``then``: ?callback: Func<obj, obj> -> JS.Promise<obj>
 
 [<Interface>]
 type DefaultsParams =
@@ -1781,8 +1781,8 @@ type Tween =
     abstract property: string with get, set
     abstract target: Target with get, set
     abstract _value: obj with get, set
-    abstract _toFunc: obj option with get, set
-    abstract _fromFunc: obj option with get, set
+    abstract _toFunc: JS.Function option with get, set
+    abstract _fromFunc: JS.Function option with get, set
     abstract _ease: EasingFunction with get, set
     abstract _fromNumbers: float[] with get, set
     abstract _toNumbers: float[] with get, set
@@ -1857,9 +1857,9 @@ type TweenLookups =
     [<EmitIndexer>]
     abstract Item: string -> TweenPropertySiblings with get, set
 
-type TweenReplaceLookups = obj
+type TweenReplaceLookups = JS.WeakMap<Target, TweenLookups>
 
-type TweenAdditiveLookups = obj
+type TweenAdditiveLookups = JS.Map<Target, TweenLookups>
 
 type TweenParamValue = obj
 
@@ -2342,8 +2342,8 @@ type Utils =
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     abstract stagger: Func<float, StaggerParams option, Func<Target option, float option, Target[] option, Tween option, Timeline option, float>> with get, set
-    abstract forEachChildren: Action<obj, obj, bool option, string option, string option> with get, set
-    abstract addChild: Action<obj, obj, obj option, string option, string option> with get, set
+    abstract forEachChildren: Action<obj, JS.Function, bool option, string option, string option> with get, set
+    abstract addChild: Action<obj, obj, JS.Function option, string option, string option> with get, set
     abstract removeChild: Action<obj, obj, string option, string option> with get, set
 
 type RandomNumberGenerator = Func<float option, float option, float option, float>
@@ -2374,7 +2374,7 @@ type WAAPIAnimation =
     /// <remarks>@type {Number}</remarks>
     abstract _speed: float with get, set
     /// <remarks>@type {Function}</remarks>
-    abstract _resolve: obj with get, set
+    abstract _resolve: JS.Function with get, set
     /// <remarks>@type {Number}</remarks>
     abstract _completed: float with get, set
     /// <remarks>@type {Array.&lt;Object&gt;}</remarks>
@@ -2400,7 +2400,7 @@ type WAAPIAnimation =
     abstract revert: unit -> WAAPIAnimation
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
-    abstract ``then``: ?callback: Func<obj, obj> -> obj
+    abstract ``then``: ?callback: Func<obj, obj> -> JS.Promise<obj>
 
 [<Interface>]
 type Waapi =
@@ -2424,11 +2424,11 @@ type Exports =
     [<Import("globals", "animejs")>]
     static member globals: Globals = jsNative
     [<Import("forEachChildren", "animejs")>]
-    static member forEachChildren (parent: obj, callback: obj, ?reverse: bool, ?prevProp: string, ?nextProp: string) : unit = jsNative
+    static member forEachChildren (parent: obj, callback: JS.Function, ?reverse: bool, ?prevProp: string, ?nextProp: string) : unit = jsNative
     [<Import("removeChild", "animejs")>]
     static member removeChild (parent: obj, child: obj, ?prevProp: string, ?nextProp: string) : unit = jsNative
     [<Import("addChild", "animejs")>]
-    static member addChild (parent: obj, child: obj, ?sortMethod: obj, ?prevProp: string, ?nextProp: string) : unit = jsNative
+    static member addChild (parent: obj, child: obj, ?sortMethod: JS.Function, ?prevProp: string, ?nextProp: string) : unit = jsNative
     [<Import("cleanInlineStyles", "animejs")>]
     static member cleanInlineStyles<'T> (renderable: 'T) : 'T = jsNative
     /// <remarks>@overload</remarks>
@@ -2484,7 +2484,7 @@ type Exports =
     [<Import("engine", "animejs")>]
     static member engine: Engine = jsNative
     [<Import("scrollContainers", "animejs")>]
-    static member scrollContainers: obj = jsNative
+    static member scrollContainers: JS.Map<obj, obj> = jsNative
     [<Import("ScrollObserver", "animejs"); EmitConstructor>]
     static member ScrollObserver (?parameters: ScrollObserverParams) : ScrollObserver = jsNative
     [<Import("onScroll", "animejs")>]

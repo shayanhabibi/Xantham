@@ -1,0 +1,6 @@
+{
+    "name": "lib-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture exercising the compiler-lib group (docs/plans/generator-architecture.md O7): the lib names Fable.Core binds and the ones it does not, plus the arity rule where TypeScript's lib and Fable's binding disagree. Tracked in git, no npm install, so the goldens pin every case under the live compiler."
+}
