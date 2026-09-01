@@ -2,31 +2,11 @@
 
 ## Project Overview
 
-Xantham is a TypeScript-to-F# bindings generator. It is mid-rebuild: the whole project now sits on
-top of `Xantham.TypeScript.Wire`, a .NET client for the TypeScript 7 compiler's own API server
-(`tsc --api`). Wire speaks the compiler's msgpack protocol and reads its binary AST in place
-through a generated typed layer.
-
-The previous design — a Fable extractor crawling the TypeScript 5 JavaScript compiler API, a
-common JSON schema as the hand-off point, and a .NET decoder plus generator — has been retired.
-
-## `.archive/` holds obsolete work only — do not read it as current
-
-**Everything under `.archive/` is dead. Do not cite it, build it, grep it for how the project
-works today, or copy patterns out of it without first confirming they still apply.** It is kept
-because the obstacles it documents are worth consulting deliberately, not because any of it is
-live. Read `.archive/README.md` for the inventory.
-
-Archived: `Xantham.Common`, `Xantham.Fable`, `Xantham.Fable.Core`, `Xantham.Fable.Utils`,
-`Xantham.Decoder`, `Xantham.Generator`, `Xantham.TypeScript`, `Xantham.Mocha`, their tests and
-docs, the superseded plans (including the `tsgo-*` route documents), the old FAKE/EasyBuild
-pipeline (`Build.fsproj`, `ci/`), the npm package manifest and `index.js`, the retired
-`.claude/rules/`, and untracked scratch under `.archive/scratch/`.
-
-Two archived traps in particular: `.archive/docs/plans/tsgo-fsharp-client.md` and
-`tsgo-native-route.md` predate the compiler merge and use stale names throughout — translate via
-the table below first. `.archive/scratch/tmp/tsgo-native` is a checkout of the dead
-`microsoft/typescript-go` repository and is not ground truth for anything.
+* Purpose: TypeScript-to-F# bindings generator
+* Mid-rebuild sitting on top of `Xantham.TypeScript.Wire`
+  * .NET client for TypeScript 7 compiler's own API server (`tsc --api`)
+  * Generated typed layer reading binary AST
+* Coordinated build pipelines through `build.fsx`
 
 ## Project Structure
 
@@ -41,6 +21,7 @@ the table below first. `.archive/scratch/tmp/tsgo-native` is a checkout of the d
 - `build.fsx` — the current build pipeline (Partas.Build).
 - `package.json` — root manifest, tooling only. The single pin of the `typescript` 7.x compiler,
   used both as generation input and as the live `tsc --api` server. Nothing else pins it.
+- `.archive/` — dead weight. Never cite, build, or grep it as current. Ask before entering.
 
 ## Key Commands
 
@@ -133,7 +114,7 @@ Paths moved in the merge. Translate before looking anything up:
 | `_tools/gen-proto` | `tools/gen-proto` |
 
 Ground truth, in order of preference:
-1. The installed npm package — `tests/Xantham.TypeScript.Wire.Tests/node_modules/typescript` (currently
+1. The installed npm package — `node_modules/typescript` at the repository root (currently
    `7.1.0-dev.20260830.1`). This is what our code actually runs against; `dist/` wins over
    upstream `main` whenever the two disagree, because upstream is always ahead of the release.
 2. `tools/tsc-ast/upstream/` — vendored at a pinned commit and checksummed in

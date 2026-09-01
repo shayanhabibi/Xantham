@@ -339,6 +339,74 @@ let liveTests =
             Ast.externalModuleIndicator ast
             |> Flip.Expect.equal "and the file itself is not a module" ValueNone)
 
+        // The string table is WTF-8, not UTF-8: a lone surrogate is the three bytes ED A0 80,
+        // which `Encoding.UTF8.GetString` would replace with U+FFFD. TypeScript permits one in a
+        // string literal and stores the cooked value, so this is the only way to see whether
+        // `Wtf8.decode` is doing anything - a corrupted read is a valid string, not an error.
+        testCase "a lone surrogate survives the string table" <| withSession (fun channel snapshot project ->
+            match Api.getSourceFile channel { Snapshot = snapshot.Snapshot; Project = project; File = file "surrogate.ts" } with
+            | ValueNone -> failtest "expected an AST"
+            | ValueSome ast ->
+
+            let literals =
+                Ast.descendants ast Ast.Root
+                |> Seq.filter (fun node -> Ast.kind ast node = SyntaxKind.StringLiteral)
+                |> Seq.map (fun node -> Ast.text ast node)
+                |> List.ofSeq
+
+            // Built from chars, not written as `"\uD800"`: F# lowers a lone-surrogate escape in
+            // its own source to U+FFFD, so a literal expectation would agree with a corrupted
+            // read and the test would pass for the wrong reason.
+            let lone = string (char 0xD800)
+            let trailing = "ab" + string (char 0xDC00)
+
+            literals
+            |> Flip.Expect.equal "the cooked text of all three literals" [
+                ValueSome lone
+                ValueSome trailing
+                ValueSome "\U0001F600"
+            ]
+
+            match literals.Head with
+            | ValueSome text ->
+                text.Length |> Flip.Expect.equal "one UTF-16 code unit, not a replacement" 1
+                int text[0] |> Flip.Expect.equal "the high surrogate itself" 0xD800
+            | ValueNone -> failtest "the first literal has text")
+
+        // The synchronous surface comes in the same three layers as the asynchronous one, and
+        // each has to reach the same server: the free function, the member taking the parameter
+        // record, and the member taking that record's fields.
+        testCase "the free function, the record overload and the flattened one agree" <| withSession (fun channel _ _ ->
+            let parameters: ParseCommandLineParams = { CommandLine = ValueSome [| "--strict"; "main.ts" |] }
+
+            let viaFunction = Api.parseCommandLine channel parameters
+            let viaRecord = channel.parseCommandLine parameters
+            let viaFields = channel.parseCommandLine(commandLine = [| "--strict"; "main.ts" |])
+
+            viaRecord.FileNames |> Flip.Expect.equal "record overload" viaFunction.FileNames
+            viaFields.FileNames |> Flip.Expect.equal "flattened overload" viaFunction.FileNames
+
+            // An optional argument left out has to end up absent from the payload rather than
+            // sent as null: `--strict` alone yields no file names, a null commandLine is an error.
+            channel.parseCommandLine().FileNames.Length
+            |> Flip.Expect.equal "no command line, no file names" 0)
+
+        // The members delegate rather than re-implement, so the binary methods have to come back
+        // as the decoded blob here too - not the schema's JSON envelope.
+        testCase "an AST member returns the same tree as the free function" <| withSession (fun channel snapshot project ->
+            let viaMember =
+                channel.getSourceFile(snapshot = snapshot.Snapshot, project = project, file = file "main.ts")
+
+            match viaMember with
+            | ValueNone -> failtest "expected an AST"
+            | ValueSome ast ->
+                let request: GetSourceFileParams =
+                    { Snapshot = snapshot.Snapshot; Project = project; File = file "main.ts" }
+
+                let viaFunction = (Api.getSourceFile channel request).Value
+                ast.NodeCount |> Flip.Expect.equal "node count" viaFunction.NodeCount
+                Ast.sourceText ast |> Flip.Expect.equal "source text" (Ast.sourceText viaFunction))
+
         testCase "release frees the snapshot" <| withSession (fun channel snapshot _ ->
             Api.release channel { Snapshot = snapshot.Snapshot })
     ]

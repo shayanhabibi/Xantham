@@ -101,7 +101,16 @@ module rec Proto =
         [<JsonPropertyName "requests">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
         Requests: BatchRequest[] voption
-    }
+    } with
+
+        static member val private DefaultValue = lazy ({
+            Requests = ValueNone
+        }: BatchRequestsParams)
+
+        /// The record with nothing set: every field is either optional or a default of its
+        /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
+        /// `{ BatchRequestsParams.Default with ... }` - rather than writing all 1 out.
+        static member Default: BatchRequestsParams = BatchRequestsParams.DefaultValue.Value
 
     type BatchRequestsResponse = {
         [<JsonPropertyName "responses">]
@@ -154,7 +163,20 @@ module rec Proto =
         [<JsonPropertyName "closeFiles">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
         CloseFiles: DocumentIdentifier[] voption
-    }
+    } with
+
+        static member val private DefaultValue = lazy ({
+            OpenProjects = ValueNone
+            CloseProjects = ValueNone
+            FileChanges = ValueNone
+            OpenFiles = ValueNone
+            CloseFiles = ValueNone
+        }: UpdateSnapshotParams)
+
+        /// The record with nothing set: every field is either optional or a default of its
+        /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
+        /// `{ UpdateSnapshotParams.Default with ... }` - rather than writing all 5 out.
+        static member Default: UpdateSnapshotParams = UpdateSnapshotParams.DefaultValue.Value
 
     ///  UpdateSnapshotResponse is returned by updateSnapshot.
     type UpdateSnapshotResponse = {
@@ -204,7 +226,19 @@ module rec Proto =
         [<JsonPropertyName "fileChanges">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
         FileChanges: APIFileChanges voption
-    }
+    } with
+
+        static member val private DefaultValue = lazy ({
+            RootFiles = ValueNone
+            CreateProgramOptions = CreateProgramOptions.Default
+            OldProgram = ValueNone
+            FileChanges = ValueNone
+        }: CreateProgramParams)
+
+        /// The record with nothing set: every field is either optional or a default of its
+        /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
+        /// `{ CreateProgramParams.Default with ... }` - rather than writing all 4 out.
+        static member Default: CreateProgramParams = CreateProgramParams.DefaultValue.Value
 
     type CreateProgramResponse = {
         [<JsonPropertyName "snapshot">]
@@ -219,7 +253,16 @@ module rec Proto =
         [<JsonPropertyName "commandLine">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
         CommandLine: string[] voption
-    }
+    } with
+
+        static member val private DefaultValue = lazy ({
+            CommandLine = ValueNone
+        }: ParseCommandLineParams)
+
+        /// The record with nothing set: every field is either optional or a default of its
+        /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
+        /// `{ ParseCommandLineParams.Default with ... }` - rather than writing all 1 out.
+        static member Default: ParseCommandLineParams = ParseCommandLineParams.DefaultValue.Value
 
     type ConfigFileResponse = {
         [<JsonPropertyName "fileNames">]
@@ -261,7 +304,17 @@ module rec Proto =
         [<JsonPropertyName "error">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
         Error: DiagnosticResponse voption
-    }
+    } with
+
+        static member val private DefaultValue = lazy ({
+            Config = null
+            Error = ValueNone
+        }: ReadConfigFileResponse)
+
+        /// The record with nothing set: every field is either optional or a default of its
+        /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
+        /// `{ ReadConfigFileResponse.Default with ... }` - rather than writing all 2 out.
+        static member Default: ReadConfigFileResponse = ReadConfigFileResponse.DefaultValue.Value
 
     type ParseJsonConfigFileContentParams = {
         [<JsonPropertyName "json">]
@@ -275,7 +328,18 @@ module rec Proto =
         [<JsonPropertyName "configFileName">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
         ConfigFileName: DocumentIdentifier voption
-    }
+    } with
+
+        static member val private DefaultValue = lazy ({
+            Json = null
+            ConfigDirectory = ValueNone
+            ConfigFileName = ValueNone
+        }: ParseJsonConfigFileContentParams)
+
+        /// The record with nothing set: every field is either optional or a default of its
+        /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
+        /// `{ ParseJsonConfigFileContentParams.Default with ... }` - rather than writing all 3 out.
+        static member Default: ParseJsonConfigFileContentParams = ParseJsonConfigFileContentParams.DefaultValue.Value
 
     type ParseConfigFileParams = {
         [<JsonPropertyName "file">]
@@ -1504,7 +1568,19 @@ module rec Proto =
         [<JsonPropertyName "deleted">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
         Deleted: DocumentIdentifier[] voption
-    }
+    } with
+
+        static member val private DefaultValue = lazy ({
+            InvalidateAll = ValueNone
+            Changed = ValueNone
+            Created = ValueNone
+            Deleted = ValueNone
+        }: APIFileChanges)
+
+        /// The record with nothing set: every field is either optional or a default of its
+        /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
+        /// `{ APIFileChanges.Default with ... }` - rather than writing all 4 out.
+        static member Default: APIFileChanges = APIFileChanges.DefaultValue.Value
 
     /// SnapshotChanges describes what changed between the previous latest snapshot
     /// and the newly created snapshot. Changes are reported per-project so clients
@@ -1521,7 +1597,17 @@ module rec Proto =
         [<JsonPropertyName "removedProjects">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
         RemovedProjects: string[] voption
-    }
+    } with
+
+        static member val private DefaultValue = lazy ({
+            ChangedProjects = null
+            RemovedProjects = ValueNone
+        }: SnapshotChanges)
+
+        /// The record with nothing set: every field is either optional or a default of its
+        /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
+        /// `{ SnapshotChanges.Default with ... }` - rather than writing all 2 out.
+        static member Default: SnapshotChanges = SnapshotChanges.DefaultValue.Value
 
     type CreateProgramOptions = {
         [<JsonPropertyName "compilerOptions">]
@@ -1534,7 +1620,18 @@ module rec Proto =
         [<JsonPropertyName "configFileParsingDiagnostics">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
         ConfigFileParsingDiagnostics: DiagnosticResponse[] voption
-    }
+    } with
+
+        static member val private DefaultValue = lazy ({
+            CompilerOptions = CompilerOptions.Default
+            ProjectReferences = ValueNone
+            ConfigFileParsingDiagnostics = ValueNone
+        }: CreateProgramOptions)
+
+        /// The record with nothing set: every field is either optional or a default of its
+        /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
+        /// `{ CreateProgramOptions.Default with ... }` - rather than writing all 3 out.
+        static member Default: CreateProgramOptions = CreateProgramOptions.DefaultValue.Value
 
     type CreateProgramOldProgramParams = {
         [<JsonPropertyName "snapshot">]
@@ -1544,7 +1641,17 @@ module rec Proto =
         [<JsonPropertyName "project">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
         Project: string voption
-    }
+    } with
+
+        static member val private DefaultValue = lazy ({
+            Snapshot = ValueNone
+            Project = ValueNone
+        }: CreateProgramOldProgramParams)
+
+        /// The record with nothing set: every field is either optional or a default of its
+        /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
+        /// `{ CreateProgramOldProgramParams.Default with ... }` - rather than writing all 2 out.
+        static member Default: CreateProgramOldProgramParams = CreateProgramOldProgramParams.DefaultValue.Value
 
     ///  CompilerOptions contains the compiler options exposed by the API.
     type CompilerOptions = {
@@ -1952,7 +2059,116 @@ module rec Proto =
         [<JsonPropertyName "configFilePath">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
         ConfigFilePath: string voption
-    }
+    } with
+
+        static member val private DefaultValue = lazy ({
+            AllowJs = ValueNone
+            AllowArbitraryExtensions = ValueNone
+            AllowImportingTsExtensions = ValueNone
+            AllowNonTsExtensions = ValueNone
+            AllowUmdGlobalAccess = ValueNone
+            AllowUnreachableCode = ValueNone
+            AllowUnusedLabels = ValueNone
+            AssumeChangesOnlyAffectDirectDependencies = ValueNone
+            CheckJs = ValueNone
+            CustomConditions = ValueNone
+            Composite = ValueNone
+            EmitDeclarationOnly = ValueNone
+            EmitBOM = ValueNone
+            EmitDecoratorMetadata = ValueNone
+            Declaration = ValueNone
+            DeclarationDir = ValueNone
+            DeclarationMap = ValueNone
+            DeduplicatePackages = ValueNone
+            DisableSizeLimit = ValueNone
+            DisableSourceOfProjectReferenceRedirect = ValueNone
+            DisableSolutionSearching = ValueNone
+            DisableReferencedProjectLoad = ValueNone
+            ErasableSyntaxOnly = ValueNone
+            ExactOptionalPropertyTypes = ValueNone
+            ExperimentalDecorators = ValueNone
+            ForceConsistentCasingInFileNames = ValueNone
+            IsolatedModules = ValueNone
+            IsolatedDeclarations = ValueNone
+            IgnoreConfig = ValueNone
+            IgnoreDeprecations = ValueNone
+            ImportHelpers = ValueNone
+            InlineSourceMap = ValueNone
+            InlineSources = ValueNone
+            Init = ValueNone
+            Incremental = ValueNone
+            Jsx = ValueNone
+            JsxFactory = ValueNone
+            JsxFragmentFactory = ValueNone
+            JsxImportSource = ValueNone
+            Lib = ValueNone
+            LibReplacement = ValueNone
+            Locale = ValueNone
+            MapRoot = ValueNone
+            ``Module`` = ValueNone
+            ModuleResolution = ValueNone
+            ModuleSuffixes = ValueNone
+            ModuleDetection = ValueNone
+            NewLine = ValueNone
+            NoEmit = ValueNone
+            NoCheck = ValueNone
+            NoErrorTruncation = ValueNone
+            NoFallthroughCasesInSwitch = ValueNone
+            NoImplicitAny = ValueNone
+            NoImplicitThis = ValueNone
+            NoImplicitReturns = ValueNone
+            NoEmitHelpers = ValueNone
+            NoLib = ValueNone
+            NoPropertyAccessFromIndexSignature = ValueNone
+            NoUncheckedIndexedAccess = ValueNone
+            NoEmitOnError = ValueNone
+            NoUnusedLocals = ValueNone
+            NoUnusedParameters = ValueNone
+            NoResolve = ValueNone
+            NoImplicitOverride = ValueNone
+            NoUncheckedSideEffectImports = ValueNone
+            OutDir = ValueNone
+            Paths = null
+            PreserveConstEnums = ValueNone
+            PreserveSymlinks = ValueNone
+            Project = ValueNone
+            ResolveJsonModule = ValueNone
+            ResolvePackageJsonExports = ValueNone
+            ResolvePackageJsonImports = ValueNone
+            RemoveComments = ValueNone
+            RewriteRelativeImportExtensions = ValueNone
+            ReactNamespace = ValueNone
+            RootDir = ValueNone
+            RootDirs = ValueNone
+            SkipLibCheck = ValueNone
+            StableTypeOrdering = ValueNone
+            Strict = ValueNone
+            StrictBindCallApply = ValueNone
+            StrictBuiltinIteratorReturn = ValueNone
+            StrictFunctionTypes = ValueNone
+            StrictNullChecks = ValueNone
+            StrictPropertyInitialization = ValueNone
+            StripInternal = ValueNone
+            SkipDefaultLibCheck = ValueNone
+            SourceMap = ValueNone
+            SourceRoot = ValueNone
+            SuppressOutputPathCheck = ValueNone
+            Target = ValueNone
+            TraceResolution = ValueNone
+            TsBuildInfoFile = ValueNone
+            TypeRoots = ValueNone
+            Types = ValueNone
+            UseDefineForClassFields = ValueNone
+            UseUnknownInCatchVariables = ValueNone
+            VerbatimModuleSyntax = ValueNone
+            MaxNodeModuleJsDepth = ValueNone
+            ConfigFilePath = ValueNone
+        }: CompilerOptions)
+
+        /// The record with nothing set: every field is either optional or a default of its
+        /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
+        /// `{ CompilerOptions.Default with ... }` - rather than writing all 101 out.
+        static member Default: CompilerOptions = CompilerOptions.DefaultValue.Value
 
     ///  Path is a normalized path on disk.
     type ProjectReference = {
@@ -1985,7 +2201,19 @@ module rec Proto =
         [<JsonPropertyName "disableFilenameBasedTypeAcquisition">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
         DisableFilenameBasedTypeAcquisition: bool voption
-    }
+    } with
+
+        static member val private DefaultValue = lazy ({
+            Enable = ValueNone
+            Include = ValueNone
+            Exclude = ValueNone
+            DisableFilenameBasedTypeAcquisition = ValueNone
+        }: TypeAcquisition)
+
+        /// The record with nothing set: every field is either optional or a default of its
+        /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
+        /// `{ TypeAcquisition.Default with ... }` - rather than writing all 4 out.
+        static member Default: TypeAcquisition = TypeAcquisition.DefaultValue.Value
 
     type TranspileOptions = {
         [<JsonPropertyName "compilerOptions">]
@@ -1999,7 +2227,18 @@ module rec Proto =
         [<JsonPropertyName "reportDiagnostics">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
         ReportDiagnostics: bool voption
-    }
+    } with
+
+        static member val private DefaultValue = lazy ({
+            CompilerOptions = ValueNone
+            FileName = ValueNone
+            ReportDiagnostics = ValueNone
+        }: TranspileOptions)
+
+        /// The record with nothing set: every field is either optional or a default of its
+        /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
+        /// `{ TranspileOptions.Default with ... }` - rather than writing all 3 out.
+        static member Default: TranspileOptions = TranspileOptions.DefaultValue.Value
 
     type ImportAdderAction = {
         [<JsonPropertyName "kind">]
@@ -2087,7 +2326,17 @@ module rec Proto =
         [<JsonPropertyName "deletedFiles">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
         DeletedFiles: string[] voption
-    }
+    } with
+
+        static member val private DefaultValue = lazy ({
+            ChangedFiles = ValueNone
+            DeletedFiles = ValueNone
+        }: ProjectFileChanges)
+
+        /// The record with nothing set: every field is either optional or a default of its
+        /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
+        /// `{ ProjectFileChanges.Default with ... }` - rather than writing all 2 out.
+        static member Default: ProjectFileChanges = ProjectFileChanges.DefaultValue.Value
 
     ///  CompletionEntryLabelDetailsResponse holds additional label display text for a completion entry.
     type CompletionEntryLabelDetailsResponse = {
@@ -2098,7 +2347,17 @@ module rec Proto =
         [<JsonPropertyName "description">]
         [<JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)>]
         Description: string voption
-    }
+    } with
+
+        static member val private DefaultValue = lazy ({
+            Detail = ValueNone
+            Description = ValueNone
+        }: CompletionEntryLabelDetailsResponse)
+
+        /// The record with nothing set: every field is either optional or a default of its
+        /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -
+        /// `{ CompletionEntryLabelDetailsResponse.Default with ... }` - rather than writing all 2 out.
+        static member Default: CompletionEntryLabelDetailsResponse = CompletionEntryLabelDetailsResponse.DefaultValue.Value
 
     /// Every method the server exposes. The comment on each records the parameter and result
     /// types the schema assigns it; `voption` marks a result the schema permits to be null.

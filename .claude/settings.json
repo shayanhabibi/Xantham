@@ -1,8 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "mcp__fslangmcp"
+      "mcp__fslangmcp",
+      "Read(./.archive/README.md)"
+    ],
+    "ask": [
+      "Read(./.archive/**)",
+      "Grep(./.archive/**)"
     ]
   },
-  "enabledMcpjsonServers": ["fslangmcp"]
+  "enabledMcpjsonServers": [
+    "fslangmcp"
+  ]
 }

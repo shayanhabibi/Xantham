@@ -1,5 +1,6 @@
 module Xantham.TypeScript.Wire.Tests.Json
 
+open System.Reflection
 open System.Text.Json
 open Expecto
 open Xantham.TypeScript.Wire
@@ -14,11 +15,18 @@ let private read<'T> (json: string) = JsonSerializer.Deserialize<'T>(json, Proto
 let private symbol = """{"id":7,"project":"p","name":"yy","flags":4,"checkFlags":0}"""
 
 let private snapshotWith openProjects : UpdateSnapshotParams =
-    { OpenProjects = openProjects
-      CloseProjects = ValueNone
-      FileChanges = ValueNone
-      OpenFiles = ValueNone
-      CloseFiles = ValueNone }
+    { UpdateSnapshotParams.Default with OpenProjects = openProjects }
+
+/// Every generated record that carries a `Default`, paired with its type, found the way a caller
+/// would find it. A record gains one when each of its fields is optional or is itself such a
+/// record, so the list grows and shrinks with the schema rather than with this file.
+let private defaults =
+    typeof<CompilerOptions>.Assembly.GetTypes()
+    |> Array.filter (fun t -> t.FullName.StartsWith "Xantham.TypeScript.Wire.Proto+")
+    |> Array.choose (fun t ->
+        match t.GetProperty("Default", BindingFlags.Public ||| BindingFlags.Static) with
+        | null -> None
+        | property -> Some(t, property.GetValue null))
 
 [<Tests>]
 let jsonTests =
@@ -34,6 +42,55 @@ let jsonTests =
 
         testCase "an all-ValueNone record is an empty object" <| fun _ ->
             snapshotWith ValueNone |> write |> Flip.Expect.equal "" "{}"
+
+        testList "record defaults" [
+            // The point of `Default` is that it costs nothing on the wire: a caller copy-updates
+            // it to set the one field they mean, and the rest go out absent rather than as nulls
+            // the server would read as instructions. A record the schema requires still has to be
+            // written, so the payload is empty objects nested inside each other - never a null,
+            // and never a value nobody asked for.
+            let rec isUnset (node: Nodes.JsonNode) =
+                match node with
+                | :? Nodes.JsonObject as object -> object |> Seq.forall (fun pair -> isUnset pair.Value)
+                | _ -> false
+
+            testCase "a Default sets nothing beyond the objects the schema requires" <| fun _ ->
+                Expect.isNonEmpty defaults "the generator emits at least one Default"
+
+                for recordType, value in defaults do
+                    let json = JsonSerializer.Serialize(value, recordType, ProtoJson.options)
+
+                    Nodes.JsonNode.Parse json
+                    |> isUnset
+                    |> Flip.Expect.isTrue $"%s{recordType.Name}.Default wrote %s{json}"
+
+            testCase "a Default whose every field is optional is the empty object" <| fun _ ->
+                JsonSerializer.Serialize(CompilerOptions.Default, ProtoJson.options)
+                |> Flip.Expect.equal "" "{}"
+
+            // Built once, behind a lazy, rather than rebuilt per read.
+            testCase "Default is a single instance" <| fun _ ->
+                obj.ReferenceEquals(CompilerOptions.Default, CompilerOptions.Default)
+                |> Flip.Expect.isTrue "the same record comes back"
+
+            // The reason CreateProgramOptions has a Default at all: its `compilerOptions` is
+            // required by the schema, and stands in its own Default. This is also the case that
+            // catches the initialisation-order trap - the field is declared 300 lines before the
+            // record it names, so a non-deferred default reads back as null here.
+            testCase "a required field of a defaultable record takes that record's Default" <| fun _ ->
+                obj.ReferenceEquals(CreateProgramOptions.Default.CompilerOptions, CompilerOptions.Default)
+                |> Flip.Expect.isTrue "nested Default"
+
+            // `paths?` is optional in the schema but maps to a bare JsonObject, which is a
+            // nullable reference rather than a value option, so its absent form is null.
+            testCase "a bare JsonObject field defaults to null, and stays absent" <| fun _ ->
+                CompilerOptions.Default.Paths |> Flip.Expect.isNull "paths"
+
+            testCase "copy-update sets one field and leaves the rest absent" <| fun _ ->
+                { CompilerOptions.Default with Strict = ValueSome true }
+                |> write
+                |> Flip.Expect.equal "" """{"strict":true}"""
+        ]
 
         testList "DocumentIdentifier" [
             // The schema's one structural union: `string | { uri: string }`. Neither arm follows

@@ -303,14 +303,14 @@ index 0..11  SourceFile record:
   04000000  pathIndex        = 4
   00000000  languageVariant  = 0
   03000000  scriptKind       = 3
-  03000000 x6                NO_STRUCTURED_DATA (0xFFFFFFFF)? see §5.6 TODO
+  03000000 x6                structured-data offsets (0xFFFFFFFF = absent); see §5.6
   03000000
 index 48     NumericLiteral record: [textIndex = 8, tokenFlags = 0]
 ```
 
-**UNVERIFIED:** the exact SourceFile extended-data field order above is reconstructed from
-`dist/api/node/node.js:264-297` (`RemoteSourceFile` reads +0 +4 +8 +12 +16 +20 +24 +28 +32 +36 +40 +44)
-and should be re-derived from that file before implementing.
+**RESOLVED:** the SourceFile extended-data field order is now transcribed in full in §5.6, from
+the `sourceFileExtendedDataOffsets` table in `dist/api/node/node.js`. The dump above was taken
+against protocol version 5, whose record was twelve words; version 8's is nineteen.
 
 **Nodes (28 bytes each: kind u32, pos u32, end u32, next u32, parent u32, data u32, flags u32):**
 
@@ -387,10 +387,12 @@ is a key identifying the parse options used.
 
 ### 5.3 String table
 
-`stringTableOffsets` is a u32 array of `[start, end)` pairs; string index `i` uses `offsets[i]` and
-`offsets[i+1]` (i.e. entries are consumed pairwise, so a "string index" as stored in node data is an
-index *into the offsets array*, stepping by 2). Bytes live in the string table section and are
-**WTF-8** (§5.7), not plain UTF-8.
+`stringTableOffsets` is a u32 array of **cumulative** start offsets: string `i` runs from
+`offsets[i]` to `offsets[i + 1]`, so consecutive strings share a word and the array has one more
+entry than there are strings. A "string index" as stored in node data is an index *into that array*,
+stepping by one word, not two — `getString` in `dist/api/node/node.generated.js:265-272` is the
+reference, and reading it as pairs yields every second string and garbage lengths. Bytes live in the
+string table section and are **WTF-8** (§5.7), not plain UTF-8.
 
 ### 5.4 Node records
 
@@ -430,11 +432,45 @@ offset, i.e. the section is empty.
 
 ### 5.6 SourceFile extended data
 
-`dist/api/node/node.js:264-297` — `RemoteSourceFile` reads twelve u32 fields at +0 … +44 of its extended
-data record: text index, fileName index, path index, languageVariant, scriptKind, and six
-structured-data slots (each possibly `NO_STRUCTURED_DATA`), plus one more. **TODO:** transcribe the exact
-field names from that file into this table before implementing; the worked-example dump above shows the
-shape but the names are partly inferred.
+**RESOLVED (2026-09-01), against `typescript@7.1.0-dev.20260830.1`.** The names and offsets are
+the `sourceFileExtendedDataOffsets` table at the top of `dist/api/node/node.js`, which the file
+itself asserts is dense and in order (`offset === index * 4`, throwing if not). Nineteen u32 words,
+76 bytes:
+
+| +off | Field | Meaning |
+|---|---|---|
+| 0 | `Text` | string index: the whole source text |
+| 4 | `FileName` | string index |
+| 8 | `Path` | string index: the canonicalised path |
+| 12 | `LanguageVariant` | value |
+| 16 | `ScriptKind` | value |
+| 20 | `ReferencedFiles` | structured-data offset: `FileReference[]` |
+| 24 | `TypeReferenceDirectives` | structured-data offset: `FileReference[]` |
+| 28 | `LibReferenceDirectives` | structured-data offset: `FileReference[]` |
+| 32 | `Imports` | structured-data offset: node-index array |
+| 36 | `ModuleAugmentations` | structured-data offset: node-index array |
+| 40 | `AmbientModuleNames` | structured-data offset: string array |
+| 44 | `ExternalModuleIndicator` | node index, `0` for none |
+| 48 | `OriginalText` | string index |
+| 52 | `SpanMap` | structured-data offset: span-map segments |
+| 56 | `SupplementalSourceFileNames` | structured-data offset: string array |
+| 60 | `CanonicalSourceFileName` | string index |
+| 64 | `ContentMapper` | string index |
+| 68 | `VirtualFileName` | string index |
+| 72 | `DiagnosticDirectives` | structured-data offset |
+
+A field is absent when its word is `NO_STRUCTURED_DATA` (`0xFFFFFFFF`) — including the string-index
+ones, so "absent" and "the string at index 0xFFFFFFFF" are told apart by the sentinel and not by a
+separate flag. `ExternalModuleIndicator` is the exception: its absent value is `0`, the nil node.
+
+The last six describe a **virtual file** — one the compiler synthesised out of part of another
+(`ast.ContentMapperSourceFileInfo`). Nothing a client can send makes the compiler write them:
+`dist/api/node/node.d.ts` exposes a `contentMapper` getter and no method that takes one. They are
+decodable but not producible over this protocol; the .NET side covers them in
+`tests/Xantham.TypeScript.Wire.Tests/VirtualFile.test.fs` by patching a real blob.
+
+On the .NET side this table is *generated*, not transcribed: `tools/tsc-ast/record.mts` reads it
+out of the compiler's own source into `SourceFileRecord` in `Ast.generated.fs`.
 
 ### 5.7 WTF-8 strings
 
@@ -586,10 +622,23 @@ Types/symbols/signatures come back as bare integers. The JS client resolves them
 
 ## 7. Method surface
 
-The shipped build (`7.0.0-dev.20260707.2`) exposes **115** methods; upstream `main` has **137**.
-`probe4.mjs` established this by probing method existence — an unknown method produces the distinctive
-`unknown API method "..."` error, so existence is cheaply testable. 10 methods present on `main` were
-unknown to the shipped build.
+**RESOLVED (2026-09-01).** The "115 shipped vs 137 on `main`" figure was measured against
+`@typescript/native-preview@7.0.0-dev.20260707.2` and is now only history. Against
+`typescript@7.1.0-dev.20260830.1`, the schema and the binary agree exactly: `APIMethodInfo` in
+`dist/api/proto.generated.d.ts` declares **142** methods, and probing every one of them against
+`tsc.exe --api` produced **zero** `unknown API method` errors. There is no shipped-versus-`main` gap
+to work around in this build, and nothing for the generator to filter — the 142 sync methods it
+emits are all real. (The async surface emits 141: `batchRequests` has no counterpart, because the
+mailbox is the batcher.)
+
+The probe is the same technique `probe4.mjs` used — an unknown method produces the distinctive
+`unknown API method "..."` error, so existence is cheaply testable — but driven off the schema's own
+method list rather than a hand-collected one, and re-running it after an npm bump is how this stays
+true. It is in the repository as `tools/probe-method-existence.mjs`, and run from the Wire's test
+project (`node ../../tools/probe-method-existence.mjs`) it exits non-zero if the binary is missing
+anything the schema declares. §7.8 is the full list.
+
+The sections below group the methods by area and give the shapes that were traced live.
 
 ### 7.1 Session / lifecycle
 
@@ -598,9 +647,11 @@ unknown to the shipped build.
 | `initialize` | `null` | `{ useCaseSensitiveFileNames, currentDirectory }` |
 | `updateSnapshot` | `{ openProjects?, closeProjects?, openFiles?, closeFiles?, fileChanges? }` | `{ snapshot, projects[], changes? }` |
 | `release` | `{ snapshot }` | `true` |
-| `ping` | — | — (used as a liveness check in `probe7.mjs`) |
+| `ping` | `null` | the JSON string `"pong"` |
 
-**TODO:** confirm `ping`'s exact params/result shape; it was exercised but not documented here.
+`ping` is **RESOLVED**: `null` in, `"pong"` out — a bare JSON string, not an object. It is the
+cheapest liveness check there is, and `tools/probe-method-existence.mjs` uses it between calls to
+tell "this method rejected my parameters" from "this method killed the server".
 
 ### 7.2 Source files and printing
 
@@ -619,8 +670,7 @@ Params shape in the shipped build: `{ snapshot, project, ...(file !== undefined 
 **DRIFT WARNING:** upstream `main`'s `GetDiagnosticsParams` uses `Files []DocumentIdentifier` (plural).
 The shipped build uses singular `file`. A client must match the binary it launches.
 
-Methods include `getSyntacticDiagnostics`, `getSemanticDiagnostics`, `getSuggestionDiagnostics`
-(**UNVERIFIED:** exact set — re-enumerate from `dist/api/sync/api.d.ts`).
+The exact set is in §7.8, with each method's parameter and result types.
 
 ### 7.4 Checker queries
 
@@ -645,17 +695,199 @@ Signatures: `getTypeParametersOfSignature`, `getParametersOfSignature`, `getThis
 
 ### 7.6 Compiler-level, non-session
 
-`transpileModule`, `transpileModuleFromFile`, `transpileDeclaration`, `transpileDeclarationFromFile`
-(present on `main`; **UNVERIFIED** in the shipped build — `probe4.mjs` can settle it).
+`transpileModule`, `transpileModuleFromFile`, `transpileDeclaration`, `transpileDeclarationFromFile`.
+**VERIFIED present** in `typescript@7.1.0-dev.20260830.1`: all four answer, and the two `...FromFile`
+forms fail with `could not read file "..."` rather than `unknown API method` when handed `{}`.
 
 ### 7.7 Client callbacks (server → client, `MSG_CALL`)
 
-Enabled per-process with `--callbacks=`. The full set: `readFile`, `fileExists`, `directoryExists`,
-`getAccessibleEntries`, `realpath`.
+Enabled per-process with `--callbacks=`. The full set, from `fsCallbackNames` in
+`dist/api/fs.js`, is **six**: `readFile`, `fileExists`, `directoryExists`, `getAccessibleEntries`,
+`realpath`, `writeFile`.
 
 `dist/api/fs.d.ts` defines the virtual FS surface. Semantics detail that matters:
 a `null` result means **"absent"** (the file does not exist), while `undefined` means **"fall back to the
 real filesystem"**. Getting this backwards silently changes module resolution.
+
+**Each callback has its own reply shape, and the shapes are stated nowhere in the schema.** They
+are in `dist/api/sync/client.js:35-56`, the JS client's adapter:
+
+| Callback | Argument | Reply |
+| --- | --- | --- |
+| `readFile` | JSON string path | `{"content": <string>}`, `{"content": null}` for absent, empty for fall-back |
+| `fileExists`, `directoryExists` | JSON string path | `true` / `false`, or empty |
+| `getAccessibleEntries` | JSON string path | `{"files": [...], "directories": [...]}`, or empty |
+| `realpath` | JSON string path | a JSON string, or empty |
+| `writeFile` | `{"path": ..., "data": ...}` | empty |
+
+An **empty payload** is how "not answered" reaches the server, which is why `readFile` wraps its
+result in an object: a bare string could not carry the difference between a `null` content and no
+answer at all.
+
+Getting a shape wrong is not an error frame. The server panics -
+`json: unable to unmarshal JSON string into Go struct { Content *string }` - and the process
+dies, so the client sees only `tsgo closed the pipe mid-frame` and has to read stderr for the
+reason. Verified live, 2026-09-01.
+
+The .NET side does not make callers do this: `VirtualFileSystem` in `Library.fs` is the typed
+surface, with `Content` / `Missing` / `FallBack` for `readFile`'s three returns, and
+`VirtualFileSystem.callbacks` produces the table. The raw `TsGoCallback` remains the escape
+hatch.
+
+---
+
+### 7.8 Full method list — VERIFIED
+
+Transcribed from `APIMethodInfo` in `dist/api/proto.generated.d.ts` of
+`typescript@7.1.0-dev.20260830.1`, in schema order, and probed against `tsc.exe --api`: every one of
+the 142 exists. The type names are the schema's own, and `Xantham.TypeScript.Wire` generates an F#
+record per params type and per response type out of the same file, so these are also the names of
+the generated types.
+
+| # | Method | Params | Result |
+|---|---|---|---|
+| 1 | `release` | `ReleaseParams` | `void` |
+| 2 | `batchRequests` | `BatchRequestsParams` | `BatchRequestsResponse` |
+| 3 | `initialize` | `null` | `InitializeResponse` |
+| 4 | `updateSnapshot` | `UpdateSnapshotParams` | `UpdateSnapshotResponse` |
+| 5 | `updateTemporarySnapshot` | `UpdateTemporarySnapshotParams` | `UpdateSnapshotResponse` |
+| 6 | `createProgram` | `CreateProgramParams` | `CreateProgramResponse` |
+| 7 | `parseCommandLine` | `ParseCommandLineParams` | `ConfigFileResponse` |
+| 8 | `readConfigFile` | `ReadConfigFileParams` | `ReadConfigFileResponse` |
+| 9 | `parseJsonConfigFileContent` | `ParseJsonConfigFileContentParams` | `ConfigFileResponse` |
+| 10 | `parseConfigFile` | `ParseConfigFileParams` | `ConfigFileResponse` |
+| 11 | `transpileModule` | `TranspileParams` | `TranspileOutputResponse` |
+| 12 | `transpileModuleFromFile` | `TranspileFromFileParams` | `TranspileOutputResponse` |
+| 13 | `transpileDeclaration` | `TranspileParams` | `TranspileOutputResponse` |
+| 14 | `transpileDeclarationFromFile` | `TranspileFromFileParams` | `TranspileOutputResponse` |
+| 15 | `getDefaultProjectForFile` | `GetDefaultProjectForFileParams` | `ProjectResponse | null` |
+| 16 | `getSymbolAtPosition` | `GetSymbolAtPositionParams` | `SymbolResponse | null` |
+| 17 | `getSymbolsAtPositions` | `GetSymbolsAtPositionsParams` | `SymbolResponse[]` |
+| 18 | `getSymbolAtLocation` | `GetSymbolAtLocationParams` | `SymbolResponse | null` |
+| 19 | `getSymbolsAtLocations` | `GetSymbolsAtLocationsParams` | `SymbolResponse[]` |
+| 20 | `getSymbolOfSourceFile` | `GetSymbolOfSourceFileParams` | `SymbolResponse | null` |
+| 21 | `getSymbolsOfSourceFiles` | `GetSymbolsOfSourceFilesParams` | `SymbolResponse[]` |
+| 22 | `getTypeOfSymbol` | `GetTypeOfSymbolParams` | `TypeResponse` |
+| 23 | `getTypesOfSymbols` | `GetTypesOfSymbolsParams` | `TypeResponse[]` |
+| 24 | `getDeclaredTypeOfSymbol` | `GetTypeOfSymbolParams` | `TypeResponse` |
+| 25 | `getNonMissingTypeOfSymbol` | `GetTypeOfSymbolParams` | `TypeResponse` |
+| 26 | `getSourceFile` | `GetSourceFileParams` | `SourceFileResponse | null` |
+| 27 | `getSourceFileNames` | `GetSourceFileNamesParams` | `string[]` |
+| 28 | `getSourceFileMetadata` | `GetSourceFileParams` | `SourceFileMetadata | null` |
+| 29 | `getConfigFileNames` | `GetProjectDiagnosticsParams` | `string[] | null` |
+| 30 | `getConfigSourceFile` | `GetSourceFileParams` | `SourceFileResponse | null` |
+| 31 | `resolveName` | `ResolveNameParams` | `SymbolResponse | null` |
+| 32 | `getSymbolsInScope` | `GetSymbolsInScopeParams` | `SymbolResponse[]` |
+| 33 | `getSignaturesOfType` | `GetSignaturesOfTypeParams` | `SignatureResponse[]` |
+| 34 | `getResolvedSignature` | `GetResolvedSignatureParams` | `SignatureResponse` |
+| 35 | `getTypeAtLocation` | `GetTypeAtLocationParams` | `TypeResponse` |
+| 36 | `getTypeAtLocations` | `GetTypeAtLocationsParams` | `TypeResponse[]` |
+| 37 | `getTypeAtPosition` | `GetTypeAtPositionParams` | `TypeResponse | null` |
+| 38 | `getTypesAtPositions` | `GetTypesAtPositionsParams` | `TypeResponse[]` |
+| 39 | `getParentOfSymbol` | `GetSymbolPropertyParams` | `SymbolResponse | null` |
+| 40 | `getMembersOfSymbol` | `GetSymbolPropertyParams` | `SymbolResponse[] | null` |
+| 41 | `getExportsOfSymbol` | `GetSymbolPropertyParams` | `SymbolResponse[] | null` |
+| 42 | `getExportSymbolOfSymbol` | `GetSymbolPropertyParams` | `SymbolResponse | null` |
+| 43 | `getSymbolOfType` | `GetTypePropertyParams` | `SymbolResponse | null` |
+| 44 | `getTargetOfType` | `GetTypePropertyParams` | `TypeResponse` |
+| 45 | `getFreshTypeOfType` | `GetTypePropertyParams` | `TypeResponse | null` |
+| 46 | `getRegularTypeOfType` | `GetTypePropertyParams` | `TypeResponse | null` |
+| 47 | `getTypesOfType` | `GetTypePropertyParams` | `TypeResponse[] | null` |
+| 48 | `getTypeParametersOfType` | `GetTypePropertyParams` | `TypeResponse[] | null` |
+| 49 | `getOuterTypeParametersOfType` | `GetTypePropertyParams` | `TypeResponse[] | null` |
+| 50 | `getLocalTypeParametersOfType` | `GetTypePropertyParams` | `TypeResponse[] | null` |
+| 51 | `getAliasTypeArgumentsOfType` | `GetTypePropertyParams` | `TypeResponse[] | null` |
+| 52 | `getAliasSymbolOfType` | `GetTypePropertyParams` | `SymbolResponse | null` |
+| 53 | `getObjectTypeOfType` | `GetTypePropertyParams` | `TypeResponse` |
+| 54 | `getIndexTypeOfType` | `GetTypePropertyParams` | `TypeResponse` |
+| 55 | `getCheckTypeOfType` | `GetTypePropertyParams` | `TypeResponse` |
+| 56 | `getExtendsTypeOfType` | `GetTypePropertyParams` | `TypeResponse` |
+| 57 | `getBaseTypeOfType` | `GetTypePropertyParams` | `TypeResponse` |
+| 58 | `getConstraintOfType` | `GetTypePropertyParams` | `TypeResponse` |
+| 59 | `getTypeParametersOfSignature` | `GetSignaturePropertyParams` | `TypeResponse[] | null` |
+| 60 | `getParametersOfSignature` | `GetSignaturePropertyParams` | `SymbolResponse[] | null` |
+| 61 | `getThisParameterOfSignature` | `GetSignaturePropertyParams` | `SymbolResponse | null` |
+| 62 | `getTargetOfSignature` | `GetSignaturePropertyParams` | `SignatureResponse | null` |
+| 63 | `getContextualType` | `GetContextualTypeParams` | `TypeResponse | null` |
+| 64 | `getBaseTypeOfLiteralType` | `GetBaseTypeOfLiteralTypeParams` | `TypeResponse` |
+| 65 | `getNonNullableType` | `GetTypePropertyParams` | `TypeResponse` |
+| 66 | `getTypeFromTypeNode` | `GetTypeFromTypeNodeParams` | `TypeResponse` |
+| 67 | `getWidenedType` | `GetWidenedTypeParams` | `TypeResponse` |
+| 68 | `getParameterType` | `GetParameterTypeParams` | `TypeResponse` |
+| 69 | `getTypeParameterAtPosition` | `GetParameterTypeParams` | `TypeResponse` |
+| 70 | `isArrayLikeType` | `IsArrayLikeTypeParams` | `boolean` |
+| 71 | `isTypeAssignableTo` | `IsTypeAssignableToParams` | `boolean` |
+| 72 | `getShorthandAssignmentValueSymbol` | `GetTypeAtLocationParams` | `SymbolResponse | null` |
+| 73 | `getTypeOfSymbolAtLocation` | `GetTypeOfSymbolAtLocationParams` | `TypeResponse` |
+| 74 | `typeToTypeNode` | `TypeToTypeNodeParams` | `SourceFileResponse | null` |
+| 75 | `signatureToSignatureDeclaration` | `SignatureToSignatureDeclarationParams` | `SourceFileResponse | null` |
+| 76 | `typeToString` | `TypeToTypeNodeParams` | `unknown` |
+| 77 | `isContextSensitive` | `GetContextualTypeParams` | `boolean` |
+| 78 | `getReturnTypeOfSignature` | `GetSignaturePropertyParams` | `TypeResponse` |
+| 79 | `getRestTypeOfSignature` | `CheckerSignatureParams` | `TypeResponse` |
+| 80 | `getTypePredicateOfSignature` | `CheckerSignatureParams` | `TypePredicateResponse | null` |
+| 81 | `getBaseTypes` | `CheckerTypeParams` | `TypeResponse[] | null` |
+| 82 | `getPropertiesOfType` | `CheckerTypeParams` | `SymbolResponse[] | null` |
+| 83 | `getApparentPropertiesOfType` | `GetTypePropertyParams` | `SymbolResponse[]` |
+| 84 | `getApparentType` | `GetTypePropertyParams` | `TypeResponse` |
+| 85 | `getReducedType` | `GetTypePropertyParams` | `TypeResponse` |
+| 86 | `getPropertyOfType` | `GetPropertyOfTypeParams` | `SymbolResponse | null` |
+| 87 | `getIndexInfosOfType` | `CheckerTypeParams` | `IndexInfoResponse[] | null` |
+| 88 | `getConstraintOfTypeParameter` | `GetTypePropertyParams` | `TypeResponse | null` |
+| 89 | `getDefaultFromTypeParameter` | `GetTypePropertyParams` | `TypeResponse | null` |
+| 90 | `getBaseConstraintOfType` | `CheckerTypeParams` | `TypeResponse | null` |
+| 91 | `getTypeArguments` | `CheckerTypeParams` | `TypeResponse[] | null` |
+| 92 | `getImportAdderEdits` | `GetImportAdderEditsParams` | `TextEdit[]` |
+| 93 | `getTrueTypeOfConditionalType` | `GetTypePropertyParams` | `TypeResponse` |
+| 94 | `getFalseTypeOfConditionalType` | `GetTypePropertyParams` | `TypeResponse` |
+| 95 | `getConstantValue` | `CheckerNodeParams` | `unknown | null` |
+| 96 | `getSignatureFromDeclaration` | `CheckerNodeParams` | `SignatureResponse` |
+| 97 | `getExportSpecifierLocalTargetSymbol` | `CheckerNodeParams` | `SymbolResponse | null` |
+| 98 | `getAliasedSymbol` | `CheckerSymbolParams` | `SymbolResponse` |
+| 99 | `getImmediateAliasedSymbol` | `CheckerSymbolParams` | `SymbolResponse | null` |
+| 100 | `getTargetSymbol` | `CheckerSymbolParams` | `SymbolResponse` |
+| 101 | `getFullyQualifiedName` | `CheckerSymbolParams` | `string` |
+| 102 | `getExportsOfModule` | `CheckerSymbolParams` | `SymbolResponse[] | null` |
+| 103 | `getMemberInModuleExports` | `GetMemberInModuleExportsParams` | `SymbolResponse | null` |
+| 104 | `getJsDocTags` | `CheckerSymbolParams` | `JSDocTagInfo[] | null` |
+| 105 | `getDocumentationComment` | `CheckerSymbolParams` | `string` |
+| 106 | `isArrayType` | `CheckerTypeParams` | `boolean` |
+| 107 | `isReadonlySymbol` | `CheckerSymbolParams` | `boolean` |
+| 108 | `getReferencesToSymbolInFile` | `GetReferencesToSymbolInFileParams` | `string[]` |
+| 109 | `getReferencedSymbolsForNode` | `GetReferencedSymbolsForNodeParams` | `ReferencedSymbolEntry[] | null` |
+| 110 | `getSignatureUsages` | `GetSignatureUsagesParams` | `SignatureUsageResponse[] | null` |
+| 111 | `getCompletionsAtPosition` | `GetCompletionsAtPositionParams` | `CompletionInfoResponse | null` |
+| 112 | `getSyntacticDiagnostics` | `GetDiagnosticsParams` | `DiagnosticResponse[] | null` |
+| 113 | `getBindDiagnostics` | `GetDiagnosticsParams` | `DiagnosticResponse[] | null` |
+| 114 | `getSemanticDiagnostics` | `GetDiagnosticsParams` | `DiagnosticResponse[] | null` |
+| 115 | `getSuggestionDiagnostics` | `GetDiagnosticsParams` | `DiagnosticResponse[] | null` |
+| 116 | `getDeclarationDiagnostics` | `GetDiagnosticsParams` | `DiagnosticResponse[] | null` |
+| 117 | `getProgramDiagnostics` | `GetProjectDiagnosticsParams` | `DiagnosticResponse[] | null` |
+| 118 | `getGlobalDiagnostics` | `GetProjectDiagnosticsParams` | `DiagnosticResponse[] | null` |
+| 119 | `getConfigFileParsingDiagnostics` | `GetProjectDiagnosticsParams` | `DiagnosticResponse[] | null` |
+| 120 | `printNode` | `PrintNodeParams` | `string` |
+| 121 | `formatNodeForInsertion` | `FormatNodeForInsertionParams` | `string` |
+| 122 | `emit` | `EmitParams` | `EmitResponse` |
+| 123 | `emitToString` | `EmitParams` | `EmitOutputResponse` |
+| 124 | `getJavaScriptEmit` | `SelectedFilesEmitParams` | `EmitOutputResponse` |
+| 125 | `getDeclarationEmit` | `SelectedFilesEmitParams` | `EmitOutputResponse` |
+| 126 | `getAnyType` | `GetIntrinsicTypeParams` | `TypeResponse` |
+| 127 | `getStringType` | `GetIntrinsicTypeParams` | `TypeResponse` |
+| 128 | `getNumberType` | `GetIntrinsicTypeParams` | `TypeResponse` |
+| 129 | `getBooleanType` | `GetIntrinsicTypeParams` | `TypeResponse` |
+| 130 | `getVoidType` | `GetIntrinsicTypeParams` | `TypeResponse` |
+| 131 | `getUndefinedType` | `GetIntrinsicTypeParams` | `TypeResponse` |
+| 132 | `getNullType` | `GetIntrinsicTypeParams` | `TypeResponse` |
+| 133 | `getNeverType` | `GetIntrinsicTypeParams` | `TypeResponse` |
+| 134 | `getUnknownType` | `GetIntrinsicTypeParams` | `TypeResponse` |
+| 135 | `getBigIntType` | `GetIntrinsicTypeParams` | `TypeResponse` |
+| 136 | `getESSymbolType` | `GetIntrinsicTypeParams` | `TypeResponse` |
+| 137 | `getNonPrimitiveType` | `GetIntrinsicTypeParams` | `TypeResponse` |
+| 138 | `getWellKnownSymbols` | `GetIntrinsicTypeParams` | `WellKnownSymbolsResponse` |
+| 139 | `getWellKnownSignatures` | `GetIntrinsicTypeParams` | `WellKnownSignaturesResponse` |
+| 140 | `startCPUProfile` | `ProfileParams` | `void` |
+| 141 | `stopCPUProfile` | `null` | `ProfileResult` |
+| 142 | `saveHeapProfile` | `ProfileParams` | `ProfileResult` |
 
 ---
 
@@ -840,8 +1072,11 @@ traces and are safe to implement from. Outstanding items are refinements, not un
 
 - [x] Position encoding resolved: **UTF-16 code units** on the RPC surface and in node `pos`/`end`;
       **UTF-8 bytes** for string-table offsets (§5.8, §5.9). `probe8.mjs` / `probe9.mjs`.
-- [ ] Transcribe exact `RemoteSourceFile` extended-data field names from `dist/api/node/node.js:264-297`
-      into §5.6.
-- [ ] Enumerate the full 115-method list with param/result types from `dist/api/sync/api.d.ts`
-      (§7 currently groups them by area and names the important ones).
-- [ ] Confirm `ping` params/result (§7.1) and whether `transpile*` exists in the shipped build (§7.6).
+- [x] `RemoteSourceFile` extended-data field names transcribed into §5.6 — nineteen words, from the
+      `sourceFileExtendedDataOffsets` table, against protocol version **8**. The document was written
+      against version 5, so §5.1 and §5.2 are stale on the version number and on the record's width;
+      everything else in §5 still holds.
+- [x] Full method list enumerated with param/result types in §7.8 — **142**, not 115: the old count
+      was measured against a build that has since been superseded.
+- [x] `ping` is `null` → `"pong"` (§7.1), and all four `transpile*` methods exist in the shipped
+      build (§7.6).
