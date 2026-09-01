@@ -619,6 +619,14 @@ type EffectOptions =
 type EffectFunction<'Prev, 'Next> = Func<'Prev, 'Next>
 
 [<Interface>]
+type CreateEffectOptions =
+    inherit EffectOptions
+    abstract name: string option with get, set
+    abstract render: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?name: string, ?render: bool) : CreateEffectOptions = jsNative
+
+[<Interface>]
 type MemoOptions<'T> =
     abstract equals: U2<bool, Func<'T, 'T, bool>> option with get, set
     abstract name: string option with get, set
@@ -720,8 +728,22 @@ type ResourceOptionsSsrLoadFrom =
     | [<CompiledName("initial")>] Initial
     | [<CompiledName("server")>] Server
 
-[<Erase>]
-type InitializedResourceOptions<'T, 'S> = private InitializedResourceOptions__ of obj
+[<Interface>]
+type InitializedResourceOptions<'T, 'S> =
+    abstract initialValue: obj with get, set
+    abstract name: string option with get, set
+    abstract deferStream: bool option with get, set
+    abstract ssrLoadFrom: ResourceOptionsSsrLoadFrom option with get, set
+    abstract storage: Func<'T option, (Func<'T option> * Func<obj, obj>)> option with get, set
+    abstract onHydrated: Action<'S option, InitializedResourceOptionsOnHydratedInfo<'T>> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<'T option, (Func<'T option> * Func<obj, obj>)>, ?onHydrated: Action<'S option, InitializedResourceOptionsOnHydratedInfo<'T>>) : InitializedResourceOptions<'T, 'S> = jsNative
+
+[<Interface>]
+type InitializedResourceOptionsOnHydratedInfo<'T> =
+    abstract value: 'T option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?value: 'T) : InitializedResourceOptionsOnHydratedInfo<'T> = jsNative
 
 [<Interface>]
 type ResourceReturnItem<'R, 'T> =
@@ -766,26 +788,26 @@ type CreateResourceFetcherInfo4<'T, 'R> =
     static member Create (refetching: U2<bool, 'R>, ?value: 'T) : CreateResourceFetcherInfo4<'T, 'R> = jsNative
 
 [<Interface>]
-type CreateResourceOptions =
-    abstract initialValue: obj option with get, set
+type CreateResourceOptions<'I, 'T> =
+    abstract initialValue: obj with get, set
     abstract name: string option with get, set
     abstract deferStream: bool option with get, set
     abstract ssrLoadFrom: ResourceOptionsSsrLoadFrom option with get, set
-    abstract storage: Func<obj option, (Func<obj option> * Func<obj, obj>)> option with get, set
-    abstract onHydrated: Action<bool option, CreateResourceOptionsOnHydratedInfo> option with get, set
+    abstract storage: Func<U2<'I, 'T> option, (Func<U2<'I, 'T> option> * Func<obj, obj>)> option with get, set
+    abstract onHydrated: Action<bool option, CreateResourceOptionsOnHydratedInfo<'I, 'T>> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<obj option, (Func<obj option> * Func<obj, obj>)>, ?onHydrated: Action<bool option, CreateResourceOptionsOnHydratedInfo>) : CreateResourceOptions = jsNative
+    static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<U2<'I, 'T> option, (Func<U2<'I, 'T> option> * Func<obj, obj>)>, ?onHydrated: Action<bool option, CreateResourceOptionsOnHydratedInfo<'I, 'T>>) : CreateResourceOptions<'I, 'T> = jsNative
 
 [<Interface>]
-type CreateResourceOptions2<'S> =
+type CreateResourceOptions2 =
     abstract initialValue: obj option with get, set
     abstract name: string option with get, set
     abstract deferStream: bool option with get, set
     abstract ssrLoadFrom: ResourceOptionsSsrLoadFrom option with get, set
     abstract storage: Func<obj option, (Func<obj option> * Func<obj, obj>)> option with get, set
-    abstract onHydrated: Action<'S option, CreateResourceOptions2OnHydratedInfo> option with get, set
+    abstract onHydrated: Action<bool option, CreateResourceOptions2OnHydratedInfo> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<obj option, (Func<obj option> * Func<obj, obj>)>, ?onHydrated: Action<'S option, CreateResourceOptions2OnHydratedInfo>) : CreateResourceOptions2<'S> = jsNative
+    static member Create (?initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<obj option, (Func<obj option> * Func<obj, obj>)>, ?onHydrated: Action<bool option, CreateResourceOptions2OnHydratedInfo>) : CreateResourceOptions2 = jsNative
 
 [<Interface>]
 type CreateResourceOptions2OnHydratedInfo =
@@ -794,10 +816,44 @@ type CreateResourceOptions2OnHydratedInfo =
     static member Create (?value: obj) : CreateResourceOptions2OnHydratedInfo = jsNative
 
 [<Interface>]
-type CreateResourceOptionsOnHydratedInfo =
+type CreateResourceOptions3<'I, 'T, 'S> =
+    abstract initialValue: obj with get, set
+    abstract name: string option with get, set
+    abstract deferStream: bool option with get, set
+    abstract ssrLoadFrom: ResourceOptionsSsrLoadFrom option with get, set
+    abstract storage: Func<U2<'I, 'T> option, (Func<U2<'I, 'T> option> * Func<obj, obj>)> option with get, set
+    abstract onHydrated: Action<'S option, CreateResourceOptions3OnHydratedInfo<'I, 'T>> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<U2<'I, 'T> option, (Func<U2<'I, 'T> option> * Func<obj, obj>)>, ?onHydrated: Action<'S option, CreateResourceOptions3OnHydratedInfo<'I, 'T>>) : CreateResourceOptions3<'I, 'T, 'S> = jsNative
+
+[<Interface>]
+type CreateResourceOptions3OnHydratedInfo<'I, 'T> =
+    abstract value: U2<'I, 'T> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?value: U2<'I, 'T>) : CreateResourceOptions3OnHydratedInfo<'I, 'T> = jsNative
+
+[<Interface>]
+type CreateResourceOptions4<'S> =
+    abstract initialValue: obj option with get, set
+    abstract name: string option with get, set
+    abstract deferStream: bool option with get, set
+    abstract ssrLoadFrom: ResourceOptionsSsrLoadFrom option with get, set
+    abstract storage: Func<obj option, (Func<obj option> * Func<obj, obj>)> option with get, set
+    abstract onHydrated: Action<'S option, CreateResourceOptions4OnHydratedInfo> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<obj option, (Func<obj option> * Func<obj, obj>)>, ?onHydrated: Action<'S option, CreateResourceOptions4OnHydratedInfo>) : CreateResourceOptions4<'S> = jsNative
+
+[<Interface>]
+type CreateResourceOptions4OnHydratedInfo =
     abstract value: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?value: obj) : CreateResourceOptionsOnHydratedInfo = jsNative
+    static member Create (?value: obj) : CreateResourceOptions4OnHydratedInfo = jsNative
+
+[<Interface>]
+type CreateResourceOptionsOnHydratedInfo<'I, 'T> =
+    abstract value: U2<'I, 'T> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?value: U2<'I, 'T>) : CreateResourceOptionsOnHydratedInfo<'I, 'T> = jsNative
 
 [<Interface>]
 type CreateResourceResultItem<'R, 'I, 'T> =
@@ -851,23 +907,50 @@ type OnOptions =
 
 [<Interface>]
 type OnOptions2 =
+    inherit OnOptions
+    abstract defer: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?defer: bool) : OnOptions2 = jsNative
+
+[<Interface>]
+type OnOptions3 =
     abstract defer: bool with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (defer: bool) : OnOptions2 = jsNative
+    static member Create (defer: bool) : OnOptions3 = jsNative
+
+type ContextProviderComponent<'T> = Func<ContextProviderComponentProps<'T>, JSXElement option>
+
+[<Interface>]
+type ContextProviderComponentProps<'T> =
+    abstract value: 'T with get, set
+    abstract children: JSXElement option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (value: 'T, ?children: JSXElement) : ContextProviderComponentProps<'T> = jsNative
 
 [<Interface>]
 type Context<'T> =
     abstract id: obj with get, set
-    abstract Provider: Func<obj, JSXElement option> with get, set
+    abstract Provider: Func<ContextProviderProps<'T>, JSXElement option> with get, set
     abstract defaultValue: 'T with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: obj, Provider: Func<obj, JSXElement option>, defaultValue: 'T) : Context<'T> = jsNative
+    static member Create (id: obj, Provider: Func<ContextProviderProps<'T>, JSXElement option>, defaultValue: 'T) : Context<'T> = jsNative
+
+[<Interface>]
+type ContextProviderProps<'T> =
+    abstract value: 'T with get, set
+    abstract children: JSXElement option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (value: 'T, ?children: JSXElement) : ContextProviderProps<'T> = jsNative
 
 type ResolvedJSXElement = obj option
 
 type ResolvedChildren = obj option
 
-type ChildrenReturn = obj
+[<Interface>]
+type ChildrenReturn =
+    abstract toArray: Func<ResolvedJSXElement option[]> with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (toArray: Func<ResolvedJSXElement option[]>) : ChildrenReturn = jsNative
 
 [<Interface>]
 type ExternalSource =
@@ -2014,7 +2097,7 @@ type Exports =
     /// <remarks>@param options allows to set a name in dev mode for debugging purposes</remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-effect</remarks>
     [<Import("createEffect", "solid-js")>]
-    static member createEffect<'Next, 'Init> (fn: Func<U2<'Init, 'Next>, 'Next>, value: 'Init, ?options: obj) : unit = jsNative
+    static member createEffect<'Next, 'Init> (fn: Func<U2<'Init, 'Next>, 'Next>, value: 'Init, ?options: CreateEffectOptions) : unit = jsNative
     /// <summary>
     /// Creates a reactive computation that runs after the render phase with flexible tracking
     /// <code lang="typescript">
@@ -2094,7 +2177,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T, 'I> (fetcher: Func<bool, obj, U2<'T, JS.Promise<'T>>>, options: obj) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * obj = jsNative
+    static member createResource<'T, 'I> (fetcher: Func<bool, obj, U2<'T, JS.Promise<'T>>>, options: CreateResourceOptions<'I, 'T>) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * obj = jsNative
     /// <summary>
     /// Creates a resource that wraps a repeated promise in a reactive pattern:
     /// <code lang="typescript">
@@ -2128,7 +2211,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T> (fetcher: Func<bool, obj, U2<'T, JS.Promise<'T>>>, ?options: CreateResourceOptions) : obj * obj = jsNative
+    static member createResource<'T> (fetcher: Func<bool, obj, U2<'T, JS.Promise<'T>>>, ?options: CreateResourceOptions2) : obj * obj = jsNative
     /// <summary>
     /// Creates a resource that wraps a repeated promise in a reactive pattern:
     /// <code lang="typescript">
@@ -2162,7 +2245,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-resource</remarks>
     [<Import("createResource", "solid-js")>]
-    static member createResource<'T, 'S, 'I> (source: U3<bool, 'S, Func<U2<bool, 'S> option>> option, fetcher: Func<'S, obj, U2<'T, JS.Promise<'T>>>, options: obj) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * obj = jsNative
+    static member createResource<'T, 'S, 'I> (source: U3<bool, 'S, Func<U2<bool, 'S> option>> option, fetcher: Func<'S, obj, U2<'T, JS.Promise<'T>>>, options: CreateResourceOptions3<'I, 'T, 'S>) : U3<Errored, Ready<U2<'I, 'T>>, Refreshing<U2<'I, 'T>>> * obj = jsNative
     /// <summary>
     /// Creates a resource that wraps a repeated promise in a reactive pattern:
     /// <code lang="typescript">
@@ -2284,7 +2367,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/on-util</remarks>
     [<Import("on", "solid-js")>]
-    static member on<'S, 'Next> (deps: U2<Func<'S>, obj[]>, fn: Func<'S, 'S option, obj option, 'Next>, ?options: obj) : Func<obj option, obj> = jsNative
+    static member on<'S, 'Next> (deps: U2<Func<'S>, obj[]>, fn: Func<'S, 'S option, obj option, 'Next>, ?options: OnOptions2) : Func<obj option, obj> = jsNative
     /// <summary>
     /// Makes dependencies of a computation explicit
     /// <code lang="typescript">
@@ -2314,7 +2397,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/reactive-utilities/on-util</remarks>
     [<Import("on", "solid-js")>]
-    static member on<'S, 'Next> (deps: U2<Func<'S>, obj[]>, fn: Func<'S, 'S option, obj option, 'Next>, options: U2<OnOptions, OnOptions2>) : Func<obj option, obj option> = jsNative
+    static member on<'S, 'Next> (deps: U2<Func<'S>, obj[]>, fn: Func<'S, 'S option, obj option, 'Next>, options: U2<OnOptions, OnOptions3>) : Func<obj option, obj option> = jsNative
     /// <summary>
     /// Runs an effect only after initial render on mount
     /// </summary>
@@ -2426,7 +2509,7 @@ type Exports =
     /// <remarks>@returns a accessor of the same children, but resolved</remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/component-apis/children</remarks>
     [<Import("children", "solid-js")>]
-    static member children (fn: Func<JSXElement option>) : obj = jsNative
+    static member children (fn: Func<JSXElement option>) : ChildrenReturn = jsNative
     [<Import("enableExternalSource", "solid-js")>]
     static member enableExternalSource (factory: Func<Func<obj, obj>, Action, ExternalSource>, ?untrack: Func<Func<obj>, obj>) : unit = jsNative
     /// <remarks>

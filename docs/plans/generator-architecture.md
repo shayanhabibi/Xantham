@@ -587,6 +587,38 @@ Phases — each ends with the compile gate green on its fixtures:
     What the compile gate had to prove: a generic interface with `[<ParamObject>]`
     `Create` over `'T`, and an application of a hoisted declaration from inside a generic
     `Exports` member - both compile under Fable.Core 5.2.0.
+  - *Object intersections flattened (2026-09-02).* The largest widening left across every
+    rung - "intersection of object types has no F# form yet", 290 sites over the four npm
+    fixtures - was §4.6's first bullet, still unimplemented. The resolve tier now asks the
+    checker for the properties, signatures and index signatures of the intersection *itself*
+    when every operand is an object (`getPropertiesOfType` hands them over flattened, a
+    property both operands declare typed as the intersection of its two types), and the shape
+    tier names and declares such an intersection exactly as it does a hoisted anonymous
+    object: `type NamedTimed = Named & Timed` is one interface with both member sets, a
+    parameter-position `Named & { id: number }` hoists as `LabelTarget`, a generic alias
+    `WithValue<T> = Named & { value: T }` binds `'T` on the declaration, and the reference
+    names it. The is-a relation §4.6 said would be lost is kept where F# can state it: an
+    operand this run declares as an interface is `inherit`ed - F# admits both the diamond
+    (`inherit Loud; inherit Pitched` sharing `volume`) and the redeclaration, verified before
+    relying on either - so the intersection upcasts to its operands. Members are still
+    declared in full rather than left to the inherited operand, which is what keeps `Create`
+    and the member list exact when an operand is not an interface (a lib type, a callable, an
+    anonymous shape folded in). What stays widened, and now says which case it is: an
+    intersection with a type-parameter or primitive operand has no members to read until
+    instantiated (`T & { id: number }`, 84 sites in `workers-types`), and a brand is still a
+    measure (D11; `brand-lab`'s two object-intersection negatives now flatten, its
+    primitive-with-a-real-member negative still widens). The naming walk also learned to
+    descend into an index signature's value - `Record<string, A & B>` reached its intersection
+    nowhere else - which closed the last two "not declared by this run" sites. Pinned by
+    `tests/fixtures/intersection-lab` and two per-pass unit tests.
+    Measured: flattened `workers-types` 80, `animejs` 21, `solid-js` 8, `type-fest` 3.
+    `animejs` widened 83 → 37 (exact 46 → 73); `workers-types` exact 197 → 232. The two big
+    goldens grew - `animejs` 2.7k → 5.6k lines, `workers-types` 19k → 26k - because an operand
+    that is a lib type or a class instance is copied member by member rather than referenced;
+    that is the honest representation until a `Reference` disposition gives those operands a
+    name to inherit. Not done: instantiations of a *generic* intersection alias still
+    re-expand under a suffixed name (`CreateResourceOptions2..4` in `solid-js`), the same
+    deferred item as generic alias applications generally.
 
 ## 7. Decisions (2026-09-01)
 

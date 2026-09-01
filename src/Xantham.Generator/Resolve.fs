@@ -124,6 +124,107 @@ let resolveExportTypes: Pass<ResolveModel> =
                         Degraded(model, findings)
             } }
 
+/// The structure of a type that has members: properties, call and construct signatures, index
+/// signatures, each with the responses it discovered. Object types and the intersections of
+/// them share it, because the checker answers the same questions about both: the properties of
+/// `A & B` are both sets, a property both declare typed as the intersection of its two types.
+let private deriveStructure (ctx: Context) (ty: TypeResponse) =
+    async {
+        let! properties = ctx.Session.getPropertiesOfType ty.Id
+        let properties = properties |> ValueOption.defaultValue [||]
+
+        let resolveMember readOnlyRelevant (property: SymbolResponse) =
+            async {
+                let! propertyType = ctx.Session.getTypeOfSymbol property.Id
+                let! docs = ctx.Session.getDocumentationComment property.Id
+                let! tags = ctx.Session.getJsDocTags property.Id
+
+                // `CheckFlags.Readonly` only marks transient symbols; a declared
+                // `readonly` modifier is the checker's to see, so ask it.
+                let! readOnly =
+                    if readOnlyRelevant then
+                        ctx.Session.isReadonlySymbol property.Id
+                    else
+                        async.Return false
+
+                return
+                    { Symbol = property
+                      Docs = docs
+                      Tags = tags |> ValueOption.map Array.toList |> ValueOption.defaultValue []
+                      Optional =
+                        property.Flags.HasFlag SymbolFlags.Optional
+                        || property.CheckFlags.HasFlag CheckFlags.OptionalParameter
+                      ReadOnly = readOnly
+                      TypeId = propertyType.Id },
+                    propertyType
+            }
+
+        let! members = properties |> Array.map (resolveMember true) |> Async.Parallel
+
+        let resolveSignatures kind =
+            async {
+                let! signatures = ctx.Session.getSignaturesOfType (ty.Id, kind)
+
+                return!
+                    signatures
+                    |> Array.map (fun signature ->
+                        async {
+                            let! parameters = ctx.Session.getParametersOfSignature signature.Id
+                            let parameters = parameters |> ValueOption.defaultValue [||]
+                            let! parameterFacts = parameters |> Array.map (resolveMember false) |> Async.Parallel
+                            let! returnType = ctx.Session.getReturnTypeOfSignature signature.Id
+
+                            // A generic callback alias spells its parameters on the
+                            // signature, not the type, so `Mapper<T> = (t: T) => T` has
+                            // nothing to bind without this call.
+                            let! typeParameters = ctx.Session.getTypeParametersOfSignature signature.Id
+                            let typeParameters = typeParameters |> ValueOption.defaultValue [||]
+
+                            return
+                                { Parameters = parameterFacts |> Array.map fst |> Array.toList
+                                  HasRest = signature.Flags.HasFlag SignatureFlags.HasRestParameter
+                                  TypeParameters = typeParameters |> Array.map _.Id |> Array.toList
+                                  ReturnTypeId = returnType.Id },
+                                [ yield! parameterFacts |> Array.map snd
+                                  yield! typeParameters
+                                  returnType ]
+                        })
+                    |> Async.Parallel
+            }
+
+        let! callSignatures = resolveSignatures SignatureKind.Call
+        let! constructSignatures = resolveSignatures SignatureKind.Construct
+
+        // An index signature is not a property: `getPropertiesOfType` returns nothing at
+        // all for `interface Bag { [key: string]: number }`, so without this the type
+        // reaches the shape tier looking empty and is never declared. Key and value are
+        // followed into the table like any other referenced type.
+        let! indexInfos = ctx.Session.getIndexInfosOfType ty.Id
+
+        let indexInfos =
+            indexInfos |> ValueOption.defaultValue [||] |> Array.toList
+
+        let discovered =
+            [ yield! members |> Array.map snd
+              yield! callSignatures |> Array.collect (snd >> List.toArray)
+              yield! constructSignatures |> Array.collect (snd >> List.toArray)
+              for info in indexInfos do
+                  info.KeyType
+                  info.ValueType ]
+
+        return
+            {| Members = members |> Array.map fst |> Array.toList
+               IndexInfos =
+                indexInfos
+                |> List.map (fun info ->
+                    { KeyTypeId = info.KeyType.Id
+                      ValueTypeId = info.ValueType.Id
+                      IsReadonly = info.IsReadonly = ValueSome true })
+               CallSignatures = callSignatures |> Array.map fst |> Array.toList
+               ConstructSignatures = constructSignatures |> Array.map fst |> Array.toList
+               Discovered = discovered |}
+    }
+
 /// Derives one type's facts and reports the responses it discovered, for the next frontier.
 let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * TypeResponse list> =
     async {
@@ -159,9 +260,9 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
             let! members = ctx.Session.getTypesOfType ty.Id
             let members = members |> ValueOption.map Array.toList |> ValueOption.defaultValue []
 
-            // The alias's arguments, for the same reason a conditional needs them: an
-            // intersection that is not a brand is a shape F# cannot write, and the phantom it
-            // becomes is worth nothing without the arity.
+            // The alias's arguments, for the same reason an object alias needs them: a
+            // flattened intersection is declared over them (§4.6), and a phantom is worth
+            // nothing without the arity.
             let! aliasTypeArguments = ctx.Session.getAliasTypeArgumentsOfType ty.Id
 
             let aliasTypeArguments =
@@ -170,11 +271,33 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                 |> Array.filter (fun argument -> argument.Flags.HasFlag TypeFlags.TypeParameter)
                 |> Array.toList
 
+            // An intersection of object types is a shape (§4.6): the checker's `getPropertiesOfType`
+            // hands over both member sets flattened, a property both operands declare typed as the
+            // intersection of its two types, so the shape tier declares it as one interface. Only
+            // when every operand is an object: a primitive operand makes it a brand or nothing, and
+            // a type-parameter operand (`T & { id: number }`) has no members to read until it is
+            // instantiated. Asking would also drag the primitive's apparent members (`String`'s
+            // whole prototype) into the table for nothing.
+            let! structure =
+                if not members.IsEmpty && members |> List.forall (fun m -> m.Flags.HasFlag TypeFlags.Object) then
+                    async {
+                        let! structure = deriveStructure ctx ty
+                        return Some structure
+                    }
+                else
+                    async.Return None
+
             return
                 { TypeFacts.shallow ty with
+                    Members = structure |> Option.map _.Members |> Option.defaultValue []
+                    IndexInfos = structure |> Option.map _.IndexInfos |> Option.defaultValue []
+                    CallSignatures = structure |> Option.map _.CallSignatures |> Option.defaultValue []
+                    ConstructSignatures = structure |> Option.map _.ConstructSignatures |> Option.defaultValue []
                     IntersectionMembers = members |> List.map _.Id
                     AliasTypeArguments = aliasTypeArguments |> List.map _.Id },
-                members @ aliasTypeArguments
+                members
+                @ aliasTypeArguments
+                @ (structure |> Option.map _.Discovered |> Option.defaultValue [])
         elif has TypeFlags.EnumLiteral then
             // An enum member: its symbol names the F# enum case (§4.7); the value is already
             // on the response.
@@ -276,107 +399,25 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                     }
                 | _ -> async.Return []
 
-            let! properties = ctx.Session.getPropertiesOfType ty.Id
-            let properties = properties |> ValueOption.defaultValue [||]
-
-            let resolveMember readOnlyRelevant (property: SymbolResponse) =
-                async {
-                    let! propertyType = ctx.Session.getTypeOfSymbol property.Id
-                    let! docs = ctx.Session.getDocumentationComment property.Id
-                    let! tags = ctx.Session.getJsDocTags property.Id
-
-                    // `CheckFlags.Readonly` only marks transient symbols; a declared
-                    // `readonly` modifier is the checker's to see, so ask it.
-                    let! readOnly =
-                        if readOnlyRelevant then
-                            ctx.Session.isReadonlySymbol property.Id
-                        else
-                            async.Return false
-
-                    return
-                        { Symbol = property
-                          Docs = docs
-                          Tags = tags |> ValueOption.map Array.toList |> ValueOption.defaultValue []
-                          Optional =
-                            property.Flags.HasFlag SymbolFlags.Optional
-                            || property.CheckFlags.HasFlag CheckFlags.OptionalParameter
-                          ReadOnly = readOnly
-                          TypeId = propertyType.Id },
-                        propertyType
-                }
-
-            let! members = properties |> Array.map (resolveMember true) |> Async.Parallel
-
-            let resolveSignatures kind =
-                async {
-                    let! signatures = ctx.Session.getSignaturesOfType (ty.Id, kind)
-
-                    return!
-                        signatures
-                        |> Array.map (fun signature ->
-                            async {
-                                let! parameters = ctx.Session.getParametersOfSignature signature.Id
-                                let parameters = parameters |> ValueOption.defaultValue [||]
-                                let! parameterFacts = parameters |> Array.map (resolveMember false) |> Async.Parallel
-                                let! returnType = ctx.Session.getReturnTypeOfSignature signature.Id
-
-                                // A generic callback alias spells its parameters on the
-                                // signature, not the type, so `Mapper<T> = (t: T) => T` has
-                                // nothing to bind without this call.
-                                let! typeParameters = ctx.Session.getTypeParametersOfSignature signature.Id
-                                let typeParameters = typeParameters |> ValueOption.defaultValue [||]
-
-                                return
-                                    { Parameters = parameterFacts |> Array.map fst |> Array.toList
-                                      HasRest = signature.Flags.HasFlag SignatureFlags.HasRestParameter
-                                      TypeParameters = typeParameters |> Array.map _.Id |> Array.toList
-                                      ReturnTypeId = returnType.Id },
-                                    [ yield! parameterFacts |> Array.map snd
-                                      yield! typeParameters
-                                      returnType ]
-                            })
-                        |> Async.Parallel
-                }
-
-            let! callSignatures = resolveSignatures SignatureKind.Call
-            let! constructSignatures = resolveSignatures SignatureKind.Construct
+            let! structure = deriveStructure ctx ty
             let! baseTypes = ctx.Session.getBaseTypes ty.Id
             let baseTypes = baseTypes |> ValueOption.map Array.toList |> ValueOption.defaultValue []
 
-            // An index signature is not a property: `getPropertiesOfType` returns nothing at
-            // all for `interface Bag { [key: string]: number }`, so without this the type
-            // reaches the shape tier looking empty and is never declared. Key and value are
-            // followed into the table like any other referenced type.
-            let! indexInfos = ctx.Session.getIndexInfosOfType ty.Id
-
-            let indexInfos =
-                indexInfos |> ValueOption.defaultValue [||] |> Array.toList
-
             let discovered =
-                [ yield! members |> Array.map snd
-                  yield! callSignatures |> Array.collect (snd >> List.toArray)
-                  yield! constructSignatures |> Array.collect (snd >> List.toArray)
+                [ yield! structure.Discovered
                   yield! baseTypes
                   yield! typeArguments
                   yield! aliasTypeArguments
-                  yield! target
-                  for info in indexInfos do
-                      info.KeyType
-                      info.ValueType ]
+                  yield! target ]
 
             return
                 { Response = ty
                   Origin = origin
                   SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
-                  Members = members |> Array.map fst |> Array.toList
-                  IndexInfos =
-                    indexInfos
-                    |> List.map (fun info ->
-                        { KeyTypeId = info.KeyType.Id
-                          ValueTypeId = info.ValueType.Id
-                          IsReadonly = info.IsReadonly = ValueSome true })
-                  CallSignatures = callSignatures |> Array.map fst |> Array.toList
-                  ConstructSignatures = constructSignatures |> Array.map fst |> Array.toList
+                  Members = structure.Members
+                  IndexInfos = structure.IndexInfos
+                  CallSignatures = structure.CallSignatures
+                  ConstructSignatures = structure.ConstructSignatures
                   BaseTypes = baseTypes |> List.map _.Id
                   TypeArguments = typeArguments |> List.map _.Id
                   TupleElements = tupleElements

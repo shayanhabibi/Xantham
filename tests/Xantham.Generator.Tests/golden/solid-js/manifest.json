@@ -3,9 +3,9 @@
   "module": "SolidJs",
   "counts": {
     "exact": 20,
-    "ergonomic": 51,
-    "widened": 67,
-    "escape": 26
+    "ergonomic": 60,
+    "widened": 68,
+    "escape": 25
   },
   "symbols": [
     {
@@ -236,7 +236,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
@@ -1388,6 +1388,42 @@
       ]
     },
     {
+      "name": "CreateEffectOptions",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
       "name": "MemoOptions",
       "tier": "ergonomic",
       "findings": [
@@ -1811,14 +1847,120 @@
       "tier": "widened",
       "findings": [
         {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
-          "pass": "shape-aliases",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "callback with 4 overloads shaped from the first"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags Conditional not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags Conditional not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "InitializedResourceOptionsOnHydratedInfo",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -1970,6 +2112,11 @@
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
@@ -1980,17 +2127,17 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "indexed access has no F# form here; widened to obj"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "widened",
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -2044,11 +2191,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "indexed access has no F# form here; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -2061,11 +2203,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "indexed access has no F# form here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2217,7 +2354,250 @@
       ]
     },
     {
-      "name": "CreateResourceOptionsOnHydratedInfo",
+      "name": "CreateResourceOptions3",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "callback with 4 overloads shaped from the first"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags Conditional not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags Conditional not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "CreateResourceOptions3OnHydratedInfo",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "CreateResourceOptions4",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "indexed access has no F# form here; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "callback with 4 overloads shaped from the first"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "indexed access has no F# form here; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags Conditional not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags Conditional not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "indexed access has no F# form here; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "CreateResourceOptions4OnHydratedInfo",
       "tier": "widened",
       "findings": [
         {
@@ -2225,6 +2605,22 @@
           "tier": "widened",
           "message": "indexed access has no F# form here; widened to obj"
         },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "CreateResourceOptionsOnHydratedInfo",
+      "tier": "ergonomic",
+      "findings": [
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -2506,6 +2902,64 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "OnOptions3",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "ContextProviderComponent",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "ContextProviderComponentProps",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "message": "ParamObject Create synthesized (D3)"
@@ -2524,12 +2978,28 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "type flags ESSymbol not mapped yet; widened to obj"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "ContextProviderProps",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags ESSymbol not mapped yet; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -2545,7 +3015,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
@@ -2566,7 +3036,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
@@ -2590,9 +3060,24 @@
       "tier": "widened",
       "findings": [
         {
-          "pass": "shape-aliases",
+          "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "callable-and-properties hybrid loses its call signatures (Invoke emission is future work)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -2645,7 +3130,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
@@ -2666,7 +3151,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
@@ -2687,7 +3172,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
@@ -2708,7 +3193,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
@@ -2724,7 +3209,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
@@ -4393,7 +4878,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -4454,7 +4939,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -4526,7 +5011,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -4546,7 +5031,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -4556,7 +5041,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -4592,7 +5077,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -4643,7 +5128,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -4684,7 +5169,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -5149,11 +5634,6 @@
         },
         {
           "pass": "shape-exports",
-          "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
-        },
-        {
-          "pass": "shape-exports",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         }
@@ -5239,16 +5719,6 @@
           "pass": "shape-exports",
           "tier": "widened",
           "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-exports",
@@ -5430,11 +5900,6 @@
         },
         {
           "pass": "shape-exports",
-          "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
-        },
-        {
-          "pass": "shape-exports",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         }
@@ -5580,13 +6045,8 @@
     },
     {
       "name": "children",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
-        },
         {
           "pass": "shape-exports",
           "tier": "ergonomic",
@@ -5716,7 +6176,7 @@
         {
           "pass": "shape-exports",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -5874,32 +6334,6 @@
       ]
     },
     {
-      "name": "ContextProviderComponent",
-      "tier": "escape",
-      "findings": [
-        {
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "pass": "repair-arity",
-          "tier": "widened",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
-        }
-      ]
-    },
-    {
       "name": "Exports",
       "tier": "widened",
       "findings": [
@@ -5926,7 +6360,7 @@
         {
           "pass": "repair-arity",
           "tier": "widened",
-          "message": "CreateResourceOptions2 is generic and this position has no arguments to apply; widened to obj"
+          "message": "CreateResourceOptions4 is generic and this position has no arguments to apply; widened to obj"
         },
         {
           "pass": "repair-arity",
@@ -5977,7 +6411,7 @@
         {
           "pass": "shape-callbacks",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -6024,7 +6458,7 @@
         {
           "pass": "shape-callbacks",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -6158,7 +6592,7 @@
         {
           "pass": "shape-callbacks",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         }
       ]
     }

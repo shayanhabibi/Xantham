@@ -3,8 +3,8 @@
   "module": "BrandLab",
   "counts": {
     "exact": 1,
-    "ergonomic": 8,
-    "widened": 4,
+    "ergonomic": 10,
+    "widened": 2,
     "escape": 0
   },
   "symbols": [
@@ -103,12 +103,17 @@
     },
     {
       "name": "Merged",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -119,18 +124,23 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         }
       ]
     },
     {
       "name": "Wrapped",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },

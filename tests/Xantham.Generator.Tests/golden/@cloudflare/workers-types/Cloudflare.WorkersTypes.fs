@@ -14,6 +14,477 @@ type BasicImageTransformationsGravityCoordinatesMode =
     | [<CompiledName("box-center")>] BoxCenter
     | [<CompiledName("remainder")>] Remainder
 
+type FetchEventRequestItem =
+    inherit IncomingRequestCfPropertiesBase
+    inherit IncomingRequestCfPropertiesBotManagementEnterprise
+    inherit IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<obj>
+    inherit IncomingRequestCfPropertiesGeographicInformation
+    inherit IncomingRequestCfPropertiesCloudflareAccessOrApiShield
+    /// <summary>
+    /// [ASN](https://www.iana.org/assignments/as-numbers/as-numbers.xhtml) of the incoming request.
+    /// </summary>
+    /// <remarks>@example 395747</remarks>
+    abstract asn: float option with get, set
+    /// <summary>
+    /// The organization which owns the ASN of the incoming request.
+    /// </summary>
+    /// <remarks>@example "Google Cloud"</remarks>
+    abstract asOrganization: string option with get, set
+    /// <summary>
+    /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
+    /// </summary>
+    /// <remarks>@example "gzip, deflate, br"</remarks>
+    abstract clientAcceptEncoding: string option with get, set
+    /// <summary>
+    /// The number of milliseconds it took for the request to reach your worker.
+    /// </summary>
+    /// <remarks>@example 22</remarks>
+    abstract clientTcpRtt: float option with get, set
+    /// <summary>
+    /// The three-letter [IATA](https://en.wikipedia.org/wiki/IATA_airport_code)
+    /// airport code of the data center that the request hit.
+    /// </summary>
+    /// <remarks>@example "DFW"</remarks>
+    abstract colo: string with get, set
+    /// <summary>
+    /// Represents the upstream's response to a
+    /// [TCP <c>keepalive</c> message](https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html)
+    /// from cloudflare.
+    ///
+    /// For workers with no upstream, this will always be <c>1</c>.
+    /// </summary>
+    /// <remarks>@example 3</remarks>
+    abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
+    /// <summary>
+    /// The HTTP Protocol the request used.
+    /// </summary>
+    /// <remarks>@example "HTTP/2"</remarks>
+    abstract httpProtocol: string with get, set
+    /// <summary>
+    /// The browser-requested prioritization information in the request object.
+    ///
+    /// If no information was set, defaults to the empty string <c>""</c>
+    /// </summary>
+    /// <remarks>@example "weight=192;exclusive=0;group=3;group-weight=127"</remarks>
+    /// <remarks>@default ""</remarks>
+    abstract requestPriority: string with get, set
+    /// <summary>
+    /// The TLS version of the connection to Cloudflare.
+    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
+    /// </summary>
+    /// <remarks>@example "TLSv1.3"</remarks>
+    abstract tlsVersion: string with get, set
+    /// <summary>
+    /// The cipher for the connection to Cloudflare.
+    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
+    /// </summary>
+    /// <remarks>@example "AEAD-AES128-GCM-SHA256"</remarks>
+    abstract tlsCipher: string with get, set
+    /// <summary>
+    /// Metadata containing the [<c>HELLO</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2) and [<c>FINISHED</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9) messages from this request's TLS handshake.
+    ///
+    /// If the incoming request was served over plaintext (without TLS) this field is undefined.
+    /// </summary>
+    abstract tlsExportedAuthenticator: IncomingRequestCfPropertiesExportedAuthenticatorMetadata option with get, set
+    /// <summary>
+    /// Results of Cloudflare's Bot Management analysis
+    /// </summary>
+    abstract botManagement: FetchEventRequestItemBotManagement with get, set
+    /// <summary>
+    /// Duplicate of <c>botManagement.score</c>.
+    /// </summary>
+    /// <remarks>@deprecated</remarks>
+    abstract clientTrustScore: float with get, set
+    /// <summary>
+    /// Custom metadata set per-host in [Cloudflare for SaaS](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/).
+    ///
+    /// This field is only present if you have Cloudflare for SaaS enabled on your account
+    /// and you have followed the [required steps to enable it]((https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/)).
+    /// </summary>
+    abstract hostMetadata: obj option with get, set
+    /// <summary>
+    /// The [ISO 3166-1 Alpha 2](https://www.iso.org/iso-3166-country-codes.html) country code the request originated from.
+    ///
+    /// If your worker is [configured to accept TOR connections](https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing), this may also be <c>"T1"</c>, indicating a request that originated over TOR.
+    ///
+    /// If Cloudflare is unable to determine where the request originated this property is omitted.
+    ///
+    /// The country code <c>"T1"</c> is used for requests originating on TOR.
+    /// </summary>
+    /// <remarks>@example "GB"</remarks>
+    abstract country: FetchEventRequestItemCountry option with get, set
+    /// <summary>
+    /// If present, this property indicates that the request originated in the EU
+    /// </summary>
+    /// <remarks>@example "1"</remarks>
+    abstract isEUCountry: string option with get, set
+    /// <summary>
+    /// A two-letter code indicating the continent the request originated from.
+    /// </summary>
+    /// <remarks>@example "AN"</remarks>
+    abstract continent: ContinentCode option with get, set
+    /// <summary>
+    /// The city the request originated from
+    /// </summary>
+    /// <remarks>@example "Austin"</remarks>
+    abstract city: string option with get, set
+    /// <summary>
+    /// Postal code of the incoming request
+    /// </summary>
+    /// <remarks>@example "78701"</remarks>
+    abstract postalCode: string option with get, set
+    /// <summary>
+    /// Latitude of the incoming request
+    /// </summary>
+    /// <remarks>@example "30.27130"</remarks>
+    abstract latitude: string option with get, set
+    /// <summary>
+    /// Longitude of the incoming request
+    /// </summary>
+    /// <remarks>@example "-97.74260"</remarks>
+    abstract longitude: string option with get, set
+    /// <summary>
+    /// Timezone of the incoming request
+    /// </summary>
+    /// <remarks>@example "America/Chicago"</remarks>
+    abstract timezone: string option with get, set
+    /// <summary>
+    /// If known, the ISO 3166-2 name for the first level region associated with
+    /// the IP address of the incoming request
+    /// </summary>
+    /// <remarks>@example "Texas"</remarks>
+    abstract region: string option with get, set
+    /// <summary>
+    /// If known, the ISO 3166-2 code for the first-level region associated with
+    /// the IP address of the incoming request
+    /// </summary>
+    /// <remarks>@example "TX"</remarks>
+    abstract regionCode: string option with get, set
+    /// <summary>
+    /// Metro code (DMA) of the incoming request
+    /// </summary>
+    /// <remarks>@example "635"</remarks>
+    abstract metroCode: string option with get, set
+    /// <summary>
+    /// Information about the client certificate presented to Cloudflare.
+    ///
+    /// This is populated when the incoming request is served over TLS using
+    /// either Cloudflare Access or API Shield (mTLS)
+    /// and the presented SSL certificate has a valid
+    /// [Certificate Serial Number](https://ldapwiki.com/wiki/Certificate%20Serial%20Number)
+    /// (i.e., not <c>null</c> or <c>""</c>).
+    ///
+    /// Otherwise, a set of placeholder values are used.
+    ///
+    /// The property <c>certPresented</c> will be set to <c>"1"</c> when
+    /// the object is populated (i.e. the above conditions were met).
+    /// </summary>
+    abstract tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder> with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
+
+[<Interface>]
+type FetchEventRequestItemBotManagement =
+    inherit IncomingRequestCfPropertiesBotManagementBase
+    /// <summary>
+    /// Cloudflare’s [level of certainty](https://developers.cloudflare.com/bots/concepts/bot-score/) that a request comes from a bot,
+    /// represented as an integer percentage between <c>1</c> (almost certainly a bot) and <c>99</c> (almost certainly human).
+    /// </summary>
+    /// <remarks>@example 54</remarks>
+    abstract score: float with get, set
+    /// <summary>
+    /// A boolean value that is true if the request comes from a good bot, like Google or Bing.
+    /// Most customers choose to allow this traffic. For more details, see [Traffic from known bots](https://developers.cloudflare.com/firewall/known-issues-and-faq/#how-does-firewall-rules-handle-traffic-from-known-bots).
+    /// </summary>
+    abstract verifiedBot: bool with get, set
+    /// <summary>
+    /// A boolean value that is true if the request originates from a
+    /// Cloudflare-verified proxy service.
+    /// </summary>
+    abstract corporateProxy: bool with get, set
+    /// <summary>
+    /// A boolean value that's true if the request matches [file extensions](https://developers.cloudflare.com/bots/reference/static-resources/) for many types of static resources.
+    /// </summary>
+    abstract staticResource: bool with get, set
+    /// <summary>
+    /// List of IDs that correlate to the Bot Management heuristic detections made on a request (you can have multiple heuristic detections on the same request).
+    /// </summary>
+    abstract detectionIds: float[] with get, set
+    /// <summary>
+    /// A [JA3 Fingerprint](https://developers.cloudflare.com/bots/concepts/ja3-fingerprint/) to help profile specific SSL/TLS clients
+    /// across different destination IPs, Ports, and X509 certificates.
+    /// </summary>
+    abstract ja3Hash: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (score: float, verifiedBot: bool, corporateProxy: bool, staticResource: bool, detectionIds: float[], ja3Hash: string) : FetchEventRequestItemBotManagement = jsNative
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type FetchEventRequestItemCountry =
+    | AD
+    | AE
+    | AF
+    | AG
+    | AI
+    | AL
+    | AM
+    | AO
+    | AQ
+    | AR
+    | AS
+    | AT
+    | AU
+    | AW
+    | AX
+    | AZ
+    | BA
+    | BB
+    | BD
+    | BE
+    | BF
+    | BG
+    | BH
+    | BI
+    | BJ
+    | BL
+    | BM
+    | BN
+    | BO
+    | BQ
+    | BR
+    | BS
+    | BT
+    | BV
+    | BW
+    | BY
+    | BZ
+    | CA
+    | CC
+    | CD
+    | CF
+    | CG
+    | CH
+    | CI
+    | CK
+    | CL
+    | CM
+    | CN
+    | CO
+    | CR
+    | CU
+    | CV
+    | CW
+    | CX
+    | CY
+    | CZ
+    | DE
+    | DJ
+    | DK
+    | DM
+    | DO
+    | DZ
+    | EC
+    | EE
+    | EG
+    | EH
+    | ER
+    | ES
+    | ET
+    | FI
+    | FJ
+    | FK
+    | FM
+    | FO
+    | FR
+    | GA
+    | GB
+    | GD
+    | GE
+    | GF
+    | GG
+    | GH
+    | GI
+    | GL
+    | GM
+    | GN
+    | GP
+    | GQ
+    | GR
+    | GS
+    | GT
+    | GU
+    | GW
+    | GY
+    | HK
+    | HM
+    | HN
+    | HR
+    | HT
+    | HU
+    | ID
+    | IE
+    | IL
+    | IM
+    | IN
+    | IO
+    | IQ
+    | IR
+    | IS
+    | IT
+    | JE
+    | JM
+    | JO
+    | JP
+    | KE
+    | KG
+    | KH
+    | KI
+    | KM
+    | KN
+    | KP
+    | KR
+    | KW
+    | KY
+    | KZ
+    | LA
+    | LB
+    | LC
+    | LI
+    | LK
+    | LR
+    | LS
+    | LT
+    | LU
+    | LV
+    | LY
+    | MA
+    | MC
+    | MD
+    | ME
+    | MF
+    | MG
+    | MH
+    | MK
+    | ML
+    | MM
+    | MN
+    | MO
+    | MP
+    | MQ
+    | MR
+    | MS
+    | MT
+    | MU
+    | MV
+    | MW
+    | MX
+    | MY
+    | MZ
+    | NA
+    | NC
+    | NE
+    | NF
+    | NG
+    | NI
+    | NL
+    | NO
+    | NP
+    | NR
+    | NU
+    | NZ
+    | OM
+    | PA
+    | PE
+    | PF
+    | PG
+    | PH
+    | PK
+    | PL
+    | PM
+    | PN
+    | PR
+    | PS
+    | PT
+    | PW
+    | PY
+    | QA
+    | RE
+    | RO
+    | RS
+    | RU
+    | RW
+    | SA
+    | SB
+    | SC
+    | SD
+    | SE
+    | SG
+    | SH
+    | SI
+    | SJ
+    | SK
+    | SL
+    | SM
+    | SN
+    | SO
+    | SR
+    | SS
+    | ST
+    | SV
+    | SX
+    | SY
+    | SZ
+    | T1
+    | TC
+    | TD
+    | TF
+    | TG
+    | TH
+    | TJ
+    | TK
+    | TL
+    | TM
+    | TN
+    | TO
+    | TR
+    | TT
+    | TV
+    | TW
+    | TZ
+    | UA
+    | UG
+    | UM
+    | US
+    | UY
+    | UZ
+    | VA
+    | VC
+    | VE
+    | VG
+    | VI
+    | VN
+    | VU
+    | WF
+    | WS
+    | YE
+    | YT
+    | ZA
+    | ZM
+    | ZW
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type IncomingRequestCfPropertiesTLSClientAuthCertRevoked =
+    | [<CompiledName("0")>] N0
+    | [<CompiledName("1")>] N1
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type IncomingRequestCfPropertiesTLSClientAuthCertVerified =
+    | FAILED
+    | [<CompiledName("FAILED:certificate has expired")>] FAILEDCertificateHasExpired
+    | [<CompiledName("FAILED:certificate is not yet valid")>] FAILEDCertificateIsNotYetValid
+    | [<CompiledName("FAILED:self signed certificate")>] FAILEDSelfSignedCertificate
+    | [<CompiledName("FAILED:unable to verify the first certificate")>] FAILEDUnableToVerifyTheFirstCertificate
+    | SUCCESS
+
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type RequestInitCfPropertiesGrpcWeb =
     | [<CompiledName("convert")>] Convert
@@ -289,6 +760,175 @@ type ExecutionContext<'Props> =
     abstract tracing: Tracing with get, set
     abstract abort: reason: obj -> unit
 
+type ExportedHandlerFetchHandlerRequestItem<'CfHostMetadata> =
+    inherit IncomingRequestCfPropertiesBase
+    inherit IncomingRequestCfPropertiesBotManagementEnterprise
+    inherit IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<'CfHostMetadata>
+    inherit IncomingRequestCfPropertiesGeographicInformation
+    inherit IncomingRequestCfPropertiesCloudflareAccessOrApiShield
+    /// <summary>
+    /// [ASN](https://www.iana.org/assignments/as-numbers/as-numbers.xhtml) of the incoming request.
+    /// </summary>
+    /// <remarks>@example 395747</remarks>
+    abstract asn: float option with get, set
+    /// <summary>
+    /// The organization which owns the ASN of the incoming request.
+    /// </summary>
+    /// <remarks>@example "Google Cloud"</remarks>
+    abstract asOrganization: string option with get, set
+    /// <summary>
+    /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
+    /// </summary>
+    /// <remarks>@example "gzip, deflate, br"</remarks>
+    abstract clientAcceptEncoding: string option with get, set
+    /// <summary>
+    /// The number of milliseconds it took for the request to reach your worker.
+    /// </summary>
+    /// <remarks>@example 22</remarks>
+    abstract clientTcpRtt: float option with get, set
+    /// <summary>
+    /// The three-letter [IATA](https://en.wikipedia.org/wiki/IATA_airport_code)
+    /// airport code of the data center that the request hit.
+    /// </summary>
+    /// <remarks>@example "DFW"</remarks>
+    abstract colo: string with get, set
+    /// <summary>
+    /// Represents the upstream's response to a
+    /// [TCP <c>keepalive</c> message](https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html)
+    /// from cloudflare.
+    ///
+    /// For workers with no upstream, this will always be <c>1</c>.
+    /// </summary>
+    /// <remarks>@example 3</remarks>
+    abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
+    /// <summary>
+    /// The HTTP Protocol the request used.
+    /// </summary>
+    /// <remarks>@example "HTTP/2"</remarks>
+    abstract httpProtocol: string with get, set
+    /// <summary>
+    /// The browser-requested prioritization information in the request object.
+    ///
+    /// If no information was set, defaults to the empty string <c>""</c>
+    /// </summary>
+    /// <remarks>@example "weight=192;exclusive=0;group=3;group-weight=127"</remarks>
+    /// <remarks>@default ""</remarks>
+    abstract requestPriority: string with get, set
+    /// <summary>
+    /// The TLS version of the connection to Cloudflare.
+    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
+    /// </summary>
+    /// <remarks>@example "TLSv1.3"</remarks>
+    abstract tlsVersion: string with get, set
+    /// <summary>
+    /// The cipher for the connection to Cloudflare.
+    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
+    /// </summary>
+    /// <remarks>@example "AEAD-AES128-GCM-SHA256"</remarks>
+    abstract tlsCipher: string with get, set
+    /// <summary>
+    /// Metadata containing the [<c>HELLO</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2) and [<c>FINISHED</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9) messages from this request's TLS handshake.
+    ///
+    /// If the incoming request was served over plaintext (without TLS) this field is undefined.
+    /// </summary>
+    abstract tlsExportedAuthenticator: IncomingRequestCfPropertiesExportedAuthenticatorMetadata option with get, set
+    /// <summary>
+    /// Results of Cloudflare's Bot Management analysis
+    /// </summary>
+    abstract botManagement: FetchEventRequestItemBotManagement with get, set
+    /// <summary>
+    /// Duplicate of <c>botManagement.score</c>.
+    /// </summary>
+    /// <remarks>@deprecated</remarks>
+    abstract clientTrustScore: float with get, set
+    /// <summary>
+    /// Custom metadata set per-host in [Cloudflare for SaaS](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/).
+    ///
+    /// This field is only present if you have Cloudflare for SaaS enabled on your account
+    /// and you have followed the [required steps to enable it]((https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/)).
+    /// </summary>
+    abstract hostMetadata: 'CfHostMetadata option with get, set
+    /// <summary>
+    /// The [ISO 3166-1 Alpha 2](https://www.iso.org/iso-3166-country-codes.html) country code the request originated from.
+    ///
+    /// If your worker is [configured to accept TOR connections](https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing), this may also be <c>"T1"</c>, indicating a request that originated over TOR.
+    ///
+    /// If Cloudflare is unable to determine where the request originated this property is omitted.
+    ///
+    /// The country code <c>"T1"</c> is used for requests originating on TOR.
+    /// </summary>
+    /// <remarks>@example "GB"</remarks>
+    abstract country: FetchEventRequestItemCountry option with get, set
+    /// <summary>
+    /// If present, this property indicates that the request originated in the EU
+    /// </summary>
+    /// <remarks>@example "1"</remarks>
+    abstract isEUCountry: string option with get, set
+    /// <summary>
+    /// A two-letter code indicating the continent the request originated from.
+    /// </summary>
+    /// <remarks>@example "AN"</remarks>
+    abstract continent: ContinentCode option with get, set
+    /// <summary>
+    /// The city the request originated from
+    /// </summary>
+    /// <remarks>@example "Austin"</remarks>
+    abstract city: string option with get, set
+    /// <summary>
+    /// Postal code of the incoming request
+    /// </summary>
+    /// <remarks>@example "78701"</remarks>
+    abstract postalCode: string option with get, set
+    /// <summary>
+    /// Latitude of the incoming request
+    /// </summary>
+    /// <remarks>@example "30.27130"</remarks>
+    abstract latitude: string option with get, set
+    /// <summary>
+    /// Longitude of the incoming request
+    /// </summary>
+    /// <remarks>@example "-97.74260"</remarks>
+    abstract longitude: string option with get, set
+    /// <summary>
+    /// Timezone of the incoming request
+    /// </summary>
+    /// <remarks>@example "America/Chicago"</remarks>
+    abstract timezone: string option with get, set
+    /// <summary>
+    /// If known, the ISO 3166-2 name for the first level region associated with
+    /// the IP address of the incoming request
+    /// </summary>
+    /// <remarks>@example "Texas"</remarks>
+    abstract region: string option with get, set
+    /// <summary>
+    /// If known, the ISO 3166-2 code for the first-level region associated with
+    /// the IP address of the incoming request
+    /// </summary>
+    /// <remarks>@example "TX"</remarks>
+    abstract regionCode: string option with get, set
+    /// <summary>
+    /// Metro code (DMA) of the incoming request
+    /// </summary>
+    /// <remarks>@example "635"</remarks>
+    abstract metroCode: string option with get, set
+    /// <summary>
+    /// Information about the client certificate presented to Cloudflare.
+    ///
+    /// This is populated when the incoming request is served over TLS using
+    /// either Cloudflare Access or API Shield (mTLS)
+    /// and the presented SSL certificate has a valid
+    /// [Certificate Serial Number](https://ldapwiki.com/wiki/Certificate%20Serial%20Number)
+    /// (i.e., not <c>null</c> or <c>""</c>).
+    ///
+    /// Otherwise, a set of placeholder values are used.
+    ///
+    /// The property <c>certPresented</c> will be set to <c>"1"</c> when
+    /// the object is populated (i.e. the above conditions were met).
+    /// </summary>
+    abstract tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder> with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
+
 type ExportedHandlerConnectHandler<'Env, 'Props> = Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -376,11 +1016,39 @@ type ExportedHandlerTailStreamHandlerResultItem =
     abstract spanClose: Func<TailEvent2<SpanClose>, JS.Promise<unit> option> option with get, set
     abstract diagnosticChannel: Func<TailEvent2<DiagnosticChannelEvent>, JS.Promise<unit> option> option with get, set
     abstract ``exception``: Func<TailEvent2<Exception>, JS.Promise<unit> option> option with get, set
-    abstract log: Func<TailEvent2<obj>, JS.Promise<unit> option> option with get, set
+    abstract log: Func<TailEvent2<U2<ExportedHandlerTailStreamHandlerResultItemEventItem, ExportedHandlerTailStreamHandlerResultItemEventItem2>>, JS.Promise<unit> option> option with get, set
     abstract ``return``: Func<TailEvent2<Return>, JS.Promise<unit> option> option with get, set
     abstract attributes: Func<TailEvent2<Attributes>, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?outcome: Func<TailEvent2<Outcome>, JS.Promise<unit> option>, ?spanOpen: Func<TailEvent2<SpanOpen>, JS.Promise<unit> option>, ?spanClose: Func<TailEvent2<SpanClose>, JS.Promise<unit> option>, ?diagnosticChannel: Func<TailEvent2<DiagnosticChannelEvent>, JS.Promise<unit> option>, ?``exception``: Func<TailEvent2<Exception>, JS.Promise<unit> option>, ?log: Func<TailEvent2<obj>, JS.Promise<unit> option>, ?``return``: Func<TailEvent2<Return>, JS.Promise<unit> option>, ?attributes: Func<TailEvent2<Attributes>, JS.Promise<unit> option>) : ExportedHandlerTailStreamHandlerResultItem = jsNative
+    static member Create (?outcome: Func<TailEvent2<Outcome>, JS.Promise<unit> option>, ?spanOpen: Func<TailEvent2<SpanOpen>, JS.Promise<unit> option>, ?spanClose: Func<TailEvent2<SpanClose>, JS.Promise<unit> option>, ?diagnosticChannel: Func<TailEvent2<DiagnosticChannelEvent>, JS.Promise<unit> option>, ?``exception``: Func<TailEvent2<Exception>, JS.Promise<unit> option>, ?log: Func<TailEvent2<U2<ExportedHandlerTailStreamHandlerResultItemEventItem, ExportedHandlerTailStreamHandlerResultItemEventItem2>>, JS.Promise<unit> option>, ?``return``: Func<TailEvent2<Return>, JS.Promise<unit> option>, ?attributes: Func<TailEvent2<Attributes>, JS.Promise<unit> option>) : ExportedHandlerTailStreamHandlerResultItem = jsNative
+
+[<Interface>]
+type ExportedHandlerTailStreamHandlerResultItemEventItem =
+    abstract ``type``: string
+    abstract level: ExportedHandlerTailStreamHandlerResultItemEventItemLevel
+    abstract errorInfo: TailStreamErrorInfo option[] option
+    abstract message: obj
+    abstract truncated: bool option
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, level: ExportedHandlerTailStreamHandlerResultItemEventItemLevel, message: obj, ?errorInfo: TailStreamErrorInfo option[], ?truncated: bool) : ExportedHandlerTailStreamHandlerResultItemEventItem = jsNative
+
+[<Interface>]
+type ExportedHandlerTailStreamHandlerResultItemEventItem2 =
+    abstract ``type``: string
+    abstract level: ExportedHandlerTailStreamHandlerResultItemEventItemLevel
+    abstract errorInfo: TailStreamErrorInfo option[] option
+    abstract message: string
+    abstract truncated: bool
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, level: ExportedHandlerTailStreamHandlerResultItemEventItemLevel, message: string, truncated: bool, ?errorInfo: TailStreamErrorInfo option[]) : ExportedHandlerTailStreamHandlerResultItemEventItem2 = jsNative
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type ExportedHandlerTailStreamHandlerResultItemEventItemLevel =
+    | [<CompiledName("debug")>] Debug
+    | [<CompiledName("error")>] Error
+    | [<CompiledName("info")>] Info
+    | [<CompiledName("log")>] Log
+    | [<CompiledName("warn")>] Warn
 
 [<Interface>]
 type FetchEventInfo =
@@ -555,6 +1223,14 @@ type TailEvent2<'Event> =
     static member Create (invocationId: string, spanContext: SpanContext, timestamp: JS.Date, sequence: float, ``event``: 'Event) : TailEvent2<'Event> = jsNative
 
 [<Interface>]
+type TailStreamErrorInfo =
+    abstract name: string
+    abstract message: string
+    abstract stack: string option
+    [<ParamObject; Emit("$0")>]
+    static member Create (name: string, message: string, ?stack: string) : TailStreamErrorInfo = jsNative
+
+[<Interface>]
 type TraceEventInfo =
     abstract ``type``: string
     abstract traces: string option[]
@@ -608,6 +1284,175 @@ type ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> =
     abstract queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?fetch: Func<obj, 'Env, ExecutionContext<'Props>, obj>, ?connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tailStream: Func<TailEvent2<Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?test: Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>) : ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> = jsNative
+
+type ExportedHandlerFetchRequestItem<'CfHostMetadata> =
+    inherit IncomingRequestCfPropertiesBase
+    inherit IncomingRequestCfPropertiesBotManagementEnterprise
+    inherit IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<'CfHostMetadata>
+    inherit IncomingRequestCfPropertiesGeographicInformation
+    inherit IncomingRequestCfPropertiesCloudflareAccessOrApiShield
+    /// <summary>
+    /// [ASN](https://www.iana.org/assignments/as-numbers/as-numbers.xhtml) of the incoming request.
+    /// </summary>
+    /// <remarks>@example 395747</remarks>
+    abstract asn: float option with get, set
+    /// <summary>
+    /// The organization which owns the ASN of the incoming request.
+    /// </summary>
+    /// <remarks>@example "Google Cloud"</remarks>
+    abstract asOrganization: string option with get, set
+    /// <summary>
+    /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
+    /// </summary>
+    /// <remarks>@example "gzip, deflate, br"</remarks>
+    abstract clientAcceptEncoding: string option with get, set
+    /// <summary>
+    /// The number of milliseconds it took for the request to reach your worker.
+    /// </summary>
+    /// <remarks>@example 22</remarks>
+    abstract clientTcpRtt: float option with get, set
+    /// <summary>
+    /// The three-letter [IATA](https://en.wikipedia.org/wiki/IATA_airport_code)
+    /// airport code of the data center that the request hit.
+    /// </summary>
+    /// <remarks>@example "DFW"</remarks>
+    abstract colo: string with get, set
+    /// <summary>
+    /// Represents the upstream's response to a
+    /// [TCP <c>keepalive</c> message](https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html)
+    /// from cloudflare.
+    ///
+    /// For workers with no upstream, this will always be <c>1</c>.
+    /// </summary>
+    /// <remarks>@example 3</remarks>
+    abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
+    /// <summary>
+    /// The HTTP Protocol the request used.
+    /// </summary>
+    /// <remarks>@example "HTTP/2"</remarks>
+    abstract httpProtocol: string with get, set
+    /// <summary>
+    /// The browser-requested prioritization information in the request object.
+    ///
+    /// If no information was set, defaults to the empty string <c>""</c>
+    /// </summary>
+    /// <remarks>@example "weight=192;exclusive=0;group=3;group-weight=127"</remarks>
+    /// <remarks>@default ""</remarks>
+    abstract requestPriority: string with get, set
+    /// <summary>
+    /// The TLS version of the connection to Cloudflare.
+    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
+    /// </summary>
+    /// <remarks>@example "TLSv1.3"</remarks>
+    abstract tlsVersion: string with get, set
+    /// <summary>
+    /// The cipher for the connection to Cloudflare.
+    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
+    /// </summary>
+    /// <remarks>@example "AEAD-AES128-GCM-SHA256"</remarks>
+    abstract tlsCipher: string with get, set
+    /// <summary>
+    /// Metadata containing the [<c>HELLO</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2) and [<c>FINISHED</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9) messages from this request's TLS handshake.
+    ///
+    /// If the incoming request was served over plaintext (without TLS) this field is undefined.
+    /// </summary>
+    abstract tlsExportedAuthenticator: IncomingRequestCfPropertiesExportedAuthenticatorMetadata option with get, set
+    /// <summary>
+    /// Results of Cloudflare's Bot Management analysis
+    /// </summary>
+    abstract botManagement: FetchEventRequestItemBotManagement with get, set
+    /// <summary>
+    /// Duplicate of <c>botManagement.score</c>.
+    /// </summary>
+    /// <remarks>@deprecated</remarks>
+    abstract clientTrustScore: float with get, set
+    /// <summary>
+    /// Custom metadata set per-host in [Cloudflare for SaaS](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/).
+    ///
+    /// This field is only present if you have Cloudflare for SaaS enabled on your account
+    /// and you have followed the [required steps to enable it]((https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/)).
+    /// </summary>
+    abstract hostMetadata: 'CfHostMetadata option with get, set
+    /// <summary>
+    /// The [ISO 3166-1 Alpha 2](https://www.iso.org/iso-3166-country-codes.html) country code the request originated from.
+    ///
+    /// If your worker is [configured to accept TOR connections](https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing), this may also be <c>"T1"</c>, indicating a request that originated over TOR.
+    ///
+    /// If Cloudflare is unable to determine where the request originated this property is omitted.
+    ///
+    /// The country code <c>"T1"</c> is used for requests originating on TOR.
+    /// </summary>
+    /// <remarks>@example "GB"</remarks>
+    abstract country: FetchEventRequestItemCountry option with get, set
+    /// <summary>
+    /// If present, this property indicates that the request originated in the EU
+    /// </summary>
+    /// <remarks>@example "1"</remarks>
+    abstract isEUCountry: string option with get, set
+    /// <summary>
+    /// A two-letter code indicating the continent the request originated from.
+    /// </summary>
+    /// <remarks>@example "AN"</remarks>
+    abstract continent: ContinentCode option with get, set
+    /// <summary>
+    /// The city the request originated from
+    /// </summary>
+    /// <remarks>@example "Austin"</remarks>
+    abstract city: string option with get, set
+    /// <summary>
+    /// Postal code of the incoming request
+    /// </summary>
+    /// <remarks>@example "78701"</remarks>
+    abstract postalCode: string option with get, set
+    /// <summary>
+    /// Latitude of the incoming request
+    /// </summary>
+    /// <remarks>@example "30.27130"</remarks>
+    abstract latitude: string option with get, set
+    /// <summary>
+    /// Longitude of the incoming request
+    /// </summary>
+    /// <remarks>@example "-97.74260"</remarks>
+    abstract longitude: string option with get, set
+    /// <summary>
+    /// Timezone of the incoming request
+    /// </summary>
+    /// <remarks>@example "America/Chicago"</remarks>
+    abstract timezone: string option with get, set
+    /// <summary>
+    /// If known, the ISO 3166-2 name for the first level region associated with
+    /// the IP address of the incoming request
+    /// </summary>
+    /// <remarks>@example "Texas"</remarks>
+    abstract region: string option with get, set
+    /// <summary>
+    /// If known, the ISO 3166-2 code for the first-level region associated with
+    /// the IP address of the incoming request
+    /// </summary>
+    /// <remarks>@example "TX"</remarks>
+    abstract regionCode: string option with get, set
+    /// <summary>
+    /// Metro code (DMA) of the incoming request
+    /// </summary>
+    /// <remarks>@example "635"</remarks>
+    abstract metroCode: string option with get, set
+    /// <summary>
+    /// Information about the client certificate presented to Cloudflare.
+    ///
+    /// This is populated when the incoming request is served over TLS using
+    /// either Cloudflare Access or API Shield (mTLS)
+    /// and the presented SSL certificate has a valid
+    /// [Certificate Serial Number](https://ldapwiki.com/wiki/Certificate%20Serial%20Number)
+    /// (i.e., not <c>null</c> or <c>""</c>).
+    ///
+    /// Otherwise, a set of placeholder values are used.
+    ///
+    /// The property <c>certPresented</c> will be set to <c>"1"</c> when
+    /// the object is populated (i.e. the above conditions were met).
+    /// </summary>
+    abstract tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder> with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 [<Interface>]
 type AlarmInvocationInfo =
@@ -722,6 +1567,20 @@ type DurableObjectNamespaceGetDurableObjectOptions =
 [<Erase>]
 type DurableObjectClass<'_T> = private DurableObjectClass__ of obj
 
+[<Interface>]
+type ContainerDirectorySnapshotRestoreParams2 =
+    abstract snapshot: ContainerDirectorySnapshot with get, set
+    abstract mountPoint: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (snapshot: ContainerDirectorySnapshot, ?mountPoint: string) : ContainerDirectorySnapshotRestoreParams2 = jsNative
+
+[<Interface>]
+type ContainerDirectorySnapshotRestoreParams3 =
+    abstract snapshot: unit option with get, set
+    abstract mountPoint: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (mountPoint: string, ?snapshot: unit) : ContainerDirectorySnapshotRestoreParams3 = jsNative
+
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type ContainerExecOptionsStderr =
     | [<CompiledName("combined")>] Combined
@@ -732,6 +1591,32 @@ type ContainerExecOptionsStderr =
 type ContainerExecOptionsStdout =
     | [<CompiledName("ignore")>] Ignore
     | [<CompiledName("pipe")>] Pipe
+
+[<Interface>]
+type ContainerStartOptions =
+    abstract entrypoint: string[] option with get, set
+    abstract enableInternet: bool with get, set
+    abstract env: obj option with get, set
+    abstract instance: U2<string, ContainerStartResources> option with get, set
+    abstract labels: obj option with get, set
+    abstract directorySnapshots: ContainerDirectorySnapshotRestoreParams[] option with get, set
+    abstract image: string with get, set
+    abstract containerSnapshot: unit option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (enableInternet: bool, image: string, ?entrypoint: string[], ?env: obj, ?instance: U2<string, ContainerStartResources>, ?labels: obj, ?directorySnapshots: ContainerDirectorySnapshotRestoreParams[], ?containerSnapshot: unit) : ContainerStartOptions = jsNative
+
+[<Interface>]
+type ContainerStartOptions2 =
+    abstract entrypoint: string[] option with get, set
+    abstract enableInternet: bool with get, set
+    abstract env: obj option with get, set
+    abstract instance: U2<string, ContainerStartResources> option with get, set
+    abstract labels: obj option with get, set
+    abstract directorySnapshots: ContainerDirectorySnapshotRestoreParams[] option with get, set
+    abstract image: unit option with get, set
+    abstract containerSnapshot: ContainerSnapshotRestoreParams option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (enableInternet: bool, ?entrypoint: string[], ?env: obj, ?instance: U2<string, ContainerStartResources>, ?labels: obj, ?directorySnapshots: ContainerDirectorySnapshotRestoreParams[], ?image: unit, ?containerSnapshot: ContainerSnapshotRestoreParams) : ContainerStartOptions2 = jsNative
 
 type DurableObjectState<'Props> =
     abstract waitUntil: promise: JS.Promise<obj> -> unit
@@ -1759,14 +2644,159 @@ type R2ListOptionsIncludeItem =
 
 type R2Bucket =
     abstract head: key: string -> JS.Promise<R2Object option>
-    abstract get: key: string * options: obj -> JS.Promise<U2<R2Object, R2ObjectBody> option>
+    abstract get: key: string * options: R2BucketGetOptions -> JS.Promise<U2<R2Object, R2ObjectBody> option>
     abstract get: key: string * ?options: R2GetOptions -> JS.Promise<R2ObjectBody option>
-    abstract put: key: string * ?value: obj * ?options: obj -> JS.Promise<R2Object option>
+    abstract put: key: string * ?value: obj * ?options: R2BucketPutOptions -> JS.Promise<R2Object option>
     abstract put: key: string * ?value: obj * ?options: R2PutOptions -> JS.Promise<R2Object>
     abstract createMultipartUpload: key: string * ?options: R2MultipartOptions -> JS.Promise<R2MultipartUpload>
     abstract resumeMultipartUpload: key: string * uploadId: string -> R2MultipartUpload
     abstract delete: keys: U2<string, string[]> -> JS.Promise<unit>
     abstract list: ?options: R2ListOptions -> JS.Promise<R2Objects>
+
+[<Interface>]
+type R2BucketGetOptions =
+    inherit R2GetOptions
+    abstract onlyIf: obj with get, set
+    abstract range: obj option with get, set
+    abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (onlyIf: obj, ?range: obj, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2BucketGetOptions = jsNative
+
+[<Interface>]
+type R2BucketGetOptionsOnlyIf =
+    inherit R2Conditional
+    /// <summary>
+    /// The **<c>append()</c>** method of the Headers interface appends a new value onto an existing header inside a Headers object, or adds the header if it does not already exist.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/append)
+    /// </summary>
+    abstract append: obj with get, set
+    /// <summary>
+    /// The **<c>delete()</c>** method of the Headers interface deletes a header from the current Headers object.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/delete)
+    /// </summary>
+    abstract delete: obj with get, set
+    /// <summary>
+    /// The **<c>get()</c>** method of the Headers interface returns a byte string of all the values of a header within a Headers object with a given name. If the requested header doesn't exist in the Headers object, it returns null.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/get)
+    /// </summary>
+    abstract get: obj with get, set
+    /// <summary>
+    /// The **<c>getSetCookie()</c>** method of the Headers interface returns an array containing the values of all Set-Cookie headers associated with a response. This allows Headers objects to handle having multiple Set-Cookie headers, which wasn't possible prior to its implementation.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/getSetCookie)
+    /// </summary>
+    abstract getSetCookie: obj with get, set
+    /// <summary>
+    /// The **<c>has()</c>** method of the Headers interface returns a boolean stating whether a Headers object contains a certain header.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/has)
+    /// </summary>
+    abstract has: obj with get, set
+    /// <summary>
+    /// The **<c>set()</c>** method of the Headers interface sets a new value for an existing header inside a Headers object, or adds the header if it does not already exist.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/set)
+    /// </summary>
+    abstract set: obj with get, set
+    abstract forEach: obj with get, set
+    /// <summary>
+    /// Returns an iterator allowing to go through all key/value pairs contained in this object.
+    /// </summary>
+    abstract entries: obj with get, set
+    /// <summary>
+    /// Returns an iterator allowing to go through all keys of the key/value pairs contained in this object.
+    /// </summary>
+    abstract keys: obj with get, set
+    /// <summary>
+    /// Returns an iterator allowing to go through all values of the key/value pairs contained in this object.
+    /// </summary>
+    abstract values: obj with get, set
+    abstract etagMatches: string option with get, set
+    abstract etagDoesNotMatch: string option with get, set
+    abstract uploadedBefore: JS.Date option with get, set
+    abstract uploadedAfter: JS.Date option with get, set
+    abstract secondsGranularity: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (append: obj, delete: obj, get: obj, getSetCookie: obj, has: obj, set: obj, forEach: obj, entries: obj, keys: obj, values: obj, ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : R2BucketGetOptionsOnlyIf = jsNative
+
+[<Interface>]
+type R2BucketGetOptionsOnlyIf2 =
+    inherit R2Conditional
+    abstract etagMatches: string option with get, set
+    abstract etagDoesNotMatch: string option with get, set
+    abstract uploadedBefore: JS.Date option with get, set
+    abstract uploadedAfter: JS.Date option with get, set
+    abstract secondsGranularity: bool option with get, set
+    /// <summary>
+    /// The **<c>append()</c>** method of the Headers interface appends a new value onto an existing header inside a Headers object, or adds the header if it does not already exist.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/append)
+    /// </summary>
+    abstract append: obj with get, set
+    /// <summary>
+    /// The **<c>delete()</c>** method of the Headers interface deletes a header from the current Headers object.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/delete)
+    /// </summary>
+    abstract delete: obj with get, set
+    /// <summary>
+    /// The **<c>get()</c>** method of the Headers interface returns a byte string of all the values of a header within a Headers object with a given name. If the requested header doesn't exist in the Headers object, it returns null.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/get)
+    /// </summary>
+    abstract get: obj with get, set
+    /// <summary>
+    /// The **<c>getSetCookie()</c>** method of the Headers interface returns an array containing the values of all Set-Cookie headers associated with a response. This allows Headers objects to handle having multiple Set-Cookie headers, which wasn't possible prior to its implementation.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/getSetCookie)
+    /// </summary>
+    abstract getSetCookie: obj with get, set
+    /// <summary>
+    /// The **<c>has()</c>** method of the Headers interface returns a boolean stating whether a Headers object contains a certain header.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/has)
+    /// </summary>
+    abstract has: obj with get, set
+    /// <summary>
+    /// The **<c>set()</c>** method of the Headers interface sets a new value for an existing header inside a Headers object, or adds the header if it does not already exist.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/set)
+    /// </summary>
+    abstract set: obj with get, set
+    abstract forEach: obj with get, set
+    /// <summary>
+    /// Returns an iterator allowing to go through all key/value pairs contained in this object.
+    /// </summary>
+    abstract entries: obj with get, set
+    /// <summary>
+    /// Returns an iterator allowing to go through all keys of the key/value pairs contained in this object.
+    /// </summary>
+    abstract keys: obj with get, set
+    /// <summary>
+    /// Returns an iterator allowing to go through all values of the key/value pairs contained in this object.
+    /// </summary>
+    abstract values: obj with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (append: obj, delete: obj, get: obj, getSetCookie: obj, has: obj, set: obj, forEach: obj, entries: obj, keys: obj, values: obj, ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : R2BucketGetOptionsOnlyIf2 = jsNative
+
+[<Interface>]
+type R2BucketPutOptions =
+    inherit R2PutOptions
+    abstract onlyIf: obj with get, set
+    abstract httpMetadata: obj option with get, set
+    abstract customMetadata: obj option with get, set
+    abstract md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
+    abstract sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
+    abstract sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
+    abstract sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
+    abstract sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
+    abstract storageClass: string option with get, set
+    abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (onlyIf: obj, ?httpMetadata: obj, ?customMetadata: obj, ?md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2BucketPutOptions = jsNative
 
 [<Interface>]
 type R2ObjectRange =
@@ -1787,6 +2817,23 @@ type R2ObjectRange3 =
     abstract suffix: float with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (suffix: float) : R2ObjectRange3 = jsNative
+
+[<Interface>]
+type R2Objects2 =
+    abstract objects: R2Object[] with get, set
+    abstract delimitedPrefixes: string[] with get, set
+    abstract truncated: bool with get, set
+    abstract cursor: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (objects: R2Object[], delimitedPrefixes: string[], truncated: bool, cursor: string) : R2Objects2 = jsNative
+
+[<Interface>]
+type R2Objects3 =
+    abstract objects: R2Object[] with get, set
+    abstract delimitedPrefixes: string[] with get, set
+    abstract truncated: bool with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (objects: R2Object[], delimitedPrefixes: string[], truncated: bool) : R2Objects3 = jsNative
 
 type R2MultipartUpload =
     abstract key: string
@@ -1912,7 +2959,7 @@ type R2HTTPMetadata =
     [<ParamObject; Emit("$0")>]
     static member Create (?contentType: string, ?contentLanguage: string, ?contentDisposition: string, ?contentEncoding: string, ?cacheControl: string, ?cacheExpiry: JS.Date) : R2HTTPMetadata = jsNative
 
-type R2Objects = obj
+type R2Objects = U2<R2Objects2, R2Objects3>
 
 [<Interface>]
 type R2UploadPartOptions =
@@ -2550,20 +3597,6 @@ type ContainerDirectorySnapshotOptions =
 type ContainerDirectorySnapshotRestoreParams = U2<ContainerDirectorySnapshotRestoreParams2, ContainerDirectorySnapshotRestoreParams3>
 
 [<Interface>]
-type ContainerDirectorySnapshotRestoreParams2 =
-    abstract snapshot: ContainerDirectorySnapshot with get, set
-    abstract mountPoint: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (snapshot: ContainerDirectorySnapshot, ?mountPoint: string) : ContainerDirectorySnapshotRestoreParams2 = jsNative
-
-[<Interface>]
-type ContainerDirectorySnapshotRestoreParams3 =
-    abstract snapshot: unit option with get, set
-    abstract mountPoint: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (mountPoint: string, ?snapshot: unit) : ContainerDirectorySnapshotRestoreParams3 = jsNative
-
-[<Interface>]
 type ContainerSnapshot =
     abstract id: string with get, set
     abstract size: float with get, set
@@ -2583,7 +3616,7 @@ type ContainerSnapshotOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?name: string) : ContainerSnapshotOptions = jsNative
 
-type ContainerStartupOptions = obj
+type ContainerStartupOptions = U2<ContainerStartOptions, ContainerStartOptions2>
 
 [<Interface>]
 type ContainerStartResources =
@@ -2612,9 +3645,16 @@ type LoopbackDurableObjectNamespace =
     abstract newUniqueId: ?options: DurableObjectNamespaceNewUniqueIdOptions -> DurableObjectId
     abstract idFromName: name: string -> DurableObjectId
     abstract idFromString: id: string -> DurableObjectId
-    abstract get: id: DurableObjectId * ?options: DurableObjectNamespaceGetDurableObjectOptions -> obj
-    abstract getByName: name: string * ?options: DurableObjectNamespaceGetDurableObjectOptions -> obj
+    abstract get: id: DurableObjectId * ?options: DurableObjectNamespaceGetDurableObjectOptions -> LoopbackDurableObjectNamespaceGetResult
+    abstract getByName: name: string * ?options: DurableObjectNamespaceGetDurableObjectOptions -> LoopbackDurableObjectNamespaceGetResult
     abstract jurisdiction: jurisdiction: DurableObjectJurisdiction -> DurableObjectNamespace<unit>
+
+type LoopbackDurableObjectNamespaceGetResult =
+    inherit ColoLocalActorNamespaceGetResult
+    abstract fetch: input: obj * ?init: obj -> JS.Promise<obj>
+    abstract connect: address: U2<string, SocketAddress> * ?options: SocketOptions -> Socket
+    abstract id: DurableObjectId
+    abstract name: string option
 
 type LoopbackColoLocalActorNamespace =
     abstract get: actorId: string -> ColoLocalActorNamespaceGetResult
@@ -3344,6 +4384,24 @@ type AiSearchOptionsRetrievalRetrievalType =
     | [<CompiledName("keyword")>] Keyword
     | [<CompiledName("vector")>] Vector
 
+[<Interface>]
+type VectorizeVectorMetadataFilterItem =
+    abstract ``$eq``: U3<string, float, bool> option with get, set
+    abstract ``$gt``: U3<string, float, bool> option with get, set
+    abstract ``$gte``: U3<string, float, bool> option with get, set
+    abstract ``$lt``: U3<string, float, bool> option with get, set
+    abstract ``$lte``: U3<string, float, bool> option with get, set
+    abstract ``$ne``: U3<string, float, bool> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?``$eq``: U3<string, float, bool>, ?``$gt``: U3<string, float, bool>, ?``$gte``: U3<string, float, bool>, ?``$lt``: U3<string, float, bool>, ?``$lte``: U3<string, float, bool>, ?``$ne``: U3<string, float, bool>) : VectorizeVectorMetadataFilterItem = jsNative
+
+[<Interface>]
+type VectorizeVectorMetadataFilterItem2 =
+    abstract ``$in``: U3<string, float, bool>[] option with get, set
+    abstract ``$nin``: U3<string, float, bool>[] option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?``$in``: U3<string, float, bool>[], ?``$nin``: U3<string, float, bool>[]) : VectorizeVectorMetadataFilterItem2 = jsNative
+
 /// <summary>
 /// Request body for single-instance search.
 /// Exactly one of <c>query</c> or <c>messages</c> must be provided.
@@ -3383,7 +4441,18 @@ type AiSearchChatCompletionsRequest =
 /// <summary>
 /// <c>ai_search_options</c> shape for multi-instance requests — requires <c>instance_ids</c>.
 /// </summary>
-type AiSearchMultiSearchOptions = obj
+type AiSearchMultiSearchOptions =
+    inherit AiSearchOptions
+    abstract retrieval: AiSearchOptionsRetrieval option with get, set
+    abstract query_rewrite: AiSearchOptionsQueryRewrite option with get, set
+    abstract reranking: AiSearchOptionsReranking option with get, set
+    abstract cache: AiSearchOptionsCache option with get, set
+    /// <summary>
+    /// Instance IDs to search across (1-10).
+    /// </summary>
+    abstract instance_ids: string[] with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 /// <summary>
 /// Request for searching across multiple instances within a namespace.
@@ -3399,9 +4468,9 @@ type AiSearchMultiSearchRequest2 =
     /// </summary>
     abstract query: string with get, set
     abstract messages: unit option with get, set
-    abstract ai_search_options: obj with get, set
+    abstract ai_search_options: AiSearchMultiSearchOptions with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (query: string, ai_search_options: obj, ?messages: unit) : AiSearchMultiSearchRequest2 = jsNative
+    static member Create (query: string, ai_search_options: AiSearchMultiSearchOptions, ?messages: unit) : AiSearchMultiSearchRequest2 = jsNative
 
 [<Interface>]
 type AiSearchMultiSearchRequest3 =
@@ -3410,55 +4479,16 @@ type AiSearchMultiSearchRequest3 =
     /// Conversation-style input.
     /// </summary>
     abstract messages: AiSearchMessage[] with get, set
-    abstract ai_search_options: obj with get, set
+    abstract ai_search_options: AiSearchMultiSearchOptions with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (messages: AiSearchMessage[], ai_search_options: obj, ?query: unit) : AiSearchMultiSearchRequest3 = jsNative
+    static member Create (messages: AiSearchMessage[], ai_search_options: AiSearchMultiSearchOptions, ?query: unit) : AiSearchMultiSearchRequest3 = jsNative
 
 /// <summary>
 /// A search result chunk tagged with the instance it originated from.
 /// </summary>
-type AiSearchMultiSearchChunk = obj
-
-/// <summary>
-/// Describes a per-instance error during a multi-instance operation.
-/// </summary>
 [<Interface>]
-type AiSearchMultiSearchError =
-    abstract instance_id: string with get, set
-    abstract message: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (instance_id: string, message: string) : AiSearchMultiSearchError = jsNative
-
-/// <summary>
-/// Response from a multi-instance search, with chunks tagged by instance and optional partial-failure errors.
-/// </summary>
-[<Interface>]
-type AiSearchMultiSearchResponse =
-    abstract search_query: string with get, set
-    abstract chunks: obj[] with get, set
-    abstract errors: AiSearchMultiSearchError[] option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (search_query: string, chunks: obj[], ?errors: AiSearchMultiSearchError[]) : AiSearchMultiSearchResponse = jsNative
-
-/// <summary>
-/// Request for chat completions across multiple instances within a namespace. <c>ai_search_options</c> is required and must include <c>instance_ids</c>.
-/// </summary>
-type AiSearchMultiChatCompletionsRequest = obj
-
-/// <summary>
-/// Response from multi-instance chat completions, with chunks tagged by instance and optional partial-failure errors.
-/// </summary>
-type AiSearchMultiChatCompletionsResponse = obj
-
-[<Interface>]
-type AiSearchSearchResponse =
-    abstract search_query: string with get, set
-    abstract chunks: AiSearchSearchResponseChunksItem[] with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (search_query: string, chunks: AiSearchSearchResponseChunksItem[]) : AiSearchSearchResponse = jsNative
-
-[<Interface>]
-type AiSearchSearchResponseChunksItem =
+type AiSearchMultiSearchChunk =
+    inherit AiSearchSearchResponseChunksItem
     abstract id: string with get, set
     abstract ``type``: string with get, set
     /// <summary>
@@ -3466,20 +4496,21 @@ type AiSearchSearchResponseChunksItem =
     /// </summary>
     abstract score: float with get, set
     abstract text: string with get, set
-    abstract item: AiSearchSearchResponseChunksItemItem with get, set
-    abstract scoring_details: AiSearchSearchResponseChunksItemScoringDetails option with get, set
+    abstract item: AiSearchMultiSearchChunkItem with get, set
+    abstract scoring_details: AiSearchMultiSearchChunkScoringDetails option with get, set
+    abstract instance_id: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, ``type``: string, score: float, text: string, item: AiSearchSearchResponseChunksItemItem, ?scoring_details: AiSearchSearchResponseChunksItemScoringDetails) : AiSearchSearchResponseChunksItem = jsNative
+    static member Create (id: string, ``type``: string, score: float, text: string, item: AiSearchMultiSearchChunkItem, instance_id: string, ?scoring_details: AiSearchMultiSearchChunkScoringDetails) : AiSearchMultiSearchChunk = jsNative
 
 [<Interface>]
-type AiSearchSearchResponseChunksItemItem =
+type AiSearchMultiSearchChunkItem =
     abstract timestamp: float option with get, set
     abstract key: string with get, set
     abstract metadata: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (key: string, ?timestamp: float, ?metadata: obj) : AiSearchSearchResponseChunksItemItem = jsNative
+    static member Create (key: string, ?timestamp: float, ?metadata: obj) : AiSearchMultiSearchChunkItem = jsNative
 
-type AiSearchSearchResponseChunksItemScoringDetails =
+type AiSearchMultiSearchChunkScoringDetails =
     /// <summary>
     /// Keyword match score (0-1)
     /// </summary>
@@ -3506,6 +4537,69 @@ type AiSearchSearchResponseChunksItemScoringDetails =
     abstract fusion_method: AiSearchOptionsRetrievalFusionMethod option with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
+
+/// <summary>
+/// Describes a per-instance error during a multi-instance operation.
+/// </summary>
+[<Interface>]
+type AiSearchMultiSearchError =
+    abstract instance_id: string with get, set
+    abstract message: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (instance_id: string, message: string) : AiSearchMultiSearchError = jsNative
+
+/// <summary>
+/// Response from a multi-instance search, with chunks tagged by instance and optional partial-failure errors.
+/// </summary>
+[<Interface>]
+type AiSearchMultiSearchResponse =
+    abstract search_query: string with get, set
+    abstract chunks: AiSearchMultiSearchChunk[] with get, set
+    abstract errors: AiSearchMultiSearchError[] option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (search_query: string, chunks: AiSearchMultiSearchChunk[], ?errors: AiSearchMultiSearchError[]) : AiSearchMultiSearchResponse = jsNative
+
+/// <summary>
+/// Request for chat completions across multiple instances within a namespace. <c>ai_search_options</c> is required and must include <c>instance_ids</c>.
+/// </summary>
+type AiSearchMultiChatCompletionsRequest =
+    abstract ai_search_options: AiSearchMultiSearchOptions with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
+    [<EmitIndexer>]
+    abstract Item: float -> obj with get, set
+
+/// <summary>
+/// Response from multi-instance chat completions, with chunks tagged by instance and optional partial-failure errors.
+/// </summary>
+type AiSearchMultiChatCompletionsResponse =
+    abstract chunks: AiSearchMultiSearchChunk[] with get, set
+    abstract errors: AiSearchMultiSearchError[] option with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
+    [<EmitIndexer>]
+    abstract Item: float -> obj with get, set
+
+[<Interface>]
+type AiSearchSearchResponse =
+    abstract search_query: string with get, set
+    abstract chunks: AiSearchSearchResponseChunksItem[] with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (search_query: string, chunks: AiSearchSearchResponseChunksItem[]) : AiSearchSearchResponse = jsNative
+
+[<Interface>]
+type AiSearchSearchResponseChunksItem =
+    abstract id: string with get, set
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// Match score (0-1)
+    /// </summary>
+    abstract score: float with get, set
+    abstract text: string with get, set
+    abstract item: AiSearchMultiSearchChunkItem with get, set
+    abstract scoring_details: AiSearchMultiSearchChunkScoringDetails option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string, ``type``: string, score: float, text: string, item: AiSearchMultiSearchChunkItem, ?scoring_details: AiSearchMultiSearchChunkScoringDetails) : AiSearchSearchResponseChunksItem = jsNative
 
 type AiSearchChatCompletionsResponse =
     abstract id: string option with get, set
@@ -4146,7 +5240,7 @@ type AiSearchItems =
     /// <remarks>@param content File content as a ReadableStream, Blob, or string.</remarks>
     /// <remarks>@param options Optional metadata and polling configuration.</remarks>
     /// <remarks>@returns The item info after processing completes (or timeout).</remarks>
-    abstract uploadAndPoll: name: string * content: obj * ?options: obj -> JS.Promise<AiSearchItemInfo>
+    abstract uploadAndPoll: name: string * content: obj * ?options: AiSearchItemsUploadAndPollOptions -> JS.Promise<AiSearchItemInfo>
     /// <summary>
     /// Get an item by ID.
     /// </summary>
@@ -4158,6 +5252,21 @@ type AiSearchItems =
     /// </summary>
     /// <remarks>@param itemId The item identifier.</remarks>
     abstract delete: itemId: string -> JS.Promise<unit>
+
+[<Interface>]
+type AiSearchItemsUploadAndPollOptions =
+    inherit AiSearchUploadItemOptions
+    abstract metadata: obj option with get, set
+    /// <summary>
+    /// Polling interval in milliseconds (default 1000).
+    /// </summary>
+    abstract pollIntervalMs: float option with get, set
+    /// <summary>
+    /// Maximum time to wait in milliseconds (default 30000).
+    /// </summary>
+    abstract timeoutMs: float option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?metadata: obj, ?pollIntervalMs: float, ?timeoutMs: float) : AiSearchItemsUploadAndPollOptions = jsNative
 
 /// <summary>
 /// Single job service for an AI Search instance.
@@ -4240,7 +5349,7 @@ type AiSearchInstance =
     /// <remarks>@returns ReadableStream of server-sent events.</remarks>
     /// <remarks>@param params Chat completions request.</remarks>
     /// <remarks>@returns Chat completion response with choices and RAG chunks.</remarks>
-    abstract chatCompletions: ``params``: obj -> JS.Promise<obj>
+    abstract chatCompletions: ``params``: AiSearchInstanceChatCompletionsParams -> JS.Promise<obj>
     /// <summary>
     /// Generate chat completions with AI Search context (streaming).
     /// Generate chat completions with AI Search context.
@@ -4273,6 +5382,15 @@ type AiSearchInstance =
     /// Jobs collection — list, create, and inspect indexing jobs.
     /// </summary>
     abstract jobs: AiSearchJobs
+
+type AiSearchInstanceChatCompletionsParams =
+    inherit AiSearchChatCompletionsRequest
+    abstract messages: AiSearchMessage[] with get, set
+    abstract model: string option with get, set
+    abstract stream: bool with get, set
+    abstract ai_search_options: AiSearchOptions option with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 /// <summary>
 /// Namespace-level AI Search service.
@@ -4362,7 +5480,26 @@ type AiSearchNamespace =
     /// <remarks>@returns ReadableStream of server-sent events.</remarks>
     /// <remarks>@param params Chat completions request with required <c>ai_search_options.instance_ids</c>.</remarks>
     /// <remarks>@returns Chat completion response with choices, chunks tagged by instance_id, and optional partial-failure errors.</remarks>
-    abstract chatCompletions: ``params``: obj -> JS.Promise<obj>
+    abstract chatCompletions: ``params``: AiSearchNamespaceChatCompletionsParams -> JS.Promise<obj>
+    /// <summary>
+    /// Generate chat completions across multiple instances within the bound namespace (streaming).
+    /// Fans out to the specified instance_ids, merges context, and generates a response.
+    /// Generate chat completions across multiple instances within the bound namespace.
+    /// Fans out to the specified instance_ids, merges context, and generates a response.
+    /// </summary>
+    /// <remarks>@param params Chat completions request with stream: true and required <c>ai_search_options.instance_ids</c>.</remarks>
+    /// <remarks>@returns ReadableStream of server-sent events.</remarks>
+    /// <remarks>@param params Chat completions request with required <c>ai_search_options.instance_ids</c>.</remarks>
+    /// <remarks>@returns Chat completion response with choices, chunks tagged by instance_id, and optional partial-failure errors.</remarks>
+    abstract chatCompletions: ``params``: AiSearchMultiChatCompletionsRequest -> JS.Promise<AiSearchMultiChatCompletionsResponse>
+
+type AiSearchNamespaceChatCompletionsParams =
+    abstract ai_search_options: AiSearchMultiSearchOptions with get, set
+    abstract stream: bool with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
+    [<EmitIndexer>]
+    abstract Item: float -> obj with get, set
 
 [<Interface>]
 type AiImageClassificationInput =
@@ -4622,6 +5759,13 @@ type AiTextGenerationToolLegacyInputParameters =
     static member Create (``type``: obj, properties: obj, required: string[]) : AiTextGenerationToolLegacyInputParameters = jsNative
 
 [<Interface>]
+type AiTextGenerationToolLegacyInputParametersPropertiesItem =
+    abstract ``type``: string with get, set
+    abstract description: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, ?description: string) : AiTextGenerationToolLegacyInputParametersPropertiesItem = jsNative
+
+[<Interface>]
 type AiTextGenerationToolInput =
     abstract ``type``: obj with get, set
     abstract ``function``: AiTextGenerationToolInputFunction with get, set
@@ -4643,6 +5787,13 @@ type AiTextGenerationToolInputFunctionParameters =
     abstract required: string[] with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: obj, properties: obj, required: string[]) : AiTextGenerationToolInputFunctionParameters = jsNative
+
+[<Interface>]
+type AiTextGenerationToolInputFunctionParametersPropertiesItem =
+    abstract ``type``: string with get, set
+    abstract description: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, ?description: string) : AiTextGenerationToolInputFunctionParametersPropertiesItem = jsNative
 
 [<Interface>]
 type AiTextGenerationFunctionsInput =
@@ -4711,10 +5862,959 @@ type UsageTags =
 [<Interface>]
 type AiTextGenerationOutput =
     abstract response: string option with get, set
-    abstract tool_calls: obj option with get, set
+    abstract tool_calls: AiTextGenerationOutputToolCalls option with get, set
     abstract usage: UsageTags option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?response: string, ?tool_calls: obj, ?usage: UsageTags) : AiTextGenerationOutput = jsNative
+    static member Create (?response: string, ?tool_calls: AiTextGenerationOutputToolCalls, ?usage: UsageTags) : AiTextGenerationOutput = jsNative
+
+type AiTextGenerationOutputToolCalls =
+    /// <summary>
+    /// Gets or sets the length of the array. This is a number one higher than the highest index in the array.
+    /// </summary>
+    abstract length: float with get, set
+    /// <summary>
+    /// Returns a string representation of an array.
+    /// </summary>
+    abstract toString: obj with get, set
+    /// <summary>
+    /// Returns a string representation of an array. The elements are converted to string using their toLocaleString methods.
+    /// </summary>
+    abstract toLocaleString: obj with get, set
+    /// <summary>
+    /// Removes the last element from an array and returns it.
+    /// If the array is empty, undefined is returned and the array is not modified.
+    /// </summary>
+    abstract pop: obj with get, set
+    /// <summary>
+    /// Appends new elements to the end of an array, and returns the new length of the array.
+    /// </summary>
+    /// <remarks>@param items New elements to add to the array.</remarks>
+    abstract push: obj with get, set
+    /// <summary>
+    /// Combines two or more arrays.
+    /// This method returns a new array without modifying any existing arrays.
+    /// </summary>
+    /// <remarks>@param items Additional arrays and/or items to add to the end of the array.</remarks>
+    /// <remarks>@param items Additional arrays and/or items to add to the end of the array.</remarks>
+    abstract concat: obj with get, set
+    /// <summary>
+    /// Adds all the elements of an array into a string, separated by the specified separator string.
+    /// </summary>
+    /// <remarks>@param separator A string used to separate one element of the array from the next in the resulting string. If omitted, the array elements are separated with a comma.</remarks>
+    abstract join: obj with get, set
+    /// <summary>
+    /// Reverses the elements in an array in place.
+    /// This method mutates the array and returns a reference to the same array.
+    /// </summary>
+    abstract reverse: obj with get, set
+    /// <summary>
+    /// Removes the first element from an array and returns it.
+    /// If the array is empty, undefined is returned and the array is not modified.
+    /// </summary>
+    abstract shift: obj with get, set
+    /// <summary>
+    /// Returns a copy of a section of an array.
+    /// For both start and end, a negative index can be used to indicate an offset from the end of the array.
+    /// For example, -2 refers to the second to last element of the array.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// start The beginning index of the specified portion of the array.
+    /// If start is undefined, then the slice begins at index 0.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// end The end index of the specified portion of the array. This is exclusive of the element at the index 'end'.
+    /// If end is undefined, then the slice extends to the end of the array.
+    /// </remarks>
+    abstract slice: obj with get, set
+    /// <summary>
+    /// Sorts an array in place.
+    /// This method mutates the array and returns a reference to the same array.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// compareFn Function used to determine the order of the elements. It is expected to return
+    /// a negative value if the first argument is less than the second argument, zero if they're equal, and a positive
+    /// value otherwise. If omitted, the elements are sorted in ascending, UTF-16 code unit order.
+    /// <code lang="ts">
+    /// [11,2,22,1].sort((a, b) =&gt; a - b)
+    /// </code>
+    /// </remarks>
+    abstract sort: obj with get, set
+    /// <summary>
+    /// Removes elements from an array and, if necessary, inserts new elements in their place, returning the deleted elements.
+    /// </summary>
+    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
+    /// <remarks>
+    /// @param
+    /// deleteCount The number of elements to remove. Omitting this argument will remove all elements from the start
+    /// paramater location to end of the array. If value of this argument is either a negative number, zero, undefined, or a type
+    /// that cannot be converted to an integer, the function will evaluate the argument as zero and not remove any elements.
+    /// </remarks>
+    /// <remarks>@returns An array containing the elements that were deleted.</remarks>
+    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
+    /// <remarks>
+    /// @param
+    /// deleteCount The number of elements to remove. If value of this argument is either a negative number, zero,
+    /// undefined, or a type that cannot be converted to an integer, the function will evaluate the argument as zero and
+    /// not remove any elements.
+    /// </remarks>
+    /// <remarks>@param items Elements to insert into the array in place of the deleted elements.</remarks>
+    /// <remarks>@returns An array containing the elements that were deleted.</remarks>
+    abstract splice: obj with get, set
+    /// <summary>
+    /// Inserts new elements at the start of an array, and returns the new length of the array.
+    /// </summary>
+    /// <remarks>@param items Elements to insert at the start of the array.</remarks>
+    abstract unshift: obj with get, set
+    /// <summary>
+    /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
+    /// </summary>
+    /// <remarks>@param searchElement The value to locate in the array.</remarks>
+    /// <remarks>@param fromIndex The array index at which to begin the search. If fromIndex is omitted, the search starts at index 0.</remarks>
+    abstract indexOf: obj with get, set
+    /// <summary>
+    /// Returns the index of the last occurrence of a specified value in an array, or -1 if it is not present.
+    /// </summary>
+    /// <remarks>@param searchElement The value to locate in the array.</remarks>
+    /// <remarks>@param fromIndex The array index at which to begin searching backward. If fromIndex is omitted, the search starts at the last index in the array.</remarks>
+    abstract lastIndexOf: obj with get, set
+    /// <summary>
+    /// Determines whether all the members of an array satisfy the specified test.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate A function that accepts up to three arguments. The every method calls
+    /// the predicate function for each element in the array until the predicate returns a value
+    /// which is coercible to the Boolean value false, or until the end of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg An object to which the this keyword can refer in the predicate function.
+    /// If thisArg is omitted, undefined is used as the this value.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// predicate A function that accepts up to three arguments. The every method calls
+    /// the predicate function for each element in the array until the predicate returns a value
+    /// which is coercible to the Boolean value false, or until the end of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg An object to which the this keyword can refer in the predicate function.
+    /// If thisArg is omitted, undefined is used as the this value.
+    /// </remarks>
+    abstract every: obj with get, set
+    /// <summary>
+    /// Determines whether the specified callback function returns true for any element of an array.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate A function that accepts up to three arguments. The some method calls
+    /// the predicate function for each element in the array until the predicate returns a value
+    /// which is coercible to the Boolean value true, or until the end of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg An object to which the this keyword can refer in the predicate function.
+    /// If thisArg is omitted, undefined is used as the this value.
+    /// </remarks>
+    abstract some: obj with get, set
+    /// <summary>
+    /// Performs the specified action for each element in an array.
+    /// </summary>
+    /// <remarks>@param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.</remarks>
+    abstract forEach: obj with get, set
+    /// <summary>
+    /// Calls a defined callback function on each element of an array, and returns an array that contains the results.
+    /// </summary>
+    /// <remarks>@param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.</remarks>
+    abstract map: obj with get, set
+    /// <summary>
+    /// Returns the elements of an array that meet the condition specified in a callback function.
+    /// </summary>
+    /// <remarks>@param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.</remarks>
+    /// <remarks>@param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.</remarks>
+    /// <remarks>@param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.</remarks>
+    /// <remarks>@param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.</remarks>
+    abstract filter: obj with get, set
+    /// <summary>
+    /// Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+    /// </summary>
+    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
+    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
+    abstract reduce: obj with get, set
+    /// <summary>
+    /// Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+    /// </summary>
+    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
+    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
+    abstract reduceRight: obj with get, set
+    /// <summary>
+    /// Returns the value of the first element in the array where predicate is true, and undefined
+    /// otherwise.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate find calls predicate once for each element of the array, in ascending
+    /// order, until it finds one where predicate returns true. If such an element is found, find
+    /// immediately returns that element value. Otherwise, find returns undefined.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg If provided, it will be used as the this value for each invocation of
+    /// predicate. If it is not provided, undefined is used instead.
+    /// </remarks>
+    abstract find: obj with get, set
+    /// <summary>
+    /// Returns the index of the first element in the array where predicate is true, and -1
+    /// otherwise.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate find calls predicate once for each element of the array, in ascending
+    /// order, until it finds one where predicate returns true. If such an element is found,
+    /// findIndex immediately returns that element index. Otherwise, findIndex returns -1.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg If provided, it will be used as the this value for each invocation of
+    /// predicate. If it is not provided, undefined is used instead.
+    /// </remarks>
+    abstract findIndex: obj with get, set
+    /// <summary>
+    /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
+    /// </summary>
+    /// <remarks>@param value value to fill array section with</remarks>
+    /// <remarks>
+    /// @param
+    /// start index to start filling the array at. If start is negative, it is treated as
+    /// length+start where length is the length of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// end index to stop filling the array at. If end is negative, it is treated as
+    /// length+end.
+    /// </remarks>
+    abstract fill: obj with get, set
+    /// <summary>
+    /// Returns the this object after copying a section of the array identified by start and end
+    /// to the same array starting at position target
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// target If target is negative, it is treated as length+target where length is the
+    /// length of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// start If start is negative, it is treated as length+start. If end is negative, it
+    /// is treated as length+end.
+    /// </remarks>
+    /// <remarks>@param end If not specified, length of the this object is used as its default value.</remarks>
+    abstract copyWithin: obj with get, set
+    /// <summary>
+    /// Returns an iterable of key, value pairs for every entry in the array
+    /// </summary>
+    abstract entries: obj with get, set
+    /// <summary>
+    /// Returns an iterable of keys in the array
+    /// </summary>
+    abstract keys: obj with get, set
+    /// <summary>
+    /// Returns an iterable of values in the array
+    /// </summary>
+    abstract values: obj with get, set
+    /// <summary>
+    /// Determines whether an array includes a certain element, returning true or false as appropriate.
+    /// </summary>
+    /// <remarks>@param searchElement The element to search for.</remarks>
+    /// <remarks>@param fromIndex The position in this array at which to begin searching for searchElement.</remarks>
+    abstract includes: obj with get, set
+    /// <summary>
+    /// Calls a defined callback function on each element of an array. Then, flattens the result into
+    /// a new array.
+    /// This is identical to a map followed by flat with depth 1.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// callback A function that accepts up to three arguments. The flatMap method calls the
+    /// callback function one time for each element in the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg An object to which the this keyword can refer in the callback function. If
+    /// thisArg is omitted, undefined is used as the this value.
+    /// </remarks>
+    abstract flatMap: obj with get, set
+    /// <summary>
+    /// Returns a new array with all sub-array elements concatenated into it recursively up to the
+    /// specified depth.
+    /// </summary>
+    /// <remarks>@param depth The maximum recursion depth</remarks>
+    abstract flat: obj with get, set
+    /// <summary>
+    /// Returns the item located at the specified index.
+    /// </summary>
+    /// <remarks>@param index The zero-based index of the desired code unit. A negative index will count back from the last item.</remarks>
+    abstract at: obj with get, set
+    /// <summary>
+    /// Returns the value of the last element in the array where predicate is true, and undefined
+    /// otherwise.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate findLast calls predicate once for each element of the array, in descending
+    /// order, until it finds one where predicate returns true. If such an element is found, findLast
+    /// immediately returns that element value. Otherwise, findLast returns undefined.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg If provided, it will be used as the this value for each invocation of
+    /// predicate. If it is not provided, undefined is used instead.
+    /// </remarks>
+    abstract findLast: obj with get, set
+    /// <summary>
+    /// Returns the index of the last element in the array where predicate is true, and -1
+    /// otherwise.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate findLastIndex calls predicate once for each element of the array, in descending
+    /// order, until it finds one where predicate returns true. If such an element is found,
+    /// findLastIndex immediately returns that element index. Otherwise, findLastIndex returns -1.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg If provided, it will be used as the this value for each invocation of
+    /// predicate. If it is not provided, undefined is used instead.
+    /// </remarks>
+    abstract findLastIndex: obj with get, set
+    /// <summary>
+    /// Returns a copy of an array with its elements reversed.
+    /// </summary>
+    abstract toReversed: obj with get, set
+    /// <summary>
+    /// Returns a copy of an array with its elements sorted.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// compareFn Function used to determine the order of the elements. It is expected to return
+    /// a negative value if the first argument is less than the second argument, zero if they're equal, and a positive
+    /// value otherwise. If omitted, the elements are sorted in ascending, UTF-16 code unit order.
+    /// <code lang="ts">
+    /// [11, 2, 22, 1].toSorted((a, b) =&gt; a - b) // [1, 2, 11, 22]
+    /// </code>
+    /// </remarks>
+    abstract toSorted: obj with get, set
+    /// <summary>
+    /// Copies an array and removes elements and, if necessary, inserts new elements in their place. Returns the copied array.
+    /// Copies an array and removes elements while returning the remaining elements.
+    /// </summary>
+    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
+    /// <remarks>@param deleteCount The number of elements to remove.</remarks>
+    /// <remarks>@param items Elements to insert into the copied array in place of the deleted elements.</remarks>
+    /// <remarks>@returns The copied array.</remarks>
+    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
+    /// <remarks>@param deleteCount The number of elements to remove.</remarks>
+    /// <remarks>@returns A copy of the original array with the remaining elements.</remarks>
+    abstract toSpliced: obj with get, set
+    /// <summary>
+    /// Copies an array, then overwrites the value at the provided index with the
+    /// given value. If the index is negative, then it replaces from the end
+    /// of the array.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// index The index of the value to overwrite. If the index is
+    /// negative, then it replaces from the end of the array.
+    /// </remarks>
+    /// <remarks>@param value The value to write into the copied array.</remarks>
+    /// <remarks>@returns The copied array with the updated value.</remarks>
+    abstract ``with``: obj with get, set
+    [<EmitIndexer>]
+    abstract Item: float -> AiTextGenerationOutputToolCallsItem with get, set
+
+type ``AiTextGenerationOutputToolCalls@unscopables@3251`` =
+    /// <summary>
+    /// Gets or sets the length of the array. This is a number one higher than the highest index in the array.
+    /// </summary>
+    abstract length: bool option with get, set
+    /// <summary>
+    /// Returns a string representation of an array.
+    /// </summary>
+    abstract toString: bool option with get, set
+    /// <summary>
+    /// Returns a string representation of an array. The elements are converted to string using their toLocaleString methods.
+    /// </summary>
+    abstract toLocaleString: bool option with get, set
+    /// <summary>
+    /// Removes the last element from an array and returns it.
+    /// If the array is empty, undefined is returned and the array is not modified.
+    /// </summary>
+    abstract pop: bool option with get, set
+    /// <summary>
+    /// Appends new elements to the end of an array, and returns the new length of the array.
+    /// </summary>
+    /// <remarks>@param items New elements to add to the array.</remarks>
+    abstract push: bool option with get, set
+    /// <summary>
+    /// Combines two or more arrays.
+    /// This method returns a new array without modifying any existing arrays.
+    /// </summary>
+    /// <remarks>@param items Additional arrays and/or items to add to the end of the array.</remarks>
+    /// <remarks>@param items Additional arrays and/or items to add to the end of the array.</remarks>
+    abstract concat: bool option with get, set
+    /// <summary>
+    /// Adds all the elements of an array into a string, separated by the specified separator string.
+    /// </summary>
+    /// <remarks>@param separator A string used to separate one element of the array from the next in the resulting string. If omitted, the array elements are separated with a comma.</remarks>
+    abstract join: bool option with get, set
+    /// <summary>
+    /// Reverses the elements in an array in place.
+    /// This method mutates the array and returns a reference to the same array.
+    /// </summary>
+    abstract reverse: bool option with get, set
+    /// <summary>
+    /// Removes the first element from an array and returns it.
+    /// If the array is empty, undefined is returned and the array is not modified.
+    /// </summary>
+    abstract shift: bool option with get, set
+    /// <summary>
+    /// Returns a copy of a section of an array.
+    /// For both start and end, a negative index can be used to indicate an offset from the end of the array.
+    /// For example, -2 refers to the second to last element of the array.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// start The beginning index of the specified portion of the array.
+    /// If start is undefined, then the slice begins at index 0.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// end The end index of the specified portion of the array. This is exclusive of the element at the index 'end'.
+    /// If end is undefined, then the slice extends to the end of the array.
+    /// </remarks>
+    abstract slice: bool option with get, set
+    /// <summary>
+    /// Sorts an array in place.
+    /// This method mutates the array and returns a reference to the same array.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// compareFn Function used to determine the order of the elements. It is expected to return
+    /// a negative value if the first argument is less than the second argument, zero if they're equal, and a positive
+    /// value otherwise. If omitted, the elements are sorted in ascending, UTF-16 code unit order.
+    /// <code lang="ts">
+    /// [11,2,22,1].sort((a, b) =&gt; a - b)
+    /// </code>
+    /// </remarks>
+    abstract sort: bool option with get, set
+    /// <summary>
+    /// Removes elements from an array and, if necessary, inserts new elements in their place, returning the deleted elements.
+    /// </summary>
+    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
+    /// <remarks>
+    /// @param
+    /// deleteCount The number of elements to remove. Omitting this argument will remove all elements from the start
+    /// paramater location to end of the array. If value of this argument is either a negative number, zero, undefined, or a type
+    /// that cannot be converted to an integer, the function will evaluate the argument as zero and not remove any elements.
+    /// </remarks>
+    /// <remarks>@returns An array containing the elements that were deleted.</remarks>
+    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
+    /// <remarks>
+    /// @param
+    /// deleteCount The number of elements to remove. If value of this argument is either a negative number, zero,
+    /// undefined, or a type that cannot be converted to an integer, the function will evaluate the argument as zero and
+    /// not remove any elements.
+    /// </remarks>
+    /// <remarks>@param items Elements to insert into the array in place of the deleted elements.</remarks>
+    /// <remarks>@returns An array containing the elements that were deleted.</remarks>
+    abstract splice: bool option with get, set
+    /// <summary>
+    /// Inserts new elements at the start of an array, and returns the new length of the array.
+    /// </summary>
+    /// <remarks>@param items Elements to insert at the start of the array.</remarks>
+    abstract unshift: bool option with get, set
+    /// <summary>
+    /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
+    /// </summary>
+    /// <remarks>@param searchElement The value to locate in the array.</remarks>
+    /// <remarks>@param fromIndex The array index at which to begin the search. If fromIndex is omitted, the search starts at index 0.</remarks>
+    abstract indexOf: bool option with get, set
+    /// <summary>
+    /// Returns the index of the last occurrence of a specified value in an array, or -1 if it is not present.
+    /// </summary>
+    /// <remarks>@param searchElement The value to locate in the array.</remarks>
+    /// <remarks>@param fromIndex The array index at which to begin searching backward. If fromIndex is omitted, the search starts at the last index in the array.</remarks>
+    abstract lastIndexOf: bool option with get, set
+    /// <summary>
+    /// Determines whether all the members of an array satisfy the specified test.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate A function that accepts up to three arguments. The every method calls
+    /// the predicate function for each element in the array until the predicate returns a value
+    /// which is coercible to the Boolean value false, or until the end of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg An object to which the this keyword can refer in the predicate function.
+    /// If thisArg is omitted, undefined is used as the this value.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// predicate A function that accepts up to three arguments. The every method calls
+    /// the predicate function for each element in the array until the predicate returns a value
+    /// which is coercible to the Boolean value false, or until the end of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg An object to which the this keyword can refer in the predicate function.
+    /// If thisArg is omitted, undefined is used as the this value.
+    /// </remarks>
+    abstract every: bool option with get, set
+    /// <summary>
+    /// Determines whether the specified callback function returns true for any element of an array.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate A function that accepts up to three arguments. The some method calls
+    /// the predicate function for each element in the array until the predicate returns a value
+    /// which is coercible to the Boolean value true, or until the end of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg An object to which the this keyword can refer in the predicate function.
+    /// If thisArg is omitted, undefined is used as the this value.
+    /// </remarks>
+    abstract some: bool option with get, set
+    /// <summary>
+    /// Performs the specified action for each element in an array.
+    /// </summary>
+    /// <remarks>@param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.</remarks>
+    abstract forEach: bool option with get, set
+    /// <summary>
+    /// Calls a defined callback function on each element of an array, and returns an array that contains the results.
+    /// </summary>
+    /// <remarks>@param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.</remarks>
+    abstract map: bool option with get, set
+    /// <summary>
+    /// Returns the elements of an array that meet the condition specified in a callback function.
+    /// </summary>
+    /// <remarks>@param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.</remarks>
+    /// <remarks>@param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.</remarks>
+    /// <remarks>@param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.</remarks>
+    /// <remarks>@param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.</remarks>
+    abstract filter: bool option with get, set
+    /// <summary>
+    /// Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+    /// </summary>
+    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
+    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
+    abstract reduce: bool option with get, set
+    /// <summary>
+    /// Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+    /// </summary>
+    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
+    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
+    abstract reduceRight: bool option with get, set
+    /// <summary>
+    /// Returns the value of the first element in the array where predicate is true, and undefined
+    /// otherwise.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate find calls predicate once for each element of the array, in ascending
+    /// order, until it finds one where predicate returns true. If such an element is found, find
+    /// immediately returns that element value. Otherwise, find returns undefined.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg If provided, it will be used as the this value for each invocation of
+    /// predicate. If it is not provided, undefined is used instead.
+    /// </remarks>
+    abstract find: bool option with get, set
+    /// <summary>
+    /// Returns the index of the first element in the array where predicate is true, and -1
+    /// otherwise.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate find calls predicate once for each element of the array, in ascending
+    /// order, until it finds one where predicate returns true. If such an element is found,
+    /// findIndex immediately returns that element index. Otherwise, findIndex returns -1.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg If provided, it will be used as the this value for each invocation of
+    /// predicate. If it is not provided, undefined is used instead.
+    /// </remarks>
+    abstract findIndex: bool option with get, set
+    /// <summary>
+    /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
+    /// </summary>
+    /// <remarks>@param value value to fill array section with</remarks>
+    /// <remarks>
+    /// @param
+    /// start index to start filling the array at. If start is negative, it is treated as
+    /// length+start where length is the length of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// end index to stop filling the array at. If end is negative, it is treated as
+    /// length+end.
+    /// </remarks>
+    abstract fill: bool option with get, set
+    /// <summary>
+    /// Returns the this object after copying a section of the array identified by start and end
+    /// to the same array starting at position target
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// target If target is negative, it is treated as length+target where length is the
+    /// length of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// start If start is negative, it is treated as length+start. If end is negative, it
+    /// is treated as length+end.
+    /// </remarks>
+    /// <remarks>@param end If not specified, length of the this object is used as its default value.</remarks>
+    abstract copyWithin: bool option with get, set
+    /// <summary>
+    /// Returns an iterable of key, value pairs for every entry in the array
+    /// </summary>
+    abstract entries: bool option with get, set
+    /// <summary>
+    /// Returns an iterable of keys in the array
+    /// </summary>
+    abstract keys: bool option with get, set
+    /// <summary>
+    /// Returns an iterable of values in the array
+    /// </summary>
+    abstract values: bool option with get, set
+    /// <summary>
+    /// Determines whether an array includes a certain element, returning true or false as appropriate.
+    /// </summary>
+    /// <remarks>@param searchElement The element to search for.</remarks>
+    /// <remarks>@param fromIndex The position in this array at which to begin searching for searchElement.</remarks>
+    abstract includes: bool option with get, set
+    /// <summary>
+    /// Calls a defined callback function on each element of an array. Then, flattens the result into
+    /// a new array.
+    /// This is identical to a map followed by flat with depth 1.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// callback A function that accepts up to three arguments. The flatMap method calls the
+    /// callback function one time for each element in the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg An object to which the this keyword can refer in the callback function. If
+    /// thisArg is omitted, undefined is used as the this value.
+    /// </remarks>
+    abstract flatMap: bool option with get, set
+    /// <summary>
+    /// Returns a new array with all sub-array elements concatenated into it recursively up to the
+    /// specified depth.
+    /// </summary>
+    /// <remarks>@param depth The maximum recursion depth</remarks>
+    abstract flat: bool option with get, set
+    /// <summary>
+    /// Returns the item located at the specified index.
+    /// </summary>
+    /// <remarks>@param index The zero-based index of the desired code unit. A negative index will count back from the last item.</remarks>
+    abstract at: bool option with get, set
+    /// <summary>
+    /// Returns the value of the last element in the array where predicate is true, and undefined
+    /// otherwise.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate findLast calls predicate once for each element of the array, in descending
+    /// order, until it finds one where predicate returns true. If such an element is found, findLast
+    /// immediately returns that element value. Otherwise, findLast returns undefined.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg If provided, it will be used as the this value for each invocation of
+    /// predicate. If it is not provided, undefined is used instead.
+    /// </remarks>
+    abstract findLast: bool option with get, set
+    /// <summary>
+    /// Returns the index of the last element in the array where predicate is true, and -1
+    /// otherwise.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate findLastIndex calls predicate once for each element of the array, in descending
+    /// order, until it finds one where predicate returns true. If such an element is found,
+    /// findLastIndex immediately returns that element index. Otherwise, findLastIndex returns -1.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg If provided, it will be used as the this value for each invocation of
+    /// predicate. If it is not provided, undefined is used instead.
+    /// </remarks>
+    abstract findLastIndex: bool option with get, set
+    /// <summary>
+    /// Returns a copy of an array with its elements reversed.
+    /// </summary>
+    abstract toReversed: bool option with get, set
+    /// <summary>
+    /// Returns a copy of an array with its elements sorted.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// compareFn Function used to determine the order of the elements. It is expected to return
+    /// a negative value if the first argument is less than the second argument, zero if they're equal, and a positive
+    /// value otherwise. If omitted, the elements are sorted in ascending, UTF-16 code unit order.
+    /// <code lang="ts">
+    /// [11, 2, 22, 1].toSorted((a, b) =&gt; a - b) // [1, 2, 11, 22]
+    /// </code>
+    /// </remarks>
+    abstract toSorted: bool option with get, set
+    /// <summary>
+    /// Copies an array and removes elements and, if necessary, inserts new elements in their place. Returns the copied array.
+    /// Copies an array and removes elements while returning the remaining elements.
+    /// </summary>
+    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
+    /// <remarks>@param deleteCount The number of elements to remove.</remarks>
+    /// <remarks>@param items Elements to insert into the copied array in place of the deleted elements.</remarks>
+    /// <remarks>@returns The copied array.</remarks>
+    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
+    /// <remarks>@param deleteCount The number of elements to remove.</remarks>
+    /// <remarks>@returns A copy of the original array with the remaining elements.</remarks>
+    abstract toSpliced: bool option with get, set
+    /// <summary>
+    /// Copies an array, then overwrites the value at the provided index with the
+    /// given value. If the index is negative, then it replaces from the end
+    /// of the array.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// index The index of the value to overwrite. If the index is
+    /// negative, then it replaces from the end of the array.
+    /// </remarks>
+    /// <remarks>@param value The value to write into the copied array.</remarks>
+    /// <remarks>@returns The copied array with the updated value.</remarks>
+    abstract ``with``: bool option with get, set
+    [<EmitIndexer>]
+    abstract Item: float -> bool option with get, set
+
+[<Interface>]
+type AiTextGenerationOutputToolCallsItem =
+    inherit AiTextGenerationToolLegacyOutput
+    inherit AiTextGenerationToolOutput
+    abstract name: string with get, set
+    abstract arguments: obj with get, set
+    abstract id: string with get, set
+    abstract ``type``: string with get, set
+    abstract ``function``: AiTextGenerationToolOutputFunction with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (name: string, arguments: obj, id: string, ``type``: string, ``function``: AiTextGenerationToolOutputFunction) : AiTextGenerationOutputToolCallsItem = jsNative
+
+type AiTextGenerationOutputToolCallsToLocaleStringOptions =
+    abstract localeMatcher: AiTextGenerationOutputToolCallsToLocaleStringOptionsLocaleMatcher option with get, set
+    abstract style: AiTextGenerationOutputToolCallsToLocaleStringOptionsStyle option with get, set
+    abstract currency: string option with get, set
+    abstract currencyDisplay: AiTextGenerationOutputToolCallsToLocaleStringOptionsCurrencyDisplay option with get, set
+    abstract useGrouping: AiTextGenerationOutputToolCallsToLocaleStringOptionsUseGrouping option with get, set
+    abstract minimumIntegerDigits: float option with get, set
+    abstract minimumFractionDigits: float option with get, set
+    abstract maximumFractionDigits: float option with get, set
+    abstract minimumSignificantDigits: float option with get, set
+    abstract maximumSignificantDigits: float option with get, set
+    abstract numberingSystem: string option with get, set
+    abstract compactDisplay: AiTextGenerationOutputToolCallsToLocaleStringOptionsCompactDisplay option with get, set
+    abstract notation: AiTextGenerationOutputToolCallsToLocaleStringOptionsNotation option with get, set
+    abstract signDisplay: AiTextGenerationOutputToolCallsToLocaleStringOptionsSignDisplay option with get, set
+    abstract unit: string option with get, set
+    abstract unitDisplay: AiTextGenerationOutputToolCallsToLocaleStringOptionsUnitDisplay option with get, set
+    abstract currencySign: AiTextGenerationOutputToolCallsToLocaleStringOptionsCurrencySign option with get, set
+    abstract roundingPriority: AiTextGenerationOutputToolCallsToLocaleStringOptionsRoundingPriority option with get, set
+    abstract roundingIncrement: AiTextGenerationOutputToolCallsToLocaleStringOptionsRoundingIncrement option with get, set
+    abstract roundingMode: AiTextGenerationOutputToolCallsToLocaleStringOptionsRoundingMode option with get, set
+    abstract trailingZeroDisplay: AiTextGenerationOutputToolCallsToLocaleStringOptionsTrailingZeroDisplay option with get, set
+    abstract weekday: AiTextGenerationOutputToolCallsToLocaleStringOptionsUnitDisplay option with get, set
+    abstract era: AiTextGenerationOutputToolCallsToLocaleStringOptionsUnitDisplay option with get, set
+    abstract year: AiTextGenerationOutputToolCallsToLocaleStringOptionsYear option with get, set
+    abstract month: AiTextGenerationOutputToolCallsToLocaleStringOptionsMonth option with get, set
+    abstract day: AiTextGenerationOutputToolCallsToLocaleStringOptionsYear option with get, set
+    abstract hour: AiTextGenerationOutputToolCallsToLocaleStringOptionsYear option with get, set
+    abstract minute: AiTextGenerationOutputToolCallsToLocaleStringOptionsYear option with get, set
+    abstract second: AiTextGenerationOutputToolCallsToLocaleStringOptionsYear option with get, set
+    abstract timeZoneName: AiTextGenerationOutputToolCallsToLocaleStringOptionsTimeZoneName option with get, set
+    abstract formatMatcher: AiTextGenerationOutputToolCallsToLocaleStringOptionsFormatMatcher option with get, set
+    abstract hour12: bool option with get, set
+    abstract timeZone: string option with get, set
+    abstract calendar: string option with get, set
+    abstract dayPeriod: AiTextGenerationOutputToolCallsToLocaleStringOptionsUnitDisplay option with get, set
+    abstract dateStyle: AiTextGenerationOutputToolCallsToLocaleStringOptionsDateStyle option with get, set
+    abstract timeStyle: AiTextGenerationOutputToolCallsToLocaleStringOptionsDateStyle option with get, set
+    abstract hourCycle: AiTextGenerationOutputToolCallsToLocaleStringOptionsHourCycle option with get, set
+    abstract fractionalSecondDigits: AiTextGenerationOutputToolCallsToLocaleStringOptionsFractionalSecondDigits option with get, set
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsCompactDisplay =
+    | [<CompiledName("long")>] Long
+    | [<CompiledName("short")>] Short
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsCurrencyDisplay =
+    | [<CompiledName("code")>] Code
+    | [<CompiledName("name")>] Name
+    | [<CompiledName("narrowSymbol")>] NarrowSymbol
+    | [<CompiledName("symbol")>] Symbol
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsCurrencySign =
+    | [<CompiledName("accounting")>] Accounting
+    | [<CompiledName("standard")>] Standard
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsDateStyle =
+    | [<CompiledName("full")>] Full
+    | [<CompiledName("long")>] Long
+    | [<CompiledName("medium")>] Medium
+    | [<CompiledName("short")>] Short
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsFormatMatcher =
+    | [<CompiledName("basic")>] Basic
+    | [<CompiledName("best fit")>] BestFit
+
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsFractionalSecondDigits =
+    | N1 = 1
+    | N2 = 2
+    | N3 = 3
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsHourCycle =
+    | [<CompiledName("h11")>] H11
+    | [<CompiledName("h12")>] H12
+    | [<CompiledName("h23")>] H23
+    | [<CompiledName("h24")>] H24
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsLocaleMatcher =
+    | [<CompiledName("best fit")>] BestFit
+    | [<CompiledName("lookup")>] Lookup
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsMonth =
+    | [<CompiledName("2-digit")>] N2Digit
+    | [<CompiledName("long")>] Long
+    | [<CompiledName("narrow")>] Narrow
+    | [<CompiledName("numeric")>] Numeric
+    | [<CompiledName("short")>] Short
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsNotation =
+    | [<CompiledName("compact")>] Compact
+    | [<CompiledName("engineering")>] Engineering
+    | [<CompiledName("scientific")>] Scientific
+    | [<CompiledName("standard")>] Standard
+
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsRoundingIncrement =
+    | N1 = 1
+    | N2 = 2
+    | N5 = 5
+    | N10 = 10
+    | N20 = 20
+    | N25 = 25
+    | N50 = 50
+    | N100 = 100
+    | N200 = 200
+    | N250 = 250
+    | N500 = 500
+    | N1000 = 1000
+    | N2000 = 2000
+    | N2500 = 2500
+    | N5000 = 5000
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsRoundingMode =
+    | [<CompiledName("ceil")>] Ceil
+    | [<CompiledName("expand")>] Expand
+    | [<CompiledName("floor")>] Floor
+    | [<CompiledName("halfCeil")>] HalfCeil
+    | [<CompiledName("halfEven")>] HalfEven
+    | [<CompiledName("halfExpand")>] HalfExpand
+    | [<CompiledName("halfFloor")>] HalfFloor
+    | [<CompiledName("halfTrunc")>] HalfTrunc
+    | [<CompiledName("trunc")>] Trunc
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsRoundingPriority =
+    | [<CompiledName("auto")>] Auto
+    | [<CompiledName("lessPrecision")>] LessPrecision
+    | [<CompiledName("morePrecision")>] MorePrecision
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsSignDisplay =
+    | [<CompiledName("always")>] Always
+    | [<CompiledName("auto")>] Auto
+    | [<CompiledName("exceptZero")>] ExceptZero
+    | [<CompiledName("negative")>] Negative
+    | [<CompiledName("never")>] Never
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsStyle =
+    | [<CompiledName("currency")>] Currency
+    | [<CompiledName("decimal")>] Decimal
+    | [<CompiledName("percent")>] Percent
+    | [<CompiledName("unit")>] Unit
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsTimeZoneName =
+    | [<CompiledName("long")>] Long
+    | [<CompiledName("longGeneric")>] LongGeneric
+    | [<CompiledName("longOffset")>] LongOffset
+    | [<CompiledName("short")>] Short
+    | [<CompiledName("shortGeneric")>] ShortGeneric
+    | [<CompiledName("shortOffset")>] ShortOffset
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsTrailingZeroDisplay =
+    | [<CompiledName("auto")>] Auto
+    | [<CompiledName("stripIfInteger")>] StripIfInteger
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsUnitDisplay =
+    | [<CompiledName("long")>] Long
+    | [<CompiledName("narrow")>] Narrow
+    | [<CompiledName("short")>] Short
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsUseGrouping =
+    | [<CompiledName("always")>] Always
+    | [<CompiledName("auto")>] Auto
+    | [<CompiledName("false")>] False
+    | [<CompiledName("min2")>] Min2
+    | [<CompiledName("true")>] True
+    | [<CompiledValue(false)>] False2
+    | [<CompiledValue(true)>] True2
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AiTextGenerationOutputToolCallsToLocaleStringOptionsYear =
+    | [<CompiledName("2-digit")>] N2Digit
+    | [<CompiledName("numeric")>] Numeric
 
 [<Interface>]
 type BaseAiTextGeneration =
@@ -5465,7 +7565,40 @@ type ChatCompletionChoiceFinishReason =
     | [<CompiledName("stop")>] Stop
     | [<CompiledName("tool_calls")>] ToolCalls
 
-type ChatCompletionsMessagesInput = obj
+type ChatCompletionsMessagesInput =
+    inherit ChatCompletionsCommonOptions
+    abstract messages: ChatCompletionMessageParam[] with get, set
+    abstract model: string option with get, set
+    abstract audio: AudioParams option with get, set
+    abstract frequency_penalty: float option with get, set
+    abstract logit_bias: obj option with get, set
+    abstract logprobs: bool option with get, set
+    abstract top_logprobs: float option with get, set
+    abstract max_tokens: float option with get, set
+    abstract max_completion_tokens: float option with get, set
+    abstract metadata: obj option with get, set
+    abstract modalities: ChatCompletionsCommonOptionsModalitiesItem[] option with get, set
+    abstract n: float option with get, set
+    abstract parallel_tool_calls: bool option with get, set
+    abstract prediction: PredictionContent option with get, set
+    abstract presence_penalty: float option with get, set
+    abstract reasoning_effort: AgentMemoryThinkingLevel option with get, set
+    abstract chat_template_kwargs: ChatTemplateKwargs option with get, set
+    abstract response_format: ResponseFormat option with get, set
+    abstract seed: float option with get, set
+    abstract service_tier: ChatCompletionsCommonOptionsServiceTier option with get, set
+    abstract stop: U2<string, string[]> option with get, set
+    abstract store: bool option with get, set
+    abstract stream: bool option with get, set
+    abstract stream_options: ChatCompletionsStreamOptions option with get, set
+    abstract temperature: float option with get, set
+    abstract tool_choice: ChatCompletionToolChoiceOption option with get, set
+    abstract tools: ChatCompletionTool[] option with get, set
+    abstract top_p: float option with get, set
+    abstract user: string option with get, set
+    abstract web_search_options: WebSearchOptions option with get, set
+    abstract function_call: U2<string, ChatCompletionsCommonOptionsFunctionCall> option with get, set
+    abstract functions: FunctionDefinition[] option with get, set
 
 [<Interface>]
 type ChatCompletionsOutput =
@@ -6992,6 +9125,19 @@ type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem2FunctionParamete
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem2FunctionParameters = jsNative
 
 [<Interface>]
+type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem2FunctionParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem2FunctionParametersPropertiesItem = jsNative
+
+[<Interface>]
 type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItemParameters =
     /// <summary>
     /// The type of the parameters object (usually 'object').
@@ -7007,6 +9153,19 @@ type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItemParameters =
     abstract properties: obj with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItemParameters = jsNative
+
+[<Interface>]
+type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItemParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItemParametersPropertiesItem = jsNative
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Prompt =
@@ -7294,6 +9453,19 @@ type Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItem2FunctionParame
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItem2FunctionParameters = jsNative
 
 [<Interface>]
+type Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItem2FunctionParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItem2FunctionParametersPropertiesItem = jsNative
+
+[<Interface>]
 type Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItemParameters =
     /// <summary>
     /// The type of the parameters object (usually 'object').
@@ -7309,6 +9481,19 @@ type Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItemParameters =
     abstract properties: obj with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItemParameters = jsNative
+
+[<Interface>]
+type Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItemParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItemParametersPropertiesItem = jsNative
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Prompt =
@@ -7741,6 +9926,19 @@ type Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItem2FunctionParameters 
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItem2FunctionParameters = jsNative
 
 [<Interface>]
+type Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItem2FunctionParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItem2FunctionParametersPropertiesItem = jsNative
+
+[<Interface>]
 type Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItemParameters =
     /// <summary>
     /// The type of the parameters object (usually 'object').
@@ -7756,6 +9954,19 @@ type Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItemParameters =
     abstract properties: obj with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItemParameters = jsNative
+
+[<Interface>]
+type Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItemParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItemParametersPropertiesItem = jsNative
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_Prompt =
@@ -8062,6 +10273,19 @@ type Ai_Cf_Qwen_Qwq_32B_MessagesToolsItem2FunctionParameters =
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Qwen_Qwq_32B_MessagesToolsItem2FunctionParameters = jsNative
 
 [<Interface>]
+type Ai_Cf_Qwen_Qwq_32B_MessagesToolsItem2FunctionParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Qwen_Qwq_32B_MessagesToolsItem2FunctionParametersPropertiesItem = jsNative
+
+[<Interface>]
 type Ai_Cf_Qwen_Qwq_32B_MessagesToolsItemParameters =
     /// <summary>
     /// The type of the parameters object (usually 'object').
@@ -8077,6 +10301,19 @@ type Ai_Cf_Qwen_Qwq_32B_MessagesToolsItemParameters =
     abstract properties: obj with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Qwen_Qwq_32B_MessagesToolsItemParameters = jsNative
+
+[<Interface>]
+type Ai_Cf_Qwen_Qwq_32B_MessagesToolsItemParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Qwen_Qwq_32B_MessagesToolsItemParametersPropertiesItem = jsNative
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwq_32B_Prompt =
@@ -8371,6 +10608,19 @@ type Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItem2FunctionPa
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItem2FunctionParameters = jsNative
 
 [<Interface>]
+type Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItem2FunctionParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItem2FunctionParametersPropertiesItem = jsNative
+
+[<Interface>]
 type Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItemParameters =
     /// <summary>
     /// The type of the parameters object (usually 'object').
@@ -8386,6 +10636,19 @@ type Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItemParameters 
     abstract properties: obj with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItemParameters = jsNative
+
+[<Interface>]
+type Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItemParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItemParametersPropertiesItem = jsNative
 
 [<Interface>]
 type Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Prompt =
@@ -8656,6 +10919,19 @@ type Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItem2FunctionParameters =
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItem2FunctionParameters = jsNative
 
 [<Interface>]
+type Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItem2FunctionParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItem2FunctionParametersPropertiesItem = jsNative
+
+[<Interface>]
 type Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItemParameters =
     /// <summary>
     /// The type of the parameters object (usually 'object').
@@ -8671,6 +10947,19 @@ type Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItemParameters =
     abstract properties: obj with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItemParameters = jsNative
+
+[<Interface>]
+type Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItemParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItemParametersPropertiesItem = jsNative
 
 [<Interface>]
 type Ai_Cf_Google_Gemma_3_12B_It_Prompt =
@@ -8965,6 +11254,19 @@ type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItem2FunctionParamet
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItem2FunctionParameters = jsNative
 
 [<Interface>]
+type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItem2FunctionParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItem2FunctionParametersPropertiesItem = jsNative
+
+[<Interface>]
 type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItemParameters =
     /// <summary>
     /// The type of the parameters object (usually 'object').
@@ -8980,6 +11282,19 @@ type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItemParameters =
     abstract properties: obj with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItemParameters = jsNative
+
+[<Interface>]
+type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItemParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItemParametersPropertiesItem = jsNative
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerFunctionsItem =
@@ -9107,6 +11422,19 @@ type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItem2FunctionP
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItem2FunctionParameters = jsNative
 
 [<Interface>]
+type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItem2FunctionParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItem2FunctionParametersPropertiesItem = jsNative
+
+[<Interface>]
 type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItemParameters =
     /// <summary>
     /// The type of the parameters object (usually 'object').
@@ -9122,6 +11450,19 @@ type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItemParameters
     abstract properties: obj with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItemParameters = jsNative
+
+[<Interface>]
+type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItemParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItemParametersPropertiesItem = jsNative
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Prompt =
@@ -9530,6 +11871,19 @@ type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItem2FunctionParameters =
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItem2FunctionParameters = jsNative
 
 [<Interface>]
+type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItem2FunctionParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItem2FunctionParametersPropertiesItem = jsNative
+
+[<Interface>]
 type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItemParameters =
     /// <summary>
     /// The type of the parameters object (usually 'object').
@@ -9545,6 +11899,19 @@ type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItemParameters =
     abstract properties: obj with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItemParameters = jsNative
+
+[<Interface>]
+type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItemParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItemParametersPropertiesItem = jsNative
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1FunctionsItem =
@@ -9641,6 +12008,19 @@ type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItem2FunctionParameters =
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItem2FunctionParameters = jsNative
 
 [<Interface>]
+type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItem2FunctionParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItem2FunctionParametersPropertiesItem = jsNative
+
+[<Interface>]
 type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItemParameters =
     /// <summary>
     /// The type of the parameters object (usually 'object').
@@ -9656,6 +12036,19 @@ type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItemParameters =
     abstract properties: obj with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItemParameters = jsNative
+
+[<Interface>]
+type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItemParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItemParametersPropertiesItem = jsNative
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Prompt =
@@ -10461,17 +12854,171 @@ type Base_Ai_Cf_Pipecat_Ai_Smart_Turn_V2 =
 
 [<Interface>]
 type Base_Ai_Cf_Openai_Gpt_Oss_120B =
-    abstract inputs: obj with get, set
-    abstract postProcessedOutputs: obj with get, set
+    abstract inputs: U2<Base_Ai_Cf_Openai_Gpt_Oss_120BInputs, Base_Ai_Cf_Openai_Gpt_Oss_120BInputs2> with get, set
+    abstract postProcessedOutputs: U2<Base_Ai_Cf_Openai_Gpt_Oss_120BPostProcessedOutputs, Base_Ai_Cf_Openai_Gpt_Oss_120BPostProcessedOutputs2> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (inputs: obj, postProcessedOutputs: obj) : Base_Ai_Cf_Openai_Gpt_Oss_120B = jsNative
+    static member Create (inputs: U2<Base_Ai_Cf_Openai_Gpt_Oss_120BInputs, Base_Ai_Cf_Openai_Gpt_Oss_120BInputs2>, postProcessedOutputs: U2<Base_Ai_Cf_Openai_Gpt_Oss_120BPostProcessedOutputs, Base_Ai_Cf_Openai_Gpt_Oss_120BPostProcessedOutputs2>) : Base_Ai_Cf_Openai_Gpt_Oss_120B = jsNative
+
+type Base_Ai_Cf_Openai_Gpt_Oss_120BInputs =
+    inherit ResponsesInput
+    abstract background: bool option with get, set
+    abstract conversation: U2<string, ResponseConversationParam> option with get, set
+    abstract ``include``: ResponseIncludable[] option with get, set
+    abstract input: U2<string, ResponseInputItem[]> option with get, set
+    abstract instructions: string option with get, set
+    abstract max_output_tokens: float option with get, set
+    abstract parallel_tool_calls: bool option with get, set
+    abstract previous_response_id: string option with get, set
+    abstract prompt_cache_key: string option with get, set
+    abstract reasoning: Reasoning option with get, set
+    abstract safety_identifier: string option with get, set
+    abstract service_tier: ChatCompletionsCommonOptionsServiceTier option with get, set
+    abstract stream: bool option with get, set
+    abstract stream_options: StreamOptions option with get, set
+    abstract temperature: float option with get, set
+    abstract text: ResponseTextConfig option with get, set
+    abstract tool_choice: U2<string, ToolChoiceFunction> option with get, set
+    abstract tools: ResponsesFunctionTool[] option with get, set
+    abstract top_p: float option with get, set
+    abstract truncation: ResponsesInputTruncation option with get, set
+    abstract audio: unit option with get, set
+    abstract chat_template_kwargs: unit option with get, set
+    abstract frequency_penalty: unit option with get, set
+    abstract function_call: unit option with get, set
+    abstract functions: unit option with get, set
+    abstract logit_bias: unit option with get, set
+    abstract logprobs: unit option with get, set
+    abstract max_completion_tokens: unit option with get, set
+    abstract max_tokens: unit option with get, set
+    abstract messages: unit option with get, set
+    abstract metadata: unit option with get, set
+    abstract modalities: unit option with get, set
+    abstract model: unit option with get, set
+    abstract n: unit option with get, set
+    abstract prediction: unit option with get, set
+    abstract presence_penalty: unit option with get, set
+    abstract reasoning_effort: unit option with get, set
+    abstract response_format: unit option with get, set
+    abstract seed: unit option with get, set
+    abstract stop: unit option with get, set
+    abstract store: unit option with get, set
+    abstract top_logprobs: unit option with get, set
+    abstract user: unit option with get, set
+    abstract web_search_options: unit option with get, set
+
+type Base_Ai_Cf_Openai_Gpt_Oss_120BInputs2 =
+    inherit ChatCompletionsCommonOptions
+    abstract messages: ChatCompletionMessageParam[] with get, set
+    abstract model: string option with get, set
+    abstract audio: AudioParams option with get, set
+    abstract frequency_penalty: float option with get, set
+    abstract logit_bias: obj option with get, set
+    abstract logprobs: bool option with get, set
+    abstract top_logprobs: float option with get, set
+    abstract max_tokens: float option with get, set
+    abstract max_completion_tokens: float option with get, set
+    abstract metadata: obj option with get, set
+    abstract modalities: ChatCompletionsCommonOptionsModalitiesItem[] option with get, set
+    abstract n: float option with get, set
+    abstract parallel_tool_calls: bool option with get, set
+    abstract prediction: PredictionContent option with get, set
+    abstract presence_penalty: float option with get, set
+    abstract reasoning_effort: AgentMemoryThinkingLevel option with get, set
+    abstract chat_template_kwargs: ChatTemplateKwargs option with get, set
+    abstract response_format: ResponseFormat option with get, set
+    abstract seed: float option with get, set
+    abstract service_tier: ChatCompletionsCommonOptionsServiceTier option with get, set
+    abstract stop: U2<string, string[]> option with get, set
+    abstract store: bool option with get, set
+    abstract stream: bool option with get, set
+    abstract stream_options: ChatCompletionsStreamOptions option with get, set
+    abstract temperature: float option with get, set
+    abstract tool_choice: ChatCompletionToolChoiceOption option with get, set
+    abstract tools: ChatCompletionTool[] option with get, set
+    abstract top_p: float option with get, set
+    abstract user: string option with get, set
+    abstract web_search_options: WebSearchOptions option with get, set
+    abstract function_call: U2<string, ChatCompletionsCommonOptionsFunctionCall> option with get, set
+    abstract functions: FunctionDefinition[] option with get, set
+    abstract background: unit option with get, set
+    abstract conversation: unit option with get, set
+    abstract ``include``: unit option with get, set
+    abstract input: unit option with get, set
+    abstract instructions: unit option with get, set
+    abstract max_output_tokens: unit option with get, set
+    abstract previous_response_id: unit option with get, set
+    abstract prompt_cache_key: unit option with get, set
+    abstract reasoning: unit option with get, set
+    abstract safety_identifier: unit option with get, set
+    abstract text: unit option with get, set
+    abstract truncation: unit option with get, set
+
+type Base_Ai_Cf_Openai_Gpt_Oss_120BPostProcessedOutputs =
+    inherit ChatCompletionsOutput
+    abstract id: string with get, set
+    abstract ``object``: string with get, set
+    abstract created: float with get, set
+    abstract model: string with get, set
+    abstract choices: ChatCompletionChoice[] with get, set
+    abstract usage: CompletionUsage option with get, set
+    abstract system_fingerprint: string option with get, set
+    abstract service_tier: ChatCompletionsCommonOptionsServiceTier option with get, set
+    abstract created_at: unit option with get, set
+    abstract error: unit option with get, set
+    abstract incomplete_details: unit option with get, set
+    abstract instructions: unit option with get, set
+    abstract max_output_tokens: unit option with get, set
+    abstract output: unit option with get, set
+    abstract output_text: unit option with get, set
+    abstract parallel_tool_calls: unit option with get, set
+    abstract previous_response_id: unit option with get, set
+    abstract prompt: unit option with get, set
+    abstract reasoning: unit option with get, set
+    abstract safety_identifier: unit option with get, set
+    abstract status: unit option with get, set
+    abstract temperature: unit option with get, set
+    abstract text: unit option with get, set
+    abstract tool_choice: unit option with get, set
+    abstract tools: unit option with get, set
+    abstract top_p: unit option with get, set
+    abstract truncation: unit option with get, set
+
+type Base_Ai_Cf_Openai_Gpt_Oss_120BPostProcessedOutputs2 =
+    inherit ResponsesOutput
+    abstract id: string option with get, set
+    abstract created_at: float option with get, set
+    abstract output_text: string option with get, set
+    abstract error: ResponseError option with get, set
+    abstract incomplete_details: ResponseIncompleteDetails option with get, set
+    abstract instructions: U2<string, ResponseInputItem[]> option with get, set
+    abstract ``object``: string option with get, set
+    abstract output: ResponseOutputItem[] option with get, set
+    abstract parallel_tool_calls: bool option with get, set
+    abstract temperature: float option with get, set
+    abstract tool_choice: U2<string, ToolChoiceFunction> option with get, set
+    abstract tools: ResponsesFunctionTool[] option with get, set
+    abstract top_p: float option with get, set
+    abstract max_output_tokens: float option with get, set
+    abstract previous_response_id: string option with get, set
+    abstract prompt: ResponsePrompt option with get, set
+    abstract reasoning: Reasoning option with get, set
+    abstract safety_identifier: string option with get, set
+    abstract service_tier: ChatCompletionsCommonOptionsServiceTier option with get, set
+    abstract status: ResponseStatus option with get, set
+    abstract text: ResponseTextConfig option with get, set
+    abstract truncation: ResponsesInputTruncation option with get, set
+    abstract usage: ResponseUsage option with get, set
+    abstract choices: unit option with get, set
+    abstract created: unit option with get, set
+    abstract model: unit option with get, set
+    abstract system_fingerprint: unit option with get, set
 
 [<Interface>]
 type Base_Ai_Cf_Openai_Gpt_Oss_20B =
-    abstract inputs: obj with get, set
-    abstract postProcessedOutputs: obj with get, set
+    abstract inputs: U2<Base_Ai_Cf_Openai_Gpt_Oss_120BInputs, Base_Ai_Cf_Openai_Gpt_Oss_120BInputs2> with get, set
+    abstract postProcessedOutputs: U2<Base_Ai_Cf_Openai_Gpt_Oss_120BPostProcessedOutputs, Base_Ai_Cf_Openai_Gpt_Oss_120BPostProcessedOutputs2> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (inputs: obj, postProcessedOutputs: obj) : Base_Ai_Cf_Openai_Gpt_Oss_20B = jsNative
+    static member Create (inputs: U2<Base_Ai_Cf_Openai_Gpt_Oss_120BInputs, Base_Ai_Cf_Openai_Gpt_Oss_120BInputs2>, postProcessedOutputs: U2<Base_Ai_Cf_Openai_Gpt_Oss_120BPostProcessedOutputs, Base_Ai_Cf_Openai_Gpt_Oss_120BPostProcessedOutputs2>) : Base_Ai_Cf_Openai_Gpt_Oss_20B = jsNative
 
 [<Interface>]
 type Ai_Cf_Leonardo_Phoenix_1_0_Input =
@@ -10799,6 +13346,19 @@ type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItem2FunctionParame
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItem2FunctionParameters = jsNative
 
 [<Interface>]
+type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItem2FunctionParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItem2FunctionParametersPropertiesItem = jsNative
+
+[<Interface>]
 type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItemParameters =
     /// <summary>
     /// The type of the parameters object (usually 'object').
@@ -10814,6 +13374,19 @@ type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItemParameters =
     abstract properties: obj with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItemParameters = jsNative
+
+[<Interface>]
+type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItemParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItemParametersPropertiesItem = jsNative
 
 [<Interface>]
 type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1FunctionsItem =
@@ -10910,6 +13483,19 @@ type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItem2FunctionPara
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItem2FunctionParameters = jsNative
 
 [<Interface>]
+type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItem2FunctionParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItem2FunctionParametersPropertiesItem = jsNative
+
+[<Interface>]
 type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItemParameters =
     /// <summary>
     /// The type of the parameters object (usually 'object').
@@ -10925,6 +13511,19 @@ type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItemParameters =
     abstract properties: obj with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItemParameters = jsNative
+
+[<Interface>]
+type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItemParametersPropertiesItem =
+    /// <summary>
+    /// The data type of the parameter.
+    /// </summary>
+    abstract ``type``: string with get, set
+    /// <summary>
+    /// A description of the expected parameter.
+    /// </summary>
+    abstract description: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, description: string) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItemParametersPropertiesItem = jsNative
 
 [<Interface>]
 type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Prompt =
@@ -11766,52 +14365,52 @@ type Base_Ai_Cf_Black_Forest_Labs_Flux_2_Klein_9B =
 
 [<Interface>]
 type Base_Ai_Cf_Zai_Org_Glm_4_7_Flash =
-    abstract inputs: obj with get, set
+    abstract inputs: ChatCompletionsMessagesInput with get, set
     abstract postProcessedOutputs: ChatCompletionsOutput with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (inputs: obj, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Zai_Org_Glm_4_7_Flash = jsNative
+    static member Create (inputs: ChatCompletionsMessagesInput, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Zai_Org_Glm_4_7_Flash = jsNative
 
 [<Interface>]
 type Base_Ai_Cf_Moonshotai_Kimi_K2_5 =
-    abstract inputs: obj with get, set
+    abstract inputs: ChatCompletionsMessagesInput with get, set
     abstract postProcessedOutputs: ChatCompletionsOutput with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (inputs: obj, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Moonshotai_Kimi_K2_5 = jsNative
+    static member Create (inputs: ChatCompletionsMessagesInput, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Moonshotai_Kimi_K2_5 = jsNative
 
 [<Interface>]
 type Base_Ai_Cf_Moonshotai_Kimi_K2_6 =
-    abstract inputs: obj with get, set
+    abstract inputs: ChatCompletionsMessagesInput with get, set
     abstract postProcessedOutputs: ChatCompletionsOutput with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (inputs: obj, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Moonshotai_Kimi_K2_6 = jsNative
+    static member Create (inputs: ChatCompletionsMessagesInput, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Moonshotai_Kimi_K2_6 = jsNative
 
 [<Interface>]
 type Base_Ai_Cf_Nvidia_Nemotron_3_120B_A12B =
-    abstract inputs: obj with get, set
+    abstract inputs: ChatCompletionsMessagesInput with get, set
     abstract postProcessedOutputs: ChatCompletionsOutput with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (inputs: obj, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Nvidia_Nemotron_3_120B_A12B = jsNative
+    static member Create (inputs: ChatCompletionsMessagesInput, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Nvidia_Nemotron_3_120B_A12B = jsNative
 
 [<Interface>]
 type Base_Ai_Cf_Google_Gemma_4_26B_A4B_IT =
-    abstract inputs: obj with get, set
+    abstract inputs: ChatCompletionsMessagesInput with get, set
     abstract postProcessedOutputs: ChatCompletionsOutput with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (inputs: obj, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Google_Gemma_4_26B_A4B_IT = jsNative
+    static member Create (inputs: ChatCompletionsMessagesInput, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Google_Gemma_4_26B_A4B_IT = jsNative
 
 [<Interface>]
 type Base_Ai_Cf_Moonshotai_Kimi_K2_7_Code =
-    abstract inputs: obj with get, set
+    abstract inputs: ChatCompletionsMessagesInput with get, set
     abstract postProcessedOutputs: ChatCompletionsOutput with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (inputs: obj, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Moonshotai_Kimi_K2_7_Code = jsNative
+    static member Create (inputs: ChatCompletionsMessagesInput, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Moonshotai_Kimi_K2_7_Code = jsNative
 
 [<Interface>]
 type Base_Ai_Cf_Zai_Org_Glm_5_2 =
-    abstract inputs: obj with get, set
+    abstract inputs: ChatCompletionsMessagesInput with get, set
     abstract postProcessedOutputs: ChatCompletionsOutput with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (inputs: obj, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Zai_Org_Glm_5_2 = jsNative
+    static member Create (inputs: ChatCompletionsMessagesInput, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Zai_Org_Glm_5_2 = jsNative
 
 [<Interface>]
 type Ai_Cf_Moondream_Moondream3_1_9B_A2B_Input =
@@ -11986,31 +14585,31 @@ type Base_Ai_Cf_Moondream_Moondream3_1_9B_A2B =
 
 [<Interface>]
 type Base_Ai_Cf_Deepseek_Ai_Deepseek_V4_Flash_0731 =
-    abstract inputs: obj with get, set
+    abstract inputs: ChatCompletionsMessagesInput with get, set
     abstract postProcessedOutputs: ChatCompletionsOutput with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (inputs: obj, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Deepseek_Ai_Deepseek_V4_Flash_0731 = jsNative
+    static member Create (inputs: ChatCompletionsMessagesInput, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Deepseek_Ai_Deepseek_V4_Flash_0731 = jsNative
 
 [<Interface>]
 type Base_Ai_Cf_Deepseek_Ai_Deepseek_V4_Pro_0813 =
-    abstract inputs: obj with get, set
+    abstract inputs: ChatCompletionsMessagesInput with get, set
     abstract postProcessedOutputs: ChatCompletionsOutput with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (inputs: obj, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Deepseek_Ai_Deepseek_V4_Pro_0813 = jsNative
+    static member Create (inputs: ChatCompletionsMessagesInput, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Deepseek_Ai_Deepseek_V4_Pro_0813 = jsNative
 
 [<Interface>]
 type Base_Ai_Cf_Qwen_Qwen3_8_27B =
-    abstract inputs: obj with get, set
+    abstract inputs: ChatCompletionsMessagesInput with get, set
     abstract postProcessedOutputs: ChatCompletionsOutput with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (inputs: obj, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Qwen_Qwen3_8_27B = jsNative
+    static member Create (inputs: ChatCompletionsMessagesInput, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Qwen_Qwen3_8_27B = jsNative
 
 [<Interface>]
 type Base_Ai_Cf_Zai_Org_Glm_5_3_Flash =
-    abstract inputs: obj with get, set
+    abstract inputs: ChatCompletionsMessagesInput with get, set
     abstract postProcessedOutputs: ChatCompletionsOutput with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (inputs: obj, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Zai_Org_Glm_5_3_Flash = jsNative
+    static member Create (inputs: ChatCompletionsMessagesInput, postProcessedOutputs: ChatCompletionsOutput) : Base_Ai_Cf_Zai_Org_Glm_5_3_Flash = jsNative
 
 type AiModels =
     abstract ``@cf/huggingface/distilbert-sst-2-int8``: BaseAiTextClassification with get, set
@@ -12255,8 +14854,9 @@ type Ai<'AiModelList when 'AiModelList :> AiModelListType> =
     /// </remarks>
     /// <remarks>@param autoragId Instance ID</remarks>
     abstract autorag: autoragId: string -> AutoRAG
-    abstract run: model: keyof<'AiModelList> * inputs: AiRunInputs * options: obj -> JS.Promise<AiAsyncBatchResponse>
-    abstract run: model: keyof<'AiModelList> * inputs: obj * options: obj -> JS.Promise<obj>
+    abstract run: model: keyof<'AiModelList> * inputs: AiRunInputs * options: AiRunOptions -> JS.Promise<AiAsyncBatchResponse>
+    abstract run: model: keyof<'AiModelList> * inputs: obj * options: AiRunOptions2 -> JS.Promise<obj>
+    abstract run: model: keyof<'AiModelList> * inputs: obj * options: AiRunOptions3 -> JS.Promise<obj>
     abstract run: model: keyof<'AiModelList> * inputs: obj * ?options: AiOptions -> JS.Promise<obj>
     abstract run: model: obj * inputs: obj * ?options: AiOptions -> JS.Promise<obj>
     abstract models: ?``params``: AiModelsSearchParams -> JS.Promise<AiModelsSearchObject[]>
@@ -12270,17 +14870,107 @@ type AiGatewayPatchLogFeedback =
 
 [<Interface>]
 type AiGatewayRunOptions =
-    abstract gateway: obj option with get, set
+    abstract gateway: UniversalGatewayOptions option with get, set
     abstract extraHeaders: obj option with get, set
     abstract signal: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?gateway: obj, ?extraHeaders: obj, ?signal: obj) : AiGatewayRunOptions = jsNative
+    static member Create (?gateway: UniversalGatewayOptions, ?extraHeaders: obj, ?signal: obj) : AiGatewayRunOptions = jsNative
 
 [<Interface>]
 type AiRunInputs =
     abstract requests: obj[] with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (requests: obj[]) : AiRunInputs = jsNative
+
+[<Interface>]
+type AiRunOptions =
+    inherit AiOptions
+    /// <summary>
+    /// Send requests as an asynchronous batch job, only works for supported models
+    /// https://developers.cloudflare.com/workers-ai/features/batch-api
+    /// </summary>
+    abstract queueRequest: bool with get, set
+    /// <summary>
+    /// Establish websocket connections, only works for supported models
+    /// </summary>
+    abstract websocket: bool option with get, set
+    /// <summary>
+    /// Tag your requests to group and view them in Cloudflare dashboard.
+    ///
+    /// Rules:
+    /// Tags must only contain letters, numbers, and the symbols: : - . / @
+    /// Each tag can have maximum 50 characters.
+    /// Maximum 5 tags are allowed each request.
+    /// Duplicate tags will removed.
+    /// </summary>
+    abstract tags: string[] option with get, set
+    abstract gateway: GatewayOptions option with get, set
+    abstract returnRawResponse: bool option with get, set
+    abstract prefix: string option with get, set
+    abstract extraHeaders: obj option with get, set
+    abstract signal: obj option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (queueRequest: bool, ?websocket: bool, ?tags: string[], ?gateway: GatewayOptions, ?returnRawResponse: bool, ?prefix: string, ?extraHeaders: obj, ?signal: obj) : AiRunOptions = jsNative
+
+[<Interface>]
+type AiRunOptions2 =
+    inherit AiOptions
+    /// <summary>
+    /// Send requests as an asynchronous batch job, only works for supported models
+    /// https://developers.cloudflare.com/workers-ai/features/batch-api
+    /// </summary>
+    abstract queueRequest: bool option with get, set
+    /// <summary>
+    /// Establish websocket connections, only works for supported models
+    /// </summary>
+    abstract websocket: bool option with get, set
+    /// <summary>
+    /// Tag your requests to group and view them in Cloudflare dashboard.
+    ///
+    /// Rules:
+    /// Tags must only contain letters, numbers, and the symbols: : - . / @
+    /// Each tag can have maximum 50 characters.
+    /// Maximum 5 tags are allowed each request.
+    /// Duplicate tags will removed.
+    /// </summary>
+    abstract tags: string[] option with get, set
+    abstract gateway: GatewayOptions option with get, set
+    abstract returnRawResponse: bool with get, set
+    abstract prefix: string option with get, set
+    abstract extraHeaders: obj option with get, set
+    abstract signal: obj option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (returnRawResponse: bool, ?queueRequest: bool, ?websocket: bool, ?tags: string[], ?gateway: GatewayOptions, ?prefix: string, ?extraHeaders: obj, ?signal: obj) : AiRunOptions2 = jsNative
+
+[<Interface>]
+type AiRunOptions3 =
+    inherit AiOptions
+    /// <summary>
+    /// Send requests as an asynchronous batch job, only works for supported models
+    /// https://developers.cloudflare.com/workers-ai/features/batch-api
+    /// </summary>
+    abstract queueRequest: bool option with get, set
+    /// <summary>
+    /// Establish websocket connections, only works for supported models
+    /// </summary>
+    abstract websocket: bool with get, set
+    /// <summary>
+    /// Tag your requests to group and view them in Cloudflare dashboard.
+    ///
+    /// Rules:
+    /// Tags must only contain letters, numbers, and the symbols: : - . / @
+    /// Each tag can have maximum 50 characters.
+    /// Maximum 5 tags are allowed each request.
+    /// Duplicate tags will removed.
+    /// </summary>
+    abstract tags: string[] option with get, set
+    abstract gateway: GatewayOptions option with get, set
+    abstract returnRawResponse: bool option with get, set
+    abstract prefix: string option with get, set
+    abstract extraHeaders: obj option with get, set
+    abstract signal: obj option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (websocket: bool, ?queueRequest: bool, ?tags: string[], ?gateway: GatewayOptions, ?returnRawResponse: bool, ?prefix: string, ?extraHeaders: obj, ?signal: obj) : AiRunOptions3 = jsNative
 
 [<Interface>]
 type AutoRagListResponseItem =
@@ -12336,24 +15026,43 @@ type ComparisonFilterType =
 
 [<Interface>]
 type ConversionOptionsDocx =
-    abstract images: obj option with get, set
+    abstract images: EmbeddedImageConversionOptions option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?images: obj) : ConversionOptionsDocx = jsNative
+    static member Create (?images: EmbeddedImageConversionOptions) : ConversionOptionsDocx = jsNative
 
 [<Interface>]
 type ConversionOptionsHtml =
-    abstract images: obj option with get, set
+    abstract images: ConversionOptionsHtmlImages option with get, set
     abstract hostname: string option with get, set
     abstract cssSelector: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?images: obj, ?hostname: string, ?cssSelector: string) : ConversionOptionsHtml = jsNative
+    static member Create (?images: ConversionOptionsHtmlImages, ?hostname: string, ?cssSelector: string) : ConversionOptionsHtml = jsNative
+
+[<Interface>]
+type ConversionOptionsHtmlImages =
+    inherit ImageConversionOptions
+    abstract descriptionLanguage: ConversionOptionsHtmlImagesDescriptionLanguage option with get, set
+    abstract convert: bool option with get, set
+    abstract maxConvertedImages: float option with get, set
+    abstract convertOGImage: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?descriptionLanguage: ConversionOptionsHtmlImagesDescriptionLanguage, ?convert: bool, ?maxConvertedImages: float, ?convertOGImage: bool) : ConversionOptionsHtmlImages = jsNative
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type ConversionOptionsHtmlImagesDescriptionLanguage =
+    | [<CompiledName("de")>] De
+    | [<CompiledName("en")>] En
+    | [<CompiledName("es")>] Es
+    | [<CompiledName("fr")>] Fr
+    | [<CompiledName("it")>] It
+    | [<CompiledName("pt")>] Pt
 
 [<Interface>]
 type ConversionOptionsPdf =
-    abstract images: obj option with get, set
+    abstract images: EmbeddedImageConversionOptions option with get, set
     abstract metadata: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?images: obj, ?metadata: bool) : ConversionOptionsPdf = jsNative
+    static member Create (?images: EmbeddedImageConversionOptions, ?metadata: bool) : ConversionOptionsPdf = jsNative
 
 [<Interface>]
 type ConversionResponse2 =
@@ -12375,15 +15084,6 @@ type ConversionResponse3 =
     abstract error: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, name: string, mimeType: string, format: string, error: string) : ConversionResponse3 = jsNative
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type ImageConversionOptionsDescriptionLanguage =
-    | [<CompiledName("de")>] De
-    | [<CompiledName("en")>] En
-    | [<CompiledName("es")>] Es
-    | [<CompiledName("fr")>] Fr
-    | [<CompiledName("it")>] It
-    | [<CompiledName("pt")>] Pt
 
 [<Interface>]
 type GatewayRetries =
@@ -12407,7 +15107,24 @@ type GatewayOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, ?cacheKey: string, ?cacheTtl: float, ?skipCache: bool, ?metadata: obj, ?collectLog: bool, ?eventId: string, ?requestTimeoutMs: float, ?retries: GatewayRetries) : GatewayOptions = jsNative
 
-type UniversalGatewayOptions = obj
+[<Interface>]
+type UniversalGatewayOptions =
+    inherit GatewayOptions
+    /// <summary>
+    /// *
+    /// </summary>
+    /// <remarks>@deprecated</remarks>
+    abstract id: string with get, set
+    abstract cacheKey: string option with get, set
+    abstract cacheTtl: float option with get, set
+    abstract skipCache: bool option with get, set
+    abstract metadata: obj option with get, set
+    abstract collectLog: bool option with get, set
+    abstract eventId: string option with get, set
+    abstract requestTimeoutMs: float option with get, set
+    abstract retries: GatewayRetries option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string, ?cacheKey: string, ?cacheTtl: float, ?skipCache: bool, ?metadata: obj, ?collectLog: bool, ?eventId: string, ?requestTimeoutMs: float, ?retries: GatewayRetries) : UniversalGatewayOptions = jsNative
 
 [<Interface>]
 type AiGatewayPatchLog =
@@ -13008,14 +15725,37 @@ type AutoRagSearchRequest =
 /// Use the standalone AI Search Workers binding instead.
 /// See https://developers.cloudflare.com/ai-search/usage/workers-binding/
 /// </remarks>
-type AutoRagAiSearchRequest = obj
+[<Interface>]
+type AutoRagAiSearchRequest =
+    inherit AutoRagSearchRequest
+    abstract query: string with get, set
+    abstract filters: U2<ComparisonFilter, CompoundFilter> option with get, set
+    abstract max_num_results: float option with get, set
+    abstract ranking_options: AutoRagSearchRequestRankingOptions option with get, set
+    abstract reranking: AutoRagSearchRequestReranking option with get, set
+    abstract rewrite_query: bool option with get, set
+    abstract stream: bool option with get, set
+    abstract system_prompt: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (query: string, ?filters: U2<ComparisonFilter, CompoundFilter>, ?max_num_results: float, ?ranking_options: AutoRagSearchRequestRankingOptions, ?reranking: AutoRagSearchRequestReranking, ?rewrite_query: bool, ?stream: bool, ?system_prompt: string) : AutoRagAiSearchRequest = jsNative
 
 /// <remarks>
 /// @deprecated
 /// Use the standalone AI Search Workers binding instead.
 /// See https://developers.cloudflare.com/ai-search/usage/workers-binding/
 /// </remarks>
-type AutoRagAiSearchRequestStreaming = obj
+[<Interface>]
+type AutoRagAiSearchRequestStreaming =
+    abstract query: string with get, set
+    abstract filters: U2<ComparisonFilter, CompoundFilter> option with get, set
+    abstract max_num_results: float option with get, set
+    abstract ranking_options: AutoRagSearchRequestRankingOptions option with get, set
+    abstract reranking: AutoRagSearchRequestReranking option with get, set
+    abstract rewrite_query: bool option with get, set
+    abstract system_prompt: string option with get, set
+    abstract stream: bool with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (query: string, stream: bool, ?filters: U2<ComparisonFilter, CompoundFilter>, ?max_num_results: float, ?ranking_options: AutoRagSearchRequestRankingOptions, ?reranking: AutoRagSearchRequestReranking, ?rewrite_query: bool, ?system_prompt: string) : AutoRagAiSearchRequestStreaming = jsNative
 
 /// <remarks>
 /// @deprecated
@@ -13044,7 +15784,17 @@ type AutoRagListResponse = AutoRagListResponseItem[]
 /// Use the standalone AI Search Workers binding instead.
 /// See https://developers.cloudflare.com/ai-search/usage/workers-binding/
 /// </remarks>
-type AutoRagAiSearchResponse = obj
+[<Interface>]
+type AutoRagAiSearchResponse =
+    inherit AutoRagSearchResponse
+    abstract ``object``: string with get, set
+    abstract search_query: string with get, set
+    abstract data: AutoRagSearchResponseDataItem[] with get, set
+    abstract has_more: bool with get, set
+    abstract next_page: string option with get, set
+    abstract response: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``object``: string, search_query: string, data: AutoRagSearchResponseDataItem[], has_more: bool, response: string, ?next_page: string) : AutoRagAiSearchResponse = jsNative
 
 /// <remarks>
 /// @deprecated
@@ -13079,7 +15829,23 @@ type AutoRAG =
     /// Use the standalone AI Search Workers binding instead.
     /// See https://developers.cloudflare.com/ai-search/usage/workers-binding/
     /// </remarks>
-    abstract aiSearch: ``params``: obj -> JS.Promise<obj>
+    abstract aiSearch: ``params``: AutoRagAiSearchRequestStreaming -> JS.Promise<obj>
+    /// <remarks>
+    /// @deprecated
+    /// Use the standalone AI Search Workers binding instead.
+    /// See https://developers.cloudflare.com/ai-search/usage/workers-binding/
+    /// </remarks>
+    /// <remarks>
+    /// @deprecated
+    /// Use the standalone AI Search Workers binding instead.
+    /// See https://developers.cloudflare.com/ai-search/usage/workers-binding/
+    /// </remarks>
+    /// <remarks>
+    /// @deprecated
+    /// Use the standalone AI Search Workers binding instead.
+    /// See https://developers.cloudflare.com/ai-search/usage/workers-binding/
+    /// </remarks>
+    abstract aiSearch: ``params``: AutoRagAiSearchRequest -> JS.Promise<AutoRagAiSearchResponse>
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type BrowserRunLifecycleEvent =
@@ -13320,7 +16086,199 @@ type BrowserRunAlternateBackendOptions =
 /// <summary>
 /// Common options shared by all quick actions. Exactly one of <c>url</c> or <c>html</c> must be provided.
 /// </summary>
-type BrowserRunCommonOptions = obj
+type BrowserRunCommonOptions = U2<BrowserRunCommonOptions2, BrowserRunCommonOptions3>
+
+[<Interface>]
+type BrowserRunCommonOptions2 =
+    inherit BrowserRunBaseOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// URL to navigate to, e.g. <c>"https://example.com"</c>.
+    /// </summary>
+    abstract url: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunCommonOptions2 = jsNative
+
+[<Interface>]
+type BrowserRunCommonOptions3 =
+    inherit BrowserRunBaseOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// Set the HTML content of the page directly.
+    /// </summary>
+    abstract html: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunCommonOptions3 = jsNative
 
 [<Interface>]
 type BrowserRunPuppeteerScreenshotOptions =
@@ -13359,13 +16317,913 @@ type BrowserRunPuppeteerScreenshotOptionsType =
     | [<CompiledName("png")>] Png
     | [<CompiledName("webp")>] Webp
 
-type BrowserRunScreenshotOptions = obj
+type BrowserRunScreenshotOptions = U2<BrowserRunScreenshotOptions2, BrowserRunScreenshotOptions3>
 
-type BrowserRunPDFOptions = obj
+[<Interface>]
+type BrowserRunScreenshotOptions2 =
+    inherit BrowserRunBaseOptions
+    inherit BrowserRunAlternateBackendOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// URL to navigate to, e.g. <c>"https://example.com"</c>.
+    /// </summary>
+    abstract url: string with get, set
+    /// <summary>
+    /// CSS selector of the element to screenshot.
+    /// </summary>
+    abstract selector: string option with get, set
+    /// <summary>
+    /// When true, scroll the entire page before taking the screenshot.
+    /// </summary>
+    abstract scrollPage: bool option with get, set
+    /// <remarks>@see https://pptr.dev/api/puppeteer.screenshotoptions</remarks>
+    abstract screenshotOptions: BrowserRunPuppeteerScreenshotOptions option with get, set
+    /// <summary>
+    /// Render with an alternate browser backend instead of the default one.
+    /// </summary>
+    abstract browser: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?selector: string, ?scrollPage: bool, ?screenshotOptions: BrowserRunPuppeteerScreenshotOptions, ?browser: string) : BrowserRunScreenshotOptions2 = jsNative
 
-type BrowserRunScrapeOptions = obj
+[<Interface>]
+type BrowserRunScreenshotOptions3 =
+    inherit BrowserRunBaseOptions
+    inherit BrowserRunAlternateBackendOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// Set the HTML content of the page directly.
+    /// </summary>
+    abstract html: string with get, set
+    /// <summary>
+    /// CSS selector of the element to screenshot.
+    /// </summary>
+    abstract selector: string option with get, set
+    /// <summary>
+    /// When true, scroll the entire page before taking the screenshot.
+    /// </summary>
+    abstract scrollPage: bool option with get, set
+    /// <remarks>@see https://pptr.dev/api/puppeteer.screenshotoptions</remarks>
+    abstract screenshotOptions: BrowserRunPuppeteerScreenshotOptions option with get, set
+    /// <summary>
+    /// Render with an alternate browser backend instead of the default one.
+    /// </summary>
+    abstract browser: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?selector: string, ?scrollPage: bool, ?screenshotOptions: BrowserRunPuppeteerScreenshotOptions, ?browser: string) : BrowserRunScreenshotOptions3 = jsNative
 
-type BrowserRunLinksOptions = obj
+type BrowserRunPDFOptions = U2<BrowserRunPDFOptions2, BrowserRunPDFOptions3>
+
+[<Interface>]
+type BrowserRunPDFOptions2 =
+    inherit BrowserRunBaseOptions
+    inherit BrowserRunAlternateBackendOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// URL to navigate to, e.g. <c>"https://example.com"</c>.
+    /// </summary>
+    abstract url: string with get, set
+    /// <remarks>@see https://pptr.dev/api/puppeteer.pdfoptions</remarks>
+    abstract pdfOptions: BrowserRunPDFOptions2PdfOptions option with get, set
+    /// <summary>
+    /// Render with an alternate browser backend instead of the default one.
+    /// </summary>
+    abstract browser: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?pdfOptions: BrowserRunPDFOptions2PdfOptions, ?browser: string) : BrowserRunPDFOptions2 = jsNative
+
+[<Interface>]
+type BrowserRunPDFOptions2PdfOptions =
+    /// <remarks>@default 1</remarks>
+    abstract scale: float option with get, set
+    /// <remarks>@default false</remarks>
+    abstract displayHeaderFooter: bool option with get, set
+    abstract headerTemplate: string option with get, set
+    abstract footerTemplate: string option with get, set
+    /// <remarks>@default false</remarks>
+    abstract printBackground: bool option with get, set
+    /// <remarks>@default false</remarks>
+    abstract landscape: bool option with get, set
+    abstract pageRanges: string option with get, set
+    /// <remarks>@default "letter"</remarks>
+    abstract format: BrowserRunPDFOptions2PdfOptionsFormat option with get, set
+    abstract width: U2<string, float> option with get, set
+    abstract height: U2<string, float> option with get, set
+    /// <remarks>@default false</remarks>
+    abstract preferCSSPageSize: bool option with get, set
+    abstract margin: BrowserRunPDFOptions2PdfOptionsMargin option with get, set
+    /// <remarks>@default false</remarks>
+    abstract omitBackground: bool option with get, set
+    /// <remarks>@default true</remarks>
+    abstract tagged: bool option with get, set
+    /// <remarks>@default false</remarks>
+    abstract outline: bool option with get, set
+    /// <remarks>@default 30000</remarks>
+    abstract timeout: float option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?scale: float, ?displayHeaderFooter: bool, ?headerTemplate: string, ?footerTemplate: string, ?printBackground: bool, ?landscape: bool, ?pageRanges: string, ?format: BrowserRunPDFOptions2PdfOptionsFormat, ?width: U2<string, float>, ?height: U2<string, float>, ?preferCSSPageSize: bool, ?margin: BrowserRunPDFOptions2PdfOptionsMargin, ?omitBackground: bool, ?tagged: bool, ?outline: bool, ?timeout: float) : BrowserRunPDFOptions2PdfOptions = jsNative
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type BrowserRunPDFOptions2PdfOptionsFormat =
+    | [<CompiledName("a0")>] A0
+    | [<CompiledName("a1")>] A1
+    | [<CompiledName("a2")>] A2
+    | [<CompiledName("a3")>] A3
+    | [<CompiledName("a4")>] A4
+    | [<CompiledName("a5")>] A5
+    | [<CompiledName("a6")>] A6
+    | [<CompiledName("ledger")>] Ledger
+    | [<CompiledName("legal")>] Legal
+    | [<CompiledName("letter")>] Letter
+    | [<CompiledName("tabloid")>] Tabloid
+
+[<Interface>]
+type BrowserRunPDFOptions2PdfOptionsMargin =
+    abstract top: U2<string, float> option with get, set
+    abstract right: U2<string, float> option with get, set
+    abstract bottom: U2<string, float> option with get, set
+    abstract left: U2<string, float> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?top: U2<string, float>, ?right: U2<string, float>, ?bottom: U2<string, float>, ?left: U2<string, float>) : BrowserRunPDFOptions2PdfOptionsMargin = jsNative
+
+[<Interface>]
+type BrowserRunPDFOptions3 =
+    inherit BrowserRunBaseOptions
+    inherit BrowserRunAlternateBackendOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// Set the HTML content of the page directly.
+    /// </summary>
+    abstract html: string with get, set
+    /// <remarks>@see https://pptr.dev/api/puppeteer.pdfoptions</remarks>
+    abstract pdfOptions: BrowserRunPDFOptions2PdfOptions option with get, set
+    /// <summary>
+    /// Render with an alternate browser backend instead of the default one.
+    /// </summary>
+    abstract browser: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?pdfOptions: BrowserRunPDFOptions2PdfOptions, ?browser: string) : BrowserRunPDFOptions3 = jsNative
+
+type BrowserRunScrapeOptions = U2<BrowserRunScrapeOptions2, BrowserRunScrapeOptions3>
+
+[<Interface>]
+type BrowserRunScrapeOptions2 =
+    inherit BrowserRunBaseOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// URL to navigate to, e.g. <c>"https://example.com"</c>.
+    /// </summary>
+    abstract url: string with get, set
+    /// <summary>
+    /// CSS selectors to scrape. At least one element is required.
+    /// </summary>
+    abstract elements: BrowserRunScrapeOptions2ElementsItem[] with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (url: string, elements: BrowserRunScrapeOptions2ElementsItem[], ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunScrapeOptions2 = jsNative
+
+[<Interface>]
+type BrowserRunScrapeOptions2ElementsItem =
+    abstract selector: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (selector: string) : BrowserRunScrapeOptions2ElementsItem = jsNative
+
+[<Interface>]
+type BrowserRunScrapeOptions3 =
+    inherit BrowserRunBaseOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// Set the HTML content of the page directly.
+    /// </summary>
+    abstract html: string with get, set
+    /// <summary>
+    /// CSS selectors to scrape. At least one element is required.
+    /// </summary>
+    abstract elements: BrowserRunScrapeOptions2ElementsItem[] with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (html: string, elements: BrowserRunScrapeOptions2ElementsItem[], ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunScrapeOptions3 = jsNative
+
+type BrowserRunLinksOptions = U2<BrowserRunLinksOptions2, BrowserRunLinksOptions3>
+
+[<Interface>]
+type BrowserRunLinksOptions2 =
+    inherit BrowserRunBaseOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// URL to navigate to, e.g. <c>"https://example.com"</c>.
+    /// </summary>
+    abstract url: string with get, set
+    /// <summary>
+    /// When true, only return links that are visible on the page.
+    /// </summary>
+    /// <remarks>@default false</remarks>
+    abstract visibleLinksOnly: bool option with get, set
+    /// <summary>
+    /// When true, exclude links pointing to external domains.
+    /// </summary>
+    /// <remarks>@default false</remarks>
+    abstract excludeExternalLinks: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?visibleLinksOnly: bool, ?excludeExternalLinks: bool) : BrowserRunLinksOptions2 = jsNative
+
+[<Interface>]
+type BrowserRunLinksOptions3 =
+    inherit BrowserRunBaseOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// Set the HTML content of the page directly.
+    /// </summary>
+    abstract html: string with get, set
+    /// <summary>
+    /// When true, only return links that are visible on the page.
+    /// </summary>
+    /// <remarks>@default false</remarks>
+    abstract visibleLinksOnly: bool option with get, set
+    /// <summary>
+    /// When true, exclude links pointing to external domains.
+    /// </summary>
+    /// <remarks>@default false</remarks>
+    abstract excludeExternalLinks: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?visibleLinksOnly: bool, ?excludeExternalLinks: bool) : BrowserRunLinksOptions3 = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type BrowserRunSnapshotFormat =
@@ -13374,12 +17232,446 @@ type BrowserRunSnapshotFormat =
     | [<CompiledName("markdown")>] Markdown
     | [<CompiledName("screenshot")>] Screenshot
 
-type BrowserRunSnapshotOptions = obj
+type BrowserRunSnapshotOptions = U2<BrowserRunSnapshotOptions2, BrowserRunSnapshotOptions3>
+
+[<Interface>]
+type BrowserRunSnapshotOptions2 =
+    inherit BrowserRunBaseOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// URL to navigate to, e.g. <c>"https://example.com"</c>.
+    /// </summary>
+    abstract url: string with get, set
+    /// <summary>
+    /// Which representations of the page to return. At least two distinct formats
+    /// are required; request a single format from its dedicated action instead.
+    /// </summary>
+    /// <remarks>@default ["content","screenshot"]</remarks>
+    abstract formats: BrowserRunSnapshotFormat[] option with get, set
+    /// <remarks>@see https://pptr.dev/api/puppeteer.screenshotoptions</remarks>
+    abstract screenshotOptions: obj option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?formats: BrowserRunSnapshotFormat[], ?screenshotOptions: obj) : BrowserRunSnapshotOptions2 = jsNative
+
+[<Interface>]
+type BrowserRunSnapshotOptions3 =
+    inherit BrowserRunBaseOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// Set the HTML content of the page directly.
+    /// </summary>
+    abstract html: string with get, set
+    /// <summary>
+    /// Which representations of the page to return. At least two distinct formats
+    /// are required; request a single format from its dedicated action instead.
+    /// </summary>
+    /// <remarks>@default ["content","screenshot"]</remarks>
+    abstract formats: BrowserRunSnapshotFormat[] option with get, set
+    /// <remarks>@see https://pptr.dev/api/puppeteer.screenshotoptions</remarks>
+    abstract screenshotOptions: obj option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?formats: BrowserRunSnapshotFormat[], ?screenshotOptions: obj) : BrowserRunSnapshotOptions3 = jsNative
 
 /// <summary>
 /// Options for the <c>accessibilityTree</c> quick action.
 /// </summary>
-type BrowserRunAccessibilityTreeOptions = obj
+type BrowserRunAccessibilityTreeOptions = U2<BrowserRunAccessibilityTreeOptions2, BrowserRunAccessibilityTreeOptions3>
+
+[<Interface>]
+type BrowserRunAccessibilityTreeOptions2 =
+    inherit BrowserRunBaseOptions
+    inherit BrowserRunAlternateBackendOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// URL to navigate to, e.g. <c>"https://example.com"</c>.
+    /// </summary>
+    abstract url: string with get, set
+    /// <summary>
+    /// When true, prune nodes that carry no semantic meaning, such as generic
+    /// containers. Defaults to true, or to false when <c>root</c> is set so that the
+    /// requested subtree is returned as-is.
+    /// </summary>
+    abstract interestingOnly: bool option with get, set
+    /// <summary>
+    /// CSS selector limiting the tree to the matching element's subtree.
+    /// A selector that matches nothing yields <c>accessibilityTree: null</c> with
+    /// HTTP 200; a malformed selector is an error.
+    /// </summary>
+    abstract root: string option with get, set
+    /// <summary>
+    /// Render with an alternate browser backend instead of the default one.
+    /// </summary>
+    abstract browser: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?interestingOnly: bool, ?root: string, ?browser: string) : BrowserRunAccessibilityTreeOptions2 = jsNative
+
+[<Interface>]
+type BrowserRunAccessibilityTreeOptions3 =
+    inherit BrowserRunBaseOptions
+    inherit BrowserRunAlternateBackendOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// Set the HTML content of the page directly.
+    /// </summary>
+    abstract html: string with get, set
+    /// <summary>
+    /// When true, prune nodes that carry no semantic meaning, such as generic
+    /// containers. Defaults to true, or to false when <c>root</c> is set so that the
+    /// requested subtree is returned as-is.
+    /// </summary>
+    abstract interestingOnly: bool option with get, set
+    /// <summary>
+    /// CSS selector limiting the tree to the matching element's subtree.
+    /// A selector that matches nothing yields <c>accessibilityTree: null</c> with
+    /// HTTP 200; a malformed selector is an error.
+    /// </summary>
+    abstract root: string option with get, set
+    /// <summary>
+    /// Render with an alternate browser backend instead of the default one.
+    /// </summary>
+    abstract browser: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?interestingOnly: bool, ?root: string, ?browser: string) : BrowserRunAccessibilityTreeOptions3 = jsNative
 
 [<Interface>]
 type BrowserRunJsonBaseOptions =
@@ -13407,9 +17699,671 @@ type BrowserRunJsonBaseOptionsCustomAiItem =
 /// Options for the <c>json</c> quick action.
 /// At least one of <c>prompt</c> or <c>response_format</c> must be provided.
 /// </summary>
-type BrowserRunJsonOptions = obj
+type BrowserRunJsonOptions = U4<BrowserRunJsonOptions2, BrowserRunJsonOptions3, BrowserRunJsonOptions4, BrowserRunJsonOptions5>
 
-type BrowserRunContentOptions = obj
+[<Interface>]
+type BrowserRunJsonOptions2 =
+    inherit BrowserRunBaseOptions
+    inherit BrowserRunAlternateBackendOptions
+    inherit BrowserRunJsonBaseOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// URL to navigate to, e.g. <c>"https://example.com"</c>.
+    /// </summary>
+    abstract url: string with get, set
+    /// <summary>
+    /// Render with an alternate browser backend instead of the default one.
+    /// </summary>
+    abstract browser: string option with get, set
+    /// <summary>
+    /// Custom AI models to try in order. Max 3. Falls back to next on error.
+    /// </summary>
+    abstract custom_ai: BrowserRunJsonBaseOptionsCustomAiItem[] option with get, set
+    /// <summary>
+    /// Natural-language prompt describing what data to extract.
+    /// </summary>
+    abstract prompt: string with get, set
+    /// <summary>
+    /// Structured output schema for the AI model.
+    /// </summary>
+    /// <remarks>@see https://developers.cloudflare.com/workers-ai/json-mode/</remarks>
+    abstract response_format: AiTextGenerationResponseFormat option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (url: string, prompt: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptionsCustomAiItem[], ?response_format: AiTextGenerationResponseFormat) : BrowserRunJsonOptions2 = jsNative
+
+[<Interface>]
+type BrowserRunJsonOptions3 =
+    inherit BrowserRunBaseOptions
+    inherit BrowserRunAlternateBackendOptions
+    inherit BrowserRunJsonBaseOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// URL to navigate to, e.g. <c>"https://example.com"</c>.
+    /// </summary>
+    abstract url: string with get, set
+    /// <summary>
+    /// Render with an alternate browser backend instead of the default one.
+    /// </summary>
+    abstract browser: string option with get, set
+    /// <summary>
+    /// Custom AI models to try in order. Max 3. Falls back to next on error.
+    /// </summary>
+    abstract custom_ai: BrowserRunJsonBaseOptionsCustomAiItem[] option with get, set
+    /// <summary>
+    /// Natural-language prompt describing what data to extract.
+    /// </summary>
+    abstract prompt: string option with get, set
+    /// <summary>
+    /// Structured output schema for the AI model.
+    /// </summary>
+    /// <remarks>@see https://developers.cloudflare.com/workers-ai/json-mode/</remarks>
+    abstract response_format: AiTextGenerationResponseFormat with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (url: string, response_format: AiTextGenerationResponseFormat, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptionsCustomAiItem[], ?prompt: string) : BrowserRunJsonOptions3 = jsNative
+
+[<Interface>]
+type BrowserRunJsonOptions4 =
+    inherit BrowserRunBaseOptions
+    inherit BrowserRunAlternateBackendOptions
+    inherit BrowserRunJsonBaseOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// Set the HTML content of the page directly.
+    /// </summary>
+    abstract html: string with get, set
+    /// <summary>
+    /// Render with an alternate browser backend instead of the default one.
+    /// </summary>
+    abstract browser: string option with get, set
+    /// <summary>
+    /// Custom AI models to try in order. Max 3. Falls back to next on error.
+    /// </summary>
+    abstract custom_ai: BrowserRunJsonBaseOptionsCustomAiItem[] option with get, set
+    /// <summary>
+    /// Natural-language prompt describing what data to extract.
+    /// </summary>
+    abstract prompt: string with get, set
+    /// <summary>
+    /// Structured output schema for the AI model.
+    /// </summary>
+    /// <remarks>@see https://developers.cloudflare.com/workers-ai/json-mode/</remarks>
+    abstract response_format: AiTextGenerationResponseFormat option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (html: string, prompt: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptionsCustomAiItem[], ?response_format: AiTextGenerationResponseFormat) : BrowserRunJsonOptions4 = jsNative
+
+[<Interface>]
+type BrowserRunJsonOptions5 =
+    inherit BrowserRunBaseOptions
+    inherit BrowserRunAlternateBackendOptions
+    inherit BrowserRunJsonBaseOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// Set the HTML content of the page directly.
+    /// </summary>
+    abstract html: string with get, set
+    /// <summary>
+    /// Render with an alternate browser backend instead of the default one.
+    /// </summary>
+    abstract browser: string option with get, set
+    /// <summary>
+    /// Custom AI models to try in order. Max 3. Falls back to next on error.
+    /// </summary>
+    abstract custom_ai: BrowserRunJsonBaseOptionsCustomAiItem[] option with get, set
+    /// <summary>
+    /// Natural-language prompt describing what data to extract.
+    /// </summary>
+    abstract prompt: string option with get, set
+    /// <summary>
+    /// Structured output schema for the AI model.
+    /// </summary>
+    /// <remarks>@see https://developers.cloudflare.com/workers-ai/json-mode/</remarks>
+    abstract response_format: AiTextGenerationResponseFormat with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (html: string, response_format: AiTextGenerationResponseFormat, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptionsCustomAiItem[], ?prompt: string) : BrowserRunJsonOptions5 = jsNative
+
+type BrowserRunContentOptions = U2<BrowserRunContentOptions2, BrowserRunContentOptions3>
+
+[<Interface>]
+type BrowserRunContentOptions2 =
+    inherit BrowserRunBaseOptions
+    inherit BrowserRunAlternateBackendOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// URL to navigate to, e.g. <c>"https://example.com"</c>.
+    /// </summary>
+    abstract url: string with get, set
+    /// <summary>
+    /// Render with an alternate browser backend instead of the default one.
+    /// </summary>
+    abstract browser: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string) : BrowserRunContentOptions2 = jsNative
+
+[<Interface>]
+type BrowserRunContentOptions3 =
+    inherit BrowserRunBaseOptions
+    inherit BrowserRunAlternateBackendOptions
+    /// <summary>
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
+    abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
+    /// <summary>
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
+    abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
+    /// <summary>
+    /// Provide credentials for HTTP authentication.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.credentials</remarks>
+    abstract authenticate: BrowserRunBaseOptionsAuthenticate option with get, set
+    /// <summary>
+    /// Set cookies before navigating.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
+    abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
+    /// <summary>
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
+    /// </summary>
+    abstract emulateMediaType: string option with get, set
+    /// <summary>
+    /// Navigation options.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
+    abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
+    /// <summary>
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
+    /// </summary>
+    abstract rejectRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
+    /// </summary>
+    abstract allowRequestPattern: string[] option with get, set
+    /// <summary>
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
+    /// </summary>
+    abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
+    /// </summary>
+    abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
+    /// <summary>
+    /// Additional HTTP headers sent with every request.
+    /// </summary>
+    abstract setExtraHTTPHeaders: obj option with get, set
+    /// <summary>
+    /// Whether JavaScript is enabled on the page.
+    /// </summary>
+    abstract setJavaScriptEnabled: bool option with get, set
+    /// <summary>
+    /// Override the default user agent string.
+    /// </summary>
+    /// <remarks>@default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"</remarks>
+    abstract userAgent: string option with get, set
+    /// <summary>
+    /// Set the browser viewport size.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.viewport</remarks>
+    /// <remarks>@default {width:1920,height:1080}</remarks>
+    abstract viewport: BrowserRunBaseOptionsViewport option with get, set
+    /// <summary>
+    /// Wait for a CSS selector to appear in the page before proceeding.
+    /// </summary>
+    /// <remarks>@see https://pptr.dev/api/puppeteer.waitforselectoroptions</remarks>
+    abstract waitForSelector: BrowserRunBaseOptionsWaitForSelector option with get, set
+    /// <summary>
+    /// Wait for a fixed delay in milliseconds before proceeding. Max 120000
+    /// </summary>
+    abstract waitForTimeout: float option with get, set
+    /// <summary>
+    /// When true, continue on best-effort when awaited events fail or timeout.
+    /// </summary>
+    abstract bestAttempt: bool option with get, set
+    /// <summary>
+    /// Maximum duration in milliseconds for the browser action after page load. Max 120000
+    /// </summary>
+    abstract actionTimeout: float option with get, set
+    /// <summary>
+    /// Cache time to live in seconds (0-86400). Set to 0 to disable.
+    /// </summary>
+    /// <remarks>@default 5</remarks>
+    abstract cacheTTL: float option with get, set
+    /// <summary>
+    /// Set the HTML content of the page directly.
+    /// </summary>
+    abstract html: string with get, set
+    /// <summary>
+    /// Render with an alternate browser backend instead of the default one.
+    /// </summary>
+    abstract browser: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string) : BrowserRunContentOptions3 = jsNative
 
 type BrowserRunMarkdownOptions = BrowserRunContentOptions
 
@@ -13751,7 +18705,17 @@ type BrowserRunErrorResponseErrorsItem =
 /// <summary>
 /// Error response for BrowserRun <c>json</c> action.
 /// </summary>
-type BrowserRunJsonErrorResponse = obj
+[<Interface>]
+type BrowserRunJsonErrorResponse =
+    inherit BrowserRunErrorResponse
+    abstract success: bool with get, set
+    abstract errors: BrowserRunErrorResponseErrorsItem[] with get, set
+    /// <summary>
+    /// Raw AI response text for debugging
+    /// </summary>
+    abstract rawAiResponse: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (success: bool, errors: BrowserRunErrorResponseErrorsItem[], ?rawAiResponse: string) : BrowserRunJsonErrorResponse = jsNative
 
 /// <summary>
 /// Browser Run API binding for automating headless browsers.
@@ -13926,6 +18890,1140 @@ type BrowserRun =
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
     abstract quickAction: action: string * options: BrowserRunScreenshotOptions -> JS.Promise<obj>
+    /// <summary>
+    /// Take a screenshot of a web page.
+    /// Generate a PDF of a web page.
+    /// Get the HTML content of a web page.
+    /// Scrape elements from a web page by CSS selector.
+    /// Extract all links from a web page.
+    /// Get several representations of a web page in one request.
+    /// Extract structured JSON data from a web page using AI.
+    /// Convert a web page to Markdown.
+    /// Get the accessibility tree of a web page.
+    /// </summary>
+    /// <remarks>@param action - Must be <c>'screenshot'</c>.</remarks>
+    /// <remarks>@param options - Screenshot options including viewport, selectors, and image format.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
+    /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'pdf'</c>.</remarks>
+    /// <remarks>@param options - PDF generation options including page size, margins, and headers/footers.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - Binary PDF data with <c>Content-Type: application/pdf</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'content'</c>.</remarks>
+    /// <remarks>@param options - Navigation and page interaction options.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'scrape'</c>.</remarks>
+    /// <remarks>@param options - Scrape options with CSS selectors for elements to extract.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'links'</c>.</remarks>
+    /// <remarks>@param options - Options to filter visible or internal links only.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'snapshot'</c>.</remarks>
+    /// <remarks>
+    /// @param
+    /// options - Snapshot options including the <c>formats</c> to return and
+    /// screenshot settings (encoding is always base64).
+    /// </remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'json'</c>.</remarks>
+    /// <remarks>@param options - JSON extraction options with prompt or response_format schema.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'markdown'</c>.</remarks>
+    /// <remarks>@param options - Navigation and page interaction options.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'accessibilityTree'</c>.</remarks>
+    /// <remarks>
+    /// @param
+    /// options - Options to scope the tree to a subtree and to control
+    /// whether semantically uninteresting nodes are pruned.
+    /// </remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 for a malformed <c>root</c> selector
+    /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    abstract quickAction: action: string * options: BrowserRunPDFOptions -> JS.Promise<obj>
+    /// <summary>
+    /// Take a screenshot of a web page.
+    /// Generate a PDF of a web page.
+    /// Get the HTML content of a web page.
+    /// Scrape elements from a web page by CSS selector.
+    /// Extract all links from a web page.
+    /// Get several representations of a web page in one request.
+    /// Extract structured JSON data from a web page using AI.
+    /// Convert a web page to Markdown.
+    /// Get the accessibility tree of a web page.
+    /// </summary>
+    /// <remarks>@param action - Must be <c>'screenshot'</c>.</remarks>
+    /// <remarks>@param options - Screenshot options including viewport, selectors, and image format.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
+    /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'pdf'</c>.</remarks>
+    /// <remarks>@param options - PDF generation options including page size, margins, and headers/footers.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - Binary PDF data with <c>Content-Type: application/pdf</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'content'</c>.</remarks>
+    /// <remarks>@param options - Navigation and page interaction options.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'scrape'</c>.</remarks>
+    /// <remarks>@param options - Scrape options with CSS selectors for elements to extract.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'links'</c>.</remarks>
+    /// <remarks>@param options - Options to filter visible or internal links only.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'snapshot'</c>.</remarks>
+    /// <remarks>
+    /// @param
+    /// options - Snapshot options including the <c>formats</c> to return and
+    /// screenshot settings (encoding is always base64).
+    /// </remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'json'</c>.</remarks>
+    /// <remarks>@param options - JSON extraction options with prompt or response_format schema.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'markdown'</c>.</remarks>
+    /// <remarks>@param options - Navigation and page interaction options.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'accessibilityTree'</c>.</remarks>
+    /// <remarks>
+    /// @param
+    /// options - Options to scope the tree to a subtree and to control
+    /// whether semantically uninteresting nodes are pruned.
+    /// </remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 for a malformed <c>root</c> selector
+    /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    abstract quickAction: action: string * options: BrowserRunContentOptions -> JS.Promise<obj>
+    /// <summary>
+    /// Take a screenshot of a web page.
+    /// Generate a PDF of a web page.
+    /// Get the HTML content of a web page.
+    /// Scrape elements from a web page by CSS selector.
+    /// Extract all links from a web page.
+    /// Get several representations of a web page in one request.
+    /// Extract structured JSON data from a web page using AI.
+    /// Convert a web page to Markdown.
+    /// Get the accessibility tree of a web page.
+    /// </summary>
+    /// <remarks>@param action - Must be <c>'screenshot'</c>.</remarks>
+    /// <remarks>@param options - Screenshot options including viewport, selectors, and image format.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
+    /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'pdf'</c>.</remarks>
+    /// <remarks>@param options - PDF generation options including page size, margins, and headers/footers.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - Binary PDF data with <c>Content-Type: application/pdf</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'content'</c>.</remarks>
+    /// <remarks>@param options - Navigation and page interaction options.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'scrape'</c>.</remarks>
+    /// <remarks>@param options - Scrape options with CSS selectors for elements to extract.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'links'</c>.</remarks>
+    /// <remarks>@param options - Options to filter visible or internal links only.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'snapshot'</c>.</remarks>
+    /// <remarks>
+    /// @param
+    /// options - Snapshot options including the <c>formats</c> to return and
+    /// screenshot settings (encoding is always base64).
+    /// </remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'json'</c>.</remarks>
+    /// <remarks>@param options - JSON extraction options with prompt or response_format schema.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'markdown'</c>.</remarks>
+    /// <remarks>@param options - Navigation and page interaction options.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'accessibilityTree'</c>.</remarks>
+    /// <remarks>
+    /// @param
+    /// options - Options to scope the tree to a subtree and to control
+    /// whether semantically uninteresting nodes are pruned.
+    /// </remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 for a malformed <c>root</c> selector
+    /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    abstract quickAction: action: string * options: BrowserRunScrapeOptions -> JS.Promise<obj>
+    /// <summary>
+    /// Take a screenshot of a web page.
+    /// Generate a PDF of a web page.
+    /// Get the HTML content of a web page.
+    /// Scrape elements from a web page by CSS selector.
+    /// Extract all links from a web page.
+    /// Get several representations of a web page in one request.
+    /// Extract structured JSON data from a web page using AI.
+    /// Convert a web page to Markdown.
+    /// Get the accessibility tree of a web page.
+    /// </summary>
+    /// <remarks>@param action - Must be <c>'screenshot'</c>.</remarks>
+    /// <remarks>@param options - Screenshot options including viewport, selectors, and image format.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
+    /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'pdf'</c>.</remarks>
+    /// <remarks>@param options - PDF generation options including page size, margins, and headers/footers.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - Binary PDF data with <c>Content-Type: application/pdf</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'content'</c>.</remarks>
+    /// <remarks>@param options - Navigation and page interaction options.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'scrape'</c>.</remarks>
+    /// <remarks>@param options - Scrape options with CSS selectors for elements to extract.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'links'</c>.</remarks>
+    /// <remarks>@param options - Options to filter visible or internal links only.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'snapshot'</c>.</remarks>
+    /// <remarks>
+    /// @param
+    /// options - Snapshot options including the <c>formats</c> to return and
+    /// screenshot settings (encoding is always base64).
+    /// </remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'json'</c>.</remarks>
+    /// <remarks>@param options - JSON extraction options with prompt or response_format schema.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'markdown'</c>.</remarks>
+    /// <remarks>@param options - Navigation and page interaction options.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'accessibilityTree'</c>.</remarks>
+    /// <remarks>
+    /// @param
+    /// options - Options to scope the tree to a subtree and to control
+    /// whether semantically uninteresting nodes are pruned.
+    /// </remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 for a malformed <c>root</c> selector
+    /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    abstract quickAction: action: string * options: BrowserRunLinksOptions -> JS.Promise<obj>
+    /// <summary>
+    /// Take a screenshot of a web page.
+    /// Generate a PDF of a web page.
+    /// Get the HTML content of a web page.
+    /// Scrape elements from a web page by CSS selector.
+    /// Extract all links from a web page.
+    /// Get several representations of a web page in one request.
+    /// Extract structured JSON data from a web page using AI.
+    /// Convert a web page to Markdown.
+    /// Get the accessibility tree of a web page.
+    /// </summary>
+    /// <remarks>@param action - Must be <c>'screenshot'</c>.</remarks>
+    /// <remarks>@param options - Screenshot options including viewport, selectors, and image format.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
+    /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'pdf'</c>.</remarks>
+    /// <remarks>@param options - PDF generation options including page size, margins, and headers/footers.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - Binary PDF data with <c>Content-Type: application/pdf</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'content'</c>.</remarks>
+    /// <remarks>@param options - Navigation and page interaction options.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'scrape'</c>.</remarks>
+    /// <remarks>@param options - Scrape options with CSS selectors for elements to extract.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'links'</c>.</remarks>
+    /// <remarks>@param options - Options to filter visible or internal links only.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'snapshot'</c>.</remarks>
+    /// <remarks>
+    /// @param
+    /// options - Snapshot options including the <c>formats</c> to return and
+    /// screenshot settings (encoding is always base64).
+    /// </remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'json'</c>.</remarks>
+    /// <remarks>@param options - JSON extraction options with prompt or response_format schema.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'markdown'</c>.</remarks>
+    /// <remarks>@param options - Navigation and page interaction options.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'accessibilityTree'</c>.</remarks>
+    /// <remarks>
+    /// @param
+    /// options - Options to scope the tree to a subtree and to control
+    /// whether semantically uninteresting nodes are pruned.
+    /// </remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 for a malformed <c>root</c> selector
+    /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    abstract quickAction: action: string * options: BrowserRunSnapshotOptions -> JS.Promise<obj>
+    /// <summary>
+    /// Take a screenshot of a web page.
+    /// Generate a PDF of a web page.
+    /// Get the HTML content of a web page.
+    /// Scrape elements from a web page by CSS selector.
+    /// Extract all links from a web page.
+    /// Get several representations of a web page in one request.
+    /// Extract structured JSON data from a web page using AI.
+    /// Convert a web page to Markdown.
+    /// Get the accessibility tree of a web page.
+    /// </summary>
+    /// <remarks>@param action - Must be <c>'screenshot'</c>.</remarks>
+    /// <remarks>@param options - Screenshot options including viewport, selectors, and image format.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
+    /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'pdf'</c>.</remarks>
+    /// <remarks>@param options - PDF generation options including page size, margins, and headers/footers.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - Binary PDF data with <c>Content-Type: application/pdf</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'content'</c>.</remarks>
+    /// <remarks>@param options - Navigation and page interaction options.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'scrape'</c>.</remarks>
+    /// <remarks>@param options - Scrape options with CSS selectors for elements to extract.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'links'</c>.</remarks>
+    /// <remarks>@param options - Options to filter visible or internal links only.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'snapshot'</c>.</remarks>
+    /// <remarks>
+    /// @param
+    /// options - Snapshot options including the <c>formats</c> to return and
+    /// screenshot settings (encoding is always base64).
+    /// </remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'json'</c>.</remarks>
+    /// <remarks>@param options - JSON extraction options with prompt or response_format schema.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'markdown'</c>.</remarks>
+    /// <remarks>@param options - Navigation and page interaction options.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'accessibilityTree'</c>.</remarks>
+    /// <remarks>
+    /// @param
+    /// options - Options to scope the tree to a subtree and to control
+    /// whether semantically uninteresting nodes are pruned.
+    /// </remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 for a malformed <c>root</c> selector
+    /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    abstract quickAction: action: string * options: BrowserRunJsonOptions -> JS.Promise<obj>
+    /// <summary>
+    /// Take a screenshot of a web page.
+    /// Generate a PDF of a web page.
+    /// Get the HTML content of a web page.
+    /// Scrape elements from a web page by CSS selector.
+    /// Extract all links from a web page.
+    /// Get several representations of a web page in one request.
+    /// Extract structured JSON data from a web page using AI.
+    /// Convert a web page to Markdown.
+    /// Get the accessibility tree of a web page.
+    /// </summary>
+    /// <remarks>@param action - Must be <c>'screenshot'</c>.</remarks>
+    /// <remarks>@param options - Screenshot options including viewport, selectors, and image format.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
+    /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'pdf'</c>.</remarks>
+    /// <remarks>@param options - PDF generation options including page size, margins, and headers/footers.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - Binary PDF data with <c>Content-Type: application/pdf</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'content'</c>.</remarks>
+    /// <remarks>@param options - Navigation and page interaction options.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'scrape'</c>.</remarks>
+    /// <remarks>@param options - Scrape options with CSS selectors for elements to extract.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'links'</c>.</remarks>
+    /// <remarks>@param options - Options to filter visible or internal links only.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'snapshot'</c>.</remarks>
+    /// <remarks>
+    /// @param
+    /// options - Snapshot options including the <c>formats</c> to return and
+    /// screenshot settings (encoding is always base64).
+    /// </remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'json'</c>.</remarks>
+    /// <remarks>@param options - JSON extraction options with prompt or response_format schema.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'markdown'</c>.</remarks>
+    /// <remarks>@param options - Navigation and page interaction options.</remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    /// <remarks>@param action - Must be <c>'accessibilityTree'</c>.</remarks>
+    /// <remarks>
+    /// @param
+    /// options - Options to scope the tree to a subtree and to control
+    /// whether semantically uninteresting nodes are pruned.
+    /// </remarks>
+    /// <remarks>
+    /// @returns
+    /// A <c>Response</c> containing one of:
+    ///
+    /// **Success (HTTP 200):**
+    /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
+    ///
+    /// **Error:**
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 for a malformed <c>root</c> selector
+    /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
+    ///
+    /// **Headers:**
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// </remarks>
+    abstract quickAction: action: string * options: BrowserRunAccessibilityTreeOptions -> JS.Promise<obj>
 
 /// <summary>
 /// In addition to the properties you can set in the RequestInit dict
@@ -14719,8 +20817,174 @@ type RequestInitCfPropertiesR2 =
 /// <summary>
 /// Request metadata provided by Cloudflare's edge.
 /// </summary>
-[<Erase>]
-type IncomingRequestCfProperties<'HostMetadata> = private IncomingRequestCfProperties__ of obj
+type IncomingRequestCfProperties<'HostMetadata> =
+    inherit IncomingRequestCfPropertiesBase
+    inherit IncomingRequestCfPropertiesBotManagementEnterprise
+    inherit IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<'HostMetadata>
+    inherit IncomingRequestCfPropertiesGeographicInformation
+    inherit IncomingRequestCfPropertiesCloudflareAccessOrApiShield
+    /// <summary>
+    /// [ASN](https://www.iana.org/assignments/as-numbers/as-numbers.xhtml) of the incoming request.
+    /// </summary>
+    /// <remarks>@example 395747</remarks>
+    abstract asn: float option with get, set
+    /// <summary>
+    /// The organization which owns the ASN of the incoming request.
+    /// </summary>
+    /// <remarks>@example "Google Cloud"</remarks>
+    abstract asOrganization: string option with get, set
+    /// <summary>
+    /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
+    /// </summary>
+    /// <remarks>@example "gzip, deflate, br"</remarks>
+    abstract clientAcceptEncoding: string option with get, set
+    /// <summary>
+    /// The number of milliseconds it took for the request to reach your worker.
+    /// </summary>
+    /// <remarks>@example 22</remarks>
+    abstract clientTcpRtt: float option with get, set
+    /// <summary>
+    /// The three-letter [IATA](https://en.wikipedia.org/wiki/IATA_airport_code)
+    /// airport code of the data center that the request hit.
+    /// </summary>
+    /// <remarks>@example "DFW"</remarks>
+    abstract colo: string with get, set
+    /// <summary>
+    /// Represents the upstream's response to a
+    /// [TCP <c>keepalive</c> message](https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html)
+    /// from cloudflare.
+    ///
+    /// For workers with no upstream, this will always be <c>1</c>.
+    /// </summary>
+    /// <remarks>@example 3</remarks>
+    abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
+    /// <summary>
+    /// The HTTP Protocol the request used.
+    /// </summary>
+    /// <remarks>@example "HTTP/2"</remarks>
+    abstract httpProtocol: string with get, set
+    /// <summary>
+    /// The browser-requested prioritization information in the request object.
+    ///
+    /// If no information was set, defaults to the empty string <c>""</c>
+    /// </summary>
+    /// <remarks>@example "weight=192;exclusive=0;group=3;group-weight=127"</remarks>
+    /// <remarks>@default ""</remarks>
+    abstract requestPriority: string with get, set
+    /// <summary>
+    /// The TLS version of the connection to Cloudflare.
+    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
+    /// </summary>
+    /// <remarks>@example "TLSv1.3"</remarks>
+    abstract tlsVersion: string with get, set
+    /// <summary>
+    /// The cipher for the connection to Cloudflare.
+    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
+    /// </summary>
+    /// <remarks>@example "AEAD-AES128-GCM-SHA256"</remarks>
+    abstract tlsCipher: string with get, set
+    /// <summary>
+    /// Metadata containing the [<c>HELLO</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2) and [<c>FINISHED</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9) messages from this request's TLS handshake.
+    ///
+    /// If the incoming request was served over plaintext (without TLS) this field is undefined.
+    /// </summary>
+    abstract tlsExportedAuthenticator: IncomingRequestCfPropertiesExportedAuthenticatorMetadata option with get, set
+    /// <summary>
+    /// Results of Cloudflare's Bot Management analysis
+    /// </summary>
+    abstract botManagement: FetchEventRequestItemBotManagement with get, set
+    /// <summary>
+    /// Duplicate of <c>botManagement.score</c>.
+    /// </summary>
+    /// <remarks>@deprecated</remarks>
+    abstract clientTrustScore: float with get, set
+    /// <summary>
+    /// Custom metadata set per-host in [Cloudflare for SaaS](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/).
+    ///
+    /// This field is only present if you have Cloudflare for SaaS enabled on your account
+    /// and you have followed the [required steps to enable it]((https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/)).
+    /// </summary>
+    abstract hostMetadata: 'HostMetadata option with get, set
+    /// <summary>
+    /// The [ISO 3166-1 Alpha 2](https://www.iso.org/iso-3166-country-codes.html) country code the request originated from.
+    ///
+    /// If your worker is [configured to accept TOR connections](https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing), this may also be <c>"T1"</c>, indicating a request that originated over TOR.
+    ///
+    /// If Cloudflare is unable to determine where the request originated this property is omitted.
+    ///
+    /// The country code <c>"T1"</c> is used for requests originating on TOR.
+    /// </summary>
+    /// <remarks>@example "GB"</remarks>
+    abstract country: FetchEventRequestItemCountry option with get, set
+    /// <summary>
+    /// If present, this property indicates that the request originated in the EU
+    /// </summary>
+    /// <remarks>@example "1"</remarks>
+    abstract isEUCountry: string option with get, set
+    /// <summary>
+    /// A two-letter code indicating the continent the request originated from.
+    /// </summary>
+    /// <remarks>@example "AN"</remarks>
+    abstract continent: ContinentCode option with get, set
+    /// <summary>
+    /// The city the request originated from
+    /// </summary>
+    /// <remarks>@example "Austin"</remarks>
+    abstract city: string option with get, set
+    /// <summary>
+    /// Postal code of the incoming request
+    /// </summary>
+    /// <remarks>@example "78701"</remarks>
+    abstract postalCode: string option with get, set
+    /// <summary>
+    /// Latitude of the incoming request
+    /// </summary>
+    /// <remarks>@example "30.27130"</remarks>
+    abstract latitude: string option with get, set
+    /// <summary>
+    /// Longitude of the incoming request
+    /// </summary>
+    /// <remarks>@example "-97.74260"</remarks>
+    abstract longitude: string option with get, set
+    /// <summary>
+    /// Timezone of the incoming request
+    /// </summary>
+    /// <remarks>@example "America/Chicago"</remarks>
+    abstract timezone: string option with get, set
+    /// <summary>
+    /// If known, the ISO 3166-2 name for the first level region associated with
+    /// the IP address of the incoming request
+    /// </summary>
+    /// <remarks>@example "Texas"</remarks>
+    abstract region: string option with get, set
+    /// <summary>
+    /// If known, the ISO 3166-2 code for the first-level region associated with
+    /// the IP address of the incoming request
+    /// </summary>
+    /// <remarks>@example "TX"</remarks>
+    abstract regionCode: string option with get, set
+    /// <summary>
+    /// Metro code (DMA) of the incoming request
+    /// </summary>
+    /// <remarks>@example "635"</remarks>
+    abstract metroCode: string option with get, set
+    /// <summary>
+    /// Information about the client certificate presented to Cloudflare.
+    ///
+    /// This is populated when the incoming request is served over TLS using
+    /// either Cloudflare Access or API Shield (mTLS)
+    /// and the presented SSL certificate has a valid
+    /// [Certificate Serial Number](https://ldapwiki.com/wiki/Certificate%20Serial%20Number)
+    /// (i.e., not <c>null</c> or <c>""</c>).
+    ///
+    /// Otherwise, a set of placeholder values are used.
+    ///
+    /// The property <c>certPresented</c> will be set to <c>"1"</c> when
+    /// the object is populated (i.e. the above conditions were met).
+    /// </summary>
+    abstract tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder> with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 type IncomingRequestCfPropertiesBase =
     /// <summary>
@@ -14840,14 +21104,14 @@ type IncomingRequestCfPropertiesBotManagementEnterprise =
     /// <summary>
     /// Results of Cloudflare's Bot Management analysis
     /// </summary>
-    abstract botManagement: obj with get, set
+    abstract botManagement: FetchEventRequestItemBotManagement with get, set
     /// <summary>
     /// Duplicate of <c>botManagement.score</c>.
     /// </summary>
     /// <remarks>@deprecated</remarks>
     abstract clientTrustScore: float with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (botManagement: obj, clientTrustScore: float) : IncomingRequestCfPropertiesBotManagementEnterprise = jsNative
+    static member Create (botManagement: FetchEventRequestItemBotManagement, clientTrustScore: float) : IncomingRequestCfPropertiesBotManagementEnterprise = jsNative
 
 [<Interface>]
 type IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<'HostMetadata> =
@@ -14880,20 +21144,6 @@ type IncomingRequestCfPropertiesCloudflareAccessOrApiShield =
     abstract tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder> with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder>) : IncomingRequestCfPropertiesCloudflareAccessOrApiShield = jsNative
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type IncomingRequestCfPropertiesTLSClientAuthCertRevoked =
-    | [<CompiledName("0")>] N0
-    | [<CompiledName("1")>] N1
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type IncomingRequestCfPropertiesTLSClientAuthCertVerified =
-    | FAILED
-    | [<CompiledName("FAILED:certificate has expired")>] FAILEDCertificateHasExpired
-    | [<CompiledName("FAILED:certificate is not yet valid")>] FAILEDCertificateIsNotYetValid
-    | [<CompiledName("FAILED:self signed certificate")>] FAILEDSelfSignedCertificate
-    | [<CompiledName("FAILED:unable to verify the first certificate")>] FAILEDUnableToVerifyTheFirstCertificate
-    | SUCCESS
 
 /// <summary>
 /// Metadata about the request's TLS handshake
@@ -14938,7 +21188,7 @@ type IncomingRequestCfPropertiesGeographicInformation =
     /// The country code <c>"T1"</c> is used for requests originating on TOR.
     /// </summary>
     /// <remarks>@example "GB"</remarks>
-    abstract country: IncomingRequestCfPropertiesGeographicInformationCountry option with get, set
+    abstract country: FetchEventRequestItemCountry option with get, set
     /// <summary>
     /// If present, this property indicates that the request originated in the EU
     /// </summary>
@@ -14992,260 +21242,7 @@ type IncomingRequestCfPropertiesGeographicInformation =
     /// <remarks>@example "635"</remarks>
     abstract metroCode: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?country: IncomingRequestCfPropertiesGeographicInformationCountry, ?isEUCountry: string, ?continent: ContinentCode, ?city: string, ?postalCode: string, ?latitude: string, ?longitude: string, ?timezone: string, ?region: string, ?regionCode: string, ?metroCode: string) : IncomingRequestCfPropertiesGeographicInformation = jsNative
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type IncomingRequestCfPropertiesGeographicInformationCountry =
-    | AD
-    | AE
-    | AF
-    | AG
-    | AI
-    | AL
-    | AM
-    | AO
-    | AQ
-    | AR
-    | AS
-    | AT
-    | AU
-    | AW
-    | AX
-    | AZ
-    | BA
-    | BB
-    | BD
-    | BE
-    | BF
-    | BG
-    | BH
-    | BI
-    | BJ
-    | BL
-    | BM
-    | BN
-    | BO
-    | BQ
-    | BR
-    | BS
-    | BT
-    | BV
-    | BW
-    | BY
-    | BZ
-    | CA
-    | CC
-    | CD
-    | CF
-    | CG
-    | CH
-    | CI
-    | CK
-    | CL
-    | CM
-    | CN
-    | CO
-    | CR
-    | CU
-    | CV
-    | CW
-    | CX
-    | CY
-    | CZ
-    | DE
-    | DJ
-    | DK
-    | DM
-    | DO
-    | DZ
-    | EC
-    | EE
-    | EG
-    | EH
-    | ER
-    | ES
-    | ET
-    | FI
-    | FJ
-    | FK
-    | FM
-    | FO
-    | FR
-    | GA
-    | GB
-    | GD
-    | GE
-    | GF
-    | GG
-    | GH
-    | GI
-    | GL
-    | GM
-    | GN
-    | GP
-    | GQ
-    | GR
-    | GS
-    | GT
-    | GU
-    | GW
-    | GY
-    | HK
-    | HM
-    | HN
-    | HR
-    | HT
-    | HU
-    | ID
-    | IE
-    | IL
-    | IM
-    | IN
-    | IO
-    | IQ
-    | IR
-    | IS
-    | IT
-    | JE
-    | JM
-    | JO
-    | JP
-    | KE
-    | KG
-    | KH
-    | KI
-    | KM
-    | KN
-    | KP
-    | KR
-    | KW
-    | KY
-    | KZ
-    | LA
-    | LB
-    | LC
-    | LI
-    | LK
-    | LR
-    | LS
-    | LT
-    | LU
-    | LV
-    | LY
-    | MA
-    | MC
-    | MD
-    | ME
-    | MF
-    | MG
-    | MH
-    | MK
-    | ML
-    | MM
-    | MN
-    | MO
-    | MP
-    | MQ
-    | MR
-    | MS
-    | MT
-    | MU
-    | MV
-    | MW
-    | MX
-    | MY
-    | MZ
-    | NA
-    | NC
-    | NE
-    | NF
-    | NG
-    | NI
-    | NL
-    | NO
-    | NP
-    | NR
-    | NU
-    | NZ
-    | OM
-    | PA
-    | PE
-    | PF
-    | PG
-    | PH
-    | PK
-    | PL
-    | PM
-    | PN
-    | PR
-    | PS
-    | PT
-    | PW
-    | PY
-    | QA
-    | RE
-    | RO
-    | RS
-    | RU
-    | RW
-    | SA
-    | SB
-    | SC
-    | SD
-    | SE
-    | SG
-    | SH
-    | SI
-    | SJ
-    | SK
-    | SL
-    | SM
-    | SN
-    | SO
-    | SR
-    | SS
-    | ST
-    | SV
-    | SX
-    | SY
-    | SZ
-    | T1
-    | TC
-    | TD
-    | TF
-    | TG
-    | TH
-    | TJ
-    | TK
-    | TL
-    | TM
-    | TN
-    | TO
-    | TR
-    | TT
-    | TV
-    | TW
-    | TZ
-    | UA
-    | UG
-    | UM
-    | US
-    | UY
-    | UZ
-    | VA
-    | VC
-    | VE
-    | VG
-    | VI
-    | VN
-    | VU
-    | WF
-    | WS
-    | YE
-    | YT
-    | ZA
-    | ZM
-    | ZW
+    static member Create (?country: FetchEventRequestItemCountry, ?isEUCountry: string, ?continent: ContinentCode, ?city: string, ?postalCode: string, ?latitude: string, ?longitude: string, ?timezone: string, ?region: string, ?regionCode: string, ?metroCode: string) : IncomingRequestCfPropertiesGeographicInformation = jsNative
 
 /// <summary>
 /// Data about the incoming request's TLS certificate
@@ -15677,6 +21674,175 @@ type ContinentCode =
 [<Erase>]
 type CfProperties<'HostMetadata> = private CfProperties__ of obj
 
+type CfProperties2<'HostMetadata> =
+    inherit IncomingRequestCfPropertiesBase
+    inherit IncomingRequestCfPropertiesBotManagementEnterprise
+    inherit IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<'HostMetadata>
+    inherit IncomingRequestCfPropertiesGeographicInformation
+    inherit IncomingRequestCfPropertiesCloudflareAccessOrApiShield
+    /// <summary>
+    /// [ASN](https://www.iana.org/assignments/as-numbers/as-numbers.xhtml) of the incoming request.
+    /// </summary>
+    /// <remarks>@example 395747</remarks>
+    abstract asn: float option with get, set
+    /// <summary>
+    /// The organization which owns the ASN of the incoming request.
+    /// </summary>
+    /// <remarks>@example "Google Cloud"</remarks>
+    abstract asOrganization: string option with get, set
+    /// <summary>
+    /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
+    /// </summary>
+    /// <remarks>@example "gzip, deflate, br"</remarks>
+    abstract clientAcceptEncoding: string option with get, set
+    /// <summary>
+    /// The number of milliseconds it took for the request to reach your worker.
+    /// </summary>
+    /// <remarks>@example 22</remarks>
+    abstract clientTcpRtt: float option with get, set
+    /// <summary>
+    /// The three-letter [IATA](https://en.wikipedia.org/wiki/IATA_airport_code)
+    /// airport code of the data center that the request hit.
+    /// </summary>
+    /// <remarks>@example "DFW"</remarks>
+    abstract colo: string with get, set
+    /// <summary>
+    /// Represents the upstream's response to a
+    /// [TCP <c>keepalive</c> message](https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html)
+    /// from cloudflare.
+    ///
+    /// For workers with no upstream, this will always be <c>1</c>.
+    /// </summary>
+    /// <remarks>@example 3</remarks>
+    abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
+    /// <summary>
+    /// The HTTP Protocol the request used.
+    /// </summary>
+    /// <remarks>@example "HTTP/2"</remarks>
+    abstract httpProtocol: string with get, set
+    /// <summary>
+    /// The browser-requested prioritization information in the request object.
+    ///
+    /// If no information was set, defaults to the empty string <c>""</c>
+    /// </summary>
+    /// <remarks>@example "weight=192;exclusive=0;group=3;group-weight=127"</remarks>
+    /// <remarks>@default ""</remarks>
+    abstract requestPriority: string with get, set
+    /// <summary>
+    /// The TLS version of the connection to Cloudflare.
+    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
+    /// </summary>
+    /// <remarks>@example "TLSv1.3"</remarks>
+    abstract tlsVersion: string with get, set
+    /// <summary>
+    /// The cipher for the connection to Cloudflare.
+    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
+    /// </summary>
+    /// <remarks>@example "AEAD-AES128-GCM-SHA256"</remarks>
+    abstract tlsCipher: string with get, set
+    /// <summary>
+    /// Metadata containing the [<c>HELLO</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2) and [<c>FINISHED</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9) messages from this request's TLS handshake.
+    ///
+    /// If the incoming request was served over plaintext (without TLS) this field is undefined.
+    /// </summary>
+    abstract tlsExportedAuthenticator: IncomingRequestCfPropertiesExportedAuthenticatorMetadata option with get, set
+    /// <summary>
+    /// Results of Cloudflare's Bot Management analysis
+    /// </summary>
+    abstract botManagement: FetchEventRequestItemBotManagement with get, set
+    /// <summary>
+    /// Duplicate of <c>botManagement.score</c>.
+    /// </summary>
+    /// <remarks>@deprecated</remarks>
+    abstract clientTrustScore: float with get, set
+    /// <summary>
+    /// Custom metadata set per-host in [Cloudflare for SaaS](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/).
+    ///
+    /// This field is only present if you have Cloudflare for SaaS enabled on your account
+    /// and you have followed the [required steps to enable it]((https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/)).
+    /// </summary>
+    abstract hostMetadata: 'HostMetadata option with get, set
+    /// <summary>
+    /// The [ISO 3166-1 Alpha 2](https://www.iso.org/iso-3166-country-codes.html) country code the request originated from.
+    ///
+    /// If your worker is [configured to accept TOR connections](https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing), this may also be <c>"T1"</c>, indicating a request that originated over TOR.
+    ///
+    /// If Cloudflare is unable to determine where the request originated this property is omitted.
+    ///
+    /// The country code <c>"T1"</c> is used for requests originating on TOR.
+    /// </summary>
+    /// <remarks>@example "GB"</remarks>
+    abstract country: FetchEventRequestItemCountry option with get, set
+    /// <summary>
+    /// If present, this property indicates that the request originated in the EU
+    /// </summary>
+    /// <remarks>@example "1"</remarks>
+    abstract isEUCountry: string option with get, set
+    /// <summary>
+    /// A two-letter code indicating the continent the request originated from.
+    /// </summary>
+    /// <remarks>@example "AN"</remarks>
+    abstract continent: ContinentCode option with get, set
+    /// <summary>
+    /// The city the request originated from
+    /// </summary>
+    /// <remarks>@example "Austin"</remarks>
+    abstract city: string option with get, set
+    /// <summary>
+    /// Postal code of the incoming request
+    /// </summary>
+    /// <remarks>@example "78701"</remarks>
+    abstract postalCode: string option with get, set
+    /// <summary>
+    /// Latitude of the incoming request
+    /// </summary>
+    /// <remarks>@example "30.27130"</remarks>
+    abstract latitude: string option with get, set
+    /// <summary>
+    /// Longitude of the incoming request
+    /// </summary>
+    /// <remarks>@example "-97.74260"</remarks>
+    abstract longitude: string option with get, set
+    /// <summary>
+    /// Timezone of the incoming request
+    /// </summary>
+    /// <remarks>@example "America/Chicago"</remarks>
+    abstract timezone: string option with get, set
+    /// <summary>
+    /// If known, the ISO 3166-2 name for the first level region associated with
+    /// the IP address of the incoming request
+    /// </summary>
+    /// <remarks>@example "Texas"</remarks>
+    abstract region: string option with get, set
+    /// <summary>
+    /// If known, the ISO 3166-2 code for the first-level region associated with
+    /// the IP address of the incoming request
+    /// </summary>
+    /// <remarks>@example "TX"</remarks>
+    abstract regionCode: string option with get, set
+    /// <summary>
+    /// Metro code (DMA) of the incoming request
+    /// </summary>
+    /// <remarks>@example "635"</remarks>
+    abstract metroCode: string option with get, set
+    /// <summary>
+    /// Information about the client certificate presented to Cloudflare.
+    ///
+    /// This is populated when the incoming request is served over TLS using
+    /// either Cloudflare Access or API Shield (mTLS)
+    /// and the presented SSL certificate has a valid
+    /// [Certificate Serial Number](https://ldapwiki.com/wiki/Certificate%20Serial%20Number)
+    /// (i.e., not <c>null</c> or <c>""</c>).
+    ///
+    /// Otherwise, a set of placeholder values are used.
+    ///
+    /// The property <c>certPresented</c> will be set to <c>"1"</c> when
+    /// the object is populated (i.e. the above conditions were met).
+    /// </summary>
+    abstract tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder> with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
+
 [<Interface>]
 type D1Meta =
     abstract duration: float with get, set
@@ -15719,13 +21885,50 @@ type D1MetaTimings =
 [<Interface>]
 type D1Response =
     abstract success: bool with get, set
-    abstract meta: obj with get, set
+    abstract meta: D1ResponseMeta with get, set
     abstract error: unit option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (success: bool, meta: obj, ?error: unit) : D1Response = jsNative
+    static member Create (success: bool, meta: D1ResponseMeta, ?error: unit) : D1Response = jsNative
 
-[<Erase>]
-type D1Result<'T> = private D1Result__ of obj
+type D1ResponseMeta =
+    inherit D1Meta
+    abstract duration: float with get, set
+    abstract size_after: float with get, set
+    abstract rows_read: float with get, set
+    abstract rows_written: float with get, set
+    abstract last_row_id: float with get, set
+    abstract changed_db: bool with get, set
+    abstract changes: float with get, set
+    /// <summary>
+    /// The region of the database instance that executed the query.
+    /// </summary>
+    abstract served_by_region: string option with get, set
+    /// <summary>
+    /// The three letters airport code of the colo that executed the query.
+    /// </summary>
+    abstract served_by_colo: string option with get, set
+    /// <summary>
+    /// True if-and-only-if the database instance that executed the query was the primary.
+    /// </summary>
+    abstract served_by_primary: bool option with get, set
+    abstract timings: D1MetaTimings option with get, set
+    /// <summary>
+    /// Number of total attempts to execute the query, due to automatic retries.
+    /// Note: All other fields in the response like <c>timings</c> only apply to the last attempt.
+    /// </summary>
+    abstract total_attempts: float option with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
+
+[<Interface>]
+type D1Result<'T> =
+    inherit D1Response
+    abstract success: bool with get, set
+    abstract meta: D1ResponseMeta with get, set
+    abstract error: unit option with get, set
+    abstract results: 'T[] with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (success: bool, meta: D1ResponseMeta, results: 'T[], ?error: unit) : D1Result<'T> = jsNative
 
 [<Interface>]
 type D1ExecResult =
@@ -15756,6 +21959,36 @@ type D1Database =
     abstract dump: unit -> JS.Promise<JS.ArrayBuffer>
 
 [<Interface>]
+type D1DatabaseBatchResultItemItem<'T> =
+    inherit D1Response
+    abstract success: bool with get, set
+    abstract meta: D1ResponseMeta with get, set
+    abstract error: unit option with get, set
+    abstract results: 'T[] with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (success: bool, meta: D1ResponseMeta, results: 'T[], ?error: unit) : D1DatabaseBatchResultItemItem<'T> = jsNative
+
+[<Interface>]
+type D1DatabaseSessionBatchResultItemItem<'T> =
+    inherit D1Response
+    abstract success: bool with get, set
+    abstract meta: D1ResponseMeta with get, set
+    abstract error: unit option with get, set
+    abstract results: 'T[] with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (success: bool, meta: D1ResponseMeta, results: 'T[], ?error: unit) : D1DatabaseSessionBatchResultItemItem<'T> = jsNative
+
+[<Interface>]
+type D1PreparedStatementAllResultItem<'T> =
+    inherit D1Response
+    abstract success: bool with get, set
+    abstract meta: D1ResponseMeta with get, set
+    abstract error: unit option with get, set
+    abstract results: 'T[] with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (success: bool, meta: D1ResponseMeta, results: 'T[], ?error: unit) : D1PreparedStatementAllResultItem<'T> = jsNative
+
+[<Interface>]
 type D1PreparedStatementRawOptions =
     abstract columnNames: bool with get, set
     [<ParamObject; Emit("$0")>]
@@ -15766,6 +21999,16 @@ type D1PreparedStatementRawOptions2 =
     abstract columnNames: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?columnNames: bool) : D1PreparedStatementRawOptions2 = jsNative
+
+[<Interface>]
+type D1PreparedStatementRunResultItem<'T> =
+    inherit D1Response
+    abstract success: bool with get, set
+    abstract meta: D1ResponseMeta with get, set
+    abstract error: unit option with get, set
+    abstract results: 'T[] with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (success: bool, meta: D1ResponseMeta, results: 'T[], ?error: unit) : D1PreparedStatementRunResultItem<'T> = jsNative
 
 type D1DatabaseSession =
     abstract prepare: query: string -> D1PreparedStatement
@@ -15893,7 +22136,787 @@ type EmailAddress =
 /// Recipient fields for <c>SendEmail.send()</c>. At least one of <c>to</c>, <c>cc</c>, or
 /// <c>bcc</c> must be provided.
 /// </summary>
-type EmailDestinations = obj
+type EmailDestinations = U3<EmailDestinations2, EmailDestinations3, EmailDestinations4>
+
+[<Interface>]
+type EmailDestinations2 =
+    abstract ``to``: obj with get, set
+    abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
+    abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``to``: obj, ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailDestinations2 = jsNative
+
+type EmailDestinations2To =
+    inherit EmailAddress
+    /// <summary>
+    /// Gets or sets the length of the array. This is a number one higher than the highest index in the array.
+    /// </summary>
+    abstract length: float with get, set
+    /// <summary>
+    /// Returns a string representation of an array.
+    /// </summary>
+    abstract toString: obj with get, set
+    /// <summary>
+    /// Returns a string representation of an array. The elements are converted to string using their toLocaleString methods.
+    /// </summary>
+    abstract toLocaleString: obj with get, set
+    /// <summary>
+    /// Removes the last element from an array and returns it.
+    /// If the array is empty, undefined is returned and the array is not modified.
+    /// </summary>
+    abstract pop: obj with get, set
+    /// <summary>
+    /// Appends new elements to the end of an array, and returns the new length of the array.
+    /// </summary>
+    /// <remarks>@param items New elements to add to the array.</remarks>
+    abstract push: obj with get, set
+    /// <summary>
+    /// Combines two or more arrays.
+    /// This method returns a new array without modifying any existing arrays.
+    /// </summary>
+    /// <remarks>@param items Additional arrays and/or items to add to the end of the array.</remarks>
+    /// <remarks>@param items Additional arrays and/or items to add to the end of the array.</remarks>
+    abstract concat: obj with get, set
+    /// <summary>
+    /// Adds all the elements of an array into a string, separated by the specified separator string.
+    /// </summary>
+    /// <remarks>@param separator A string used to separate one element of the array from the next in the resulting string. If omitted, the array elements are separated with a comma.</remarks>
+    abstract join: obj with get, set
+    /// <summary>
+    /// Reverses the elements in an array in place.
+    /// This method mutates the array and returns a reference to the same array.
+    /// </summary>
+    abstract reverse: obj with get, set
+    /// <summary>
+    /// Removes the first element from an array and returns it.
+    /// If the array is empty, undefined is returned and the array is not modified.
+    /// </summary>
+    abstract shift: obj with get, set
+    /// <summary>
+    /// Returns a copy of a section of an array.
+    /// For both start and end, a negative index can be used to indicate an offset from the end of the array.
+    /// For example, -2 refers to the second to last element of the array.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// start The beginning index of the specified portion of the array.
+    /// If start is undefined, then the slice begins at index 0.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// end The end index of the specified portion of the array. This is exclusive of the element at the index 'end'.
+    /// If end is undefined, then the slice extends to the end of the array.
+    /// </remarks>
+    abstract slice: obj with get, set
+    /// <summary>
+    /// Sorts an array in place.
+    /// This method mutates the array and returns a reference to the same array.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// compareFn Function used to determine the order of the elements. It is expected to return
+    /// a negative value if the first argument is less than the second argument, zero if they're equal, and a positive
+    /// value otherwise. If omitted, the elements are sorted in ascending, UTF-16 code unit order.
+    /// <code lang="ts">
+    /// [11,2,22,1].sort((a, b) =&gt; a - b)
+    /// </code>
+    /// </remarks>
+    abstract sort: obj with get, set
+    /// <summary>
+    /// Removes elements from an array and, if necessary, inserts new elements in their place, returning the deleted elements.
+    /// </summary>
+    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
+    /// <remarks>
+    /// @param
+    /// deleteCount The number of elements to remove. Omitting this argument will remove all elements from the start
+    /// paramater location to end of the array. If value of this argument is either a negative number, zero, undefined, or a type
+    /// that cannot be converted to an integer, the function will evaluate the argument as zero and not remove any elements.
+    /// </remarks>
+    /// <remarks>@returns An array containing the elements that were deleted.</remarks>
+    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
+    /// <remarks>
+    /// @param
+    /// deleteCount The number of elements to remove. If value of this argument is either a negative number, zero,
+    /// undefined, or a type that cannot be converted to an integer, the function will evaluate the argument as zero and
+    /// not remove any elements.
+    /// </remarks>
+    /// <remarks>@param items Elements to insert into the array in place of the deleted elements.</remarks>
+    /// <remarks>@returns An array containing the elements that were deleted.</remarks>
+    abstract splice: obj with get, set
+    /// <summary>
+    /// Inserts new elements at the start of an array, and returns the new length of the array.
+    /// </summary>
+    /// <remarks>@param items Elements to insert at the start of the array.</remarks>
+    abstract unshift: obj with get, set
+    /// <summary>
+    /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
+    /// </summary>
+    /// <remarks>@param searchElement The value to locate in the array.</remarks>
+    /// <remarks>@param fromIndex The array index at which to begin the search. If fromIndex is omitted, the search starts at index 0.</remarks>
+    abstract indexOf: obj with get, set
+    /// <summary>
+    /// Returns the index of the last occurrence of a specified value in an array, or -1 if it is not present.
+    /// </summary>
+    /// <remarks>@param searchElement The value to locate in the array.</remarks>
+    /// <remarks>@param fromIndex The array index at which to begin searching backward. If fromIndex is omitted, the search starts at the last index in the array.</remarks>
+    abstract lastIndexOf: obj with get, set
+    /// <summary>
+    /// Determines whether all the members of an array satisfy the specified test.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate A function that accepts up to three arguments. The every method calls
+    /// the predicate function for each element in the array until the predicate returns a value
+    /// which is coercible to the Boolean value false, or until the end of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg An object to which the this keyword can refer in the predicate function.
+    /// If thisArg is omitted, undefined is used as the this value.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// predicate A function that accepts up to three arguments. The every method calls
+    /// the predicate function for each element in the array until the predicate returns a value
+    /// which is coercible to the Boolean value false, or until the end of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg An object to which the this keyword can refer in the predicate function.
+    /// If thisArg is omitted, undefined is used as the this value.
+    /// </remarks>
+    abstract every: obj with get, set
+    /// <summary>
+    /// Determines whether the specified callback function returns true for any element of an array.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate A function that accepts up to three arguments. The some method calls
+    /// the predicate function for each element in the array until the predicate returns a value
+    /// which is coercible to the Boolean value true, or until the end of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg An object to which the this keyword can refer in the predicate function.
+    /// If thisArg is omitted, undefined is used as the this value.
+    /// </remarks>
+    abstract some: obj with get, set
+    /// <summary>
+    /// Performs the specified action for each element in an array.
+    /// </summary>
+    /// <remarks>@param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.</remarks>
+    abstract forEach: obj with get, set
+    /// <summary>
+    /// Calls a defined callback function on each element of an array, and returns an array that contains the results.
+    /// </summary>
+    /// <remarks>@param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.</remarks>
+    abstract map: obj with get, set
+    /// <summary>
+    /// Returns the elements of an array that meet the condition specified in a callback function.
+    /// </summary>
+    /// <remarks>@param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.</remarks>
+    /// <remarks>@param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.</remarks>
+    /// <remarks>@param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.</remarks>
+    /// <remarks>@param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.</remarks>
+    abstract filter: obj with get, set
+    /// <summary>
+    /// Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+    /// </summary>
+    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
+    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
+    abstract reduce: obj with get, set
+    /// <summary>
+    /// Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+    /// </summary>
+    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
+    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
+    abstract reduceRight: obj with get, set
+    /// <summary>
+    /// Returns the value of the first element in the array where predicate is true, and undefined
+    /// otherwise.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate find calls predicate once for each element of the array, in ascending
+    /// order, until it finds one where predicate returns true. If such an element is found, find
+    /// immediately returns that element value. Otherwise, find returns undefined.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg If provided, it will be used as the this value for each invocation of
+    /// predicate. If it is not provided, undefined is used instead.
+    /// </remarks>
+    abstract find: obj with get, set
+    /// <summary>
+    /// Returns the index of the first element in the array where predicate is true, and -1
+    /// otherwise.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate find calls predicate once for each element of the array, in ascending
+    /// order, until it finds one where predicate returns true. If such an element is found,
+    /// findIndex immediately returns that element index. Otherwise, findIndex returns -1.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg If provided, it will be used as the this value for each invocation of
+    /// predicate. If it is not provided, undefined is used instead.
+    /// </remarks>
+    abstract findIndex: obj with get, set
+    /// <summary>
+    /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
+    /// </summary>
+    /// <remarks>@param value value to fill array section with</remarks>
+    /// <remarks>
+    /// @param
+    /// start index to start filling the array at. If start is negative, it is treated as
+    /// length+start where length is the length of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// end index to stop filling the array at. If end is negative, it is treated as
+    /// length+end.
+    /// </remarks>
+    abstract fill: obj with get, set
+    /// <summary>
+    /// Returns the this object after copying a section of the array identified by start and end
+    /// to the same array starting at position target
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// target If target is negative, it is treated as length+target where length is the
+    /// length of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// start If start is negative, it is treated as length+start. If end is negative, it
+    /// is treated as length+end.
+    /// </remarks>
+    /// <remarks>@param end If not specified, length of the this object is used as its default value.</remarks>
+    abstract copyWithin: obj with get, set
+    /// <summary>
+    /// Returns an iterable of key, value pairs for every entry in the array
+    /// </summary>
+    abstract entries: obj with get, set
+    /// <summary>
+    /// Returns an iterable of keys in the array
+    /// </summary>
+    abstract keys: obj with get, set
+    /// <summary>
+    /// Returns an iterable of values in the array
+    /// </summary>
+    abstract values: obj with get, set
+    /// <summary>
+    /// Determines whether an array includes a certain element, returning true or false as appropriate.
+    /// </summary>
+    /// <remarks>@param searchElement The element to search for.</remarks>
+    /// <remarks>@param fromIndex The position in this array at which to begin searching for searchElement.</remarks>
+    abstract includes: obj with get, set
+    /// <summary>
+    /// Calls a defined callback function on each element of an array. Then, flattens the result into
+    /// a new array.
+    /// This is identical to a map followed by flat with depth 1.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// callback A function that accepts up to three arguments. The flatMap method calls the
+    /// callback function one time for each element in the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg An object to which the this keyword can refer in the callback function. If
+    /// thisArg is omitted, undefined is used as the this value.
+    /// </remarks>
+    abstract flatMap: obj with get, set
+    /// <summary>
+    /// Returns a new array with all sub-array elements concatenated into it recursively up to the
+    /// specified depth.
+    /// </summary>
+    /// <remarks>@param depth The maximum recursion depth</remarks>
+    abstract flat: obj with get, set
+    /// <summary>
+    /// Returns the item located at the specified index.
+    /// </summary>
+    /// <remarks>@param index The zero-based index of the desired code unit. A negative index will count back from the last item.</remarks>
+    abstract at: obj with get, set
+    /// <summary>
+    /// Returns the value of the last element in the array where predicate is true, and undefined
+    /// otherwise.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate findLast calls predicate once for each element of the array, in descending
+    /// order, until it finds one where predicate returns true. If such an element is found, findLast
+    /// immediately returns that element value. Otherwise, findLast returns undefined.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg If provided, it will be used as the this value for each invocation of
+    /// predicate. If it is not provided, undefined is used instead.
+    /// </remarks>
+    abstract findLast: obj with get, set
+    /// <summary>
+    /// Returns the index of the last element in the array where predicate is true, and -1
+    /// otherwise.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate findLastIndex calls predicate once for each element of the array, in descending
+    /// order, until it finds one where predicate returns true. If such an element is found,
+    /// findLastIndex immediately returns that element index. Otherwise, findLastIndex returns -1.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg If provided, it will be used as the this value for each invocation of
+    /// predicate. If it is not provided, undefined is used instead.
+    /// </remarks>
+    abstract findLastIndex: obj with get, set
+    /// <summary>
+    /// Returns a copy of an array with its elements reversed.
+    /// </summary>
+    abstract toReversed: obj with get, set
+    /// <summary>
+    /// Returns a copy of an array with its elements sorted.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// compareFn Function used to determine the order of the elements. It is expected to return
+    /// a negative value if the first argument is less than the second argument, zero if they're equal, and a positive
+    /// value otherwise. If omitted, the elements are sorted in ascending, UTF-16 code unit order.
+    /// <code lang="ts">
+    /// [11, 2, 22, 1].toSorted((a, b) =&gt; a - b) // [1, 2, 11, 22]
+    /// </code>
+    /// </remarks>
+    abstract toSorted: obj with get, set
+    /// <summary>
+    /// Copies an array and removes elements and, if necessary, inserts new elements in their place. Returns the copied array.
+    /// Copies an array and removes elements while returning the remaining elements.
+    /// </summary>
+    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
+    /// <remarks>@param deleteCount The number of elements to remove.</remarks>
+    /// <remarks>@param items Elements to insert into the copied array in place of the deleted elements.</remarks>
+    /// <remarks>@returns The copied array.</remarks>
+    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
+    /// <remarks>@param deleteCount The number of elements to remove.</remarks>
+    /// <remarks>@returns A copy of the original array with the remaining elements.</remarks>
+    abstract toSpliced: obj with get, set
+    /// <summary>
+    /// Copies an array, then overwrites the value at the provided index with the
+    /// given value. If the index is negative, then it replaces from the end
+    /// of the array.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// index The index of the value to overwrite. If the index is
+    /// negative, then it replaces from the end of the array.
+    /// </remarks>
+    /// <remarks>@param value The value to write into the copied array.</remarks>
+    /// <remarks>@returns The copied array with the updated value.</remarks>
+    abstract ``with``: obj with get, set
+    abstract name: string with get, set
+    abstract email: string with get, set
+    [<EmitIndexer>]
+    abstract Item: float -> U2<string, EmailAddress> with get, set
+
+type EmailDestinations2To2 =
+    inherit EmailAddress
+    abstract name: string with get, set
+    abstract email: string with get, set
+    /// <summary>
+    /// Gets or sets the length of the array. This is a number one higher than the highest index in the array.
+    /// </summary>
+    abstract length: float with get, set
+    /// <summary>
+    /// Returns a string representation of an array.
+    /// </summary>
+    abstract toString: obj with get, set
+    /// <summary>
+    /// Returns a string representation of an array. The elements are converted to string using their toLocaleString methods.
+    /// </summary>
+    abstract toLocaleString: obj with get, set
+    /// <summary>
+    /// Removes the last element from an array and returns it.
+    /// If the array is empty, undefined is returned and the array is not modified.
+    /// </summary>
+    abstract pop: obj with get, set
+    /// <summary>
+    /// Appends new elements to the end of an array, and returns the new length of the array.
+    /// </summary>
+    /// <remarks>@param items New elements to add to the array.</remarks>
+    abstract push: obj with get, set
+    /// <summary>
+    /// Combines two or more arrays.
+    /// This method returns a new array without modifying any existing arrays.
+    /// </summary>
+    /// <remarks>@param items Additional arrays and/or items to add to the end of the array.</remarks>
+    /// <remarks>@param items Additional arrays and/or items to add to the end of the array.</remarks>
+    abstract concat: obj with get, set
+    /// <summary>
+    /// Adds all the elements of an array into a string, separated by the specified separator string.
+    /// </summary>
+    /// <remarks>@param separator A string used to separate one element of the array from the next in the resulting string. If omitted, the array elements are separated with a comma.</remarks>
+    abstract join: obj with get, set
+    /// <summary>
+    /// Reverses the elements in an array in place.
+    /// This method mutates the array and returns a reference to the same array.
+    /// </summary>
+    abstract reverse: obj with get, set
+    /// <summary>
+    /// Removes the first element from an array and returns it.
+    /// If the array is empty, undefined is returned and the array is not modified.
+    /// </summary>
+    abstract shift: obj with get, set
+    /// <summary>
+    /// Returns a copy of a section of an array.
+    /// For both start and end, a negative index can be used to indicate an offset from the end of the array.
+    /// For example, -2 refers to the second to last element of the array.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// start The beginning index of the specified portion of the array.
+    /// If start is undefined, then the slice begins at index 0.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// end The end index of the specified portion of the array. This is exclusive of the element at the index 'end'.
+    /// If end is undefined, then the slice extends to the end of the array.
+    /// </remarks>
+    abstract slice: obj with get, set
+    /// <summary>
+    /// Sorts an array in place.
+    /// This method mutates the array and returns a reference to the same array.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// compareFn Function used to determine the order of the elements. It is expected to return
+    /// a negative value if the first argument is less than the second argument, zero if they're equal, and a positive
+    /// value otherwise. If omitted, the elements are sorted in ascending, UTF-16 code unit order.
+    /// <code lang="ts">
+    /// [11,2,22,1].sort((a, b) =&gt; a - b)
+    /// </code>
+    /// </remarks>
+    abstract sort: obj with get, set
+    /// <summary>
+    /// Removes elements from an array and, if necessary, inserts new elements in their place, returning the deleted elements.
+    /// </summary>
+    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
+    /// <remarks>
+    /// @param
+    /// deleteCount The number of elements to remove. Omitting this argument will remove all elements from the start
+    /// paramater location to end of the array. If value of this argument is either a negative number, zero, undefined, or a type
+    /// that cannot be converted to an integer, the function will evaluate the argument as zero and not remove any elements.
+    /// </remarks>
+    /// <remarks>@returns An array containing the elements that were deleted.</remarks>
+    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
+    /// <remarks>
+    /// @param
+    /// deleteCount The number of elements to remove. If value of this argument is either a negative number, zero,
+    /// undefined, or a type that cannot be converted to an integer, the function will evaluate the argument as zero and
+    /// not remove any elements.
+    /// </remarks>
+    /// <remarks>@param items Elements to insert into the array in place of the deleted elements.</remarks>
+    /// <remarks>@returns An array containing the elements that were deleted.</remarks>
+    abstract splice: obj with get, set
+    /// <summary>
+    /// Inserts new elements at the start of an array, and returns the new length of the array.
+    /// </summary>
+    /// <remarks>@param items Elements to insert at the start of the array.</remarks>
+    abstract unshift: obj with get, set
+    /// <summary>
+    /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
+    /// </summary>
+    /// <remarks>@param searchElement The value to locate in the array.</remarks>
+    /// <remarks>@param fromIndex The array index at which to begin the search. If fromIndex is omitted, the search starts at index 0.</remarks>
+    abstract indexOf: obj with get, set
+    /// <summary>
+    /// Returns the index of the last occurrence of a specified value in an array, or -1 if it is not present.
+    /// </summary>
+    /// <remarks>@param searchElement The value to locate in the array.</remarks>
+    /// <remarks>@param fromIndex The array index at which to begin searching backward. If fromIndex is omitted, the search starts at the last index in the array.</remarks>
+    abstract lastIndexOf: obj with get, set
+    /// <summary>
+    /// Determines whether all the members of an array satisfy the specified test.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate A function that accepts up to three arguments. The every method calls
+    /// the predicate function for each element in the array until the predicate returns a value
+    /// which is coercible to the Boolean value false, or until the end of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg An object to which the this keyword can refer in the predicate function.
+    /// If thisArg is omitted, undefined is used as the this value.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// predicate A function that accepts up to three arguments. The every method calls
+    /// the predicate function for each element in the array until the predicate returns a value
+    /// which is coercible to the Boolean value false, or until the end of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg An object to which the this keyword can refer in the predicate function.
+    /// If thisArg is omitted, undefined is used as the this value.
+    /// </remarks>
+    abstract every: obj with get, set
+    /// <summary>
+    /// Determines whether the specified callback function returns true for any element of an array.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate A function that accepts up to three arguments. The some method calls
+    /// the predicate function for each element in the array until the predicate returns a value
+    /// which is coercible to the Boolean value true, or until the end of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg An object to which the this keyword can refer in the predicate function.
+    /// If thisArg is omitted, undefined is used as the this value.
+    /// </remarks>
+    abstract some: obj with get, set
+    /// <summary>
+    /// Performs the specified action for each element in an array.
+    /// </summary>
+    /// <remarks>@param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.</remarks>
+    abstract forEach: obj with get, set
+    /// <summary>
+    /// Calls a defined callback function on each element of an array, and returns an array that contains the results.
+    /// </summary>
+    /// <remarks>@param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.</remarks>
+    abstract map: obj with get, set
+    /// <summary>
+    /// Returns the elements of an array that meet the condition specified in a callback function.
+    /// </summary>
+    /// <remarks>@param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.</remarks>
+    /// <remarks>@param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.</remarks>
+    /// <remarks>@param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.</remarks>
+    /// <remarks>@param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.</remarks>
+    abstract filter: obj with get, set
+    /// <summary>
+    /// Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+    /// </summary>
+    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
+    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
+    abstract reduce: obj with get, set
+    /// <summary>
+    /// Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+    /// </summary>
+    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
+    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.</remarks>
+    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
+    abstract reduceRight: obj with get, set
+    /// <summary>
+    /// Returns the value of the first element in the array where predicate is true, and undefined
+    /// otherwise.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate find calls predicate once for each element of the array, in ascending
+    /// order, until it finds one where predicate returns true. If such an element is found, find
+    /// immediately returns that element value. Otherwise, find returns undefined.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg If provided, it will be used as the this value for each invocation of
+    /// predicate. If it is not provided, undefined is used instead.
+    /// </remarks>
+    abstract find: obj with get, set
+    /// <summary>
+    /// Returns the index of the first element in the array where predicate is true, and -1
+    /// otherwise.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate find calls predicate once for each element of the array, in ascending
+    /// order, until it finds one where predicate returns true. If such an element is found,
+    /// findIndex immediately returns that element index. Otherwise, findIndex returns -1.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg If provided, it will be used as the this value for each invocation of
+    /// predicate. If it is not provided, undefined is used instead.
+    /// </remarks>
+    abstract findIndex: obj with get, set
+    /// <summary>
+    /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
+    /// </summary>
+    /// <remarks>@param value value to fill array section with</remarks>
+    /// <remarks>
+    /// @param
+    /// start index to start filling the array at. If start is negative, it is treated as
+    /// length+start where length is the length of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// end index to stop filling the array at. If end is negative, it is treated as
+    /// length+end.
+    /// </remarks>
+    abstract fill: obj with get, set
+    /// <summary>
+    /// Returns the this object after copying a section of the array identified by start and end
+    /// to the same array starting at position target
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// target If target is negative, it is treated as length+target where length is the
+    /// length of the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// start If start is negative, it is treated as length+start. If end is negative, it
+    /// is treated as length+end.
+    /// </remarks>
+    /// <remarks>@param end If not specified, length of the this object is used as its default value.</remarks>
+    abstract copyWithin: obj with get, set
+    /// <summary>
+    /// Returns an iterable of key, value pairs for every entry in the array
+    /// </summary>
+    abstract entries: obj with get, set
+    /// <summary>
+    /// Returns an iterable of keys in the array
+    /// </summary>
+    abstract keys: obj with get, set
+    /// <summary>
+    /// Returns an iterable of values in the array
+    /// </summary>
+    abstract values: obj with get, set
+    /// <summary>
+    /// Determines whether an array includes a certain element, returning true or false as appropriate.
+    /// </summary>
+    /// <remarks>@param searchElement The element to search for.</remarks>
+    /// <remarks>@param fromIndex The position in this array at which to begin searching for searchElement.</remarks>
+    abstract includes: obj with get, set
+    /// <summary>
+    /// Calls a defined callback function on each element of an array. Then, flattens the result into
+    /// a new array.
+    /// This is identical to a map followed by flat with depth 1.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// callback A function that accepts up to three arguments. The flatMap method calls the
+    /// callback function one time for each element in the array.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg An object to which the this keyword can refer in the callback function. If
+    /// thisArg is omitted, undefined is used as the this value.
+    /// </remarks>
+    abstract flatMap: obj with get, set
+    /// <summary>
+    /// Returns a new array with all sub-array elements concatenated into it recursively up to the
+    /// specified depth.
+    /// </summary>
+    /// <remarks>@param depth The maximum recursion depth</remarks>
+    abstract flat: obj with get, set
+    /// <summary>
+    /// Returns the item located at the specified index.
+    /// </summary>
+    /// <remarks>@param index The zero-based index of the desired code unit. A negative index will count back from the last item.</remarks>
+    abstract at: obj with get, set
+    /// <summary>
+    /// Returns the value of the last element in the array where predicate is true, and undefined
+    /// otherwise.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate findLast calls predicate once for each element of the array, in descending
+    /// order, until it finds one where predicate returns true. If such an element is found, findLast
+    /// immediately returns that element value. Otherwise, findLast returns undefined.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg If provided, it will be used as the this value for each invocation of
+    /// predicate. If it is not provided, undefined is used instead.
+    /// </remarks>
+    abstract findLast: obj with get, set
+    /// <summary>
+    /// Returns the index of the last element in the array where predicate is true, and -1
+    /// otherwise.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// predicate findLastIndex calls predicate once for each element of the array, in descending
+    /// order, until it finds one where predicate returns true. If such an element is found,
+    /// findLastIndex immediately returns that element index. Otherwise, findLastIndex returns -1.
+    /// </remarks>
+    /// <remarks>
+    /// @param
+    /// thisArg If provided, it will be used as the this value for each invocation of
+    /// predicate. If it is not provided, undefined is used instead.
+    /// </remarks>
+    abstract findLastIndex: obj with get, set
+    /// <summary>
+    /// Returns a copy of an array with its elements reversed.
+    /// </summary>
+    abstract toReversed: obj with get, set
+    /// <summary>
+    /// Returns a copy of an array with its elements sorted.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// compareFn Function used to determine the order of the elements. It is expected to return
+    /// a negative value if the first argument is less than the second argument, zero if they're equal, and a positive
+    /// value otherwise. If omitted, the elements are sorted in ascending, UTF-16 code unit order.
+    /// <code lang="ts">
+    /// [11, 2, 22, 1].toSorted((a, b) =&gt; a - b) // [1, 2, 11, 22]
+    /// </code>
+    /// </remarks>
+    abstract toSorted: obj with get, set
+    /// <summary>
+    /// Copies an array and removes elements and, if necessary, inserts new elements in their place. Returns the copied array.
+    /// Copies an array and removes elements while returning the remaining elements.
+    /// </summary>
+    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
+    /// <remarks>@param deleteCount The number of elements to remove.</remarks>
+    /// <remarks>@param items Elements to insert into the copied array in place of the deleted elements.</remarks>
+    /// <remarks>@returns The copied array.</remarks>
+    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
+    /// <remarks>@param deleteCount The number of elements to remove.</remarks>
+    /// <remarks>@returns A copy of the original array with the remaining elements.</remarks>
+    abstract toSpliced: obj with get, set
+    /// <summary>
+    /// Copies an array, then overwrites the value at the provided index with the
+    /// given value. If the index is negative, then it replaces from the end
+    /// of the array.
+    /// </summary>
+    /// <remarks>
+    /// @param
+    /// index The index of the value to overwrite. If the index is
+    /// negative, then it replaces from the end of the array.
+    /// </remarks>
+    /// <remarks>@param value The value to write into the copied array.</remarks>
+    /// <remarks>@returns The copied array with the updated value.</remarks>
+    abstract ``with``: obj with get, set
+    [<EmitIndexer>]
+    abstract Item: float -> U2<string, EmailAddress> with get, set
+
+[<Interface>]
+type EmailDestinations3 =
+    abstract ``to``: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
+    abstract cc: obj with get, set
+    abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (cc: obj, ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailDestinations3 = jsNative
+
+[<Interface>]
+type EmailDestinations4 =
+    abstract ``to``: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
+    abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
+    abstract bcc: obj with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (bcc: obj, ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailDestinations4 = jsNative
 
 /// <summary>
 /// Fields shared by all composed emails (no recipients). Used directly by
@@ -15916,7 +22939,55 @@ type EmailReplyMessageBuilder =
 /// Fields for composing an email without constructing raw MIME, for
 /// <c>SendEmail.send()</c>. Requires at least one of <c>to</c>, <c>cc</c>, or <c>bcc</c>.
 /// </summary>
-type EmailMessageBuilder = obj
+type EmailMessageBuilder = U3<EmailMessageBuilder2, EmailMessageBuilder3, EmailMessageBuilder4>
+
+[<Interface>]
+type EmailMessageBuilder2 =
+    inherit EmailReplyMessageBuilder
+    abstract from: U2<string, EmailAddress> with get, set
+    abstract subject: string with get, set
+    abstract replyTo: U2<string, EmailAddress> option with get, set
+    abstract headers: obj option with get, set
+    abstract text: string option with get, set
+    abstract html: string option with get, set
+    abstract attachments: EmailAttachment[] option with get, set
+    abstract ``to``: obj with get, set
+    abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
+    abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (from: U2<string, EmailAddress>, subject: string, ``to``: obj, ?replyTo: U2<string, EmailAddress>, ?headers: obj, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder2 = jsNative
+
+[<Interface>]
+type EmailMessageBuilder3 =
+    inherit EmailReplyMessageBuilder
+    abstract from: U2<string, EmailAddress> with get, set
+    abstract subject: string with get, set
+    abstract replyTo: U2<string, EmailAddress> option with get, set
+    abstract headers: obj option with get, set
+    abstract text: string option with get, set
+    abstract html: string option with get, set
+    abstract attachments: EmailAttachment[] option with get, set
+    abstract ``to``: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
+    abstract cc: obj with get, set
+    abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (from: U2<string, EmailAddress>, subject: string, cc: obj, ?replyTo: U2<string, EmailAddress>, ?headers: obj, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder3 = jsNative
+
+[<Interface>]
+type EmailMessageBuilder4 =
+    inherit EmailReplyMessageBuilder
+    abstract from: U2<string, EmailAddress> with get, set
+    abstract subject: string with get, set
+    abstract replyTo: U2<string, EmailAddress> option with get, set
+    abstract headers: obj option with get, set
+    abstract text: string option with get, set
+    abstract html: string option with get, set
+    abstract attachments: EmailAttachment[] option with get, set
+    abstract ``to``: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
+    abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
+    abstract bcc: obj with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (from: U2<string, EmailAddress>, subject: string, bcc: obj, ?replyTo: U2<string, EmailAddress>, ?headers: obj, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder4 = jsNative
 
 /// <summary>
 /// A binding that allows a Worker to send email messages.
@@ -17040,9 +24111,9 @@ type WorkflowEntrypointRunEventSchedule =
 
 type WorkflowStep =
     abstract ``do``<'T>: name: string * callback: Func<WorkflowStepDoCallbackCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
-    abstract ``do``<'T>: name: string * config: obj * callback: Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
-    abstract ``do``<'T>: name: string * config: obj * callback: Func<WorkflowStepDoCallbackCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
-    abstract ``do``<'T>: name: string * config: WorkflowStepDoConfig * callback: Func<WorkflowStepDoCallbackCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
+    abstract ``do``<'T>: name: string * config: WorkflowStepDoConfig * callback: Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
+    abstract ``do``<'T>: name: string * config: WorkflowStepDoConfig2 * callback: Func<WorkflowStepDoCallbackCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
+    abstract ``do``<'T>: name: string * config: WorkflowStepDoConfig3 * callback: Func<WorkflowStepDoCallbackCtx, JS.Promise<'T>> * ?rollbackOptions: obj -> JS.Promise<'T>
     abstract sleep: Func<string, WorkflowSleepDuration, JS.Promise<unit>> with get, set
     abstract sleepUntil: Func<string, U2<float, JS.Date>, JS.Promise<unit>> with get, set
     abstract waitForEvent: name: string * options: WorkflowStepWaitForEventOptions -> JS.Promise<obj>
@@ -17057,11 +24128,20 @@ type WorkflowStepDoCallbackCtx =
 
 [<Interface>]
 type WorkflowStepDoCallbackCtxConfig =
-    abstract retries: obj option with get, set
+    abstract retries: WorkflowStepDoCallbackCtxConfigRetries option with get, set
     abstract timeout: WorkflowSleepDuration option with get, set
     abstract sensitive: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?retries: obj, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepDoCallbackCtxConfig = jsNative
+    static member Create (?retries: WorkflowStepDoCallbackCtxConfigRetries, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepDoCallbackCtxConfig = jsNative
+
+[<Interface>]
+type WorkflowStepDoCallbackCtxConfigRetries =
+    inherit WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfigRetries
+    abstract limit: float with get, set
+    abstract backoff: GatewayRetriesBackoff option with get, set
+    abstract delay: WorkflowSleepDuration with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (limit: float, delay: WorkflowSleepDuration, ?backoff: GatewayRetriesBackoff) : WorkflowStepDoCallbackCtxConfigRetries = jsNative
 
 [<Interface>]
 type WorkflowStepDoCallbackCtxStep =
@@ -17072,11 +24152,43 @@ type WorkflowStepDoCallbackCtxStep =
 
 [<Interface>]
 type WorkflowStepDoConfig =
+    abstract timeout: WorkflowSleepDuration option with get, set
+    abstract sensitive: string option with get, set
+    abstract retries: WorkflowStepDoConfigRetries with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (retries: WorkflowStepDoConfigRetries, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepDoConfig = jsNative
+
+[<Interface>]
+type WorkflowStepDoConfig2 =
+    abstract timeout: WorkflowSleepDuration option with get, set
+    abstract sensitive: string option with get, set
+    abstract retries: WorkflowStepDoConfig2Retries option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?timeout: WorkflowSleepDuration, ?sensitive: string, ?retries: WorkflowStepDoConfig2Retries) : WorkflowStepDoConfig2 = jsNative
+
+[<Interface>]
+type WorkflowStepDoConfig2Retries =
+    abstract limit: float with get, set
+    abstract delay: WorkflowSleepDuration with get, set
+    abstract backoff: GatewayRetriesBackoff option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (limit: float, delay: WorkflowSleepDuration, ?backoff: GatewayRetriesBackoff) : WorkflowStepDoConfig2Retries = jsNative
+
+[<Interface>]
+type WorkflowStepDoConfig3 =
     abstract retries: WorkflowStepDoRollbackOptionsRollbackConfigRetries option with get, set
     abstract timeout: WorkflowSleepDuration option with get, set
     abstract sensitive: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?retries: WorkflowStepDoRollbackOptionsRollbackConfigRetries, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepDoConfig = jsNative
+    static member Create (?retries: WorkflowStepDoRollbackOptionsRollbackConfigRetries, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepDoConfig3 = jsNative
+
+[<Interface>]
+type WorkflowStepDoConfigRetries =
+    abstract limit: float with get, set
+    abstract delay: Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput, obj> with get, set
+    abstract backoff: GatewayRetriesBackoff option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (limit: float, delay: Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput, obj>, ?backoff: GatewayRetriesBackoff) : WorkflowStepDoConfigRetries = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions<'T> =
@@ -18119,11 +25231,18 @@ type ConversionResponse = U2<ConversionResponse2, ConversionResponse3>
 
 [<Interface>]
 type ImageConversionOptions =
-    abstract descriptionLanguage: ImageConversionOptionsDescriptionLanguage option with get, set
+    abstract descriptionLanguage: ConversionOptionsHtmlImagesDescriptionLanguage option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?descriptionLanguage: ImageConversionOptionsDescriptionLanguage) : ImageConversionOptions = jsNative
+    static member Create (?descriptionLanguage: ConversionOptionsHtmlImagesDescriptionLanguage) : ImageConversionOptions = jsNative
 
-type EmbeddedImageConversionOptions = obj
+[<Interface>]
+type EmbeddedImageConversionOptions =
+    inherit ImageConversionOptions
+    abstract descriptionLanguage: ConversionOptionsHtmlImagesDescriptionLanguage option with get, set
+    abstract convert: bool option with get, set
+    abstract maxConvertedImages: float option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?descriptionLanguage: ConversionOptionsHtmlImagesDescriptionLanguage, ?convert: bool, ?maxConvertedImages: float) : EmbeddedImageConversionOptions = jsNative
 
 [<Interface>]
 type ConversionOutputOptions =
@@ -18331,17 +25450,40 @@ type VectorizeVector =
 /// <summary>
 /// Represents a matched vector for a query along with its score and (if specified) the matching vector information.
 /// </summary>
-type VectorizeMatch = obj
+[<Interface>]
+type VectorizeMatch =
+    /// <summary>
+    /// The vector values
+    /// </summary>
+    abstract values: U3<float[], JS.Float32Array, JS.Float64Array> option with get, set
+    /// <summary>
+    /// The ID for the vector. This can be user-defined, and must be unique. It should uniquely identify the object, and is best set based on the ID of what the vector represents.
+    /// </summary>
+    abstract id: string with get, set
+    /// <summary>
+    /// The namespace this vector belongs to.
+    /// </summary>
+    abstract ``namespace``: string option with get, set
+    /// <summary>
+    /// Metadata associated with the vector. Includes the values of other fields and potentially additional details.
+    /// </summary>
+    abstract metadata: obj option with get, set
+    /// <summary>
+    /// The score or rank for similarity, when returned as a result
+    /// </summary>
+    abstract score: float with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string, score: float, ?values: U3<float[], JS.Float32Array, JS.Float64Array>, ?``namespace``: string, ?metadata: obj) : VectorizeMatch = jsNative
 
 /// <summary>
 /// A set of matching VectorizeMatch for a particular query.
 /// </summary>
 [<Interface>]
 type VectorizeMatches =
-    abstract matches: obj[] with get, set
+    abstract matches: VectorizeMatch[] with get, set
     abstract count: float with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (matches: obj[], count: float) : VectorizeMatches = jsNative
+    static member Create (matches: VectorizeMatch[], count: float) : VectorizeMatches = jsNative
 
 /// <summary>
 /// Results of an operation that performed a mutation on a set of vectors.

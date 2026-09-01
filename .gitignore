@@ -43,6 +43,9 @@ tests/fixtures/lib-lab/node_modules/
 !tests/fixtures/generics-lab/
 !tests/fixtures/generics-lab/**
 tests/fixtures/generics-lab/node_modules/
+!tests/fixtures/intersection-lab/
+!tests/fixtures/intersection-lab/**
+tests/fixtures/intersection-lab/node_modules/
 # ... and except the pins, which are the tracked half of every npm rung: the install is
 # untracked, so the version it was generated against has to be written down somewhere.
 !tests/fixtures/pins.json

@@ -83,7 +83,12 @@ type Store =
 /// <summary>
 /// An intersection of two object types: a real shape, not a brand.
 /// </summary>
-type Merged = obj
+[<Interface>]
+type Merged =
+    abstract a: string with get, set
+    abstract b: float with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (a: string, b: float) : Merged = jsNative
 
 /// <summary>
 /// A primitive intersected with an object that has a *real* member - not a brand.
@@ -93,7 +98,12 @@ type Counted = obj
 /// <summary>
 /// An object intersected with a branded primitive: still not a branded object.
 /// </summary>
-type Wrapped = obj
+[<Interface>]
+type Wrapped =
+    abstract id: string<UserId> with get, set
+    abstract at: float<Millis> with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string<UserId>, at: float<Millis>) : Wrapped = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

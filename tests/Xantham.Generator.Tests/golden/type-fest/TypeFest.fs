@@ -787,7 +787,56 @@ type AbstractConstructor<'T, 'Arguments> = private AbstractConstructor__ of obj
 /// CamelCase options.
 /// </summary>
 /// <remarks>@see {@link CamelCase}</remarks>
-type CamelCaseOptions = obj
+[<Interface>]
+type CamelCaseOptions =
+    inherit WordsOptions
+    /// <summary>
+    /// Split on numeric sequence.
+    /// </summary>
+    /// <remarks>@default true</remarks>
+    /// <remarks>
+    /// @example
+    /// <code>
+    /// import type {Words} from 'type-fest';
+    ///
+    /// type Example1 = Words&lt;'p2pNetwork', {splitOnNumbers: true}&gt;;
+    /// //=&gt; ['p', '2', 'p', 'Network']
+    ///
+    /// type Example2 = Words&lt;'p2pNetwork', {splitOnNumbers: false}&gt;;
+    /// //=&gt; ['p2p', 'Network']
+    /// </code>
+    /// </remarks>
+    abstract splitOnNumbers: bool option with get, set
+    /// <summary>
+    /// Split on punctuation characters (e.g., <c>#</c>, <c>&amp;</c>, <c>*</c>, <c>:</c>, <c>?</c>, <c>@</c>, <c>~</c>).
+    /// </summary>
+    /// <remarks>
+    /// @example
+    /// <code>
+    /// import type {Words} from 'type-fest';
+    ///
+    /// type Example1 = Words&lt;'hello:world', {splitOnPunctuation: true}&gt;;
+    /// //=&gt; ['hello', 'world']
+    ///
+    /// type Example2 = Words&lt;'hello:world', {splitOnPunctuation: false}&gt;;
+    /// //=&gt; ['hello', ':world']
+    /// </code>
+    /// </remarks>
+    abstract splitOnPunctuation: bool option with get, set
+    /// <summary>
+    /// Whether to preserved consecutive uppercase letter.
+    /// </summary>
+    /// <remarks>@default false</remarks>
+    abstract preserveConsecutiveUppercase: bool option with get, set
+    /// <summary>
+    /// Whether to preserve leading underscores.
+    ///
+    /// This matches the behavior of the [<c>camelcase</c>](https://github.com/sindresorhus/camelcase) package v9+.
+    /// </summary>
+    /// <remarks>@default false</remarks>
+    abstract preserveLeadingUnderscores: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?splitOnNumbers: bool, ?splitOnPunctuation: bool, ?preserveConsecutiveUppercase: bool, ?preserveLeadingUnderscores: bool) : CamelCaseOptions = jsNative
 
 /// <summary>
 /// Convert a string literal to camel-case.
@@ -4330,10 +4379,10 @@ type JsonValue = obj option
 type Jsonifiable = obj option
 
 [<Interface>]
-type Jsonifiable2 =
+type JsonifiableItem =
     abstract toJSON: Func<Jsonifiable option> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (toJSON: Func<Jsonifiable option>) : Jsonifiable2 = jsNative
+    static member Create (toJSON: Func<Jsonifiable option>) : JsonifiableItem = jsNative
 
 /// <summary>
 /// Transform a type to one that is assignable to the <c>JsonValue</c> type.
@@ -6044,7 +6093,523 @@ type OverrideProperties<'TOriginal, 'TOverride> = private OverrideProperties__ o
 /// Type for [npm's <c>package.json</c> file](https://docs.npmjs.com/creating-a-package-json-file). Also includes types for fields used by other popular projects, like TypeScript and Yarn.
 /// </summary>
 /// <remarks>@category File</remarks>
-type PackageJson = obj
+type PackageJson =
+    inherit JsonObject
+    /// <summary>
+    /// Defines which package manager is expected to be used when working on the current project. It can set to any of the [supported package managers](https://nodejs.org/api/corepack.html#supported-package-managers), and will ensure that your teams use the exact same package manager versions without having to install anything else than Node.js.
+    ///
+    /// __This field is currently experimental and needs to be opted-in; check the [Corepack](https://nodejs.org/api/corepack.html) page for details about the procedure.__
+    /// </summary>
+    /// <remarks>
+    /// @example
+    /// <code lang="json">
+    /// {
+    /// 	"packageManager": "&lt;package manager name&gt;@&lt;version&gt;"
+    /// }
+    /// </code>
+    /// </remarks>
+    abstract packageManager: string option with get, set
+    /// <summary>
+    /// The name of the package.
+    /// </summary>
+    abstract name: string option with get, set
+    /// <summary>
+    /// Package version, parseable by [<c>node-semver</c>](https://github.com/npm/node-semver).
+    /// </summary>
+    abstract version: string option with get, set
+    /// <summary>
+    /// Package description, listed in <c>npm search</c>.
+    /// </summary>
+    abstract description: string option with get, set
+    /// <summary>
+    /// Keywords associated with package, listed in <c>npm search</c>.
+    /// </summary>
+    abstract keywords: string[] option with get, set
+    /// <summary>
+    /// The URL to the package's homepage.
+    /// </summary>
+    abstract homepage: obj option with get, set
+    /// <summary>
+    /// The URL to the package's issue tracker and/or the email address to which issues should be reported.
+    /// </summary>
+    abstract bugs: U2<string, PackageJsonBugs> option with get, set
+    /// <summary>
+    /// The license for the package.
+    /// </summary>
+    abstract license: string option with get, set
+    /// <summary>
+    /// The licenses for the package.
+    /// </summary>
+    abstract licenses: PackageJsonLicensesItem[] option with get, set
+    abstract author: U2<string, PackageJsonAuthor> option with get, set
+    /// <summary>
+    /// A list of people who contributed to the package.
+    /// </summary>
+    abstract contributors: U2<string, PackageJsonAuthor>[] option with get, set
+    /// <summary>
+    /// A list of people who maintain the package.
+    /// </summary>
+    abstract maintainers: U2<string, PackageJsonAuthor>[] option with get, set
+    /// <summary>
+    /// The files included in the package.
+    /// </summary>
+    abstract files: string[] option with get, set
+    /// <summary>
+    /// Resolution algorithm for importing ".js" files from the package's scope.
+    ///
+    /// [Read more.](https://nodejs.org/api/esm.html#esm_package_json_type_field)
+    /// </summary>
+    abstract ``type``: PackageJsonType option with get, set
+    /// <summary>
+    /// The module ID that is the primary entry point to the program.
+    /// </summary>
+    abstract main: string option with get, set
+    /// <summary>
+    /// Subpath exports to define entry points of the package.
+    ///
+    /// [Read more.](https://nodejs.org/api/packages.html#subpath-exports)
+    /// </summary>
+    abstract exports: obj option with get, set
+    /// <summary>
+    /// Subpath imports to define internal package import maps that only apply to import specifiers from within the package itself.
+    ///
+    /// [Read more.](https://nodejs.org/api/packages.html#subpath-imports)
+    /// </summary>
+    abstract imports: obj option with get, set
+    /// <summary>
+    /// The executable files that should be installed into the <c>PATH</c>.
+    /// </summary>
+    abstract bin: obj option with get, set
+    /// <summary>
+    /// Filenames to put in place for the <c>man</c> program to find.
+    /// </summary>
+    abstract man: U2<string, string[]> option with get, set
+    /// <summary>
+    /// Indicates the structure of the package.
+    /// </summary>
+    abstract directories: PackageJsonDirectories option with get, set
+    /// <summary>
+    /// Location for the code repository.
+    /// </summary>
+    abstract repository: U2<string, PackageJsonRepository> option with get, set
+    /// <summary>
+    /// Script commands that are run at various times in the lifecycle of the package. The key is the lifecycle event, and the value is the command to run at that point.
+    /// </summary>
+    abstract scripts: PackageJsonScripts option with get, set
+    /// <summary>
+    /// Is used to set configuration parameters used in package scripts that persist across upgrades.
+    /// </summary>
+    abstract config: JsonObject option with get, set
+    /// <summary>
+    /// The dependencies of the package.
+    /// </summary>
+    abstract dependencies: obj option with get, set
+    /// <summary>
+    /// Additional tooling dependencies that are not required for the package to work. Usually test, build, or documentation tooling.
+    /// </summary>
+    abstract devDependencies: obj option with get, set
+    /// <summary>
+    /// Dependencies that are skipped if they fail to install.
+    /// </summary>
+    abstract optionalDependencies: obj option with get, set
+    /// <summary>
+    /// Dependencies that will usually be required by the package user directly or via another dependency.
+    /// </summary>
+    abstract peerDependencies: obj option with get, set
+    /// <summary>
+    /// Indicate peer dependencies that are optional.
+    /// </summary>
+    abstract peerDependenciesMeta: obj option with get, set
+    /// <summary>
+    /// Package names that are bundled when the package is published.
+    /// </summary>
+    abstract bundledDependencies: string[] option with get, set
+    /// <summary>
+    /// Alias of <c>bundledDependencies</c>.
+    /// </summary>
+    abstract bundleDependencies: string[] option with get, set
+    /// <summary>
+    /// Overrides is used to support selective version overrides using npm, which lets you define custom package versions or ranges inside your dependencies.
+    /// </summary>
+    abstract overrides: obj option with get, set
+    /// <summary>
+    /// Engines that this package runs on.
+    /// </summary>
+    abstract engines: PackageJsonEngines option with get, set
+    /// <remarks>@deprecated</remarks>
+    abstract engineStrict: bool option with get, set
+    /// <summary>
+    /// Operating systems the module runs on.
+    /// </summary>
+    abstract os: obj[] option with get, set
+    /// <summary>
+    /// CPU architectures the module runs on.
+    /// </summary>
+    abstract cpu: obj[] option with get, set
+    /// <summary>
+    /// Define the runtime and package manager for developing the current project.
+    /// </summary>
+    abstract devEngines: PackageJsonDevEngines option with get, set
+    /// <summary>
+    /// If set to <c>true</c>, a warning will be shown if package is installed locally. Useful if the package is primarily a command-line application that should be installed globally.
+    /// </summary>
+    /// <remarks>@deprecated</remarks>
+    abstract preferGlobal: bool option with get, set
+    /// <summary>
+    /// If set to <c>true</c>, then npm will refuse to publish it.
+    /// </summary>
+    abstract ``private``: bool option with get, set
+    /// <summary>
+    /// A set of config values that will be used at publish-time. It's especially handy to set the tag, registry or access, to ensure that a given package is not tagged with 'latest', published to the global public registry or that a scoped module is private by default.
+    /// </summary>
+    abstract publishConfig: PackageJsonPublishConfig option with get, set
+    /// <summary>
+    /// Describes and notifies consumers of a package's monetary support information.
+    ///
+    /// [Read more.](https://github.com/npm/rfcs/blob/main/implemented/0017-add-funding-support.md)
+    /// </summary>
+    abstract funding: U2<string, PackageJsonFunding> option with get, set
+    /// <summary>
+    /// Used to configure [npm workspaces](https://docs.npmjs.com/cli/using-npm/workspaces) / [Yarn workspaces](https://classic.yarnpkg.com/docs/workspaces/).
+    ///
+    /// Workspaces allow you to manage multiple packages within the same repository in such a way that you only need to run your install command once in order to install all of them in a single pass.
+    ///
+    /// Please note that the top-level <c>private</c> property of <c>package.json</c> **must** be set to <c>true</c> in order to use workspaces.
+    /// </summary>
+    abstract workspaces: U2<string[], PackageJsonWorkspaces> option with get, set
+    /// <summary>
+    /// An ECMAScript module ID that is the primary entry point to the program.
+    /// </summary>
+    abstract ``module``: string option with get, set
+    /// <summary>
+    /// A module ID with untranspiled code that is the primary entry point to the program.
+    /// </summary>
+    abstract esnext: U2<string, PackageJsonEsnext> option with get, set
+    /// <summary>
+    /// A hint to JavaScript bundlers or component tools when packaging modules for client side use.
+    /// </summary>
+    abstract browser: obj option with get, set
+    /// <summary>
+    /// Denote which files in your project are "pure" and therefore safe for Webpack to prune if unused.
+    ///
+    /// [Read more.](https://webpack.js.org/guides/tree-shaking/)
+    /// </summary>
+    abstract sideEffects: U2<bool, string[]> option with get, set
+    /// <summary>
+    /// Location of the bundled TypeScript declaration file.
+    /// </summary>
+    abstract types: string option with get, set
+    /// <summary>
+    /// Version selection map of TypeScript.
+    /// </summary>
+    abstract typesVersions: obj option with get, set
+    /// <summary>
+    /// Location of the bundled TypeScript declaration file. Alias of <c>types</c>.
+    /// </summary>
+    abstract typings: string option with get, set
+    /// <summary>
+    /// If your package only allows one version of a given dependency, and you’d like to enforce the same behavior as <c>yarn install --flat</c> on the command-line, set this to <c>true</c>.
+    ///
+    /// Note that if your <c>package.json</c> contains <c>"flat": true</c> and other packages depend on yours (e.g. you are building a library rather than an app), those other packages will also need <c>"flat": true</c> in their <c>package.json</c> or be installed with <c>yarn install --flat</c> on the command-line.
+    /// </summary>
+    abstract flat: bool option with get, set
+    /// <summary>
+    /// Selective version resolutions. Allows the definition of custom package versions inside dependencies without manual edits in the <c>yarn.lock</c> file.
+    /// </summary>
+    abstract resolutions: obj option with get, set
+    /// <summary>
+    /// JSPM configuration.
+    /// </summary>
+    abstract jspm: PackageJson option with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> JsonValue option with get, set
+
+[<Interface>]
+type PackageJsonAuthor =
+    abstract name: string with get, set
+    abstract url: string option with get, set
+    abstract email: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (name: string, ?url: string, ?email: string) : PackageJsonAuthor = jsNative
+
+[<Interface>]
+type PackageJsonBugs =
+    /// <summary>
+    /// The URL to the package's issue tracker.
+    /// </summary>
+    abstract url: string option with get, set
+    /// <summary>
+    /// The email address to which issues should be reported.
+    /// </summary>
+    abstract email: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?url: string, ?email: string) : PackageJsonBugs = jsNative
+
+[<Interface>]
+type PackageJsonDevEngines =
+    abstract os: U2<PackageJsonDevEnginesOsItem[], PackageJsonDevEnginesOsItem> option with get, set
+    abstract cpu: U2<PackageJsonDevEnginesOsItem[], PackageJsonDevEnginesOsItem> option with get, set
+    abstract libc: U2<PackageJsonDevEnginesOsItem[], PackageJsonDevEnginesOsItem> option with get, set
+    abstract runtime: U2<PackageJsonDevEnginesOsItem[], PackageJsonDevEnginesOsItem> option with get, set
+    abstract packageManager: U2<PackageJsonDevEnginesOsItem[], PackageJsonDevEnginesOsItem> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?os: U2<PackageJsonDevEnginesOsItem[], PackageJsonDevEnginesOsItem>, ?cpu: U2<PackageJsonDevEnginesOsItem[], PackageJsonDevEnginesOsItem>, ?libc: U2<PackageJsonDevEnginesOsItem[], PackageJsonDevEnginesOsItem>, ?runtime: U2<PackageJsonDevEnginesOsItem[], PackageJsonDevEnginesOsItem>, ?packageManager: U2<PackageJsonDevEnginesOsItem[], PackageJsonDevEnginesOsItem>) : PackageJsonDevEngines = jsNative
+
+[<Interface>]
+type PackageJsonDevEnginesOsItem =
+    abstract name: string with get, set
+    abstract version: string option with get, set
+    abstract onFail: PackageJsonDevEnginesOsItemOnFail option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (name: string, ?version: string, ?onFail: PackageJsonDevEnginesOsItemOnFail) : PackageJsonDevEnginesOsItem = jsNative
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type PackageJsonDevEnginesOsItemOnFail =
+    | [<CompiledName("download")>] Download
+    | [<CompiledName("error")>] Error
+    | [<CompiledName("ignore")>] Ignore
+    | [<CompiledName("warn")>] Warn
+
+type PackageJsonDirectories =
+    /// <summary>
+    /// Location for executable scripts. Sugar to generate entries in the <c>bin</c> property by walking the folder.
+    /// </summary>
+    abstract bin: string option with get, set
+    /// <summary>
+    /// Location for Markdown files.
+    /// </summary>
+    abstract doc: string option with get, set
+    /// <summary>
+    /// Location for example scripts.
+    /// </summary>
+    abstract example: string option with get, set
+    /// <summary>
+    /// Location for the bulk of the library.
+    /// </summary>
+    abstract lib: string option with get, set
+    /// <summary>
+    /// Location for man pages. Sugar to generate a <c>man</c> array by walking the folder.
+    /// </summary>
+    abstract man: string option with get, set
+    /// <summary>
+    /// Location for test files.
+    /// </summary>
+    abstract test: string option with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> JsonValue option with get, set
+
+type PackageJsonEngines =
+    abstract node: string option with get, set
+    abstract npm: string option with get, set
+    [<EmitIndexer>]
+    abstract Item: obj -> string option with get, set
+
+type PackageJsonEsnext =
+    abstract main: string option with get, set
+    abstract browser: string option with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> string option with get, set
+
+[<Interface>]
+type PackageJsonFunding =
+    /// <summary>
+    /// The type of funding.
+    /// </summary>
+    abstract ``type``: obj option with get, set
+    /// <summary>
+    /// The URL to the funding page.
+    /// </summary>
+    abstract url: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (url: string, ?``type``: obj) : PackageJsonFunding = jsNative
+
+[<Interface>]
+type PackageJsonLicensesItem =
+    abstract ``type``: string option with get, set
+    abstract url: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?``type``: string, ?url: string) : PackageJsonLicensesItem = jsNative
+
+[<Interface>]
+type PackageJsonPeerDependenciesMetaItem =
+    abstract optional: bool with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (optional: bool) : PackageJsonPeerDependenciesMetaItem = jsNative
+
+type PackageJsonPublishConfig =
+    /// <summary>
+    /// When publishing scoped packages, the access level defaults to restricted. If you want your scoped package to be publicly viewable (and installable) set <c>--access=public</c>. The only valid values for access are public and restricted. Unscoped packages always have an access level of public.
+    /// </summary>
+    abstract access: PackageJsonPublishConfigAccess option with get, set
+    /// <summary>
+    /// The base URL of the npm registry.
+    ///
+    /// Default: <c>'https://registry.npmjs.org/'</c>
+    /// </summary>
+    abstract registry: string option with get, set
+    /// <summary>
+    /// The tag to publish the package under.
+    ///
+    /// Default: <c>'latest'</c>
+    /// </summary>
+    abstract tag: string option with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> JsonValue option with get, set
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type PackageJsonPublishConfigAccess =
+    | [<CompiledName("public")>] Public
+    | [<CompiledName("restricted")>] Restricted
+
+[<Interface>]
+type PackageJsonRepository =
+    abstract ``type``: string with get, set
+    abstract url: string with get, set
+    /// <summary>
+    /// Relative path to package.json if it is placed in non-root directory (for example if it is part of a monorepo).
+    ///
+    /// [Read more.](https://github.com/npm/rfcs/blob/latest/implemented/0010-monorepo-subdirectory-declaration.md)
+    /// </summary>
+    abstract directory: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, url: string, ?directory: string) : PackageJsonRepository = jsNative
+
+type PackageJsonScripts =
+    /// <summary>
+    /// Run **before** the package is published (Also run on local <c>npm install</c> without any arguments).
+    /// </summary>
+    abstract prepublish: string option with get, set
+    /// <summary>
+    /// Run both **before** the package is packed and published, and on local <c>npm install</c> without any arguments. This is run **after** <c>prepublish</c>, but **before** <c>prepublishOnly</c>.
+    /// </summary>
+    abstract prepare: string option with get, set
+    /// <summary>
+    /// Run **before** the package is prepared and packed, **only** on <c>npm publish</c>.
+    /// </summary>
+    abstract prepublishOnly: string option with get, set
+    /// <summary>
+    /// Run **before** a tarball is packed (on <c>npm pack</c>, <c>npm publish</c>, and when installing git dependencies).
+    /// </summary>
+    abstract prepack: string option with get, set
+    /// <summary>
+    /// Run **after** the tarball has been generated and moved to its final destination.
+    /// </summary>
+    abstract postpack: string option with get, set
+    /// <summary>
+    /// Run **after** the package is published.
+    /// </summary>
+    abstract publish: string option with get, set
+    /// <summary>
+    /// Run **after** the package is published.
+    /// </summary>
+    abstract postpublish: string option with get, set
+    /// <summary>
+    /// Run **before** the package is installed.
+    /// </summary>
+    abstract preinstall: string option with get, set
+    /// <summary>
+    /// Run **after** the package is installed.
+    /// </summary>
+    abstract install: string option with get, set
+    /// <summary>
+    /// Run **after** the package is installed and after <c>install</c>.
+    /// </summary>
+    abstract postinstall: string option with get, set
+    /// <summary>
+    /// Run **before** the package is uninstalled and before <c>uninstall</c>.
+    /// </summary>
+    abstract preuninstall: string option with get, set
+    /// <summary>
+    /// Run **before** the package is uninstalled.
+    /// </summary>
+    abstract uninstall: string option with get, set
+    /// <summary>
+    /// Run **after** the package is uninstalled.
+    /// </summary>
+    abstract postuninstall: string option with get, set
+    /// <summary>
+    /// Run **before** bump the package version and before <c>version</c>.
+    /// </summary>
+    abstract preversion: string option with get, set
+    /// <summary>
+    /// Run **before** bump the package version.
+    /// </summary>
+    abstract version: string option with get, set
+    /// <summary>
+    /// Run **after** bump the package version.
+    /// </summary>
+    abstract postversion: string option with get, set
+    /// <summary>
+    /// Run with the <c>npm test</c> command, before <c>test</c>.
+    /// </summary>
+    abstract pretest: string option with get, set
+    /// <summary>
+    /// Run with the <c>npm test</c> command.
+    /// </summary>
+    abstract test: string option with get, set
+    /// <summary>
+    /// Run with the <c>npm test</c> command, after <c>test</c>.
+    /// </summary>
+    abstract posttest: string option with get, set
+    /// <summary>
+    /// Run with the <c>npm stop</c> command, before <c>stop</c>.
+    /// </summary>
+    abstract prestop: string option with get, set
+    /// <summary>
+    /// Run with the <c>npm stop</c> command.
+    /// </summary>
+    abstract stop: string option with get, set
+    /// <summary>
+    /// Run with the <c>npm stop</c> command, after <c>stop</c>.
+    /// </summary>
+    abstract poststop: string option with get, set
+    /// <summary>
+    /// Run with the <c>npm start</c> command, before <c>start</c>.
+    /// </summary>
+    abstract prestart: string option with get, set
+    /// <summary>
+    /// Run with the <c>npm start</c> command.
+    /// </summary>
+    abstract start: string option with get, set
+    /// <summary>
+    /// Run with the <c>npm start</c> command, after <c>start</c>.
+    /// </summary>
+    abstract poststart: string option with get, set
+    /// <summary>
+    /// Run with the <c>npm restart</c> command, before <c>restart</c>. Note: <c>npm restart</c> will run the <c>stop</c> and <c>start</c> scripts if no <c>restart</c> script is provided.
+    /// </summary>
+    abstract prerestart: string option with get, set
+    /// <summary>
+    /// Run with the <c>npm restart</c> command. Note: <c>npm restart</c> will run the <c>stop</c> and <c>start</c> scripts if no <c>restart</c> script is provided.
+    /// </summary>
+    abstract restart: string option with get, set
+    /// <summary>
+    /// Run with the <c>npm restart</c> command, after <c>restart</c>. Note: <c>npm restart</c> will run the <c>stop</c> and <c>start</c> scripts if no <c>restart</c> script is provided.
+    /// </summary>
+    abstract postrestart: string option with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> string option with get, set
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type PackageJsonType =
+    | [<CompiledName("commonjs")>] Commonjs
+    | [<CompiledName("module")>] Module
+
+[<Interface>]
+type PackageJsonWorkspaces =
+    /// <summary>
+    /// An array of workspace pattern strings which contain the workspace packages.
+    /// </summary>
+    abstract packages: string[] option with get, set
+    /// <summary>
+    /// Designed to solve the problem of packages which break when their <c>node_modules</c> are moved to the root workspace directory - a process known as hoisting. For these packages, both within your workspace, and also some that have been installed via <c>node_modules</c>, it is important to have a mechanism for preventing the default Yarn workspace behavior. By adding workspace pattern strings here, Yarn will resume non-workspace behavior for any package which matches the defined patterns.
+    ///
+    /// [Supported](https://classic.yarnpkg.com/blog/2018/02/15/nohoist/) by Yarn.
+    /// [Not supported](https://github.com/npm/rfcs/issues/287) by npm.
+    /// </summary>
+    abstract nohoist: string[] option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?packages: string[], ?nohoist: string[]) : PackageJsonWorkspaces = jsNative
 
 /// <remarks>@see {@link PartialDeep}</remarks>
 [<Interface>]

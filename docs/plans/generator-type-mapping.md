@@ -288,17 +288,44 @@ consumer must discriminate. The generator knows the position; use it.
 
 ### 4.6 Intersections
 
-- Intersections of object types → flatten with `getApparentPropertiesOfType` → one emitted
-  interface (Exact in members, loses the "is-a" relation to each operand — mitigate by
-  also emitting F# interface inheritance when every operand is a named generated interface).
+- Intersections of object types → flatten with `getPropertiesOfType` on the intersection
+  itself → one emitted interface (Exact in members). The "is-a" relation to each operand is
+  kept where F# can state it: every operand this run declares as an interface is `inherit`ed,
+  so the intersection upcasts to it; an operand that is not one (a lib type, a callable, an
+  anonymous shape) is folded in by its members alone.
 - Branding intersections (`string & { __brand: "UserId" }`) → **measure-tagged primitive or
   erased single-case wrapper** (`string<userId>` per the existing `Measures.fs` idiom, or
   `[<Erase>] type UserId = UserId of string`). Exact-in-spirit; this repo already lives this
   pattern. Detection: primitive & object-with-only-phantom-members.
 - Nonsensical/`never` intersections → whatever the checker reduces them to (`getReducedType`).
 
-*Landed (2026-09-02, phase D) — the branding half. Object-intersection flattening is still
-open; those stay `obj` with a Widened finding.* The declaration becomes the measure and the
+*Landed (2026-09-02, phase E) — the object half.* The resolve tier reads members off an
+intersection only when every operand is an object; the shape tier then names and declares it
+exactly as a hoisted anonymous object (by alias name, or by path at a parameter position), over
+the alias's type parameters where it has them, and a reference names it. Members are declared in
+full beside the `inherit`s - F# admits the redeclaration, and the diamond (`inherit Loud;
+inherit Pitched` sharing `volume`) - which is what keeps `Create` and the member list exact when
+an operand is not inheritable. The finding is Ergonomic, once, on the declaration:
+
+```fsharp
+[<Interface>]
+type NamedTimed =
+    inherit Named
+    inherit Timed
+    abstract name: string with get, set
+    abstract at: float with get, set
+    abstract stamp: string option
+    [<ParamObject; Emit("$0")>]
+    static member Create (name: string, at: float, ?stamp: string) : NamedTimed = jsNative
+```
+
+What still widens, each saying which case it is: an intersection with a type-parameter or
+primitive operand (`T & { id: number }`, `string & { count: number }`) has no members to read,
+and a member-level generic intersection alias instantiates by re-expansion under a suffixed name
+like any generic alias (§4.9's deferred item). `tests/fixtures/intersection-lab` pins the
+positives and the negative.
+
+*Landed (2026-09-02, phase D) — the branding half.* The declaration becomes the measure and the
 *uses* carry the brand:
 
 ```fsharp

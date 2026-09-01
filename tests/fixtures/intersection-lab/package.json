@@ -1,0 +1,6 @@
+{
+    "name": "intersection-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture exercising the object intersections of docs/plans/generator-type-mapping.md 4.6 - two shapes flattened into one interface, an anonymous operand, a generic alias, a hoisted parameter position, overlapping members, an index-signature operand, a mapped operand, and the intersections that cannot flatten and must still say so. Tracked in git, no npm install, so the goldens pin every idiom under the live compiler."
+}

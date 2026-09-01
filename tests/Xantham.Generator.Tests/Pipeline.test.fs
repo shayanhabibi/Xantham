@@ -307,6 +307,65 @@ let pipelineTests =
                         "every type parameter the lab writes is in scope where it is read" ])
 
         yield!
+            fixtureTests "intersection-lab" (handFixture "intersection-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "an intersection of object types flattens into one interface (§4.6)" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `Named & Timed` carries both member sets; the checker hands them over
+                    // flattened, so the declaration is one interface and the reference names it.
+                    Expect.stringContains source "type NamedTimed =" "the alias is declared as an interface"
+                    Expect.stringContains source "abstract name: string with get, set" "the first operand's member"
+                    Expect.stringContains source "abstract stamp: string option" "the second operand's optional readonly member"
+                    Expect.stringContains source "type Extended =" "an anonymous operand flattens the same way"
+                    Expect.stringContains source "abstract extra: bool with get, set" "with its own members"
+                    Expect.isFalse (source.Contains "type NamedTimed = obj") "nothing flattenable widens"
+
+                  testCase "an intersection at a parameter position is hoisted and named by path" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains source "type LabelTarget =" "hoisted like an anonymous object"
+                    Expect.stringContains source "abstract id: float with get, set" "carrying the anonymous operand's member"
+                    Expect.stringContains source "static member label (target: LabelTarget) : unit" "and applied at the parameter"
+
+                  testCase "a generic intersection alias binds its parameter and reads it" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains source "type WithValue<'T> =" "declared over the alias's parameter"
+                    Expect.stringContains source "abstract value: 'T with get, set" "which the member reads in scope"
+
+                  testCase "overlapping, indexed, mapped and callable operands flatten" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains source "type LoudPitched =" "operands sharing a member declare once"
+                    Expect.equal (source.Split("abstract volume: float").Length - 1) 3 "volume once per declaration that has it"
+                    Expect.stringContains source "type Bag =" "an index-signature operand"
+                    Expect.stringContains source "abstract Item: string -> obj with get, set" "carries its indexer"
+                    Expect.stringContains source "type Loose =" "a mapped operand expands under D6"
+                    Expect.stringContains source "abstract at: float option with get, set" "so its members arrive optional"
+                    Expect.stringContains source "type Cancelable =" "a callable operand keeps its properties"
+                    Expect.stringContains source "abstract cancel: unit -> unit" "and loses its call signature loudly"
+
+                  testCase "an intersection over a type-parameter operand still widens, and says so" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains source "static member merge<'T> (``base``: obj) : 'T" "T & { id: number } has no members to flatten"
+
+                    Expect.contains
+                        (rendered.Findings |> List.map (fun finding -> finding.Tier, finding.Message))
+                        (Widened, "intersection over a non-object operand has no members to flatten; widened to obj (§4.6)")
+                        "the widening is owned"
+
+                    Expect.isEmpty
+                        (rendered.Findings
+                         |> List.filter (fun finding -> finding.Message.Contains "has no F# form yet"))
+                        "the old blanket widening is gone" ])
+
+        yield!
             fixtureTests "keyof-lab" (handFixture "keyof-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "a mapped type over a concrete operand is expanded, not widened (D6)" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -497,12 +556,21 @@ let pipelineTests =
                       Expect.stringContains source "type Mode" "so does a branded literal union"
 
                       // The negatives. None of these is a brand and none may be read as one.
-                      for name in [ "Merged"; "Counted"; "Wrapped" ] do
+                      // `Merged` and `Wrapped` are object intersections, so they flatten into
+                      // interfaces (§4.6) rather than measures; `Counted` intersects a primitive
+                      // with a readable member, which is neither a brand nor a shape.
+                      for name in [ "Merged"; "Wrapped" ] do
                           Expect.isTrue
                               (rendered.Findings
                                |> List.exists (fun f ->
-                                   f.Symbol = name && f.Tier = Widened && f.Message.Contains "intersection of object types"))
-                              $"{name} is an ordinary intersection, and says so"
+                                   f.Symbol = name && f.Tier = Ergonomic && f.Message.Contains "flattened into one interface"))
+                              $"{name} is an ordinary intersection, and flattens"
+
+                      Expect.isTrue
+                          (rendered.Findings
+                           |> List.exists (fun f ->
+                               f.Symbol = "Counted" && f.Tier = Widened && f.Message.Contains "non-object operand"))
+                          "Counted is neither a brand nor a shape, and says so"
 
                       Expect.isFalse (source.Contains "Merged>") "and none of them is written as a measure" ])
 

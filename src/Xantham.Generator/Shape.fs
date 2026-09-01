@@ -307,6 +307,14 @@ let private ownArguments (facts: TypeFacts) =
 let private freeParamsOf (model: ShapeModel) (typeId: int) =
     Map.tryFind typeId model.DeclParams |> Option.defaultValue []
 
+/// An intersection of object types that flattens into one interface (§4.6): not a brand, and
+/// carrying the members the resolve tier read off it - which it only does when every operand
+/// is an object, so a primitive or type-parameter operand leaves this false.
+let private isFlattenable (model: ShapeModel) (facts: TypeFacts) =
+    flag TypeFlags.Intersection facts
+    && (brandedPrimitive model facts).IsNone
+    && not (facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
+
 // ---------------------------------------------------------------------------------------------
 // Type references.
 // ---------------------------------------------------------------------------------------------
@@ -357,7 +365,7 @@ and private typeRefOnPath (ctx: Context) (model: ShapeModel) (self: string optio
         if has TypeFlags.Boolean then
             FsBool, []
         elif has TypeFlags.Union && (brandedPrimitive model facts).IsSome then
-            intersectionRef model owner facts
+            intersectionRef ctx model self owner facts
         elif has TypeFlags.Union then
             unionRef ctx model self owner facts
         elif has TypeFlags.BooleanLiteral then
@@ -424,7 +432,7 @@ and private typeRefOnPath (ctx: Context) (model: ShapeModel) (self: string optio
         elif has TypeFlags.IndexedAccess then
             indexedAccessRef model owner facts
         elif has TypeFlags.Intersection then
-            intersectionRef model owner facts
+            intersectionRef ctx model self owner facts
         else
             FsObj, [ Finding.make Widened owner $"type flags {facts.Response.Flags} not mapped yet; widened to obj" ]
 
@@ -451,7 +459,7 @@ and private keyOfRef (model: ShapeModel) (owner: string) (facts: TypeFacts) : Fs
 /// finding here - the declaration records the idiom once - but a brand that never got a
 /// declaration has no measure to name, and falls back to the bare primitive loudly. Intersections
 /// of object types are a separate mapping (§4.6's first bullet) and are not shaped yet.
-and private intersectionRef (model: ShapeModel) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
+and private intersectionRef (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
     match brandedPrimitive model facts with
     | Some primitive ->
         match Map.tryFind facts.Response.Id model.DeclNames with
@@ -463,8 +471,21 @@ and private intersectionRef (model: ShapeModel) (owner: string) (facts: TypeFact
                   owner
                   "an unnamed brand has no measure to carry; widened to the primitive it brands (§4.6)" ]
     | None ->
-        FsObj,
-        [ Finding.make Widened owner "intersection of object types has no F# form yet; widened to obj (§4.6)" ]
+        // A flattened intersection is declared under a name (§4.6), exactly as a hoisted
+        // anonymous object is, and is applied over the parameters it reads the same way.
+        match Map.tryFind facts.Response.Id model.DeclNames with
+        | Some name when isFlattenable model facts ->
+            match freeParamsOf model facts.Response.Id with
+            | [] -> FsNamed name, []
+            | arguments -> appliedRef ctx model self owner name arguments
+        | _ ->
+            let reason =
+                if facts.Members.IsEmpty && facts.IndexInfos.IsEmpty then
+                    "intersection over a non-object operand has no members to flatten; widened to obj (§4.6)"
+                else
+                    "intersection of object types not declared by this run; widened to obj (§4.6)"
+
+            FsObj, [ Finding.make Widened owner reason ]
 
 /// `T[K]`. Where `K` is a key variable this signature bound as `typekeyof<'T,'R>`, the access is
 /// exactly the `'R` that idiom introduced. Everything else - `T[keyof T]`, an access over an
@@ -1233,6 +1254,13 @@ let synthesizeAnonymous: Pass<ShapeModel> =
                 // application (§4.9). Naming it would declare the expansion a second time
                 // under a made-up name and lose the tie to the generic it came from.
                 && (instantiationOf { model with DeclNames = names } facts).IsNone
+            elif flag TypeFlags.Intersection facts then
+                // An intersection of object types is one flattened interface (§4.6): the
+                // resolve tier read its members off the intersection itself, so it names and
+                // declares like any anonymous shape. A brand is a measure, named elsewhere;
+                // an intersection with no members (a type-parameter operand) has nothing to
+                // declare and widens at the reference.
+                isFlattenable model facts
             else
                 false
 
@@ -1282,6 +1310,11 @@ let synthesizeAnonymous: Pass<ShapeModel> =
                     if not (isTuple facts) then
                         for m in facts.Members do
                             walk (into (Naming.pascalSegment m.Symbol.Name)) order m.TypeId
+
+                    // An index signature's value is shape the declaration reads too:
+                    // `Record<string, A & B>` reaches its intersection nowhere else.
+                    for info in facts.IndexInfos do
+                        walk (into "Item") order info.ValueTypeId
 
                     let signatures = facts.CallSignatures @ facts.ConstructSignatures
 
@@ -1391,11 +1424,12 @@ let bindFreeTypeParams: Pass<ShapeModel> =
             |> List.choose (fun (typeId, _) ->
                 match Map.tryFind typeId model.Types with
                 | Some facts when
-                    flag TypeFlags.Object facts
-                    && GeneratorConfig.disposition ctx.Config facts.Origin = Ship
-                    && (arrayElement facts).IsNone
-                    && not (isTuple facts)
-                    && not (isPureCallback facts)
+                    (flag TypeFlags.Object facts
+                     && GeneratorConfig.disposition ctx.Config facts.Origin = Ship
+                     && (arrayElement facts).IsNone
+                     && not (isTuple facts)
+                     && not (isPureCallback facts))
+                    || isFlattenable model facts
                     ->
                     let own = declParamIds facts
 
@@ -1711,6 +1745,20 @@ let shapeCallbacks: Pass<ShapeModel> =
 /// instance sides alike, plus the synthesized anonymous shapes. Heritage is flattened - the
 /// checker's property list already includes inherited members, and F# rejects re-abstracted
 /// inherited members - with a finding recording the lost is-a relation.
+/// What `shape-interfaces` declares under a name: an object shape with members - not an array,
+/// a tuple, or a named instantiation (`type StringBox = Box<string>`, an abbreviation of the
+/// application rather than a second copy of the expansion, which `shape-aliases` writes) - or
+/// an intersection of object types flattened into one interface (§4.6). An index signature is
+/// shape too: `interface Bag { [key: string]: number }` has no properties at all, and without
+/// that it would reach `shape-aliases` looking empty and abbreviate to obj (§4.10).
+let private declaresInterface (model: ShapeModel) (facts: TypeFacts) =
+    (flag TypeFlags.Object facts
+     && not (facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
+     && (arrayElement facts).IsNone
+     && not (isTuple facts)
+     && (instantiationOf model facts).IsNone)
+    || isFlattenable model facts
+
 let shapeInterfaces: Pass<ShapeModel> =
     { Name = "shape-interfaces"
       Run =
@@ -1726,25 +1774,24 @@ let shapeInterfaces: Pass<ShapeModel> =
                         |> Option.map (fun typeId -> typeId, (export.Docs, export.Tags)))
                     |> Map.ofList
 
+                // The names this pass declares, known ahead of the declarations: what a
+                // flattened intersection may inherit.
+                let interfaceNames =
+                    model.DeclNames
+                    |> Map.toList
+                    |> List.choose (fun (typeId, name) ->
+                        match Map.tryFind typeId model.Types with
+                        | Some facts when declaresInterface model facts -> Some name
+                        | _ -> None)
+                    |> Set.ofList
+
                 let decls =
                     model.DeclNames
                     |> Map.toList
                     |> List.sortBy fst
                     |> List.choose (fun (typeId, name) ->
                         match Map.tryFind typeId model.Types with
-                        | Some facts when
-                            flag TypeFlags.Object facts
-                            // An index signature is shape too: `interface Bag { [key: string]:
-                            // number }` has no properties at all, and without this it reaches
-                            // `shape-aliases` looking empty and abbreviates to obj (§4.10).
-                            && not (facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
-                            && (arrayElement facts).IsNone
-                            && not (isTuple facts)
-                            // A named instantiation - `type StringBox = Box<string>` - is an
-                            // abbreviation of the application, not a second copy of the
-                            // expansion the checker substituted; `shape-aliases` writes it.
-                            && (instantiationOf model facts).IsNone
-                            ->
+                        | Some facts when declaresInterface model facts ->
                             let typeParameters, scope, parameterFindings =
                                 declTypeParams ctx model name facts
 
@@ -1756,6 +1803,28 @@ let shapeInterfaces: Pass<ShapeModel> =
                                 shapeMembers ctx { model with TypeVars = scope } name facts
 
                             findings <- findings @ memberFindings
+
+                            // A flattened intersection keeps the is-a relation §4.6 warned it
+                            // would lose, where F# can state it: an operand this run declares
+                            // as an interface is inherited, so the intersection upcasts to it.
+                            // Its members are still declared here in full - F# admits the
+                            // redeclaration, and it is what keeps `Create` and the member list
+                            // exact when an operand is not an interface (a lib type, a callable,
+                            // an anonymous shape folded in).
+                            let inherits =
+                                if not (flag TypeFlags.Intersection facts) then
+                                    []
+                                else
+                                    facts.IntersectionMembers
+                                    |> List.choose (fun operandId ->
+                                        match typeRef ctx { model with TypeVars = scope } None name operandId with
+                                        | (FsNamed operand | FsApp(operand, _)) as reference, refFindings when
+                                            operand <> name && Set.contains operand interfaceNames
+                                            ->
+                                            findings <- findings @ refFindings
+                                            Some reference
+                                        | _ -> None)
+                                    |> List.distinct
 
                             if not facts.CallSignatures.IsEmpty then
                                 findings <-
@@ -1773,6 +1842,14 @@ let shapeInterfaces: Pass<ShapeModel> =
                                             name
                                             "base members flattened into the interface (the is-a relation is not emitted)" ]
 
+                            if flag TypeFlags.Intersection facts then
+                                findings <-
+                                    findings
+                                    @ [ Finding.make
+                                            Ergonomic
+                                            name
+                                            $"intersection of {facts.IntersectionMembers.Length} object types flattened into one interface (the is-a relation to its operands is not emitted, §4.6)" ]
+
                             let docs, tags =
                                 Map.tryFind typeId fallbackDocs |> Option.defaultValue ("", [])
 
@@ -1783,7 +1860,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                       Tags = tags
                                       Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
                                       TypeParameters = typeParameters
-                                      Inherits = []
+                                      Inherits = inherits
                                       Members = members
                                       CreateOverloads = [] }
                             )

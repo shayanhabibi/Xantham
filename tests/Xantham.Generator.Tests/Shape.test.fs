@@ -700,6 +700,88 @@ let shapePassTests =
 
             Expect.equal (Map.tryFind 40 bound.DeclParams) None "nothing free"
 
+        testCase "shape-interfaces flattens an object intersection and inherits its named operands" <| fun _ ->
+            // `type NamedTimed = Named & Timed`: the resolve tier read both member sets off the
+            // intersection itself, so it declares as one interface (§4.6) - inheriting the
+            // operands this run declares, so it upcasts to either, and still declaring every
+            // member, so `Create` and the member list stay exact.
+            let name = Build.resolvedMember (Build.symbol 401 "name" SymbolFlags.Property) 1
+            let at = Build.resolvedMember (Build.symbol 402 "at" SymbolFlags.Property) 2
+
+            let named =
+                { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                    SymbolName = Some "Named"
+                    Members = [ name ] }
+
+            let timed =
+                { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
+                    SymbolName = Some "Timed"
+                    Members = [ at ] }
+
+            let both =
+                { Build.facts (Build.typeResponse 50 TypeFlags.Intersection) with
+                    IntersectionMembers = [ 40; 41 ]
+                    Members = [ name; at ] }
+
+            let model =
+                { Build.shapeModel (named :: timed :: both :: Build.primitives) with
+                    DeclNames = Map.ofList [ 40, "Named"; 41, "Timed"; 50, "NamedTimed" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeInterfaces model
+
+            let decl =
+                shaped.Decls
+                |> List.pick (function
+                    | FsInterface d when d.Name = "NamedTimed" -> Some d
+                    | _ -> None)
+
+            Expect.equal decl.Inherits [ FsNamed "Named"; FsNamed "Timed" ] "the named operands are inherited"
+
+            Expect.equal
+                (decl.Members
+                 |> List.map (function
+                     | FsProperty p -> p.Name
+                     | FsMethod m -> m.Name
+                     | FsIndexer _ -> "Item"))
+                [ "name"; "at" ]
+                "both member sets, in the checker's order"
+
+            Expect.contains
+                (findings |> List.map (fun f -> f.Tier, f.Symbol))
+                (Ergonomic, "NamedTimed")
+                "the flattening is recorded on the declaration"
+
+            let reference, refFindings = Shape.typeRef Build.context shaped None "x" 50
+            Expect.equal reference (FsNamed "NamedTimed") "a reference names it"
+            Expect.isEmpty refFindings "at no further cost"
+
+        testCase "an intersection over a type-parameter operand has nothing to flatten" <| fun _ ->
+            // `T & { id: number }`: the resolve tier reads no members off an intersection with
+            // a non-object operand, so there is no shape to declare and the reference widens,
+            // saying which case it is.
+            let named =
+                { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                    SymbolName = Some "Named"
+                    Members = [ Build.resolvedMember (Build.symbol 401 "name" SymbolFlags.Property) 1 ] }
+
+            let bare =
+                { Build.facts (Build.typeResponse 51 TypeFlags.Intersection) with IntersectionMembers = [ 20; 40 ] }
+
+            let model =
+                { Build.shapeModel (named :: bare :: typeParam 20 "T" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 40, "Named" ] }
+
+            let named, _ = Build.runPass Shape.synthesizeAnonymous model
+            Expect.equal (Map.tryFind 51 named.DeclNames) None "nothing to name"
+
+            let reference, findings = Shape.typeRef Build.context named None "x" 51
+            Expect.equal reference FsObj "widened"
+
+            Expect.equal
+                (findings |> List.map _.Message)
+                [ "intersection over a non-object operand has no members to flatten; widened to obj (§4.6)" ]
+                "and owned"
+
         testCase "classify-literal-unions makes a StringEnum with CompiledName per case" <| fun _ ->
             let union =
                 { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 7; 8 ] }
