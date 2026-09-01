@@ -755,7 +755,8 @@ type DurableObject =
     abstract webSocketClose: Func<obj, float, string, bool, obj option> option with get, set
     abstract webSocketError: Func<obj, obj, obj option> option with get, set
 
-type DurableObjectStub = obj
+[<Erase>]
+type DurableObjectStub<'T> = private DurableObjectStub__ of obj
 
 type DurableObjectId =
     abstract toString: unit -> string
@@ -806,6 +807,9 @@ type DurableObjectNamespaceGetDurableObjectOptions =
     abstract routingMode: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?locationHint: DurableObjectLocationHint, ?routingMode: string) : DurableObjectNamespaceGetDurableObjectOptions = jsNative
+
+[<Erase>]
+type DurableObjectClass<'_T> = private DurableObjectClass__ of obj
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type ContainerExecOptionsStderr =
@@ -962,9 +966,9 @@ type DurableObjectFacets =
 [<Interface>]
 type FacetStartupOptions<'T> =
     abstract id: U2<string, DurableObjectId> option with get, set
-    abstract ``class``: obj with get, set
+    abstract ``class``: DurableObjectClass<'T> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``class``: obj, ?id: U2<string, DurableObjectId>) : FacetStartupOptions<'T> = jsNative
+    static member Create (``class``: DurableObjectClass<'T>, ?id: U2<string, DurableObjectId>) : FacetStartupOptions<'T> = jsNative
 
 type AnalyticsEngineDataset =
     abstract writeDataPoint: ?``event``: AnalyticsEngineDataPoint -> unit
@@ -1494,9 +1498,11 @@ type FetchEvent =
     /// </summary>
     abstract waitUntil: promise: obj -> unit
 
-type Service = obj
+[<Erase>]
+type Service<'T> = private Service__ of obj
 
-type Fetcher = obj
+[<Erase>]
+type Fetcher<'T, 'Reserved> = private Fetcher__ of obj
 
 [<Interface>]
 type KVNamespaceListKey<'Metadata, 'Key> =
@@ -2696,11 +2702,14 @@ type MessagePortPostMessageOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?transfer: obj[]) : MessagePortPostMessageOptions = jsNative
 
-type LoopbackForExport = obj
+[<Erase>]
+type LoopbackForExport<'T> = private LoopbackForExport__ of obj
 
-type LoopbackServiceStub = obj
+[<Erase>]
+type LoopbackServiceStub<'T> = private LoopbackServiceStub__ of obj
 
-type LoopbackDurableObjectClass = obj
+[<Erase>]
+type LoopbackDurableObjectClass<'T> = private LoopbackDurableObjectClass__ of obj
 
 type LoopbackDurableObjectNamespace =
     abstract newUniqueId: ?options: DurableObjectNamespaceNewUniqueIdOptions -> DurableObjectId
@@ -2732,7 +2741,7 @@ type SyncKvListOptions =
 
 type WorkerStub =
     abstract getEntrypoint: ?name: string * ?options: WorkerStubEntrypointOptions -> obj
-    abstract getDurableObjectClass<'T>: ?name: string * ?options: WorkerStubEntrypointOptions -> obj
+    abstract getDurableObjectClass<'T>: ?name: string * ?options: WorkerStubEntrypointOptions -> DurableObjectClass<'T>
 
 [<Interface>]
 type WorkerStubEntrypointOptions =
@@ -6205,6 +6214,12 @@ type StreamOptions =
     abstract include_obfuscation: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?include_obfuscation: bool) : StreamOptions = jsNative
+
+/// <summary>
+/// Marks keys from T that aren't in U as optional never
+/// </summary>
+[<Erase>]
+type Without<'T, 'U> = private Without__ of obj
 
 /// <summary>
 /// Either T or U, but not both (mutually exclusive)
@@ -14812,7 +14827,8 @@ type RequestInitCfPropertiesR2 =
 /// <summary>
 /// Request metadata provided by Cloudflare's edge.
 /// </summary>
-type IncomingRequestCfProperties = obj
+[<Erase>]
+type IncomingRequestCfProperties<'HostMetadata> = private IncomingRequestCfProperties__ of obj
 
 type IncomingRequestCfPropertiesBase =
     /// <summary>
@@ -15815,7 +15831,8 @@ type D1Response =
     [<ParamObject; Emit("$0")>]
     static member Create (success: bool, meta: obj, ?error: unit) : D1Response = jsNative
 
-type D1Result = obj
+[<Erase>]
+type D1Result<'T> = private D1Result__ of obj
 
 [<Interface>]
 type D1ExecResult =
@@ -16927,6 +16944,9 @@ type MediaTransformationOutputOptions =
     abstract format: MediaTransformationOutputOptionsFormat option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?mode: MediaTransformationOutputOptionsMode, ?audio: bool, ?time: string, ?duration: string, ?imageCount: float, ?format: MediaTransformationOutputOptionsFormat) : MediaTransformationOutputOptions = jsNative
+
+[<Erase>]
+type Params<'P> = private Params__ of obj
 
 [<Interface>]
 type EventContext<'Env, 'P, 'Data> =

@@ -317,7 +317,46 @@ let pipelineTests =
                     Expect.isTrue
                         (rendered.Findings
                          |> List.exists (fun f -> f.Symbol.StartsWith "values" && f.Tier = Widened))
-                        "and the widening is recorded" ])
+                        "and the widening is recorded"
+
+                  testCase "a type-level computation over an open operand emits an erased phantom" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // §4.10/§4.11: mapped, conditional and template-literal declarations whose
+                    // operand the checker could not supply. F# can express none of them and has
+                    // no unused type variable in an abbreviation either, so the name and arity
+                    // survive as a phantom with a private case - a cast is the only use of it.
+                    Expect.stringContains
+                        source
+                        "type DeepPartial<'T> = private DeepPartial__ of obj"
+                        "a mapped type over an open operand"
+
+                    Expect.stringContains
+                        source
+                        "type Unwrap<'T> = private Unwrap__ of obj"
+                        "a conditional over an open operand"
+
+                    // A template literal is still a string at runtime whatever it interpolates,
+                    // so the phantom carries one.
+                    Expect.stringContains
+                        source
+                        "type Prefixed<'T> = private Prefixed__ of string"
+                        "a template literal over an open operand"
+
+                    Expect.stringContains source "[<Erase>]" "and each is erased"
+
+                    // The concrete siblings are unaffected: the checker finished those, so they
+                    // are ordinary declarations rather than phantoms.
+                    Expect.stringContains source "type ConcreteBranch = string" "a resolved conditional"
+                    Expect.isFalse (source.Contains "EventName__") "a resolved template literal is a StringEnum"
+
+                    for name in [ "DeepPartial"; "Flags"; "Unwrap"; "Prefixed" ] do
+                        Expect.isTrue
+                            (rendered.Findings
+                             |> List.exists (fun f ->
+                                 f.Symbol = name && f.Tier = Widened && f.Message.Contains "erased phantom"))
+                            $"{name} says in the manifest that it is a phantom" ])
 
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 

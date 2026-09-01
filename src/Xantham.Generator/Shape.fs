@@ -1520,6 +1520,7 @@ let shapeAliases: Pass<ShapeModel> =
                         | FsTaggedUnion decl -> [ decl.Name ]
                         | FsEnum decl -> [ decl.Name ]
                         | FsAbbrev decl -> [ decl.Name ]
+                        | FsPhantom decl -> [ decl.Name ]
                         | FsExports _ -> [])
                     |> Set.ofList
 
@@ -1544,6 +1545,7 @@ let shapeAliases: Pass<ShapeModel> =
                     |> List.choose (function
                         | FsInterface decl -> Some(decl.Name, decl.TypeParameters)
                         | FsAbbrev decl -> Some(decl.Name, decl.TypeParameters)
+                        | FsPhantom decl -> Some(decl.Name, decl.TypeParameters)
                         | _ -> None)
                     |> Map.ofList
 
@@ -1613,15 +1615,56 @@ let shapeAliases: Pass<ShapeModel> =
                                 let docs, tags =
                                     Map.tryFind typeId exportDocs |> Option.defaultValue ("", [])
 
-                                Some(
-                                    FsAbbrev
-                                        { Name = name
-                                          Docs = docs
-                                          Tags = tags
-                                          Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
-                                          TypeParameters = typeParameters
-                                          Target = reference }
-                                )
+                                let order =
+                                    Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+
+                                // A generic declaration whose right side names none of its
+                                // parameters is a type-level computation the checker could not
+                                // finish: `DeepPartial<T>`, `Unwrap<T>`, `` `x-${T}` ``. F# has
+                                // no unused type variable in an abbreviation, so this used to be
+                                // dropped outright and every use of it widened to obj. An erased
+                                // phantom keeps the name and the arity - enough for uses to stay
+                                // distinct - and admits, by having no members at all, that a cast
+                                // is the only thing anyone can do with it (§4.10, §4.11).
+                                if
+                                    not typeParameters.IsEmpty
+                                    && typeParameters
+                                       |> List.forall (fun p -> not (Set.contains p.Name (typeVarsOf reference)))
+                                then
+                                    findings <-
+                                        findings
+                                        @ [ Finding.make
+                                                Widened
+                                                name
+                                                "type-level computation over an unresolved operand; emitted as an \
+                                                 erased phantom, which casts are the only use of" ]
+
+                                    Some(
+                                        FsPhantom
+                                            { Name = name
+                                              Docs = docs
+                                              Tags = tags
+                                              Order = order
+                                              TypeParameters = typeParameters
+                                              Carrier =
+                                                if
+                                                    flag TypeFlags.TemplateLiteral facts
+                                                    || flag TypeFlags.StringMapping facts
+                                                then
+                                                    FsString
+                                                else
+                                                    FsObj }
+                                    )
+                                else
+                                    Some(
+                                        FsAbbrev
+                                            { Name = name
+                                              Docs = docs
+                                              Tags = tags
+                                              Order = order
+                                              TypeParameters = typeParameters
+                                              Target = reference }
+                                    )
                             | None -> None)
 
                 let model =
@@ -2007,6 +2050,11 @@ let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
             { d with
                 TypeParameters = d.TypeParameters |> List.map typeParam
                 Target = reference d.Target }
+    | FsPhantom d ->
+        FsPhantom
+            { d with
+                TypeParameters = d.TypeParameters |> List.map typeParam
+                Carrier = reference d.Carrier }
     | FsTaggedUnion d ->
         FsTaggedUnion
             { d with
@@ -2036,6 +2084,7 @@ let private declName =
     function
     | FsInterface d -> Some d.Name
     | FsAbbrev d -> Some d.Name
+    | FsPhantom d -> Some d.Name
     | FsTaggedUnion d -> Some d.Name
     | FsStringEnum d -> Some d.Name
     | FsEnum d -> Some d.Name
@@ -2081,6 +2130,7 @@ let private repaired (model: ShapeModel) =
             |> List.choose (function
                 | FsInterface d -> Some(d.Name, d.TypeParameters.Length)
                 | FsAbbrev d -> Some(d.Name, d.TypeParameters.Length)
+                | FsPhantom d -> Some(d.Name, d.TypeParameters.Length)
                 | _ -> None)
             |> Map.ofList
 
@@ -2189,6 +2239,7 @@ let orderDeclarations: Pass<ShapeModel> =
                 | FsTaggedUnion decl -> orderKey decl.Order decl.Name
                 | FsEnum decl -> orderKey decl.Order decl.Name
                 | FsAbbrev decl -> orderKey decl.Order decl.Name
+                | FsPhantom decl -> orderKey decl.Order decl.Name
                 | FsExports _ -> ("￿", System.Int32.MaxValue), "￿")
 
         let exports =
@@ -2219,6 +2270,7 @@ let auditCoverage: Pass<ShapeModel> =
                         | FsTaggedUnion decl -> [ decl.Name ]
                         | FsEnum decl -> [ decl.Name ]
                         | FsAbbrev decl -> [ decl.Name ]
+                        | FsPhantom decl -> [ decl.Name ]
                         | FsExports members -> members |> List.map _.Name)
                     |> Set.ofList
 

@@ -1262,6 +1262,88 @@ let shapePassTests =
 
             Expect.equal (findings |> List.map _.Tier) [] "an erased union costs no fidelity"
 
+        testCase "shape-aliases emits a phantom for a computation that names none of its parameters" <| fun _ ->
+            // `type Unwrap<T> = T extends Array<infer E> ? E : T`: a conditional the checker
+            // could not finish. It binds `T` through the alias, but there is nothing on the
+            // right for `T` to appear in, and F# has no unused type variable in an
+            // abbreviation - so the declaration keeps its name and arity as a phantom.
+            let conditional =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Conditional) with
+                    AliasTypeArguments = [ 20 ] }
+
+            let model =
+                { Build.shapeModel (conditional :: typeParam 20 "T" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 10, "Unwrap" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeAliases model
+
+            let phantoms =
+                shaped.Decls
+                |> List.choose (function
+                    | FsPhantom d -> Some(d.Name, d.TypeParameters |> List.map _.Name, d.Carrier)
+                    | _ -> None)
+
+            Expect.equal phantoms [ "Unwrap", [ "T" ], FsObj ] "the arity survives, over an obj carrier"
+
+            Expect.isEmpty
+                (shaped.Decls |> List.choose (function FsAbbrev d -> Some d.Name | _ -> None))
+                "and it is not also written as an abbreviation"
+
+            Expect.isTrue
+                (findings |> List.exists (fun f -> f.Tier = Widened && f.Message.Contains "erased phantom"))
+                "the manifest says a phantom is what it got"
+
+        testCase "shape-aliases carries a template literal's phantom on a string" <| fun _ ->
+            // `` type Prefixed<T extends string> = `x-${T}` ``. Whatever it interpolates, the
+            // value is a string at runtime, so the phantom says so rather than obj.
+            let template =
+                { Build.facts (Build.typeResponse 10 TypeFlags.TemplateLiteral) with
+                    AliasTypeArguments = [ 20 ] }
+
+            let model =
+                { Build.shapeModel (template :: typeParam 20 "T" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 10, "Prefixed" ] }
+
+            let shaped, _ = Build.runPass Shape.shapeAliases model
+
+            Expect.equal
+                (shaped.Decls
+                 |> List.choose (function
+                     | FsPhantom d -> Some(d.Name, d.Carrier)
+                     | _ -> None))
+                [ "Prefixed", FsString ]
+                "a template literal is a string at runtime"
+
+        testCase "shape-aliases leaves an alias that does name its parameter an abbreviation" <| fun _ ->
+            // The other side of the same test: `type Alias<T> = T[]` has somewhere for `T` to
+            // appear, so it stays an ordinary abbreviation and no phantom is invented for it.
+            let array' =
+                { Build.facts
+                    { Build.typeResponse 10 TypeFlags.Object with
+                        ObjectFlags = ValueSome ObjectFlags.Reference
+                        Target = ValueSome 90 } with
+                    SymbolName = Some "Array"
+                    TypeArguments = [ 20 ]
+                    AliasTypeArguments = [ 20 ] }
+
+            let model =
+                { Build.shapeModel (array' :: typeParam 20 "T" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 10, "Alias" ] }
+
+            let shaped, _ = Build.runPass Shape.shapeAliases model
+
+            Expect.isEmpty
+                (shaped.Decls |> List.choose (function FsPhantom d -> Some d.Name | _ -> None))
+                "nothing here is a phantom"
+
+            Expect.equal
+                (shaped.Decls
+                 |> List.choose (function
+                     | FsAbbrev d -> Some(d.Name, d.TypeParameters |> List.map _.Name, d.Target)
+                     | _ -> None))
+                [ "Alias", [ "T" ], FsArray(FsTypeVar "T") ]
+                "the parameter is named on the right, so an abbreviation holds it"
+
         testCase "order-declarations puts declarations in source order, Exports last" <| fun _ ->
             let interface' name order =
                 FsInterface

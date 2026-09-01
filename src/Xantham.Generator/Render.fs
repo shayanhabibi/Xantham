@@ -295,6 +295,19 @@ let private renderAbbrev (decl: FsAbbrevDecl) =
     [ yield! docLines "" decl.Docs decl.Tags
       yield $"type {declHead decl.Name decl.TypeParameters} = {printType decl.Target}" ]
 
+/// A declaration whose right-hand side is a type-level computation F# has no way to reproduce -
+/// a mapped or conditional type, or a template literal over an operand the checker left open
+/// (§4.10, §4.11). The name and the arity survive, so uses of it stay distinct from one another
+/// and from `obj`; the single private case means a cast is the only way in or out.
+let private renderPhantom (decl: FsPhantomDecl) =
+    // Named after the type it carries, so the cases of two phantoms never collide in the one
+    // module a package generates into.
+    let case = ident (decl.Name + "__")
+
+    [ yield! docLines "" decl.Docs decl.Tags
+      yield "[<Erase>]"
+      yield $"type {declHead decl.Name decl.TypeParameters} = private {case} of {printType decl.Carrier}" ]
+
 /// The import name a default export binds under - the JavaScript key, not an F# name.
 let private defaultExportKey = "default"
 
@@ -341,6 +354,7 @@ let renderSource: Pass<RenderModel> =
                 | FsTaggedUnion decl -> renderTaggedUnion decl
                 | FsEnum decl -> renderEnum decl
                 | FsAbbrev decl -> renderAbbrev decl
+                | FsPhantom decl -> renderPhantom decl
                 | FsExports members -> renderExports model.PackageName members)
             |> List.map (String.concat "\n")
             |> String.concat "\n\n"
@@ -384,6 +398,7 @@ let symbolTiers (model: RenderModel) : (string * Tier * Finding list) list =
             | FsTaggedUnion decl -> [ decl.Name ]
             | FsEnum decl -> [ decl.Name ]
             | FsAbbrev decl -> [ decl.Name ]
+            | FsPhantom decl -> [ decl.Name ]
             | FsExports members -> members |> List.map _.Name)
         |> List.distinct
 

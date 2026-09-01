@@ -410,6 +410,36 @@ Mapped types over concrete operands (`Partial<Options>`, `Pick<X,"a"|"b">`,
   measure-tagged `string<brand>` per named alias as opt-in. Closed template literals over
   finite unions expand to literal unions in the checker → StringEnum path applies.
 
+*Landed (2026-09-02, phase D) — the phantom rung, taking option (c) here and the last
+bullet of §4.10 with it.* A declaration whose right-hand side is a type-level computation
+the checker could not finish — a mapped type, a conditional, or a template literal over an
+open operand — used to reach the shape tier looking like a plain alias to nothing, because
+its parameters hang off the *alias* rather than the type. It was then dropped outright
+(F# has no unused type variable in an abbreviation) and every use of it widened to `obj`.
+Now the name and the arity survive:
+
+```fsharp
+[<Erase>]
+type DeepPartial<'T> = private DeepPartial__ of obj
+```
+
+The single private case means a cast is the only way in or out — an honest statement that
+nothing is known about the contents — while the arity keeps `DeepPartial<A>` and
+`DeepPartial<B>` distinct from each other and from `obj`. The carrier is `string` for
+template literals and intrinsic string mappings, which are strings at runtime whatever they
+interpolate, and `obj` otherwise. Every phantom is Widened and says so in the manifest.
+Option (a), the union of both conditional branches, is not taken: a phantom is loud where a
+branch union quietly looks precise.
+
+Two supporting changes made it work. The resolve tier now reads alias type arguments for
+these types — without them the declaration binds nothing and there is no arity to keep — and
+a template literal, interned by its texts and operands and so carrying no alias at all, falls
+back to its own operands. The gain is not confined to the lab fixture: in
+`@cloudflare/workers-types` this recovered `DurableObjectClass<'T>`, `Fetcher<'T,'Reserved>`,
+`D1Result<'T>`, `Service<'T>`, `IncomingRequestCfProperties<'HostMetadata>` and others, and
+`WorkerStub.getDurableObjectClass<'T>` now returns `DurableObjectClass<'T>` where it returned
+`obj`.
+
 ### 4.12 Tuples
 
 Fable F# tuples *are* JS arrays — a happy exact match:

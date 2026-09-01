@@ -162,6 +162,18 @@ type FrozenOptions =
     static member Create (duration: float, label: string, loop: bool) : FrozenOptions = jsNative
 
 /// <summary>
+/// A generic mapped type at an unresolved operand - cannot be expanded.
+/// </summary>
+[<Erase>]
+type DeepPartial<'T> = private DeepPartial__ of obj
+
+/// <summary>
+/// A mapped type that changes the value type rather than the modifiers.
+/// </summary>
+[<Erase>]
+type Flags<'T> = private Flags__ of obj
+
+/// <summary>
 /// A conditional over a concrete operand - already resolved by the checker.
 /// </summary>
 type ConcreteBranch = string
@@ -169,7 +181,8 @@ type ConcreteBranch = string
 /// <summary>
 /// A conditional in a generic signature - unresolved.
 /// </summary>
-type Unwrap = obj
+[<Erase>]
+type Unwrap<'T> = private Unwrap__ of obj
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type EventName =
@@ -179,7 +192,8 @@ type EventName =
 /// <summary>
 /// A template literal in a generic signature - unresolved.
 /// </summary>
-type Prefixed = obj
+[<Erase>]
+type Prefixed<'T> = private Prefixed__ of string
 
 /// <summary>
 /// Uppercase over a concrete operand: an intrinsic string mapping.

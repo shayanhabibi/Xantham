@@ -3,9 +3,9 @@
   "module": "Cloudflare.WorkersTypes",
   "counts": {
     "exact": 189,
-    "ergonomic": 651,
-    "widened": 526,
-    "escape": 41
+    "ergonomic": 652,
+    "widened": 528,
+    "escape": 38
   },
   "symbols": [
     {
@@ -2654,8 +2654,18 @@
       "findings": [
         {
           "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-aliases",
           "tier": "widened",
           "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         }
       ]
     },
@@ -2801,6 +2811,27 @@
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "DurableObjectClass",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "DurableObjectClass is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027_T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         }
       ]
     },
@@ -3641,18 +3672,8 @@
     },
     {
       "name": "FacetStartupOptions",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "repair-arity",
-          "tier": "widened",
-          "message": "reference to the dropped generic alias DurableObjectClass widened to obj"
-        },
-        {
-          "pass": "repair-arity",
-          "tier": "widened",
-          "message": "reference to the dropped generic alias DurableObjectClass widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -5226,8 +5247,18 @@
       "findings": [
         {
           "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-aliases",
           "tier": "widened",
           "message": "type flags Conditional not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         }
       ]
     },
@@ -5237,8 +5268,23 @@
       "findings": [
         {
           "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027Reserved\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-aliases",
           "tier": "widened",
           "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         }
       ]
     },
@@ -9437,8 +9483,18 @@
       "findings": [
         {
           "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-aliases",
           "tier": "widened",
           "message": "type flags Conditional not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         }
       ]
     },
@@ -9448,8 +9504,18 @@
       "findings": [
         {
           "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-aliases",
           "tier": "widened",
           "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         }
       ]
     },
@@ -9459,8 +9525,18 @@
       "findings": [
         {
           "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-aliases",
           "tier": "widened",
           "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         }
       ]
     },
@@ -9612,11 +9688,6 @@
       "name": "WorkerStub",
       "tier": "widened",
       "findings": [
-        {
-          "pass": "repair-arity",
-          "tier": "widened",
-          "message": "reference to the dropped generic alias DurableObjectClass widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -19019,6 +19090,22 @@
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Without",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         }
       ]
     },
@@ -36801,6 +36888,11 @@
           "pass": "shape-aliases",
           "tier": "widened",
           "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         }
       ]
     },
@@ -37361,6 +37453,11 @@
           "pass": "shape-aliases",
           "tier": "widened",
           "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         }
       ]
     },
@@ -39917,6 +40014,27 @@
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Params",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         }
       ]
     },
@@ -44829,32 +44947,6 @@
       ]
     },
     {
-      "name": "DurableObjectClass",
-      "tier": "escape",
-      "findings": [
-        {
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "pass": "repair-arity",
-          "tier": "widened",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "DurableObjectClass is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "message": "constraint on \u0027_T\u0027 has no F# form and is dropped (\u00A74.9)"
-        }
-      ]
-    },
-    {
       "name": "ExportedHandlerFetchHandler",
       "tier": "escape",
       "findings": [
@@ -44954,53 +45046,6 @@
           "pass": "shape-callbacks",
           "tier": "widened",
           "message": "Response is not among the generated declarations; widened to obj"
-        }
-      ]
-    },
-    {
-      "name": "Params",
-      "tier": "escape",
-      "findings": [
-        {
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "pass": "repair-arity",
-          "tier": "widened",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
-        }
-      ]
-    },
-    {
-      "name": "Without",
-      "tier": "escape",
-      "findings": [
-        {
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "pass": "repair-arity",
-          "tier": "widened",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
         }
       ]
     }

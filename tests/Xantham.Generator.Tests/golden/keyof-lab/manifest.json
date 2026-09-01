@@ -4,8 +4,8 @@
   "counts": {
     "exact": 5,
     "ergonomic": 13,
-    "widened": 5,
-    "escape": 2
+    "widened": 7,
+    "escape": 0
   },
   "symbols": [
     {
@@ -180,6 +180,38 @@
       ]
     },
     {
+      "name": "DeepPartial",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+        }
+      ]
+    },
+    {
+      "name": "Flags",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+        }
+      ]
+    },
+    {
       "name": "ConcreteBranch",
       "tier": "widened",
       "findings": [
@@ -198,6 +230,11 @@
           "pass": "shape-aliases",
           "tier": "widened",
           "message": "type flags Conditional not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         }
       ]
     },
@@ -212,8 +249,18 @@
       "findings": [
         {
           "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-aliases",
           "tier": "widened",
           "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         }
       ]
     },
@@ -263,48 +310,6 @@
           "pass": "shape-exports",
           "tier": "widened",
           "message": "indexed access has no F# form here; widened to obj"
-        }
-      ]
-    },
-    {
-      "name": "DeepPartial",
-      "tier": "escape",
-      "findings": [
-        {
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "pass": "repair-arity",
-          "tier": "widened",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
-        }
-      ]
-    },
-    {
-      "name": "Flags",
-      "tier": "escape",
-      "findings": [
-        {
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "pass": "repair-arity",
-          "tier": "widened",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
         }
       ]
     }

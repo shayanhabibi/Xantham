@@ -582,9 +582,26 @@ type FsAbbrevDecl =
       TypeParameters: FsTypeParam list
       Target: FsTypeRef }
 
+/// A declaration TypeScript *computes* and F# cannot reproduce: a mapped type, a conditional or
+/// a template literal at an operand the checker could not resolve (§4.10, §4.11). There is no
+/// structure to emit - the structure is a function of an argument not yet supplied - so the
+/// declaration is erased and keeps only its name and arity, which is enough for uses of it to
+/// stay distinct from each other and from `obj`. Its single case is private, so the only way in
+/// or out is a cast, which is exactly the guarantee the generator can honestly make.
+type FsPhantomDecl =
+    { Name: string
+      Docs: string
+      Tags: JSDocTagInfo list
+      Order: DeclOrder option
+      TypeParameters: FsTypeParam list
+      /// What the value is at runtime once erased: `string` for a template literal or an
+      /// intrinsic string mapping, `obj` for everything else.
+      Carrier: FsTypeRef }
+
 type FsDecl =
     | FsInterface of FsInterfaceDecl
     | FsStringEnum of FsStringEnumDecl
+    | FsPhantom of FsPhantomDecl
     | FsTaggedUnion of FsTaggedUnionDecl
     | FsEnum of FsEnumDecl
     | FsAbbrev of FsAbbrevDecl

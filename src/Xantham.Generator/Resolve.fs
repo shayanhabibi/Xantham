@@ -318,7 +318,39 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
             let! indexType = ctx.Session.getIndexTypeOfType ty.Id
             return TypeFacts.shallow ty, [ objectType; indexType ]
         else
-            return TypeFacts.shallow ty, []
+            // A conditional, a template literal or an intrinsic string mapping. None of these
+            // has a structure to read - each is a type-level computation over an argument the
+            // checker could not supply - but the *arguments* are what the declaration binds,
+            // and without them `type Unwrap<T> = ...` reaches the shape tier looking like a
+            // plain alias with nothing generic about it.
+            let! aliasTypeArguments = ctx.Session.getAliasTypeArgumentsOfType ty.Id
+
+            let aliasTypeArguments =
+                aliasTypeArguments
+                |> ValueOption.defaultValue [||]
+                |> Array.filter (fun argument -> argument.Flags.HasFlag TypeFlags.TypeParameter)
+                |> Array.toList
+
+            // A template literal type is interned by its texts and operands, so it carries no
+            // alias of its own: `` type Prefixed<T extends string> = `x-${T}` `` reports no
+            // alias arguments at all. Its operands are the parameters it binds, and those it
+            // does report.
+            let! operands =
+                if has TypeFlags.TemplateLiteral && List.isEmpty aliasTypeArguments then
+                    ctx.Session.getTypesOfType ty.Id
+                else
+                    async.Return ValueNone
+
+            let operands =
+                operands
+                |> ValueOption.defaultValue [||]
+                |> Array.filter (fun operand -> operand.Flags.HasFlag TypeFlags.TypeParameter)
+                |> Array.toList
+
+            let bound = aliasTypeArguments @ operands
+
+            return
+                { TypeFacts.shallow ty with AliasTypeArguments = bound |> List.map _.Id }, bound
     }
 
 /// Builds the closed type table: derive the current frontier (sorted by id, so the fold is
