@@ -1,0 +1,307 @@
+{
+  "package": "keyof-lab",
+  "module": "KeyofLab",
+  "counts": {
+    "exact": 5,
+    "ergonomic": 5,
+    "widened": 13,
+    "escape": 2
+  },
+  "symbols": [
+    {
+      "name": "Options",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "OptionKey",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "Duration",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "DurationOrLabel",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "Selection",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Accessor",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags Index not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags IndexedAccess not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type parameter is not in scope here; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "Bag",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        }
+      ]
+    },
+    {
+      "name": "Slots",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        }
+      ]
+    },
+    {
+      "name": "Registry",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "FrozenBag",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        }
+      ]
+    },
+    {
+      "name": "PartialOptions",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "OptionsHead",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "OptionsTail",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "FrozenOptions",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "ConcreteBranch",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        }
+      ]
+    },
+    {
+      "name": "Unwrap",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type flags Conditional not mapped yet; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "EventName",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "Prefixed",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "ShoutedKey",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        }
+      ]
+    },
+    {
+      "name": "pick",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "get",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "type flags IndexedAccess not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "type parameter is not in scope here; widened to obj"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "type parameter is not in scope here; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "keys",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "type flags Index not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "type parameter is not in scope here; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "values",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "type flags IndexedAccess not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "type parameter is not in scope here; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "DeepPartial",
+      "tier": "escape",
+      "findings": [
+        {
+          "pass": "audit-coverage",
+          "tier": "escape",
+          "message": "export not represented in the generated output"
+        },
+        {
+          "pass": "repair-arity",
+          "tier": "widened",
+          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "Flags",
+      "tier": "escape",
+      "findings": [
+        {
+          "pass": "audit-coverage",
+          "tier": "escape",
+          "message": "export not represented in the generated output"
+        },
+        {
+          "pass": "repair-arity",
+          "tier": "widened",
+          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        }
+      ]
+    }
+  ]
+}

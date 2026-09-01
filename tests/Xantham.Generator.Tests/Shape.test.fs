@@ -385,6 +385,89 @@ let shapePassTests =
                 | members -> failtest $"expected one property, got %A{members}"
             | decls -> failtest $"expected one interface, got %A{decls}"
 
+        testCase "shape-interfaces declares a type whose only shape is an index signature" <| fun _ ->
+            // `interface Bag { [key: string]: number }` has no properties at all, so before
+            // §4.10's signatures were read it looked empty and abbreviated to obj.
+            let bagSymbol = Build.symbol 100 "Bag" SymbolFlags.Interface
+
+            let bagType =
+                { Build.facts (Build.typeResponse 20 TypeFlags.Object) with
+                    IndexInfos =
+                        [ { KeyTypeId = 1
+                            ValueTypeId = 2
+                            IsReadonly = false } ] }
+
+            let model =
+                { Build.shapeModel (bagType :: Build.primitives) with
+                    Harvest = { Exports = [ Build.export "Bag" bagSymbol ] }
+                    ExportTypes = Map.ofList [ 100, { Declared = Some 20; Value = None } ] }
+
+            let named, _ = Build.runPass Shape.nameExports model
+            let shaped, _ = Build.runPass Shape.shapeInterfaces named
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                Expect.equal decl.Name "Bag" "the index signature is shape enough to declare"
+
+                match decl.Members with
+                | [ FsIndexer indexer ] ->
+                    Expect.equal indexer.Key FsString "key type"
+                    Expect.equal indexer.Value FsFloat "value type"
+                    Expect.isFalse indexer.ReadOnly "a writable signature keeps its setter"
+                | members -> failtest $"expected one indexer, got %A{members}"
+            | decls -> failtest $"expected one interface, got %A{decls}"
+
+        testCase "shape-interfaces drops the setter for a readonly index signature" <| fun _ ->
+            let bagSymbol = Build.symbol 100 "FrozenBag" SymbolFlags.Interface
+
+            let bagType =
+                { Build.facts (Build.typeResponse 20 TypeFlags.Object) with
+                    IndexInfos =
+                        [ { KeyTypeId = 1
+                            ValueTypeId = 1
+                            IsReadonly = true } ] }
+
+            let model =
+                { Build.shapeModel (bagType :: Build.primitives) with
+                    Harvest = { Exports = [ Build.export "FrozenBag" bagSymbol ] }
+                    ExportTypes = Map.ofList [ 100, { Declared = Some 20; Value = None } ] }
+
+            let named, _ = Build.runPass Shape.nameExports model
+            let shaped, _ = Build.runPass Shape.shapeInterfaces named
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                match decl.Members with
+                | [ FsIndexer indexer ] -> Expect.isTrue indexer.ReadOnly "readonly survives to the emission"
+                | members -> failtest $"expected one indexer, got %A{members}"
+            | decls -> failtest $"expected one interface, got %A{decls}"
+
+        testCase "synthesize-paramobjects declines a type carrying an index signature" <| fun _ ->
+            // An index signature has no name to bind a Create parameter to, so the type is
+            // not plain data however many named members sit beside it.
+            let bagSymbol = Build.symbol 100 "Bag" SymbolFlags.Interface
+
+            let bagType =
+                { Build.facts (Build.typeResponse 20 TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol 101 "label" SymbolFlags.Property) 1 ]
+                    IndexInfos =
+                        [ { KeyTypeId = 1
+                            ValueTypeId = 2
+                            IsReadonly = false } ] }
+
+            let model =
+                { Build.shapeModel (bagType :: Build.primitives) with
+                    Harvest = { Exports = [ Build.export "Bag" bagSymbol ] }
+                    ExportTypes = Map.ofList [ 100, { Declared = Some 20; Value = None } ] }
+
+            let named, _ = Build.runPass Shape.nameExports model
+            let shaped, _ = Build.runPass Shape.shapeInterfaces named
+            let withCreate, _ = Build.runPass Shape.synthesizeParamObjects shaped
+
+            match withCreate.Decls with
+            | [ FsInterface decl ] -> Expect.isEmpty decl.CreateOverloads "no Create for an indexed type"
+            | decls -> failtest $"expected one interface, got %A{decls}"
+
         testCase "shape-exports binds the default export under its declared name" <| fun _ ->
             let named, _ = Build.runPass Shape.nameExports (ansiRegexShaped ())
             let shaped, findings = Build.runPass Shape.shapeExports named

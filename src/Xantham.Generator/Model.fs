@@ -295,6 +295,15 @@ type ResolvedMember =
       ReadOnly: bool
       TypeId: int }
 
+/// One index signature (`[key: string]: V`) as the resolve tier records it. These are
+/// invisible to property enumeration - `getPropertiesOfType` returns nothing for a type whose
+/// only content is an index signature - so a type can carry these and no members at all, and
+/// the shape tier has to consult both before deciding a type has no shape worth declaring.
+type ResolvedIndex =
+    { KeyTypeId: int
+      ValueTypeId: int
+      IsReadonly: bool }
+
 type ResolvedSignature =
     { Parameters: ResolvedMember list
       /// The signature's last parameter is a rest parameter (`...args`).
@@ -315,6 +324,9 @@ type TypeFacts =
       /// templates with, and what a widening finding names.
       SymbolName: string option
       Members: ResolvedMember list
+      /// Index signatures (§4.10). Kept apart from `Members` because they are not properties:
+      /// they have no name, and a type may carry one with no members at all.
+      IndexInfos: ResolvedIndex list
       CallSignatures: ResolvedSignature list
       ConstructSignatures: ResolvedSignature list
       /// `extends` bases of an interface or class instance type, by id.
@@ -344,6 +356,7 @@ module TypeFacts =
           Origin = Unclassified
           SymbolName = None
           Members = []
+          IndexInfos = []
           CallSignatures = []
           ConstructSignatures = []
           BaseTypes = []
@@ -435,11 +448,20 @@ type FsMethodMember =
       Parameters: FsParam list
       Return: FsTypeRef }
 
+/// A TypeScript index signature rendered as F#: an `Item` member under `[<EmitIndexer>]`, so
+/// `bag["key"]` is what reaches JavaScript rather than a `.Item(...)` call (§4.10). A readonly
+/// signature drops the setter.
+type FsIndexerMember =
+    { Key: FsTypeRef
+      Value: FsTypeRef
+      ReadOnly: bool }
+
 /// An interface member. Overloads are consecutive `FsMethod` entries sharing a name -
 /// overloaded abstract members are legal F#.
 type FsMember =
     | FsProperty of FsPropertyMember
     | FsMethod of FsMethodMember
+    | FsIndexer of FsIndexerMember
 
 /// How a value export is bound to its JavaScript module.
 type ImportBinding =

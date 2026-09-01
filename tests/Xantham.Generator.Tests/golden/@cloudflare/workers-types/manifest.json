@@ -3,8 +3,8 @@
   "module": "Cloudflare.WorkersTypes",
   "counts": {
     "exact": 188,
-    "ergonomic": 659,
-    "widened": 518,
+    "ergonomic": 649,
+    "widened": 528,
     "escape": 40
   },
   "symbols": [
@@ -9937,6 +9937,16 @@
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
@@ -10068,11 +10078,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -10565,27 +10570,17 @@
     },
     {
       "name": "AiSearchOptions",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
+          "tier": "widened",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "pass": "shape-interfaces",
@@ -10608,9 +10603,24 @@
           "message": "optional member reads as option"
         },
         {
-          "pass": "synthesize-paramobjects",
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         }
       ]
     },
@@ -10652,11 +10662,31 @@
     },
     {
       "name": "AiSearchOptionsQueryRewrite",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
@@ -10673,31 +10703,36 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
     {
       "name": "AiSearchOptionsReranking",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
@@ -10714,47 +10749,22 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
     {
       "name": "AiSearchOptionsRetrieval",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
+          "tier": "widened",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "pass": "shape-interfaces",
@@ -10837,9 +10847,24 @@
           "message": "optional member reads as option"
         },
         {
-          "pass": "synthesize-paramobjects",
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         }
       ]
     },
@@ -10943,11 +10968,31 @@
     },
     {
       "name": "AiSearchChatCompletionsRequest",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
@@ -10964,21 +11009,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -11180,27 +11210,17 @@
     },
     {
       "name": "AiSearchSearchResponseChunksItemScoringDetails",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
+          "tier": "widened",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "pass": "shape-interfaces",
@@ -11243,19 +11263,54 @@
           "message": "optional member reads as option"
         },
         {
-          "pass": "synthesize-paramobjects",
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         }
       ]
     },
     {
       "name": "AiSearchChatCompletionsResponse",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
@@ -11272,28 +11327,23 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
     {
       "name": "AiSearchChatCompletionsResponseChoicesItem",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "unknown maps to obj (D8)"
+        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -11303,27 +11353,27 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
     {
       "name": "AiSearchChatCompletionsResponseChoicesItemMessage",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
-          "pass": "synthesize-paramobjects",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -11475,6 +11525,16 @@
       "name": "AiSearchInstanceInfo",
       "tier": "widened",
       "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "unknown maps to obj (D8)"
+        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -12032,6 +12092,16 @@
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
@@ -12428,6 +12498,16 @@
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
@@ -12529,11 +12609,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -32435,8 +32510,13 @@
       "findings": [
         {
           "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "message": "type flags NonPrimitive not mapped yet; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -32444,9 +32524,14 @@
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -35178,6 +35263,16 @@
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
@@ -35399,11 +35494,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -35503,6 +35593,16 @@
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
@@ -35519,11 +35619,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -36566,7 +36661,7 @@
     },
     {
       "name": "IncomingRequestCfPropertiesBase",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -36576,22 +36671,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
+          "tier": "widened",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "pass": "shape-interfaces",
@@ -36624,9 +36709,24 @@
           "message": "optional member reads as option"
         },
         {
-          "pass": "synthesize-paramobjects",
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         }
       ]
     },
@@ -43287,9 +43387,29 @@
       "tier": "widened",
       "findings": [
         {
-          "pass": "shape-aliases",
+          "pass": "shape-interfaces",
           "tier": "widened",
           "message": "__type is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },

@@ -665,7 +665,25 @@ let private shapeMembers (ctx: Context) (model: ShapeModel) (self: string) (fact
                         ReadOnly = m.ReadOnly
                         Type = optionalRef m.Optional reference } ])
 
-    members, findings
+    // Index signatures come after the named members, because that is where an `Item` member
+    // reads most naturally and because the order has to be stable for the goldens. A type may
+    // declare both a string and a number signature; each becomes its own `Item` overload.
+    let indexers =
+        facts.IndexInfos
+        |> List.map (fun info ->
+            let owner = $"{self}.[]"
+            let key, keyFindings = typeRef ctx model (Some self) owner info.KeyTypeId
+            let value, valueFindings = typeRef ctx model (Some self) owner info.ValueTypeId
+            findings <- findings @ keyFindings @ valueFindings
+
+            emit (Finding.make Ergonomic owner "index signature reads as an EmitIndexer Item member (§4.10)")
+
+            FsIndexer
+                { Key = key
+                  Value = value
+                  ReadOnly = info.IsReadonly })
+
+    members @ indexers, findings
 
 // ---------------------------------------------------------------------------------------------
 // Passes.
@@ -1140,7 +1158,10 @@ let shapeInterfaces: Pass<ShapeModel> =
                         match Map.tryFind typeId model.Types with
                         | Some facts when
                             flag TypeFlags.Object facts
-                            && not facts.Members.IsEmpty
+                            // An index signature is shape too: `interface Bag { [key: string]:
+                            // number }` has no properties at all, and without this it reaches
+                            // `shape-aliases` looking empty and abbreviates to obj (§4.10).
+                            && not (facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
                             && (arrayElement facts).IsNone
                             && not (isTuple facts)
                             // A named instantiation - `type StringBox = Box<string>` - is an
@@ -1529,7 +1550,10 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                             && decl.Members
                                |> List.forall (function
                                    | FsProperty _ -> true
-                                   | FsMethod _ -> false)
+                                   // An index signature has no name to bind a Create
+                                   // parameter to, so a type carrying one is not plain data.
+                                   | FsMethod _
+                                   | FsIndexer _ -> false)
                             ->
                             let parameters =
                                 decl.Members
@@ -1544,7 +1568,8 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                           Optional = optional
                                           Rest = false
                                           Type = p.Type }
-                                    | FsMethod _ -> failwith "unreachable: filtered to properties")
+                                    | FsMethod _
+                                    | FsIndexer _ -> failwith "unreachable: filtered to properties")
 
                             let required, optional = parameters |> List.partition (fun p -> not p.Optional)
 
@@ -1604,6 +1629,9 @@ let dedupeOverloads: Pass<ShapeModel> =
                     members
                     |> List.filter (function
                         | FsProperty _ -> true
+                        // Two `Item` overloads differing only in key type are legal and
+                        // wanted - a type may index by both string and number.
+                        | FsIndexer _ -> true
                         | FsMethod m ->
                             let key = (m.Name, signatureKey m.Parameters).ToString()
 
@@ -1715,6 +1743,11 @@ let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
     let declMember =
         function
         | FsProperty p -> FsProperty { p with Type = reference p.Type }
+        | FsIndexer i ->
+            FsIndexer
+                { i with
+                    Key = reference i.Key
+                    Value = reference i.Value }
         | FsMethod m ->
             FsMethod
                 { m with

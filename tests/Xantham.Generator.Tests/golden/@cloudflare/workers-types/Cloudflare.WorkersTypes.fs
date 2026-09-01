@@ -2858,7 +2858,6 @@ type Span =
 /// configuration for the Access application. The fields below represent commonly
 /// available properties, but additional provider-specific fields may be present.
 /// </summary>
-[<Interface>]
 type CloudflareAccessIdentity =
     /// <summary>
     /// The user's email address, if available from the identity provider.
@@ -2912,8 +2911,8 @@ type CloudflareAccessIdentity =
     /// True if the user is authenticated via Cloudflare Gateway.
     /// </summary>
     abstract is_gateway: bool option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?email: string, ?name: string, ?user_uuid: string, ?account_id: string, ?iat: float, ?ip: string, ?amr: string[], ?idp: CloudflareAccessIdentityIdp, ?geo: CloudflareAccessIdentityGeo, ?groups: CloudflareAccessIdentityGroupsItem[], ?devicePosture: obj, ?is_warp: bool, ?is_gateway: bool) : CloudflareAccessIdentity = jsNative
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type AgentMemoryMemoryType =
@@ -3293,14 +3292,13 @@ type AiSearchMessageRole =
 /// Common shape for `ai_search_options` used by both single-instance and multi-instance requests.
 /// Contains retrieval, query rewrite, reranking, and cache sub-options.
 /// </summary>
-[<Interface>]
 type AiSearchOptions =
     abstract retrieval: AiSearchOptionsRetrieval option with get, set
     abstract query_rewrite: AiSearchOptionsQueryRewrite option with get, set
     abstract reranking: AiSearchOptionsReranking option with get, set
     abstract cache: AiSearchOptionsCache option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?retrieval: AiSearchOptionsRetrieval, ?query_rewrite: AiSearchOptionsQueryRewrite, ?reranking: AiSearchOptionsReranking, ?cache: AiSearchOptionsCache) : AiSearchOptions = jsNative
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 [<Interface>]
 type AiSearchOptionsCache =
@@ -3316,15 +3314,13 @@ type AiSearchOptionsCacheCacheThreshold =
     | [<CompiledName("flexible_friend")>] FlexibleFriend
     | [<CompiledName("super_strict_match")>] SuperStrictMatch
 
-[<Interface>]
 type AiSearchOptionsQueryRewrite =
     abstract enabled: bool option with get, set
     abstract model: string option with get, set
     abstract rewrite_prompt: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?enabled: bool, ?model: string, ?rewrite_prompt: string) : AiSearchOptionsQueryRewrite = jsNative
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
-[<Interface>]
 type AiSearchOptionsReranking =
     abstract enabled: bool option with get, set
     abstract model: string option with get, set
@@ -3332,10 +3328,9 @@ type AiSearchOptionsReranking =
     /// Match threshold (0-1, default 0.4)
     /// </summary>
     abstract match_threshold: float option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?enabled: bool, ?model: string, ?match_threshold: float) : AiSearchOptionsReranking = jsNative
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
-[<Interface>]
 type AiSearchOptionsRetrieval =
     /// <summary>
     /// Which retrieval backend to use. Defaults to the instance's configured index_method.
@@ -3377,8 +3372,8 @@ type AiSearchOptionsRetrieval =
     /// Boost results by metadata field values. Max 3 entries.
     /// </summary>
     abstract boost_by: AiSearchOptionsRetrievalBoostByItem[] option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?retrieval_type: AiSearchOptionsRetrievalRetrievalType, ?fusion_method: AiSearchOptionsRetrievalFusionMethod, ?keyword_match_mode: AiSearchOptionsRetrievalKeywordMatchMode, ?match_threshold: float, ?max_num_results: float, ?filters: VectorizeVectorMetadataFilter, ?context_expansion: float, ?metadata_only: bool, ?return_on_failure: bool, ?boost_by: AiSearchOptionsRetrievalBoostByItem[]) : AiSearchOptionsRetrieval = jsNative
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 [<Interface>]
 type AiSearchOptionsRetrievalBoostByItem =
@@ -3438,14 +3433,13 @@ type AiSearchSearchRequest3 =
     [<ParamObject; Emit("$0")>]
     static member Create (messages: AiSearchMessage[], ?query: unit, ?ai_search_options: AiSearchOptions) : AiSearchSearchRequest3 = jsNative
 
-[<Interface>]
 type AiSearchChatCompletionsRequest =
     abstract messages: AiSearchMessage[] with get, set
     abstract model: string option with get, set
     abstract stream: bool option with get, set
     abstract ai_search_options: AiSearchOptions option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (messages: AiSearchMessage[], ?model: string, ?stream: bool, ?ai_search_options: AiSearchOptions) : AiSearchChatCompletionsRequest = jsNative
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 /// <summary>
 /// `ai_search_options` shape for multi-instance requests — requires `instance_ids`.
@@ -3546,7 +3540,6 @@ type AiSearchSearchResponseChunksItemItem =
     [<ParamObject; Emit("$0")>]
     static member Create (key: string, ?timestamp: float, ?metadata: obj) : AiSearchSearchResponseChunksItemItem = jsNative
 
-[<Interface>]
 type AiSearchSearchResponseChunksItemScoringDetails =
     /// <summary>
     /// Keyword match score (0-1)
@@ -3572,32 +3565,29 @@ type AiSearchSearchResponseChunksItemScoringDetails =
     /// Fusion method used to combine results
     /// </summary>
     abstract fusion_method: AiSearchOptionsRetrievalFusionMethod option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?keyword_score: float, ?vector_score: float, ?keyword_rank: float, ?vector_rank: float, ?reranking_score: float, ?fusion_method: AiSearchOptionsRetrievalFusionMethod) : AiSearchSearchResponseChunksItemScoringDetails = jsNative
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
-[<Interface>]
 type AiSearchChatCompletionsResponse =
     abstract id: string option with get, set
     abstract ``object``: string option with get, set
     abstract model: string option with get, set
     abstract choices: AiSearchChatCompletionsResponseChoicesItem[] with get, set
     abstract chunks: AiSearchSearchResponseChunksItem[] with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (choices: AiSearchChatCompletionsResponseChoicesItem[], chunks: AiSearchSearchResponseChunksItem[], ?id: string, ?``object``: string, ?model: string) : AiSearchChatCompletionsResponse = jsNative
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
-[<Interface>]
 type AiSearchChatCompletionsResponseChoicesItem =
     abstract index: float option with get, set
     abstract message: AiSearchChatCompletionsResponseChoicesItemMessage with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (message: AiSearchChatCompletionsResponseChoicesItemMessage, ?index: float) : AiSearchChatCompletionsResponseChoicesItem = jsNative
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
-[<Interface>]
 type AiSearchChatCompletionsResponseChoicesItemMessage =
     abstract role: AiSearchMessageRole with get, set
     abstract content: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (role: AiSearchMessageRole, ?content: string) : AiSearchChatCompletionsResponseChoicesItemMessage = jsNative
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 [<Interface>]
 type AiSearchStatsResponse =
@@ -3680,6 +3670,8 @@ type AiSearchInstanceInfo =
     /// </summary>
     abstract sync_interval: AiSearchInstanceInfoSyncInterval option with get, set
     abstract metadata: obj option with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 [<Interface>]
 type AiSearchInstanceInfoCustomMetadataItem =
@@ -3841,6 +3833,8 @@ type AiSearchConfig =
     /// </summary>
     abstract sync_interval: AiSearchInstanceInfoSyncInterval option with get, set
     abstract metadata: obj option with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 [<Interface>]
 type AiSearchConfigCustomMetadataItem =
@@ -3876,7 +3870,6 @@ type AiSearchConfigRetrievalOptionsBoostByItem =
     [<ParamObject; Emit("$0")>]
     static member Create (field: string, ?direction: AiSearchOptionsRetrievalBoostByItemDirection) : AiSearchConfigRetrievalOptionsBoostByItem = jsNative
 
-[<Interface>]
 type AiSearchItemInfo =
     abstract id: string with get, set
     abstract key: string with get, set
@@ -3891,8 +3884,8 @@ type AiSearchItemInfo =
     abstract last_seen_at: string option with get, set
     abstract created_at: string option with get, set
     abstract metadata: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (id: string, key: string, status: AiSearchItemInfoStatus, ?next_action: AiSearchItemInfoNextAction, ?error: string, ?checksum: string, ?``namespace``: string, ?chunks_count: float, ?file_size: float, ?source_id: string, ?last_seen_at: string, ?created_at: string, ?metadata: obj) : AiSearchItemInfo = jsNative
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type AiSearchItemInfoNextAction =
@@ -12518,7 +12511,6 @@ type AIGatewayProviders =
     | [<CompiledName("replicate")>] Replicate
     | [<CompiledName("workers-ai")>] WorkersAi
 
-[<Interface>]
 type AIGatewayHeaders =
     abstract ``cf-aig-metadata``: obj with get, set
     abstract ``cf-aig-custom-cost``: U3<string, AIGatewayHeadersCfAigCustomCost, AIGatewayHeadersCfAigCustomCost2> with get, set
@@ -12533,8 +12525,8 @@ type AIGatewayHeaders =
     abstract ``cf-aig-collect-log``: U2<string, bool> with get, set
     abstract Authorization: string with get, set
     abstract ``Content-Type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``cf-aig-metadata``: obj, ``cf-aig-custom-cost``: U3<string, AIGatewayHeadersCfAigCustomCost, AIGatewayHeadersCfAigCustomCost2>, ``cf-aig-cache-ttl``: U2<string, float>, ``cf-aig-skip-cache``: U2<string, bool>, ``cf-aig-cache-key``: string, ``cf-aig-event-id``: string, ``cf-aig-request-timeout``: U2<string, float>, ``cf-aig-max-attempts``: U2<string, float>, ``cf-aig-retry-delay``: U2<string, float>, ``cf-aig-backoff``: string, ``cf-aig-collect-log``: U2<string, bool>, Authorization: string, ``Content-Type``: string) : AIGatewayHeaders = jsNative
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 [<Interface>]
 type AIGatewayHeadersCfAigCustomCost =
@@ -14001,7 +13993,6 @@ type BrowserRun =
 /// Note: Currently, these properties cannot be tested in the
 /// playground.
 /// </summary>
-[<Interface>]
 type RequestInitCfProperties =
     abstract cacheEverything: bool option with get, set
     /// <summary>
@@ -14102,8 +14093,8 @@ type RequestInitCfProperties =
     /// to point to that CNAME record.
     /// </summary>
     abstract resolveOverride: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?cacheEverything: bool, ?cacheKey: string, ?cacheTags: string[], ?cacheTtl: float, ?cacheTtlByStatus: obj, ?vary: RequestInitCfPropertiesVary, ?cacheControl: string, ?cacheReserveEligible: bool, ?respectStrongEtag: bool, ?stripEtags: bool, ?stripLastModified: bool, ?cacheDeceptionArmor: bool, ?cacheReserveMinimumFileSize: float, ?scrapeShield: bool, ?apps: bool, ?grpcWeb: RequestInitCfPropertiesGrpcWeb, ?image: RequestInitCfPropertiesImage, ?minify: RequestInitCfPropertiesImageMinify, ?mirage: bool, ?polish: RequestInitCfPropertiesPolish, ?r2: RequestInitCfPropertiesR2, ?resolveOverride: string) : RequestInitCfProperties = jsNative
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type RequestInitCfPropertiesVaryAction =
@@ -14183,12 +14174,11 @@ type RequestInitCfPropertiesVaryAcceptLanguageHeader =
 /// The index signature allows arbitrary custom request headers beyond the
 /// well-known `accept` and `accept-language` specializations.
 /// </summary>
-[<Interface>]
 type RequestInitCfPropertiesVaryHeaders =
     abstract accept: RequestInitCfPropertiesVaryAcceptHeader option with get, set
     abstract ``accept-language``: RequestInitCfPropertiesVaryAcceptLanguageHeader option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?accept: RequestInitCfPropertiesVaryAcceptHeader, ?``accept-language``: RequestInitCfPropertiesVaryAcceptLanguageHeader) : RequestInitCfPropertiesVaryHeaders = jsNative
+    [<EmitIndexer>]
+    abstract Item: string -> U3<RequestInitCfPropertiesVaryAcceptHeader, RequestInitCfPropertiesVaryAcceptLanguageHeader, RequestInitCfPropertiesVaryHeader> option with get, set
 
 [<Interface>]
 type BasicImageTransformations =
@@ -14788,7 +14778,6 @@ type RequestInitCfPropertiesR2 =
 /// </summary>
 type IncomingRequestCfProperties = obj
 
-[<Interface>]
 type IncomingRequestCfPropertiesBase =
     /// <summary>
     /// [ASN](https://www.iana.org/assignments/as-numbers/as-numbers.xhtml) of the incoming request.
@@ -14856,8 +14845,8 @@ type IncomingRequestCfPropertiesBase =
     /// If the incoming request was served over plaintext (without TLS) this field is undefined.
     /// </summary>
     abstract tlsExportedAuthenticator: IncomingRequestCfPropertiesExportedAuthenticatorMetadata option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (colo: string, edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus, httpProtocol: string, requestPriority: string, tlsVersion: string, tlsCipher: string, ?asn: float, ?asOrganization: string, ?clientAcceptEncoding: string, ?clientTcpRtt: float, ?tlsExportedAuthenticator: IncomingRequestCfPropertiesExportedAuthenticatorMetadata) : IncomingRequestCfPropertiesBase = jsNative
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 [<Interface>]
 type IncomingRequestCfPropertiesBotManagementBase =
@@ -18250,7 +18239,9 @@ type VectorizeVectorMetadataFilterCollectionOp =
 /// <summary>
 /// Filter criteria for vector metadata used to limit the retrieved query result set.
 /// </summary>
-type VectorizeVectorMetadataFilter = obj
+type VectorizeVectorMetadataFilter =
+    [<EmitIndexer>]
+    abstract Item: string -> obj option with get, set
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type VectorizeDistanceMetric =

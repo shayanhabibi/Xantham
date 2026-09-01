@@ -184,6 +184,12 @@ let private renderMember (m: FsMember) =
     | FsMethod m ->
         [ yield! docLines "    " m.Docs m.Tags
           yield $"    abstract {ident m.Name}: {renderAbstractSignature m.Parameters m.Return}" ]
+    | FsIndexer i ->
+        // `[<EmitIndexer>]` is what makes this reach JavaScript as `bag[key]` rather than a
+        // method call; the member must be named `Item` for F# indexer syntax to bind to it.
+        [ yield "    [<EmitIndexer>]"
+          let mutability = if i.ReadOnly then "" else " with get, set"
+          yield $"    abstract Item: {printType i.Key} -> {printType i.Value}{mutability}" ]
 
 /// A declaration's name with its type parameters and their constraints (§4.9), as written at
 /// the point of definition: `Box<'T>`, `Node<'T when 'T :> Element>`.

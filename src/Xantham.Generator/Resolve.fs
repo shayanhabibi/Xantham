@@ -232,19 +232,37 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
             let! baseTypes = ctx.Session.getBaseTypes ty.Id
             let baseTypes = baseTypes |> ValueOption.map Array.toList |> ValueOption.defaultValue []
 
+            // An index signature is not a property: `getPropertiesOfType` returns nothing at
+            // all for `interface Bag { [key: string]: number }`, so without this the type
+            // reaches the shape tier looking empty and is never declared. Key and value are
+            // followed into the table like any other referenced type.
+            let! indexInfos = ctx.Session.getIndexInfosOfType ty.Id
+
+            let indexInfos =
+                indexInfos |> ValueOption.defaultValue [||] |> Array.toList
+
             let discovered =
                 [ yield! members |> Array.map snd
                   yield! callSignatures |> Array.collect (snd >> List.toArray)
                   yield! constructSignatures |> Array.collect (snd >> List.toArray)
                   yield! baseTypes
                   yield! typeArguments
-                  yield! aliasTypeArguments ]
+                  yield! aliasTypeArguments
+                  for info in indexInfos do
+                      info.KeyType
+                      info.ValueType ]
 
             return
                 { Response = ty
                   Origin = origin
                   SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
                   Members = members |> Array.map fst |> Array.toList
+                  IndexInfos =
+                    indexInfos
+                    |> List.map (fun info ->
+                        { KeyTypeId = info.KeyType.Id
+                          ValueTypeId = info.ValueType.Id
+                          IsReadonly = info.IsReadonly = ValueSome true })
                   CallSignatures = callSignatures |> Array.map fst |> Array.toList
                   ConstructSignatures = constructSignatures |> Array.map fst |> Array.toList
                   BaseTypes = baseTypes |> List.map _.Id

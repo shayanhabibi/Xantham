@@ -3,9 +3,9 @@
   "module": "GlobalsLab",
   "counts": {
     "exact": 3,
-    "ergonomic": 3,
+    "ergonomic": 4,
     "widened": 1,
-    "escape": 2
+    "escape": 1
   },
   "symbols": [
     {
@@ -47,6 +47,17 @@
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Loose",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         }
       ]
     },
@@ -95,27 +106,6 @@
           "pass": "harvest-globals",
           "tier": "escape",
           "message": "global dropped - an ambient module declaration; its members are importable from that specifier, which the generator does not emit yet"
-        }
-      ]
-    },
-    {
-      "name": "Loose",
-      "tier": "escape",
-      "findings": [
-        {
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "pass": "repair-arity",
-          "tier": "widened",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
         }
       ]
     }

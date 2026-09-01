@@ -228,12 +228,18 @@ let pipelineTests =
                       Expect.stringContains source "[<Global(\"Gadget\"); EmitConstructor>]" "so does a global class"
                       Expect.isFalse (source.Contains "[<Import(") "a global library imports nothing"
 
-                      // repair-arity, end to end: a brand holds no value, so it has no setter,
-                      // and an alias that widened away its parameter takes its uses with it.
+                      // repair-arity, end to end: a brand holds no value, so it has no setter.
                       // `__brand` reaches the checker escaped to `___brand`; the emitted member
                       // has to name the key the object actually carries.
                       Expect.stringContains source "abstract __brand: unit\n" "the brand reads but does not write"
-                      Expect.isFalse (source.Contains "type Loose") "the unusable generic alias is gone"
+
+                      // `Loose<P> = { [key: string]: string }` used to widen away its parameter
+                      // and be dropped by repair-arity, because an index signature is not a
+                      // property and the type read as empty. Now that §4.10's signatures are
+                      // shaped, it has a body - and a declaration keeps an unused parameter
+                      // happily, where the abbreviation it used to become could not (FS0035).
+                      Expect.stringContains source "type Loose<'P> =" "the alias survives once its index signature is shape"
+                      Expect.stringContains source "abstract Item: string -> string with get, set" "and carries an EmitIndexer"
 
                   testCase "an ambient module declaration is dropped loudly" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -246,6 +252,8 @@ let pipelineTests =
                            |> List.map (fun finding -> finding.Tier, finding.Symbol))
                           (Escape, "\"globals-lab:extra\"")
                           "the ambient module is an escape, not a silence" ])
+
+        yield! fixtureTests "keyof-lab" (handFixture "keyof-lab") GeneratorConfig.Default (fun _ -> [])
 
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 
