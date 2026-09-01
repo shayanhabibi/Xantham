@@ -224,6 +224,15 @@ Phases — each ends with the compile gate green on its fixtures:
 - **A — walking skeleton.** Bootstrap, harvest, resolve, minimal shape (interfaces,
   functions, primitives, `option`), render, manifest. End-to-end on `ansi-regex`.
   *Everything after this is adding passes to a working pipeline.*
+  **Landed (2026-09-01):** `src/Xantham.Generator` + `tests/Xantham.Generator.Tests`
+  (per-pass units, live e2e goldens, run-twice determinism) +
+  `tests/Xantham.Generator.CompileGate` (goldens compiled against Fable.Core on every
+  build). Two things the fixture taught that the plan should carry forward: the resolve
+  tier stops at the package boundary (expanding an external type like `RegExp` reaches
+  most of `lib.d.ts` for nothing — external object types stay shallow and widen with a
+  named finding), and the wire flags neither optional parameters nor declared `readonly`
+  on symbols (`?` optionality is derived from the hoisted `undefined`; readonly comes
+  from `isReadonlySymbol`).
 - **B — the common 90%.** Literal unions (D12), enums, ParamObject synthesis (D3),
   callbacks (D5), classes/statics, naming pass hardening. Fixture: `animejs`.
 - **C — unions and generics.** Position-aware unions (D4), tagged-union detection, tuples

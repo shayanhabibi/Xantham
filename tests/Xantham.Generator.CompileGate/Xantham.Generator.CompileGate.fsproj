@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- The compile gate of docs/plans/generator-architecture.md §5: the committed golden
+         bindings are compiled as F# against Fable.Core on every build, because bindings that
+         do not compile are not bindings. Growing the golden corpus means adding its .fs files
+         here. A Fable compile joins once the support package exists (phase D). -->
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="..\Xantham.Generator.Tests\golden\ansi-regex\AnsiRegex.fs" Link="ansi-regex\AnsiRegex.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Fable.Core" Version="4.5.0" />
+    </ItemGroup>
+
+</Project>

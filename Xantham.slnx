@@ -49,10 +49,13 @@
 <!--    ===================    -->
   <Folder Name="/src/">
     <Project Path="src/Xantham.TypeScript.Wire/Xantham.TypeScript.Wire.fsproj" />
+    <Project Path="src/Xantham.Generator/Xantham.Generator.fsproj" />
   </Folder>
   <Folder Name="/tests/">
     <File Path="tests/Test.fsx" />
     <Project Path="tests/Xantham.TypeScript.Wire.Tests/Xantham.TypeScript.Wire.Tests.fsproj" />
+    <Project Path="tests/Xantham.Generator.Tests/Xantham.Generator.Tests.fsproj" />
+    <Project Path="tests/Xantham.Generator.CompileGate/Xantham.Generator.CompileGate.fsproj" />
   </Folder>
   <Folder Name="/tools/">
     <File Path="tools/generate-wire.fsx" />

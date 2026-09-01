@@ -1,0 +1,33 @@
+{
+  "package": "ansi-regex",
+  "module": "AnsiRegex",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 0,
+    "widened": 1,
+    "escape": 0
+  },
+  "symbols": [
+    {
+      "name": "Options",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "ansiRegex",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "widened",
+          "message": "RegExp is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    }
+  ]
+}

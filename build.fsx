@@ -169,13 +169,15 @@ module Stages =
     }
     
     /// Compose with `deps`: the live tests resolve the compiler with `Tsc.locate`, which walks
-    /// parents from the test project, so the root install is what they find.
+    /// parents from the test project, so the root install is what they find. Solution-driven so
+    /// a new test project is in the run the moment the solution references it - `dotnet test`
+    /// only executes projects that carry the test SDK, so the compile gate just builds.
     let test = input {
         let! skipTests = Options.skipTests
         and! config = Options.config
         return stage "test" {
             when' (not skipTests)
-            run (cmd $"dotnet test {Repo.Project.``Xantham.TypeScript.Wire.Tests``.Path} -c {config}")
+            run (cmd $"dotnet test {Repo.Project.SolutionFile} -c {config}")
         }
     }
     
