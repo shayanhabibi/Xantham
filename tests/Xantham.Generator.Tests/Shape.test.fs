@@ -151,8 +151,8 @@ let private ansiRegexShaped () =
                   Build.export "default" functionSymbol ] }
         ExportTypes =
             Map.ofList
-                [ 100, { Declared = Some 20; Value = None }
-                  200, { Declared = None; Value = Some 30 } ] }
+                [ 100, { Declared = ValueSome 20; Value = ValueNone }
+                  200, { Declared = ValueNone; Value = ValueSome 30 } ] }
 
 [<Tests>]
 let shapePassTests =
