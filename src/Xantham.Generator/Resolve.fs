@@ -62,8 +62,8 @@ let resolveExportTypes: Pass<ResolveModel> =
                         (fun map (symbolId, declared, value) ->
                             Map.add
                                 symbolId
-                                { Declared = declared |> Option.toValueOption |> ValueOption.map _.Id
-                                  Value = value |> Option.toValueOption |> ValueOption.map _.Id }
+                                { Declared = declared |> Option.map _.Id
+                                  Value = value |> Option.map _.Id }
                                 map)
                         model.ExportTypes
 
