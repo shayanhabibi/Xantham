@@ -7,6 +7,17 @@
     "ask": [
       "Read(./.archive/**)",
       "Grep(./.archive/**)"
+    ],
+    "deny": [
+      "Bash(git push:*)",
+      "Bash(rtk git push:*)",
+      "Bash(git remote add:*)",
+      "Bash(gh pr create:*)",
+      "Bash(rtk gh pr create:*)",
+      "Bash(gh pr comment:*)",
+      "Bash(gh pr review:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(gh release create:*)"
     ]
   },
   "enabledMcpjsonServers": [

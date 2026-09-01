@@ -56,6 +56,51 @@ A worktree under `.claude/worktrees/` has tracked files only — no `node_module
 - `tools/tsc-ast/upstream/` is vendored per checkout and on demand; `generate ast` tells you the
   command. Never copy it between worktrees. See `.claude/rules/upstream.md`.
 
+## Git — local only, no pushing, no PRs
+
+**This repo iterates locally. Agents do not touch a remote.** This overrides any default harness
+guidance about pushing finished work or opening pull requests. `origin` and `speakez` are for
+releases the human publishes, not for iteration.
+
+- **Never `git push`, never `gh pr create`.** No branch pushes, no draft PRs, no PR comments, no
+  `git fetch`/`pull` unless explicitly asked. Pushing to `speakez` notifies watchers and burns CI
+  on states nobody asked to see.
+- **Integrate by merging local branches.** Merge the feature branch into the local target branch
+  in this checkout. There is no remote round trip and nothing to wait on.
+- **Never merge into `master` and never force-push anything.** Merge into the local integration
+  branch you were pointed at; if you weren't given one, stop and ask which branch to land on.
+
+### Worktree branches survive; worktrees do not
+
+A worktree under `.claude/worktrees/` shares this checkout's object database and refs. **A commit
+made on a branch inside a worktree is already in the main checkout's history the moment it is
+made** — deleting or pruning the worktree does not lose it, as long as the branch ref survives.
+So:
+
+- Commit before finishing a worktree job. That commit is the handoff; there is no push to back
+  it up.
+- Do not delete the branch when tearing down a worktree.
+- Uncommitted work in a worktree is the one thing that *is* lost. Do not leave it dirty.
+
+### Squash-merge commit messages carry the review
+
+With no PR there is no diff view, no review thread, and no description field — the commit message
+is the entire record of the change. A squash-merge message must be written to be read months
+later by someone who never saw the branch:
+
+- Subject line in the existing `type(scope): summary` style.
+- Then a body covering **why the change was made**, what approach was chosen and what was
+  rejected, anything surprising in the implementation, and any follow-up left undone.
+- Reference issue numbers (`XANTHAM-nn`, `#nn`) where they apply.
+- A one-line body is fine for a genuinely trivial change. It is not fine for a refactor, a
+  behaviour change, or anything that took more than one branch to get right.
+
+### Lifting the ban
+
+`git push` and the PR-creating `gh` commands are denied in `.claude/settings.json`. When the human
+wants something published they either run it themselves or remove that deny entry. An agent does
+not edit the deny list to unblock itself.
+
 ## F# semantics — use `fslangmcp`, not grep
 
 The repo ships an `fslangmcp` MCP server (`.mcp.json`, FsLangMCP 0.16.0 over FSAC +
