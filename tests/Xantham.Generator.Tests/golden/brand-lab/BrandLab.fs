@@ -45,7 +45,7 @@ type Millis
 type Verified
 
 /// <summary>
-/// A brand whose marker carries `never` - the marker is unconstructible, not just unnamed.
+/// A brand whose marker carries <c>never</c> - the marker is unconstructible, not just unnamed.
 /// </summary>
 /// <remarks>A brand over <c>string</c>.</remarks>
 [<Measure>]

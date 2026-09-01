@@ -47,7 +47,7 @@ type Box<'T> =
 [<Erase>]
 type Exports =
     /// <summary>
-    /// The one that matters most: nearly every asynchronous API in a `.d.ts` returns one.
+    /// The one that matters most: nearly every asynchronous API in a <c>.d.ts</c> returns one.
     /// </summary>
     [<Import("fetchOne", "lib-lab")>]
     static member fetchOne (url: string) : JS.Promise<string> = jsNative
@@ -87,12 +87,12 @@ type Exports =
     [<Import("stream", "lib-lab")>]
     static member stream (source: JS.AsyncIterable<string>) : JS.AsyncIterator<float> = jsNative
     /// <summary>
-    /// A bare `Function` in a `.d.ts` is untyped by construction; `JS.Function` says the same.
+    /// A bare <c>Function</c> in a <c>.d.ts</c> is untyped by construction; <c>JS.Function</c> says the same.
     /// </summary>
     [<Import("invoke", "lib-lab")>]
     static member invoke (fn: JS.Function) : JS.Object = jsNative
     /// <summary>
-    /// A typed array. Under a modern lib this is `Uint8Array&lt;ArrayBufferLike&gt;`.
+    /// A typed array. Under a modern lib this is <c>Uint8Array&lt;ArrayBufferLike&gt;</c>.
     /// </summary>
     [<Import("bytes", "lib-lab")>]
     static member bytes (input: JS.Uint8Array) : JS.Float64Array = jsNative
@@ -107,12 +107,12 @@ type Exports =
     [<Import("frozen", "lib-lab")>]
     static member frozen (entries: JS.Map<string, float>, values: JS.Set<string>) : unit = jsNative
     /// <summary>
-    /// `seq&lt;'T&gt;` is not a JS iterable, whatever the two have in common. Widened, and noted.
+    /// <c>seq&lt;'T&gt;</c> is not a JS iterable, whatever the two have in common. Widened, and noted.
     /// </summary>
     [<Import("each", "lib-lab")>]
     static member each (values: obj) : unit = jsNative
     /// <summary>
-    /// A DOM name. Real, ubiquitous in `.d.ts` files, and still `obj` here.
+    /// A DOM name. Real, ubiquitous in <c>.d.ts</c> files, and still <c>obj</c> here.
     /// </summary>
     [<Import("handle", "lib-lab")>]
     static member handle (target: obj) : unit = jsNative

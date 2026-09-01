@@ -366,6 +366,55 @@ let renderTests =
                       "/// </summary>" ])
                 "unbalanced XML would break every consumer"
 
+        testCase "markdown code spans become <c>, fenced blocks excepted" <| fun _ ->
+            // A span closes on a backtick run of its own length, so a span may itself contain
+            // backticks; a run that never closes is prose, and inside a fence nothing is a span.
+            let model =
+                { baseModel with
+                    Decls =
+                        [ FsAbbrev
+                            { Name = "Handle"
+                              Docs =
+                                String.concat
+                                    "\n"
+                                    [ "Pass `open<T>` or ``a`b`` to it."
+                                      "A stray ` backtick is just text."
+                                      "```ts"
+                                      "`inside` is code already"
+                                      "```" ]
+                              Tags =
+                                [ { Name = "see"; Text = ValueSome "the `Timer` type" }
+                                  { Name = "example"
+                                    Text = ValueSome(String.concat "\n" [ "Call `open()`."; "Twice." ]) } ]
+                              Order = None
+                              TypeParameters = []
+                              Target = FsString } ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+
+            Expect.stringContains
+                source
+                (String.concat
+                    "\n"
+                    [ "/// <summary>"
+                      "/// Pass <c>open&lt;T&gt;</c> or <c>a`b</c> to it."
+                      "/// A stray ` backtick is just text."
+                      "/// <code lang=\"ts\">"
+                      "/// `inside` is code already"
+                      "/// </code>"
+                      "/// </summary>" ])
+                "spans in the summary, and none inside the block"
+
+            Expect.stringContains
+                source
+                "/// <remarks>@see the <c>Timer</c> type</remarks>"
+                "a one-line tag"
+
+            Expect.stringContains
+                source
+                (String.concat "\n" [ "/// @example"; "/// Call <c>open()</c>."; "/// Twice." ])
+                "a multi-line tag"
+
         testCase "the manifest reports per-symbol tiers with pass provenance" <| fun _ ->
             let model =
                 { baseModel with
