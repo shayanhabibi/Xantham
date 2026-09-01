@@ -27,7 +27,7 @@ type Exports =
     /// </summary>
     /// <remarks>
     /// @example
-    /// ```
+    /// <code>
     /// import ansiRegex from 'ansi-regex';
     ///
     /// ansiRegex().test('\u001B[4mcake\u001B[0m');
@@ -44,7 +44,7 @@ type Exports =
     ///
     /// '\u001B]8;;https://github.com\u0007click\u001B]8;;\u0007'.match(ansiRegex());
     /// //=&gt; ['\u001B]8;;https://github.com\u0007', '\u001B]8;;\u0007']
-    /// ```
+    /// </code>
     /// </remarks>
     [<Import("default", "ansi-regex")>]
     static member ansiRegex (?options: Options) : obj = jsNative

@@ -23,7 +23,7 @@ type Widget =
     static member Create (label: string, ?size: float) : Widget = jsNative
 
 /// <summary>
-/// A global class: `[&lt;Global&gt;]` plus `[&lt;EmitConstructor&gt;]`.
+/// A global class: <c>[&lt;Global&gt;]</c> plus <c>[&lt;EmitConstructor&gt;]</c>.
 /// </summary>
 type Gadget =
     abstract widget: Widget
@@ -59,7 +59,7 @@ type Bag =
 [<Erase>]
 type Exports =
     /// <summary>
-    /// A global value: already on `globalThis`, so it binds with `[&lt;Global&gt;]`, not `[&lt;Import&gt;]`.
+    /// A global value: already on <c>globalThis</c>, so it binds with <c>[&lt;Global&gt;]</c>, not <c>[&lt;Import&gt;]</c>.
     /// </summary>
     [<Global("registry")>]
     static member registry: Widget = jsNative
@@ -74,7 +74,7 @@ type Exports =
     [<Global("ping")>]
     static member ping (target: string, ?retries: float) : bool = jsNative
     /// <summary>
-    /// A global class: `[&lt;Global&gt;]` plus `[&lt;EmitConstructor&gt;]`.
+    /// A global class: <c>[&lt;Global&gt;]</c> plus <c>[&lt;EmitConstructor&gt;]</c>.
     /// </summary>
     [<Global("Gadget"); EmitConstructor>]
     static member Gadget (widget: Widget) : Gadget = jsNative

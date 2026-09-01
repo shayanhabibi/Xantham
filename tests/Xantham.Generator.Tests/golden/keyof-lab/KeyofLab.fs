@@ -36,12 +36,12 @@ type OptionKey =
     | [<CompiledName("loop")>] Loop
 
 /// <summary>
-/// Concrete indexed access - the checker resolves this to `number`.
+/// Concrete indexed access - the checker resolves this to <c>number</c>.
 /// </summary>
 type Duration = float
 
 /// <summary>
-/// Concrete indexed access over a union of keys - resolves to `number | string`.
+/// Concrete indexed access over a union of keys - resolves to <c>number | string</c>.
 /// </summary>
 type DurationOrLabel = U2<string, float>
 
@@ -77,7 +77,7 @@ type Slots =
     abstract Item: float -> string with get, set
 
 /// <summary>
-/// `Record` over concrete operands.
+/// <c>Record</c> over concrete operands.
 /// </summary>
 type Registry =
     [<EmitIndexer>]
@@ -210,17 +210,17 @@ type Exports =
     [<Import("pick", "keyof-lab")>]
     static member pick (key: OptionKey) : U3<string, float, bool> = jsNative
     /// <summary>
-    /// `K extends keyof T` plus `T[K]` - the canonical typed accessor.
+    /// <c>K extends keyof T</c> plus <c>T[K]</c> - the canonical typed accessor.
     /// </summary>
     [<Import("get", "keyof-lab")>]
     static member get<'T, 'R> (source: 'T, key: typekeyof<'T, 'R>) : 'R = jsNative
     /// <summary>
-    /// A bare `keyof T` parameter over an unresolved operand.
+    /// A bare <c>keyof T</c> parameter over an unresolved operand.
     /// </summary>
     [<Import("keys", "keyof-lab")>]
     static member keys<'T> (source: 'T) : keyof<'T>[] = jsNative
     /// <summary>
-    /// `T[keyof T]` - the value-of idiom.
+    /// <c>T[keyof T]</c> - the value-of idiom.
     /// </summary>
     [<Import("values", "keyof-lab")>]
     static member values<'T> (source: 'T) : obj[] = jsNative

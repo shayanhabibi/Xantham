@@ -391,6 +391,13 @@ depend on it. That was the open question here - a decision about what generated 
 on rather than a row in a table - and the answer is that the family is already an implicit
 dependency of most Fable libraries, so taking it costs less than the widening did.
 
+The alternative is not closed off, only deferred. [Default Lib Bindings](lib-bindings.md)
+measures generating the DOM *ourselves* against the hand-written family and finds the
+generated binding decisively ahead on coverage, freshness, nullability, mutability and docs —
+but not compiling, with one cause (heritage flattened rather than emitted as `inherit`)
+accounting for 1,698 of 1,700 errors. Depending on the family is what ships today; that
+document is what would replace it, and the two agree that the deciding work is `inherit`.
+
 Unlike `LibBindings`, this table is *generated*: `tools/browser-gen/generate.fsx` intersects
 the `Browser.Types` namespace of the 23 pinned packages with the names the pinned compiler's
 `lib.*.d.ts` declares, and emits `Naming.BrowserBindings`' backing data (439 entries) plus a
@@ -561,7 +568,10 @@ Fable F# tuples *are* JS arrays — a happy exact match:
   names per the archive's `NamePath` scheme).
 - JSDoc → XML doc comments (`getDocumentationComment`, `getJsDocTags`); `@deprecated` →
   `[<Obsolete>]`; `@see`/`@example` carried into `<remarks>`/`<example>`. The tier
-  annotation from §1 also lands here.
+  annotation from §1 also lands here. JSDoc is markdown and XML docs are not, so a fenced
+  block becomes `<code>` (its info string as `lang="ts"`) and a code span becomes `<c>`, in
+  both the summary and the tags; a fence the comment leaves open is closed at its end so the
+  XML stays balanced, and inside a block nothing is a span - backticks there are code.
 
 ---
 

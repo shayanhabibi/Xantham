@@ -47,7 +47,7 @@ type Box<'T> =
 [<Erase>]
 type Exports =
     /// <summary>
-    /// The one that matters most: nearly every asynchronous API in a `.d.ts` returns one.
+    /// The one that matters most: nearly every asynchronous API in a <c>.d.ts</c> returns one.
     /// </summary>
     [<Import("fetchOne", "lib-lab")>]
     static member fetchOne (url: string) : JS.Promise<string> = jsNative
@@ -87,12 +87,12 @@ type Exports =
     [<Import("stream", "lib-lab")>]
     static member stream (source: JS.AsyncIterable<string>) : JS.AsyncIterator<float> = jsNative
     /// <summary>
-    /// A bare `Function` in a `.d.ts` is untyped by construction; `JS.Function` says the same.
+    /// A bare <c>Function</c> in a <c>.d.ts</c> is untyped by construction; <c>JS.Function</c> says the same.
     /// </summary>
     [<Import("invoke", "lib-lab")>]
     static member invoke (fn: JS.Function) : JS.Object = jsNative
     /// <summary>
-    /// A typed array. Under a modern lib this is `Uint8Array&lt;ArrayBufferLike&gt;`.
+    /// A typed array. Under a modern lib this is <c>Uint8Array&lt;ArrayBufferLike&gt;</c>.
     /// </summary>
     [<Import("bytes", "lib-lab")>]
     static member bytes (input: JS.Uint8Array) : JS.Float64Array = jsNative
@@ -112,7 +112,7 @@ type Exports =
     [<Import("handle", "lib-lab")>]
     static member handle (target: Browser.Types.EventTarget) : unit = jsNative
     /// <summary>
-    /// Elements and events, which is most of what a browser-facing `.d.ts` traffics in.
+    /// Elements and events, which is most of what a browser-facing <c>.d.ts</c> traffics in.
     /// </summary>
     [<Import("mount", "lib-lab")>]
     static member mount (host: Browser.Types.HTMLElement, on: Browser.Types.Event) : unit = jsNative
@@ -122,26 +122,26 @@ type Exports =
     [<Import("upload", "lib-lab")>]
     static member upload (body: Browser.Types.Blob, ``to``: Browser.Types.URL) : Browser.Types.FormData = jsNative
     /// <summary>
-    /// Bound at two arities: `CustomEvent` is in the family both bare and generic.
+    /// Bound at two arities: <c>CustomEvent</c> is in the family both bare and generic.
     /// </summary>
     [<Import("emit", "lib-lab")>]
     static member emit (detail: Browser.Types.CustomEvent<string>) : unit = jsNative
     /// <summary>
-    /// `seq&lt;'T&gt;` is not a JS iterable, whatever the two have in common. Widened, and noted.
+    /// <c>seq&lt;'T&gt;</c> is not a JS iterable, whatever the two have in common. Widened, and noted.
     /// </summary>
     [<Import("each", "lib-lab")>]
     static member each (values: obj) : unit = jsNative
     /// <summary>
-    /// A DOM name two packages of the family both define (`Browser.IndexedDB` and
-    /// `Browser.MediaStream` each declare a `Range`). There is no qualification that picks one, so
+    /// A DOM name two packages of the family both define (<c>Browser.IndexedDB</c> and
+    /// <c>Browser.MediaStream</c> each declare a <c>Range</c>). There is no qualification that picks one, so
     /// the table drops it and this widens - the honest outcome, and the reason ambiguity is
     /// resolved when the table is generated rather than when the reference is emitted.
     /// </summary>
     [<Import("select", "lib-lab")>]
     static member ``select`` (over: obj) : unit = jsNative
     /// <summary>
-    /// A DOM name the family does not bind at all. `Response` and the rest of `fetch` live in
-    /// `Fable.Fetch`, a different package family, so this is still `obj`.
+    /// A DOM name the family does not bind at all. <c>Response</c> and the rest of <c>fetch</c> live in
+    /// <c>Fable.Fetch</c>, a different package family, so this is still <c>obj</c>.
     /// </summary>
     [<Import("respond", "lib-lab")>]
     static member respond () : obj = jsNative

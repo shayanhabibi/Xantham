@@ -109,6 +109,90 @@ let private xmlEscape (text: string) =
 
 let private splitLines (text: string) = text.Replace("\r\n", "\n").Split '\n'
 
+/// A line of doc prose, XML-escaped, with its markdown code spans as `<c>`. A span opens on a
+/// run of backticks and closes on a run of the same length - so a span can carry backticks of
+/// its own - and a run that never closes is prose, which is what a lone backtick in a sentence
+/// nearly always is. Multi-line spans are not recognised; the caller works a line at a time.
+let private inlineCode (line: string) =
+    let ticksAt index =
+        let mutable last = index
+
+        while last < line.Length && line[last] = '`' do
+            last <- last + 1
+
+        last - index
+
+    // The closing run must be exactly as long as the opening one, so a shorter or longer run
+    // in between is content and the scan carries on past it.
+    let closingRun opening index =
+        let mutable index = index
+        let mutable found = -1
+
+        while found < 0 && index < line.Length do
+            match ticksAt index with
+            | 0 -> index <- index + 1
+            | run when run = opening -> found <- index
+            | run -> index <- index + run
+
+        found
+
+    let rendered = System.Text.StringBuilder()
+    let mutable index = 0
+    let mutable prose = 0
+
+    while index < line.Length do
+        match ticksAt index with
+        | 0 -> index <- index + 1
+        | opening ->
+            match closingRun opening (index + opening) with
+            | -1 -> index <- index + opening
+            | closing ->
+                rendered.Append(xmlEscape line[prose .. index - 1]) |> ignore
+                rendered.Append($"<c>{xmlEscape line[index + opening .. closing - 1]}</c>") |> ignore
+                index <- closing + opening
+                prose <- index
+
+    rendered.Append(xmlEscape line[prose ..]).ToString()
+
+/// A markdown fence line: three or more backticks, and whatever info string follows them.
+let private (|CodeFence|_|) (line: string) =
+    let trimmed = line.Trim()
+    let ticks = trimmed |> Seq.takeWhile ((=) '`') |> Seq.length
+
+    if ticks >= 3 then
+        Some(ticks, trimmed.Substring(ticks).Trim())
+    else
+        None
+
+/// The body of a doc comment, XML-escaped, with markdown fences rewritten as `<code>` blocks -
+/// JSDoc is markdown, XML docs are not, and a fence left alone reads as three backticks in
+/// every tooltip. The info string's first word, where there is one, becomes `lang`. A fence
+/// left open by the comment closes at its end, because unbalanced XML breaks the consumers.
+let private docBody (indent: string) (lines: string seq) =
+    // Inside a block every character is already code, backticks included; outside it a code
+    // span becomes `<c>`.
+    let escaped (line: string) = $"{indent}/// {xmlEscape line}".TrimEnd()
+    let prose (line: string) = $"{indent}/// {inlineCode line}".TrimEnd()
+
+    let opener (info: string) =
+        match info.Split([| ' '; '\t' |]) |> Array.head with
+        | "" -> "<code>"
+        | language -> $"""<code lang="{xmlEscape (language.Replace("\"", ""))}">"""
+
+    let rec walk fence lines =
+        match lines with
+        | [] -> if fence > 0 then [ $"{indent}/// </code>" ] else []
+        | line :: rest ->
+            match line, fence with
+            | CodeFence(ticks, info), 0 -> $"{indent}/// {opener info}" :: walk ticks rest
+            // Markdown closes a block on a bare fence at least as long as the one that opened
+            // it; anything else inside the block is code, backticks and all.
+            | CodeFence(ticks, ""), _ when ticks >= fence -> $"{indent}/// </code>" :: walk 0 rest
+            | line, 0 -> prose line :: walk 0 rest
+            | line, _ -> escaped line :: walk fence rest
+
+    walk 0 (List.ofSeq lines)
+
 /// JSDoc as XML docs: the comment as `<summary>`, each tag as a `<remarks>` line or block.
 /// The tier annotation lands in the manifest, not here.
 let private docLines (indent: string) (docs: string) (tags: JSDocTagInfo list) =
@@ -116,10 +200,7 @@ let private docLines (indent: string) (docs: string) (tags: JSDocTagInfo list) =
 
       if summary <> "" then
           yield $"{indent}/// <summary>"
-
-          for line in splitLines summary do
-              yield $"{indent}/// {xmlEscape line}".TrimEnd()
-
+          yield! docBody indent (splitLines summary)
           yield $"{indent}/// </summary>"
 
       for tag in tags do
@@ -128,14 +209,11 @@ let private docLines (indent: string) (docs: string) (tags: JSDocTagInfo list) =
           match splitLines text with
           | [| single |] ->
               let content = if single = "" then $"@{tag.Name}" else $"@{tag.Name} {single}"
-              yield $"{indent}/// <remarks>{xmlEscape content}</remarks>"
+              yield $"{indent}/// <remarks>{inlineCode content}</remarks>"
           | lines ->
               yield $"{indent}/// <remarks>"
               yield $"{indent}/// @{tag.Name}"
-
-              for line in lines do
-                  yield $"{indent}/// {xmlEscape line}".TrimEnd()
-
+              yield! docBody indent lines
               yield $"{indent}/// </remarks>" ]
 
 /// A parameter of a static emission (`Exports` members, `Create` overloads): F# optional

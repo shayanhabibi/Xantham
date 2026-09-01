@@ -297,11 +297,41 @@ let private ownArguments (facts: TypeFacts) =
 // Type references.
 // ---------------------------------------------------------------------------------------------
 
+/// The type ids on the current reference descent, so that a shape reached from itself is cut
+/// rather than followed forever.
+///
+/// A *named* cycle terminates on its own: the declaration is in `DeclNames` and the second
+/// visit renders as the name. An unnamed one has no such floor - `lib.dom.d.ts` writes several,
+/// and every one of them is a union whose arm is an anonymous object with a member back in the
+/// union - so the descent must remember where it has been. Per-thread because the shape tier
+/// runs its passes sequentially but the pipeline is `Async`, and the state is a path, not a
+/// cache: an id is removed on the way out, so a type referenced twice side by side is shaped
+/// twice, as it must be.
+type private Descent() =
+    [<System.ThreadStatic; DefaultValue>]
+    static val mutable private path: System.Collections.Generic.HashSet<int>
+
+    static member Path =
+        if isNull Descent.path then
+            Descent.path <- System.Collections.Generic.HashSet<int>()
+
+        Descent.path
+
 /// The F# type written at a reference position, with the findings any widening produces.
 /// `self` is the name of the declaration being shaped, so a polymorphic `this` return can
 /// resolve to it. Flag-test order matters: `boolean` (a union wearing the Boolean flag) before
 /// the union case, unions before the literal tests, literals before their base primitives.
 let rec typeRef (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (typeId: int) : FsTypeRef * Finding list =
+    if not (Descent.Path.Add typeId) then
+        FsObj,
+        [ Finding.make Widened owner "type refers to itself through unnamed shapes; widened to obj" ]
+    else
+        try
+            typeRefOnPath ctx model self owner typeId
+        finally
+            Descent.Path.Remove typeId |> ignore
+
+and private typeRefOnPath (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (typeId: int) : FsTypeRef * Finding list =
     match Map.tryFind typeId model.Types with
     | None ->
         match Map.tryFind typeId model.NotFollowed with

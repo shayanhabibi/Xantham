@@ -283,6 +283,138 @@ let renderTests =
 
             Expect.equal (renderAll model |> Map.find "TestPkg.fs") expected "the source golden"
 
+        testCase "markdown code fences in a doc comment become XML <code> blocks" <| fun _ ->
+            // JSDoc is markdown; XML docs are not. A fence left verbatim reads as three
+            // backticks in a tooltip, so it is rewritten - the info string, where given,
+            // as the `lang` attribute.
+            let model =
+                { baseModel with
+                    Decls =
+                        [ FsAbbrev
+                            { Name = "Handle"
+                              Docs =
+                                String.concat
+                                    "\n"
+                                    [ "Opens a handle."
+                                      ""
+                                      "```typescript"
+                                      "const h = open<T>(\"file\")"
+                                      "```"
+                                      ""
+                                      "```"
+                                      "plain fence"
+                                      "```" ]
+                              Tags =
+                                [ { Name = "example"
+                                    Text = ValueSome(String.concat "\n" [ "```js"; "open()"; "```" ]) } ]
+                              Order = None
+                              TypeParameters = []
+                              Target = FsString } ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+
+            Expect.stringContains
+                source
+                (String.concat
+                    "\n"
+                    [ "/// <summary>"
+                      "/// Opens a handle."
+                      "///"
+                      "/// <code lang=\"typescript\">"
+                      "/// const h = open&lt;T&gt;(\"file\")"
+                      "/// </code>"
+                      "///"
+                      "/// <code>"
+                      "/// plain fence"
+                      "/// </code>"
+                      "/// </summary>" ])
+                "the summary's fences, the block's own text still escaped"
+
+            Expect.stringContains
+                source
+                (String.concat
+                    "\n"
+                    [ "/// <remarks>"
+                      "/// @example"
+                      "/// <code lang=\"js\">"
+                      "/// open()"
+                      "/// </code>"
+                      "/// </remarks>" ])
+                "a tag's fences too"
+
+        testCase "an unclosed code fence still closes before the doc comment ends" <| fun _ ->
+            let model =
+                { baseModel with
+                    Decls =
+                        [ FsAbbrev
+                            { Name = "Handle"
+                              Docs = String.concat "\n" [ "Truncated."; "```ts"; "open()" ]
+                              Tags = []
+                              Order = None
+                              TypeParameters = []
+                              Target = FsString } ] }
+
+            Expect.stringContains
+                (renderAll model |> Map.find "TestPkg.fs")
+                (String.concat
+                    "\n"
+                    [ "/// <summary>"
+                      "/// Truncated."
+                      "/// <code lang=\"ts\">"
+                      "/// open()"
+                      "/// </code>"
+                      "/// </summary>" ])
+                "unbalanced XML would break every consumer"
+
+        testCase "markdown code spans become <c>, fenced blocks excepted" <| fun _ ->
+            // A span closes on a backtick run of its own length, so a span may itself contain
+            // backticks; a run that never closes is prose, and inside a fence nothing is a span.
+            let model =
+                { baseModel with
+                    Decls =
+                        [ FsAbbrev
+                            { Name = "Handle"
+                              Docs =
+                                String.concat
+                                    "\n"
+                                    [ "Pass `open<T>` or ``a`b`` to it."
+                                      "A stray ` backtick is just text."
+                                      "```ts"
+                                      "`inside` is code already"
+                                      "```" ]
+                              Tags =
+                                [ { Name = "see"; Text = ValueSome "the `Timer` type" }
+                                  { Name = "example"
+                                    Text = ValueSome(String.concat "\n" [ "Call `open()`."; "Twice." ]) } ]
+                              Order = None
+                              TypeParameters = []
+                              Target = FsString } ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+
+            Expect.stringContains
+                source
+                (String.concat
+                    "\n"
+                    [ "/// <summary>"
+                      "/// Pass <c>open&lt;T&gt;</c> or <c>a`b</c> to it."
+                      "/// A stray ` backtick is just text."
+                      "/// <code lang=\"ts\">"
+                      "/// `inside` is code already"
+                      "/// </code>"
+                      "/// </summary>" ])
+                "spans in the summary, and none inside the block"
+
+            Expect.stringContains
+                source
+                "/// <remarks>@see the <c>Timer</c> type</remarks>"
+                "a one-line tag"
+
+            Expect.stringContains
+                source
+                (String.concat "\n" [ "/// @example"; "/// Call <c>open()</c>."; "/// Twice." ])
+                "a multi-line tag"
+
         testCase "the manifest reports per-symbol tiers with pass provenance" <| fun _ ->
             let model =
                 { baseModel with

@@ -1580,14 +1580,14 @@ type StaggerParams =
     abstract modifier: TweenModifier option with get, set
     /// <summary>
     /// Additive uniform noise on the
-    /// computed stagger value. Number form gives flat `+/-jitter`; tuple form
-    /// ramps the magnitude `start -&gt; end` across the from/axis/grid ordering
-    /// and respects `ease`.
+    /// computed stagger value. Number form gives flat <c>+/-jitter</c>; tuple form
+    /// ramps the magnitude <c>start -&gt; end</c> across the from/axis/grid ordering
+    /// and respects <c>ease</c>.
     /// </summary>
     abstract jitter: U2<float, (float * float)> option with get, set
     /// <summary>
-    /// Seed for jitter draws and `from: 'random'`
-    /// shuffling. `false` (default) uses Math.random. `true` seeds with `0`. A
+    /// Seed for jitter draws and <c>from: 'random'</c>
+    /// shuffling. <c>false</c> (default) uses Math.random. <c>true</c> seeds with <c>0</c>. A
     /// number is used directly as the seed.
     /// </summary>
     abstract seed: U2<float, bool> option with get, set
@@ -1926,28 +1926,28 @@ type AnimationParams = obj
 
 /// <summary>
 /// Accepts:&lt;br&gt;
-/// - `Number` - Absolute position in milliseconds (e.g., `500` places element at exactly 500ms)&lt;br&gt;
-/// - `'+=Number'` - Addition: Position element X ms after the last element (e.g., `'+=100'`)&lt;br&gt;
-/// - `'-=Number'` - Subtraction: Position element X ms before the last element's end (e.g., `'-=100'`)&lt;br&gt;
-/// - `'*=Number'` - Multiplier: Position element at a fraction of the total duration (e.g., `'*=.5'` for halfway)&lt;br&gt;
-/// - `'&lt;'` - Previous end: Position element at the end position of the previous element&lt;br&gt;
-/// - `'&lt;&lt;'` - Previous start: Position element at the start position of the previous element&lt;br&gt;
-/// - `'&lt;&lt;+=Number'` - Combined: Position element relative to previous element's start (e.g., `'&lt;&lt;+=250'`)&lt;br&gt;
-/// - `'label'` - Label: Position element at a named label position (e.g., `'My Label'`)
+/// - <c>Number</c> - Absolute position in milliseconds (e.g., <c>500</c> places element at exactly 500ms)&lt;br&gt;
+/// - <c>'+=Number'</c> - Addition: Position element X ms after the last element (e.g., <c>'+=100'</c>)&lt;br&gt;
+/// - <c>'-=Number'</c> - Subtraction: Position element X ms before the last element's end (e.g., <c>'-=100'</c>)&lt;br&gt;
+/// - <c>'*=Number'</c> - Multiplier: Position element at a fraction of the total duration (e.g., <c>'*=.5'</c> for halfway)&lt;br&gt;
+/// - <c>'&lt;'</c> - Previous end: Position element at the end position of the previous element&lt;br&gt;
+/// - <c>'&lt;&lt;'</c> - Previous start: Position element at the start position of the previous element&lt;br&gt;
+/// - <c>'&lt;&lt;+=Number'</c> - Combined: Position element relative to previous element's start (e.g., <c>'&lt;&lt;+=250'</c>)&lt;br&gt;
+/// - <c>'label'</c> - Label: Position element at a named label position (e.g., <c>'My Label'</c>)
 /// </summary>
 type TimelinePosition = U2<string, float>
 
 /// <summary>
 /// Accepts:&lt;br&gt;
-/// - `Number` - Absolute position in milliseconds (e.g., `500` places animation at exactly 500ms)&lt;br&gt;
-/// - `'+=Number'` - Addition: Position animation X ms after the last animation (e.g., `'+=100'`)&lt;br&gt;
-/// - `'-=Number'` - Subtraction: Position animation X ms before the last animation's end (e.g., `'-=100'`)&lt;br&gt;
-/// - `'*=Number'` - Multiplier: Position animation at a fraction of the total duration (e.g., `'*=.5'` for halfway)&lt;br&gt;
-/// - `'&lt;'` - Previous end: Position animation at the end position of the previous animation&lt;br&gt;
-/// - `'&lt;&lt;'` - Previous start: Position animation at the start position of the previous animation&lt;br&gt;
-/// - `'&lt;&lt;+=Number'` - Combined: Position animation relative to previous animation's start (e.g., `'&lt;&lt;+=250'`)&lt;br&gt;
-/// - `'label'` - Label: Position animation at a named label position (e.g., `'My Label'`)&lt;br&gt;
-/// - `stagger(String|Nummber)` - Stagger multi-elements animation positions (e.g., 10, 20, 30...)
+/// - <c>Number</c> - Absolute position in milliseconds (e.g., <c>500</c> places animation at exactly 500ms)&lt;br&gt;
+/// - <c>'+=Number'</c> - Addition: Position animation X ms after the last animation (e.g., <c>'+=100'</c>)&lt;br&gt;
+/// - <c>'-=Number'</c> - Subtraction: Position animation X ms before the last animation's end (e.g., <c>'-=100'</c>)&lt;br&gt;
+/// - <c>'*=Number'</c> - Multiplier: Position animation at a fraction of the total duration (e.g., <c>'*=.5'</c> for halfway)&lt;br&gt;
+/// - <c>'&lt;'</c> - Previous end: Position animation at the end position of the previous animation&lt;br&gt;
+/// - <c>'&lt;&lt;'</c> - Previous start: Position animation at the start position of the previous animation&lt;br&gt;
+/// - <c>'&lt;&lt;+=Number'</c> - Combined: Position animation relative to previous animation's start (e.g., <c>'&lt;&lt;+=250'</c>)&lt;br&gt;
+/// - <c>'label'</c> - Label: Position animation at a named label position (e.g., <c>'My Label'</c>)&lt;br&gt;
+/// - <c>stagger(String|Nummber)</c> - Stagger multi-elements animation positions (e.g., 10, 20, 30...)
 /// </summary>
 type TimelineAnimationPosition = U4<string, float, Func<Target option, float option, Target[] option, Tween option, Timeline option, TimelinePosition>, TweakRegister>
 

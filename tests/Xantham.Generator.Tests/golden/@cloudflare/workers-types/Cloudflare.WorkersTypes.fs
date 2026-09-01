@@ -138,7 +138,7 @@ type WorkerGlobalScope2 =
 type TypedArray = obj
 
 /// <summary>
-/// The **`ServiceWorkerGlobalScope`** interface of the Service Worker API represents the global execution context of a service worker.
+/// The **<c>ServiceWorkerGlobalScope</c>** interface of the Service Worker API represents the global execution context of a service worker.
 /// Available only in secure contexts.
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ServiceWorkerGlobalScope)
@@ -1010,117 +1010,117 @@ type SchedulerWaitOptions =
     static member Create (?signal: obj) : SchedulerWaitOptions = jsNative
 
 /// <summary>
-/// The **`ExtendableEvent`** interface extends the lifetime of the install and activate events dispatched on the global scope as part of the service worker lifecycle. This ensures that any functional events (like FetchEvent) are not dispatched until it upgrades database schemas and deletes the outdated cache entries.
+/// The **<c>ExtendableEvent</c>** interface extends the lifetime of the install and activate events dispatched on the global scope as part of the service worker lifecycle. This ensures that any functional events (like FetchEvent) are not dispatched until it upgrades database schemas and deletes the outdated cache entries.
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent)
 /// </summary>
 type ExtendableEvent =
     /// <summary>
-    /// The **`ExtendableEvent.waitUntil()`** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
+    /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
     abstract waitUntil: promise: JS.Promise<obj> -> unit
     /// <summary>
-    /// The **`bubbles`** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
     /// </summary>
     abstract bubbles: bool
     /// <summary>
-    /// The **`cancelBubble`** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
     abstract cancelBubble: bool with get, set
     /// <summary>
-    /// The **`cancelable`** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
     /// </summary>
     abstract cancelable: bool
     /// <summary>
-    /// The read-only **`composed`** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
     /// </summary>
     abstract composed: bool
     /// <summary>
-    /// The **`currentTarget`** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
     abstract currentTarget: Browser.Types.EventTarget option
     /// <summary>
-    /// The **`defaultPrevented`** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
     /// </summary>
     abstract defaultPrevented: bool
     /// <summary>
-    /// The **`eventPhase`** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
+    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
     /// </summary>
     abstract eventPhase: float
     /// <summary>
-    /// The **`isTrusted`** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
     /// </summary>
     abstract isTrusted: bool
     /// <summary>
-    /// The Event property **`returnValue`** indicates whether the default action for this event has been prevented or not.
+    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
     abstract returnValue: bool with get, set
     /// <summary>
-    /// The deprecated **`Event.srcElement`** is an alias for the Event.target property. Use Event.target instead.
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
     abstract srcElement: Browser.Types.EventTarget option
     /// <summary>
-    /// The read-only **`target`** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
+    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
     abstract target: Browser.Types.EventTarget option
     /// <summary>
-    /// The **`timeStamp`** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
+    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
     /// </summary>
     abstract timeStamp: float
     /// <summary>
-    /// The **`type`** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
+    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
     /// </summary>
     abstract ``type``: string
     /// <summary>
-    /// The **`composedPath()`** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: obj with get, set
     /// <summary>
-    /// The **`Event.initEvent()`** method is used to initialize the value of an event created using Document.createEvent().
+    /// The **<c>Event.initEvent()</c>** method is used to initialize the value of an event created using Document.createEvent().
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/initEvent)</remarks>
     abstract initEvent: obj with get, set
     /// <summary>
-    /// The **`preventDefault()`** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
     /// </summary>
     abstract preventDefault: obj with get, set
     /// <summary>
-    /// The **`stopImmediatePropagation()`** method of the Event interface prevents other listeners of the same event from being called.
+    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
     /// </summary>
     abstract stopImmediatePropagation: obj with get, set
     /// <summary>
-    /// The **`stopPropagation()`** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
+    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
     /// </summary>
@@ -1262,25 +1262,25 @@ type DigestStream =
     abstract digest: JS.Promise<JS.ArrayBuffer>
     abstract bytesWritten: obj
     /// <summary>
-    /// The **`locked`** read-only property of the WritableStream interface returns a boolean indicating whether the WritableStream is locked to a writer.
+    /// The **<c>locked</c>** read-only property of the WritableStream interface returns a boolean indicating whether the WritableStream is locked to a writer.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/locked)
     /// </summary>
     abstract locked: bool
     /// <summary>
-    /// The **`abort()`** method of the WritableStream interface aborts the stream, signaling that the producer can no longer successfully write to the stream and it is to be immediately moved to an error state, with any queued writes discarded.
+    /// The **<c>abort()</c>** method of the WritableStream interface aborts the stream, signaling that the producer can no longer successfully write to the stream and it is to be immediately moved to an error state, with any queued writes discarded.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/abort)
     /// </summary>
     abstract abort: obj with get, set
     /// <summary>
-    /// The **`close()`** method of the WritableStream interface closes the associated stream. All chunks written before this method is called are sent before the returned promise is fulfilled.
+    /// The **<c>close()</c>** method of the WritableStream interface closes the associated stream. All chunks written before this method is called are sent before the returned promise is fulfilled.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/close)
     /// </summary>
     abstract close: obj with get, set
     /// <summary>
-    /// The **`getWriter()`** method of the WritableStream interface returns a new instance of WritableStreamDefaultWriter and locks the stream to that instance. While the stream is locked, no other writer can be acquired until this one is released.
+    /// The **<c>getWriter()</c>** method of the WritableStream interface returns a new instance of WritableStreamDefaultWriter and locks the stream to that instance. While the stream is locked, no other writer can be acquired until this one is released.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/getWriter)
     /// </summary>
@@ -1372,118 +1372,118 @@ type DocumentEnd =
 /// </summary>
 type FetchEvent =
     /// <summary>
-    /// The **`request`** read-only property of the FetchEvent interface returns the Request that triggered the event handler.
+    /// The **<c>request</c>** read-only property of the FetchEvent interface returns the Request that triggered the event handler.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FetchEvent/request)
     /// </summary>
     abstract request: obj
     /// <summary>
-    /// The **`respondWith()`** method of FetchEvent prevents the browser's default fetch handling, and allows you to provide a promise for a Response yourself.
+    /// The **<c>respondWith()</c>** method of FetchEvent prevents the browser's default fetch handling, and allows you to provide a promise for a Response yourself.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FetchEvent/respondWith)
     /// </summary>
     abstract respondWith: promise: obj -> unit
     abstract passThroughOnException: unit -> unit
     /// <summary>
-    /// The **`bubbles`** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
     /// </summary>
     abstract bubbles: bool
     /// <summary>
-    /// The **`cancelBubble`** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
     abstract cancelBubble: bool with get, set
     /// <summary>
-    /// The **`cancelable`** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
     /// </summary>
     abstract cancelable: bool
     /// <summary>
-    /// The read-only **`composed`** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
     /// </summary>
     abstract composed: bool
     /// <summary>
-    /// The **`currentTarget`** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
     abstract currentTarget: Browser.Types.EventTarget option
     /// <summary>
-    /// The **`defaultPrevented`** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
     /// </summary>
     abstract defaultPrevented: bool
     /// <summary>
-    /// The **`eventPhase`** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
+    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
     /// </summary>
     abstract eventPhase: float
     /// <summary>
-    /// The **`isTrusted`** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
     /// </summary>
     abstract isTrusted: bool
     /// <summary>
-    /// The Event property **`returnValue`** indicates whether the default action for this event has been prevented or not.
+    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
     abstract returnValue: bool with get, set
     /// <summary>
-    /// The deprecated **`Event.srcElement`** is an alias for the Event.target property. Use Event.target instead.
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
     abstract srcElement: Browser.Types.EventTarget option
     /// <summary>
-    /// The read-only **`target`** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
+    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
     abstract target: Browser.Types.EventTarget option
     /// <summary>
-    /// The **`timeStamp`** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
+    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
     /// </summary>
     abstract timeStamp: float
     /// <summary>
-    /// The **`type`** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
+    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
     /// </summary>
     abstract ``type``: string
     /// <summary>
-    /// The **`composedPath()`** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: obj with get, set
     /// <summary>
-    /// The **`Event.initEvent()`** method is used to initialize the value of an event created using Document.createEvent().
+    /// The **<c>Event.initEvent()</c>** method is used to initialize the value of an event created using Document.createEvent().
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/initEvent)</remarks>
     abstract initEvent: obj with get, set
     /// <summary>
-    /// The **`preventDefault()`** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
     /// </summary>
     abstract preventDefault: obj with get, set
     /// <summary>
-    /// The **`stopImmediatePropagation()`** method of the Event interface prevents other listeners of the same event from being called.
+    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
     /// </summary>
     abstract stopImmediatePropagation: obj with get, set
     /// <summary>
-    /// The **`stopPropagation()`** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
+    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
     /// </summary>
@@ -1493,7 +1493,7 @@ type FetchEvent =
     abstract AT_TARGET: float
     abstract BUBBLING_PHASE: float
     /// <summary>
-    /// The **`ExtendableEvent.waitUntil()`** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
+    /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
@@ -1713,105 +1713,105 @@ type QueueEvent<'Body> =
     abstract retryAll: ?options: QueueRetryOptions -> unit
     abstract ackAll: unit -> unit
     /// <summary>
-    /// The **`bubbles`** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
     /// </summary>
     abstract bubbles: bool
     /// <summary>
-    /// The **`cancelBubble`** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
     abstract cancelBubble: bool with get, set
     /// <summary>
-    /// The **`cancelable`** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
     /// </summary>
     abstract cancelable: bool
     /// <summary>
-    /// The read-only **`composed`** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
     /// </summary>
     abstract composed: bool
     /// <summary>
-    /// The **`currentTarget`** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
     abstract currentTarget: Browser.Types.EventTarget option
     /// <summary>
-    /// The **`defaultPrevented`** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
     /// </summary>
     abstract defaultPrevented: bool
     /// <summary>
-    /// The **`eventPhase`** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
+    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
     /// </summary>
     abstract eventPhase: float
     /// <summary>
-    /// The **`isTrusted`** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
     /// </summary>
     abstract isTrusted: bool
     /// <summary>
-    /// The Event property **`returnValue`** indicates whether the default action for this event has been prevented or not.
+    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
     abstract returnValue: bool with get, set
     /// <summary>
-    /// The deprecated **`Event.srcElement`** is an alias for the Event.target property. Use Event.target instead.
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
     abstract srcElement: Browser.Types.EventTarget option
     /// <summary>
-    /// The read-only **`target`** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
+    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
     abstract target: Browser.Types.EventTarget option
     /// <summary>
-    /// The **`timeStamp`** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
+    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
     /// </summary>
     abstract timeStamp: float
     /// <summary>
-    /// The **`type`** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
+    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
     /// </summary>
     abstract ``type``: string
     /// <summary>
-    /// The **`composedPath()`** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: obj with get, set
     /// <summary>
-    /// The **`Event.initEvent()`** method is used to initialize the value of an event created using Document.createEvent().
+    /// The **<c>Event.initEvent()</c>** method is used to initialize the value of an event created using Document.createEvent().
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/initEvent)</remarks>
     abstract initEvent: obj with get, set
     /// <summary>
-    /// The **`preventDefault()`** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
     /// </summary>
     abstract preventDefault: obj with get, set
     /// <summary>
-    /// The **`stopImmediatePropagation()`** method of the Event interface prevents other listeners of the same event from being called.
+    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
     /// </summary>
     abstract stopImmediatePropagation: obj with get, set
     /// <summary>
-    /// The **`stopPropagation()`** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
+    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
     /// </summary>
@@ -1821,7 +1821,7 @@ type QueueEvent<'Body> =
     abstract AT_TARGET: float
     abstract BUBBLING_PHASE: float
     /// <summary>
-    /// The **`ExtendableEvent.waitUntil()`** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
+    /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
@@ -2029,105 +2029,105 @@ type ScheduledEvent =
     abstract cron: string
     abstract noRetry: unit -> unit
     /// <summary>
-    /// The **`bubbles`** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
     /// </summary>
     abstract bubbles: bool
     /// <summary>
-    /// The **`cancelBubble`** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
     abstract cancelBubble: bool with get, set
     /// <summary>
-    /// The **`cancelable`** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
     /// </summary>
     abstract cancelable: bool
     /// <summary>
-    /// The read-only **`composed`** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
     /// </summary>
     abstract composed: bool
     /// <summary>
-    /// The **`currentTarget`** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
     abstract currentTarget: Browser.Types.EventTarget option
     /// <summary>
-    /// The **`defaultPrevented`** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
     /// </summary>
     abstract defaultPrevented: bool
     /// <summary>
-    /// The **`eventPhase`** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
+    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
     /// </summary>
     abstract eventPhase: float
     /// <summary>
-    /// The **`isTrusted`** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
     /// </summary>
     abstract isTrusted: bool
     /// <summary>
-    /// The Event property **`returnValue`** indicates whether the default action for this event has been prevented or not.
+    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
     abstract returnValue: bool with get, set
     /// <summary>
-    /// The deprecated **`Event.srcElement`** is an alias for the Event.target property. Use Event.target instead.
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
     abstract srcElement: Browser.Types.EventTarget option
     /// <summary>
-    /// The read-only **`target`** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
+    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
     abstract target: Browser.Types.EventTarget option
     /// <summary>
-    /// The **`timeStamp`** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
+    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
     /// </summary>
     abstract timeStamp: float
     /// <summary>
-    /// The **`type`** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
+    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
     /// </summary>
     abstract ``type``: string
     /// <summary>
-    /// The **`composedPath()`** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: obj with get, set
     /// <summary>
-    /// The **`Event.initEvent()`** method is used to initialize the value of an event created using Document.createEvent().
+    /// The **<c>Event.initEvent()</c>** method is used to initialize the value of an event created using Document.createEvent().
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/initEvent)</remarks>
     abstract initEvent: obj with get, set
     /// <summary>
-    /// The **`preventDefault()`** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
     /// </summary>
     abstract preventDefault: obj with get, set
     /// <summary>
-    /// The **`stopImmediatePropagation()`** method of the Event interface prevents other listeners of the same event from being called.
+    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
     /// </summary>
     abstract stopImmediatePropagation: obj with get, set
     /// <summary>
-    /// The **`stopPropagation()`** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
+    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
     /// </summary>
@@ -2137,7 +2137,7 @@ type ScheduledEvent =
     abstract AT_TARGET: float
     abstract BUBBLING_PHASE: float
     /// <summary>
-    /// The **`ExtendableEvent.waitUntil()`** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
+    /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
@@ -2157,13 +2157,13 @@ type ReadableStreamBYOBReaderReadableStreamBYOBReaderReadOptions =
 [<Interface>]
 type FixedLengthStream =
     /// <summary>
-    /// The **`readable`** read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
+    /// The **<c>readable</c>** read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/readable)
     /// </summary>
     abstract readable: obj
     /// <summary>
-    /// The **`writable`** read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
+    /// The **<c>writable</c>** read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/writable)
     /// </summary>
@@ -2174,13 +2174,13 @@ type FixedLengthStream =
 [<Interface>]
 type IdentityTransformStream =
     /// <summary>
-    /// The **`readable`** read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
+    /// The **<c>readable</c>** read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/readable)
     /// </summary>
     abstract readable: obj
     /// <summary>
-    /// The **`writable`** read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
+    /// The **<c>writable</c>** read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/writable)
     /// </summary>
@@ -2227,105 +2227,105 @@ type TailEvent =
     abstract events: TraceItem[]
     abstract traces: TraceItem[]
     /// <summary>
-    /// The **`bubbles`** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
     /// </summary>
     abstract bubbles: bool
     /// <summary>
-    /// The **`cancelBubble`** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
     abstract cancelBubble: bool with get, set
     /// <summary>
-    /// The **`cancelable`** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
     /// </summary>
     abstract cancelable: bool
     /// <summary>
-    /// The read-only **`composed`** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
     /// </summary>
     abstract composed: bool
     /// <summary>
-    /// The **`currentTarget`** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
     abstract currentTarget: Browser.Types.EventTarget option
     /// <summary>
-    /// The **`defaultPrevented`** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
     /// </summary>
     abstract defaultPrevented: bool
     /// <summary>
-    /// The **`eventPhase`** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
+    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
     /// </summary>
     abstract eventPhase: float
     /// <summary>
-    /// The **`isTrusted`** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
     /// </summary>
     abstract isTrusted: bool
     /// <summary>
-    /// The Event property **`returnValue`** indicates whether the default action for this event has been prevented or not.
+    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
     abstract returnValue: bool with get, set
     /// <summary>
-    /// The deprecated **`Event.srcElement`** is an alias for the Event.target property. Use Event.target instead.
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
     abstract srcElement: Browser.Types.EventTarget option
     /// <summary>
-    /// The read-only **`target`** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
+    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
     abstract target: Browser.Types.EventTarget option
     /// <summary>
-    /// The **`timeStamp`** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
+    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
     /// </summary>
     abstract timeStamp: float
     /// <summary>
-    /// The **`type`** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
+    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
     /// </summary>
     abstract ``type``: string
     /// <summary>
-    /// The **`composedPath()`** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: obj with get, set
     /// <summary>
-    /// The **`Event.initEvent()`** method is used to initialize the value of an event created using Document.createEvent().
+    /// The **<c>Event.initEvent()</c>** method is used to initialize the value of an event created using Document.createEvent().
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/initEvent)</remarks>
     abstract initEvent: obj with get, set
     /// <summary>
-    /// The **`preventDefault()`** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
     /// </summary>
     abstract preventDefault: obj with get, set
     /// <summary>
-    /// The **`stopImmediatePropagation()`** method of the Event interface prevents other listeners of the same event from being called.
+    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
     /// </summary>
     abstract stopImmediatePropagation: obj with get, set
     /// <summary>
-    /// The **`stopPropagation()`** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
+    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
     /// </summary>
@@ -2335,7 +2335,7 @@ type TailEvent =
     abstract AT_TARGET: float
     abstract BUBBLING_PHASE: float
     /// <summary>
-    /// The **`ExtendableEvent.waitUntil()`** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
+    /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
@@ -2507,11 +2507,11 @@ type UnsafeTraceMetrics =
 [<Interface>]
 type WebSocketAcceptOptions =
     /// <summary>
-    /// When set to `true`, receiving a server-initiated WebSocket Close frame will not
+    /// When set to <c>true</c>, receiving a server-initiated WebSocket Close frame will not
     /// automatically send a reciprocal Close frame, leaving the connection in a half-open
     /// state. This is useful for proxying scenarios where you need to coordinate closing
-    /// both sides independently. Defaults to `false` when the
-    /// `no_web_socket_half_open_by_default` compatibility flag is enabled.
+    /// both sides independently. Defaults to <c>false</c> when the
+    /// <c>no_web_socket_half_open_by_default</c> compatibility flag is enabled.
     /// </summary>
     abstract allowHalfOpen: bool option with get, set
     [<ParamObject; Emit("$0")>]
@@ -2807,31 +2807,31 @@ type PerformanceNodeTiming =
     abstract idleTime: float
     abstract uvMetricsInfo: UvMetricsInfo
     /// <summary>
-    /// The **`toJSON()`** method is a serializer; it returns a JSON representation of the PerformanceEntry object.
+    /// The **<c>toJSON()</c>** method is a serializer; it returns a JSON representation of the PerformanceEntry object.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/toJSON)
     /// </summary>
     abstract toJSON: unit -> obj
     /// <summary>
-    /// The read-only **`duration`** property returns a timestamp that is the duration of the performance entry. The meaning of this property depends on the value of this entry's entryType.
+    /// The read-only **<c>duration</c>** property returns a timestamp that is the duration of the performance entry. The meaning of this property depends on the value of this entry's entryType.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/duration)
     /// </summary>
     abstract duration: float
     /// <summary>
-    /// The read-only **`entryType`** property returns a string representing the type of performance metric that this entry represents.
+    /// The read-only **<c>entryType</c>** property returns a string representing the type of performance metric that this entry represents.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/entryType)
     /// </summary>
     abstract entryType: string
     /// <summary>
-    /// The read-only **`name`** property of the PerformanceEntry interface is a string representing the name for a performance entry. It acts as an identifier, but it does not have to be unique. The value depends on the subclass.
+    /// The read-only **<c>name</c>** property of the PerformanceEntry interface is a string representing the name for a performance entry. It acts as an identifier, but it does not have to be unique. The value depends on the subclass.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/name)
     /// </summary>
     abstract name: string
     /// <summary>
-    /// The read-only **`startTime`** property returns the first timestamp recorded for this PerformanceEntry. The meaning of this property depends on the value of this entry's entryType.
+    /// The read-only **<c>startTime</c>** property returns the first timestamp recorded for this PerformanceEntry. The meaning of this property depends on the value of this entry's entryType.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/startTime)
     /// </summary>
@@ -3116,7 +3116,7 @@ type AgentMemoryGetSummaryResponse =
 /// <summary>
 /// Options for the recall() method.
 ///
-/// `referenceDate` accepts a Date object, an ISO-8601 date string
+/// <c>referenceDate</c> accepts a Date object, an ISO-8601 date string
 /// (YYYY-MM-DD), or a full ISO-8601 datetime string. When provided, this
 /// date is used as "today" for resolving relative time references
 /// ("how many days ago", "last week") instead of the server's wall-clock time.
@@ -3161,8 +3161,8 @@ type AgentMemoryRecallResult =
 /// <summary>
 /// Options for the list() method.
 ///
-/// `cursor` is the opaque continuation token returned by the previous page;
-/// pass it back unchanged to fetch the next page. `sessionId` and `type`
+/// <c>cursor</c> is the opaque continuation token returned by the previous page;
+/// pass it back unchanged to fetch the next page. <c>sessionId</c> and <c>type</c>
 /// are exact-match filters; combining them is allowed.
 /// </summary>
 [<Interface>]
@@ -3248,14 +3248,14 @@ type AgentMemoryProfile =
     /// List active memories in this profile.
     ///
     /// Returns a paginated, filterable view of stored memories. Superseded
-    /// versions are excluded. Use the returned `cursor` (when present) to
+    /// versions are excluded. Use the returned <c>cursor</c> (when present) to
     /// fetch the next page.
     /// </summary>
     /// <remarks>@param options - Optional pagination and filter options.</remarks>
     abstract list: ?options: AgentMemoryListMemoriesOptions -> JS.Promise<AgentMemoryListMemoriesResult>
     /// <summary>
     /// Soft-delete every memory and message in this profile that is tagged
-    /// with `sessionId`.
+    /// with <c>sessionId</c>.
     ///
     /// Idempotent: deleting a sessionId that has no rows is a no-op.
     /// </summary>
@@ -3265,12 +3265,12 @@ type AgentMemoryProfile =
 /// <summary>
 /// Namespace-level Agent Memory binding.
 ///
-/// Used as the type of an `env.MEMORY`-style binding backed by the Agent
+/// Used as the type of an <c>env.MEMORY</c>-style binding backed by the Agent
 /// Memory product.
 /// </summary>
 /// <remarks>
 /// @example
-/// ```ts
+/// <code lang="ts">
 /// export default {
 ///   async fetch(_request: Request, env: Env): Promise&lt;Response&gt; {
 ///     const profile = await env.MEMORY.getProfile("wrangler-e2e");
@@ -3278,7 +3278,7 @@ type AgentMemoryProfile =
 ///     return Response.json(summary);
 ///   },
 /// };
-/// ```
+/// </code>
 /// </remarks>
 type AgentMemoryNamespace =
     /// <summary>
@@ -3332,7 +3332,7 @@ type AiSearchMessageRole =
     | [<CompiledName("user")>] User
 
 /// <summary>
-/// Common shape for `ai_search_options` used by both single-instance and multi-instance requests.
+/// Common shape for <c>ai_search_options</c> used by both single-instance and multi-instance requests.
 /// Contains retrieval, query rewrite, reranking, and cache sub-options.
 /// </summary>
 type AiSearchOptions =
@@ -3450,7 +3450,7 @@ type AiSearchOptionsRetrievalRetrievalType =
 
 /// <summary>
 /// Request body for single-instance search.
-/// Exactly one of `query` or `messages` must be provided.
+/// Exactly one of <c>query</c> or <c>messages</c> must be provided.
 /// </summary>
 type AiSearchSearchRequest = U2<AiSearchSearchRequest2, AiSearchSearchRequest3>
 
@@ -3485,14 +3485,14 @@ type AiSearchChatCompletionsRequest =
     abstract Item: string -> obj with get, set
 
 /// <summary>
-/// `ai_search_options` shape for multi-instance requests — requires `instance_ids`.
+/// <c>ai_search_options</c> shape for multi-instance requests — requires <c>instance_ids</c>.
 /// </summary>
 type AiSearchMultiSearchOptions = obj
 
 /// <summary>
 /// Request for searching across multiple instances within a namespace.
-/// `ai_search_options` is required and must include `instance_ids`.
-/// Exactly one of `query` or `messages` must be provided.
+/// <c>ai_search_options</c> is required and must include <c>instance_ids</c>.
+/// Exactly one of <c>query</c> or <c>messages</c> must be provided.
 /// </summary>
 type AiSearchMultiSearchRequest = U2<AiSearchMultiSearchRequest2, AiSearchMultiSearchRequest3>
 
@@ -3545,7 +3545,7 @@ type AiSearchMultiSearchResponse =
     static member Create (search_query: string, chunks: obj[], ?errors: AiSearchMultiSearchError[]) : AiSearchMultiSearchResponse = jsNative
 
 /// <summary>
-/// Request for chat completions across multiple instances within a namespace. `ai_search_options` is required and must include `instance_ids`.
+/// Request for chat completions across multiple instances within a namespace. <c>ai_search_options</c> is required and must include <c>instance_ids</c>.
 /// </summary>
 type AiSearchMultiChatCompletionsRequest = obj
 
@@ -3989,7 +3989,7 @@ type AiSearchListItemsParams =
     abstract item_id: string option with get, set
     /// <summary>
     /// Filter items by their exact key (object key / filename). Keys are unique
-    /// per source, so combine with `source` to disambiguate across data sources.
+    /// per source, so combine with <c>source</c> to disambiguate across data sources.
     /// </summary>
     abstract key: string option with get, set
     [<ParamObject; Emit("$0")>]
@@ -4023,7 +4023,7 @@ type AiSearchItemLogsParams =
     /// </summary>
     abstract limit: float option with get, set
     /// <summary>
-    /// Opaque cursor for pagination. Pass the `cursor` value from a previous response.
+    /// Opaque cursor for pagination. Pass the <c>cursor</c> value from a previous response.
     /// </summary>
     abstract cursor: string option with get, set
     [<ParamObject; Emit("$0")>]
@@ -4309,14 +4309,14 @@ type AiSearchJobs =
 /// Instance-level AI Search service.
 ///
 /// Used as:
-/// - The return type of `AiSearchNamespace.get(name)` (namespace binding)
-/// - The type of `env.BLOG_SEARCH` (single instance binding via `ai_search`)
+/// - The return type of <c>AiSearchNamespace.get(name)</c> (namespace binding)
+/// - The type of <c>env.BLOG_SEARCH</c> (single instance binding via <c>ai_search</c>)
 ///
 /// Provides search, chat, update, stats, items, and jobs operations.
 /// </summary>
 /// <remarks>
 /// @example
-/// ```ts
+/// <code lang="ts">
 /// // Via namespace binding
 /// const instance = env.AI_SEARCH.get("blog");
 /// const results = await instance.search({
@@ -4327,7 +4327,7 @@ type AiSearchJobs =
 /// const results = await env.BLOG_SEARCH.search({
 ///   messages: [{ role: "user", content: "How does caching work?" }],
 /// });
-/// ```
+/// </code>
 /// </remarks>
 type AiSearchInstance =
     /// <summary>
@@ -4381,13 +4381,13 @@ type AiSearchInstance =
 /// <summary>
 /// Namespace-level AI Search service.
 ///
-/// Used as the type of `env.AI_SEARCH` (namespace binding via `ai_search_namespaces`).
+/// Used as the type of <c>env.AI_SEARCH</c> (namespace binding via <c>ai_search_namespaces</c>).
 /// Scoped to a single namespace. Provides dynamic instance access, creation, deletion,
 /// and multi-instance search/chat operations.
 /// </summary>
 /// <remarks>
 /// @example
-/// ```ts
+/// <code lang="ts">
 /// // Access an instance within the namespace
 /// const blog = env.AI_SEARCH.get("blog");
 /// const results = await blog.search({ query: "How does caching work?" });
@@ -4409,7 +4409,7 @@ type AiSearchInstance =
 ///
 /// // Delete an instance
 /// await env.AI_SEARCH.delete("tenant-123");
-/// ```
+/// </code>
 /// </remarks>
 type AiSearchNamespace =
     /// <summary>
@@ -4427,11 +4427,11 @@ type AiSearchNamespace =
     /// <summary>
     /// Create a new instance within the bound namespace.
     /// </summary>
-    /// <remarks>@param config Instance configuration. Only `id` is required — omit `type` and `source` to create with built-in storage.</remarks>
+    /// <remarks>@param config Instance configuration. Only <c>id</c> is required — omit <c>type</c> and <c>source</c> to create with built-in storage.</remarks>
     /// <remarks>@returns Instance service for the newly created instance.</remarks>
     /// <remarks>
     /// @example
-    /// ```ts
+    /// <code lang="ts">
     /// // Create with built-in storage (upload items manually)
     /// const instance = await env.AI_SEARCH.create({ id: "my-search" });
     ///
@@ -4441,7 +4441,7 @@ type AiSearchNamespace =
     ///   type: "web-crawler",
     ///   source: "https://developers.cloudflare.com",
     /// });
-    /// ```
+    /// </code>
     /// </remarks>
     abstract create: config: AiSearchConfig -> JS.Promise<AiSearchInstance>
     /// <summary>
@@ -4453,7 +4453,7 @@ type AiSearchNamespace =
     /// Search across multiple instances within the bound namespace.
     /// Fans out to the specified instance_ids and merges results.
     /// </summary>
-    /// <remarks>@param params Search request with required `ai_search_options.instance_ids`.</remarks>
+    /// <remarks>@param params Search request with required <c>ai_search_options.instance_ids</c>.</remarks>
     /// <remarks>@returns Search response with chunks tagged by instance_id and optional partial-failure errors.</remarks>
     abstract search: ``params``: AiSearchMultiSearchRequest -> JS.Promise<AiSearchMultiSearchResponse>
     /// <summary>
@@ -4462,9 +4462,9 @@ type AiSearchNamespace =
     /// Generate chat completions across multiple instances within the bound namespace.
     /// Fans out to the specified instance_ids, merges context, and generates a response.
     /// </summary>
-    /// <remarks>@param params Chat completions request with stream: true and required `ai_search_options.instance_ids`.</remarks>
+    /// <remarks>@param params Chat completions request with stream: true and required <c>ai_search_options.instance_ids</c>.</remarks>
     /// <remarks>@returns ReadableStream of server-sent events.</remarks>
-    /// <remarks>@param params Chat completions request with required `ai_search_options.instance_ids`.</remarks>
+    /// <remarks>@param params Chat completions request with required <c>ai_search_options.instance_ids</c>.</remarks>
     /// <remarks>@returns Chat completion response with choices, chunks tagged by instance_id, and optional partial-failure errors.</remarks>
     abstract chatCompletions: ``params``: obj -> JS.Promise<obj>
 
@@ -6233,7 +6233,7 @@ type Ai_Cf_Baai_Bge_Base_En_V1_5_Input = U2<Ai_Cf_Baai_Bge_Base_En_V1_5_Input2, 
 type Ai_Cf_Baai_Bge_Base_En_V1_5_Input2 =
     abstract text: U2<string, string[]> with get, set
     /// <summary>
-    /// The pooling method used in the embedding process. `cls` pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is `mean` in order for this to not be a breaking change, but we highly suggest using the new `cls` pooling for better accuracy.
+    /// The pooling method used in the embedding process. <c>cls</c> pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is <c>mean</c> in order for this to not be a breaking change, but we highly suggest using the new <c>cls</c> pooling for better accuracy.
     /// </summary>
     abstract pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2Pooling option with get, set
     [<ParamObject; Emit("$0")>]
@@ -6257,7 +6257,7 @@ type Ai_Cf_Baai_Bge_Base_En_V1_5_Input3 =
 type Ai_Cf_Baai_Bge_Base_En_V1_5_Input3RequestsItem =
     abstract text: U2<string, string[]> with get, set
     /// <summary>
-    /// The pooling method used in the embedding process. `cls` pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is `mean` in order for this to not be a breaking change, but we highly suggest using the new `cls` pooling for better accuracy.
+    /// The pooling method used in the embedding process. <c>cls</c> pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is <c>mean</c> in order for this to not be a breaking change, but we highly suggest using the new <c>cls</c> pooling for better accuracy.
     /// </summary>
     abstract pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2Pooling option with get, set
     [<ParamObject; Emit("$0")>]
@@ -6417,7 +6417,7 @@ type Ai_Cf_Baai_Bge_Small_En_V1_5_Input = U2<Ai_Cf_Baai_Bge_Small_En_V1_5_Input2
 type Ai_Cf_Baai_Bge_Small_En_V1_5_Input2 =
     abstract text: U2<string, string[]> with get, set
     /// <summary>
-    /// The pooling method used in the embedding process. `cls` pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is `mean` in order for this to not be a breaking change, but we highly suggest using the new `cls` pooling for better accuracy.
+    /// The pooling method used in the embedding process. <c>cls</c> pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is <c>mean</c> in order for this to not be a breaking change, but we highly suggest using the new <c>cls</c> pooling for better accuracy.
     /// </summary>
     abstract pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2Pooling option with get, set
     [<ParamObject; Emit("$0")>]
@@ -6436,7 +6436,7 @@ type Ai_Cf_Baai_Bge_Small_En_V1_5_Input3 =
 type Ai_Cf_Baai_Bge_Small_En_V1_5_Input3RequestsItem =
     abstract text: U2<string, string[]> with get, set
     /// <summary>
-    /// The pooling method used in the embedding process. `cls` pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is `mean` in order for this to not be a breaking change, but we highly suggest using the new `cls` pooling for better accuracy.
+    /// The pooling method used in the embedding process. <c>cls</c> pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is <c>mean</c> in order for this to not be a breaking change, but we highly suggest using the new <c>cls</c> pooling for better accuracy.
     /// </summary>
     abstract pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2Pooling option with get, set
     [<ParamObject; Emit("$0")>]
@@ -6480,7 +6480,7 @@ type Ai_Cf_Baai_Bge_Large_En_V1_5_Input = U2<Ai_Cf_Baai_Bge_Large_En_V1_5_Input2
 type Ai_Cf_Baai_Bge_Large_En_V1_5_Input2 =
     abstract text: U2<string, string[]> with get, set
     /// <summary>
-    /// The pooling method used in the embedding process. `cls` pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is `mean` in order for this to not be a breaking change, but we highly suggest using the new `cls` pooling for better accuracy.
+    /// The pooling method used in the embedding process. <c>cls</c> pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is <c>mean</c> in order for this to not be a breaking change, but we highly suggest using the new <c>cls</c> pooling for better accuracy.
     /// </summary>
     abstract pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2Pooling option with get, set
     [<ParamObject; Emit("$0")>]
@@ -6499,7 +6499,7 @@ type Ai_Cf_Baai_Bge_Large_En_V1_5_Input3 =
 type Ai_Cf_Baai_Bge_Large_En_V1_5_Input3RequestsItem =
     abstract text: U2<string, string[]> with get, set
     /// <summary>
-    /// The pooling method used in the embedding process. `cls` pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is `mean` in order for this to not be a breaking change, but we highly suggest using the new `cls` pooling for better accuracy.
+    /// The pooling method used in the embedding process. <c>cls</c> pooling will generate more accurate embeddings on larger inputs - however, embeddings created with cls pooling are not compatible with embeddings generated with mean pooling. The default pooling method is <c>mean</c> in order for this to not be a breaking change, but we highly suggest using the new <c>cls</c> pooling for better accuracy.
     /// </summary>
     abstract pooling: Ai_Cf_Baai_Bge_Base_En_V1_5_Input2Pooling option with get, set
     [<ParamObject; Emit("$0")>]
@@ -11923,23 +11923,23 @@ type Ai_Cf_Moondream_Moondream3_1_9B_A2B_Input =
     /// </summary>
     abstract task: Ai_Cf_Moondream_Moondream3_1_9B_A2B_InputTask option with get, set
     /// <summary>
-    /// Input image as a public HTTPS URL or base64 data URI. Optional for `query`; required for `caption`, `point`, and `detect`.
+    /// Input image as a public HTTPS URL or base64 data URI. Optional for <c>query</c>; required for <c>caption</c>, <c>point</c>, and <c>detect</c>.
     /// </summary>
     abstract image: string option with get, set
     /// <summary>
-    /// Question for the `query` task.
+    /// Question for the <c>query</c> task.
     /// </summary>
     abstract question: string option with get, set
     /// <summary>
-    /// Caption length for the `caption` task.
+    /// Caption length for the <c>caption</c> task.
     /// </summary>
     abstract caption_length: Ai_Cf_Moondream_Moondream3_1_9B_A2B_InputCaptionLength option with get, set
     /// <summary>
-    /// Object phrase to locate for `point` and `detect` tasks (e.g. 'person wearing a red shirt').
+    /// Object phrase to locate for <c>point</c> and <c>detect</c> tasks (e.g. 'person wearing a red shirt').
     /// </summary>
     abstract target: string option with get, set
     /// <summary>
-    /// Enable reasoning trace for the `query` task.
+    /// Enable reasoning trace for the <c>query</c> task.
     /// </summary>
     abstract reasoning: bool option with get, set
     /// <summary>
@@ -11951,15 +11951,15 @@ type Ai_Cf_Moondream_Moondream3_1_9B_A2B_Input =
     /// </summary>
     abstract top_p: float option with get, set
     /// <summary>
-    /// Max tokens to generate for `query` and `caption`.
+    /// Max tokens to generate for <c>query</c> and <c>caption</c>.
     /// </summary>
     abstract max_tokens: float option with get, set
     /// <summary>
-    /// Max objects to return for `point` and `detect`.
+    /// Max objects to return for <c>point</c> and <c>detect</c>.
     /// </summary>
     abstract max_objects: float option with get, set
     /// <summary>
-    /// Return incremental tokens for `query` and `caption`. `point` and `detect` do not support streaming.
+    /// Return incremental tokens for <c>query</c> and <c>caption</c>. <c>point</c> and <c>detect</c> do not support streaming.
     /// </summary>
     abstract stream: bool option with get, set
     [<ParamObject; Emit("$0")>]
@@ -11986,23 +11986,23 @@ type Ai_Cf_Moondream_Moondream3_1_9B_A2B_Output =
     abstract finish_reason: string with get, set
     abstract metrics: Ai_Cf_Moondream_Moondream3_1_9B_A2B_OutputMetrics with get, set
     /// <summary>
-    /// Answer text for the `query` task. Null for other tasks.
+    /// Answer text for the <c>query</c> task. Null for other tasks.
     /// </summary>
     abstract answer: string option with get, set
     /// <summary>
-    /// Caption text for the `caption` task. Null for other tasks.
+    /// Caption text for the <c>caption</c> task. Null for other tasks.
     /// </summary>
     abstract caption: string option with get, set
     /// <summary>
-    /// Located points for the `point` task. Null for other tasks.
+    /// Located points for the <c>point</c> task. Null for other tasks.
     /// </summary>
     abstract points: Ai_Cf_Moondream_Moondream3_1_9B_A2B_OutputPointsItem[] option with get, set
     /// <summary>
-    /// Detected bounding boxes for the `detect` task. Null for other tasks.
+    /// Detected bounding boxes for the <c>detect</c> task. Null for other tasks.
     /// </summary>
     abstract objects: Ai_Cf_Moondream_Moondream3_1_9B_A2B_OutputObjectsItem[] option with get, set
     /// <summary>
-    /// Reasoning trace for the `query` task when reasoning=true. Null otherwise.
+    /// Reasoning trace for the <c>query</c> task when reasoning=true. Null otherwise.
     /// </summary>
     abstract reasoning: Ai_Cf_Moondream_Moondream3_1_9B_A2B_OutputReasoning option with get, set
     [<ParamObject; Emit("$0")>]
@@ -12346,14 +12346,14 @@ type Ai<'AiModelList when 'AiModelList :> AiModelListType> =
     abstract gateway: gatewayId: string -> AiGateway
     /// <remarks>
     /// @deprecated
-    /// Use the standalone `ai_search_namespaces` or `ai_search` Workers bindings instead.
+    /// Use the standalone <c>ai_search_namespaces</c> or <c>ai_search</c> Workers bindings instead.
     /// See https://developers.cloudflare.com/ai-search/usage/workers-binding/
     /// </remarks>
     abstract aiSearch: unit -> AiSearchNamespace
     /// <remarks>
     /// @deprecated
     /// AutoRAG has been replaced by AI Search.
-    /// Use the standalone `ai_search_namespaces` or `ai_search` Workers bindings instead.
+    /// Use the standalone <c>ai_search_namespaces</c> or <c>ai_search</c> Workers bindings instead.
     /// See https://developers.cloudflare.com/ai-search/usage/workers-binding/
     /// </remarks>
     /// <remarks>@param autoragId Instance ID</remarks>
@@ -12716,7 +12716,7 @@ type ArtifactsCreateRepoResult =
 [<Interface>]
 type ArtifactsRepoListResult =
     /// <summary>
-    /// Repositories in this page (without the `remote` field).
+    /// Repositories in this page (without the <c>remote</c> field).
     /// </summary>
     abstract repos: obj[] with get, set
     /// <summary>
@@ -12812,7 +12812,7 @@ type ArtifactsTokenListResult =
 /// <summary>
 /// Handle for a single repository. Returned by Artifacts.get().
 ///
-/// Methods may throw `ArtifactsError` with code `INTERNAL_ERROR` if an unexpected service error occurs.
+/// Methods may throw <c>ArtifactsError</c> with code <c>INTERNAL_ERROR</c> if an unexpected service error occurs.
 /// </summary>
 type ArtifactsRepo =
     /// <summary>
@@ -12820,7 +12820,7 @@ type ArtifactsRepo =
     /// </summary>
     /// <remarks>@param scope Token scope: "write" (default) or "read".</remarks>
     /// <remarks>@param ttl Time-to-live in seconds (default 86400, min 60, max 31536000).</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `INVALID_TTL` if ttl is out of range.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>INVALID_TTL</c> if ttl is out of range.</remarks>
     abstract createToken: ?scope: ArtifactsCreateTokenResultScope * ?ttl: float -> JS.Promise<ArtifactsCreateTokenResult>
     /// <summary>
     /// List tokens for this repo (metadata only, no plaintext).
@@ -12831,16 +12831,16 @@ type ArtifactsRepo =
     /// </summary>
     /// <remarks>@param tokenOrId Plaintext token or token ID.</remarks>
     /// <remarks>@returns true if revoked, false if not found.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `INVALID_INPUT` if tokenOrId is empty.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>INVALID_INPUT</c> if tokenOrId is empty.</remarks>
     abstract revokeToken: tokenOrId: string -> JS.Promise<bool>
     /// <summary>
     /// Fork this repo to a new repo.
     /// </summary>
     /// <remarks>@param name Target repository name.</remarks>
     /// <remarks>@param opts Optional: description, readOnly flag, defaultBranchOnly (default true).</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `INVALID_REPO_NAME` if name is invalid.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `ALREADY_EXISTS` if the target repo already exists.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `FORK_IN_PROGRESS` if a fork is already running.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>INVALID_REPO_NAME</c> if name is invalid.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>ALREADY_EXISTS</c> if the target repo already exists.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>FORK_IN_PROGRESS</c> if a fork is already running.</remarks>
     abstract fork: name: string * ?opts: ArtifactsRepoForkOpts -> JS.Promise<ArtifactsCreateRepoResult>
     /// <summary>
     /// Unique repository ID.
@@ -12909,9 +12909,9 @@ type ArtifactsErrorCode =
 /// <summary>
 /// Error thrown by Artifacts binding operations.
 ///
-/// Uses a string `.code` discriminator following the Cloudflare platform
-/// convention (StreamError, ImagesError, etc.). The `.numericCode` matches
-/// the REST API `errors[].code` values.
+/// Uses a string <c>.code</c> discriminator following the Cloudflare platform
+/// convention (StreamError, ImagesError, etc.). The <c>.numericCode</c> matches
+/// the REST API <c>errors[].code</c> values.
 /// </summary>
 [<Interface>]
 type ArtifactsError =
@@ -12933,7 +12933,7 @@ type ArtifactsError =
 /// <summary>
 /// Artifacts binding — namespace-level operations.
 ///
-/// Methods may throw `ArtifactsError` with code `INTERNAL_ERROR` if an unexpected service error occurs.
+/// Methods may throw <c>ArtifactsError</c> with code <c>INTERNAL_ERROR</c> if an unexpected service error occurs.
 /// </summary>
 type Artifacts =
     /// <summary>
@@ -12942,31 +12942,31 @@ type Artifacts =
     /// <remarks>@param name Repository name (alphanumeric, dots, hyphens, underscores).</remarks>
     /// <remarks>@param opts Optional: readOnly flag, description, default branch name.</remarks>
     /// <remarks>@returns Repo metadata with initial token.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `INVALID_REPO_NAME` if name is invalid.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `ALREADY_EXISTS` if the repo already exists.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>INVALID_REPO_NAME</c> if name is invalid.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>ALREADY_EXISTS</c> if the repo already exists.</remarks>
     abstract create: name: string * ?opts: ArtifactsCreateOpts -> JS.Promise<ArtifactsCreateRepoResult>
     /// <summary>
     /// Get a handle to an existing repository.
     /// </summary>
     /// <remarks>@param name Repository name.</remarks>
     /// <remarks>@returns Repo handle.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `NOT_FOUND` if the repo does not exist.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `IMPORT_IN_PROGRESS` if the repo is still importing.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `FORK_IN_PROGRESS` if the repo is still forking.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>NOT_FOUND</c> if the repo does not exist.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>IMPORT_IN_PROGRESS</c> if the repo is still importing.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>FORK_IN_PROGRESS</c> if the repo is still forking.</remarks>
     abstract get: name: string -> JS.Promise<ArtifactsRepo>
     /// <summary>
     /// Import a repository from an external git remote.
     /// </summary>
     /// <remarks>@param params Source URL and optional branch/depth, plus target name and options.</remarks>
     /// <remarks>@returns Repo metadata with initial token.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `INVALID_REPO_NAME` if the target name is invalid.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `INVALID_INPUT` if the source URL is not valid HTTPS.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `INVALID_URL` if the source URL does not point to a git repository.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `REMOTE_AUTH_REQUIRED` if the remote requires authentication.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `NOT_FOUND` if the remote repository does not exist.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `UPSTREAM_UNAVAILABLE` if the remote cannot be reached.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `MEMORY_LIMIT` if the import exceeds service memory limits.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `ALREADY_EXISTS` if the target repo already exists.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>INVALID_REPO_NAME</c> if the target name is invalid.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>INVALID_INPUT</c> if the source URL is not valid HTTPS.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>INVALID_URL</c> if the source URL does not point to a git repository.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>REMOTE_AUTH_REQUIRED</c> if the remote requires authentication.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>NOT_FOUND</c> if the remote repository does not exist.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>UPSTREAM_UNAVAILABLE</c> if the remote cannot be reached.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>MEMORY_LIMIT</c> if the import exceeds service memory limits.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>ALREADY_EXISTS</c> if the target repo already exists.</remarks>
     abstract import: ``params``: ArtifactsImportParams -> JS.Promise<ArtifactsCreateRepoResult>
     /// <summary>
     /// List repositories with cursor-based pagination.
@@ -12978,7 +12978,7 @@ type Artifacts =
     /// </summary>
     /// <remarks>@param name Repository name.</remarks>
     /// <remarks>@returns true if deleted, false if not found.</remarks>
-    /// <remarks>@throws {ArtifactsError} with code `INVALID_REPO_NAME` if name is invalid.</remarks>
+    /// <remarks>@throws {ArtifactsError} with code <c>INVALID_REPO_NAME</c> if name is invalid.</remarks>
     abstract delete: name: string -> JS.Promise<bool>
 
 [<Interface>]
@@ -13224,12 +13224,12 @@ type BrowserRunResourceType =
 [<Interface>]
 type BrowserRunBaseOptions =
     /// <summary>
-    /// Adds `&lt;script&gt;` tags into the page with the desired URL or content.
+    /// Adds <c>&lt;script&gt;</c> tags into the page with the desired URL or content.
     /// </summary>
     /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddscripttagoptions</remarks>
     abstract addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[] option with get, set
     /// <summary>
-    /// Adds `&lt;link rel="stylesheet"&gt;` or `&lt;style&gt;` tags into the page.
+    /// Adds <c>&lt;link rel="stylesheet"&gt;</c> or <c>&lt;style&gt;</c> tags into the page.
     /// </summary>
     /// <remarks>@see https://pptr.dev/api/puppeteer.frameaddstyletagoptions</remarks>
     abstract addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[] option with get, set
@@ -13244,7 +13244,7 @@ type BrowserRunBaseOptions =
     /// <remarks>@see https://pptr.dev/api/puppeteer.cookieparam</remarks>
     abstract cookies: BrowserRunBaseOptionsCookiesItem[] option with get, set
     /// <summary>
-    /// Emulate a specific CSS media type (e.g. `"screen"`, `"print"`).
+    /// Emulate a specific CSS media type (e.g. <c>"screen"</c>, <c>"print"</c>).
     /// </summary>
     abstract emulateMediaType: string option with get, set
     /// <summary>
@@ -13253,19 +13253,19 @@ type BrowserRunBaseOptions =
     /// <remarks>@see https://pptr.dev/api/puppeteer.gotooptions</remarks>
     abstract gotoOptions: BrowserRunBaseOptionsGotoOptions option with get, set
     /// <summary>
-    /// Block requests matching these regex patterns. Mutually exclusive with `allowRequestPattern`.
+    /// Block requests matching these regex patterns. Mutually exclusive with <c>allowRequestPattern</c>.
     /// </summary>
     abstract rejectRequestPattern: string[] option with get, set
     /// <summary>
-    /// Only allow requests matching these regex patterns. Mutually exclusive with `rejectRequestPattern`.
+    /// Only allow requests matching these regex patterns. Mutually exclusive with <c>rejectRequestPattern</c>.
     /// </summary>
     abstract allowRequestPattern: string[] option with get, set
     /// <summary>
-    /// Block requests of these resource types. Mutually exclusive with `allowResourceTypes`.
+    /// Block requests of these resource types. Mutually exclusive with <c>allowResourceTypes</c>.
     /// </summary>
     abstract rejectResourceTypes: BrowserRunResourceType[] option with get, set
     /// <summary>
-    /// Only allow requests of these resource types. Mutually exclusive with `rejectResourceTypes`.
+    /// Only allow requests of these resource types. Mutually exclusive with <c>rejectResourceTypes</c>.
     /// </summary>
     abstract allowResourceTypes: BrowserRunResourceType[] option with get, set
     /// <summary>
@@ -13414,7 +13414,7 @@ type BrowserRunBaseOptionsWaitForSelector =
 
 /// <summary>
 /// Backend selection, mixed into the options of the quick actions that support it.
-/// Deliberately not part of `BrowserRunBaseOptions`: `scrape`, `links` and `snapshot`
+/// Deliberately not part of <c>BrowserRunBaseOptions</c>: <c>scrape</c>, <c>links</c> and <c>snapshot</c>
 /// reject an alternate backend, so they must not accept the field.
 /// </summary>
 [<Interface>]
@@ -13427,7 +13427,7 @@ type BrowserRunAlternateBackendOptions =
     static member Create (?browser: string) : BrowserRunAlternateBackendOptions = jsNative
 
 /// <summary>
-/// Common options shared by all quick actions. Exactly one of `url` or `html` must be provided.
+/// Common options shared by all quick actions. Exactly one of <c>url</c> or <c>html</c> must be provided.
 /// </summary>
 type BrowserRunCommonOptions = obj
 
@@ -13486,7 +13486,7 @@ type BrowserRunSnapshotFormat =
 type BrowserRunSnapshotOptions = obj
 
 /// <summary>
-/// Options for the `accessibilityTree` quick action.
+/// Options for the <c>accessibilityTree</c> quick action.
 /// </summary>
 type BrowserRunAccessibilityTreeOptions = obj
 
@@ -13502,7 +13502,7 @@ type BrowserRunJsonBaseOptions =
 [<Interface>]
 type BrowserRunJsonBaseOptionsCustomAiItem =
     /// <summary>
-    /// Model ID in `&lt;provider&gt;/&lt;model_name&gt;` format, e.g. `"workers-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast"`.
+    /// Model ID in <c>&lt;provider&gt;/&lt;model_name&gt;</c> format, e.g. <c>"workers-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast"</c>.
     /// </summary>
     abstract model: string with get, set
     /// <summary>
@@ -13513,8 +13513,8 @@ type BrowserRunJsonBaseOptionsCustomAiItem =
     static member Create (model: string, ?authorization: string) : BrowserRunJsonBaseOptionsCustomAiItem = jsNative
 
 /// <summary>
-/// Options for the `json` quick action.
-/// At least one of `prompt` or `response_format` must be provided.
+/// Options for the <c>json</c> quick action.
+/// At least one of <c>prompt</c> or <c>response_format</c> must be provided.
 /// </summary>
 type BrowserRunJsonOptions = obj
 
@@ -13533,7 +13533,7 @@ type BrowserRunRedirectHop =
     /// </summary>
     abstract status: float with get, set
     /// <summary>
-    /// Redirect response headers, including `location`.
+    /// Redirect response headers, including <c>location</c>.
     /// </summary>
     abstract headers: obj with get, set
     [<ParamObject; Emit("$0")>]
@@ -13558,7 +13558,7 @@ type BrowserRunResponseMeta =
     /// </summary>
     abstract finalUrl: string option with get, set
     /// <summary>
-    /// HTTP redirects followed to reach `finalUrl`, oldest first. Omitted for direct navigation and for client-side redirects such as meta refresh. An empty array means redirects occurred but their intermediate responses could not be read.
+    /// HTTP redirects followed to reach <c>finalUrl</c>, oldest first. Omitted for direct navigation and for client-side redirects such as meta refresh. An empty array means redirects occurred but their intermediate responses could not be read.
     /// </summary>
     abstract redirectChain: BrowserRunRedirectHop[] option with get, set
     [<ParamObject; Emit("$0")>]
@@ -13566,17 +13566,17 @@ type BrowserRunResponseMeta =
 
 /// <summary>
 /// A node in the page's accessibility tree, as exposed to assistive technology.
-/// `role` is the only field always present; the rest are populated when the
+/// <c>role</c> is the only field always present; the rest are populated when the
 /// underlying element defines them.
 /// </summary>
 /// <remarks>@see https://pptr.dev/api/puppeteer.serializedaxnode</remarks>
 type BrowserRunSerializedAXNode =
     /// <summary>
-    /// The ARIA role, e.g. `"button"`, `"heading"`, `"RootWebArea"`.
+    /// The ARIA role, e.g. <c>"button"</c>, <c>"heading"</c>, <c>"RootWebArea"</c>.
     /// </summary>
     abstract role: string with get, set
     /// <summary>
-    /// The `aria-autocomplete` value.
+    /// The <c>aria-autocomplete</c> value.
     /// </summary>
     abstract autocomplete: string option with get, set
     /// <summary>
@@ -13584,7 +13584,7 @@ type BrowserRunSerializedAXNode =
     /// </summary>
     abstract ``checked``: BrowserRunSerializedAXNodeChecked option with get, set
     /// <summary>
-    /// Accessible description, typically from `aria-describedby` or `title`.
+    /// Accessible description, typically from <c>aria-describedby</c> or <c>title</c>.
     /// </summary>
     abstract description: string option with get, set
     abstract disabled: bool option with get, set
@@ -13594,19 +13594,19 @@ type BrowserRunSerializedAXNode =
     /// </summary>
     abstract focused: bool option with get, set
     /// <summary>
-    /// The kind of popup the element triggers, e.g. `"menu"`, `"dialog"`.
+    /// The kind of popup the element triggers, e.g. <c>"menu"</c>, <c>"dialog"</c>.
     /// </summary>
     abstract haspopup: string option with get, set
     /// <summary>
-    /// The `aria-invalid` value.
+    /// The <c>aria-invalid</c> value.
     /// </summary>
     abstract invalid: string option with get, set
     /// <summary>
-    /// Keyboard shortcuts bound to the element, from `aria-keyshortcuts`.
+    /// Keyboard shortcuts bound to the element, from <c>aria-keyshortcuts</c>.
     /// </summary>
     abstract keyshortcuts: string option with get, set
     /// <summary>
-    /// Hierarchical level, e.g. the heading level of an `&lt;h2&gt;`.
+    /// Hierarchical level, e.g. the heading level of an <c>&lt;h2&gt;</c>.
     /// </summary>
     abstract level: float option with get, set
     /// <summary>
@@ -13633,7 +13633,7 @@ type BrowserRunSerializedAXNode =
     abstract readonly: bool option with get, set
     abstract required: bool option with get, set
     /// <summary>
-    /// Author-supplied role description, from `aria-roledescription`.
+    /// Author-supplied role description, from <c>aria-roledescription</c>.
     /// </summary>
     abstract roledescription: string option with get, set
     abstract selected: bool option with get, set
@@ -13644,7 +13644,7 @@ type BrowserRunSerializedAXNode =
     abstract valuemax: float option with get, set
     abstract valuemin: float option with get, set
     /// <summary>
-    /// Human-readable form of `value`, from `aria-valuetext`.
+    /// Human-readable form of <c>value</c>, from <c>aria-valuetext</c>.
     /// </summary>
     abstract valuetext: string option with get, set
     /// <summary>
@@ -13659,7 +13659,7 @@ type BrowserRunSerializedAXNodeChecked =
     | [<CompiledValue(true)>] True
 
 /// <summary>
-/// Success response for `content` action.
+/// Success response for <c>content</c> action.
 /// </summary>
 [<Interface>]
 type BrowserRunContentSuccessResponse =
@@ -13673,7 +13673,7 @@ type BrowserRunContentSuccessResponse =
     static member Create (success: bool, result: string, meta: BrowserRunResponseMeta) : BrowserRunContentSuccessResponse = jsNative
 
 /// <summary>
-/// Success response for `links` action.
+/// Success response for <c>links</c> action.
 /// </summary>
 [<Interface>]
 type BrowserRunLinksSuccessResponse =
@@ -13687,7 +13687,7 @@ type BrowserRunLinksSuccessResponse =
     static member Create (success: bool, result: string[], meta: BrowserRunResponseMeta) : BrowserRunLinksSuccessResponse = jsNative
 
 /// <summary>
-/// Success response for `scrape` action.
+/// Success response for <c>scrape</c> action.
 /// </summary>
 [<Interface>]
 type BrowserRunScrapeSuccessResponse =
@@ -13757,8 +13757,8 @@ type BrowserRunScrapeSuccessResponseResultItemResultsItemAttributesItem =
     static member Create (name: string, value: string) : BrowserRunScrapeSuccessResponseResultItemResultsItemAttributesItem = jsNative
 
 /// <summary>
-/// Success response for `snapshot` action. Each field is present only when the
-/// corresponding entry was requested in `formats`.
+/// Success response for <c>snapshot</c> action. Each field is present only when the
+/// corresponding entry was requested in <c>formats</c>.
 /// </summary>
 [<Interface>]
 type BrowserRunSnapshotSuccessResponse =
@@ -13779,7 +13779,7 @@ type BrowserRunSnapshotSuccessResponseResult =
     /// </summary>
     abstract screenshot: string option with get, set
     /// <summary>
-    /// Markdown content. Prefixed with YAML frontmatter (e.g. `title`) when the
+    /// Markdown content. Prefixed with YAML frontmatter (e.g. <c>title</c>) when the
     /// page provides that metadata.
     /// </summary>
     abstract markdown: string option with get, set
@@ -13791,7 +13791,7 @@ type BrowserRunSnapshotSuccessResponseResult =
     static member Create (?content: string, ?screenshot: string, ?markdown: string, ?accessibilityTree: BrowserRunSerializedAXNode) : BrowserRunSnapshotSuccessResponseResult = jsNative
 
 /// <summary>
-/// Success response for `accessibilityTree` action.
+/// Success response for <c>accessibilityTree</c> action.
 /// </summary>
 [<Interface>]
 type BrowserRunAccessibilityTreeSuccessResponse =
@@ -13804,14 +13804,14 @@ type BrowserRunAccessibilityTreeSuccessResponse =
 [<Interface>]
 type BrowserRunAccessibilityTreeSuccessResponseResult =
     /// <summary>
-    /// Root of the accessibility tree, or `null` when `root` matched no element.
+    /// Root of the accessibility tree, or <c>null</c> when <c>root</c> matched no element.
     /// </summary>
     abstract accessibilityTree: BrowserRunSerializedAXNode option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?accessibilityTree: BrowserRunSerializedAXNode) : BrowserRunAccessibilityTreeSuccessResponseResult = jsNative
 
 /// <summary>
-/// Success response for `json` action.
+/// Success response for <c>json</c> action.
 /// </summary>
 [<Interface>]
 type BrowserRunJsonSuccessResponse =
@@ -13825,7 +13825,7 @@ type BrowserRunJsonSuccessResponse =
     static member Create (success: bool, result: obj, meta: BrowserRunResponseMeta) : BrowserRunJsonSuccessResponse = jsNative
 
 /// <summary>
-/// Success response for `markdown` action.
+/// Success response for <c>markdown</c> action.
 /// </summary>
 [<Interface>]
 type BrowserRunMarkdownSuccessResponse =
@@ -13858,7 +13858,7 @@ type BrowserRunErrorResponseErrorsItem =
     static member Create (message: string, ?code: float, ?detail: string, ?path: string) : BrowserRunErrorResponseErrorsItem = jsNative
 
 /// <summary>
-/// Error response for BrowserRun `json` action.
+/// Error response for BrowserRun <c>json</c> action.
 /// </summary>
 type BrowserRunJsonErrorResponse = obj
 
@@ -13869,7 +13869,7 @@ type BrowserRunJsonErrorResponse = obj
 type BrowserRun =
     /// <summary>
     /// Send a raw HTTP request to the Browser Run API.
-    /// Used by libraries like `@cloudflare/puppeteer` to acquire and connect to a browser instance.
+    /// Used by libraries like <c>@cloudflare/puppeteer</c> to acquire and connect to a browser instance.
     /// </summary>
     /// <remarks>@see https://developers.cloudflare.com/browser-run/</remarks>
     abstract fetch: input: obj * ?init: obj -> JS.Promise<obj>
@@ -13884,135 +13884,135 @@ type BrowserRun =
     /// Convert a web page to Markdown.
     /// Get the accessibility tree of a web page.
     /// </summary>
-    /// <remarks>@param action - Must be `'screenshot'`.</remarks>
+    /// <remarks>@param action - Must be <c>'screenshot'</c>.</remarks>
     /// <remarks>@param options - Screenshot options including viewport, selectors, and image format.</remarks>
     /// <remarks>
     /// @returns
-    /// A `Response` containing one of:
+    /// A <c>Response</c> containing one of:
     ///
     /// **Success (HTTP 200):**
-    /// - Binary image data with `Content-Type: image/png`, `image/jpeg`, or `image/webp` (when `encoding: 'binary'`, the default)
-    /// - Data URI string with `Content-Type: text/plain` (when `encoding: 'base64'`)
+    /// - Binary image data with <c>Content-Type: image/png</c>, <c>image/jpeg</c>, or <c>image/webp</c> (when <c>encoding: 'binary'</c>, the default)
+    /// - Data URI string with <c>Content-Type: text/plain</c> (when <c>encoding: 'base64'</c>)
     ///
     /// **Error:**
-    /// - `BrowserRunErrorResponse` JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     ///
     /// **Headers:**
-    /// - `X-Browser-Ms-Used`: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    /// <remarks>@param action - Must be `'pdf'`.</remarks>
+    /// <remarks>@param action - Must be <c>'pdf'</c>.</remarks>
     /// <remarks>@param options - PDF generation options including page size, margins, and headers/footers.</remarks>
     /// <remarks>
     /// @returns
-    /// A `Response` containing one of:
+    /// A <c>Response</c> containing one of:
     ///
     /// **Success (HTTP 200):**
-    /// - Binary PDF data with `Content-Type: application/pdf`
+    /// - Binary PDF data with <c>Content-Type: application/pdf</c>
     ///
     /// **Error:**
-    /// - `BrowserRunErrorResponse` JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     ///
     /// **Headers:**
-    /// - `X-Browser-Ms-Used`: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    /// <remarks>@param action - Must be `'content'`.</remarks>
+    /// <remarks>@param action - Must be <c>'content'</c>.</remarks>
     /// <remarks>@param options - Navigation and page interaction options.</remarks>
     /// <remarks>
     /// @returns
-    /// A `Response` containing one of:
+    /// A <c>Response</c> containing one of:
     ///
     /// **Success (HTTP 200):**
-    /// - `BrowserRunContentSuccessResponse` JSON with `Content-Type: application/json`
+    /// - <c>BrowserRunContentSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
     ///
     /// **Error:**
-    /// - `BrowserRunErrorResponse` JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     ///
     /// **Headers:**
-    /// - `X-Browser-Ms-Used`: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    /// <remarks>@param action - Must be `'scrape'`.</remarks>
+    /// <remarks>@param action - Must be <c>'scrape'</c>.</remarks>
     /// <remarks>@param options - Scrape options with CSS selectors for elements to extract.</remarks>
     /// <remarks>
     /// @returns
-    /// A `Response` containing one of:
+    /// A <c>Response</c> containing one of:
     ///
     /// **Success (HTTP 200):**
-    /// - `BrowserRunScrapeSuccessResponse` JSON with `Content-Type: application/json`
+    /// - <c>BrowserRunScrapeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
     ///
     /// **Error:**
-    /// - `BrowserRunErrorResponse` JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     ///
     /// **Headers:**
-    /// - `X-Browser-Ms-Used`: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    /// <remarks>@param action - Must be `'links'`.</remarks>
+    /// <remarks>@param action - Must be <c>'links'</c>.</remarks>
     /// <remarks>@param options - Options to filter visible or internal links only.</remarks>
     /// <remarks>
     /// @returns
-    /// A `Response` containing one of:
+    /// A <c>Response</c> containing one of:
     ///
     /// **Success (HTTP 200):**
-    /// - `BrowserRunLinksSuccessResponse` JSON with `Content-Type: application/json`
+    /// - <c>BrowserRunLinksSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
     ///
     /// **Error:**
-    /// - `BrowserRunErrorResponse` JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     ///
     /// **Headers:**
-    /// - `X-Browser-Ms-Used`: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    /// <remarks>@param action - Must be `'snapshot'`.</remarks>
+    /// <remarks>@param action - Must be <c>'snapshot'</c>.</remarks>
     /// <remarks>
     /// @param
-    /// options - Snapshot options including the `formats` to return and
+    /// options - Snapshot options including the <c>formats</c> to return and
     /// screenshot settings (encoding is always base64).
     /// </remarks>
     /// <remarks>
     /// @returns
-    /// A `Response` containing one of:
+    /// A <c>Response</c> containing one of:
     ///
     /// **Success (HTTP 200):**
-    /// - `BrowserRunSnapshotSuccessResponse` JSON with `Content-Type: application/json`
+    /// - <c>BrowserRunSnapshotSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
     ///
     /// **Error:**
-    /// - `BrowserRunErrorResponse` JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
     ///
     /// **Headers:**
-    /// - `X-Browser-Ms-Used`: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    /// <remarks>@param action - Must be `'json'`.</remarks>
+    /// <remarks>@param action - Must be <c>'json'</c>.</remarks>
     /// <remarks>@param options - JSON extraction options with prompt or response_format schema.</remarks>
     /// <remarks>
     /// @returns
-    /// A `Response` containing one of:
+    /// A <c>Response</c> containing one of:
     ///
     /// **Success (HTTP 200):**
-    /// - `BrowserRunJsonSuccessResponse` JSON with `Content-Type: application/json`
+    /// - <c>BrowserRunJsonSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
     ///
     /// **Error:**
-    /// - `BrowserRunErrorResponse` JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    /// - HTTP 422 with code `2012` for HTML-to-markdown conversion failures
-    /// - HTTP 422/500 for AI extraction failures (may include `rawAiResponse` field)
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
+    /// - HTTP 422/500 for AI extraction failures (may include <c>rawAiResponse</c> field)
     ///
     /// **Headers:**
-    /// - `X-Browser-Ms-Used`: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    /// <remarks>@param action - Must be `'markdown'`.</remarks>
+    /// <remarks>@param action - Must be <c>'markdown'</c>.</remarks>
     /// <remarks>@param options - Navigation and page interaction options.</remarks>
     /// <remarks>
     /// @returns
-    /// A `Response` containing one of:
+    /// A <c>Response</c> containing one of:
     ///
     /// **Success (HTTP 200):**
-    /// - `BrowserRunMarkdownSuccessResponse` JSON with `Content-Type: application/json`
+    /// - <c>BrowserRunMarkdownSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
     ///
     /// **Error:**
-    /// - `BrowserRunErrorResponse` JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    /// - HTTP 422 with code `2012` for HTML-to-markdown conversion failures
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 with code <c>2012</c> for HTML-to-markdown conversion failures
     ///
     /// **Headers:**
-    /// - `X-Browser-Ms-Used`: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    /// <remarks>@param action - Must be `'accessibilityTree'`.</remarks>
+    /// <remarks>@param action - Must be <c>'accessibilityTree'</c>.</remarks>
     /// <remarks>
     /// @param
     /// options - Options to scope the tree to a subtree and to control
@@ -14020,26 +14020,26 @@ type BrowserRun =
     /// </remarks>
     /// <remarks>
     /// @returns
-    /// A `Response` containing one of:
+    /// A <c>Response</c> containing one of:
     ///
     /// **Success (HTTP 200):**
-    /// - `BrowserRunAccessibilityTreeSuccessResponse` JSON with `Content-Type: application/json`
-    /// - `result.accessibilityTree` is `null` when `root` matched no element
+    /// - <c>BrowserRunAccessibilityTreeSuccessResponse</c> JSON with <c>Content-Type: application/json</c>
+    /// - <c>result.accessibilityTree</c> is <c>null</c> when <c>root</c> matched no element
     ///
     /// **Error:**
-    /// - `BrowserRunErrorResponse` JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
-    /// - HTTP 422 for a malformed `root` selector
-    /// - HTTP 500 with code `2017` or `2018` when the tree could not be built
+    /// - <c>BrowserRunErrorResponse</c> JSON with appropriate HTTP status code (400, 422, 429, 500, 503)
+    /// - HTTP 422 for a malformed <c>root</c> selector
+    /// - HTTP 500 with code <c>2017</c> or <c>2018</c> when the tree could not be built
     ///
     /// **Headers:**
-    /// - `X-Browser-Ms-Used`: Browser time consumed in milliseconds (set when status &lt; 500)
+    /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
     abstract quickAction: action: string * options: BrowserRunScreenshotOptions -> JS.Promise<obj>
 
 /// <summary>
 /// In addition to the properties you can set in the RequestInit dict
 /// that you pass as an argument to the Request constructor, you can
-/// set certain properties of a `cf` object to control how Cloudflare
+/// set certain properties of a <c>cf</c> object to control how Cloudflare
 /// features are applied to that new Request.
 ///
 /// Note: Currently, these properties cannot be tested in the
@@ -14075,17 +14075,17 @@ type RequestInitCfProperties =
     /// </summary>
     abstract cacheTtlByStatus: obj option with get, set
     /// <summary>
-    /// Controls how responses with a `Vary` header are cached for this request.
+    /// Controls how responses with a <c>Vary</c> header are cached for this request.
     /// </summary>
     abstract vary: RequestInitCfPropertiesVary option with get, set
     /// <summary>
     /// Explicit Cache-Control header value to set on the response stored in cache.
     /// This gives full control over cache directives (e.g. 'public, max-age=3600, s-maxage=86400').
     ///
-    /// Cannot be used together with `cacheTtl` or the `cache` request option (`no-store`/`no-cache`),
+    /// Cannot be used together with <c>cacheTtl</c> or the <c>cache</c> request option (<c>no-store</c>/<c>no-cache</c>),
     /// as these are mutually exclusive cache control mechanisms. Setting both will throw a TypeError.
     ///
-    /// Can be used together with `cacheTtlByStatus`.
+    /// Can be used together with <c>cacheTtlByStatus</c>.
     /// </summary>
     abstract cacheControl: string option with get, set
     /// <summary>
@@ -14119,11 +14119,11 @@ type RequestInitCfProperties =
     /// Controls whether an outbound gRPC-web subrequest from this Worker is
     /// converted to gRPC at the Cloudflare edge.
     ///
-    /// - `"passthrough"`: forward the subrequest unchanged as gRPC-web (default).
-    /// - `"convert"`: convert the gRPC-web subrequest to gRPC at the edge.
+    /// - <c>"passthrough"</c>: forward the subrequest unchanged as gRPC-web (default).
+    /// - <c>"convert"</c>: convert the gRPC-web subrequest to gRPC at the edge.
     ///
     /// Provides per-request control over the same edge conversion behavior
-    /// gated by the `auto_grpc_convert` compatibility flag.
+    /// gated by the <c>auto_grpc_convert</c> compatibility flag.
     /// </summary>
     abstract grpcWeb: RequestInitCfPropertiesGrpcWeb option with get, set
     abstract image: RequestInitCfPropertiesImage option with get, set
@@ -14160,14 +14160,14 @@ type RequestInitCfPropertiesVaryAction =
 [<Interface>]
 type RequestInitCfPropertiesVary =
     /// <summary>
-    /// The fallback action for varied request headers not listed in `headers`.
+    /// The fallback action for varied request headers not listed in <c>headers</c>.
     /// </summary>
     abstract ``default``: RequestInitCfPropertiesVaryHeader with get, set
     /// <summary>
     /// Lowercase request header names and their Vary configuration.
     ///
-    /// The `accept` header can include `media_types`, the `accept-language`
-    /// header can include `languages`, and other headers support only `action`.
+    /// The <c>accept</c> header can include <c>media_types</c>, the <c>accept-language</c>
+    /// header can include <c>languages</c>, and other headers support only <c>action</c>.
     /// </summary>
     abstract headers: RequestInitCfPropertiesVaryHeaders option with get, set
     [<ParamObject; Emit("$0")>]
@@ -14186,14 +14186,14 @@ type RequestInitCfPropertiesVaryHeader =
     static member Create (action: RequestInitCfPropertiesVaryAction) : RequestInitCfPropertiesVaryHeader = jsNative
 
 /// <summary>
-/// Vary behavior for the `accept` request header.
+/// Vary behavior for the <c>accept</c> request header.
 /// </summary>
 [<Interface>]
 type RequestInitCfPropertiesVaryAcceptHeader =
     /// <summary>
-    /// Media types to keep when normalizing the `Accept` request header.
+    /// Media types to keep when normalizing the <c>Accept</c> request header.
     ///
-    /// Named `media_types` to match the serialized `cf.vary` configuration.
+    /// Named <c>media_types</c> to match the serialized <c>cf.vary</c> configuration.
     /// </summary>
     abstract media_types: string[] option with get, set
     /// <summary>
@@ -14204,12 +14204,12 @@ type RequestInitCfPropertiesVaryAcceptHeader =
     static member Create (action: RequestInitCfPropertiesVaryAction, ?media_types: string[]) : RequestInitCfPropertiesVaryAcceptHeader = jsNative
 
 /// <summary>
-/// Vary behavior for the `accept-language` request header.
+/// Vary behavior for the <c>accept-language</c> request header.
 /// </summary>
 [<Interface>]
 type RequestInitCfPropertiesVaryAcceptLanguageHeader =
     /// <summary>
-    /// Language tags to keep when normalizing the `Accept-Language` request
+    /// Language tags to keep when normalizing the <c>Accept-Language</c> request
     /// header.
     /// </summary>
     abstract languages: string[] option with get, set
@@ -14224,7 +14224,7 @@ type RequestInitCfPropertiesVaryAcceptLanguageHeader =
 /// Lowercase request header names and their Vary behavior.
 ///
 /// The index signature allows arbitrary custom request headers beyond the
-/// well-known `accept` and `accept-language` specializations.
+/// well-known <c>accept</c> and <c>accept-language</c> specializations.
 /// </summary>
 type RequestInitCfPropertiesVaryHeaders =
     abstract accept: RequestInitCfPropertiesVaryAcceptHeader option with get, set
@@ -14378,11 +14378,11 @@ type BasicImageTransformations =
     abstract segment: string option with get, set
     /// <summary>
     /// Controls the algorithm used when an image needs to be enlarged. This
-    /// parameter works with any fit mode that upscales, such as `contain`,
-    /// `cover`, and `scale-up`. It has no effect when `fit=scale-down` or when
+    /// parameter works with any fit mode that upscales, such as <c>contain</c>,
+    /// <c>cover</c>, and <c>scale-up</c>. It has no effect when <c>fit=scale-down</c> or when
     /// the target dimensions are smaller than the source.
     /// - interpolate: Uses bicubic interpolation, which may reduce image quality.
-    ///   This is the default behavior when `upscale` is not specified.
+    ///   This is the default behavior when <c>upscale</c> is not specified.
     /// - generate: Uses AI upscaling to produce sharper, more detailed results
     ///   when enlarging images.
     /// </summary>
@@ -14582,11 +14582,11 @@ type RequestInitCfPropertiesImageDraw =
     abstract segment: string option with get, set
     /// <summary>
     /// Controls the algorithm used when an image needs to be enlarged. This
-    /// parameter works with any fit mode that upscales, such as `contain`,
-    /// `cover`, and `scale-up`. It has no effect when `fit=scale-down` or when
+    /// parameter works with any fit mode that upscales, such as <c>contain</c>,
+    /// <c>cover</c>, and <c>scale-up</c>. It has no effect when <c>fit=scale-down</c> or when
     /// the target dimensions are smaller than the source.
     /// - interpolate: Uses bicubic interpolation, which may reduce image quality.
-    ///   This is the default behavior when `upscale` is not specified.
+    ///   This is the default behavior when <c>upscale</c> is not specified.
     /// - generate: Uses AI upscaling to produce sharper, more detailed results
     ///   when enlarging images.
     /// </summary>
@@ -14798,11 +14798,11 @@ type RequestInitCfPropertiesImage =
     abstract segment: string option with get, set
     /// <summary>
     /// Controls the algorithm used when an image needs to be enlarged. This
-    /// parameter works with any fit mode that upscales, such as `contain`,
-    /// `cover`, and `scale-up`. It has no effect when `fit=scale-down` or when
+    /// parameter works with any fit mode that upscales, such as <c>contain</c>,
+    /// <c>cover</c>, and <c>scale-up</c>. It has no effect when <c>fit=scale-down</c> or when
     /// the target dimensions are smaller than the source.
     /// - interpolate: Uses bicubic interpolation, which may reduce image quality.
-    ///   This is the default behavior when `upscale` is not specified.
+    ///   This is the default behavior when <c>upscale</c> is not specified.
     /// - generate: Uses AI upscaling to produce sharper, more detailed results
     ///   when enlarging images.
     /// </summary>
@@ -14843,7 +14843,7 @@ type IncomingRequestCfPropertiesBase =
     /// <remarks>@example "Google Cloud"</remarks>
     abstract asOrganization: string option with get, set
     /// <summary>
-    /// The original value of the `Accept-Encoding` header if Cloudflare modified it.
+    /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
     /// </summary>
     /// <remarks>@example "gzip, deflate, br"</remarks>
     abstract clientAcceptEncoding: string option with get, set
@@ -14860,10 +14860,10 @@ type IncomingRequestCfPropertiesBase =
     abstract colo: string with get, set
     /// <summary>
     /// Represents the upstream's response to a
-    /// [TCP `keepalive` message](https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html)
+    /// [TCP <c>keepalive</c> message](https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html)
     /// from cloudflare.
     ///
-    /// For workers with no upstream, this will always be `1`.
+    /// For workers with no upstream, this will always be <c>1</c>.
     /// </summary>
     /// <remarks>@example 3</remarks>
     abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
@@ -14875,25 +14875,25 @@ type IncomingRequestCfPropertiesBase =
     /// <summary>
     /// The browser-requested prioritization information in the request object.
     ///
-    /// If no information was set, defaults to the empty string `""`
+    /// If no information was set, defaults to the empty string <c>""</c>
     /// </summary>
     /// <remarks>@example "weight=192;exclusive=0;group=3;group-weight=127"</remarks>
     /// <remarks>@default ""</remarks>
     abstract requestPriority: string with get, set
     /// <summary>
     /// The TLS version of the connection to Cloudflare.
-    /// In requests served over plaintext (without TLS), this property is the empty string `""`.
+    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
     /// </summary>
     /// <remarks>@example "TLSv1.3"</remarks>
     abstract tlsVersion: string with get, set
     /// <summary>
     /// The cipher for the connection to Cloudflare.
-    /// In requests served over plaintext (without TLS), this property is the empty string `""`.
+    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
     /// </summary>
     /// <remarks>@example "AEAD-AES128-GCM-SHA256"</remarks>
     abstract tlsCipher: string with get, set
     /// <summary>
-    /// Metadata containing the [`HELLO`](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2) and [`FINISHED`](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9) messages from this request's TLS handshake.
+    /// Metadata containing the [<c>HELLO</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2) and [<c>FINISHED</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9) messages from this request's TLS handshake.
     ///
     /// If the incoming request was served over plaintext (without TLS) this field is undefined.
     /// </summary>
@@ -14905,7 +14905,7 @@ type IncomingRequestCfPropertiesBase =
 type IncomingRequestCfPropertiesBotManagementBase =
     /// <summary>
     /// Cloudflare’s [level of certainty](https://developers.cloudflare.com/bots/concepts/bot-score/) that a request comes from a bot,
-    /// represented as an integer percentage between `1` (almost certainly a bot) and `99` (almost certainly human).
+    /// represented as an integer percentage between <c>1</c> (almost certainly a bot) and <c>99</c> (almost certainly human).
     /// </summary>
     /// <remarks>@example 54</remarks>
     abstract score: float with get, set
@@ -14937,7 +14937,7 @@ type IncomingRequestCfPropertiesBotManagement =
     /// </summary>
     abstract botManagement: IncomingRequestCfPropertiesBotManagementBase with get, set
     /// <summary>
-    /// Duplicate of `botManagement.score`.
+    /// Duplicate of <c>botManagement.score</c>.
     /// </summary>
     /// <remarks>@deprecated</remarks>
     abstract clientTrustScore: float with get, set
@@ -14951,7 +14951,7 @@ type IncomingRequestCfPropertiesBotManagementEnterprise =
     /// </summary>
     abstract botManagement: obj with get, set
     /// <summary>
-    /// Duplicate of `botManagement.score`.
+    /// Duplicate of <c>botManagement.score</c>.
     /// </summary>
     /// <remarks>@deprecated</remarks>
     abstract clientTrustScore: float with get, set
@@ -14979,11 +14979,11 @@ type IncomingRequestCfPropertiesCloudflareAccessOrApiShield =
     /// either Cloudflare Access or API Shield (mTLS)
     /// and the presented SSL certificate has a valid
     /// [Certificate Serial Number](https://ldapwiki.com/wiki/Certificate%20Serial%20Number)
-    /// (i.e., not `null` or `""`).
+    /// (i.e., not <c>null</c> or <c>""</c>).
     ///
     /// Otherwise, a set of placeholder values are used.
     ///
-    /// The property `certPresented` will be set to `"1"` when
+    /// The property <c>certPresented</c> will be set to <c>"1"</c> when
     /// the object is populated (i.e. the above conditions were met).
     /// </summary>
     abstract tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder> with get, set
@@ -15010,22 +15010,22 @@ type IncomingRequestCfPropertiesTLSClientAuthCertVerified =
 [<Interface>]
 type IncomingRequestCfPropertiesExportedAuthenticatorMetadata =
     /// <summary>
-    /// The client's [`HELLO` message](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2), encoded in hexadecimal
+    /// The client's [<c>HELLO</c> message](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2), encoded in hexadecimal
     /// </summary>
     /// <remarks>@example "44372ba35fa1270921d318f34c12f155dc87b682cf36a790cfaa3ba8737a1b5d"</remarks>
     abstract clientHandshake: string with get, set
     /// <summary>
-    /// The server's [`HELLO` message](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2), encoded in hexadecimal
+    /// The server's [<c>HELLO</c> message](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2), encoded in hexadecimal
     /// </summary>
     /// <remarks>@example "44372ba35fa1270921d318f34c12f155dc87b682cf36a790cfaa3ba8737a1b5d"</remarks>
     abstract serverHandshake: string with get, set
     /// <summary>
-    /// The client's [`FINISHED` message](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9), encoded in hexadecimal
+    /// The client's [<c>FINISHED</c> message](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9), encoded in hexadecimal
     /// </summary>
     /// <remarks>@example "084ee802fe1348f688220e2a6040a05b2199a761f33cf753abb1b006792d3f8b"</remarks>
     abstract clientFinished: string with get, set
     /// <summary>
-    /// The server's [`FINISHED` message](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9), encoded in hexadecimal
+    /// The server's [<c>FINISHED</c> message](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9), encoded in hexadecimal
     /// </summary>
     /// <remarks>@example "084ee802fe1348f688220e2a6040a05b2199a761f33cf753abb1b006792d3f8b"</remarks>
     abstract serverFinished: string with get, set
@@ -15040,11 +15040,11 @@ type IncomingRequestCfPropertiesGeographicInformation =
     /// <summary>
     /// The [ISO 3166-1 Alpha 2](https://www.iso.org/iso-3166-country-codes.html) country code the request originated from.
     ///
-    /// If your worker is [configured to accept TOR connections](https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing), this may also be `"T1"`, indicating a request that originated over TOR.
+    /// If your worker is [configured to accept TOR connections](https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing), this may also be <c>"T1"</c>, indicating a request that originated over TOR.
     ///
     /// If Cloudflare is unable to determine where the request originated this property is omitted.
     ///
-    /// The country code `"T1"` is used for requests originating on TOR.
+    /// The country code <c>"T1"</c> is used for requests originating on TOR.
     /// </summary>
     /// <remarks>@example "GB"</remarks>
     abstract country: IncomingRequestCfPropertiesGeographicInformationCountry option with get, set
@@ -15362,7 +15362,7 @@ type IncomingRequestCfPropertiesGeographicInformationCountry =
 [<Interface>]
 type IncomingRequestCfPropertiesTLSClientAuth =
     /// <summary>
-    /// Always `"1"`, indicating that the certificate was presented
+    /// Always <c>"1"</c>, indicating that the certificate was presented
     /// </summary>
     abstract certPresented: string with get, set
     /// <summary>
@@ -15373,8 +15373,8 @@ type IncomingRequestCfPropertiesTLSClientAuth =
     /// <summary>
     /// The presented certificate's revokation status.
     ///
-    /// - A value of `"1"` indicates the certificate has been revoked
-    /// - A value of `"0"` indicates the certificate has not been revoked
+    /// - A value of <c>"1"</c> indicates the certificate has been revoked
+    /// - A value of <c>"0"</c> indicates the certificate has not been revoked
     /// </summary>
     abstract certRevoked: IncomingRequestCfPropertiesTLSClientAuthCertRevoked with get, set
     /// <summary>
@@ -15447,14 +15447,14 @@ type IncomingRequestCfPropertiesTLSClientAuth =
     abstract certNotAfter: string with get, set
     /// <summary>
     /// The client leaf certificate in [RFC 9440](https://www.rfc-editor.org/rfc/rfc9440)
-    /// format (`:base64-DER:`). Empty if no client certificate was presented or if
+    /// format (<c>:base64-DER:</c>). Empty if no client certificate was presented or if
     /// the leaf certificate exceeded 10 KB (see certRFC9440TooLarge).
     ///
-    /// Suitable for forwarding to an origin via the `Client-Cert` HTTP header.
+    /// Suitable for forwarding to an origin via the <c>Client-Cert</c> HTTP header.
     /// </summary>
     abstract certRFC9440: string with get, set
     /// <summary>
-    /// `true` if the leaf certificate exceeded 10 KB and was omitted from
+    /// <c>true</c> if the leaf certificate exceeded 10 KB and was omitted from
     /// certRFC9440.
     /// </summary>
     abstract certRFC9440TooLarge: bool with get, set
@@ -15463,11 +15463,11 @@ type IncomingRequestCfPropertiesTLSClientAuth =
     /// format as a comma-separated list. Empty if no intermediates were sent or
     /// if the chain exceeded 16 KB (see certChainRFC9440TooLarge).
     ///
-    /// Suitable for forwarding to an origin via the `Client-Cert-Chain` HTTP header.
+    /// Suitable for forwarding to an origin via the <c>Client-Cert-Chain</c> HTTP header.
     /// </summary>
     abstract certChainRFC9440: string with get, set
     /// <summary>
-    /// `true` if the intermediate chain exceeded 16 KB and was omitted from
+    /// <c>true</c> if the intermediate chain exceeded 16 KB and was omitted from
     /// certChainRFC9440.
     /// </summary>
     abstract certChainRFC9440TooLarge: bool with get, set
@@ -15809,7 +15809,7 @@ type D1Meta =
     abstract timings: D1MetaTimings option with get, set
     /// <summary>
     /// Number of total attempts to execute the query, due to automatic retries.
-    /// Note: All other fields in the response like `timings` only apply to the last attempt.
+    /// Note: All other fields in the response like <c>timings</c> only apply to the last attempt.
     /// </summary>
     abstract total_attempts: float option with get, set
     [<ParamObject; Emit("$0")>]
@@ -15881,7 +15881,7 @@ type D1DatabaseSession =
     /// <remarks>
     /// @returns
     /// The latest session bookmark across all executed queries on the session.
-    /// If no query has been executed yet, `null` is returned.
+    /// If no query has been executed yet, <c>null</c> is returned.
     /// </remarks>
     abstract getBookmark: unit -> string option
 
@@ -15998,15 +15998,15 @@ type EmailAddress =
     static member Create (name: string, email: string) : EmailAddress = jsNative
 
 /// <summary>
-/// Recipient fields for `SendEmail.send()`. At least one of `to`, `cc`, or
-/// `bcc` must be provided.
+/// Recipient fields for <c>SendEmail.send()</c>. At least one of <c>to</c>, <c>cc</c>, or
+/// <c>bcc</c> must be provided.
 /// </summary>
 type EmailDestinations = obj
 
 /// <summary>
 /// Fields shared by all composed emails (no recipients). Used directly by
-/// `ForwardableEmailMessage.reply()`, which always replies to the original
-/// sender, and extended by `EmailMessageBuilder` for `SendEmail.send()`.
+/// <c>ForwardableEmailMessage.reply()</c>, which always replies to the original
+/// sender, and extended by <c>EmailMessageBuilder</c> for <c>SendEmail.send()</c>.
 /// </summary>
 [<Interface>]
 type EmailReplyMessageBuilder =
@@ -16022,7 +16022,7 @@ type EmailReplyMessageBuilder =
 
 /// <summary>
 /// Fields for composing an email without constructing raw MIME, for
-/// `SendEmail.send()`. Requires at least one of `to`, `cc`, or `bcc`.
+/// <c>SendEmail.send()</c>. Requires at least one of <c>to</c>, <c>cc</c>, or <c>bcc</c>.
 /// </summary>
 type EmailMessageBuilder = obj
 
@@ -16036,105 +16036,105 @@ type SendEmail =
 type EmailEvent =
     abstract message: ForwardableEmailMessage
     /// <summary>
-    /// The **`bubbles`** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
     /// </summary>
     abstract bubbles: bool
     /// <summary>
-    /// The **`cancelBubble`** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
     abstract cancelBubble: bool with get, set
     /// <summary>
-    /// The **`cancelable`** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
     /// </summary>
     abstract cancelable: bool
     /// <summary>
-    /// The read-only **`composed`** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
     /// </summary>
     abstract composed: bool
     /// <summary>
-    /// The **`currentTarget`** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
     abstract currentTarget: Browser.Types.EventTarget option
     /// <summary>
-    /// The **`defaultPrevented`** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
     /// </summary>
     abstract defaultPrevented: bool
     /// <summary>
-    /// The **`eventPhase`** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
+    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
     /// </summary>
     abstract eventPhase: float
     /// <summary>
-    /// The **`isTrusted`** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
     /// </summary>
     abstract isTrusted: bool
     /// <summary>
-    /// The Event property **`returnValue`** indicates whether the default action for this event has been prevented or not.
+    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
     abstract returnValue: bool with get, set
     /// <summary>
-    /// The deprecated **`Event.srcElement`** is an alias for the Event.target property. Use Event.target instead.
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
     abstract srcElement: Browser.Types.EventTarget option
     /// <summary>
-    /// The read-only **`target`** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
+    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
     abstract target: Browser.Types.EventTarget option
     /// <summary>
-    /// The **`timeStamp`** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
+    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
     /// </summary>
     abstract timeStamp: float
     /// <summary>
-    /// The **`type`** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
+    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
     /// </summary>
     abstract ``type``: string
     /// <summary>
-    /// The **`composedPath()`** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: obj with get, set
     /// <summary>
-    /// The **`Event.initEvent()`** method is used to initialize the value of an event created using Document.createEvent().
+    /// The **<c>Event.initEvent()</c>** method is used to initialize the value of an event created using Document.createEvent().
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/initEvent)</remarks>
     abstract initEvent: obj with get, set
     /// <summary>
-    /// The **`preventDefault()`** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
     /// </summary>
     abstract preventDefault: obj with get, set
     /// <summary>
-    /// The **`stopImmediatePropagation()`** method of the Event interface prevents other listeners of the same event from being called.
+    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
     /// </summary>
     abstract stopImmediatePropagation: obj with get, set
     /// <summary>
-    /// The **`stopPropagation()`** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
+    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
     /// </summary>
@@ -16144,7 +16144,7 @@ type EmailEvent =
     abstract AT_TARGET: float
     abstract BUBBLING_PHASE: float
     /// <summary>
-    /// The **`ExtendableEvent.waitUntil()`** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
+    /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
@@ -16185,7 +16185,7 @@ type FlagshipEvaluationError =
 /// </summary>
 /// <remarks>
 /// @example
-/// ```typescript
+/// <code lang="typescript">
 /// // Get a boolean flag value with a default
 /// const enabled = await env.FLAGS.getBooleanValue('my-feature', false);
 ///
@@ -16198,7 +16198,7 @@ type FlagshipEvaluationError =
 /// // Get full evaluation details including variant and reason
 /// const details = await env.FLAGS.getBooleanDetails('my-feature', false);
 /// console.log(details.variant, details.reason);
-/// ```
+/// </code>
 /// </remarks>
 type Flagship =
     /// <summary>
@@ -16290,7 +16290,7 @@ type Hyperdrive =
     /// Connect directly to Hyperdrive as if it's your database, returning a TCP socket.
     ///
     /// Calling this method returns an identical socket to if you call
-    /// `connect("host:port")` using the `host` and `port` fields from this object.
+    /// <c>connect("host:port")</c> using the <c>host</c> and <c>port</c> fields from this object.
     /// Pick whichever approach works better with your preferred DB client library.
     ///
     /// Note that this socket is not yet authenticated -- it's expected that your
@@ -16313,7 +16313,7 @@ type Hyperdrive =
 
 /// <summary>
 /// A handle to a dynamically-provisioned Hyperdrive connection, returned by
-/// `HyperdriveApi.get()`.
+/// <c>HyperdriveApi.get()</c>.
 /// </summary>
 type HyperdriveDynamic =
     /// <summary>
@@ -16333,7 +16333,7 @@ type HyperdriveDynamic =
 /// </summary>
 type HyperdriveDynamicApi =
     /// <summary>
-    /// Provision a connection for the database described by `args`.
+    /// Provision a connection for the database described by <c>args</c>.
     /// </summary>
     abstract get: args: HyperdriveDynamicConfig -> JS.Promise<HyperdriveDynamic>
     /// <summary>
@@ -17211,7 +17211,7 @@ type WorkflowStepDoRollbackOptions2RollbackCtx<'T> =
     abstract ctx: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx with get, set
     abstract error: obj with get, set
     abstract output: 'T option with get, set
-    /// <remarks>@deprecated Use `ctx.step.name` and `ctx.step.count` instead.</remarks>
+    /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (ctx: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx, error: obj, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptions2RollbackCtx<'T> = jsNative
@@ -17228,7 +17228,7 @@ type WorkflowStepDoRollbackOptions3RollbackCtx<'T> =
     abstract ctx: WorkflowStepDoCallbackCtx with get, set
     abstract error: obj with get, set
     abstract output: 'T option with get, set
-    /// <remarks>@deprecated Use `ctx.step.name` and `ctx.step.count` instead.</remarks>
+    /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (ctx: WorkflowStepDoCallbackCtx, error: obj, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptions3RollbackCtx<'T> = jsNative
@@ -17245,7 +17245,7 @@ type WorkflowStepDoRollbackOptions4RollbackCtx<'T> =
     abstract ctx: WorkflowStepDoCallbackCtx with get, set
     abstract error: obj with get, set
     abstract output: 'T option with get, set
-    /// <remarks>@deprecated Use `ctx.step.name` and `ctx.step.count` instead.</remarks>
+    /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (ctx: WorkflowStepDoCallbackCtx, error: obj, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptions4RollbackCtx<'T> = jsNative
@@ -17293,7 +17293,7 @@ type WorkflowStepDoRollbackOptionsRollbackCtx<'T> =
     abstract ctx: WorkflowStepDoCallbackCtx with get, set
     abstract error: obj with get, set
     abstract output: 'T option with get, set
-    /// <remarks>@deprecated Use `ctx.step.name` and `ctx.step.count` instead.</remarks>
+    /// <remarks>@deprecated Use <c>ctx.step.name</c> and <c>ctx.step.count</c> instead.</remarks>
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (ctx: WorkflowStepDoCallbackCtx, error: obj, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptionsRollbackCtx<'T> = jsNative
@@ -17326,22 +17326,22 @@ type SecretsStoreSecret =
 ///
 /// Usage:
 /// - Binding-level operations:
-///   `await env.STREAM.videos.upload`
-///   `await env.STREAM.videos.createDirectUpload`
-///   `await env.STREAM.videos.*`
-///   `await env.STREAM.watermarks.*`
+///   <c>await env.STREAM.videos.upload</c>
+///   <c>await env.STREAM.videos.createDirectUpload</c>
+///   <c>await env.STREAM.videos.*</c>
+///   <c>await env.STREAM.watermarks.*</c>
 /// - Per-video operations:
-///   `await env.STREAM.video(id).downloads.*`
-///   `await env.STREAM.video(id).captions.*`
+///   <c>await env.STREAM.video(id).downloads.*</c>
+///   <c>await env.STREAM.video(id).captions.*</c>
 ///
 /// Example usage:
-/// ```ts
+/// <code lang="ts">
 /// await env.STREAM.video(id).downloads.generate();
 ///
 /// const video = env.STREAM.video(id)
 /// const captions = video.captions.list();
 /// const videoDetails = video.details()
-/// ```
+/// </code>
 /// </summary>
 type StreamBinding =
     /// <summary>
@@ -17626,7 +17626,7 @@ type StreamDirectUploadCreateParams =
     /// </summary>
     abstract allowedOrigins: string[] option with get, set
     /// <summary>
-    /// Indicates whether the video can be accessed using the id. When set to `true`,
+    /// Indicates whether the video can be accessed using the id. When set to <c>true</c>,
     /// a signed token must be generated with a signing key to view the video.
     /// </summary>
     abstract requireSignedURLs: bool option with get, set
@@ -17635,7 +17635,7 @@ type StreamDirectUploadCreateParams =
     /// </summary>
     abstract thumbnailTimestampPct: float option with get, set
     /// <summary>
-    /// The date and time at which the video will be deleted. Include `null` to remove
+    /// The date and time at which the video will be deleted. Include <c>null</c> to remove
     /// a scheduled deletion.
     /// </summary>
     abstract scheduledDeletion: string option with get, set
@@ -17659,7 +17659,7 @@ type StreamDirectUploadWatermark =
 type StreamUrlUploadParams =
     /// <summary>
     /// Lists the origins allowed to display the video. Enter allowed origin
-    /// domains in an array and use `*` for wildcard subdomains. Empty arrays allow the
+    /// domains in an array and use <c>*</c> for wildcard subdomains. Empty arrays allow the
     /// video to be viewed on any origin.
     /// </summary>
     abstract allowedOrigins: string[] option with get, set
@@ -17674,13 +17674,13 @@ type StreamUrlUploadParams =
     abstract meta: obj option with get, set
     /// <summary>
     /// Indicates whether the video can be a accessed using the id. When
-    /// set to `true`, a signed token must be generated with a signing key to view the
+    /// set to <c>true</c>, a signed token must be generated with a signing key to view the
     /// video.
     /// </summary>
     abstract requireSignedURLs: bool option with get, set
     /// <summary>
     /// Indicates the date and time at which the video will be deleted. Omit
-    /// the field to indicate no change, or include with a `null` value to remove an
+    /// the field to indicate no change, or include with a <c>null</c> value to remove an
     /// existing scheduled deletion. If specified, must be at least 30 days from upload
     /// time.
     /// </summary>
@@ -17746,7 +17746,7 @@ type StreamScopedCaptions =
 type StreamScopedDownloads =
     /// <summary>
     /// Generates a download for a video when a video is ready to view. Available
-    /// types are `default` and `audio`. Defaults to `default` when omitted.
+    /// types are <c>default</c> and <c>audio</c>. Defaults to <c>default</c> when omitted.
     /// </summary>
     /// <remarks>@param downloadType The download type to create.</remarks>
     /// <remarks>@returns The current downloads for the video.</remarks>
@@ -17764,8 +17764,8 @@ type StreamScopedDownloads =
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
     abstract get: unit -> JS.Promise<StreamDownloadGetResponse>
     /// <summary>
-    /// Delete the downloads for a video. Available types are `default` and `audio`.
-    /// Defaults to `default` when omitted.
+    /// Delete the downloads for a video. Available types are <c>default</c> and <c>audio</c>.
+    /// Defaults to <c>default</c> when omitted.
     /// </summary>
     /// <remarks>@param downloadType The download type to delete.</remarks>
     /// <remarks>@returns A promise that resolves when deletion completes.</remarks>
@@ -17846,7 +17846,7 @@ type StreamWatermarks =
 type StreamUpdateVideoParams =
     /// <summary>
     /// Lists the origins allowed to display the video. Enter allowed origin
-    /// domains in an array and use `*` for wildcard subdomains. Empty arrays allow the
+    /// domains in an array and use <c>*</c> for wildcard subdomains. Empty arrays allow the
     /// video to be viewed on any origin.
     /// </summary>
     abstract allowedOrigins: string[] option with get, set
@@ -17857,7 +17857,7 @@ type StreamUpdateVideoParams =
     /// <summary>
     /// The maximum duration in seconds for a video upload. Can be set for a
     /// video that is not yet uploaded to limit its duration. Uploads that exceed the
-    /// specified duration will fail during processing. A value of `-1` means the value
+    /// specified duration will fail during processing. A value of <c>-1</c> means the value
     /// is unknown.
     /// </summary>
     abstract maxDurationSeconds: float option with get, set
@@ -17868,13 +17868,13 @@ type StreamUpdateVideoParams =
     abstract meta: obj option with get, set
     /// <summary>
     /// Indicates whether the video can be a accessed using the id. When
-    /// set to `true`, a signed token must be generated with a signing key to view the
+    /// set to <c>true</c>, a signed token must be generated with a signing key to view the
     /// video.
     /// </summary>
     abstract requireSignedURLs: bool option with get, set
     /// <summary>
     /// Indicates the date and time at which the video will be deleted. Omit
-    /// the field to indicate no change, or include with a `null` value to remove an
+    /// the field to indicate no change, or include with a <c>null</c> value to remove an
     /// existing scheduled deletion. If specified, must be at least 30 days from upload
     /// time.
     /// </summary>
@@ -17996,28 +17996,28 @@ type StreamWatermark =
     /// </summary>
     abstract name: string with get, set
     /// <summary>
-    /// The translucency of the image. A value of `0.0` makes the image completely
-    /// transparent, and `1.0` makes the image completely opaque. Note that if the image
-    /// is already semi-transparent, setting this to `1.0` will not make the image
+    /// The translucency of the image. A value of <c>0.0</c> makes the image completely
+    /// transparent, and <c>1.0</c> makes the image completely opaque. Note that if the image
+    /// is already semi-transparent, setting this to <c>1.0</c> will not make the image
     /// completely opaque.
     /// </summary>
     abstract opacity: float with get, set
     /// <summary>
     /// The whitespace between the adjacent edges (determined by position) of the video
-    /// and the image. `0.0` indicates no padding, and `1.0` indicates a fully padded
+    /// and the image. <c>0.0</c> indicates no padding, and <c>1.0</c> indicates a fully padded
     /// video width or length, as determined by the algorithm.
     /// </summary>
     abstract padding: float with get, set
     /// <summary>
     /// The size of the image relative to the overall size of the video. This parameter
-    /// will adapt to horizontal and vertical videos automatically. `0.0` indicates no
-    /// scaling (use the size of the image as-is), and `1.0 `fills the entire video.
+    /// will adapt to horizontal and vertical videos automatically. <c>0.0</c> indicates no
+    /// scaling (use the size of the image as-is), and <c>1.0 </c>fills the entire video.
     /// </summary>
     abstract scale: float with get, set
     /// <summary>
-    /// The location of the image. Valid positions are: `upperRight`, `upperLeft`,
-    /// `lowerLeft`, `lowerRight`, and `center`. Note that `center` ignores the
-    /// `padding` parameter.
+    /// The location of the image. Valid positions are: <c>upperRight</c>, <c>upperLeft</c>,
+    /// <c>lowerLeft</c>, <c>lowerRight</c>, and <c>center</c>. Note that <c>center</c> ignores the
+    /// <c>padding</c> parameter.
     /// </summary>
     abstract position: StreamWatermarkPosition with get, set
     [<ParamObject; Emit("$0")>]
@@ -18030,22 +18030,22 @@ type StreamWatermarkCreateParams =
     /// </summary>
     abstract name: string option with get, set
     /// <summary>
-    /// The translucency of the image. A value of `0.0` makes the image completely
-    /// transparent, and `1.0` makes the image completely opaque. Note that if the
-    /// image is already semi-transparent, setting this to `1.0` will not make the
+    /// The translucency of the image. A value of <c>0.0</c> makes the image completely
+    /// transparent, and <c>1.0</c> makes the image completely opaque. Note that if the
+    /// image is already semi-transparent, setting this to <c>1.0</c> will not make the
     /// image completely opaque.
     /// </summary>
     abstract opacity: float option with get, set
     /// <summary>
     /// The whitespace between the adjacent edges (determined by position) of the
-    /// video and the image. `0.0` indicates no padding, and `1.0` indicates a fully
+    /// video and the image. <c>0.0</c> indicates no padding, and <c>1.0</c> indicates a fully
     /// padded video width or length, as determined by the algorithm.
     /// </summary>
     abstract padding: float option with get, set
     /// <summary>
     /// The size of the image relative to the overall size of the video. This
-    /// parameter will adapt to horizontal and vertical videos automatically. `0.0`
-    /// indicates no scaling (use the size of the image as-is), and `1.0 `fills the
+    /// parameter will adapt to horizontal and vertical videos automatically. <c>0.0</c>
+    /// indicates no scaling (use the size of the image as-is), and <c>1.0 </c>fills the
     /// entire video.
     /// </summary>
     abstract scale: float option with get, set
@@ -18068,7 +18068,7 @@ type StreamVideosListParams =
     /// </summary>
     abstract before: string option with get, set
     /// <summary>
-    /// Comparison operator for the `before` field.
+    /// Comparison operator for the <c>before</c> field.
     /// </summary>
     /// <remarks>@default 'lt'</remarks>
     abstract beforeComp: StreamPaginationComparison option with get, set
@@ -18078,7 +18078,7 @@ type StreamVideosListParams =
     /// </summary>
     abstract after: string option with get, set
     /// <summary>
-    /// Comparison operator for the `after` field.
+    /// Comparison operator for the <c>after</c> field.
     /// </summary>
     /// <remarks>@default 'gte'</remarks>
     abstract afterComp: StreamPaginationComparison option with get, set
@@ -18459,7 +18459,7 @@ type VectorizeMatches =
 
 /// <summary>
 /// Results of an operation that performed a mutation on a set of vectors.
-/// Here, `ids` is a list of vectors that were successfully processed.
+/// Here, <c>ids</c> is a list of vectors that were successfully processed.
 ///
 /// This type is exclusively for the Vectorize **beta** and will be deprecated once Vectorize RC is released.
 /// See VectorizeAsyncMutation for its post-beta equivalent.
@@ -18473,7 +18473,7 @@ type VectorizeVectorMutation =
 
 /// <summary>
 /// Result type indicating a mutation on the Vectorize Index.
-/// Actual mutations are processed async where the `mutationId` is the unique identifier for the operation.
+/// Actual mutations are processed async where the <c>mutationId</c> is the unique identifier for the operation.
 /// </summary>
 [<Interface>]
 type VectorizeAsyncMutation =
@@ -18621,7 +18621,7 @@ type WebSearchSearchOptions =
 ///
 /// Web Search is discovery-only -- results carry catalog metadata about a page
 /// but never the page body. To read a result's content the caller invokes the
-/// global `fetch()` API against the result's `url`, at which point the
+/// global <c>fetch()</c> API against the result's <c>url</c>, at which point the
 /// destination's own access controls apply (including Cloudflare Pay-per-Crawl).
 /// </summary>
 [<Interface>]
@@ -18640,11 +18640,11 @@ type WebSearchResult =
     abstract description: string option with get, set
     /// <summary>
     /// Last-modified date for the page, when known. Naive (no timezone)
-    /// ISO-8601 datetime, e.g. `"2025-11-30T04:39:48"`.
+    /// ISO-8601 datetime, e.g. <c>"2025-11-30T04:39:48"</c>.
     /// </summary>
     abstract lastModifiedDate: string option with get, set
     /// <summary>
-    /// Page meta image URL (typically the `og:image`). May be absent.
+    /// Page meta image URL (typically the <c>og:image</c>). May be absent.
     /// </summary>
     abstract imageUrl: string option with get, set
     /// <summary>
@@ -18690,18 +18690,18 @@ type WebSearchSearchResponse =
 ///
 /// Discovery-only primitive for agents and Workers. Returns URLs and catalog
 /// metadata for a query; never returns page content or excerpts. To read a
-/// result's body, fetch the URL with the global `fetch()` API.
+/// result's body, fetch the URL with the global <c>fetch()</c> API.
 ///
 /// Declared in wrangler with a single object (there is exactly one corpus, the
 /// public web, so there is no name, namespace, or instance to specify):
 ///
-/// ```jsonc
+/// <code lang="jsonc">
 /// { "web_search": { "binding": "WEBSEARCH" } }
-/// ```
+/// </code>
 /// </summary>
 /// <remarks>
 /// @example
-/// ```ts
+/// <code lang="ts">
 /// const { items, metadata } = await env.WEBSEARCH.search({
 ///   query: "Cloudflare Workers",
 /// });
@@ -18712,13 +18712,13 @@ type WebSearchSearchResponse =
 /// // Read content yourself; pay-per-crawl and other publisher
 /// // controls apply at the fetch site, not at search time.
 /// const page = await fetch(top.url);
-/// ```
+/// </code>
 /// </remarks>
 type WebSearch =
     /// <summary>
     /// Run a Web Search query.
     /// </summary>
-    /// <remarks>@param options Search options. Only `query` is required.</remarks>
+    /// <remarks>@param options Search options. Only <c>query</c> is required.</remarks>
     /// <remarks>@returns The matching results plus per-response metadata.</remarks>
     abstract search: options: WebSearchSearchOptions -> JS.Promise<WebSearchSearchResponse>
 
@@ -18790,14 +18790,14 @@ type Workflow<'PARAMS> =
     abstract create: ?options: WorkflowInstanceCreateOptions<'PARAMS> -> JS.Promise<WorkflowInstance>
     /// <summary>
     /// Create a batch of instances and return handle for all of them. If a provided id exists, an error will be thrown.
-    /// `createBatch` is limited at 100 instances at a time or when the RPC limit for the batch (1MiB) is reached.
+    /// <c>createBatch</c> is limited at 100 instances at a time or when the RPC limit for the batch (1MiB) is reached.
     /// </summary>
     /// <remarks>@param batch List of Options when creating an instance including name and params</remarks>
     /// <remarks>@returns A promise that resolves with a list of handles for the created instances.</remarks>
     abstract createBatch: batch: WorkflowInstanceCreateOptions<'PARAMS>[] -> JS.Promise<WorkflowInstance[]>
     /// <summary>
     /// Delete a batch of Workflow instances and their stored state.
-    /// `deleteBatch` is limited to 100 instances at a time. Duplicate IDs are deleted once.
+    /// <c>deleteBatch</c> is limited to 100 instances at a time. Duplicate IDs are deleted once.
     /// The result contains one entry for each input position; IDs that do not exist are returned as per-instance errors.
     /// </summary>
     /// <remarks>@param instanceIds IDs of the Workflow instances to delete</remarks>
@@ -18908,7 +18908,7 @@ type WorkflowInstanceCreateOptions<'PARAMS> =
     abstract retention: WorkflowCreateOptionsRetention option with get, set
     /// <summary>
     /// A best-effort geographic placement preference for the Workflow instance.
-    /// See `WorkflowInstanceLocationHint` for supported regions.
+    /// See <c>WorkflowInstanceLocationHint</c> for supported regions.
     /// </summary>
     abstract locationHint: DurableObjectLocationHint option with get, set
     [<ParamObject; Emit("$0")>]
@@ -19005,7 +19005,7 @@ type Exports =
     [<Global("WebSocketRequestResponsePair"); EmitConstructor>]
     static member WebSocketRequestResponsePair (request: string, response: string) : WebSocketRequestResponsePair = jsNative
     /// <summary>
-    /// The **`ExtendableEvent`** interface extends the lifetime of the install and activate events dispatched on the global scope as part of the service worker lifecycle. This ensures that any functional events (like FetchEvent) are not dispatched until it upgrades database schemas and deletes the outdated cache entries.
+    /// The **<c>ExtendableEvent</c>** interface extends the lifetime of the install and activate events dispatched on the global scope as part of the service worker lifecycle. This ensures that any functional events (like FetchEvent) are not dispatched until it upgrades database schemas and deletes the outdated cache entries.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent)
     /// </summary>
@@ -19050,12 +19050,12 @@ type Exports =
     /// <summary>
     /// Namespace-level Agent Memory binding.
     ///
-    /// Used as the type of an `env.MEMORY`-style binding backed by the Agent
+    /// Used as the type of an <c>env.MEMORY</c>-style binding backed by the Agent
     /// Memory product.
     /// </summary>
     /// <remarks>
     /// @example
-    /// ```ts
+    /// <code lang="ts">
     /// export default {
     ///   async fetch(_request: Request, env: Env): Promise&lt;Response&gt; {
     ///     const profile = await env.MEMORY.getProfile("wrangler-e2e");
@@ -19063,7 +19063,7 @@ type Exports =
     ///     return Response.json(summary);
     ///   },
     /// };
-    /// ```
+    /// </code>
     /// </remarks>
     [<Global("AgentMemoryNamespace"); EmitConstructor>]
     static member AgentMemoryNamespace () : AgentMemoryNamespace = jsNative
@@ -19095,14 +19095,14 @@ type Exports =
     /// Instance-level AI Search service.
     ///
     /// Used as:
-    /// - The return type of `AiSearchNamespace.get(name)` (namespace binding)
-    /// - The type of `env.BLOG_SEARCH` (single instance binding via `ai_search`)
+    /// - The return type of <c>AiSearchNamespace.get(name)</c> (namespace binding)
+    /// - The type of <c>env.BLOG_SEARCH</c> (single instance binding via <c>ai_search</c>)
     ///
     /// Provides search, chat, update, stats, items, and jobs operations.
     /// </summary>
     /// <remarks>
     /// @example
-    /// ```ts
+    /// <code lang="ts">
     /// // Via namespace binding
     /// const instance = env.AI_SEARCH.get("blog");
     /// const results = await instance.search({
@@ -19113,20 +19113,20 @@ type Exports =
     /// const results = await env.BLOG_SEARCH.search({
     ///   messages: [{ role: "user", content: "How does caching work?" }],
     /// });
-    /// ```
+    /// </code>
     /// </remarks>
     [<Global("AiSearchInstance"); EmitConstructor>]
     static member AiSearchInstance () : AiSearchInstance = jsNative
     /// <summary>
     /// Namespace-level AI Search service.
     ///
-    /// Used as the type of `env.AI_SEARCH` (namespace binding via `ai_search_namespaces`).
+    /// Used as the type of <c>env.AI_SEARCH</c> (namespace binding via <c>ai_search_namespaces</c>).
     /// Scoped to a single namespace. Provides dynamic instance access, creation, deletion,
     /// and multi-instance search/chat operations.
     /// </summary>
     /// <remarks>
     /// @example
-    /// ```ts
+    /// <code lang="ts">
     /// // Access an instance within the namespace
     /// const blog = env.AI_SEARCH.get("blog");
     /// const results = await blog.search({ query: "How does caching work?" });
@@ -19148,7 +19148,7 @@ type Exports =
     ///
     /// // Delete an instance
     /// await env.AI_SEARCH.delete("tenant-123");
-    /// ```
+    /// </code>
     /// </remarks>
     [<Global("AiSearchNamespace"); EmitConstructor>]
     static member AiSearchNamespace () : AiSearchNamespace = jsNative
@@ -19308,7 +19308,7 @@ type Exports =
     /// </summary>
     /// <remarks>
     /// @example
-    /// ```typescript
+    /// <code lang="typescript">
     /// // Get a boolean flag value with a default
     /// const enabled = await env.FLAGS.getBooleanValue('my-feature', false);
     ///
@@ -19321,7 +19321,7 @@ type Exports =
     /// // Get full evaluation details including variant and reason
     /// const details = await env.FLAGS.getBooleanDetails('my-feature', false);
     /// console.log(details.variant, details.reason);
-    /// ```
+    /// </code>
     /// </remarks>
     [<Global("Flagship"); EmitConstructor>]
     static member Flagship () : Flagship = jsNative
@@ -19351,18 +19351,18 @@ type Exports =
     ///
     /// Discovery-only primitive for agents and Workers. Returns URLs and catalog
     /// metadata for a query; never returns page content or excerpts. To read a
-    /// result's body, fetch the URL with the global `fetch()` API.
+    /// result's body, fetch the URL with the global <c>fetch()</c> API.
     ///
     /// Declared in wrangler with a single object (there is exactly one corpus, the
     /// public web, so there is no name, namespace, or instance to specify):
     ///
-    /// ```jsonc
+    /// <code lang="jsonc">
     /// { "web_search": { "binding": "WEBSEARCH" } }
-    /// ```
+    /// </code>
     /// </summary>
     /// <remarks>
     /// @example
-    /// ```ts
+    /// <code lang="ts">
     /// const { items, metadata } = await env.WEBSEARCH.search({
     ///   query: "Cloudflare Workers",
     /// });
@@ -19373,7 +19373,7 @@ type Exports =
     /// // Read content yourself; pay-per-crawl and other publisher
     /// // controls apply at the fetch site, not at search time.
     /// const page = await fetch(top.url);
-    /// ```
+    /// </code>
     /// </remarks>
     [<Global("WebSearch"); EmitConstructor>]
     static member WebSearch () : WebSearch = jsNative

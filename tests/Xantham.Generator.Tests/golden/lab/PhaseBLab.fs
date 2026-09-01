@@ -69,7 +69,7 @@ type Coords = float * float
 type Entry = string * float
 
 /// <summary>
-/// An optional tail element - the checker hands it over as `number | undefined`.
+/// An optional tail element - the checker hands it over as <c>number | undefined</c>.
 /// </summary>
 type Span = float * float option
 
