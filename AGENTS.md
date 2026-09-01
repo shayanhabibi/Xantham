@@ -38,13 +38,18 @@ the table below first. `.archive/scratch/tmp/tsgo-native` is a checkout of the d
   in `bin/`.
 - `tools/tsc-ast` — vendors upstream compiler sources and emits the AST/enum F# layers.
 - `tools/proto-gen` — emits the protocol F# layers from the `typescript` package's shipped schema.
-- `build.fsx` — the current build pipeline (Partas.Build). There is no root `package.json`.
+- `build.fsx` — the current build pipeline (Partas.Build).
+- `package.json` — root manifest, tooling only. Pins the `typescript` 7.x compiler that generation
+  reads and that `Tsc.locate` resolves upward to; the Wire test project pins the same version.
 
 ## Key Commands
 
 - `dotnet build Xantham.slnx` — build. `dotnet test` — run the Expecto suite.
-- `dotnet fsi build.fsx -- <build|test|docs|pack|publish|bump>` — the full pipeline; `test` runs
-  `npm install` in the Wire test project first.
+- `dotnet fsi build.fsx -- <build|test|generate|docs|pack|publish|bump>` — the full pipeline; `test`
+  runs `npm install` in the Wire test project first.
+- `dotnet fsi build.fsx -- generate [--only ast|proto] [--sync]` — installs the root `typescript`
+  pin, then routes to `tools/generate-wire.fsx` for both generated layers with repository defaults.
+  `--sync` re-vendors the upstream sources first (network).
 - `dotnet fsi tools/generate-wire.fsx sync tsc-ast [--check]` — vendor (or verify) the upstream
   sources pinned in `tools/tsc-ast/upstream.json` into `tools/tsc-ast/upstream/`, against the
   per-file digests in `upstream.lock.json`. The lock is committed; the tree is not.

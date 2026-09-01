@@ -128,10 +128,15 @@ module TscAst =
     }
 
 module Options =
+    /// The repository-level install pinned by the root `package.json`; `build.fsx -- generate`
+    /// runs `npm install` for it first.
+    ///
+    /// Built as a string rather than through `Repo.FileSystem`, which only exposes directories that
+    /// exist when the script compiles - `node_modules` does not, on a clean checkout.
     let typescriptPkgDir =
         Input.option<string> "--typescript-pkg"
         |> Input.desc "Path to the typescript package directory"
-        |> Input.def (Repo.FileSystem.tests.``Xantham.TypeScript.Wire.Tests``.node_modules.typescript.ToString())
+        |> Input.def (System.IO.Path.GetFullPath(System.IO.Path.Combine(__REPOSITORY_DIRECTORY__, "node_modules", "typescript")))
     let parserDir =
         Input.option<string> "--parser-dir"
         |> Input.def (Repo.FileSystem.ToString())

@@ -1,0 +1,9 @@
+{
+  "name": "xantham",
+  "private": true,
+  "type": "module",
+  "description": "Repository-level tooling dependencies. Pins the `typescript` 7.x package that tools/proto-gen reads the shipped schema from, and whose platform `@typescript/typescript-<rid>` package provides the `tsc --api` server. `dotnet fsi build.fsx -- generate` installs it. NOTE: tests/Xantham.TypeScript.Wire.Tests/package.json pins the same version for its own node_modules; the two must be bumped together.",
+  "devDependencies": {
+    "typescript": "7.1.0-dev.20260830.1"
+  }
+}

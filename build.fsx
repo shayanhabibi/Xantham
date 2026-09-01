@@ -58,6 +58,14 @@ module Options =
     let skipTests =
         Input.option<bool> "--skip-tests"
         |> Input.description "Skip running tests"
+    let generateOnly =
+        Input.option<string> "--only"
+        |> Input.description "Limit generation to one layer: ast | proto. Both by default."
+        |> Input.def ""
+    let syncUpstream =
+        Input.option<bool> "--sync"
+        |> Input.description "Re-vendor the upstream compiler sources before generating. Hits the network, so it is off by default; bump the pin in tools/tsc-ast/upstream.json first."
+        |> Input.def false
 
 module Stages =
     let restore = input {
@@ -109,8 +117,39 @@ module Stages =
         }
     }
     
-    let generate = stage "generate" {
-        echo "NULL OP"
+    /// Installs the repository-level `typescript` pin from the root `package.json`. Generation reads
+    /// the shipped schema out of that package, and `Tsc.locate` walks parent directories, so the
+    /// same install also serves as the live `tsc --api` server for anything run under the repo.
+    let deps = input {
+        let! quick = Options.quick
+        return stage "npm install" {
+            quiet
+            when' (not quick)
+            workingDir Repo.FileSystem.``.``
+            run "npm install"
+        }
+    }
+
+    /// Routes to `tools/generate-wire.fsx`, which owns the per-layer options. Everything it needs
+    /// already defaults to the repository layout, so the stages pass no arguments.
+    let generate = input {
+        let! only = Options.generateOnly
+        and! sync = Options.syncUpstream
+        return stage "generate" {
+            workingDir Repo.FileSystem.``.``
+            stage "sync tsc-ast" {
+                when' sync
+                run "dotnet fsi tools/generate-wire.fsx -- sync tsc-ast"
+            }
+            stage "generate ast" {
+                when' (only <> "proto")
+                run "dotnet fsi tools/generate-wire.fsx -- generate ast"
+            }
+            stage "generate proto" {
+                when' (only <> "ast")
+                run "dotnet fsi tools/generate-wire.fsx -- generate proto"
+            }
+        }
     }
     
     let test = input {
@@ -160,6 +199,10 @@ rootCommand fsi.CommandLineArgs[1..] {
         Stages.restore
         Stages.clean
         Stages.build (Options.projects |> InputSpec.map (List.map _.RelativePath))
+    }
+    command "generate" {
+        Stages.deps
+        Stages.generate
     }
     command "docs" {
         Stages.restore
