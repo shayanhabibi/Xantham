@@ -1,3 +1,9 @@
+---
+category: Wire
+title: Hand-written Register
+index: 2
+---
+
 # The hand-written register
 
 Almost everything in `src/Xantham.TypeScript.Wire` is generated from a vendored upstream file.

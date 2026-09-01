@@ -1,3 +1,9 @@
+---
+category: Generator
+title: Plan - Architecture
+index: 1
+---
+
 # Generator architecture — a nano-pass pipeline over the Wire
 
 Companion to `generator-type-mapping.md` (the *what*); this document plans the *how*: the

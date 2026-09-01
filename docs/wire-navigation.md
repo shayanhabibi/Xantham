@@ -1,3 +1,9 @@
+---
+category: Wire
+title: Navigation
+index: 1
+---
+
 # Navigating the wire AST
 
 How to get from "I have a thing" to "I have the thing's text" in

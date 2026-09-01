@@ -1,3 +1,9 @@
+---
+category: Generator
+index: 0
+title: Plan - Type Mapping
+---
+
 # TypeScript → F# type mapping for the Wire-based generator
 
 Research document for phase 6 of `wire-remaining-work.md` ("it needs a direction before it

@@ -1,3 +1,8 @@
+---
+category: Tsc API
+title: Plan - Protocol Specification
+---
+
 # tsgo "unstable API" — protocol specification
 
 > **Packaging note (2026-08-30).** This document was researched against the

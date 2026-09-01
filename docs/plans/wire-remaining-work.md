@@ -1,3 +1,8 @@
+---
+category: Wire
+title: Plan - Remaining Work
+---
+
 # Xantham.TypeScript.Wire — remaining work
 
 Baseline at the time of writing: the library builds clean on `net10.0`, `net8.0` and

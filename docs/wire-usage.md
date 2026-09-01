@@ -1,3 +1,9 @@
+---
+category: Wire
+title: Usage
+index: 0
+---
+
 # Using Xantham.TypeScript.Wire
 
 How to consume the package: install it, get a compiler talking, call the API, read what comes
