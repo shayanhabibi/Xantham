@@ -70,6 +70,7 @@ let export (name: string) (sym: SymbolResponse) : HarvestedExport =
       Symbol = sym
       Docs = ""
       Tags = []
+      Origin = FromModule
       Order = None }
 
 /// A shape model over the given type table, everything else empty.

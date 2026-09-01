@@ -1,4 +1,4 @@
-/// Tier 3 - Shape: the mapping document executed. Phase B of
+﻿/// Tier 3 - Shape: the mapping document executed. Phase B of
 /// `docs/plans/generator-architecture.md` covers interfaces with methods and overloads,
 /// literal unions (D12), callbacks as delegates (D5), classes (instance interface plus
 /// constructor members on `Exports`), ParamObject synthesis (D3), arrays, and value exports;
@@ -13,6 +13,14 @@ let private hasAny (mask: SymbolFlags) (flags: SymbolFlags) = uint32 (flags &&& 
 
 /// The fallback name for a default export - `Naming.defaultExport` over the entry package.
 let defaultExportName (ctx: Context) = Naming.defaultExport ctx.PackageName
+
+/// How a harvested value binds in JavaScript. An ambient global is already on `globalThis`, so
+/// it takes `[<Global>]`; only a module export carries an import.
+let bindingOf (export: HarvestedExport) =
+    match export.Origin with
+    | FromGlobal -> GlobalName export.ExportName
+    | FromModule when export.ExportName = "default" -> ImportDefault
+    | FromModule -> ImportNamed export.ExportName
 
 /// The F# name a harvested export generates under: the exported name; a default export takes
 /// its declaring symbol's name - except `export default function name` binds the symbol itself
@@ -592,7 +600,7 @@ let private shapeSignature (ctx: Context) (model: ShapeModel) (self: string opti
             if p.Optional then
                 findings <- findings @ [ Finding.make Ergonomic paramOwner "optional parameter reads as option" ]
 
-            { Name = p.Symbol.Name
+            { Name = Naming.memberName p.Symbol.Name
               Optional = optional
               Rest = rest
               Type = optionalRef optional reference })
@@ -638,7 +646,7 @@ let private shapeMembers (ctx: Context) (model: ShapeModel) (self: string) (fact
                     findings <- findings @ signatureFindings
 
                     FsMethod
-                        { Name = m.Symbol.Name
+                        { Name = Naming.memberName m.Symbol.Name
                           Docs = m.Docs
                           Tags = m.Tags
                           Parameters = parameters
@@ -651,7 +659,7 @@ let private shapeMembers (ctx: Context) (model: ShapeModel) (self: string) (fact
                     emit (Finding.make Ergonomic owner "optional member reads as option")
 
                 [ FsProperty
-                      { Name = m.Symbol.Name
+                      { Name = Naming.memberName m.Symbol.Name
                         Docs = m.Docs
                         Tags = m.Tags
                         ReadOnly = m.ReadOnly
@@ -1012,7 +1020,7 @@ let detectTaggedUnions: Pass<ShapeModel> =
 
                                                     findings <- findings @ refFindings
 
-                                                    { Name = m.Symbol.Name
+                                                    { Name = Naming.memberName m.Symbol.Name
                                                       Type = optionalRef m.Optional reference })
 
                                             { Name = caseName
@@ -1411,11 +1419,7 @@ let shapeClasses: Pass<ShapeModel> =
                                     { Name = name
                                       Docs = export.Docs
                                       Tags = export.Tags
-                                      Binding =
-                                        if export.ExportName = "default" then
-                                            ImportDefault
-                                        else
-                                            ImportNamed export.ExportName
+                                      Binding = bindingOf export
                                       Body = ExportConstructor(parameters, returns) }))
 
                 let model =
@@ -1454,11 +1458,7 @@ let shapeExports: Pass<ShapeModel> =
                         else
                             let name = fsName fallback export
 
-                            let binding =
-                                if export.ExportName = "default" then
-                                    ImportDefault
-                                else
-                                    ImportNamed export.ExportName
+                            let binding = bindingOf export
 
                             let valueFacts =
                                 Map.tryFind export.Symbol.Id model.ExportTypes
@@ -1670,6 +1670,234 @@ let dedupeOverloads: Pass<ShapeModel> =
                         Degraded(model, findings)
             } }
 
+// ---------------------------------------------------------------------------------------------
+// Arity repair: the two ways a shaped declaration can still be un-writable F#.
+// ---------------------------------------------------------------------------------------------
+
+/// Every type reference inside a reference, rebuilt through `f` (applied outside-in, so a
+/// widening stops the descent). Written once because both repairs below rewrite references in
+/// place, and a hand-rolled traversal per repair is how a new `FsTypeRef` case gets silently
+/// skipped by one of them.
+let rec private mapRef (f: FsTypeRef -> FsTypeRef) (reference: FsTypeRef) : FsTypeRef =
+    let recur = mapRef f
+
+    match f reference with
+    | FsOption inner -> FsOption(recur inner)
+    | FsArray element -> FsArray(recur element)
+    | FsTuple elements -> FsTuple(elements |> List.map recur)
+    | FsErasedUnion arms -> FsErasedUnion(arms |> List.map recur)
+    | FsDelegate(arguments, returns) -> FsDelegate(arguments |> List.map recur, recur returns)
+    | FsApp(name, arguments) -> FsApp(name, arguments |> List.map recur)
+    | other -> other
+
+/// The type variables a reference mentions.
+let rec private typeVarsOf (reference: FsTypeRef) : Set<string> =
+    let union = List.fold (fun acc item -> Set.union acc (typeVarsOf item)) Set.empty
+
+    match reference with
+    | FsTypeVar name -> Set.singleton name
+    | FsOption inner
+    | FsArray inner -> typeVarsOf inner
+    | FsTuple items
+    | FsErasedUnion items -> union items
+    | FsDelegate(arguments, returns) -> Set.union (union arguments) (typeVarsOf returns)
+    | FsApp(_, arguments) -> union arguments
+    | _ -> Set.empty
+
+/// Every type reference in a declaration, rebuilt through `f`.
+let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
+    let reference = mapRef f
+    let parameter (p: FsParam) = { p with Type = reference p.Type }
+
+    let typeParam (p: FsTypeParam) =
+        { p with Constraint = p.Constraint |> Option.map reference }
+
+    let declMember =
+        function
+        | FsProperty p -> FsProperty { p with Type = reference p.Type }
+        | FsMethod m ->
+            FsMethod
+                { m with
+                    Parameters = m.Parameters |> List.map parameter
+                    Return = reference m.Return }
+
+    match decl with
+    | FsInterface d ->
+        FsInterface
+            { d with
+                TypeParameters = d.TypeParameters |> List.map typeParam
+                Inherits = d.Inherits |> List.map reference
+                Members = d.Members |> List.map declMember
+                CreateOverloads = d.CreateOverloads |> List.map (List.map parameter) }
+    | FsAbbrev d ->
+        FsAbbrev
+            { d with
+                TypeParameters = d.TypeParameters |> List.map typeParam
+                Target = reference d.Target }
+    | FsTaggedUnion d ->
+        FsTaggedUnion
+            { d with
+                Cases =
+                    d.Cases
+                    |> List.map (fun case ->
+                        { case with
+                            Fields = case.Fields |> List.map (fun field -> { field with Type = reference field.Type }) }) }
+    | FsExports members ->
+        FsExports(
+            members
+            |> List.map (fun m ->
+                { m with
+                    Body =
+                        match m.Body with
+                        | ExportFunction(parameters, returns) ->
+                            ExportFunction(parameters |> List.map parameter, reference returns)
+                        | ExportValue returns -> ExportValue(reference returns)
+                        | ExportConstructor(parameters, returns) ->
+                            ExportConstructor(parameters |> List.map parameter, reference returns) })
+        )
+    | FsStringEnum _
+    | FsEnum _ -> decl
+
+/// The name a declaration is written under, for the two repairs that work by name.
+let private declName =
+    function
+    | FsInterface d -> Some d.Name
+    | FsAbbrev d -> Some d.Name
+    | FsTaggedUnion d -> Some d.Name
+    | FsStringEnum d -> Some d.Name
+    | FsEnum d -> Some d.Name
+    | FsExports _ -> None
+
+/// The repair itself, as a plain function: the model it produces plus what it had to widen.
+let private repaired (model: ShapeModel) =
+        let mutable findings = []
+
+        // Only abbreviations can hit FS0035; an interface may leave a parameter unused.
+        let dropped =
+            model.Decls
+            |> List.choose (function
+                | FsAbbrev decl when not decl.TypeParameters.IsEmpty ->
+                    let used = typeVarsOf decl.Target
+
+                    if decl.TypeParameters |> List.forall (fun p -> Set.contains p.Name used) then
+                        None
+                    else
+                        Some decl.Name
+                | _ -> None)
+            |> Set.ofList
+
+        for name in dropped do
+            findings <-
+                findings
+                @ [ Finding.make
+                        Widened
+                        name
+                        "generic alias dropped: its target widened away every type parameter, and F# has no \
+                         unused type variable in an abbreviation" ]
+
+        let surviving =
+            model.Decls
+            |> List.filter (fun decl ->
+                match declName decl with
+                | Some name -> not (Set.contains name dropped)
+                | None -> true)
+
+        // Arity by name, over the survivors only - a dropped alias must not look applicable.
+        let arity =
+            surviving
+            |> List.choose (function
+                | FsInterface d -> Some(d.Name, d.TypeParameters.Length)
+                | FsAbbrev d -> Some(d.Name, d.TypeParameters.Length)
+                | _ -> None)
+            |> Map.ofList
+
+        let decls =
+            surviving
+            |> List.map (fun decl ->
+                let owner = declName decl |> Option.defaultValue "Exports"
+
+                let widen (message: string) =
+                    findings <- findings @ [ Finding.make Widened owner message ]
+                    FsObj
+
+                // FS0252: a settable property must have a settable type, and `unit` is not one.
+                // The type is right - a `never`-typed brand or an `undefined` slot holds no
+                // value - so only the setter goes, and the member still reads.
+                let demoteUnitSetters (decl: FsDecl) =
+                    match decl with
+                    | FsInterface d ->
+                        FsInterface
+                            { d with
+                                Members =
+                                    d.Members
+                                    |> List.map (function
+                                        | FsProperty p when not p.ReadOnly && p.Type = FsUnit ->
+                                            findings <-
+                                                findings
+                                                @ [ Finding.make
+                                                        Ergonomic
+                                                        owner
+                                                        $"{p.Name} reads but does not write: its type holds no value, \
+                                                          and F# has no setter of type unit" ]
+
+                                            FsProperty { p with ReadOnly = true }
+                                        | other -> other)
+                                // And no Create parameter either: there is no value to pass,
+                                // and writing the key as `undefined` is not what the author
+                                // declared. The property still reads on the result.
+                                CreateOverloads =
+                                    d.CreateOverloads
+                                    |> List.map (List.filter (fun p -> p.Type <> FsUnit)) }
+                    | other -> other
+
+                decl
+                |> demoteUnitSetters
+                |> mapDeclRefs (fun reference ->
+                    match reference with
+                    | FsNamed name when Set.contains name dropped ->
+                        widen $"reference to the dropped generic alias {name} widened to obj"
+                    | FsApp(name, _) when Set.contains name dropped ->
+                        widen $"reference to the dropped generic alias {name} widened to obj"
+                    | FsNamed name when Map.tryFind name arity |> Option.exists (fun n -> n > 0) ->
+                        widen $"{name} is generic and this position has no arguments to apply; widened to obj"
+                    | FsApp(name, arguments) when
+                        Map.tryFind name arity |> Option.exists (fun n -> n <> arguments.Length)
+                        ->
+                        widen $"{name} applied to {arguments.Length} arguments but declares {arity[name]}; widened to obj"
+                    | other -> other))
+
+        { model with Decls = decls }, findings
+
+/// The last two ways a shaped model still fails to be F#, both repaired by widening - the type
+/// exists, but this position cannot say which instantiation of it, and `obj` is what that means.
+///
+/// *A generic abbreviation whose target does not mention its parameters* is FS0035: F# has no
+/// unused type variables in an abbreviation. It arises when the right side widened -
+/// `type Params<'P> = obj` after `P`'s only use dropped to `obj`. Dropping the parameter instead
+/// would silently change the alias's arity at every application, so the declaration goes and its
+/// references widen.
+///
+/// *A generic declaration named bare* is FS0033: `PagesFunctionContext` needs three arguments,
+/// and a member of some *other* declaration has no names to write for them. §4.9 already widens
+/// an out-of-scope type *variable* to `obj` for the same reason; this is that rule one level up,
+/// at the declaration head.
+///
+/// Runs after `order-declarations`, which is what folds the export members into an `FsExports`
+/// declaration: references written there need the same repair as any other.
+let repairArity: Pass<ShapeModel> =
+    { Name = "repair-arity"
+      Run =
+        fun _ model ->
+            async {
+                let model, findings = repaired model
+
+                return
+                    if List.isEmpty findings then
+                        Advanced model
+                    else
+                        Degraded(model, findings)
+            } }
+
 /// Fixes the output order the renderer will follow verbatim: declarations in source order with
 /// name as the tiebreak, then the `Exports` type - its members in harvest order - last.
 let orderDeclarations: Pass<ShapeModel> =
@@ -1750,4 +1978,5 @@ let passes: Pass<ShapeModel> list =
       synthesizeParamObjects
       dedupeOverloads
       orderDeclarations
+      repairArity
       auditCoverage ]

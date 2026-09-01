@@ -1,0 +1,123 @@
+{
+  "package": "globals-lab",
+  "module": "GlobalsLab",
+  "counts": {
+    "exact": 3,
+    "ergonomic": 3,
+    "widened": 1,
+    "escape": 2
+  },
+  "symbols": [
+    {
+      "name": "Widget",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Gadget",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "Branded",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "repair-arity",
+          "tier": "ergonomic",
+          "message": "__brand reads but does not write: its type holds no value, and F# has no setter of type unit"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Bag",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "registry",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "counter",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "ping",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "\u0022globals-lab:extra\u0022",
+      "tier": "escape",
+      "findings": [
+        {
+          "pass": "harvest-globals",
+          "tier": "escape",
+          "message": "global dropped - an ambient module declaration; its members are importable from that specifier, which the generator does not emit yet"
+        }
+      ]
+    },
+    {
+      "name": "Loose",
+      "tier": "escape",
+      "findings": [
+        {
+          "pass": "audit-coverage",
+          "tier": "escape",
+          "message": "export not represented in the generated output"
+        },
+        {
+          "pass": "repair-arity",
+          "tier": "widened",
+          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "__type is not among the generated declarations; widened to obj"
+        }
+      ]
+    }
+  ]
+}

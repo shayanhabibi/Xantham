@@ -1,4 +1,4 @@
-/// Tier 2 - Resolve: the type table. Breadth-first from the harvested exports' types, batched
+﻿/// Tier 2 - Resolve: the type table. Breadth-first from the harvested exports' types, batched
 /// per generation frontier through the mailbox, memoized on `TypeResponse.Id`. The tier's
 /// invariant is closure: every type id a `TypeFacts` refers to is in the table or recorded in
 /// `NotFollowed` with its reason.
@@ -14,40 +14,6 @@ open Xantham.TypeScript.Wire.Proto
 let private FollowDepth = 12
 
 let private hasAny (mask: SymbolFlags) (flags: SymbolFlags) = uint32 (flags &&& mask) <> 0u
-
-/// Classifies a symbol's origin group (O7) from its first declaration's file path: under the
-/// package directory is the entry package; the compiler's default libs are the compiler-lib
-/// group; under a `node_modules` entry is that dependency; anything else - including anonymous
-/// shapes with no declaration - is unclassified, which dispositions as the entry group.
-///
-/// The default libs are recognised three ways because the compiler serves them three ways: from
-/// the platform package (`node_modules/@typescript/typescript-<rid>/lib/lib.*.d.ts` - what the
-/// live wire reports), from `typescript/lib`, or as `bundled:` pseudo-paths for the embedded
-/// copies. A non-entry `lib.*.d.ts` anywhere else still classifies as compiler lib rather than
-/// unclassified: unclassified means Ship, and full derivation of a mistaken standard-lib file
-/// is the expensive failure, while a mis-grouped oddball is a visible finding.
-let classify (packageDir: string) (symbol: SymbolResponse voption) : PackageId =
-    match symbol |> ValueOption.bind (fun s -> Harvest.declOrder s.Declarations |> ValueOption.ofOption) with
-    | ValueNone -> Unclassified
-    | ValueSome order ->
-        let path = order.File.Replace('\\', '/')
-        let root = packageDir.Replace('\\', '/').TrimEnd '/' + "/"
-        let file = path.Substring(path.LastIndexOf '/' + 1)
-        let isLibFile = file.StartsWith "lib." && file.EndsWith ".d.ts"
-
-        if path.StartsWith(root, System.StringComparison.OrdinalIgnoreCase) then
-            EntryPackage
-        else
-            match path.LastIndexOf "/node_modules/" with
-            | -1 -> if isLibFile then CompilerLib else Unclassified
-            | at ->
-                match path.Substring(at + "/node_modules/".Length).Split '/' with
-                | parts when parts.Length > 0 && (parts[0] = "typescript" || parts[0] = "@typescript") ->
-                    CompilerLib
-                | _ when isLibFile -> CompilerLib
-                | parts when parts.Length > 1 && parts[0].StartsWith "@" -> Dependency $"{parts[0]}/{parts[1]}"
-                | parts when parts.Length > 0 -> Dependency parts[0]
-                | _ -> Unclassified
 
 /// The type ids each export resolves to: the declared type for type-like symbols, the value
 /// type for value-like ones, both for symbols that are both (a class). The responses land in
@@ -81,7 +47,14 @@ let resolveExportTypes: Pass<ResolveModel> =
 
                             return export.Symbol.Id, declared, value
                         })
-                    |> Async.Parallel
+                    // Sequential, unlike every other fan-out in this tier: asking for a
+                    // declared type is what *creates* it in the checker, and a type alias
+                    // stamps its name on the type it creates. Two aliases with the same right
+                    // side (`type A = X & Y; type B = X & Y`) therefore race - whichever is
+                    // asked for first owns the intersection, and the other either aliases it
+                    // or widens. Under Async.Parallel that ordering came out of the thread
+                    // pool, so the same package generated two different files.
+                    |> Async.Sequential
 
                 let exportTypes =
                     resolved
@@ -129,12 +102,12 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
 
             return
                 { TypeFacts.shallow ty with
-                    Origin = classify ctx.PackageDir symbol
+                    Origin = Grouping.classify ctx.PackageDir symbol
                     SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption },
                 []
         elif has TypeFlags.Object then
             let! symbol = ctx.Session.getSymbolOfType ty.Id
-            let origin = classify ctx.PackageDir symbol
+            let origin = Grouping.classify ctx.PackageDir symbol
 
             // Type arguments resolve for every group (O7 note): an external `Array<T>` or
             // `Promise<T>` carries entry-package types the walk must still reach.

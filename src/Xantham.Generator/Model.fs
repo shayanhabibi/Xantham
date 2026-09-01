@@ -156,6 +156,25 @@ module Naming =
         | CompilerLib -> CompilerLibModule
         | Dependency name -> packageModule name
 
+    /// The JavaScript key a member symbol stands for. The checker escapes a name that begins
+    /// with two underscores by prepending a third, so that a real `__html` cannot collide with
+    /// the internal names it invents (`__type`, `__call`); undoing that is what turns the
+    /// symbol back into the key the object actually carries. Apply it only *after* testing for
+    /// an internal name - the escaping is the one thing that tells the two apart.
+    let memberName (name: string) =
+        if name.StartsWith "___" then name.Substring 1 else name
+
+    /// Whether a name can head an F# declaration. Backticks rescue keywords and spaces, but not
+    /// every symbol name is spellable even so: an ambient module declaration's symbol *is* its
+    /// quoted specifier (`"cloudflare:email"`), and `` ``"cloudflare:email"`` `` is FS0883, not a
+    /// type name. The rule is deliberately conservative - letters, digits and underscore, not
+    /// starting with a digit - because the failure it prevents is a whole file that will not
+    /// compile, and the cost of a false negative is one finding.
+    let isWritableTypeName (name: string) =
+        not (System.String.IsNullOrEmpty name)
+        && (System.Char.IsLetter name[0] || name[0] = '_')
+        && name |> Seq.forall (fun c -> System.Char.IsLetterOrDigit c || c = '_')
+
     /// The DU case name for a string-literal union member: PascalCased over separator
     /// segments (`"utf-8"` -> `Utf8`), prefixed when the result cannot start an F# case.
     /// Pinned like the module scheme - StringEnum case names are part of a binding's surface.
@@ -232,16 +251,29 @@ module Pass =
 /// ordering output the way the author ordered source.
 type DeclOrder = { File: string; NodeIndex: int }
 
+/// Where a harvested name came from, which is what decides how a *value* binds in JavaScript.
+/// Types are unaffected: an interface is the same F# declaration either way.
+type ExportOrigin =
+    /// A member of the entry file's module symbol - bound with `[<Import(name, package)>]`.
+    | FromModule
+    /// An ambient declaration in global scope (`declare class Response`). A global type library
+    /// has no module to import from; the name is already on `globalThis`, so values bind with
+    /// `[<Global>]` instead.
+    | FromGlobal
+
 /// One export of the entry module, aliases already followed to their origin so re-exports
-/// appear once under the name they are exported as.
+/// appear once under the name they are exported as. A global type library has no module to
+/// export from, and its ambient declarations arrive here too - see `ExportOrigin`.
 type HarvestedExport =
-    { /// The name the entry module exports it under - `"default"` for a default export.
+    { /// The name the entry module exports it under - `"default"` for a default export, and
+      /// the declared name for an ambient global, which is exported under nothing.
       ExportName: string
       /// The origin symbol (`getAliasedSymbol` applied until stable).
       Symbol: SymbolResponse
       /// `getDocumentationComment`, already rendered to plain text by the wire.
       Docs: string
       Tags: JSDocTagInfo list
+      Origin: ExportOrigin
       Order: DeclOrder option }
 
 type HarvestModel =
@@ -324,10 +356,9 @@ module TypeFacts =
 
 /// The type ids an export resolves to. A symbol can be both a type and a value (a class), so
 /// the two are separate fields rather than one.
-[<Struct>]
 type ExportTypeIds =
-    { Declared: int voption
-      Value: int voption }
+    { Declared: int option
+      Value: int option }
 
 type ResolveModel =
     { Harvest: HarvestModel
@@ -411,10 +442,12 @@ type FsMember =
     | FsMethod of FsMethodMember
 
 /// How a value export is bound to its JavaScript module.
-[<Struct>]
 type ImportBinding =
     | ImportDefault
-    | ImportNamed of name: string
+    | ImportNamed of string
+    /// An ambient global (`declare function fetch`): there is no module to import from, so the
+    /// name is taken off `globalThis` with `[<Global>]`.
+    | GlobalName of string
 
 /// What one member of the `Exports` erased type is.
 type FsExportBody =
@@ -565,7 +598,6 @@ type RenderModel =
       /// so rendering stays pure.
       Files: (string * string) list }
 
-[<Struct>]
 type TierCounts =
     { Exact: int
       Ergonomic: int
@@ -578,3 +610,60 @@ type RunReport =
       OutputFiles: string list
       Findings: Finding list
       Counts: TierCounts }
+
+// ---------------------------------------------------------------------------------------------
+// Placement: reading a symbol's declaration handle for where it came from. Used by two tiers -
+// harvest, to pick the entry package's ambient globals out of a whole global scope, and resolve,
+// to disposition a group (O7) - so it lives below both rather than inside either.
+// ---------------------------------------------------------------------------------------------
+
+module Grouping =
+
+    /// Parses the ordering key out of a symbol's first declaration handle. A handle is
+    /// `index.kind.path` where only the path may contain further dots.
+    let declOrder (declarations: string[] voption) : DeclOrder option =
+        match declarations with
+        | ValueSome handles when handles.Length > 0 ->
+            match handles[0].Split([| '.' |], 3) with
+            | [| index; _kind; path |] ->
+                match System.Int32.TryParse index with
+                | true, index -> Some { File = path; NodeIndex = index }
+                | _ -> None
+            | _ -> None
+        | _ -> None
+
+    /// Classifies a symbol's origin group (O7) from its first declaration's file path: under the
+    /// package directory is the entry package; the compiler's default libs are the compiler-lib
+    /// group; under a `node_modules` entry is that dependency; anything else - including
+    /// anonymous shapes with no declaration - is unclassified, which dispositions as the entry
+    /// group.
+    ///
+    /// The default libs are recognised three ways because the compiler serves them three ways:
+    /// from the platform package (`node_modules/@typescript/typescript-<rid>/lib/lib.*.d.ts` -
+    /// what the live wire reports), from `typescript/lib`, or as `bundled:` pseudo-paths for the
+    /// embedded copies. A non-entry `lib.*.d.ts` anywhere else still classifies as compiler lib
+    /// rather than unclassified: unclassified means Ship, and full derivation of a mistaken
+    /// standard-lib file is the expensive failure, while a mis-grouped oddball is a visible
+    /// finding.
+    let classify (packageDir: string) (symbol: SymbolResponse voption) : PackageId =
+        match symbol |> ValueOption.bind (fun s -> declOrder s.Declarations |> ValueOption.ofOption) with
+        | ValueNone -> Unclassified
+        | ValueSome order ->
+            let path = order.File.Replace('\\', '/')
+            let root = packageDir.Replace('\\', '/').TrimEnd '/' + "/"
+            let file = path.Substring(path.LastIndexOf '/' + 1)
+            let isLibFile = file.StartsWith "lib." && file.EndsWith ".d.ts"
+
+            if path.StartsWith(root, System.StringComparison.OrdinalIgnoreCase) then
+                EntryPackage
+            else
+                match path.LastIndexOf "/node_modules/" with
+                | -1 -> if isLibFile then CompilerLib else Unclassified
+                | at ->
+                    match path.Substring(at + "/node_modules/".Length).Split '/' with
+                    | parts when parts.Length > 0 && (parts[0] = "typescript" || parts[0] = "@typescript") ->
+                        CompilerLib
+                    | _ when isLibFile -> CompilerLib
+                    | parts when parts.Length > 1 && parts[0].StartsWith "@" -> Dependency $"{parts[0]}/{parts[1]}"
+                    | parts when parts.Length > 0 -> Dependency parts[0]
+                    | _ -> Unclassified

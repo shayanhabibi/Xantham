@@ -196,7 +196,12 @@ Layered, mirroring the tiers:
    tests build models through the construction DSL; a test that someday wants a big
    recorded model gets one bespoke JSON dump, not a corpus format.
 3. **End-to-end golden files:** fixture package → generated `.fs` + manifest, committed and
-   diffed. A golden diff is the review surface for any pass change.
+   diffed. A golden diff is the review surface for any pass change. An npm rung's install is
+   untracked, so `tests/fixtures/pins.json` records the version each golden was generated
+   against and the suite reports a mismatch as fixture drift *instead of* the golden diff:
+   a package that moved and a pass that regressed otherwise produce the same diff. Rungs
+   that exercise a feature rather than a package are hand-authored and tracked whole
+   (`tests/fixtures/lab`, `tests/fixtures/globals-lab`), so they need no install and no pin.
 4. **Compile gate:** generated output for the golden fixtures is compiled (F# type-check;
    Fable compile once the support package exists) in the test suite. Bindings that do not
    compile are not bindings.
@@ -281,8 +286,8 @@ Phases — each ends with the compile gate green on its fixtures:
 - **C — unions and generics.** Position-aware unions (D4), tagged-union detection, tuples
   (D7), generics/constraints/default-args. Fixture: `@cloudflare/workers-types`.
   **Landed (2026-09-01):** tuples, erased and tagged unions, and declaration-level
-  generics, all on the `lab` and `animejs` rungs; the `@cloudflare/workers-types` rung
-  is not yet installed. What the fixtures settled:
+  generics on the `lab` and `animejs` rungs, then the `@cloudflare/workers-types` rung
+  itself - 1387 declarations, compile gate green. What the fixtures settled:
   - *Tuple element flags live on the type's target*, not on the reference the checker
     hands back (the reference reports `elementFlags: null`). The target is read for its
     flags and then dropped rather than followed - it is the generic tuple type, so
@@ -334,6 +339,50 @@ Phases — each ends with the compile gate green on its fixtures:
     `extends keyof T` are dropped with a finding rather than approximated: F# has no
     form for them and the nearest one would reject code TypeScript accepts.
   - *Rank-2 function types hoist onto the alias* with a finding - F# has no rank-2 form.
+  - *A package can declare no module at all.* `@cloudflare/workers-types` is a global
+    type library: `getSymbolOfSourceFile` returns nothing, and every name lives in the
+    global scope. `harvest-globals` reads them from `getSymbolsInScope` at position 0 of
+    the entry file and filters the three thousand names that come back to the ones the
+    package itself declares, by the same O7 placement the resolve tier groups types with.
+    It runs only when `harvest-exports` found nothing - a package that has a module may
+    *also* augment global scope, and folding those in would emit names it does not
+    export. A value harvested this way binds with `[<Global(name)>]` rather than
+    `[<Import>]`: it is already on `globalThis`. **Unverified:** only the F# compile is
+    gated; that `[<Global>]` emits the right JavaScript is a Fable-run claim, and the
+    Fable gate arrives with the support package in phase D.
+  - *An ambient module declaration is dropped with an escape.* `declare module
+    "cloudflare:email"` is a global-scope symbol whose name *is* its quoted specifier;
+    `` ``"cloudflare:email"`` `` is FS0883, not a type name. Its members are importable
+    from that specifier, which needs a nested module with imports of its own - until
+    that exists, dropping it loudly beats emitting a name F# cannot write.
+  - *Two repairs have to run after every shaping pass*, because they fix what the others
+    produce (`repair-arity`, between `order-declarations` and `audit-coverage`): a
+    generic abbreviation whose target widened away its parameters is FS0035, so the
+    declaration goes and its references widen; a generic declaration named bare at a
+    reference position is FS0033, so that position widens - §4.9's rule for an
+    out-of-scope type *variable*, one level up at the declaration head. A settable
+    property of type `unit` is FS0252 and is demoted to read-only in the same pass: a
+    `never`-typed brand holds no value, so it also stops being a `Create` parameter.
+  - *Parallel fan-out is not free of observable order.* Asking for a declared type is
+    what *creates* it in the checker, and a type alias stamps its name on what it
+    creates, so `type A = X & Y; type B = X & Y` race: whichever is asked for first owns
+    the intersection and the other aliases it or widens. Under `Async.Parallel` that
+    order came from the thread pool and the same package generated two different files
+    (the second determinism failure the e2e property caught, and the reason the seed
+    resolution in `resolve-export-types` is sequential - it costs nothing measurable).
+  - *The checker hands back escaped symbol names.* A member whose name begins with two
+    underscores arrives with a third prepended, so that a real `__html` cannot collide
+    with the internal names the checker invents (`__type`, `__call`). Emitting the
+    escaped form names a key the object does not carry, so `Naming.memberName` undoes it
+    - after the internal-name test, since the escaping is the only thing telling the two
+    apart.
+  - *A global library redeclares DOM names.* `Response`, `Request` and friends are
+    declared by `lib.dom.d.ts` too, so O7 places them in the compiler-lib group and the
+    default `Widen` disposition takes them to `obj`; a `Reference` disposition templates
+    them as `TypeScript.Lib.Response` instead. This is the grouping working as designed,
+    but it is why six workers-types aliases (`PagesFunction`, `ExportedHandlerFetch-
+    Handler`, ...) lose their whole shape - the phase D work on group dispositions is
+    what improves them, not more shaping.
   - Still deferred, and findings say so at every site: method- and function-level
     generics (F# can spell generic abstract members, but nothing needed it yet),
     instantiations of generic *aliases* written as applications (they re-expand

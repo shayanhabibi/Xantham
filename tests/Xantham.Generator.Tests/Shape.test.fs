@@ -950,6 +950,119 @@ let shapePassTests =
             Expect.equal names [ "A"; "B"; "<exports>" ] "file order first, Exports last"
             Expect.isEmpty ordered.ExportMembers "consumed into the Exports decl"
 
+        testCase "repair-arity drops an alias whose target lost its parameters, and widens its uses" <| fun _ ->
+            // `type Params<'P> = obj` is FS0035, and every reference to it has to go with it.
+            let model =
+                { Build.shapeModel [] with
+                    Decls =
+                        [ FsAbbrev
+                              { Name = "Params"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters = [ { Name = "P"; Constraint = None } ]
+                                Target = FsObj }
+                          FsInterface
+                              { Name = "Context"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters = []
+                                Inherits = []
+                                Members =
+                                    [ FsProperty
+                                          { Name = "params"
+                                            Docs = ""
+                                            Tags = []
+                                            ReadOnly = true
+                                            Type = FsApp("Params", [ FsString ]) } ]
+                                CreateOverloads = [] } ] }
+
+            let repaired, findings = Build.runPass Shape.repairArity model
+
+            match repaired.Decls with
+            | [ FsInterface decl ] ->
+                Expect.equal decl.Name "Context" "the alias is gone, its user stays"
+
+                match decl.Members with
+                | [ FsProperty p ] -> Expect.equal p.Type FsObj "the reference widened"
+                | members -> failtest $"expected one property, got %A{members}"
+            | decls -> failtest $"expected the interface alone, got %A{decls}"
+
+            Expect.equal
+                (findings |> List.map (fun f -> f.Tier, f.Symbol))
+                [ Widened, "Params"; Widened, "Context" ]
+                "the drop and the widening are both findings"
+
+        testCase "repair-arity widens a generic named without its arguments" <| fun _ ->
+            // FS0033: `PagesFunctionContext` takes three arguments and this position has none.
+            let generic =
+                FsInterface
+                    { Name = "Ctx"
+                      Docs = ""
+                      Tags = []
+                      Order = None
+                      TypeParameters = [ { Name = "Env"; Constraint = None } ]
+                      Inherits = []
+                      Members = []
+                      CreateOverloads = [] }
+
+            let model =
+                { Build.shapeModel [] with
+                    Decls =
+                        [ generic
+                          FsAbbrev
+                              { Name = "Handler"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters = []
+                                Target = FsDelegate([ FsNamed "Ctx" ], FsNamed "Other") } ] }
+
+            let repaired, findings = Build.runPass Shape.repairArity model
+
+            match repaired.Decls with
+            | [ _; FsAbbrev decl ] ->
+                Expect.equal
+                    decl.Target
+                    (FsDelegate([ FsObj ], FsNamed "Other"))
+                    "the generic widened; a name this run does not declare is left alone (O7)"
+            | decls -> failtest $"expected the interface and the alias, got %A{decls}"
+
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "one widening, reported"
+
+        testCase "repair-arity demotes a settable property that holds no value" <| fun _ ->
+            // FS0252: `[__BRAND]: never` shapes to `unit`, which cannot be a setter's type.
+            let model =
+                { Build.shapeModel [] with
+                    Decls =
+                        [ FsInterface
+                              { Name = "Branded"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters = []
+                                Inherits = []
+                                Members =
+                                    [ FsProperty
+                                          { Name = "__BRAND"
+                                            Docs = ""
+                                            Tags = []
+                                            ReadOnly = false
+                                            Type = FsUnit } ]
+                                CreateOverloads = [] } ] }
+
+            let repaired, findings = Build.runPass Shape.repairArity model
+
+            match repaired.Decls with
+            | [ FsInterface decl ] ->
+                match decl.Members with
+                | [ FsProperty p ] -> Expect.isTrue p.ReadOnly "the setter is gone, the member reads"
+                | members -> failtest $"expected one property, got %A{members}"
+            | decls -> failtest $"expected the interface, got %A{decls}"
+
+            Expect.equal (findings |> List.map (fun f -> f.Tier, f.Symbol)) [ Ergonomic, "Branded" ] "reported"
+
         testCase "audit-coverage reports an export nothing represented" <| fun _ ->
             let model =
                 { Build.shapeModel [] with

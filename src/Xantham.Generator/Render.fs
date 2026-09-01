@@ -288,6 +288,9 @@ let private renderAbbrev (decl: FsAbbrevDecl) =
     [ yield! docLines "" decl.Docs decl.Tags
       yield $"type {declHead decl.Name decl.TypeParameters} = {printType decl.Target}" ]
 
+/// The import name a default export binds under - the JavaScript key, not an F# name.
+let private defaultExportKey = "default"
+
 let private renderExports (packageName: string) (members: FsExportMember list) =
     [ yield "/// <summary>The package's value exports, each bound to its import.</summary>"
       yield "[<Erase>]"
@@ -296,20 +299,25 @@ let private renderExports (packageName: string) (members: FsExportMember list) =
       for m in members do
           yield! docLines "    " m.Docs m.Tags
 
-          let importName =
+          // The binding attribute, optionally carrying a second attribute inside the same
+          // brackets: a global is named off `globalThis` and imports nothing.
+          let attribute (also: string) =
+              let package = stringLit packageName
+
               match m.Binding with
-              | ImportDefault -> "default"
-              | ImportNamed name -> name
+              | ImportDefault -> $"    [<Import({stringLit defaultExportKey}, {package}){also}>]"
+              | ImportNamed name -> $"    [<Import({stringLit name}, {package}){also}>]"
+              | GlobalName name -> $"    [<Global({stringLit name}){also}>]"
 
           match m.Body with
           | ExportFunction(parameters, returns) ->
-              yield $"    [<Import({stringLit importName}, {stringLit packageName})>]"
+              yield attribute ""
               yield $"    static member {ident m.Name} {renderParamList parameters} : {printType returns} = jsNative"
           | ExportValue reference ->
-              yield $"    [<Import({stringLit importName}, {stringLit packageName})>]"
+              yield attribute ""
               yield $"    static member {ident m.Name}: {printType reference} = jsNative"
           | ExportConstructor(parameters, returns) ->
-              yield $"    [<Import({stringLit importName}, {stringLit packageName}); EmitConstructor>]"
+              yield attribute "; EmitConstructor"
               yield $"    static member {ident m.Name} {renderParamList parameters} : {printType returns} = jsNative" ]
 
 /// The one `.fs` file of the walking skeleton: header, opens, declarations in the order the

@@ -10,6 +10,7 @@ module Xantham.Generator.Tests.PipelineTests
 
 open System
 open System.IO
+open System.Text.Json
 open Expecto
 open Xantham.TypeScript.Wire
 open Xantham.Generator
@@ -55,8 +56,41 @@ let private npmFixture (name: string) =
     |> List.map (fun checkout -> Path.Combine(checkout, "tests", "fixtures", name, "node_modules", name))
     |> List.tryFind Directory.Exists
 
-/// The hand-authored lab fixture, tracked in git - always present.
-let private labFixture = Path.Combine(root, "tests", "fixtures", "lab")
+/// A hand-authored fixture, tracked in git - always present, so it needs no pin.
+let private handFixture (name: string) =
+    let path = Path.Combine(root, "tests", "fixtures", name)
+    if Directory.Exists path then Some path else None
+
+/// The version every npm rung is pinned at, from the tracked `tests/fixtures/pins.json`. The
+/// install is untracked, so this file is the only record of what a golden was generated
+/// against; it is JSONC, like every other configuration Xantham reads.
+let private pins: Map<string, string> =
+    let path = Path.Combine(root, "tests", "fixtures", "pins.json")
+
+    if not (File.Exists path) then
+        Map.empty
+    else
+        let options =
+            JsonDocumentOptions(CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true)
+
+        use doc = JsonDocument.Parse(File.ReadAllText path, options)
+
+        doc.RootElement.EnumerateObject()
+        |> Seq.map (fun property -> property.Name, property.Value.GetString())
+        |> Map.ofSeq
+
+/// The version an install actually carries, from the installed package's own manifest.
+let private installedVersion (package: string) =
+    let path = Path.Combine(package, "package.json")
+
+    if not (File.Exists path) then
+        None
+    else
+        use doc = JsonDocument.Parse(File.ReadAllText path)
+
+        match doc.RootElement.TryGetProperty "version" with
+        | true, value -> Some(value.GetString())
+        | _ -> None
 
 let private updateGoldens =
     match Environment.GetEnvironmentVariable "XANTHAM_UPDATE_GOLDEN" with
@@ -120,6 +154,21 @@ let private fixtureTests (fixture: string) (package: string option) (config: Gen
                         run `npm install` in that fixture directory"
               else
                   skiptest $"run `npm install` in tests/fixtures/{fixture}" ]
+    | Some _, Some package when
+        (match Map.tryFind fixture pins, installedVersion package with
+         | Some pinned, Some installed -> installed <> pinned
+         | _ -> false)
+        ->
+        // Drift replaces the golden diff rather than joining it: a package that moved and a
+        // generator that regressed produce the same diff, and only one of them is a bug here.
+        [ testCase $"{fixture}: the install has drifted from its pin" <| fun _ ->
+              let pinned = Map.find fixture pins
+              let installed = installedVersion package |> Option.defaultValue "?"
+
+              failtest
+                  $"tests/fixtures/pins.json pins {fixture} at {pinned}, but the install is {installed}, so \
+                    the committed goldens describe a different package. Reinstall the pin, or bump it and \
+                    regenerate the goldens (XANTHAM_UPDATE_GOLDEN=1) in the same commit." ]
     | Some _, Some package ->
         [ testCase $"{fixture} generates the committed goldens" <| fun _ ->
               matchesGoldens fixture config package |> ignore
@@ -160,7 +209,7 @@ let pipelineTests =
         yield!
             fixtureTests
                 "lab"
-                (if Directory.Exists labFixture then Some labFixture else None)
+                (handFixture "lab")
                 GeneratorConfig.Default
                 (fun package ->
                     [ testCase "no export of the lab is silently dropped" <| fun _ ->
@@ -169,5 +218,73 @@ let pipelineTests =
 
                           Expect.equal counts.Escape 0 "the lab exercises only supported features - no escapes" ])
 
+        yield!
+            fixtureTests "globals-lab" (handFixture "globals-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a package with no module is harvested from global scope" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "[<Global(\"registry\")>]" "a global value binds off globalThis"
+                      Expect.stringContains source "[<Global(\"Gadget\"); EmitConstructor>]" "so does a global class"
+                      Expect.isFalse (source.Contains "[<Import(") "a global library imports nothing"
+
+                      // repair-arity, end to end: a brand holds no value, so it has no setter,
+                      // and an alias that widened away its parameter takes its uses with it.
+                      // `__brand` reaches the checker escaped to `___brand`; the emitted member
+                      // has to name the key the object actually carries.
+                      Expect.stringContains source "abstract __brand: unit\n" "the brand reads but does not write"
+                      Expect.isFalse (source.Contains "type Loose") "the unusable generic alias is gone"
+
+                  testCase "an ambient module declaration is dropped loudly" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                      // Its name is its quoted specifier, which is not an F# declaration name;
+                      // the escape is the promise that it will not vanish unremarked.
+                      Expect.contains
+                          (rendered.Findings
+                           |> List.filter (fun finding -> finding.Pass = "harvest-globals")
+                           |> List.map (fun finding -> finding.Tier, finding.Symbol))
+                          (Escape, "\"globals-lab:extra\"")
+                          "the ambient module is an escape, not a silence" ])
+
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
+
+        yield!
+            fixtureTests
+                "@cloudflare/workers-types"
+                (npmFixture "@cloudflare/workers-types")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "a package that declares no module is harvested from global scope" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          // The whole point of the rung: workers-types has no module symbol, so
+                          // every name here comes from `harvest-globals`, and a value it declares
+                          // is already on `globalThis` rather than importable.
+                          Expect.stringContains source "[<Global(\"Cloudflare\")>]" "a declared global binds with Global"
+                          Expect.isFalse (source.Contains "[<Import(") "a global library imports nothing"
+
+                      testCase "no declaration of workers-types is dropped without saying why" <| fun _ ->
+                          // This rung cannot claim zero escapes - ambient module declarations and
+                          // generic aliases whose parameters all widened away do get dropped. The
+                          // claim it does make is that `audit-coverage`, the safety net, never
+                          // fires alone: some pass owns every drop and named the reason.
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                          let byPass pass =
+                              rendered.Findings
+                              |> List.filter (fun finding -> finding.Pass = pass)
+                              |> List.map _.Symbol
+                              |> Set.ofList
+
+                          let explained =
+                              rendered.Findings
+                              |> List.filter (fun finding -> finding.Pass <> "audit-coverage")
+                              |> List.map _.Symbol
+                              |> Set.ofList
+
+                          Expect.isEmpty
+                              (Set.difference (byPass "audit-coverage") explained |> Set.toList)
+                              "every export missing from the output is the subject of an explaining finding" ])
     ]

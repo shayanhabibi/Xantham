@@ -1,0 +1,16 @@
+{
+    // The litmus ladder of docs/plans/generator-architecture.md §5, pinned.
+    //
+    // An npm fixture install is untracked (a worktree carries tracked files only, and
+    // AGENTS.md forbids `npm install` there), so this file is the tracked half: every
+    // committed golden was generated against exactly these versions. The e2e suite reads it
+    // and reports a mismatched install as fixture drift rather than as a golden diff - a
+    // floating `"*"` install turns a 400-line diff into a puzzle about whether the generator
+    // regressed or the package moved.
+    //
+    // Bumping a rung means: reinstall, regenerate its golden, review the diff as a *package*
+    // change, and land both together.
+    "ansi-regex": "6.3.0",
+    "animejs": "4.5.0",
+    "@cloudflare/workers-types": "5.20260901.1"
+}

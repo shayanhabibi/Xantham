@@ -2,10 +2,10 @@
   "package": "animejs",
   "module": "Animejs",
   "counts": {
-    "exact": 44,
-    "ergonomic": 39,
-    "widened": 83,
-    "escape": 50
+    "exact": 40,
+    "ergonomic": 48,
+    "widened": 98,
+    "escape": 34
   },
   "symbols": [
     {
@@ -121,13 +121,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -136,13 +131,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -151,73 +141,13 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -248,16 +178,6 @@
           "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -295,6 +215,26 @@
           "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Function is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Function is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Function is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Function is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -447,8 +387,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -492,13 +432,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -507,13 +442,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -522,13 +452,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -537,73 +462,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -617,8 +477,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -794,16 +654,6 @@
           "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -849,13 +699,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -864,13 +709,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -879,13 +719,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -894,13 +729,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -909,13 +739,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -924,13 +749,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -939,133 +759,13 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -1229,7 +929,7 @@
     },
     {
       "name": "LayoutAnimationTimingsParams",
-      "tier": "escape",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -1249,17 +949,302 @@
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "optional member reads as option"
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -1292,7 +1277,7 @@
     },
     {
       "name": "LayoutSpecificAnimationParams",
-      "tier": "escape",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -1312,17 +1297,302 @@
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "optional member reads as option"
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -1366,8 +1636,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -1462,7 +1732,7 @@
     },
     {
       "name": "LayoutNode",
-      "tier": "escape",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -1483,11 +1753,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -1632,6 +1897,26 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "message": "ParamObject Create synthesized (D3)"
@@ -1642,6 +1927,66 @@
       "name": "SvgCreateMotionPathResult",
       "tier": "ergonomic",
       "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
         {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -1702,6 +2047,26 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "widened",
           "message": "HTMLElement is not among the generated declarations; widened to obj"
         },
@@ -1745,6 +2110,17 @@
           "tier": "widened",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "ScrambleTextTween",
+      "tier": "ergonomic",
+      "findings": [
         {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -1921,23 +2297,13 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -1971,13 +2337,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -1986,13 +2347,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2001,73 +2357,13 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -2152,16 +2448,6 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "message": "type flags Intersection not mapped yet; widened to obj"
         }
       ]
@@ -2217,13 +2503,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2232,13 +2513,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2247,58 +2523,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -2329,16 +2555,6 @@
           "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -2414,17 +2630,302 @@
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "optional member reads as option"
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -2518,13 +3019,18 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2543,13 +3049,18 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2568,13 +3079,18 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2593,16 +3109,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -2613,83 +3119,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2756,6 +3187,22 @@
       ]
     },
     {
+      "name": "TweakRegister",
+      "tier": "escape",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
       "name": "StaggerFunction",
       "tier": "ergonomic",
       "findings": [
@@ -2788,7 +3235,7 @@
     },
     {
       "name": "StaggerParams",
-      "tier": "escape",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -2802,8 +3249,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -2839,6 +3286,26 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         },
         {
           "pass": "shape-interfaces",
@@ -2906,6 +3373,11 @@
           "message": "ParamObject Create synthesized (D3)"
         }
       ]
+    },
+    {
+      "name": "StaggerParamsAxis",
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "DOMTarget",
@@ -3139,19 +3611,515 @@
     },
     {
       "name": "EasingParam",
-      "tier": "escape",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-aliases",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
     {
       "name": "WAAPIEasingParam",
-      "tier": "exact",
-      "findings": []
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        }
+      ]
     },
     {
       "name": "SpringParams",
@@ -3214,16 +4182,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -3261,12 +4219,7 @@
         {
           "pass": "shape-callbacks",
           "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "message": "type parameter is not in scope here; widened to obj"
         }
       ]
     },
@@ -3296,13 +4249,18 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -3321,13 +4279,18 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -3346,16 +4309,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -3368,66 +4321,6 @@
           "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -3461,16 +4354,6 @@
           "message": "any maps to obj"
         },
         {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "message": "ParamObject Create synthesized (D3)"
@@ -3479,7 +4362,7 @@
     },
     {
       "name": "TimerOptions",
-      "tier": "escape",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -3503,8 +4386,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3513,8 +4396,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3610,14 +4493,40 @@
       ]
     },
     {
-      "name": "FunctionValue",
-      "tier": "escape",
+      "name": "FunctionValueReturn",
+      "tier": "widened",
       "findings": [
         {
-          "pass": "shape-callbacks",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
         },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        }
+      ]
+    },
+    {
+      "name": "FunctionValue",
+      "tier": "ergonomic",
+      "findings": [
         {
           "pass": "shape-callbacks",
           "tier": "ergonomic",
@@ -3652,7 +4561,7 @@
     },
     {
       "name": "Tween",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -3666,6 +4575,16 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "widened",
           "message": "Function is not among the generated declarations; widened to obj"
         },
@@ -3673,6 +4592,11 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
         }
       ]
     },
@@ -3743,13 +4667,75 @@
     },
     {
       "name": "TweenParamValue",
-      "tier": "exact",
-      "findings": []
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
     },
     {
       "name": "TweenPropValue",
-      "tier": "exact",
-      "findings": []
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
     },
     {
       "name": "TweenComposition",
@@ -3784,7 +4770,7 @@
     },
     {
       "name": "TweenParamsOptions",
-      "tier": "escape",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -3798,8 +4784,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3808,8 +4794,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3818,13 +4804,258 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3845,12 +5076,12 @@
     },
     {
       "name": "TweenValues",
-      "tier": "escape",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3859,8 +5090,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3869,8 +5100,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3897,19 +5128,120 @@
     },
     {
       "name": "ArraySyntaxValue",
-      "tier": "escape",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-aliases",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
     {
       "name": "TweenOptions",
-      "tier": "exact",
-      "findings": []
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
     },
     {
       "name": "TweenObjectValue",
@@ -3924,12 +5256,12 @@
     },
     {
       "name": "PercentageKeyframeOptions",
-      "tier": "escape",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3978,7 +5310,7 @@
     },
     {
       "name": "AnimationOptions",
-      "tier": "escape",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -3997,8 +5329,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -4030,12 +5362,38 @@
     },
     {
       "name": "TimelineAnimationPosition",
-      "tier": "exact",
-      "findings": []
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
     },
     {
       "name": "TimelineOptions",
-      "tier": "escape",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -4059,8 +5417,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -4092,12 +5450,17 @@
     },
     {
       "name": "WAAPIFunctionValue",
-      "tier": "escape",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-callbacks",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -4114,7 +5477,7 @@
     },
     {
       "name": "WAAPITweenOptions",
-      "tier": "escape",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -4148,8 +5511,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -4254,16 +5617,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4271,31 +5624,306 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -4337,7 +5965,7 @@
     },
     {
       "name": "AnimatablePropertySetter",
-      "tier": "escape",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-callbacks",
@@ -4351,8 +5979,8 @@
         },
         {
           "pass": "shape-callbacks",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -4385,7 +6013,7 @@
     },
     {
       "name": "AnimatablePropertyParamsOptions",
-      "tier": "escape",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -4399,8 +6027,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -4409,8 +6037,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -4606,8 +6234,8 @@
       "findings": [
         {
           "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-callbacks",
@@ -4773,16 +6401,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -4795,191 +6413,6 @@
           "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -4999,7 +6432,122 @@
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags Intersection not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "pass": "shape-interfaces",
@@ -5282,13 +6830,18 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -5307,13 +6860,18 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -5332,13 +6890,18 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -5357,16 +6920,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -5382,91 +6935,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -5487,8 +6955,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -5732,7 +7200,7 @@
     },
     {
       "name": "ScrambleTextParams",
-      "tier": "escape",
+      "tier": "widened",
       "findings": [
         {
           "pass": "shape-interfaces",
@@ -5776,8 +7244,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -6223,8 +7691,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "widened",
+          "message": "type flags Conditional not mapped yet; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -6233,13 +7701,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "widened",
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -6343,6 +7806,11 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "widened",
           "message": "type flags Intersection not mapped yet; widened to obj"
         },
@@ -6390,16 +7858,6 @@
           "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -6475,16 +7933,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -6502,16 +7950,6 @@
           "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -6887,6 +8325,26 @@
           "pass": "shape-exports",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -6910,6 +8368,26 @@
       "name": "scrambleText",
       "tier": "ergonomic",
       "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
         {
           "pass": "shape-exports",
           "tier": "ergonomic",
@@ -7229,6 +8707,11 @@
           "pass": "shape-exports",
           "tier": "escape",
           "message": "any maps to obj"
+        },
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -7403,16 +8886,6 @@
           "pass": "shape-exports",
           "tier": "escape",
           "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -7422,8 +8895,8 @@
       "findings": [
         {
           "pass": "shape-exports",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "widened",
+          "message": "type flags Conditional not mapped yet; widened to obj"
         },
         {
           "pass": "shape-exports",
@@ -7432,13 +8905,8 @@
         },
         {
           "pass": "shape-exports",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "escape",
-          "message": "any maps to obj"
+          "tier": "widened",
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-exports",
