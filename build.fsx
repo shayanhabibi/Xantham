@@ -3,6 +3,8 @@
 #r "nuget: Str"
 #r "nuget: Fake.IO.FileSystem"
 
+#load "tools/workspace.fsx"
+
 open Partas.Build
 open Partas.TypeProvider.BuildHelper
 open Fake.IO
@@ -120,11 +122,16 @@ module Stages =
     /// Installs the repository-level `typescript` pin from the root `package.json`. Generation reads
     /// the shipped schema out of that package, and `Tsc.locate` walks parent directories, so the
     /// same install also serves as the live `tsc --api` server for anything run under the repo.
+    ///
+    /// An agent worktree has no `node_modules` of its own, so it borrows the main checkout's
+    /// install instead of downloading the pin a second time - `Workspace.ensureTsc` exports it as
+    /// `XANTHAM_TSGO_EXE` for every later stage, and there is then nothing left to install.
     let deps = input {
         let! quick = Options.quick
+        let borrowed = Workspace.ensureTsc __SOURCE_DIRECTORY__
         return stage "npm install" {
             quiet
-            when' (not quick)
+            when' (not quick && borrowed.IsNone)
             workingDir Repo.FileSystem.``.``
             run "npm install"
         }

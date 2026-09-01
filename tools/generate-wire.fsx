@@ -2,6 +2,8 @@
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
 #r "nuget: Str"
 
+#load "workspace.fsx"
+
 open Partas.Build
 open Partas.TypeProvider.BuildHelper
 
@@ -133,13 +135,19 @@ module Options =
     ///
     /// Built as a string rather than through `Repo.FileSystem`, which only exposes directories that
     /// exist when the script compiles - `node_modules` does not, on a clean checkout.
+    ///
+    /// In an agent worktree the install lives in the main checkout instead; `Workspace` resolves
+    /// whichever of the two is actually present, nearest first.
     let typescriptPkgDir =
         Input.option<string> "--typescript-pkg"
         |> Input.desc "Path to the typescript package directory"
-        |> Input.def (System.IO.Path.GetFullPath(System.IO.Path.Combine(__REPOSITORY_DIRECTORY__, "node_modules", "typescript")))
+        |> Input.def (Workspace.typescriptPackage __REPOSITORY_DIRECTORY__)
+    /// Where `generate.mjs` resolves its `typescript` parser from. That has to be a TypeScript
+    /// 5.x install - the 7.x package exposes only `version` to `require` - and it is found by
+    /// Node's usual walk up from this directory, so it must be a checkout that has one.
     let parserDir =
         Input.option<string> "--parser-dir"
-        |> Input.def (Repo.FileSystem.ToString())
+        |> Input.def (Workspace.nodeModulesRoot __REPOSITORY_DIRECTORY__)
     let outputDir =
         Input.option<string> "--output"
         |> Input.def (Repo.FileSystem.src.``Xantham.TypeScript.Wire``.ToString())
@@ -173,10 +181,31 @@ let syncTscAst = input {
     }
 }
 
+/// `tools/tsc-ast/upstream/` is gitignored, so it is missing from a fresh clone and from every
+/// agent worktree until someone vendors it. Say so with the command that fixes it, rather than
+/// letting `generate-ast.mts` fail on a module it cannot resolve. The vendoring hits the
+/// network, so it stays an explicit step and is never run implicitly here.
+let requireUpstream = input {
+    return stage "check upstream" {
+        quiet
+        run (fun _ -> async {
+            let vendored = System.IO.Path.Combine(__SOURCE_DIRECTORY__, "tsc-ast", "upstream")
+
+            if System.IO.Directory.Exists vendored then
+                return Ok (None: Cmd option)
+            else
+                return
+                    Error
+                        $"no vendored upstream sources at {vendored} - run `dotnet fsi tools/generate-wire.fsx -- sync tsc-ast` first"
+        })
+    }
+}
+
 /// Emits `Ast.generated.fs`, `AstNode.generated.fs` and `Typed.generated.fs` from the vendored
 /// `ast.json`, via the upstream `SchemaAPI`.
 let generateAst = input {
     let! outputDir = Options.astOutputDir
+    Workspace.ensureTsc __REPOSITORY_DIRECTORY__ |> ignore
     return stage "generate ast" {
         echo "Generating AST bindings"
         workingDir Repo.FileSystem.``.``
@@ -188,6 +217,7 @@ let generateProto = input {
     let! typescriptPkgDir = Options.typescriptPkgDir
     and! parserDir = Options.parserDir
     and! outputDir = Options.outputDir
+    Workspace.ensureTsc __REPOSITORY_DIRECTORY__ |> ignore
     return stage "generate proto" {
         echo "Generating proto files"
         workingDir Repo.FileSystem.``.``
@@ -206,6 +236,7 @@ rootCommand fsi.CommandLineArgs[1..] {
             generateProto
         }
         command "ast" {
+            requireUpstream
             generateAst
         }
     }

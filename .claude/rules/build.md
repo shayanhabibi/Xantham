@@ -42,6 +42,27 @@ let build = input {
   paths; build those as strings off the repository root, or the script stops compiling on a clean
   checkout.
 
+## Worktrees borrow the main checkout's install
+
+`tools/workspace.fsx` is a `#load`-only helper (not a command script) that both `build.fsx` and
+`tools/generate-wire.fsx` use to answer "which checkout has the dependencies?".
+
+An agent worktree under `.claude/worktrees/` carries tracked files only, so it has no
+`node_modules`. Rather than install the pin twice, `Workspace.ensureTsc` finds the main
+checkout's compiler and exports it as `XANTHAM_TSGO_EXE`, which `Tsc.locate` honours ahead of its
+parent-directory walk; `npm install` is then skipped and the live tests run against the same
+binary the main checkout uses. `typescriptPackage` and `nodeModulesRoot` resolve the generators'
+inputs the same way — worktree first, then the main checkout.
+
+- Detection is "`.git` is a file, not a directory", so it does not depend on where the worktree
+  sits. The main checkout is found through the worktree's `commondir`.
+- Only worktrees get the redirect. In the main checkout `ensureTsc` returns `None` and changes
+  nothing, so a pin bump is picked up normally.
+- An `XANTHAM_TSGO_EXE` already in the environment always wins.
+- Generated output still goes to the worktree — only *inputs* are borrowed.
+- Consequence: with the override set, the `tsc` layout test skips itself by design. CI installs
+  normally and sets `XANTHAM_REQUIRE_TSC`, so that assertion still runs there.
+
 ## General Patterns
 
 - ** DO ** add common repository level commands/tasks to `build.fsx`
