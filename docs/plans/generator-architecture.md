@@ -406,11 +406,25 @@ Phases — each ends with the compile gate green on its fixtures:
   - *The package multi-targets `netstandard2.1;net8.0`.* netstandard2.1 is the Fable library
     convention; net8.0 exists only so the gate — held at net8.0 by phase B's `Create` static
     interface members — can reference the package without a downgrade.
+  - *Brands render to units of measure* (`src/Xantham.Fable.Core/Brand.fs`, new work - the
+    archive had no brand helpers, D11 having dropped them until the generator existed). A
+    measure is precisely a compile-time-only nominal distinction over a shared runtime
+    representation, which is what a TypeScript intersection brand is, and Fable erases it to
+    nothing. Numeric brands need no support at all - `float<Millis>` is an ordinary measure
+    application. Non-numeric primitives go through `[<MeasureAnnotatedAbbreviation>]`, the
+    mechanism FSharp.UMX is built on, which carries a measure on `string`/`bool`/`char`.
+    Verified rather than assumed: the brand is enforced in *both* directions (a
+    `string<UserId>` is not a `string<OrderId>`, and a raw `string` is neither), and the
+    abbreviation does **not** shadow the primitive - an application with no measure argument
+    still resolves to `string`. That last property is what makes it safe to put the
+    abbreviation in scope over generated code, and it is gated rather than assumed:
+    `tests/Xantham.Generator.CompileGate/BrandIdioms.fs` compiles plain and branded
+    primitives side by side under `open Xantham.Fable.Core`.
   - **Not yet done, and the rest of phase D is what does it:** nothing *generated* references
     the package. The revival makes the idioms available and gated; teaching the shape tier to
-    emit `keyof<'T>` / `typekeyof<'T,'U>` for the keyof regimes is the next rung, and brand
-    helpers do not exist in the archive at all (D11 dropped unique-symbol brands), so those
-    are new work rather than a revival.
+    emit `keyof<'T>` / `typekeyof<'T,'U>` for the keyof regimes is the next rung, and
+    *detecting* a brand in the checker's output - as opposed to being able to render one - is
+    still ahead.
 - **E — hardening.** Dedup/naming at scale, fidelity-manifest UX, determinism under the
   full litmus ladder, `@types/three` and `typescript` rungs.
 

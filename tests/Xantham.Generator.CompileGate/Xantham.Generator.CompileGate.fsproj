@@ -19,6 +19,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="BrandIdioms.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\ansi-regex\AnsiRegex.fs" Link="ansi-regex\AnsiRegex.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\lab\PhaseBLab.fs" Link="lab\PhaseBLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\globals-lab\GlobalsLab.fs" Link="globals-lab\GlobalsLab.fs" />

@@ -481,6 +481,23 @@ from the catalogue as D1–D12.
 11. **D11 — decided.** Protected members, unique-symbol brands, and type predicates are
     dropped (with doc notes) now; revisit after the generator exists (§4.4, §4.1, §4.8).
 
+    **Revisited (2026-09-01, phase D) for brands: they render to units of measure.** A
+    measure is exactly a compile-time nominal distinction over a shared runtime
+    representation — which is what an intersection brand (`type UserId = string & {
+    __brand: "UserId" }`) is — and Fable erases it, so a branded value costs nothing on the
+    JavaScript side. Numeric brands are ordinary measure applications (`float<Millis>`) and
+    need no support package at all. Non-numeric primitives use
+    `[<MeasureAnnotatedAbbreviation>]` (the FSharp.UMX mechanism) to carry a measure on
+    `string`/`bool`/`char`; `Xantham.Fable.Core`'s `Brands` module declares those and
+    `Brand.tag*`/`untag*` are the only ways across the boundary. Two properties were
+    verified rather than recalled, because the emission depends on both: the brand is
+    enforced in *both* directions (`string<UserId>` ≠ `string<OrderId>`, and a raw `string`
+    is neither), and the abbreviation does not shadow the primitive — `string` with no
+    measure argument still resolves — which is what lets generated code `open` the support
+    package at the top of a file that then uses `string` on every line. Brand *detection*
+    (recognising the intersection in the checker's output) is separate work and is what
+    remains open here.
+
 12. **D12 — decided (added after review).** Mixed literal unions (string + number literals
     in one union) map to a single `[<StringEnum>]` DU: Fable 5 respects
     `[<CompiledValue(_)>]` on cases within a StringEnum union, so non-string literal
