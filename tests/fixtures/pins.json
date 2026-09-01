@@ -11,5 +11,6 @@
     // Bumping a rung means: reinstall, regenerate its golden, review the diff as a *package*
     // change, and land both together.
     "ansi-regex": "6.3.0",
-    "animejs": "4.5.0"
+    "animejs": "4.5.0",
+    "@cloudflare/workers-types": "5.20260901.1"
 }

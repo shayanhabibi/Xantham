@@ -12,12 +12,19 @@
         <TargetFramework>net8.0</TargetFramework>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
         <IsPackable>false</IsPackable>
+        <!-- FS1104, "identifiers containing '@' are reserved for F# code generation": a
+             JavaScript property name is not an F# identifier, and `@cf/meta/llama-3` is a real
+             key on a real object. The backticked member is the only way to write it. -->
+        <NoWarn>$(NoWarn);FS1104</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
         <Compile Include="..\Xantham.Generator.Tests\golden\ansi-regex\AnsiRegex.fs" Link="ansi-regex\AnsiRegex.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\lab\PhaseBLab.fs" Link="lab\PhaseBLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\globals-lab\GlobalsLab.fs" Link="globals-lab\GlobalsLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\animejs\Animejs.fs" Link="animejs\Animejs.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\@cloudflare\workers-types\Cloudflare.WorkersTypes.fs"
+                 Link="workers-types\Cloudflare.WorkersTypes.fs" />
     </ItemGroup>
 
     <ItemGroup>

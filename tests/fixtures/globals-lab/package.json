@@ -1,0 +1,6 @@
+{
+    "name": "globals-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture for a package that declares no module: every name is an ambient global, the way @cloudflare/workers-types and the global @types/* libraries are shaped. Tracked in git, no npm install, so the goldens pin the globals harvest under the live compiler."
+}

@@ -25,6 +25,9 @@ tests/fixtures/**/*
 !tests/fixtures/lab/
 !tests/fixtures/lab/**
 tests/fixtures/lab/node_modules/
+!tests/fixtures/globals-lab/
+!tests/fixtures/globals-lab/**
+tests/fixtures/globals-lab/node_modules/
 # ... and except the pins, which are the tracked half of every npm rung: the install is
 # untracked, so the version it was generated against has to be written down somewhere.
 !tests/fixtures/pins.json

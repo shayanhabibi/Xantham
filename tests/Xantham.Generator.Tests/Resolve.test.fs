@@ -19,7 +19,7 @@ let classifyTests =
     testList "resolve classify" [
         testCase "a declaration under the package directory is the entry package" <| fun _ ->
             Expect.equal
-                (Resolve.classify packageDir (declaredAt $"{packageDir}/index.d.ts"))
+                (Grouping.classify packageDir (declaredAt $"{packageDir}/index.d.ts"))
                 EntryPackage
                 "entry"
 
@@ -29,21 +29,21 @@ let classifyTests =
                   "C:/repo/node_modules/typescript/lib/lib.dom.d.ts"
                   // The platform package is where the live wire actually reports them from.
                   "c:/repo/node_modules/@typescript/typescript-win32-x64/lib/lib.es5.d.ts" ] do
-                Expect.equal (Resolve.classify packageDir (declaredAt path)) CompilerLib $"{path}"
+                Expect.equal (Grouping.classify packageDir (declaredAt path)) CompilerLib $"{path}"
 
         testCase "a node_modules entry is that dependency, scoped names kept whole" <| fun _ ->
             Expect.equal
-                (Resolve.classify packageDir (declaredAt "C:/repo/node_modules/left-pad/index.d.ts"))
+                (Grouping.classify packageDir (declaredAt "C:/repo/node_modules/left-pad/index.d.ts"))
                 (Dependency "left-pad")
                 "plain"
 
             Expect.equal
-                (Resolve.classify packageDir (declaredAt "C:/repo/node_modules/@types/node/fs.d.ts"))
+                (Grouping.classify packageDir (declaredAt "C:/repo/node_modules/@types/node/fs.d.ts"))
                 (Dependency "@types/node")
                 "scoped"
 
         testCase "no declaration path is unclassified, which dispositions as the entry" <| fun _ ->
-            Expect.equal (Resolve.classify packageDir ValueNone) Unclassified "no symbol"
+            Expect.equal (Grouping.classify packageDir ValueNone) Unclassified "no symbol"
 
             Expect.equal
                 (GeneratorConfig.disposition GeneratorConfig.Default Unclassified)
