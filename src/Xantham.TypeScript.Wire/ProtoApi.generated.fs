@@ -455,3 +455,1562 @@ module Api =
     let saveHeapProfile (channel: TscChannel) (parameters: ProfileParams) : ProfileResult =
         ProtoJson.request<ProfileParams, ProfileResult> channel Method.SaveHeapProfile parameters
 
+/// `Api` as members, so the channel is not threaded through every call:
+/// `channel.getSymbolAtPosition parameters` rather than `Api.getSymbolAtPosition channel`.
+///
+/// Each method that takes a parameter record gets a second, inlined overload accepting that
+/// record's fields directly and building it on the caller's behalf. Fields the schema marks
+/// optional are `[<Struct>]` optional arguments, so they arrive as the `voption` the record
+/// field already holds and pass straight through. F# requires optional arguments to come last,
+/// so where a required field follows an optional one the argument order is not the record's
+/// own. Named arguments sidestep that, and are worth using here regardless: several methods
+/// take four or more arguments of the same type.
+[<AutoOpen>]
+module TscChannelExtensions =
+
+    type TscChannel with
+
+        member this.release(parameters: ReleaseParams) = Api.release this parameters
+
+        /// The fields of ReleaseParams, spread. Builds the record and calls the overload above.
+        member inline this.release(snapshot: int) =
+            this.release(
+                { Snapshot = snapshot }
+                : ReleaseParams
+            )
+
+        member this.batchRequests(parameters: BatchRequestsParams) = Api.batchRequests this parameters
+
+        /// The fields of BatchRequestsParams, spread. Builds the record and calls the overload above.
+        member inline this.batchRequests([<Struct>] ?requests: BatchRequest[]) =
+            this.batchRequests(
+                { Requests = requests }
+                : BatchRequestsParams
+            )
+
+        member this.initialize() = Api.initialize this
+
+        member this.updateSnapshot(parameters: UpdateSnapshotParams) = Api.updateSnapshot this parameters
+
+        /// The fields of UpdateSnapshotParams, spread. Builds the record and calls the overload above.
+        member inline this.updateSnapshot([<Struct>] ?openProjects: DocumentIdentifier[], [<Struct>] ?closeProjects: DocumentIdentifier[], [<Struct>] ?fileChanges: APIFileChanges, [<Struct>] ?openFiles: DocumentIdentifier[], [<Struct>] ?closeFiles: DocumentIdentifier[]) =
+            this.updateSnapshot(
+                { OpenProjects = openProjects
+                  CloseProjects = closeProjects
+                  FileChanges = fileChanges
+                  OpenFiles = openFiles
+                  CloseFiles = closeFiles }
+                : UpdateSnapshotParams
+            )
+
+        member this.updateTemporarySnapshot(parameters: UpdateTemporarySnapshotParams) = Api.updateTemporarySnapshot this parameters
+
+        /// The fields of UpdateTemporarySnapshotParams, spread. Builds the record and calls the overload above.
+        member inline this.updateTemporarySnapshot(snapshot: int, file: DocumentIdentifier, newText: string) =
+            this.updateTemporarySnapshot(
+                { Snapshot = snapshot
+                  ``File`` = file
+                  NewText = newText }
+                : UpdateTemporarySnapshotParams
+            )
+
+        member this.createProgram(parameters: CreateProgramParams) = Api.createProgram this parameters
+
+        /// The fields of CreateProgramParams, spread. Builds the record and calls the overload above.
+        member inline this.createProgram(createProgramOptions: CreateProgramOptions, [<Struct>] ?rootFiles: DocumentIdentifier[], [<Struct>] ?oldProgram: CreateProgramOldProgramParams, [<Struct>] ?fileChanges: APIFileChanges) =
+            this.createProgram(
+                { CreateProgramOptions = createProgramOptions
+                  RootFiles = rootFiles
+                  OldProgram = oldProgram
+                  FileChanges = fileChanges }
+                : CreateProgramParams
+            )
+
+        member this.parseCommandLine(parameters: ParseCommandLineParams) = Api.parseCommandLine this parameters
+
+        /// The fields of ParseCommandLineParams, spread. Builds the record and calls the overload above.
+        member inline this.parseCommandLine([<Struct>] ?commandLine: string[]) =
+            this.parseCommandLine(
+                { CommandLine = commandLine }
+                : ParseCommandLineParams
+            )
+
+        member this.readConfigFile(parameters: ReadConfigFileParams) = Api.readConfigFile this parameters
+
+        /// The fields of ReadConfigFileParams, spread. Builds the record and calls the overload above.
+        member inline this.readConfigFile(file: DocumentIdentifier) =
+            this.readConfigFile(
+                { ``File`` = file }
+                : ReadConfigFileParams
+            )
+
+        member this.parseJsonConfigFileContent(parameters: ParseJsonConfigFileContentParams) = Api.parseJsonConfigFileContent this parameters
+
+        /// The fields of ParseJsonConfigFileContentParams, spread. Builds the record and calls the overload above.
+        member inline this.parseJsonConfigFileContent([<Struct>] ?json: JsonNode, [<Struct>] ?configDirectory: string, [<Struct>] ?configFileName: DocumentIdentifier) =
+            this.parseJsonConfigFileContent(
+                { Json = (match json with ValueSome value -> value | ValueNone -> null)
+                  ConfigDirectory = configDirectory
+                  ConfigFileName = configFileName }
+                : ParseJsonConfigFileContentParams
+            )
+
+        member this.parseConfigFile(parameters: ParseConfigFileParams) = Api.parseConfigFile this parameters
+
+        /// The fields of ParseConfigFileParams, spread. Builds the record and calls the overload above.
+        member inline this.parseConfigFile(file: DocumentIdentifier) =
+            this.parseConfigFile(
+                { ``File`` = file }
+                : ParseConfigFileParams
+            )
+
+        member this.transpileModule(parameters: TranspileParams) = Api.transpileModule this parameters
+
+        /// The fields of TranspileParams, spread. Builds the record and calls the overload above.
+        member inline this.transpileModule(input: string, options: TranspileOptions) =
+            this.transpileModule(
+                { Input = input
+                  Options = options }
+                : TranspileParams
+            )
+
+        member this.transpileModuleFromFile(parameters: TranspileFromFileParams) = Api.transpileModuleFromFile this parameters
+
+        /// The fields of TranspileFromFileParams, spread. Builds the record and calls the overload above.
+        member inline this.transpileModuleFromFile(fileName: string, options: TranspileOptions) =
+            this.transpileModuleFromFile(
+                { FileName = fileName
+                  Options = options }
+                : TranspileFromFileParams
+            )
+
+        member this.transpileDeclaration(parameters: TranspileParams) = Api.transpileDeclaration this parameters
+
+        /// The fields of TranspileParams, spread. Builds the record and calls the overload above.
+        member inline this.transpileDeclaration(input: string, options: TranspileOptions) =
+            this.transpileDeclaration(
+                { Input = input
+                  Options = options }
+                : TranspileParams
+            )
+
+        member this.transpileDeclarationFromFile(parameters: TranspileFromFileParams) = Api.transpileDeclarationFromFile this parameters
+
+        /// The fields of TranspileFromFileParams, spread. Builds the record and calls the overload above.
+        member inline this.transpileDeclarationFromFile(fileName: string, options: TranspileOptions) =
+            this.transpileDeclarationFromFile(
+                { FileName = fileName
+                  Options = options }
+                : TranspileFromFileParams
+            )
+
+        member this.getDefaultProjectForFile(parameters: GetDefaultProjectForFileParams) = Api.getDefaultProjectForFile this parameters
+
+        /// The fields of GetDefaultProjectForFileParams, spread. Builds the record and calls the overload above.
+        member inline this.getDefaultProjectForFile(snapshot: int, file: DocumentIdentifier) =
+            this.getDefaultProjectForFile(
+                { Snapshot = snapshot
+                  ``File`` = file }
+                : GetDefaultProjectForFileParams
+            )
+
+        member this.getSymbolAtPosition(parameters: GetSymbolAtPositionParams) = Api.getSymbolAtPosition this parameters
+
+        /// The fields of GetSymbolAtPositionParams, spread. Builds the record and calls the overload above.
+        member inline this.getSymbolAtPosition(snapshot: int, project: string, file: DocumentIdentifier, position: int) =
+            this.getSymbolAtPosition(
+                { Snapshot = snapshot
+                  Project = project
+                  ``File`` = file
+                  Position = position }
+                : GetSymbolAtPositionParams
+            )
+
+        member this.getSymbolsAtPositions(parameters: GetSymbolsAtPositionsParams) = Api.getSymbolsAtPositions this parameters
+
+        /// The fields of GetSymbolsAtPositionsParams, spread. Builds the record and calls the overload above.
+        member inline this.getSymbolsAtPositions(snapshot: int, project: string, file: DocumentIdentifier, [<Struct>] ?positions: int[]) =
+            this.getSymbolsAtPositions(
+                { Snapshot = snapshot
+                  Project = project
+                  ``File`` = file
+                  Positions = positions }
+                : GetSymbolsAtPositionsParams
+            )
+
+        member this.getSymbolAtLocation(parameters: GetSymbolAtLocationParams) = Api.getSymbolAtLocation this parameters
+
+        /// The fields of GetSymbolAtLocationParams, spread. Builds the record and calls the overload above.
+        member inline this.getSymbolAtLocation(snapshot: int, project: string, location: string) =
+            this.getSymbolAtLocation(
+                { Snapshot = snapshot
+                  Project = project
+                  Location = location }
+                : GetSymbolAtLocationParams
+            )
+
+        member this.getSymbolsAtLocations(parameters: GetSymbolsAtLocationsParams) = Api.getSymbolsAtLocations this parameters
+
+        /// The fields of GetSymbolsAtLocationsParams, spread. Builds the record and calls the overload above.
+        member inline this.getSymbolsAtLocations(snapshot: int, project: string, [<Struct>] ?locations: string[]) =
+            this.getSymbolsAtLocations(
+                { Snapshot = snapshot
+                  Project = project
+                  Locations = locations }
+                : GetSymbolsAtLocationsParams
+            )
+
+        member this.getSymbolOfSourceFile(parameters: GetSymbolOfSourceFileParams) = Api.getSymbolOfSourceFile this parameters
+
+        /// The fields of GetSymbolOfSourceFileParams, spread. Builds the record and calls the overload above.
+        member inline this.getSymbolOfSourceFile(snapshot: int, project: string, file: DocumentIdentifier) =
+            this.getSymbolOfSourceFile(
+                { Snapshot = snapshot
+                  Project = project
+                  ``File`` = file }
+                : GetSymbolOfSourceFileParams
+            )
+
+        member this.getSymbolsOfSourceFiles(parameters: GetSymbolsOfSourceFilesParams) = Api.getSymbolsOfSourceFiles this parameters
+
+        /// The fields of GetSymbolsOfSourceFilesParams, spread. Builds the record and calls the overload above.
+        member inline this.getSymbolsOfSourceFiles(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
+            this.getSymbolsOfSourceFiles(
+                { Snapshot = snapshot
+                  Project = project
+                  Files = files }
+                : GetSymbolsOfSourceFilesParams
+            )
+
+        member this.getTypeOfSymbol(parameters: GetTypeOfSymbolParams) = Api.getTypeOfSymbol this parameters
+
+        /// The fields of GetTypeOfSymbolParams, spread. Builds the record and calls the overload above.
+        member inline this.getTypeOfSymbol(snapshot: int, project: string, symbol: int) =
+            this.getTypeOfSymbol(
+                { Snapshot = snapshot
+                  Project = project
+                  Symbol = symbol }
+                : GetTypeOfSymbolParams
+            )
+
+        member this.getTypesOfSymbols(parameters: GetTypesOfSymbolsParams) = Api.getTypesOfSymbols this parameters
+
+        /// The fields of GetTypesOfSymbolsParams, spread. Builds the record and calls the overload above.
+        member inline this.getTypesOfSymbols(snapshot: int, project: string, [<Struct>] ?symbols: int[]) =
+            this.getTypesOfSymbols(
+                { Snapshot = snapshot
+                  Project = project
+                  Symbols = symbols }
+                : GetTypesOfSymbolsParams
+            )
+
+        member this.getDeclaredTypeOfSymbol(parameters: GetTypeOfSymbolParams) = Api.getDeclaredTypeOfSymbol this parameters
+
+        /// The fields of GetTypeOfSymbolParams, spread. Builds the record and calls the overload above.
+        member inline this.getDeclaredTypeOfSymbol(snapshot: int, project: string, symbol: int) =
+            this.getDeclaredTypeOfSymbol(
+                { Snapshot = snapshot
+                  Project = project
+                  Symbol = symbol }
+                : GetTypeOfSymbolParams
+            )
+
+        member this.getNonMissingTypeOfSymbol(parameters: GetTypeOfSymbolParams) = Api.getNonMissingTypeOfSymbol this parameters
+
+        /// The fields of GetTypeOfSymbolParams, spread. Builds the record and calls the overload above.
+        member inline this.getNonMissingTypeOfSymbol(snapshot: int, project: string, symbol: int) =
+            this.getNonMissingTypeOfSymbol(
+                { Snapshot = snapshot
+                  Project = project
+                  Symbol = symbol }
+                : GetTypeOfSymbolParams
+            )
+
+        member this.getSourceFile(parameters: GetSourceFileParams) = Api.getSourceFile this parameters
+
+        /// The fields of GetSourceFileParams, spread. Builds the record and calls the overload above.
+        member inline this.getSourceFile(snapshot: int, project: string, file: DocumentIdentifier) =
+            this.getSourceFile(
+                { Snapshot = snapshot
+                  Project = project
+                  ``File`` = file }
+                : GetSourceFileParams
+            )
+
+        member this.getSourceFileNames(parameters: GetSourceFileNamesParams) = Api.getSourceFileNames this parameters
+
+        /// The fields of GetSourceFileNamesParams, spread. Builds the record and calls the overload above.
+        member inline this.getSourceFileNames(snapshot: int, project: string) =
+            this.getSourceFileNames(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetSourceFileNamesParams
+            )
+
+        member this.getSourceFileMetadata(parameters: GetSourceFileParams) = Api.getSourceFileMetadata this parameters
+
+        /// The fields of GetSourceFileParams, spread. Builds the record and calls the overload above.
+        member inline this.getSourceFileMetadata(snapshot: int, project: string, file: DocumentIdentifier) =
+            this.getSourceFileMetadata(
+                { Snapshot = snapshot
+                  Project = project
+                  ``File`` = file }
+                : GetSourceFileParams
+            )
+
+        member this.getConfigFileNames(parameters: GetProjectDiagnosticsParams) = Api.getConfigFileNames this parameters
+
+        /// The fields of GetProjectDiagnosticsParams, spread. Builds the record and calls the overload above.
+        member inline this.getConfigFileNames(snapshot: int, project: string) =
+            this.getConfigFileNames(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetProjectDiagnosticsParams
+            )
+
+        member this.getConfigSourceFile(parameters: GetSourceFileParams) = Api.getConfigSourceFile this parameters
+
+        /// The fields of GetSourceFileParams, spread. Builds the record and calls the overload above.
+        member inline this.getConfigSourceFile(snapshot: int, project: string, file: DocumentIdentifier) =
+            this.getConfigSourceFile(
+                { Snapshot = snapshot
+                  Project = project
+                  ``File`` = file }
+                : GetSourceFileParams
+            )
+
+        member this.resolveName(parameters: ResolveNameParams) = Api.resolveName this parameters
+
+        /// The fields of ResolveNameParams, spread. Builds the record and calls the overload above.
+        member inline this.resolveName(snapshot: int, project: string, name: string, meaning: SymbolFlags, [<Struct>] ?location: string, [<Struct>] ?file: DocumentIdentifier, [<Struct>] ?position: int, [<Struct>] ?excludeGlobals: bool) =
+            this.resolveName(
+                { Snapshot = snapshot
+                  Project = project
+                  Name = name
+                  Meaning = meaning
+                  Location = location
+                  ``File`` = file
+                  Position = position
+                  ExcludeGlobals = excludeGlobals }
+                : ResolveNameParams
+            )
+
+        member this.getSymbolsInScope(parameters: GetSymbolsInScopeParams) = Api.getSymbolsInScope this parameters
+
+        /// The fields of GetSymbolsInScopeParams, spread. Builds the record and calls the overload above.
+        member inline this.getSymbolsInScope(snapshot: int, project: string, meaning: SymbolFlags, [<Struct>] ?location: string, [<Struct>] ?file: DocumentIdentifier, [<Struct>] ?position: int) =
+            this.getSymbolsInScope(
+                { Snapshot = snapshot
+                  Project = project
+                  Meaning = meaning
+                  Location = location
+                  ``File`` = file
+                  Position = position }
+                : GetSymbolsInScopeParams
+            )
+
+        member this.getSignaturesOfType(parameters: GetSignaturesOfTypeParams) = Api.getSignaturesOfType this parameters
+
+        /// The fields of GetSignaturesOfTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getSignaturesOfType(snapshot: int, project: string, ``type``: int, kind: SignatureKind) =
+            this.getSignaturesOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ``Type`` = ``type``
+                  Kind = kind }
+                : GetSignaturesOfTypeParams
+            )
+
+        member this.getResolvedSignature(parameters: GetResolvedSignatureParams) = Api.getResolvedSignature this parameters
+
+        /// The fields of GetResolvedSignatureParams, spread. Builds the record and calls the overload above.
+        member inline this.getResolvedSignature(snapshot: int, project: string, location: string) =
+            this.getResolvedSignature(
+                { Snapshot = snapshot
+                  Project = project
+                  Location = location }
+                : GetResolvedSignatureParams
+            )
+
+        member this.getTypeAtLocation(parameters: GetTypeAtLocationParams) = Api.getTypeAtLocation this parameters
+
+        /// The fields of GetTypeAtLocationParams, spread. Builds the record and calls the overload above.
+        member inline this.getTypeAtLocation(snapshot: int, project: string, location: string) =
+            this.getTypeAtLocation(
+                { Snapshot = snapshot
+                  Project = project
+                  Location = location }
+                : GetTypeAtLocationParams
+            )
+
+        member this.getTypeAtLocations(parameters: GetTypeAtLocationsParams) = Api.getTypeAtLocations this parameters
+
+        /// The fields of GetTypeAtLocationsParams, spread. Builds the record and calls the overload above.
+        member inline this.getTypeAtLocations(snapshot: int, project: string, [<Struct>] ?locations: string[]) =
+            this.getTypeAtLocations(
+                { Snapshot = snapshot
+                  Project = project
+                  Locations = locations }
+                : GetTypeAtLocationsParams
+            )
+
+        member this.getTypeAtPosition(parameters: GetTypeAtPositionParams) = Api.getTypeAtPosition this parameters
+
+        /// The fields of GetTypeAtPositionParams, spread. Builds the record and calls the overload above.
+        member inline this.getTypeAtPosition(snapshot: int, project: string, file: DocumentIdentifier, position: int) =
+            this.getTypeAtPosition(
+                { Snapshot = snapshot
+                  Project = project
+                  ``File`` = file
+                  Position = position }
+                : GetTypeAtPositionParams
+            )
+
+        member this.getTypesAtPositions(parameters: GetTypesAtPositionsParams) = Api.getTypesAtPositions this parameters
+
+        /// The fields of GetTypesAtPositionsParams, spread. Builds the record and calls the overload above.
+        member inline this.getTypesAtPositions(snapshot: int, project: string, file: DocumentIdentifier, [<Struct>] ?positions: int[]) =
+            this.getTypesAtPositions(
+                { Snapshot = snapshot
+                  Project = project
+                  ``File`` = file
+                  Positions = positions }
+                : GetTypesAtPositionsParams
+            )
+
+        member this.getParentOfSymbol(parameters: GetSymbolPropertyParams) = Api.getParentOfSymbol this parameters
+
+        /// The fields of GetSymbolPropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getParentOfSymbol(snapshot: int, project: string, objectId: int) =
+            this.getParentOfSymbol(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetSymbolPropertyParams
+            )
+
+        member this.getMembersOfSymbol(parameters: GetSymbolPropertyParams) = Api.getMembersOfSymbol this parameters
+
+        /// The fields of GetSymbolPropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getMembersOfSymbol(snapshot: int, project: string, objectId: int) =
+            this.getMembersOfSymbol(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetSymbolPropertyParams
+            )
+
+        member this.getExportsOfSymbol(parameters: GetSymbolPropertyParams) = Api.getExportsOfSymbol this parameters
+
+        /// The fields of GetSymbolPropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getExportsOfSymbol(snapshot: int, project: string, objectId: int) =
+            this.getExportsOfSymbol(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetSymbolPropertyParams
+            )
+
+        member this.getExportSymbolOfSymbol(parameters: GetSymbolPropertyParams) = Api.getExportSymbolOfSymbol this parameters
+
+        /// The fields of GetSymbolPropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getExportSymbolOfSymbol(snapshot: int, project: string, objectId: int) =
+            this.getExportSymbolOfSymbol(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetSymbolPropertyParams
+            )
+
+        member this.getSymbolOfType(parameters: GetTypePropertyParams) = Api.getSymbolOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getSymbolOfType(snapshot: int, project: string, objectId: int) =
+            this.getSymbolOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getTargetOfType(parameters: GetTypePropertyParams) = Api.getTargetOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getTargetOfType(snapshot: int, project: string, objectId: int) =
+            this.getTargetOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getFreshTypeOfType(parameters: GetTypePropertyParams) = Api.getFreshTypeOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getFreshTypeOfType(snapshot: int, project: string, objectId: int) =
+            this.getFreshTypeOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getRegularTypeOfType(parameters: GetTypePropertyParams) = Api.getRegularTypeOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getRegularTypeOfType(snapshot: int, project: string, objectId: int) =
+            this.getRegularTypeOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getTypesOfType(parameters: GetTypePropertyParams) = Api.getTypesOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getTypesOfType(snapshot: int, project: string, objectId: int) =
+            this.getTypesOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getTypeParametersOfType(parameters: GetTypePropertyParams) = Api.getTypeParametersOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getTypeParametersOfType(snapshot: int, project: string, objectId: int) =
+            this.getTypeParametersOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getOuterTypeParametersOfType(parameters: GetTypePropertyParams) = Api.getOuterTypeParametersOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getOuterTypeParametersOfType(snapshot: int, project: string, objectId: int) =
+            this.getOuterTypeParametersOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getLocalTypeParametersOfType(parameters: GetTypePropertyParams) = Api.getLocalTypeParametersOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getLocalTypeParametersOfType(snapshot: int, project: string, objectId: int) =
+            this.getLocalTypeParametersOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getAliasTypeArgumentsOfType(parameters: GetTypePropertyParams) = Api.getAliasTypeArgumentsOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getAliasTypeArgumentsOfType(snapshot: int, project: string, objectId: int) =
+            this.getAliasTypeArgumentsOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getAliasSymbolOfType(parameters: GetTypePropertyParams) = Api.getAliasSymbolOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getAliasSymbolOfType(snapshot: int, project: string, objectId: int) =
+            this.getAliasSymbolOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getObjectTypeOfType(parameters: GetTypePropertyParams) = Api.getObjectTypeOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getObjectTypeOfType(snapshot: int, project: string, objectId: int) =
+            this.getObjectTypeOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getIndexTypeOfType(parameters: GetTypePropertyParams) = Api.getIndexTypeOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getIndexTypeOfType(snapshot: int, project: string, objectId: int) =
+            this.getIndexTypeOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getCheckTypeOfType(parameters: GetTypePropertyParams) = Api.getCheckTypeOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getCheckTypeOfType(snapshot: int, project: string, objectId: int) =
+            this.getCheckTypeOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getExtendsTypeOfType(parameters: GetTypePropertyParams) = Api.getExtendsTypeOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getExtendsTypeOfType(snapshot: int, project: string, objectId: int) =
+            this.getExtendsTypeOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getBaseTypeOfType(parameters: GetTypePropertyParams) = Api.getBaseTypeOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getBaseTypeOfType(snapshot: int, project: string, objectId: int) =
+            this.getBaseTypeOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getConstraintOfType(parameters: GetTypePropertyParams) = Api.getConstraintOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getConstraintOfType(snapshot: int, project: string, objectId: int) =
+            this.getConstraintOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getTypeParametersOfSignature(parameters: GetSignaturePropertyParams) = Api.getTypeParametersOfSignature this parameters
+
+        /// The fields of GetSignaturePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getTypeParametersOfSignature(snapshot: int, project: string, objectId: int) =
+            this.getTypeParametersOfSignature(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetSignaturePropertyParams
+            )
+
+        member this.getParametersOfSignature(parameters: GetSignaturePropertyParams) = Api.getParametersOfSignature this parameters
+
+        /// The fields of GetSignaturePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getParametersOfSignature(snapshot: int, project: string, objectId: int) =
+            this.getParametersOfSignature(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetSignaturePropertyParams
+            )
+
+        member this.getThisParameterOfSignature(parameters: GetSignaturePropertyParams) = Api.getThisParameterOfSignature this parameters
+
+        /// The fields of GetSignaturePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getThisParameterOfSignature(snapshot: int, project: string, objectId: int) =
+            this.getThisParameterOfSignature(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetSignaturePropertyParams
+            )
+
+        member this.getTargetOfSignature(parameters: GetSignaturePropertyParams) = Api.getTargetOfSignature this parameters
+
+        /// The fields of GetSignaturePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getTargetOfSignature(snapshot: int, project: string, objectId: int) =
+            this.getTargetOfSignature(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetSignaturePropertyParams
+            )
+
+        member this.getContextualType(parameters: GetContextualTypeParams) = Api.getContextualType this parameters
+
+        /// The fields of GetContextualTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getContextualType(snapshot: int, project: string, location: string) =
+            this.getContextualType(
+                { Snapshot = snapshot
+                  Project = project
+                  Location = location }
+                : GetContextualTypeParams
+            )
+
+        member this.getBaseTypeOfLiteralType(parameters: GetBaseTypeOfLiteralTypeParams) = Api.getBaseTypeOfLiteralType this parameters
+
+        /// The fields of GetBaseTypeOfLiteralTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getBaseTypeOfLiteralType(snapshot: int, project: string, ``type``: int) =
+            this.getBaseTypeOfLiteralType(
+                { Snapshot = snapshot
+                  Project = project
+                  ``Type`` = ``type`` }
+                : GetBaseTypeOfLiteralTypeParams
+            )
+
+        member this.getNonNullableType(parameters: GetTypePropertyParams) = Api.getNonNullableType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getNonNullableType(snapshot: int, project: string, objectId: int) =
+            this.getNonNullableType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getTypeFromTypeNode(parameters: GetTypeFromTypeNodeParams) = Api.getTypeFromTypeNode this parameters
+
+        /// The fields of GetTypeFromTypeNodeParams, spread. Builds the record and calls the overload above.
+        member inline this.getTypeFromTypeNode(snapshot: int, project: string, location: string) =
+            this.getTypeFromTypeNode(
+                { Snapshot = snapshot
+                  Project = project
+                  Location = location }
+                : GetTypeFromTypeNodeParams
+            )
+
+        member this.getWidenedType(parameters: GetWidenedTypeParams) = Api.getWidenedType this parameters
+
+        /// The fields of GetWidenedTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getWidenedType(snapshot: int, project: string, ``type``: int) =
+            this.getWidenedType(
+                { Snapshot = snapshot
+                  Project = project
+                  ``Type`` = ``type`` }
+                : GetWidenedTypeParams
+            )
+
+        member this.getParameterType(parameters: GetParameterTypeParams) = Api.getParameterType this parameters
+
+        /// The fields of GetParameterTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getParameterType(snapshot: int, project: string, signature: int, index: int) =
+            this.getParameterType(
+                { Snapshot = snapshot
+                  Project = project
+                  Signature = signature
+                  Index = index }
+                : GetParameterTypeParams
+            )
+
+        member this.getTypeParameterAtPosition(parameters: GetParameterTypeParams) = Api.getTypeParameterAtPosition this parameters
+
+        /// The fields of GetParameterTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getTypeParameterAtPosition(snapshot: int, project: string, signature: int, index: int) =
+            this.getTypeParameterAtPosition(
+                { Snapshot = snapshot
+                  Project = project
+                  Signature = signature
+                  Index = index }
+                : GetParameterTypeParams
+            )
+
+        member this.isArrayLikeType(parameters: IsArrayLikeTypeParams) = Api.isArrayLikeType this parameters
+
+        /// The fields of IsArrayLikeTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.isArrayLikeType(snapshot: int, project: string, ``type``: int) =
+            this.isArrayLikeType(
+                { Snapshot = snapshot
+                  Project = project
+                  ``Type`` = ``type`` }
+                : IsArrayLikeTypeParams
+            )
+
+        member this.isTypeAssignableTo(parameters: IsTypeAssignableToParams) = Api.isTypeAssignableTo this parameters
+
+        /// The fields of IsTypeAssignableToParams, spread. Builds the record and calls the overload above.
+        member inline this.isTypeAssignableTo(snapshot: int, project: string, source: int, target: int) =
+            this.isTypeAssignableTo(
+                { Snapshot = snapshot
+                  Project = project
+                  Source = source
+                  Target = target }
+                : IsTypeAssignableToParams
+            )
+
+        member this.getShorthandAssignmentValueSymbol(parameters: GetTypeAtLocationParams) = Api.getShorthandAssignmentValueSymbol this parameters
+
+        /// The fields of GetTypeAtLocationParams, spread. Builds the record and calls the overload above.
+        member inline this.getShorthandAssignmentValueSymbol(snapshot: int, project: string, location: string) =
+            this.getShorthandAssignmentValueSymbol(
+                { Snapshot = snapshot
+                  Project = project
+                  Location = location }
+                : GetTypeAtLocationParams
+            )
+
+        member this.getTypeOfSymbolAtLocation(parameters: GetTypeOfSymbolAtLocationParams) = Api.getTypeOfSymbolAtLocation this parameters
+
+        /// The fields of GetTypeOfSymbolAtLocationParams, spread. Builds the record and calls the overload above.
+        member inline this.getTypeOfSymbolAtLocation(snapshot: int, project: string, symbol: int, location: string) =
+            this.getTypeOfSymbolAtLocation(
+                { Snapshot = snapshot
+                  Project = project
+                  Symbol = symbol
+                  Location = location }
+                : GetTypeOfSymbolAtLocationParams
+            )
+
+        member this.typeToTypeNode(parameters: TypeToTypeNodeParams) = Api.typeToTypeNode this parameters
+
+        /// The fields of TypeToTypeNodeParams, spread. Builds the record and calls the overload above.
+        member inline this.typeToTypeNode(snapshot: int, project: string, ``type``: int, [<Struct>] ?location: string, [<Struct>] ?flags: int) =
+            this.typeToTypeNode(
+                { Snapshot = snapshot
+                  Project = project
+                  ``Type`` = ``type``
+                  Location = location
+                  Flags = flags }
+                : TypeToTypeNodeParams
+            )
+
+        member this.signatureToSignatureDeclaration(parameters: SignatureToSignatureDeclarationParams) = Api.signatureToSignatureDeclaration this parameters
+
+        /// The fields of SignatureToSignatureDeclarationParams, spread. Builds the record and calls the overload above.
+        member inline this.signatureToSignatureDeclaration(snapshot: int, project: string, signature: int, kind: SyntaxKind, [<Struct>] ?location: string, [<Struct>] ?flags: NodeBuilderFlags) =
+            this.signatureToSignatureDeclaration(
+                { Snapshot = snapshot
+                  Project = project
+                  Signature = signature
+                  Kind = kind
+                  Location = location
+                  Flags = flags }
+                : SignatureToSignatureDeclarationParams
+            )
+
+        member this.typeToString(parameters: TypeToTypeNodeParams) = Api.typeToString this parameters
+
+        /// The fields of TypeToTypeNodeParams, spread. Builds the record and calls the overload above.
+        member inline this.typeToString(snapshot: int, project: string, ``type``: int, [<Struct>] ?location: string, [<Struct>] ?flags: int) =
+            this.typeToString(
+                { Snapshot = snapshot
+                  Project = project
+                  ``Type`` = ``type``
+                  Location = location
+                  Flags = flags }
+                : TypeToTypeNodeParams
+            )
+
+        member this.isContextSensitive(parameters: GetContextualTypeParams) = Api.isContextSensitive this parameters
+
+        /// The fields of GetContextualTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.isContextSensitive(snapshot: int, project: string, location: string) =
+            this.isContextSensitive(
+                { Snapshot = snapshot
+                  Project = project
+                  Location = location }
+                : GetContextualTypeParams
+            )
+
+        member this.getReturnTypeOfSignature(parameters: GetSignaturePropertyParams) = Api.getReturnTypeOfSignature this parameters
+
+        /// The fields of GetSignaturePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getReturnTypeOfSignature(snapshot: int, project: string, objectId: int) =
+            this.getReturnTypeOfSignature(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetSignaturePropertyParams
+            )
+
+        member this.getRestTypeOfSignature(parameters: CheckerSignatureParams) = Api.getRestTypeOfSignature this parameters
+
+        /// The fields of CheckerSignatureParams, spread. Builds the record and calls the overload above.
+        member inline this.getRestTypeOfSignature(snapshot: int, project: string, signature: int) =
+            this.getRestTypeOfSignature(
+                { Snapshot = snapshot
+                  Project = project
+                  Signature = signature }
+                : CheckerSignatureParams
+            )
+
+        member this.getTypePredicateOfSignature(parameters: CheckerSignatureParams) = Api.getTypePredicateOfSignature this parameters
+
+        /// The fields of CheckerSignatureParams, spread. Builds the record and calls the overload above.
+        member inline this.getTypePredicateOfSignature(snapshot: int, project: string, signature: int) =
+            this.getTypePredicateOfSignature(
+                { Snapshot = snapshot
+                  Project = project
+                  Signature = signature }
+                : CheckerSignatureParams
+            )
+
+        member this.getBaseTypes(parameters: CheckerTypeParams) = Api.getBaseTypes this parameters
+
+        /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getBaseTypes(snapshot: int, project: string, ``type``: int) =
+            this.getBaseTypes(
+                { Snapshot = snapshot
+                  Project = project
+                  ``Type`` = ``type`` }
+                : CheckerTypeParams
+            )
+
+        member this.getPropertiesOfType(parameters: CheckerTypeParams) = Api.getPropertiesOfType this parameters
+
+        /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getPropertiesOfType(snapshot: int, project: string, ``type``: int) =
+            this.getPropertiesOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ``Type`` = ``type`` }
+                : CheckerTypeParams
+            )
+
+        member this.getApparentPropertiesOfType(parameters: GetTypePropertyParams) = Api.getApparentPropertiesOfType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getApparentPropertiesOfType(snapshot: int, project: string, objectId: int) =
+            this.getApparentPropertiesOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getApparentType(parameters: GetTypePropertyParams) = Api.getApparentType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getApparentType(snapshot: int, project: string, objectId: int) =
+            this.getApparentType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getReducedType(parameters: GetTypePropertyParams) = Api.getReducedType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getReducedType(snapshot: int, project: string, objectId: int) =
+            this.getReducedType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getPropertyOfType(parameters: GetPropertyOfTypeParams) = Api.getPropertyOfType this parameters
+
+        /// The fields of GetPropertyOfTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getPropertyOfType(snapshot: int, project: string, ``type``: int, name: string) =
+            this.getPropertyOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ``Type`` = ``type``
+                  Name = name }
+                : GetPropertyOfTypeParams
+            )
+
+        member this.getIndexInfosOfType(parameters: CheckerTypeParams) = Api.getIndexInfosOfType this parameters
+
+        /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getIndexInfosOfType(snapshot: int, project: string, ``type``: int) =
+            this.getIndexInfosOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ``Type`` = ``type`` }
+                : CheckerTypeParams
+            )
+
+        member this.getConstraintOfTypeParameter(parameters: GetTypePropertyParams) = Api.getConstraintOfTypeParameter this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getConstraintOfTypeParameter(snapshot: int, project: string, objectId: int) =
+            this.getConstraintOfTypeParameter(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getDefaultFromTypeParameter(parameters: GetTypePropertyParams) = Api.getDefaultFromTypeParameter this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getDefaultFromTypeParameter(snapshot: int, project: string, objectId: int) =
+            this.getDefaultFromTypeParameter(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getBaseConstraintOfType(parameters: CheckerTypeParams) = Api.getBaseConstraintOfType this parameters
+
+        /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getBaseConstraintOfType(snapshot: int, project: string, ``type``: int) =
+            this.getBaseConstraintOfType(
+                { Snapshot = snapshot
+                  Project = project
+                  ``Type`` = ``type`` }
+                : CheckerTypeParams
+            )
+
+        member this.getTypeArguments(parameters: CheckerTypeParams) = Api.getTypeArguments this parameters
+
+        /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getTypeArguments(snapshot: int, project: string, ``type``: int) =
+            this.getTypeArguments(
+                { Snapshot = snapshot
+                  Project = project
+                  ``Type`` = ``type`` }
+                : CheckerTypeParams
+            )
+
+        member this.getImportAdderEdits(parameters: GetImportAdderEditsParams) = Api.getImportAdderEdits this parameters
+
+        /// The fields of GetImportAdderEditsParams, spread. Builds the record and calls the overload above.
+        member inline this.getImportAdderEdits(snapshot: int, project: string, file: DocumentIdentifier, [<Struct>] ?actions: ImportAdderAction[]) =
+            this.getImportAdderEdits(
+                { Snapshot = snapshot
+                  Project = project
+                  ``File`` = file
+                  Actions = actions }
+                : GetImportAdderEditsParams
+            )
+
+        member this.getTrueTypeOfConditionalType(parameters: GetTypePropertyParams) = Api.getTrueTypeOfConditionalType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getTrueTypeOfConditionalType(snapshot: int, project: string, objectId: int) =
+            this.getTrueTypeOfConditionalType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getFalseTypeOfConditionalType(parameters: GetTypePropertyParams) = Api.getFalseTypeOfConditionalType this parameters
+
+        /// The fields of GetTypePropertyParams, spread. Builds the record and calls the overload above.
+        member inline this.getFalseTypeOfConditionalType(snapshot: int, project: string, objectId: int) =
+            this.getFalseTypeOfConditionalType(
+                { Snapshot = snapshot
+                  Project = project
+                  ObjectId = objectId }
+                : GetTypePropertyParams
+            )
+
+        member this.getConstantValue(parameters: CheckerNodeParams) = Api.getConstantValue this parameters
+
+        /// The fields of CheckerNodeParams, spread. Builds the record and calls the overload above.
+        member inline this.getConstantValue(snapshot: int, project: string, location: string) =
+            this.getConstantValue(
+                { Snapshot = snapshot
+                  Project = project
+                  Location = location }
+                : CheckerNodeParams
+            )
+
+        member this.getSignatureFromDeclaration(parameters: CheckerNodeParams) = Api.getSignatureFromDeclaration this parameters
+
+        /// The fields of CheckerNodeParams, spread. Builds the record and calls the overload above.
+        member inline this.getSignatureFromDeclaration(snapshot: int, project: string, location: string) =
+            this.getSignatureFromDeclaration(
+                { Snapshot = snapshot
+                  Project = project
+                  Location = location }
+                : CheckerNodeParams
+            )
+
+        member this.getExportSpecifierLocalTargetSymbol(parameters: CheckerNodeParams) = Api.getExportSpecifierLocalTargetSymbol this parameters
+
+        /// The fields of CheckerNodeParams, spread. Builds the record and calls the overload above.
+        member inline this.getExportSpecifierLocalTargetSymbol(snapshot: int, project: string, location: string) =
+            this.getExportSpecifierLocalTargetSymbol(
+                { Snapshot = snapshot
+                  Project = project
+                  Location = location }
+                : CheckerNodeParams
+            )
+
+        member this.getAliasedSymbol(parameters: CheckerSymbolParams) = Api.getAliasedSymbol this parameters
+
+        /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
+        member inline this.getAliasedSymbol(snapshot: int, project: string, symbol: int) =
+            this.getAliasedSymbol(
+                { Snapshot = snapshot
+                  Project = project
+                  Symbol = symbol }
+                : CheckerSymbolParams
+            )
+
+        member this.getImmediateAliasedSymbol(parameters: CheckerSymbolParams) = Api.getImmediateAliasedSymbol this parameters
+
+        /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
+        member inline this.getImmediateAliasedSymbol(snapshot: int, project: string, symbol: int) =
+            this.getImmediateAliasedSymbol(
+                { Snapshot = snapshot
+                  Project = project
+                  Symbol = symbol }
+                : CheckerSymbolParams
+            )
+
+        member this.getTargetSymbol(parameters: CheckerSymbolParams) = Api.getTargetSymbol this parameters
+
+        /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
+        member inline this.getTargetSymbol(snapshot: int, project: string, symbol: int) =
+            this.getTargetSymbol(
+                { Snapshot = snapshot
+                  Project = project
+                  Symbol = symbol }
+                : CheckerSymbolParams
+            )
+
+        member this.getFullyQualifiedName(parameters: CheckerSymbolParams) = Api.getFullyQualifiedName this parameters
+
+        /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
+        member inline this.getFullyQualifiedName(snapshot: int, project: string, symbol: int) =
+            this.getFullyQualifiedName(
+                { Snapshot = snapshot
+                  Project = project
+                  Symbol = symbol }
+                : CheckerSymbolParams
+            )
+
+        member this.getExportsOfModule(parameters: CheckerSymbolParams) = Api.getExportsOfModule this parameters
+
+        /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
+        member inline this.getExportsOfModule(snapshot: int, project: string, symbol: int) =
+            this.getExportsOfModule(
+                { Snapshot = snapshot
+                  Project = project
+                  Symbol = symbol }
+                : CheckerSymbolParams
+            )
+
+        member this.getMemberInModuleExports(parameters: GetMemberInModuleExportsParams) = Api.getMemberInModuleExports this parameters
+
+        /// The fields of GetMemberInModuleExportsParams, spread. Builds the record and calls the overload above.
+        member inline this.getMemberInModuleExports(snapshot: int, project: string, symbol: int, name: string) =
+            this.getMemberInModuleExports(
+                { Snapshot = snapshot
+                  Project = project
+                  Symbol = symbol
+                  Name = name }
+                : GetMemberInModuleExportsParams
+            )
+
+        member this.getJsDocTags(parameters: CheckerSymbolParams) = Api.getJsDocTags this parameters
+
+        /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
+        member inline this.getJsDocTags(snapshot: int, project: string, symbol: int) =
+            this.getJsDocTags(
+                { Snapshot = snapshot
+                  Project = project
+                  Symbol = symbol }
+                : CheckerSymbolParams
+            )
+
+        member this.getDocumentationComment(parameters: CheckerSymbolParams) = Api.getDocumentationComment this parameters
+
+        /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
+        member inline this.getDocumentationComment(snapshot: int, project: string, symbol: int) =
+            this.getDocumentationComment(
+                { Snapshot = snapshot
+                  Project = project
+                  Symbol = symbol }
+                : CheckerSymbolParams
+            )
+
+        member this.isArrayType(parameters: CheckerTypeParams) = Api.isArrayType this parameters
+
+        /// The fields of CheckerTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.isArrayType(snapshot: int, project: string, ``type``: int) =
+            this.isArrayType(
+                { Snapshot = snapshot
+                  Project = project
+                  ``Type`` = ``type`` }
+                : CheckerTypeParams
+            )
+
+        member this.isReadonlySymbol(parameters: CheckerSymbolParams) = Api.isReadonlySymbol this parameters
+
+        /// The fields of CheckerSymbolParams, spread. Builds the record and calls the overload above.
+        member inline this.isReadonlySymbol(snapshot: int, project: string, symbol: int) =
+            this.isReadonlySymbol(
+                { Snapshot = snapshot
+                  Project = project
+                  Symbol = symbol }
+                : CheckerSymbolParams
+            )
+
+        member this.getReferencesToSymbolInFile(parameters: GetReferencesToSymbolInFileParams) = Api.getReferencesToSymbolInFile this parameters
+
+        /// The fields of GetReferencesToSymbolInFileParams, spread. Builds the record and calls the overload above.
+        member inline this.getReferencesToSymbolInFile(snapshot: int, project: string, file: DocumentIdentifier, symbol: int) =
+            this.getReferencesToSymbolInFile(
+                { Snapshot = snapshot
+                  Project = project
+                  ``File`` = file
+                  Symbol = symbol }
+                : GetReferencesToSymbolInFileParams
+            )
+
+        member this.getReferencedSymbolsForNode(parameters: GetReferencedSymbolsForNodeParams) = Api.getReferencedSymbolsForNode this parameters
+
+        /// The fields of GetReferencedSymbolsForNodeParams, spread. Builds the record and calls the overload above.
+        member inline this.getReferencedSymbolsForNode(snapshot: int, project: string, node: string, position: int) =
+            this.getReferencedSymbolsForNode(
+                { Snapshot = snapshot
+                  Project = project
+                  Node = node
+                  Position = position }
+                : GetReferencedSymbolsForNodeParams
+            )
+
+        member this.getSignatureUsages(parameters: GetSignatureUsagesParams) = Api.getSignatureUsages this parameters
+
+        /// The fields of GetSignatureUsagesParams, spread. Builds the record and calls the overload above.
+        member inline this.getSignatureUsages(snapshot: int, project: string, signatureDecl: string) =
+            this.getSignatureUsages(
+                { Snapshot = snapshot
+                  Project = project
+                  SignatureDecl = signatureDecl }
+                : GetSignatureUsagesParams
+            )
+
+        member this.getCompletionsAtPosition(parameters: GetCompletionsAtPositionParams) = Api.getCompletionsAtPosition this parameters
+
+        /// The fields of GetCompletionsAtPositionParams, spread. Builds the record and calls the overload above.
+        member inline this.getCompletionsAtPosition(snapshot: int, project: string, file: DocumentIdentifier, position: int, [<Struct>] ?triggerCharacter: string, [<Struct>] ?includeSymbol: bool) =
+            this.getCompletionsAtPosition(
+                { Snapshot = snapshot
+                  Project = project
+                  ``File`` = file
+                  Position = position
+                  TriggerCharacter = triggerCharacter
+                  IncludeSymbol = includeSymbol }
+                : GetCompletionsAtPositionParams
+            )
+
+        member this.getSyntacticDiagnostics(parameters: GetDiagnosticsParams) = Api.getSyntacticDiagnostics this parameters
+
+        /// The fields of GetDiagnosticsParams, spread. Builds the record and calls the overload above.
+        member inline this.getSyntacticDiagnostics(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
+            this.getSyntacticDiagnostics(
+                { Snapshot = snapshot
+                  Project = project
+                  Files = files }
+                : GetDiagnosticsParams
+            )
+
+        member this.getBindDiagnostics(parameters: GetDiagnosticsParams) = Api.getBindDiagnostics this parameters
+
+        /// The fields of GetDiagnosticsParams, spread. Builds the record and calls the overload above.
+        member inline this.getBindDiagnostics(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
+            this.getBindDiagnostics(
+                { Snapshot = snapshot
+                  Project = project
+                  Files = files }
+                : GetDiagnosticsParams
+            )
+
+        member this.getSemanticDiagnostics(parameters: GetDiagnosticsParams) = Api.getSemanticDiagnostics this parameters
+
+        /// The fields of GetDiagnosticsParams, spread. Builds the record and calls the overload above.
+        member inline this.getSemanticDiagnostics(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
+            this.getSemanticDiagnostics(
+                { Snapshot = snapshot
+                  Project = project
+                  Files = files }
+                : GetDiagnosticsParams
+            )
+
+        member this.getSuggestionDiagnostics(parameters: GetDiagnosticsParams) = Api.getSuggestionDiagnostics this parameters
+
+        /// The fields of GetDiagnosticsParams, spread. Builds the record and calls the overload above.
+        member inline this.getSuggestionDiagnostics(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
+            this.getSuggestionDiagnostics(
+                { Snapshot = snapshot
+                  Project = project
+                  Files = files }
+                : GetDiagnosticsParams
+            )
+
+        member this.getDeclarationDiagnostics(parameters: GetDiagnosticsParams) = Api.getDeclarationDiagnostics this parameters
+
+        /// The fields of GetDiagnosticsParams, spread. Builds the record and calls the overload above.
+        member inline this.getDeclarationDiagnostics(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
+            this.getDeclarationDiagnostics(
+                { Snapshot = snapshot
+                  Project = project
+                  Files = files }
+                : GetDiagnosticsParams
+            )
+
+        member this.getProgramDiagnostics(parameters: GetProjectDiagnosticsParams) = Api.getProgramDiagnostics this parameters
+
+        /// The fields of GetProjectDiagnosticsParams, spread. Builds the record and calls the overload above.
+        member inline this.getProgramDiagnostics(snapshot: int, project: string) =
+            this.getProgramDiagnostics(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetProjectDiagnosticsParams
+            )
+
+        member this.getGlobalDiagnostics(parameters: GetProjectDiagnosticsParams) = Api.getGlobalDiagnostics this parameters
+
+        /// The fields of GetProjectDiagnosticsParams, spread. Builds the record and calls the overload above.
+        member inline this.getGlobalDiagnostics(snapshot: int, project: string) =
+            this.getGlobalDiagnostics(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetProjectDiagnosticsParams
+            )
+
+        member this.getConfigFileParsingDiagnostics(parameters: GetProjectDiagnosticsParams) = Api.getConfigFileParsingDiagnostics this parameters
+
+        /// The fields of GetProjectDiagnosticsParams, spread. Builds the record and calls the overload above.
+        member inline this.getConfigFileParsingDiagnostics(snapshot: int, project: string) =
+            this.getConfigFileParsingDiagnostics(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetProjectDiagnosticsParams
+            )
+
+        member this.printNode(parameters: PrintNodeParams) = Api.printNode this parameters
+
+        /// The fields of PrintNodeParams, spread. Builds the record and calls the overload above.
+        member inline this.printNode(data: string, [<Struct>] ?preserveSourceNewlines: bool, [<Struct>] ?neverAsciiEscape: bool, [<Struct>] ?terminateUnterminatedLiterals: bool) =
+            this.printNode(
+                { Data = data
+                  PreserveSourceNewlines = preserveSourceNewlines
+                  NeverAsciiEscape = neverAsciiEscape
+                  TerminateUnterminatedLiterals = terminateUnterminatedLiterals }
+                : PrintNodeParams
+            )
+
+        member this.formatNodeForInsertion(parameters: FormatNodeForInsertionParams) = Api.formatNodeForInsertion this parameters
+
+        /// The fields of FormatNodeForInsertionParams, spread. Builds the record and calls the overload above.
+        member inline this.formatNodeForInsertion(snapshot: int, project: string, file: DocumentIdentifier, position: int, data: string) =
+            this.formatNodeForInsertion(
+                { Snapshot = snapshot
+                  Project = project
+                  ``File`` = file
+                  Position = position
+                  Data = data }
+                : FormatNodeForInsertionParams
+            )
+
+        member this.emit(parameters: EmitParams) = Api.emit this parameters
+
+        /// The fields of EmitParams, spread. Builds the record and calls the overload above.
+        member inline this.emit(snapshot: int, project: string, [<Struct>] ?emitOnly: int) =
+            this.emit(
+                { Snapshot = snapshot
+                  Project = project
+                  EmitOnly = emitOnly }
+                : EmitParams
+            )
+
+        member this.emitToString(parameters: EmitParams) = Api.emitToString this parameters
+
+        /// The fields of EmitParams, spread. Builds the record and calls the overload above.
+        member inline this.emitToString(snapshot: int, project: string, [<Struct>] ?emitOnly: int) =
+            this.emitToString(
+                { Snapshot = snapshot
+                  Project = project
+                  EmitOnly = emitOnly }
+                : EmitParams
+            )
+
+        member this.getJavaScriptEmit(parameters: SelectedFilesEmitParams) = Api.getJavaScriptEmit this parameters
+
+        /// The fields of SelectedFilesEmitParams, spread. Builds the record and calls the overload above.
+        member inline this.getJavaScriptEmit(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
+            this.getJavaScriptEmit(
+                { Snapshot = snapshot
+                  Project = project
+                  Files = files }
+                : SelectedFilesEmitParams
+            )
+
+        member this.getDeclarationEmit(parameters: SelectedFilesEmitParams) = Api.getDeclarationEmit this parameters
+
+        /// The fields of SelectedFilesEmitParams, spread. Builds the record and calls the overload above.
+        member inline this.getDeclarationEmit(snapshot: int, project: string, [<Struct>] ?files: DocumentIdentifier[]) =
+            this.getDeclarationEmit(
+                { Snapshot = snapshot
+                  Project = project
+                  Files = files }
+                : SelectedFilesEmitParams
+            )
+
+        member this.getAnyType(parameters: GetIntrinsicTypeParams) = Api.getAnyType this parameters
+
+        /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getAnyType(snapshot: int, project: string) =
+            this.getAnyType(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetIntrinsicTypeParams
+            )
+
+        member this.getStringType(parameters: GetIntrinsicTypeParams) = Api.getStringType this parameters
+
+        /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getStringType(snapshot: int, project: string) =
+            this.getStringType(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetIntrinsicTypeParams
+            )
+
+        member this.getNumberType(parameters: GetIntrinsicTypeParams) = Api.getNumberType this parameters
+
+        /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getNumberType(snapshot: int, project: string) =
+            this.getNumberType(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetIntrinsicTypeParams
+            )
+
+        member this.getBooleanType(parameters: GetIntrinsicTypeParams) = Api.getBooleanType this parameters
+
+        /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getBooleanType(snapshot: int, project: string) =
+            this.getBooleanType(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetIntrinsicTypeParams
+            )
+
+        member this.getVoidType(parameters: GetIntrinsicTypeParams) = Api.getVoidType this parameters
+
+        /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getVoidType(snapshot: int, project: string) =
+            this.getVoidType(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetIntrinsicTypeParams
+            )
+
+        member this.getUndefinedType(parameters: GetIntrinsicTypeParams) = Api.getUndefinedType this parameters
+
+        /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getUndefinedType(snapshot: int, project: string) =
+            this.getUndefinedType(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetIntrinsicTypeParams
+            )
+
+        member this.getNullType(parameters: GetIntrinsicTypeParams) = Api.getNullType this parameters
+
+        /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getNullType(snapshot: int, project: string) =
+            this.getNullType(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetIntrinsicTypeParams
+            )
+
+        member this.getNeverType(parameters: GetIntrinsicTypeParams) = Api.getNeverType this parameters
+
+        /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getNeverType(snapshot: int, project: string) =
+            this.getNeverType(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetIntrinsicTypeParams
+            )
+
+        member this.getUnknownType(parameters: GetIntrinsicTypeParams) = Api.getUnknownType this parameters
+
+        /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getUnknownType(snapshot: int, project: string) =
+            this.getUnknownType(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetIntrinsicTypeParams
+            )
+
+        member this.getBigIntType(parameters: GetIntrinsicTypeParams) = Api.getBigIntType this parameters
+
+        /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getBigIntType(snapshot: int, project: string) =
+            this.getBigIntType(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetIntrinsicTypeParams
+            )
+
+        member this.getESSymbolType(parameters: GetIntrinsicTypeParams) = Api.getESSymbolType this parameters
+
+        /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getESSymbolType(snapshot: int, project: string) =
+            this.getESSymbolType(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetIntrinsicTypeParams
+            )
+
+        member this.getNonPrimitiveType(parameters: GetIntrinsicTypeParams) = Api.getNonPrimitiveType this parameters
+
+        /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getNonPrimitiveType(snapshot: int, project: string) =
+            this.getNonPrimitiveType(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetIntrinsicTypeParams
+            )
+
+        member this.getWellKnownSymbols(parameters: GetIntrinsicTypeParams) = Api.getWellKnownSymbols this parameters
+
+        /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getWellKnownSymbols(snapshot: int, project: string) =
+            this.getWellKnownSymbols(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetIntrinsicTypeParams
+            )
+
+        member this.getWellKnownSignatures(parameters: GetIntrinsicTypeParams) = Api.getWellKnownSignatures this parameters
+
+        /// The fields of GetIntrinsicTypeParams, spread. Builds the record and calls the overload above.
+        member inline this.getWellKnownSignatures(snapshot: int, project: string) =
+            this.getWellKnownSignatures(
+                { Snapshot = snapshot
+                  Project = project }
+                : GetIntrinsicTypeParams
+            )
+
+        member this.startCPUProfile(parameters: ProfileParams) = Api.startCPUProfile this parameters
+
+        /// The fields of ProfileParams, spread. Builds the record and calls the overload above.
+        member inline this.startCPUProfile(dir: string) =
+            this.startCPUProfile(
+                { Dir = dir }
+                : ProfileParams
+            )
+
+        member this.stopCPUProfile() = Api.stopCPUProfile this
+
+        member this.saveHeapProfile(parameters: ProfileParams) = Api.saveHeapProfile this parameters
+
+        /// The fields of ProfileParams, spread. Builds the record and calls the overload above.
+        member inline this.saveHeapProfile(dir: string) =
+            this.saveHeapProfile(
+                { Dir = dir }
+                : ProfileParams
+            )
+

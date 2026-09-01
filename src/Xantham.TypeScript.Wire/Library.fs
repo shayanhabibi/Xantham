@@ -52,6 +52,119 @@ exception TsGoError of method: string * message: string
 /// resolution semantics.
 type TsGoCallback = string -> string
 
+/// The entries of one directory, as `getAccessibleEntries` answers them: names, not paths.
+type FileSystemEntries =
+    { Files: string[]
+      Directories: string[] }
+
+/// What `readFile` found. The server distinguishes all three, and the distinction is the reason
+/// the reply is an object rather than a bare string: `Missing` stops resolution at this path,
+/// where `FallBack` sends it on to the real filesystem. Getting the two the wrong way round
+/// silently changes module resolution.
+type FileRead =
+    /// The file's content, `Content ""` included - an empty file is not a missing one.
+    | Content of content: string
+    /// The file does not exist, and the real filesystem is not consulted.
+    | Missing
+    /// Not answered here; the server reads the real filesystem.
+    | FallBack
+
+/// <summary>
+/// The virtual filesystem the server delegates to when the process is started with
+/// <c>--callbacks=</c>, mirroring <c>dist/api/fs.d.ts</c>. Every member is optional, and one left
+/// unset is not registered at all, so the server never asks about it.
+/// </summary>
+/// <remarks>
+/// <para>This exists because the raw <see cref="T:Xantham.TypeScript.Wire.TsGoCallback"/> surface is
+/// unforgiving: each callback has its own reply shape, the shapes appear nowhere in the schema, and
+/// a wrong one is not an error but a Go panic that kills the process mid-request. The encoding is
+/// applied here once, transcribed from <c>dist/api/sync/client.js:35-56</c>.</para>
+/// <para><c>ValueNone</c> from a member means "not answered" - the empty reply the server reads as
+/// "fall back to the real filesystem" - which is why <c>ReadFile</c> has its own three-way type
+/// rather than returning an option.</para>
+/// </remarks>
+type VirtualFileSystem =
+    { DirectoryExists: (string -> bool voption) voption
+      FileExists: (string -> bool voption) voption
+      GetAccessibleEntries: (string -> FileSystemEntries voption) voption
+      ReadFile: (string -> FileRead) voption
+      Realpath: (string -> string voption) voption
+      /// Takes the path and then the content to write. The server expects no answer.
+      WriteFile: (string -> string -> unit) voption }
+
+    /// A filesystem that answers nothing, so every path falls back to the real one. Copy-update
+    /// it with the members you mean to serve.
+    static member Default =
+        { DirectoryExists = ValueNone
+          FileExists = ValueNone
+          GetAccessibleEntries = ValueNone
+          ReadFile = ValueNone
+          Realpath = ValueNone
+          WriteFile = ValueNone }
+
+[<RequireQualifiedAccess>]
+module VirtualFileSystem =
+    /// The argument always arrives as a JSON string - `"C:/..."`, quotes included.
+    let private path (argument: string) = Json.JsonSerializer.Deserialize<string> argument
+
+    let private json (value: 'T) = Json.JsonSerializer.Serialize<'T> value
+
+    /// An empty reply is how "not answered" reaches the server; anything else is JSON.
+    let private orFallBack (encode: 'T -> string) (value: 'T voption) =
+        match value with
+        | ValueSome value -> encode value
+        | ValueNone -> ""
+
+    let private ofBool exists = if exists then "true" else "false"
+
+    /// <summary>
+    /// The callback table to hand to <c>TscChannel</c> or <c>TscMailbox</c>. Only the members that
+    /// are set appear in it, and only those names reach <c>--callbacks=</c>.
+    /// </summary>
+    let callbacks (fs: VirtualFileSystem) : IDictionary<string, TsGoCallback> =
+        let table = Dictionary<string, TsGoCallback>()
+        let add name (callback: TsGoCallback) = table[name] <- callback
+
+        fs.ReadFile
+        |> ValueOption.iter (fun readFile ->
+            // The one callback whose reply is an object: it has to carry the difference between a
+            // content of `null` and no answer at all, which a bare string cannot.
+            add "readFile" (fun argument ->
+                match readFile (path argument) with
+                | Content content -> "{\"content\":" + json content + "}"
+                | Missing -> "{\"content\":null}"
+                | FallBack -> ""))
+
+        fs.FileExists
+        |> ValueOption.iter (fun fileExists -> add "fileExists" (path >> fileExists >> orFallBack ofBool))
+
+        fs.DirectoryExists
+        |> ValueOption.iter (fun directoryExists ->
+            add "directoryExists" (path >> directoryExists >> orFallBack ofBool))
+
+        fs.Realpath
+        |> ValueOption.iter (fun realpath -> add "realpath" (path >> realpath >> orFallBack json))
+
+        fs.GetAccessibleEntries
+        |> ValueOption.iter (fun getEntries ->
+            add "getAccessibleEntries" (
+                path
+                >> getEntries
+                >> orFallBack (fun entries ->
+                    "{\"files\":" + json entries.Files + ",\"directories\":" + json entries.Directories + "}")))
+
+        fs.WriteFile
+        |> ValueOption.iter (fun writeFile ->
+            // The only callback whose argument is an object rather than a path, and the only one
+            // the server expects nothing back from.
+            add "writeFile" (fun argument ->
+                use document = Json.JsonDocument.Parse argument
+                let field name = document.RootElement.GetProperty(name: string).GetString()
+                writeFile (field "path") (field "data")
+                ""))
+
+        table
+
 /// The AST string table is WTF-8, not UTF-8: an unpaired UTF-16 surrogate is encoded as the
 /// three bytes `ED A0-BF 80-BF`, which strict UTF-8 rejects. `Encoding.UTF8.GetString` replaces
 /// those with U+FFFD, so identifiers and string literals carrying a lone surrogate come back
@@ -820,7 +933,16 @@ module Ast =
           OriginalStart: int
           OriginalLength: int
           Kind: SpanMapKind
-          /// Absent for segments the compiler wrote without one.
+          /// <summary>
+          /// Absent when the compiler wrote a five-element segment.
+          /// </summary>
+          /// <remarks>
+          /// Absent is not "no features": the reference client reads a segment with no sixth
+          /// element as <c>SpanMapFeature.All</c> (`dist/api/node/node.js`, `get spanMap`). The
+          /// wire fact is kept as it is rather than defaulted, so that a caller can tell the two
+          /// forms apart - but a caller asking what the segment supports should read
+          /// <c>ValueNone</c> as everything.
+          /// </remarks>
           Features: SpanMapFeature voption }
 
     /// A suppression directive mapped from an original file onto a virtual one, in UTF-16 code

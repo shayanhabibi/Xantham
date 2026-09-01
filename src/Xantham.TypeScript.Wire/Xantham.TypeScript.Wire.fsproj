@@ -5,6 +5,17 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Version>0.1.0</Version><AssemblyVersion>0.0.0.0</AssemblyVersion></PropertyGroup>
 
+    <PropertyGroup>
+        <Authors>Shayan Habibi</Authors>
+        <Description>An F# client for the TypeScript 7 compiler's API server. Speaks the compiler's own msgpack protocol over stdio, reads its binary AST in place through a generated typed layer, and exposes the full 142-method API synchronously, asynchronously, and through a batching mailbox.</Description>
+        <PackageTags>typescript;fsharp;compiler;ast;bindings;tsc;codegen</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
     <ItemGroup>
         <!-- `Slot` and `AstNode` are internal: the typed layer supersedes them, and two public
              APIs over the same bytes is the thing worth avoiding. The tests still exercise the

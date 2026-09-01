@@ -12,6 +12,9 @@ on:
 
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  # The live tests skip themselves when no `tsc` is installed, which on a runner would be a green
+  # build that tested nothing. This turns that skip into a failure - see `Tsc.test.fs`.
+  XANTHAM_REQUIRE_TSC: 1
 
 concurrency:
   group: ${{ github.workflow }}
@@ -25,5 +28,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
+        with:
+          # The library multi-targets net10.0, and the runner's preinstalled SDK is older, so
+          # without this the build fails before any test runs.
+          dotnet-version: '10.0.x'
       - name: Run CI
         run: dotnet fsi build.fsx -- test

@@ -253,6 +253,57 @@ const recordNames = [];
 // name -> [{ wire, ident, fs, optional, bare, raw }], kept so the async extensions below can
 // rebuild each parameter record from a flat argument list.
 const recordFields = new Map();
+
+// A record whose every field is optional gets a `Default` - the empty record, which serialises
+// to `{}` because each field carries `WhenWritingDefault`. Without it a caller has to write out
+// every field by hand to set one of them, and `CompilerOptions` alone has 110. It is
+// `static member val`, so the record is allocated once rather than per read.
+// A field's absent form follows how it is emitted above: `voption` for the ordinary case, and
+// `null` for the ones typed as a bare `JsonNode`/`JsonObject` or as raw UTF-8 JSON, which are
+// nullable reference types rather than value options.
+// A field's absent form follows how it is emitted above, and a required field of a defaultable
+// record type stands in its own `Default` - which is what makes `CreateProgramOptions`, whose
+// `compilerOptions` the schema requires, defaultable in turn.
+const absent = field =>
+  field.optional ? (field.bare || field.raw ? "null" : "ValueNone") : `${field.fs}.Default`;
+// Least fixpoint: a record is defaultable when every field is optional or is itself a
+// defaultable record. Starting from nothing and only ever adding means a cycle - two records
+// each requiring the other - is never admitted, which is right, since no finite value satisfies
+// it.
+const defaultable = new Set();
+// name -> index in `L` of that record's closing brace.
+const recordClose = new Map();
+function resolveDefaultable() {
+  for (let changed = true; changed; ) {
+    changed = false;
+    for (const [name, fields] of recordFields) {
+      if (defaultable.has(name) || fields.length === 0) continue;
+      if (fields.every(f => f.optional || defaultable.has(f.fs))) {
+        defaultable.add(name);
+        changed = true;
+      }
+    }
+  }
+}
+// The record is built behind a `Lazy` rather than by `static member val`, and not for laziness:
+// static fields of a file initialise in declaration order, the module is in schema order, and a
+// record whose default names another's - `CreateProgramOptions` at the top naming
+// `CompilerOptions.Default` 300 lines below - would otherwise capture that field before it was
+// assigned and hold a silent null. Deferring the body to first read puts it after the whole
+// file's initialiser, and the value is still built once.
+function defaultLines(name, fields) {
+  return [
+    `        static member val private DefaultValue = lazy ({`,
+    ...fields.map(f => `            ${f.ident} = ${absent(f)}`),
+    `        }: ${name})`,
+    "",
+    "        /// The record with nothing set: every field is either optional or a default of its",
+    "        /// own, so this serialises to `{}`. Copy-update it to fill in the fields you mean -",
+    `        /// \`{ ${name}.Default with ... }\` - rather than writing all ${fields.length} out.`,
+    `        static member Default: ${name} = ${name}.DefaultValue.Value`,
+    "",
+  ];
+}
 for (const decl of interfaces) {
   const name = decl.name.text;
   if (name === "APIMethodInfo") continue; // emitted below as the method table
@@ -262,8 +313,12 @@ for (const decl of interfaces) {
   const fields = [];
   recordFields.set(name, fields);
   if (members.length === 0) {
-    w(`    type ${name} = { Unused: unit voption }`);
+    w(`    type ${name} =`);
+    w("        { Unused: unit voption }");
     w();
+    w(`        static member Default: ${name} = { Unused = ValueNone }`);
+    w();
+    defaultable.add(name);
     continue;
   }
   w(`    type ${name} = {`);
@@ -288,8 +343,18 @@ for (const decl of interfaces) {
     w(`        ${fsIdent(pascal(wire))}: ${optional && !bare ? `${mapped.fs} voption` : mapped.fs}`);
     if (i < members.length - 1) w();
   });
+  recordClose.set(name, L.length);
   w("    }");
   w();
+}
+
+// Now that every record's fields are known, work out which are defaultable and splice each
+// `Default` back into its own type, reopening the record's closing brace with `with`.
+resolveDefaultable();
+for (const [name, at] of [...recordClose].sort((a, b) => b[1] - a[1])) {
+  if (!defaultable.has(name)) continue;
+  L[at] = "    } with";
+  L.splice(at + 2, 0, ...defaultLines(name, recordFields.get(name)));
 }
 
 // A key that matches nothing is a table entry the schema has moved out from under, and it would
@@ -367,6 +432,89 @@ a("module Api =");
 a();
 
 const camel = s => s[0].toLowerCase() + s.slice(1);
+
+// F# reserved words, for escaping camel-cased argument names. Deliberately narrower than
+// KEYWORDS above, which also guards pascal-cased record fields and errs on the side of escaping:
+// `file` is a fine argument name and reads badly in backticks.
+const FS_KEYWORDS = new Set(["abstract", "and", "as", "assert", "base", "begin", "class", "const",
+  "default", "delegate", "do", "done", "downcast", "downto", "elif", "else", "end", "exception",
+  "extern", "false", "finally", "fixed", "for", "fun", "function", "global", "if", "in", "inherit",
+  "inline", "interface", "internal", "lazy", "let", "match", "member", "module", "mutable",
+  "namespace", "new", "not", "null", "of", "open", "or", "override", "private", "public", "rec",
+  "return", "select", "static", "struct", "then", "to", "true", "try", "type", "upcast", "use",
+  "val", "void", "when", "while", "with", "yield", "atomic", "break", "checked", "component",
+  "constraint", "constructor", "continue", "eager", "event", "external", "functor", "include",
+  "method", "mixin", "object", "parallel", "process", "protected", "pure", "sealed", "tailcall",
+  "trait", "virtual", "volatile"]);
+const TICKS = "``";
+const fsParam = n => (FS_KEYWORDS.has(n) ? TICKS + n + TICKS : n);
+
+/// The extension-member block, emitted for both surfaces from the same method table so the
+/// synchronous and asynchronous members cannot drift. Returns the number of methods that got a
+/// flattened overload as well as the record one.
+function extensions(emit, typeName, receiver, apiModule, list) {
+  emit(`/// \`${apiModule}\` as members, so the ${receiver} is not threaded through every call:`);
+  emit(`/// \`${receiver}.getSymbolAtPosition parameters\` rather than \`${apiModule}.getSymbolAtPosition ${receiver}\`.`);
+  emit("///");
+  emit("/// Each method that takes a parameter record gets a second, inlined overload accepting that");
+  emit("/// record's fields directly and building it on the caller's behalf. Fields the schema marks");
+  emit("/// optional are `[<Struct>]` optional arguments, so they arrive as the `voption` the record");
+  emit("/// field already holds and pass straight through. F# requires optional arguments to come last,");
+  emit("/// so where a required field follows an optional one the argument order is not the record's");
+  emit("/// own. Named arguments sidestep that, and are worth using here regardless: several methods");
+  emit("/// take four or more arguments of the same type.");
+  emit("[<AutoOpen>]");
+  emit(`module ${typeName}Extensions =`);
+  emit();
+  emit(`    type ${typeName} with`);
+  emit();
+
+  let flattened = 0;
+  for (const { wire, params, doc } of list) {
+    const noParams = params.fs === "JsonNode" || params.fs === "unit";
+    const fn = fsIdent(camel(wire));
+    for (const d of doc) emit(`        /// ${d}`);
+    if (noParams) {
+      emit(`        member this.${fn}() = ${apiModule}.${fn} this`);
+      emit();
+      continue;
+    }
+    emit(`        member this.${fn}(parameters: ${params.fs}) = ${apiModule}.${fn} this parameters`);
+    emit();
+
+    const fields = recordFields.get(params.fs);
+    // Nothing to spread, and a raw JSON field has no sensible flat argument - both cases keep the
+    // record overload on its own.
+    if (!fields || fields.length === 0 || fields.some(f => f.raw)) continue;
+    flattened++;
+
+    const ordered = [...fields.filter(f => !f.optional), ...fields.filter(f => f.optional)];
+    // [<Struct>] makes an optional argument voption rather than option, which is what the record
+    // field already is - so for all but the bare JsonNode fields the argument goes straight in with
+    // no conversion at all.
+    const args = ordered.map(f =>
+      f.optional
+        ? `[<Struct>] ?${fsParam(camel(f.wire))}: ${f.fs}`
+        : `${fsParam(camel(f.wire))}: ${f.fs}`);
+    const assignments = ordered.map(f => {
+      const arg = fsParam(camel(f.wire));
+      // A bare JsonNode field has no voption wrapper to fill; absent is null there.
+      return f.optional && f.bare
+        ? `${f.ident} = (match ${arg} with ValueSome value -> value | ValueNone -> null)`
+        : `${f.ident} = ${arg}`;
+    });
+
+    emit(`        /// The fields of ${params.fs}, spread. Builds the record and calls the overload above.`);
+    emit(`        member inline this.${fn}(${args.join(", ")}) =`);
+    emit(`            this.${fn}(`);
+    emit(`                { ${assignments.join("\n                  ")} }`);
+    emit(`                : ${params.fs}`);
+    emit("            )");
+    emit();
+  }
+  return flattened;
+}
+
 let binaryCount = 0, unitParamCount = 0;
 for (const { wire, params, result, doc } of methods) {
   for (const d of doc) a(`    /// ${d}`);
@@ -406,30 +554,17 @@ for (const { wire, params, result, doc } of methods) {
   a();
 }
 
+const apiFlattened = extensions(a, "TscChannel", "channel", "Api", methods);
+
 const apiFile = path.join(path.dirname(outFile), "ProtoApi.generated.fs");
 fs.writeFileSync(apiFile, A.join("\n").replace(/\n{3,}/g, "\n\n") + "\n", "utf8");
-console.log(`api      ${apiFile} (${methods.length} functions, ${binaryCount} binary, ${unitParamCount} without parameters)`);
+console.log(`api      ${apiFile} (${methods.length} functions, ${binaryCount} binary, ${unitParamCount} without parameters, ${apiFlattened} with a flattened overload)`);
 
 // ── async surface over the mailbox ────────────────────────────────────────
 // The mirror of Api, over TscMailbox rather than TscChannel, emitted from the same method table
 // so the two cannot drift. Extension members come with it, so the mailbox does not have to be
 // threaded through every call.
 
-// F# reserved words, for escaping camel-cased argument names. Deliberately narrower than
-// KEYWORDS above, which also guards pascal-cased record fields and errs on the side of escaping:
-// `file` is a fine argument name and reads badly in backticks.
-const FS_KEYWORDS = new Set(["abstract", "and", "as", "assert", "base", "begin", "class", "const",
-  "default", "delegate", "do", "done", "downcast", "downto", "elif", "else", "end", "exception",
-  "extern", "false", "finally", "fixed", "for", "fun", "function", "global", "if", "in", "inherit",
-  "inline", "interface", "internal", "lazy", "let", "match", "member", "module", "mutable",
-  "namespace", "new", "not", "null", "of", "open", "or", "override", "private", "public", "rec",
-  "return", "select", "static", "struct", "then", "to", "true", "try", "type", "upcast", "use",
-  "val", "void", "when", "while", "with", "yield", "atomic", "break", "checked", "component",
-  "constraint", "constructor", "continue", "eager", "event", "external", "functor", "include",
-  "method", "mixin", "object", "parallel", "process", "protected", "pure", "sealed", "tailcall",
-  "trait", "virtual", "volatile"]);
-const TICKS = "``";
-const fsParam = n => (FS_KEYWORDS.has(n) ? TICKS + n + TICKS : n);
 
 const M = [];
 const m = (s = "") => M.push(s);
@@ -495,65 +630,7 @@ for (const { wire, params, result, doc } of asyncMethods) {
   m();
 }
 
-m("/// `AsyncApi` as members, so the mailbox is not threaded through every call:");
-m("/// `mailbox.getSymbolAtPosition parameters` rather than `AsyncApi.getSymbolAtPosition mailbox`.");
-m("///");
-m("/// Each method that takes a parameter record gets a second, inlined overload accepting that");
-m("/// record's fields directly and building it on the caller's behalf. Fields the schema marks");
-m("/// optional are `[<Struct>]` optional arguments, so they arrive as the `voption` the record");
-m("/// field already holds and pass straight through. F# requires optional arguments to come last,");
-m("/// so where a required field follows an optional one the argument order is not the record's");
-m("/// own. Named arguments sidestep that, and are worth using here regardless: several methods");
-m("/// take four or more arguments of the same type.");
-m("[<AutoOpen>]");
-m("module TscMailboxExtensions =");
-m();
-m("    type TscMailbox with");
-m();
-
-let flattened = 0;
-for (const { wire, params, doc } of asyncMethods) {
-  const noParams = params.fs === "JsonNode" || params.fs === "unit";
-  const fn = fsIdent(camel(wire));
-  for (const d of doc) m(`        /// ${d}`);
-  if (noParams) {
-    m(`        member this.${fn}() = AsyncApi.${fn} this`);
-    m();
-    continue;
-  }
-  m(`        member this.${fn}(parameters: ${params.fs}) = AsyncApi.${fn} this parameters`);
-  m();
-
-  const fields = recordFields.get(params.fs);
-  // Nothing to spread, and a raw JSON field has no sensible flat argument - both cases keep the
-  // record overload on its own.
-  if (!fields || fields.length === 0 || fields.some(f => f.raw)) continue;
-  flattened++;
-
-  const ordered = [...fields.filter(f => !f.optional), ...fields.filter(f => f.optional)];
-  // [<Struct>] makes an optional argument voption rather than option, which is what the record
-  // field already is - so for all but the bare JsonNode fields the argument goes straight in with
-  // no conversion at all.
-  const args = ordered.map(f =>
-    f.optional
-      ? `[<Struct>] ?${fsParam(camel(f.wire))}: ${f.fs}`
-      : `${fsParam(camel(f.wire))}: ${f.fs}`);
-  const assignments = ordered.map(f => {
-    const arg = fsParam(camel(f.wire));
-    // A bare JsonNode field has no voption wrapper to fill; absent is null there.
-    return f.optional && f.bare
-      ? `${f.ident} = (match ${arg} with ValueSome value -> value | ValueNone -> null)`
-      : `${f.ident} = ${arg}`;
-  });
-
-  m(`        /// The fields of ${params.fs}, spread. Builds the record and calls the overload above.`);
-  m(`        member inline this.${fn}(${args.join(", ")}) =`);
-  m(`            this.${fn}(`);
-  m(`                { ${assignments.join("\n                  ")} }`);
-  m(`                : ${params.fs}`);
-  m("            )");
-  m();
-}
+const flattened = extensions(m, "TscMailbox", "mailbox", "AsyncApi", asyncMethods);
 
 const asyncFile = path.join(path.dirname(outFile), "ProtoAsync.generated.fs");
 fs.writeFileSync(asyncFile, M.join("\n").replace(/\n{3,}/g, "\n\n") + "\n", "utf8");
