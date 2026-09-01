@@ -31884,27 +31884,27 @@
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "constraint on \u0027Name\u0027 has no F# form and is dropped (\u00A74.9)"
+          "message": "key over \u0027AiModelList\u0027 reads as keyof\u003C\u0027AiModelList\u003E (\u00A74.10)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "constraint on \u0027Name\u0027 has no F# form and is dropped (\u00A74.9)"
+          "message": "key over \u0027AiModelList\u0027 reads as keyof\u003C\u0027AiModelList\u003E (\u00A74.10)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "constraint on \u0027Name\u0027 has no F# form and is dropped (\u00A74.9)"
+          "message": "key over \u0027AiModelList\u0027 reads as keyof\u003C\u0027AiModelList\u003E (\u00A74.10)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "constraint on \u0027Name\u0027 has no F# form and is dropped (\u00A74.9)"
+          "message": "key over \u0027AiModelList\u0027 reads as keyof\u003C\u0027AiModelList\u003E (\u00A74.10)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "constraint on \u0027Name\u0027 has no F# form and is dropped (\u00A74.9)"
+          "message": "key over \u0027AiModelList\u0027 reads as keyof\u003C\u0027AiModelList\u003E (\u00A74.10)"
         },
         {
           "pass": "shape-interfaces",
@@ -31949,17 +31949,17 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags IndexedAccess not mapped yet; widened to obj"
+          "message": "indexed access has no F# form here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags IndexedAccess not mapped yet; widened to obj"
+          "message": "indexed access has no F# form here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags IndexedAccess not mapped yet; widened to obj"
+          "message": "indexed access has no F# form here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -32107,7 +32107,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags IndexedAccess not mapped yet; widened to obj"
+          "message": "indexed access has no F# form here; widened to obj"
         },
         {
           "pass": "synthesize-paramobjects",

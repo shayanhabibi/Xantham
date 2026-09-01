@@ -12342,9 +12342,9 @@ type Ai<'AiModelList when 'AiModelList :> AiModelListType> =
     /// </remarks>
     /// <remarks>@param autoragId Instance ID</remarks>
     abstract autorag: autoragId: string -> AutoRAG
-    abstract run<'Name>: model: 'Name * inputs: AiRunInputs * options: obj -> obj
-    abstract run<'Name>: model: 'Name * inputs: obj * options: obj -> obj
-    abstract run<'Name>: model: 'Name * inputs: obj * ?options: AiOptions -> obj
+    abstract run: model: keyof<'AiModelList> * inputs: AiRunInputs * options: obj -> obj
+    abstract run: model: keyof<'AiModelList> * inputs: obj * options: obj -> obj
+    abstract run: model: keyof<'AiModelList> * inputs: obj * ?options: AiOptions -> obj
     abstract run: model: obj * inputs: obj * ?options: AiOptions -> obj
     abstract models: ?``params``: AiModelsSearchParams -> obj
     abstract toMarkdown: unit -> ToMarkdownService

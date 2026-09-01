@@ -357,6 +357,32 @@ This is where the archived `Xantham.Fable.Core` work pays off. Two regimes:
   genuinely safe — this was the point of that library, and its README's mapping table
   (keyof / K-extends-keyof + T[K] / T[keyof T] / index signature) is adopted as-is.
 
+  *Landed (2026-09-02, phase D).* The open regime turns on one decision: **`K` is not bound
+  as an F# type parameter at all.** Its bound is the whole of what it means and F# cannot
+  state it, so a bare `'K` is an unconstrained variable that accepts anything and drags the
+  `T[K]` it selects down to `obj` with it — which is exactly what the generator emitted
+  before this rung (`get` read `(source: obj, key: obj) : obj`). Instead the key variable is
+  dropped and its uses are written as the idiom:
+
+  | TypeScript | F# |
+  |---|---|
+  | `keyof T`, `T` in scope | `keyof<'T>` |
+  | `K extends keyof T` used only as a key | `keyof<'T>`, `K` unbound |
+  | `K extends keyof T` plus `T[K]` | `typekeyof<'T,'R>` at the key, `'R` at the access, `K` replaced by `'R` |
+  | `T[keyof T]` | `obj`, Widened — nothing names the value type |
+
+  So `get<T, K extends keyof T>(source: T, key: K): T[K]` emits
+  `get<'T, 'R> (source: 'T, key: typekeyof<'T, 'R>) : 'R`, and Cloudflare's
+  `Ai.run<Name extends keyof AiModelList>` reads `model: keyof<'AiModelList>` where it used
+  to bind a `'Name` that meant nothing. Detection is over the checker's own facts — a type
+  parameter whose constraint is an `Index` type, and whether the signature reaches an
+  `IndexedAccess` over the same operand and key — so it is the idiom that is recognised, not
+  a name. The resolve tier now follows index operands and both halves of an indexed access;
+  without that the table was not closed over them.
+
+  `proptypekey`/`proptypelock` and `PropertyRecord` are not emitted yet: no fixture has
+  needed them, and `T[keyof T]` widens loudly rather than guessing.
+
 Mapped types over concrete operands (`Partial<Options>`, `Pick<X,"a"|"b">`,
 `Record<string, T>`):
 

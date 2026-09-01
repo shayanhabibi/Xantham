@@ -280,7 +280,44 @@ let pipelineTests =
                     // nothing beyond the union and literal machinery phase C already landed.
                     Expect.stringContains source "type Duration = float" "a concrete indexed access"
                     Expect.stringContains source "type DurationOrLabel = U2<string, float>" "over a union of keys"
-                    Expect.stringContains source "| [<CompiledName(\"duration\")>] Duration" "keyof Options is a StringEnum" ])
+                    Expect.stringContains source "| [<CompiledName(\"duration\")>] Duration" "keyof Options is a StringEnum"
+
+                  testCase "the open keyof regime is carried by the support package" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // §4.10's second regime: the checker cannot finish these, and F# cannot
+                    // state `K extends keyof T` at all. The key variable is dropped and its
+                    // uses are written as the erased idioms instead - which is the whole
+                    // reason the support package exists.
+                    Expect.stringContains
+                        source
+                        "static member get<'T, 'R> (source: 'T, key: typekeyof<'T, 'R>) : 'R = jsNative"
+                        "K extends keyof T plus T[K] is the typed accessor"
+
+                    Expect.stringContains
+                        source
+                        "static member keys<'T> (source: 'T) : keyof<'T>[] = jsNative"
+                        "a bare keyof T"
+
+                    Expect.stringContains
+                        source
+                        "abstract read<'R>: key: typekeyof<'T, 'R> -> 'R"
+                        "the same idiom on a member, over the interface's own operand"
+
+                    Expect.stringContains source "abstract all: unit -> keyof<'T>[]" "keyof T in return position"
+
+                    // `T[keyof T]` is a different animal: no key variable selects it, so there
+                    // is nothing to name the value type. It stays widened, and says so.
+                    Expect.stringContains
+                        source
+                        "static member values<'T> (source: 'T) : obj[] = jsNative"
+                        "the value-of idiom has no F# form"
+
+                    Expect.isTrue
+                        (rendered.Findings
+                         |> List.exists (fun f -> f.Symbol.StartsWith "values" && f.Tier = Widened))
+                        "and the widening is recorded" ])
 
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 

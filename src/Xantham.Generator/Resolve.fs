@@ -304,6 +304,19 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                     Constraint = bound |> ValueOption.map _.Id |> ValueOption.toOption
                     Default = fallback |> ValueOption.map _.Id |> ValueOption.toOption },
                 [ yield! ValueOption.toList bound; yield! ValueOption.toList fallback ]
+        elif has TypeFlags.Index then
+            // `keyof T` at an operand the checker could not finish (§4.10). The operand is the
+            // index type's target, and it is what the whole idiom is about - `keyof<'T>` needs
+            // a `'T` - so it is followed rather than left dangling.
+            let! operand = ctx.Session.getTargetOfType ty.Id
+            return TypeFacts.shallow ty, [ operand ]
+        elif has TypeFlags.IndexedAccess then
+            // `T[K]`. Both halves are followed: the index is usually a key variable whose
+            // constraint names the object, and reading one without the other cannot tell
+            // `T[K]` apart from `T[keyof T]`.
+            let! objectType = ctx.Session.getObjectTypeOfType ty.Id
+            let! indexType = ctx.Session.getIndexTypeOfType ty.Id
+            return TypeFacts.shallow ty, [ objectType; indexType ]
         else
             return TypeFacts.shallow ty, []
     }

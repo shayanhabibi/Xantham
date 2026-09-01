@@ -32,6 +32,18 @@ let private tuple (id: int) (components: int list) (flags: ElementFlags list) =
 let private typeParam (id: int) (name: string) =
     { Build.facts (Build.typeResponse id TypeFlags.TypeParameter) with SymbolName = Some name }
 
+/// `keyof X`: an index type carrying its operand as its target, the way the checker hands one
+/// back when it cannot finish it.
+let private keyOf (id: int) (operand: int) =
+    Build.facts { Build.typeResponse id TypeFlags.Index with Target = ValueSome operand }
+
+/// `X[K]`: an indexed access over an object type and an index type.
+let private indexedAccess (id: int) (objectId: int) (keyId: int) =
+    Build.facts
+        { Build.typeResponse id TypeFlags.IndexedAccess with
+            ObjectType = ValueSome objectId
+            IndexType = ValueSome keyId }
+
 /// A generic declaration: its own target, holding its parameters as its arguments.
 let private genericDecl (id: int) (parameters: int list) (members: ResolvedMember list) =
     { Build.facts
@@ -196,6 +208,39 @@ let typeRefTests =
 
             Expect.equal reference FsObj "no arity to write Box at"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
+
+        testCase "keyof over an operand not in scope widens to obj" <| fun _ ->
+            // The idiom needs a `'T` to be taken over; without one there is nothing to phantom
+            // the key with, and an unphantomed key is just a string.
+            let model = Build.shapeModel (keyOf 40 20 :: typeParam 20 "T" :: Build.primitives)
+            let reference, findings = Shape.typeRef Build.context model None "x" 40
+
+            Expect.equal reference FsObj "no operand, no keyof"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
+
+        testCase "keyof over an in-scope operand reads as keyof of it" <| fun _ ->
+            let model =
+                { Build.shapeModel (keyOf 40 20 :: typeParam 20 "T" :: Build.primitives) with
+                    TypeVars = Map.ofList [ 20, "T" ] }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 40
+
+            Expect.equal reference (FsApp("keyof", [ FsTypeVar "T" ])) "keyof<'T>"
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the support idiom is ergonomic, not a widening"
+
+        testCase "an indexed access no key variable selects has no F# form" <| fun _ ->
+            // `T[keyof T]` - the value-of idiom. Nothing names the value type, so there is no
+            // `'R` to write and no honest alternative to obj.
+            let model =
+                { Build.shapeModel (
+                      indexedAccess 41 20 40 :: keyOf 40 20 :: typeParam 20 "T" :: Build.primitives
+                  ) with
+                    TypeVars = Map.ofList [ 20, "T" ] }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 41
+
+            Expect.equal reference FsObj "widened"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "and said so"
 
         testCase "an instantiation of a declared generic is written as an application" <| fun _ ->
             let instantiation =
@@ -837,6 +882,94 @@ let shapePassTests =
             Expect.isTrue
                 (findings |> List.exists (fun f -> f.Message.Contains "'K' is erased"))
                 "the dropped parameter is named in the manifest"
+
+        testCase "a key variable with an indexed access reads as the typed accessor" <| fun _ ->
+            // `interface Accessor<T> { read<K extends keyof T>(key: K): T[K] }`. F# cannot state
+            // the bound, so `K` is not bound at all: the key is written as `typekeyof<'T,'R>`
+            // and the access it selects as the `'R` that introduced.
+            let read =
+                { Build.facts (Build.typeResponse 70 TypeFlags.Object) with
+                    CallSignatures =
+                        [ { Build.signature
+                                [ Build.resolvedMember (Build.symbol 700 "key" SymbolFlags.FunctionScopedVariable) 21 ]
+                                41 with
+                              TypeParameters = [ 21 ] } ] }
+
+            let accessor =
+                genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "read" SymbolFlags.Method) 70 ]
+
+            let model =
+                { Build.shapeModel (
+                      accessor
+                      :: read
+                      :: indexedAccess 41 20 21
+                      :: keyOf 40 20
+                      :: typeParam 20 "T"
+                      :: { typeParam 21 "K" with Constraint = Some 40 }
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 30, "Accessor" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeInterfaces model
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                Expect.equal decl.TypeParameters [ { Name = "T"; Constraint = None } ] "Accessor<'T>"
+
+                match decl.Members with
+                | [ FsMethod m ] ->
+                    Expect.equal m.TypeParameters [ { Name = "R"; Constraint = None } ] "'K is gone, 'R is bound"
+
+                    Expect.equal
+                        (m.Parameters |> List.map _.Type)
+                        [ FsApp("typekeyof", [ FsTypeVar "T"; FsTypeVar "R" ]) ]
+                        "the key carries both"
+
+                    Expect.equal m.Return (FsTypeVar "R") "and the access is exactly the result"
+                | members -> failtest $"expected one method, got %A{members}"
+            | decls -> failtest $"expected one interface, got %A{decls}"
+
+            Expect.equal (findings |> List.map _.Tier |> List.distinct) [ Ergonomic ] "an idiom, not a widening"
+
+        testCase "a key variable nothing indexes with reads as a bare keyof" <| fun _ ->
+            // `read<K extends keyof T>(key: K): void` - no `T[K]`, so nothing needs the value
+            // type and there is no reason to bind a variable for it.
+            let read =
+                { Build.facts (Build.typeResponse 70 TypeFlags.Object) with
+                    CallSignatures =
+                        [ { Build.signature
+                                [ Build.resolvedMember (Build.symbol 700 "key" SymbolFlags.FunctionScopedVariable) 21 ]
+                                4 with
+                              TypeParameters = [ 21 ] } ] }
+
+            let accessor =
+                genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "read" SymbolFlags.Method) 70 ]
+
+            let model =
+                { Build.shapeModel (
+                      accessor
+                      :: read
+                      :: keyOf 40 20
+                      :: typeParam 20 "T"
+                      :: { typeParam 21 "K" with Constraint = Some 40 }
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 30, "Accessor" ] }
+
+            let shaped, _ = Build.runPass Shape.shapeInterfaces model
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                match decl.Members with
+                | [ FsMethod m ] ->
+                    Expect.isEmpty m.TypeParameters "the member is not generic in its own right"
+
+                    Expect.equal
+                        (m.Parameters |> List.map _.Type)
+                        [ FsApp("keyof", [ FsTypeVar "T" ]) ]
+                        "keyof<'T> at the key"
+                | members -> failtest $"expected one method, got %A{members}"
+            | decls -> failtest $"expected one interface, got %A{decls}"
 
         testCase "shape-callbacks binds the parameters the alias carries" <| fun _ ->
             // `type Mapper<T> = (input: T) => T` leaves the function type parameterless; the

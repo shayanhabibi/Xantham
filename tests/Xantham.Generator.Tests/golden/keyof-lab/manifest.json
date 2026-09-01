@@ -3,8 +3,8 @@
   "module": "KeyofLab",
   "counts": {
     "exact": 5,
-    "ergonomic": 10,
-    "widened": 8,
+    "ergonomic": 13,
+    "widened": 5,
     "escape": 2
   },
   "symbols": [
@@ -47,22 +47,17 @@
     },
     {
       "name": "Accessor",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags Index not mapped yet; widened to obj"
+          "tier": "ergonomic",
+          "message": "keyof over an open operand reads as keyof\u003C\u0027T\u003E (\u00A74.10)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags IndexedAccess not mapped yet; widened to obj"
+          "message": "key over \u0027T\u0027 with its indexed access reads as typekeyof\u003C\u0027T,\u0027R\u003E (\u00A74.10)"
         }
       ]
     },
@@ -240,28 +235,23 @@
     },
     {
       "name": "get",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-exports",
           "tier": "ergonomic",
-          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "pass": "shape-exports",
-          "tier": "widened",
-          "message": "type flags IndexedAccess not mapped yet; widened to obj"
+          "message": "key over \u0027T\u0027 with its indexed access reads as typekeyof\u003C\u0027T,\u0027R\u003E (\u00A74.10)"
         }
       ]
     },
     {
       "name": "keys",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-exports",
-          "tier": "widened",
-          "message": "type flags Index not mapped yet; widened to obj"
+          "tier": "ergonomic",
+          "message": "keyof over an open operand reads as keyof\u003C\u0027T\u003E (\u00A74.10)"
         }
       ]
     },
@@ -272,7 +262,7 @@
         {
           "pass": "shape-exports",
           "tier": "widened",
-          "message": "type flags IndexedAccess not mapped yet; widened to obj"
+          "message": "indexed access has no F# form here; widened to obj"
         }
       ]
     },

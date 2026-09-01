@@ -273,6 +273,13 @@ let rec typeRef (ctx: Context) (model: ShapeModel) (self: string option) (owner:
                 | Some name -> FsNamed name, [ Finding.make Ergonomic owner "polymorphic this reads as the declaring type" ]
                 | None -> FsObj, [ Finding.make Widened owner "this type outside a declaration; widened to obj" ]
             else
+                // A key variable is not bound as a variable at all: `K extends keyof T` is
+                // written as the support package's idiom over the operand (§4.10).
+                match Map.tryFind typeId model.KeyVars with
+                | Some(KeyOf operand) -> FsApp("keyof", [ FsTypeVar operand ]), []
+                | Some(TypedKeyOf(operand, result)) -> FsApp("typekeyof", [ FsTypeVar operand; FsTypeVar result ]), []
+                | None ->
+
                 // In scope only where the declaration being shaped bound it (§4.9); a
                 // parameter of some *other* declaration has no name here to write.
                 match Map.tryFind typeId model.TypeVars with
@@ -299,8 +306,47 @@ let rec typeRef (ctx: Context) (model: ShapeModel) (self: string option) (owner:
                     | None -> FsObj, [ Finding.make Widened owner "type parameter is not in scope here; widened to obj" ]
         elif has TypeFlags.Object then
             objectRef ctx model self owner facts
+        elif has TypeFlags.Index then
+            keyOfRef model owner facts
+        elif has TypeFlags.IndexedAccess then
+            indexedAccessRef model owner facts
         else
             FsObj, [ Finding.make Widened owner $"type flags {facts.Response.Flags} not mapped yet; widened to obj" ]
+
+/// `keyof T` at an operand the checker could not finish (§4.10). A closed `keyof` never gets
+/// here - the checker hands those back already expanded into their union of literal keys, which
+/// shapes as a StringEnum - so this is the open regime, where the only honest carrier is the
+/// support package's `keyof<'T>`: erased to the string it is at runtime, and phantom-typed by
+/// the operand so a key of one type cannot be passed where another's is wanted.
+and private keyOfRef (model: ShapeModel) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
+    let operand =
+        facts.Response.Target
+        |> ValueOption.toOption
+        |> Option.bind (fun id -> Map.tryFind id model.TypeVars)
+
+    match operand with
+    | Some name ->
+        FsApp("keyof", [ FsTypeVar name ]),
+        [ Finding.make Ergonomic owner $"keyof over an open operand reads as keyof<'{name}> (§4.10)" ]
+    | None -> FsObj, [ Finding.make Widened owner "keyof over an operand not in scope here; widened to obj" ]
+
+/// `T[K]`. Where `K` is a key variable this signature bound as `typekeyof<'T,'R>`, the access is
+/// exactly the `'R` that idiom introduced. Everything else - `T[keyof T]`, an access over an
+/// operand not in scope - is a type-level computation with no F# form, and widens loudly.
+and private indexedAccessRef (model: ShapeModel) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
+    let binding =
+        facts.Response.IndexType
+        |> ValueOption.toOption
+        |> Option.bind (fun id -> Map.tryFind id model.KeyVars)
+
+    let objectName =
+        facts.Response.ObjectType
+        |> ValueOption.toOption
+        |> Option.bind (fun id -> Map.tryFind id model.TypeVars)
+
+    match binding, objectName with
+    | Some(TypedKeyOf(operand, result)), Some name when operand = name -> FsTypeVar result, []
+    | _ -> FsObj, [ Finding.make Widened owner "indexed access has no F# form here; widened to obj" ]
 
 and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
     match arrayElement facts with
@@ -632,6 +678,61 @@ let rec private typeVarsOf (reference: FsTypeRef) : Set<string> =
     | FsApp(_, arguments) -> union arguments
     | _ -> Set.empty
 
+/// The key variables a signature binds (§4.10): each type parameter whose bound is a `keyof`,
+/// paired with the id of the operand that `keyof` was taken over.
+let private keyCandidates (model: ShapeModel) (ids: int list) : (int * int) list =
+    ids
+    |> List.choose (fun id ->
+        match Map.tryFind id model.Types |> Option.bind _.Constraint with
+        | None -> None
+        | Some boundId ->
+            match Map.tryFind boundId model.Types with
+            | Some bound when flag TypeFlags.Index bound ->
+                bound.Response.Target |> ValueOption.toOption |> Option.map (fun operand -> id, operand)
+            | _ -> None)
+
+/// Whether any of `roots` reaches the indexed access `object[key]` - what tells `key: K` apart
+/// from `key: K` *plus* the value it selects. Carriers are followed, members are not: the point
+/// is to find `T[K]` where a signature returns it, bare or wrapped, not to walk object graphs.
+let private mentionsAccess (model: ShapeModel) (objectId: int) (keyId: int) (roots: int list) : bool =
+    let rec go visited pending =
+        match pending with
+        | [] -> false
+        | id :: rest when Set.contains id visited -> go visited rest
+        | id :: rest ->
+            match Map.tryFind id model.Types with
+            | None -> go (Set.add id visited) rest
+            | Some facts ->
+                if
+                    flag TypeFlags.IndexedAccess facts
+                    && facts.Response.ObjectType = ValueSome objectId
+                    && facts.Response.IndexType = ValueSome keyId
+                then
+                    true
+                else
+                    let carried =
+                        [ yield! facts.TypeArguments
+                          yield! facts.UnionMembers
+                          yield! facts.AliasTypeArguments
+                          for info in facts.IndexInfos -> info.ValueTypeId
+                          for signature in facts.CallSignatures do
+                              yield! signature.Parameters |> List.map _.TypeId
+                              yield signature.ReturnTypeId ]
+
+                    go (Set.add id visited) (rest @ carried)
+
+    go Set.empty roots
+
+/// The name to write the value a key selects under: `R`, unless something in scope already
+/// answers to it - a generated variable that shadows one the signature also mentions would
+/// silently retype it.
+let private resultName (taken: Set<string>) =
+    let rec pick n =
+        let candidate = if n = 0 then "R" else $"R{n}"
+        if Set.contains candidate taken then pick (n + 1) else candidate
+
+    pick 0
+
 // ---------------------------------------------------------------------------------------------
 // Shared shaping of members and signatures.
 // ---------------------------------------------------------------------------------------------
@@ -650,13 +751,70 @@ let private shapeSignature
     (owner: string)
     (signature: ResolvedSignature)
     : FsTypeParam list * FsParam list * FsTypeRef * Finding list =
+    // §4.10, the open keyof regime: a `K extends keyof T` variable is deliberately *not* bound
+    // as an F# variable. Its bound is the whole of what it means, and F# cannot state it, so a
+    // bare `'K` would be an unconstrained variable that lets any type through and drags `T[K]`
+    // down to obj with it. The support package's idiom is written at its uses instead.
+    let candidates = keyCandidates model signature.TypeParameters
+
+    let plain =
+        signature.TypeParameters
+        |> List.filter (fun id -> candidates |> List.forall (fun (key, _) -> key <> id))
+
     let typeParameters, scope, parameterFindings =
-        match signature.TypeParameters with
+        match plain with
         | [] -> [], model.TypeVars, []
         | ids -> typeParamsOf ctx model owner ids
 
-    let model = { model with TypeVars = scope }
-    let mutable findings = parameterFindings
+    // A key over an operand that is nowhere in scope has no `'T` to be taken over, so it falls
+    // back to an ordinary type parameter and widens like one.
+    let bindable, loose =
+        candidates |> List.partition (fun (_, operand) -> Map.containsKey operand scope)
+
+    let looseParameters, scope, looseFindings =
+        match loose |> List.map fst with
+        | [] -> [], scope, []
+        | ids -> typeParamsOf ctx { model with TypeVars = scope } owner ids
+
+    let roots =
+        (signature.Parameters |> List.map _.TypeId) @ [ signature.ReturnTypeId ]
+
+    let mutable taken = scope |> Map.toList |> List.map snd |> Set.ofList
+    let mutable keyVars = model.KeyVars
+    let mutable resultParameters = []
+    let mutable keyFindings = []
+
+    for key, operand in bindable do
+        let operandName = Map.find operand scope
+
+        if mentionsAccess model operand key roots then
+            let result = resultName taken
+            taken <- Set.add result taken
+            resultParameters <- resultParameters @ [ { Name = result; Constraint = None } ]
+            keyVars <- Map.add key (TypedKeyOf(operandName, result)) keyVars
+
+            keyFindings <-
+                keyFindings
+                @ [ Finding.make
+                        Ergonomic
+                        owner
+                        $"key over '{operandName}' with its indexed access reads as \
+                          typekeyof<'{operandName},'{result}> (§4.10)" ]
+        else
+            keyVars <- Map.add key (KeyOf operandName) keyVars
+
+            keyFindings <-
+                keyFindings
+                @ [ Finding.make Ergonomic owner $"key over '{operandName}' reads as keyof<'{operandName}> (§4.10)" ]
+
+    let typeParameters = typeParameters @ looseParameters @ resultParameters
+
+    let model =
+        { model with
+            TypeVars = scope
+            KeyVars = keyVars }
+
+    let mutable findings = parameterFindings @ looseFindings @ keyFindings
     let parameterCount = signature.Parameters.Length
 
     let parameters =

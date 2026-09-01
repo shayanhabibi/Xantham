@@ -591,6 +591,18 @@ type FsDecl =
     /// The one `Exports` type gathering the module's value exports.
     | FsExports of FsExportMember list
 
+/// How a `K extends keyof T` variable is written in F# (§4.10, the open keyof regime).
+/// TypeScript's key variable has no F# counterpart of its own: a bare `'K` would be an
+/// unconstrained variable saying nothing about T's keys, and every use of it - including the
+/// `T[K]` it selects - would have to widen to obj. The support package carries the idiom
+/// instead, so `'K` is not bound at all; its uses are written as one of these.
+type KeyBinding =
+    /// `keyof<'T>`: the key is only ever a key, so nothing needs the type it selects.
+    | KeyOf of operand: string
+    /// `typekeyof<'T,'R>` at the key's uses and `'R` at `T[K]`: the signature reads the value
+    /// the key selects, so `'K` is replaced by the result variable that names it.
+    | TypedKeyOf of operand: string * result: string
+
 type ShapeModel =
     { Harvest: HarvestModel
       ExportTypes: Map<int, ExportTypeIds>
@@ -611,6 +623,10 @@ type ShapeModel =
       /// it is a property of *where* the reference is written, not of the reference: a pass
       /// binds it once around a declaration and every nested `typeRef` inherits it.
       TypeVars: Map<int, string>
+      /// Type-parameter id -> the support-package idiom its uses are written as, for the
+      /// signature currently being shaped (§4.10). Scoped like `TypeVars`, and for the same
+      /// reason: `K extends keyof T` binds nothing outside the signature that declared it.
+      KeyVars: Map<int, KeyBinding>
       Decls: FsDecl list }
 
 // ---------------------------------------------------------------------------------------------
