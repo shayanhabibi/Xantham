@@ -198,6 +198,26 @@ let private tupleElementFlags (facts: TypeFacts) =
     else
         facts.TypeArguments |> List.map (fun _ -> ElementFlags.Required)
 
+/// The generic declaration an instantiation points back at, when this run declares it. A
+/// generic declaration is its own target, so only a genuine instantiation matches.
+///
+/// The checker substitutes members eagerly, so `Box<string>` arrives fully expanded and would
+/// read perfectly well as a structure of its own; writing it as an application instead keeps
+/// the two spellings tied together, which is what §4.9 asks for.
+let private instantiationOf (model: ShapeModel) (facts: TypeFacts) =
+    match facts.Response.Target with
+    | ValueSome target when target <> facts.Response.Id ->
+        Map.tryFind target model.DeclNames |> Option.map (fun name -> name, facts.TypeArguments)
+    | _ -> None
+
+/// The arguments a generic declaration stands for when it is named at a reference position:
+/// its own parameters. F# has no bare spelling for a generic type, so the self-reference in
+/// `map(next: T): Box<T>` has to re-apply them to come back out as it was written.
+let private ownArguments (facts: TypeFacts) =
+    match facts.Response.Target with
+    | ValueSome target when target = facts.Response.Id -> facts.TypeArguments
+    | _ -> []
+
 // ---------------------------------------------------------------------------------------------
 // Type references.
 // ---------------------------------------------------------------------------------------------
@@ -245,7 +265,11 @@ let rec typeRef (ctx: Context) (model: ShapeModel) (self: string option) (owner:
                 | Some name -> FsNamed name, [ Finding.make Ergonomic owner "polymorphic this reads as the declaring type" ]
                 | None -> FsObj, [ Finding.make Widened owner "this type outside a declaration; widened to obj" ]
             else
-                FsObj, [ Finding.make Widened owner "type parameter widened to obj (generics are phase C)" ]
+                // In scope only where the declaration being shaped bound it (§4.9); a
+                // parameter of some *other* declaration has no name here to write.
+                match Map.tryFind typeId model.TypeVars with
+                | Some name -> FsTypeVar name, []
+                | None -> FsObj, [ Finding.make Widened owner "type parameter is not in scope here; widened to obj" ]
         elif has TypeFlags.Object then
             objectRef ctx model self owner facts
         else
@@ -259,13 +283,20 @@ and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (
     | None ->
 
     match Map.tryFind facts.Response.Id model.DeclNames with
-    | Some name -> FsNamed name, []
+    | Some name ->
+        match ownArguments facts with
+        | [] -> FsNamed name, []
+        | arguments -> appliedRef ctx model self owner name arguments
     | None ->
         if isTuple facts then
             tupleRef ctx model self owner facts
         elif isPureCallback facts then
             delegateRef ctx model self owner facts
         else
+
+        match instantiationOf model facts with
+        | Some(name, arguments) -> appliedRef ctx model self owner name arguments
+        | None ->
             match GeneratorConfig.disposition ctx.Config facts.Origin, facts.SymbolName with
             | Reference, Some typeName ->
                 // The O7 contract: a `ship` run of this group produces exactly this name.
@@ -289,6 +320,19 @@ and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (
 /// element type when every component agrees, `obj[]` otherwise. §4.12 recommends an erased
 /// carrier with typed accessors instead; that waits for a fixture that needs one, the way
 /// class statics do.
+/// A generic name applied to type arguments, each shaped at this position (§4.9).
+and private appliedRef (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (name: string) (arguments: int list) : FsTypeRef * Finding list =
+    let mutable findings = []
+
+    let mapped =
+        arguments
+        |> List.map (fun argument ->
+            let reference, argumentFindings = typeRef ctx model self owner argument
+            findings <- findings @ argumentFindings
+            reference)
+
+    FsApp(name, mapped), findings
+
 and private tupleRef (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
     let mutable findings = []
 
@@ -432,6 +476,98 @@ and private isOptionalParam (p: ResolvedMember) (reference: FsTypeRef) =
     || (match reference with
         | FsOption _ -> true
         | _ -> false)
+
+// ---------------------------------------------------------------------------------------------
+// Generics (§4.9).
+// ---------------------------------------------------------------------------------------------
+
+/// A declaration's own type parameters, and the scope its members must be shaped under.
+///
+/// Both come from the same walk because they have to agree: a parameter that earns a name is
+/// the one a member is allowed to reference, and one that does not must not be in scope, or
+/// the member would name a variable the declaration never binds.
+///
+/// A constraint survives only if it maps to a named type, which is the only bound F# can
+/// state. `extends string` and `extends keyof T` are dropped with a finding: F# has no form
+/// for them, and the nearest approximation would reject code TypeScript accepts.
+let private typeParamsOf
+    (ctx: Context)
+    (model: ShapeModel)
+    (owner: string)
+    (ids: int list)
+    : FsTypeParam list * Map<int, string> * Finding list =
+    let mutable findings = []
+
+    let named =
+        ids
+        |> List.choose (fun id ->
+            match Map.tryFind id model.Types |> Option.bind _.SymbolName with
+            | Some name -> Some(id, name)
+            | None ->
+                findings <-
+                    findings
+                    @ [ Finding.make Widened owner $"type parameter #{id} has no name to write; its uses widen to obj" ]
+
+                None)
+
+    let scope = named |> Map.ofList
+
+    // The constraint is read under the scope being defined, so `T extends Node<T>` resolves
+    // its own variable rather than widening it.
+    let scoped = { model with TypeVars = scope }
+
+    let parameters =
+        named
+        |> List.map (fun (id, name) ->
+            let bound =
+                Map.tryFind id model.Types
+                |> Option.bind _.Constraint
+                |> Option.map (fun boundId -> typeRef ctx scoped None owner boundId)
+
+            match bound with
+            | Some((FsNamed _ | FsApp _) as reference, boundFindings) ->
+                findings <- findings @ boundFindings
+                { Name = name; Constraint = Some reference }
+            | Some _ ->
+                findings <-
+                    findings
+                    @ [ Finding.make Ergonomic owner $"constraint on '{name}' has no F# form and is dropped (§4.9)" ]
+
+                { Name = name; Constraint = None }
+            | None -> { Name = name; Constraint = None })
+
+    parameters, scope, findings
+
+/// The ids a declaration binds: its own where it is a genuine generic declaration, and the
+/// alias's where it is a generic *alias*. `type Mapper<T> = (t: T) => T` leaves the function
+/// type itself parameterless - the alias is the only place `T` appears - so both are read.
+let private declParamIds (facts: TypeFacts) =
+    (facts.Response.TypeParameters
+     |> ValueOption.map Array.toList
+     |> ValueOption.defaultValue [])
+    @ facts.AliasTypeArguments
+    |> List.distinct
+
+/// The parameters a declaration binds on its left side.
+let private declTypeParams (ctx: Context) (model: ShapeModel) (owner: string) (facts: TypeFacts) =
+    declParamIds facts |> typeParamsOf ctx model owner
+
+/// The parameters a callback alias binds, which include the signature's own. F# has no rank-2
+/// form, so a generic *function type* - `type F = <T>(t: T) => T`, where each caller picks `T`
+/// - can only be approximated by hoisting the variable onto the alias, and that shift is worth
+/// a finding. A generic alias to a plain function type binds nothing extra and costs nothing.
+let private aliasTypeParams (ctx: Context) (model: ShapeModel) (owner: string) (facts: TypeFacts) =
+    let declared = declParamIds facts
+    let hoisted = facts.CallSignatures |> List.collect _.TypeParameters |> List.distinct
+    let parameters, scope, findings = declared @ hoisted |> List.distinct |> typeParamsOf ctx model owner
+
+    let hoistFindings =
+        if hoisted |> List.exists (fun id -> not (List.contains id declared)) then
+            [ Finding.make Ergonomic owner "generic function type hoisted onto the alias; F# has no rank-2 form (§4.9)" ]
+        else
+            []
+
+    parameters, scope, findings @ hoistFindings
 
 // ---------------------------------------------------------------------------------------------
 // Shared shaping of members and signatures.
@@ -605,6 +741,10 @@ let synthesizeAnonymous: Pass<ShapeModel> =
                 && not (isTuple facts)
                 && facts.ConstructSignatures.IsEmpty
                 && not facts.Members.IsEmpty
+                // An instantiation of a generic this run declares is written as an
+                // application (§4.9). Naming it would declare the expansion a second time
+                // under a made-up name and lose the tie to the generic it came from.
+                && (instantiationOf { model with DeclNames = names } facts).IsNone
             else
                 false
 
@@ -936,8 +1076,14 @@ let shapeCallbacks: Pass<ShapeModel> =
                     |> List.choose (fun (typeId, name) ->
                         match Map.tryFind typeId model.Types with
                         | Some facts when flag TypeFlags.Object facts && isPureCallback facts ->
-                            let reference, refFindings = delegateRefFor ctx model name facts
-                            findings <- findings @ refFindings
+                            let typeParameters, scope, parameterFindings = aliasTypeParams ctx model name facts
+
+                            // The signature is read under the alias's own parameters, so
+                            // `Callback<T> = (self: T) => void` writes `'T` rather than widening it.
+                            let reference, refFindings =
+                                delegateRefFor ctx { model with TypeVars = scope } name facts
+
+                            findings <- findings @ parameterFindings @ refFindings
 
                             Some(
                                 FsAbbrev
@@ -945,6 +1091,7 @@ let shapeCallbacks: Pass<ShapeModel> =
                                       Docs = ""
                                       Tags = []
                                       Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+                                      TypeParameters = typeParameters
                                       Target = reference }
                             )
                         | _ -> None)
@@ -988,8 +1135,21 @@ let shapeInterfaces: Pass<ShapeModel> =
                             && not facts.Members.IsEmpty
                             && (arrayElement facts).IsNone
                             && not (isTuple facts)
+                            // A named instantiation - `type StringBox = Box<string>` - is an
+                            // abbreviation of the application, not a second copy of the
+                            // expansion the checker substituted; `shape-aliases` writes it.
+                            && (instantiationOf model facts).IsNone
                             ->
-                            let members, memberFindings = shapeMembers ctx model name facts
+                            let typeParameters, scope, parameterFindings =
+                                declTypeParams ctx model name facts
+
+                            findings <- findings @ parameterFindings
+
+                            // Members are shaped under the declaration's own parameters, so a
+                            // `T` in a member position names the variable rather than widening.
+                            let members, memberFindings =
+                                shapeMembers ctx { model with TypeVars = scope } name facts
+
                             findings <- findings @ memberFindings
 
                             if not facts.CallSignatures.IsEmpty then
@@ -1017,6 +1177,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                       Docs = docs
                                       Tags = tags
                                       Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+                                      TypeParameters = typeParameters
                                       Inherits = []
                                       Members = members
                                       CreateOverloads = [] }
@@ -1085,6 +1246,28 @@ let shapeAliases: Pass<ShapeModel> =
 
                 let fallback = defaultExportName ctx
 
+                // An abbreviation that stands in for an export - `type StringBox = Box<string>`
+                // reaches here rather than `shape-interfaces` - still carries that export's
+                // documentation; it is the only declaration the reader will see for it.
+                let exportDocs =
+                    model.Harvest.Exports
+                    |> List.choose (fun export ->
+                        Map.tryFind export.Symbol.Id model.ExportTypes
+                        |> Option.bind _.Declared
+                        |> Option.map (fun typeId -> typeId, (export.Docs, export.Tags)))
+                    |> Map.ofList
+
+                // A generic declaration cannot be named bare on the right of an abbreviation -
+                // F# demands the full arity - so an alias to one repeats its parameters and
+                // applies them straight through: `type Alias<'T> = Primary<'T>`.
+                let parametersOf =
+                    model.Decls
+                    |> List.choose (function
+                        | FsInterface decl -> Some(decl.Name, decl.TypeParameters)
+                        | FsAbbrev decl -> Some(decl.Name, decl.TypeParameters)
+                        | _ -> None)
+                    |> Map.ofList
+
                 // A second type-like export of an already-named type abbreviates to it.
                 let aliasDecls =
                     model.Harvest.Exports
@@ -1098,13 +1281,23 @@ let shapeAliases: Pass<ShapeModel> =
                             | Some typeId ->
                                 match Map.tryFind typeId model.DeclNames with
                                 | Some primary when primary <> name ->
+                                    let typeParameters =
+                                        Map.tryFind primary parametersOf |> Option.defaultValue []
+
+                                    let target =
+                                        if typeParameters.IsEmpty then
+                                            FsNamed primary
+                                        else
+                                            FsApp(primary, typeParameters |> List.map (_.Name >> FsTypeVar))
+
                                     Some(
                                         FsAbbrev
                                             { Name = name
                                               Docs = export.Docs
                                               Tags = export.Tags
                                               Order = export.Order
-                                              Target = FsNamed primary }
+                                              TypeParameters = typeParameters
+                                              Target = target }
                                     )
                                 | _ -> None
                             | None -> None)
@@ -1119,26 +1312,35 @@ let shapeAliases: Pass<ShapeModel> =
                         else
                             match Map.tryFind typeId model.Types with
                             | Some facts ->
+                                let typeParameters, scope, parameterFindings =
+                                    declTypeParams ctx model name facts
+
+                                let scoped = { model with TypeVars = scope }
+
                                 // The named cases earlier passes handle; what reaches here is
                                 // referable without a declaration of its own.
                                 let reference, refFindings =
                                     match arrayElement facts with
                                     | Some element ->
-                                        let inner, innerFindings = typeRef ctx model None name element
+                                        let inner, innerFindings = typeRef ctx scoped None name element
                                         FsArray inner, innerFindings
                                     | None ->
                                         match Map.tryFind facts.Response.Id model.DeclNames with
                                         | Some primary when primary <> name -> FsNamed primary, []
-                                        | _ -> typeRefIgnoringSelf ctx model name facts
+                                        | _ -> typeRefIgnoringSelf ctx scoped name facts
 
-                                findings <- findings @ refFindings
+                                findings <- findings @ parameterFindings @ refFindings
+
+                                let docs, tags =
+                                    Map.tryFind typeId exportDocs |> Option.defaultValue ("", [])
 
                                 Some(
                                     FsAbbrev
                                         { Name = name
-                                          Docs = ""
-                                          Tags = []
+                                          Docs = docs
+                                          Tags = tags
                                           Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+                                          TypeParameters = typeParameters
                                           Target = reference }
                                 )
                             | None -> None)

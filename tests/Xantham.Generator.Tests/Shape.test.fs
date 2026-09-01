@@ -28,6 +28,19 @@ let private tuple (id: int) (components: int list) (flags: ElementFlags list) =
         TypeArguments = components
         TupleElements = flags }
 
+/// A type parameter type, named by its own symbol the way the resolve tier records it.
+let private typeParam (id: int) (name: string) =
+    { Build.facts (Build.typeResponse id TypeFlags.TypeParameter) with SymbolName = Some name }
+
+/// A generic declaration: its own target, holding its parameters as its arguments.
+let private genericDecl (id: int) (parameters: int list) (members: ResolvedMember list) =
+    { Build.facts
+        { Build.typeResponse id TypeFlags.Object with
+            Target = ValueSome id
+            TypeParameters = ValueSome(List.toArray parameters) } with
+        TypeArguments = parameters
+        Members = members }
+
 [<Tests>]
 let typeRefTests =
     testList "shape typeRef" [
@@ -137,6 +150,51 @@ let typeRefTests =
 
             Expect.equal reference (FsArray FsString) "widened to its element"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
+
+        testCase "a type parameter in scope names its variable (§4.9)" <| fun _ ->
+            let model =
+                { Build.shapeModel (typeParam 20 "T" :: Build.primitives) with
+                    TypeVars = Map.ofList [ 20, "T" ] }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 20
+
+            Expect.equal reference (FsTypeVar "T") "'T"
+            Expect.isEmpty findings "a bound variable costs nothing"
+
+        testCase "a type parameter of some other declaration is not in scope" <| fun _ ->
+            let model = Build.shapeModel (typeParam 20 "T" :: Build.primitives)
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 20
+
+            Expect.equal reference FsObj "nothing here binds T"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
+
+        testCase "an instantiation of a declared generic is written as an application" <| fun _ ->
+            let instantiation =
+                { Build.facts
+                    { Build.typeResponse 31 TypeFlags.Object with Target = ValueSome 30 } with
+                    TypeArguments = [ 1 ] }
+
+            let model =
+                { Build.shapeModel (genericDecl 30 [ 20 ] [] :: instantiation :: typeParam 20 "T" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 30, "Box" ] }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 31
+
+            Expect.equal reference (FsApp("Box", [ FsString ])) "Box<string>, not the expansion"
+            Expect.isEmpty findings "an application is exact"
+
+        testCase "a generic declaration named at a reference re-applies its parameters" <| fun _ ->
+            // `map(next: T): Box<T>` refers to the declaration itself; F# has no bare `Box`.
+            let model =
+                { Build.shapeModel (genericDecl 30 [ 20 ] [] :: typeParam 20 "T" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 30, "Box" ]
+                    TypeVars = Map.ofList [ 20, "T" ] }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 30
+
+            Expect.equal reference (FsApp("Box", [ FsTypeVar "T" ])) "Box<'T>"
+            Expect.isEmpty findings "exact"
 
         testCase "a named literal union references its declaration, hoist intact" <| fun _ ->
             let union =
@@ -505,6 +563,93 @@ let shapePassTests =
                     "this-chaining is the only finding"
             | decls -> failtest $"expected one interface, got %A{decls}"
 
+        testCase "shape-interfaces binds a declaration's parameters for its members (§4.9)" <| fun _ ->
+            let box =
+                genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "value" SymbolFlags.Property) 20 ]
+
+            let model =
+                { Build.shapeModel (box :: typeParam 20 "T" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 30, "Box" ] }
+
+            let shaped, _ = Build.runPass Shape.shapeInterfaces model
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                Expect.equal decl.TypeParameters [ { Name = "T"; Constraint = None } ] "Box<'T>"
+
+                match decl.Members with
+                | [ FsProperty property ] -> Expect.equal property.Type (FsTypeVar "T") "the member names the variable"
+                | members -> failtest $"expected one property, got %A{members}"
+            | decls -> failtest $"expected one interface, got %A{decls}"
+
+        testCase "a constraint naming a generated type survives" <| fun _ ->
+            let bounded = { typeParam 20 "T" with Constraint = Some 60 }
+            let timer = Build.facts (Build.typeResponse 60 TypeFlags.Object)
+
+            let holder =
+                genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "held" SymbolFlags.Property) 20 ]
+
+            let model =
+                { Build.shapeModel (holder :: bounded :: timer :: Build.primitives) with
+                    DeclNames = Map.ofList [ 30, "Holder"; 60, "Timer" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeInterfaces model
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                Expect.equal decl.TypeParameters [ { Name = "T"; Constraint = Some(FsNamed "Timer") } ] "'T :> Timer"
+            | decls -> failtest $"expected one interface, got %A{decls}"
+
+            Expect.isEmpty
+                (findings |> List.filter (fun finding -> finding.Message.Contains "constraint"))
+                "a bound F# can state costs nothing"
+
+        testCase "a constraint with no F# form is dropped with a finding" <| fun _ ->
+            // `K extends string`: an F# subtype constraint cannot name a primitive, and the
+            // nearest approximation would reject code TypeScript accepts.
+            let bounded = { typeParam 20 "K" with Constraint = Some 1 }
+
+            let keyed =
+                genericDecl 30 [ 20 ] [ Build.resolvedMember (Build.symbol 300 "key" SymbolFlags.Property) 20 ]
+
+            let model =
+                { Build.shapeModel (keyed :: bounded :: Build.primitives) with
+                    DeclNames = Map.ofList [ 30, "Keyed" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeInterfaces model
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                Expect.equal decl.TypeParameters [ { Name = "K"; Constraint = None } ] "the variable stays, the bound goes"
+            | decls -> failtest $"expected one interface, got %A{decls}"
+
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "a dropped bound is ergonomic, not widening"
+
+        testCase "shape-callbacks binds the parameters the alias carries" <| fun _ ->
+            // `type Mapper<T> = (input: T) => T` leaves the function type parameterless; the
+            // variable is only reachable through the alias's arguments.
+            let mapper =
+                { Build.facts (Build.typeResponse 50 TypeFlags.Object) with
+                    AliasTypeArguments = [ 20 ]
+                    CallSignatures =
+                        [ Build.signature
+                              [ Build.resolvedMember (Build.symbol 500 "input" SymbolFlags.FunctionScopedVariable) 20 ]
+                              20 ] }
+
+            let model =
+                { Build.shapeModel (mapper :: typeParam 20 "T" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 50, "Mapper" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeCallbacks model
+
+            match shaped.Decls with
+            | [ FsAbbrev decl ] ->
+                Expect.equal decl.TypeParameters [ { Name = "T"; Constraint = None } ] "Mapper<'T>"
+                Expect.equal decl.Target (FsDelegate([ FsTypeVar "T" ], FsTypeVar "T")) "Func<'T, 'T>"
+            | decls -> failtest $"expected one abbreviation, got %A{decls}"
+
+            Expect.isEmpty findings "a generic alias is exact"
+
         testCase "shape-classes emits a constructor member per construct signature" <| fun _ ->
             let instance =
                 { Build.facts (Build.typeResponse 80 TypeFlags.Object) with
@@ -546,6 +691,7 @@ let shapePassTests =
                       Docs = ""
                       Tags = []
                       Order = None
+                      TypeParameters = []
                       Inherits = []
                       Members =
                         [ FsProperty
@@ -583,6 +729,7 @@ let shapePassTests =
                       Docs = ""
                       Tags = []
                       Order = None
+                      TypeParameters = []
                       Inherits = []
                       Members =
                         [ FsMethod
@@ -623,6 +770,7 @@ let shapePassTests =
                       Docs = ""
                       Tags = []
                       Order = None
+                      TypeParameters = []
                       Target = FsObj }
 
             let model =
@@ -635,6 +783,7 @@ let shapePassTests =
                                 Docs = ""
                                 Tags = []
                                 Order = None
+                                TypeParameters = []
                                 Inherits = []
                                 Members =
                                   [ method' "add" [ parameter "targets" (FsNamed "DOMTargets") ]
@@ -771,6 +920,7 @@ let shapePassTests =
                       Docs = ""
                       Tags = []
                       Order = Some order
+                      TypeParameters = []
                       Inherits = []
                       Members = []
                       CreateOverloads = [] }

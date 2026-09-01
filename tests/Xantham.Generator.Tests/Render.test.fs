@@ -84,6 +84,62 @@ let renderTests =
 
             Expect.stringContains source "    | Blank\n" "a tag-only arm carries nothing"
 
+        testCase "type variables and applications print in F# order" <| fun _ ->
+            Expect.equal (Render.printType (FsTypeVar "T")) "'T" "the tick is the renderer's"
+
+            Expect.equal
+                (Render.printType (FsApp("Box", [ FsString ])))
+                "Box<string>"
+                "an application, not the expansion"
+
+            Expect.equal
+                (Render.printType (FsApp("Pkg.type", [ FsApp("Box", [ FsTypeVar "T" ]) ])))
+                "Pkg.``type``<Box<'T>>"
+                "each name segment escapes on its own, nested"
+
+        testCase "a generic declaration writes its parameters, constraints at the definition" <| fun _ ->
+            let model =
+                { baseModel with
+                    Decls =
+                        [ FsInterface
+                              { Name = "Holder"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters = [ { Name = "T"; Constraint = Some(FsNamed "Timer") } ]
+                                Inherits = []
+                                Members =
+                                  [ FsProperty
+                                      { Name = "held"
+                                        Docs = ""
+                                        Tags = []
+                                        ReadOnly = false
+                                        Type = FsTypeVar "T" } ]
+                                CreateOverloads =
+                                  [ [ { Name = "held"
+                                        Type = FsTypeVar "T"
+                                        Optional = false
+                                        Rest = false } ] ] }
+                          FsAbbrev
+                              { Name = "Mapper"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters = [ { Name = "T"; Constraint = None } ]
+                                Target = FsDelegate([ FsTypeVar "T" ], FsTypeVar "T") } ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+
+            Expect.stringContains source "type Holder<'T when 'T :> Timer> =" "the bound is written once"
+            Expect.stringContains source "    abstract held: 'T with get, set" "the member names the variable"
+
+            Expect.stringContains
+                source
+                "static member Create (held: 'T) : Holder<'T> = jsNative"
+                "the Create return applies the parameters, bare"
+
+            Expect.stringContains source "type Mapper<'T> = Func<'T, 'T>" "a generic abbreviation"
+
         testCase "a qualified templated name escapes per segment" <| fun _ ->
             Expect.equal (Render.printType (FsNamed "TypeScript.Lib.RegExp")) "TypeScript.Lib.RegExp" "qualified"
             Expect.equal (Render.printType (FsNamed "Pkg.type")) "Pkg.``type``" "keyword segment"
@@ -97,6 +153,7 @@ let renderTests =
                                 Docs = "Opts."
                                 Tags = []
                                 Order = None
+                                TypeParameters = []
                                 Inherits = []
                                 Members =
                                   [ FsProperty
@@ -150,6 +207,7 @@ let renderTests =
                                 Docs = ""
                                 Tags = []
                                 Order = None
+                                TypeParameters = []
                                 Target = FsDelegate([ FsNamed "Options" ], FsUnit) }
                           FsExports
                               [ { Name = "make"
@@ -229,6 +287,7 @@ let renderTests =
                                 Docs = ""
                                 Tags = []
                                 Order = None
+                                TypeParameters = []
                                 Inherits = []
                                 Members = []
                                 CreateOverloads = [] } ]

@@ -41,6 +41,7 @@ let toShape (resolve: ResolveModel) : ShapeModel =
       DeclNames = Map.empty
       DeclOrders = Map.empty
       ExportMembers = []
+      TypeVars = Map.empty
       Decls = [] }
 
 /// The generated module's name: the config override, or the entry package's name under the

@@ -2,8 +2,8 @@
   "package": "phase-b-lab",
   "module": "PhaseBLab",
   "counts": {
-    "exact": 13,
-    "ergonomic": 7,
+    "exact": 16,
+    "ergonomic": 9,
     "widened": 4,
     "escape": 0
   },
@@ -218,6 +218,48 @@
           "message": "discriminated union on \u0027kind\u0027 (D4)"
         }
       ]
+    },
+    {
+      "name": "Box",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "StringBox",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "Holder",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Keyed",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Mapper",
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "Utils",

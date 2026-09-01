@@ -167,6 +167,18 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                 else
                     async.Return []
 
+            // A generic alias hangs its parameters off the alias, not the type: the function
+            // type behind `type Mapper<T> = (t: T) => T` reports none of its own. Only the
+            // arguments that *are* type parameters bind anything - an instantiated alias
+            // reports concrete arguments here, and those are already substituted in.
+            let! aliasTypeArguments = ctx.Session.getAliasTypeArgumentsOfType ty.Id
+
+            let aliasTypeArguments =
+                aliasTypeArguments
+                |> ValueOption.defaultValue [||]
+                |> Array.filter (fun argument -> argument.Flags.HasFlag TypeFlags.TypeParameter)
+                |> Array.toList
+
             if GeneratorConfig.disposition ctx.Config origin <> Ship then
                 // Identity only (O7): the shape tier renders references to this group by
                 // templated name or widens them, and either way nothing reads its members.
@@ -175,8 +187,9 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                         Origin = origin
                         SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
                         TypeArguments = typeArguments |> List.map _.Id
-                        TupleElements = tupleElements },
-                    typeArguments
+                        TupleElements = tupleElements
+                        AliasTypeArguments = aliasTypeArguments |> List.map _.Id },
+                    typeArguments @ aliasTypeArguments
             else
 
             let! properties = ctx.Session.getPropertiesOfType ty.Id
@@ -223,11 +236,20 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                                 let! parameterFacts = parameters |> Array.map (resolveMember false) |> Async.Parallel
                                 let! returnType = ctx.Session.getReturnTypeOfSignature signature.Id
 
+                                // A generic callback alias spells its parameters on the
+                                // signature, not the type, so `Mapper<T> = (t: T) => T` has
+                                // nothing to bind without this call.
+                                let! typeParameters = ctx.Session.getTypeParametersOfSignature signature.Id
+                                let typeParameters = typeParameters |> ValueOption.defaultValue [||]
+
                                 return
                                     { Parameters = parameterFacts |> Array.map fst |> Array.toList
                                       HasRest = signature.Flags.HasFlag SignatureFlags.HasRestParameter
+                                      TypeParameters = typeParameters |> Array.map _.Id |> Array.toList
                                       ReturnTypeId = returnType.Id },
-                                    [ yield! parameterFacts |> Array.map snd; returnType ]
+                                    [ yield! parameterFacts |> Array.map snd
+                                      yield! typeParameters
+                                      returnType ]
                             })
                         |> Async.Parallel
                 }
@@ -242,7 +264,8 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                   yield! callSignatures |> Array.collect (snd >> List.toArray)
                   yield! constructSignatures |> Array.collect (snd >> List.toArray)
                   yield! baseTypes
-                  yield! typeArguments ]
+                  yield! typeArguments
+                  yield! aliasTypeArguments ]
 
             return
                 { Response = ty
@@ -254,8 +277,27 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                   BaseTypes = baseTypes |> List.map _.Id
                   TypeArguments = typeArguments |> List.map _.Id
                   TupleElements = tupleElements
+                  AliasTypeArguments = aliasTypeArguments |> List.map _.Id
+                  Constraint = None
+                  Default = None
                   UnionMembers = [] },
                 discovered
+        elif has TypeFlags.TypeParameter && ty.IsThisType <> ValueSome true then
+            // A type parameter is named by its own symbol - `T`, not the declaration's - and
+            // the response carries only the symbol's id, so the name costs a round trip. The
+            // bound and the default are followed into the table: an unresolved constraint
+            // cannot be rendered, and dropping one silently is the bug the manifest exists to
+            // catch.
+            let! symbol = ctx.Session.getSymbolOfType ty.Id
+            let! bound = ctx.Session.getConstraintOfTypeParameter ty.Id
+            let! fallback = ctx.Session.getDefaultFromTypeParameter ty.Id
+
+            return
+                { TypeFacts.shallow ty with
+                    SymbolName = symbol |> ValueOption.map _.Name |> ValueOption.toOption
+                    Constraint = bound |> ValueOption.map _.Id |> ValueOption.toOption
+                    Default = fallback |> ValueOption.map _.Id |> ValueOption.toOption },
+                [ yield! ValueOption.toList bound; yield! ValueOption.toList fallback ]
         else
             return TypeFacts.shallow ty, []
     }

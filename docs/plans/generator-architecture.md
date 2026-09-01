@@ -274,6 +274,65 @@ Phases — each ends with the compile gate green on its fixtures:
     Fable erases them).
 - **C — unions and generics.** Position-aware unions (D4), tagged-union detection, tuples
   (D7), generics/constraints/default-args. Fixture: `@cloudflare/workers-types`.
+  **Landed (2026-09-01):** tuples, erased and tagged unions, and declaration-level
+  generics, all on the `lab` and `animejs` rungs; the `@cloudflare/workers-types` rung
+  is not yet installed. What the fixtures settled:
+  - *Tuple element flags live on the type's target*, not on the reference the checker
+    hands back (the reference reports `elementFlags: null`). The target is read for its
+    flags and then dropped rather than followed - it is the generic tuple type, so
+    deriving it drags all of `Array.prototype` in again per distinct tuple shape.
+  - *Optional tuple components need no work of their own*: `[number, number?]` arrives
+    as `number` and `number | undefined`, so D1's nullability hoist produces
+    `float * float option` for free.
+  - *Rest and variadic tuples widen to an array* with a finding. §4.12's erased carrier
+    is deferred until a fixture asks for it.
+  - *Erased unions* are Fable's `U2`-`U4`; four is the cap, because past that the
+    consumer is doing runtime tests the type no longer helps them write. Arms are
+    deduplicated *after* mapping (`boolean` re-expands inside unions, several string
+    literals all widen to `string`), a union collapsing to one arm *is* that arm, and
+    any `obj` arm collapses the whole union to `obj`. `U_n` already satisfies D4's
+    position preference - `U2.Case1 x` constructs on input, and the DU matches on
+    output - so only overload expansion at input positions is still deferred.
+  - *Fable's tagged-union erasure carries the arm's own properties as named DU fields*,
+    not the arm type as a single payload. Verified against Fable 5.13 rather than
+    recalled: `Circle(radius = 2.0)` emits `{ kind: "circle", radius: 2 }`, `None` in an
+    optional field omits the key exactly as TypeScript optional properties do, and
+    backtick escaping is transparent (`` ``type`` `` reaches JS as `type`). The
+    single-payload form emits `{ kind: "circle", Item: x }`, which no TypeScript
+    signature accepts. The discriminant is written by Fable from the case's
+    `CompiledName`, so it must *not* also be a field. Cases are capped at twelve fields:
+    a DU binds fields positionally, and past a dozen every `match` is a wall of
+    wildcards that the erased union over arm interfaces reads better than.
+  - *A type parameter's name costs a round trip*: `TypeFacts.SymbolName` is `None` for
+    type parameters, but `getSymbolOfType` returns the `T`. Constraints and defaults come
+    from `getConstraintOfTypeParameter` / `getDefaultFromTypeParameter`.
+  - *In-scope type variables live on the shape model* (`ShapeModel.TypeVars`), not in
+    `typeRef`'s arguments: scope is a property of *where* a reference is written, so the
+    pass binds it once around a declaration and every nested `typeRef` inherits it. A
+    parameter of some other declaration has no name to write here and widens to `obj`.
+  - *A generic alias hangs its parameters off the alias, not the type.* The function type
+    behind `type Mapper<T> = (t: T) => T` reports no parameters of its own; they are only
+    reachable through `getAliasTypeArgumentsOfType`, filtered to the arguments that
+    actually are type parameters (an instantiated alias reports concrete ones).
+    `getLocalTypeParametersOfType` is not an alternative - it panics the checker on
+    anonymous types.
+  - *A generic declaration named at a reference position re-applies its parameters*: F#
+    has no bare `Box`, so the self-reference in `map(next: T): Box<T>` and the `Create`
+    return type both carry `<'T>`.
+  - *Instantiations are never named or re-declared.* The checker substitutes members
+    eagerly, so `Box<string>` would read perfectly well as a structure of its own;
+    naming it would declare the expansion a second time under a made-up name and lose
+    the tie to the generic. `synthesize-anonymous` skips them and `shape-interfaces`
+    leaves them to `shape-aliases`, which writes `type StringBox = Box<string>`.
+  - *A constraint survives only if it maps to a named type.* `extends string` and
+    `extends keyof T` are dropped with a finding rather than approximated: F# has no
+    form for them and the nearest one would reject code TypeScript accepts.
+  - *Rank-2 function types hoist onto the alias* with a finding - F# has no rank-2 form.
+  - Still deferred, and findings say so at every site: method- and function-level
+    generics (F# can spell generic abstract members, but nothing needed it yet),
+    instantiations of generic *aliases* written as applications (they re-expand
+    inline today), and default type arguments, whose §4.9 wording needs revisiting
+    because F# cannot overload a type name by arity.
 - **D — the erased-idiom zone.** Revive `Xantham.Fable.Core`; keyof regimes, mapped/
   conditional handling, alias naming (D6), brand detection. Fixtures: `solid-js`, `type-fest`.
 - **E — hardening.** Dedup/naming at scale, fidelity-manifest UX, determinism under the

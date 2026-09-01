@@ -1550,7 +1550,7 @@ type CallbackArgument = obj
 
 type Revertible = obj
 
-type StaggerFunction = Func<Target option, float option, Target[] option, Tween option, Timeline option, obj>
+type StaggerFunction<'T> = Func<Target option, float option, Target[] option, Tween option, Timeline option, 'T>
 
 [<Interface>]
 type StaggerParams =
@@ -1657,6 +1657,18 @@ type ElasticEasing = Func<TimelinePosition option, TimelinePosition option, Easi
 
 type EasingFunctionWithParams = U3<BackEasing, ElasticEasing, PowerEasing>
 
+/// <summary>
+/// Accepts:&lt;br&gt;
+/// - `Number` - Absolute position in milliseconds (e.g., `500` places animation at exactly 500ms)&lt;br&gt;
+/// - `'+=Number'` - Addition: Position animation X ms after the last animation (e.g., `'+=100'`)&lt;br&gt;
+/// - `'-=Number'` - Subtraction: Position animation X ms before the last animation's end (e.g., `'-=100'`)&lt;br&gt;
+/// - `'*=Number'` - Multiplier: Position animation at a fraction of the total duration (e.g., `'*=.5'` for halfway)&lt;br&gt;
+/// - `'&lt;'` - Previous end: Position animation at the end position of the previous animation&lt;br&gt;
+/// - `'&lt;&lt;'` - Previous start: Position animation at the start position of the previous animation&lt;br&gt;
+/// - `'&lt;&lt;+=Number'` - Combined: Position animation relative to previous animation's start (e.g., `'&lt;&lt;+=250'`)&lt;br&gt;
+/// - `'label'` - Label: Position animation at a named label position (e.g., `'My Label'`)&lt;br&gt;
+/// - `stagger(String|Nummber)` - Stagger multi-elements animation positions (e.g., 10, 20, 30...)
+/// </summary>
 type EasingParam = obj
 
 type WAAPIEasingParam = EasingParam
@@ -1694,24 +1706,24 @@ type SpringParams =
     [<ParamObject; Emit("$0")>]
     static member Create (?mass: float, ?stiffness: float, ?damping: float, ?velocity: float, ?bounce: float, ?duration: float, ?onComplete: Func<JSAnimation, obj option, obj>) : SpringParams = jsNative
 
-type Callback = Func<obj, obj option, obj>
+type Callback<'T> = Func<'T, obj option, obj>
 
 [<Interface>]
-type TickableCallbacks =
-    abstract onBegin: Func<obj, obj option, obj> option with get, set
-    abstract onBeforeUpdate: Func<obj, obj option, obj> option with get, set
-    abstract onUpdate: Func<obj, obj option, obj> option with get, set
-    abstract onLoop: Func<obj, obj option, obj> option with get, set
-    abstract onPause: Func<obj, obj option, obj> option with get, set
-    abstract onComplete: Func<obj, obj option, obj> option with get, set
+type TickableCallbacks<'T> =
+    abstract onBegin: Func<'T, obj option, obj> option with get, set
+    abstract onBeforeUpdate: Func<'T, obj option, obj> option with get, set
+    abstract onUpdate: Func<'T, obj option, obj> option with get, set
+    abstract onLoop: Func<'T, obj option, obj> option with get, set
+    abstract onPause: Func<'T, obj option, obj> option with get, set
+    abstract onComplete: Func<'T, obj option, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?onBegin: Func<obj, obj option, obj>, ?onBeforeUpdate: Func<obj, obj option, obj>, ?onUpdate: Func<obj, obj option, obj>, ?onLoop: Func<obj, obj option, obj>, ?onPause: Func<obj, obj option, obj>, ?onComplete: Func<obj, obj option, obj>) : TickableCallbacks = jsNative
+    static member Create (?onBegin: Func<'T, obj option, obj>, ?onBeforeUpdate: Func<'T, obj option, obj>, ?onUpdate: Func<'T, obj option, obj>, ?onLoop: Func<'T, obj option, obj>, ?onPause: Func<'T, obj option, obj>, ?onComplete: Func<'T, obj option, obj>) : TickableCallbacks<'T> = jsNative
 
 [<Interface>]
-type RenderableCallbacks =
-    abstract onRender: Func<obj, obj option, obj> option with get, set
+type RenderableCallbacks<'T> =
+    abstract onRender: Func<'T, obj option, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?onRender: Func<obj, obj option, obj>) : RenderableCallbacks = jsNative
+    static member Create (?onRender: Func<'T, obj option, obj>) : RenderableCallbacks<'T> = jsNative
 
 [<Interface>]
 type TimerOptions =
@@ -1870,6 +1882,17 @@ type AnimationOptions =
 
 type AnimationParams = obj
 
+/// <summary>
+/// Accepts:&lt;br&gt;
+/// - `Number` - Absolute position in milliseconds (e.g., `500` places element at exactly 500ms)&lt;br&gt;
+/// - `'+=Number'` - Addition: Position element X ms after the last element (e.g., `'+=100'`)&lt;br&gt;
+/// - `'-=Number'` - Subtraction: Position element X ms before the last element's end (e.g., `'-=100'`)&lt;br&gt;
+/// - `'*=Number'` - Multiplier: Position element at a fraction of the total duration (e.g., `'*=.5'` for halfway)&lt;br&gt;
+/// - `'&lt;'` - Previous end: Position element at the end position of the previous element&lt;br&gt;
+/// - `'&lt;&lt;'` - Previous start: Position element at the start position of the previous element&lt;br&gt;
+/// - `'&lt;&lt;+=Number'` - Combined: Position element relative to previous element's start (e.g., `'&lt;&lt;+=250'`)&lt;br&gt;
+/// - `'label'` - Label: Position element at a named label position (e.g., `'My Label'`)
+/// </summary>
 type TimelinePosition = U2<string, float>
 
 /// <summary>
@@ -1977,7 +2000,7 @@ type ScopeParams =
     [<ParamObject; Emit("$0")>]
     static member Create (?root: obj, ?defaults: DefaultsParams, ?mediaQueries: obj) : ScopeParams = jsNative
 
-type ScopedCallback = Func<Scope, obj>
+type ScopedCallback<'T> = Func<Scope, 'T>
 
 type ScopeCleanupCallback = Func<Scope option, obj>
 

@@ -1,0 +1,6 @@
+{
+    "name": "phase-b-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture exercising each phase B mapping precisely - tracked in git, no npm install, so the goldens pin every feature under the live compiler."
+}

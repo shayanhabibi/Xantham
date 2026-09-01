@@ -2,9 +2,9 @@
   "package": "animejs",
   "module": "Animejs",
   "counts": {
-    "exact": 43,
-    "ergonomic": 38,
-    "widened": 85,
+    "exact": 44,
+    "ergonomic": 39,
+    "widened": 83,
     "escape": 50
   },
   "symbols": [
@@ -1558,12 +1558,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -2757,13 +2757,8 @@
     },
     {
       "name": "StaggerFunction",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
-        },
         {
           "pass": "shape-callbacks",
           "tier": "ergonomic",
@@ -3272,11 +3267,6 @@
           "pass": "shape-callbacks",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
         }
       ]
     },
@@ -3287,32 +3277,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "pass": "shape-interfaces",
@@ -3341,8 +3306,28 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "PointerEvent is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3371,8 +3356,28 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "PointerEvent is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -3401,11 +3406,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -3428,41 +3428,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "escape",
-          "message": "any maps to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "PointerEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -3478,6 +3443,11 @@
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
@@ -3499,11 +3469,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -4600,14 +4565,8 @@
     },
     {
       "name": "ScopedCallback",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "ScopeCleanupCallback",
@@ -6195,12 +6154,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -6315,7 +6274,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -6325,7 +6284,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -6714,12 +6673,12 @@
         {
           "pass": "shape-exports",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-exports",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         }
       ]
     },
@@ -7243,7 +7202,7 @@
         {
           "pass": "shape-exports",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         },
         {
           "pass": "shape-exports",
@@ -7253,7 +7212,7 @@
         {
           "pass": "shape-exports",
           "tier": "widened",
-          "message": "type parameter widened to obj (generics are phase C)"
+          "message": "type parameter is not in scope here; widened to obj"
         }
       ]
     },
