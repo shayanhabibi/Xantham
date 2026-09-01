@@ -136,6 +136,15 @@ module Stages =
             run "npm install"
         }
     }
+    
+    let fixtures = input {
+        let! quick = Options.quick
+        return stage "initialise fixtures" {
+            quiet
+            when' (not quick)
+            run "dotnet fsi tools/xantham-fixtures.fsx -- init" 
+        }
+    }
 
     /// Routes to `tools/generate-wire.fsx`, which owns the per-layer options. Everything it needs
     /// already defaults to the repository layout, so the stages pass no arguments.
@@ -228,6 +237,7 @@ rootCommand fsi.CommandLineArgs[1..] {
         Stages.clean
         Stages.build (Options.projects |> InputSpec.map (List.map _.RelativePath))
         Stages.deps
+        Stages.fixtures
         Stages.test
         Stages.pack
         Stages.publish
@@ -236,6 +246,7 @@ rootCommand fsi.CommandLineArgs[1..] {
         Stages.restore
         Stages.clean
         Stages.deps
+        Stages.fixtures
         Stages.test
     }
     command "pack" {
@@ -243,6 +254,7 @@ rootCommand fsi.CommandLineArgs[1..] {
         Stages.clean
         Stages.build (Options.projects |> InputSpec.map (List.map _.RelativePath))
         Stages.deps
+        Stages.fixtures
         Stages.test
         Stages.pack
     }

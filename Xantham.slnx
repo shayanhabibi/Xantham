@@ -62,6 +62,9 @@
   </Folder>
   <Folder Name="/tools/">
     <File Path="tools/generate-wire.fsx" />
+    <File Path="tools/probe-method-existence.mjs" />
+    <File Path="tools/workspace.fsx" />
+    <File Path="tools/xantham-fixtures.fsx" />
   </Folder>
   <Folder Name="/tools/proto-gen/">
     <File Path="tools/proto-gen/generate.mjs" />
@@ -74,8 +77,5 @@
     <File Path="tools/tsc-ast/record.mts" />
     <File Path="tools/tsc-ast/upstream.json" />
     <File Path="tools/tsc-ast/upstream.lock.json" />
-  </Folder>
-  <Folder Name="/tools/session-gen/">
-    <File Path="tools/session-gen/generate.mjs" />
   </Folder>
 </Solution>
