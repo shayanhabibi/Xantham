@@ -10,6 +10,7 @@ module Xantham.Generator.Tests.PipelineTests
 
 open System
 open System.IO
+open System.Text.Json
 open Expecto
 open Xantham.TypeScript.Wire
 open Xantham.Generator
@@ -57,6 +58,37 @@ let private npmFixture (name: string) =
 
 /// The hand-authored lab fixture, tracked in git - always present.
 let private labFixture = Path.Combine(root, "tests", "fixtures", "lab")
+
+/// The version every npm rung is pinned at, from the tracked `tests/fixtures/pins.json`. The
+/// install is untracked, so this file is the only record of what a golden was generated
+/// against; it is JSONC, like every other configuration Xantham reads.
+let private pins: Map<string, string> =
+    let path = Path.Combine(root, "tests", "fixtures", "pins.json")
+
+    if not (File.Exists path) then
+        Map.empty
+    else
+        let options =
+            JsonDocumentOptions(CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true)
+
+        use doc = JsonDocument.Parse(File.ReadAllText path, options)
+
+        doc.RootElement.EnumerateObject()
+        |> Seq.map (fun property -> property.Name, property.Value.GetString())
+        |> Map.ofSeq
+
+/// The version an install actually carries, from the installed package's own manifest.
+let private installedVersion (package: string) =
+    let path = Path.Combine(package, "package.json")
+
+    if not (File.Exists path) then
+        None
+    else
+        use doc = JsonDocument.Parse(File.ReadAllText path)
+
+        match doc.RootElement.TryGetProperty "version" with
+        | true, value -> Some(value.GetString())
+        | _ -> None
 
 let private updateGoldens =
     match Environment.GetEnvironmentVariable "XANTHAM_UPDATE_GOLDEN" with
@@ -120,6 +152,21 @@ let private fixtureTests (fixture: string) (package: string option) (config: Gen
                         run `npm install` in that fixture directory"
               else
                   skiptest $"run `npm install` in tests/fixtures/{fixture}" ]
+    | Some _, Some package when
+        (match Map.tryFind fixture pins, installedVersion package with
+         | Some pinned, Some installed -> installed <> pinned
+         | _ -> false)
+        ->
+        // Drift replaces the golden diff rather than joining it: a package that moved and a
+        // generator that regressed produce the same diff, and only one of them is a bug here.
+        [ testCase $"{fixture}: the install has drifted from its pin" <| fun _ ->
+              let pinned = Map.find fixture pins
+              let installed = installedVersion package |> Option.defaultValue "?"
+
+              failtest
+                  $"tests/fixtures/pins.json pins {fixture} at {pinned}, but the install is {installed}, so \
+                    the committed goldens describe a different package. Reinstall the pin, or bump it and \
+                    regenerate the goldens (XANTHAM_UPDATE_GOLDEN=1) in the same commit." ]
     | Some _, Some package ->
         [ testCase $"{fixture} generates the committed goldens" <| fun _ ->
               matchesGoldens fixture config package |> ignore

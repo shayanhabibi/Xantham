@@ -11,6 +11,7 @@ open Fable.Core.JsInterop
 /// <remarks>@import ;</remarks>
 type Animatable =
     abstract targets: Target[] with get, set
+    /// <remarks>@type {Record&lt;String, JSAnimation&gt;}</remarks>
     abstract animations: obj with get, set
     /// <remarks>@type {JSAnimation|null}</remarks>
     abstract callbacks: JSAnimation option with get, set
@@ -27,8 +28,6 @@ type Clock =
     abstract _startTime: float with get, set
     /// <remarks>@type {Number}</remarks>
     abstract _lastTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _scheduledTime: float with get, set
     /// <remarks>@type {Number}</remarks>
     abstract _frameDuration: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -118,10 +117,14 @@ type ScrollObserverAxisCallbackResult =
     | [<CompiledName("y")>] Y
 
 type JSAnimation =
+    /// <remarks>@type {Tween}</remarks>
+    abstract _head: Tween with get, set
+    /// <remarks>@type {Tween}</remarks>
+    abstract _tail: Tween with get, set
     /// <remarks>@type {TargetsArray}</remarks>
     abstract targets: Target[] with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onRender: Func<JSAnimation, obj option, obj> with get, set
+    abstract onRender: Func<JSAnimation, obj> with get, set
     /// <remarks>@type {EasingFunction}</remarks>
     abstract _ease: EasingFunction with get, set
     /// <remarks>@param newDuration</remarks>
@@ -136,7 +139,7 @@ type JSAnimation =
     abstract revert: unit -> JSAnimation
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
-    abstract ``then``: ?callback: Func<obj, obj option, obj> -> obj
+    abstract ``then``: ?callback: Func<obj, obj> -> obj
     /// <remarks>@type {Number}</remarks>
     abstract deltaTime: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -148,8 +151,6 @@ type JSAnimation =
     /// <remarks>@type {Number}</remarks>
     abstract _lastTime: float with get, set
     /// <remarks>@type {Number}</remarks>
-    abstract _scheduledTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
     abstract _frameDuration: float with get, set
     /// <remarks>@type {Number}</remarks>
     abstract _fps: float with get, set
@@ -157,10 +158,6 @@ type JSAnimation =
     abstract _speed: float with get, set
     /// <remarks>@type {Boolean}</remarks>
     abstract _hasChildren: bool with get, set
-    /// <remarks>@type {Tickable|Tween}</remarks>
-    abstract _head: U4<JSAnimation, Timeline, Timer, Tween> with get, set
-    /// <remarks>@type {Tickable|Tween}</remarks>
-    abstract _tail: U4<JSAnimation, Timeline, Timer, Tween> with get, set
     abstract fps: float with get, set
     abstract speed: float with get, set
     /// <remarks>@param time</remarks>
@@ -183,17 +180,17 @@ type JSAnimation =
     /// <remarks>@type {Boolean}</remarks>
     abstract completed: bool with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onBegin: Func<JSAnimation, obj option, obj> with get, set
+    abstract onBegin: Func<JSAnimation, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onBeforeUpdate: Func<JSAnimation, obj option, obj> with get, set
+    abstract onBeforeUpdate: Func<JSAnimation, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onUpdate: Func<JSAnimation, obj option, obj> with get, set
+    abstract onUpdate: Func<JSAnimation, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onLoop: Func<JSAnimation, obj option, obj> with get, set
+    abstract onLoop: Func<JSAnimation, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onPause: Func<JSAnimation, obj option, obj> with get, set
+    abstract onPause: Func<JSAnimation, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onComplete: Func<JSAnimation, obj option, obj> with get, set
+    abstract onComplete: Func<JSAnimation, obj> with get, set
     /// <remarks>@type {Number}</remarks>
     abstract iterationDuration: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -282,15 +279,18 @@ type Globals =
 [<Interface>]
 type GlobalsEditor =
     abstract showPanel: bool with get, set
-    abstract synced: bool with get, set
     abstract addAnimation: obj with get, set
+    abstract addSet: obj with get, set
     abstract addTimeline: obj with get, set
     abstract addTimelineChild: obj with get, set
+    abstract addTimelineLabel: obj with get, set
+    abstract addTimelineCall: obj with get, set
+    abstract addTimelineSync: obj with get, set
     abstract resolveStagger: obj with get, set
     abstract _head: obj with get, set
     abstract _tail: obj with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (showPanel: bool, synced: bool, addAnimation: obj, addTimeline: obj, addTimelineChild: obj, resolveStagger: obj, _head: obj, _tail: obj) : GlobalsEditor = jsNative
+    static member Create (showPanel: bool, addAnimation: obj, addSet: obj, addTimeline: obj, addTimelineChild: obj, addTimelineLabel: obj, addTimelineCall: obj, addTimelineSync: obj, resolveStagger: obj, _head: obj, _tail: obj) : GlobalsEditor = jsNative
 
 type DOMProxy =
     abstract el: obj with get, set
@@ -364,21 +364,21 @@ type Draggable =
     /// <remarks>@type {Boolean}</remarks>
     abstract hasReleaseSpring: bool with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onGrab: Func<Draggable, obj option, obj> with get, set
+    abstract onGrab: Func<Draggable, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onDrag: Func<Draggable, obj option, obj> with get, set
+    abstract onDrag: Func<Draggable, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onRelease: Func<Draggable, obj option, obj> with get, set
+    abstract onRelease: Func<Draggable, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onUpdate: Func<Draggable, obj option, obj> with get, set
+    abstract onUpdate: Func<Draggable, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onSettle: Func<Draggable, obj option, obj> with get, set
+    abstract onSettle: Func<Draggable, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onSnap: Func<Draggable, obj option, obj> with get, set
+    abstract onSnap: Func<Draggable, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onResize: Func<Draggable, obj option, obj> with get, set
+    abstract onResize: Func<Draggable, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onAfterResize: Func<Draggable, obj option, obj> with get, set
+    abstract onAfterResize: Func<Draggable, obj> with get, set
     /// <remarks>@type {[Number, Number]}</remarks>
     abstract disabled: float * float with get, set
     /// <remarks>@type {AnimatableObject}</remarks>
@@ -475,13 +475,13 @@ type Draggable =
     /// <remarks>@param gap</remarks>
     /// <remarks>@param ease</remarks>
     /// <remarks>@return</remarks>
-    abstract scrollInView: ?duration: float * ?gap: float * ease: obj -> Draggable
+    abstract scrollInView: ?duration: float * ?gap: float * ?ease: EasingParam -> Draggable
     abstract handleHover: unit -> unit
     /// <remarks>@param duration</remarks>
     /// <remarks>@param gap</remarks>
     /// <remarks>@param ease</remarks>
     /// <remarks>@return</remarks>
-    abstract animateInView: ?duration: float * ?gap: float * ease: obj -> Draggable
+    abstract animateInView: ?duration: float * ?gap: float * ?ease: EasingParam -> Draggable
     /// <remarks>@param e</remarks>
     abstract handleDown: e: obj -> unit
     /// <remarks>@param e</remarks>
@@ -607,7 +607,7 @@ type Spring =
     /// <remarks>@type {JSAnimation}</remarks>
     abstract parent: JSAnimation with get, set
     /// <remarks>@type {Callback&lt;JSAnimation&gt;}</remarks>
-    abstract onComplete: Func<JSAnimation, obj option, obj> with get, set
+    abstract onComplete: Func<JSAnimation, obj> with get, set
     /// <remarks>@type {EasingFunction}</remarks>
     abstract ease: EasingFunction with get, set
     abstract solve: time: float -> float
@@ -633,7 +633,7 @@ type Engine =
     /// <remarks>@type {Number}</remarks>
     abstract _lastTime: float with get, set
     /// <remarks>@type {Number}</remarks>
-    abstract _scheduledTime: float with get, set
+    abstract _frameDuration: float with get, set
     abstract useDefaultMainLoop: bool with get, set
     abstract pauseOnDocumentHidden: bool with get, set
     /// <remarks>@type {DefaultsParams}</remarks>
@@ -647,8 +647,6 @@ type Engine =
     abstract resume: unit -> Engine
     abstract timeUnit: EngineTimeUnit with get, set
     abstract precision: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _frameDuration: float with get, set
     /// <remarks>@type {Number}</remarks>
     abstract _fps: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -699,35 +697,35 @@ type ScrollObserver =
     /// <remarks>@type {Number}</remarks>
     abstract syncSmooth: float with get, set
     /// <remarks>@type {Callback&lt;ScrollObserver&gt;}</remarks>
-    abstract onSyncEnter: Func<ScrollObserver, obj option, obj> with get, set
+    abstract onSyncEnter: Func<ScrollObserver, obj> with get, set
     /// <remarks>@type {Callback&lt;ScrollObserver&gt;}</remarks>
-    abstract onSyncLeave: Func<ScrollObserver, obj option, obj> with get, set
+    abstract onSyncLeave: Func<ScrollObserver, obj> with get, set
     /// <remarks>@type {Callback&lt;ScrollObserver&gt;}</remarks>
-    abstract onSyncEnterForward: Func<ScrollObserver, obj option, obj> with get, set
+    abstract onSyncEnterForward: Func<ScrollObserver, obj> with get, set
     /// <remarks>@type {Callback&lt;ScrollObserver&gt;}</remarks>
-    abstract onSyncLeaveForward: Func<ScrollObserver, obj option, obj> with get, set
+    abstract onSyncLeaveForward: Func<ScrollObserver, obj> with get, set
     /// <remarks>@type {Callback&lt;ScrollObserver&gt;}</remarks>
-    abstract onSyncEnterBackward: Func<ScrollObserver, obj option, obj> with get, set
+    abstract onSyncEnterBackward: Func<ScrollObserver, obj> with get, set
     /// <remarks>@type {Callback&lt;ScrollObserver&gt;}</remarks>
-    abstract onSyncLeaveBackward: Func<ScrollObserver, obj option, obj> with get, set
+    abstract onSyncLeaveBackward: Func<ScrollObserver, obj> with get, set
     /// <remarks>@type {Callback&lt;ScrollObserver&gt;}</remarks>
-    abstract onEnter: Func<ScrollObserver, obj option, obj> with get, set
+    abstract onEnter: Func<ScrollObserver, obj> with get, set
     /// <remarks>@type {Callback&lt;ScrollObserver&gt;}</remarks>
-    abstract onLeave: Func<ScrollObserver, obj option, obj> with get, set
+    abstract onLeave: Func<ScrollObserver, obj> with get, set
     /// <remarks>@type {Callback&lt;ScrollObserver&gt;}</remarks>
-    abstract onEnterForward: Func<ScrollObserver, obj option, obj> with get, set
+    abstract onEnterForward: Func<ScrollObserver, obj> with get, set
     /// <remarks>@type {Callback&lt;ScrollObserver&gt;}</remarks>
-    abstract onLeaveForward: Func<ScrollObserver, obj option, obj> with get, set
+    abstract onLeaveForward: Func<ScrollObserver, obj> with get, set
     /// <remarks>@type {Callback&lt;ScrollObserver&gt;}</remarks>
-    abstract onEnterBackward: Func<ScrollObserver, obj option, obj> with get, set
+    abstract onEnterBackward: Func<ScrollObserver, obj> with get, set
     /// <remarks>@type {Callback&lt;ScrollObserver&gt;}</remarks>
-    abstract onLeaveBackward: Func<ScrollObserver, obj option, obj> with get, set
+    abstract onLeaveBackward: Func<ScrollObserver, obj> with get, set
     /// <remarks>@type {Callback&lt;ScrollObserver&gt;}</remarks>
-    abstract onUpdate: Func<ScrollObserver, obj option, obj> with get, set
+    abstract onUpdate: Func<ScrollObserver, obj> with get, set
     /// <remarks>@type {Callback&lt;ScrollObserver&gt;}</remarks>
-    abstract onResize: Func<ScrollObserver, obj option, obj> with get, set
+    abstract onResize: Func<ScrollObserver, obj> with get, set
     /// <remarks>@type {Callback&lt;ScrollObserver&gt;}</remarks>
-    abstract onSyncComplete: Func<ScrollObserver, obj option, obj> with get, set
+    abstract onSyncComplete: Func<ScrollObserver, obj> with get, set
     /// <remarks>@type {Boolean}</remarks>
     abstract reverted: bool with get, set
     /// <remarks>@type {Boolean}</remarks>
@@ -878,11 +876,11 @@ type LayoutChildrenParam = obj
 
 [<Interface>]
 type LayoutAnimationTimingsParams =
-    abstract delay: U2<float, FunctionValue> option with get, set
-    abstract duration: U2<float, FunctionValue> option with get, set
+    abstract delay: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> option with get, set
+    abstract duration: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> option with get, set
     abstract ease: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?delay: U2<float, FunctionValue>, ?duration: U2<float, FunctionValue>, ?ease: obj) : LayoutAnimationTimingsParams = jsNative
+    static member Create (?delay: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>>, ?duration: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>>, ?ease: obj) : LayoutAnimationTimingsParams = jsNative
 
 type LayoutStateAnimationProperties = obj
 
@@ -891,15 +889,15 @@ type LayoutStateParams = obj
 [<Interface>]
 type LayoutSpecificAnimationParams =
     abstract id: TimelinePosition option with get, set
-    abstract delay: U2<float, FunctionValue> option with get, set
-    abstract duration: U2<float, FunctionValue> option with get, set
+    abstract delay: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> option with get, set
+    abstract duration: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> option with get, set
     abstract ease: obj option with get, set
-    abstract playbackEase: obj option with get, set
+    abstract playbackEase: EasingParam option with get, set
     abstract swapAt: obj option with get, set
     abstract enterFrom: obj option with get, set
     abstract leaveTo: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: TimelinePosition, ?delay: U2<float, FunctionValue>, ?duration: U2<float, FunctionValue>, ?ease: obj, ?playbackEase: obj, ?swapAt: obj, ?enterFrom: obj, ?leaveTo: obj) : LayoutSpecificAnimationParams = jsNative
+    static member Create (?id: TimelinePosition, ?delay: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>>, ?duration: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>>, ?ease: obj, ?playbackEase: EasingParam, ?swapAt: obj, ?enterFrom: obj, ?leaveTo: obj) : LayoutSpecificAnimationParams = jsNative
 
 type LayoutAnimationParams = obj
 
@@ -921,7 +919,7 @@ type LayoutNode =
     abstract targets: DOMTarget[] with get, set
     abstract delay: float with get, set
     abstract duration: float with get, set
-    abstract ease: obj with get, set
+    abstract ease: EasingParam with get, set
     abstract ``$measure``: DOMTarget with get, set
     abstract state: LayoutSnapshot with get, set
     abstract layout: AutoLayout with get, set
@@ -1029,17 +1027,17 @@ type Scope =
 type Svg =
     abstract createMotionPath: Func<TargetsParam, float option, SvgCreateMotionPathResult> with get, set
     abstract createDrawable: Func<TargetsParam, float option, float option, obj[]> with get, set
-    abstract morphTo: Func<TargetsParam, float option, FunctionValue> with get, set
+    abstract morphTo: Func<TargetsParam, float option, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (createMotionPath: Func<TargetsParam, float option, SvgCreateMotionPathResult>, createDrawable: Func<TargetsParam, float option, float option, obj[]>, morphTo: Func<TargetsParam, float option, FunctionValue>) : Svg = jsNative
+    static member Create (createMotionPath: Func<TargetsParam, float option, SvgCreateMotionPathResult>, createDrawable: Func<TargetsParam, float option, float option, obj[]>, morphTo: Func<TargetsParam, float option, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>>) : Svg = jsNative
 
 [<Interface>]
 type SvgCreateMotionPathResult =
-    abstract translateX: FunctionValue with get, set
-    abstract translateY: FunctionValue with get, set
-    abstract rotate: FunctionValue with get, set
+    abstract translateX: Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn> with get, set
+    abstract translateY: Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn> with get, set
+    abstract rotate: Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (translateX: FunctionValue, translateY: FunctionValue, rotate: FunctionValue) : SvgCreateMotionPathResult = jsNative
+    static member Create (translateX: Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>, translateY: Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>, rotate: Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>) : SvgCreateMotionPathResult = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type SplitTemplateParamsClone =
@@ -1070,9 +1068,20 @@ type Text =
     abstract TextSplitter: obj with get, set
     abstract splitText: Func<obj, TextSplitterParams option, TextSplitter> with get, set
     abstract split: Func<obj, TextSplitterParams option, TextSplitter> with get, set
-    abstract scrambleText: Func<ScrambleTextParams option, FunctionValue> with get, set
+    abstract scrambleText: Func<ScrambleTextParams option, Func<Target option, float option, Target[] option, Tween option, ScrambleTextTween>> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (TextSplitter: obj, splitText: Func<obj, TextSplitterParams option, TextSplitter>, split: Func<obj, TextSplitterParams option, TextSplitter>, scrambleText: Func<ScrambleTextParams option, FunctionValue>) : Text = jsNative
+    static member Create (TextSplitter: obj, splitText: Func<obj, TextSplitterParams option, TextSplitter>, split: Func<obj, TextSplitterParams option, TextSplitter>, scrambleText: Func<ScrambleTextParams option, Func<Target option, float option, Target[] option, Tween option, ScrambleTextTween>>) : Text = jsNative
+
+[<Interface>]
+type ScrambleTextTween =
+    abstract from: float with get, set
+    abstract ``to``: float with get, set
+    abstract duration: float with get, set
+    abstract delay: float with get, set
+    abstract ease: string with get, set
+    abstract modifier: Func<float, string> with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (from: float, ``to``: float, duration: float, delay: float, ease: string, modifier: Func<float, string>) : ScrambleTextTween = jsNative
 
 /// <summary>
 /// A class that splits text into words and wraps them in span elements while preserving the original HTML structure.
@@ -1136,7 +1145,7 @@ type Timeline =
     /// <remarks>@type {Boolean}</remarks>
     abstract composition: bool with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onRender: Func<Timeline, obj option, obj> with get, set
+    abstract onRender: Func<Timeline, obj> with get, set
     abstract _ease: EasingFunction with get, set
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
@@ -1148,7 +1157,7 @@ type Timeline =
     /// <remarks>@param a1</remarks>
     /// <remarks>@param a2</remarks>
     /// <remarks>@param a3</remarks>
-    abstract add: a1: TargetsParam * a2: obj * a3: obj -> Timeline
+    abstract add: a1: TargetsParam * a2: obj * ?a3: TimelineAnimationPosition -> Timeline
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@param a1</remarks>
@@ -1212,11 +1221,11 @@ type Timeline =
     /// <remarks>@param parameters</remarks>
     /// <remarks>@param position</remarks>
     /// <remarks>@return</remarks>
-    abstract set: targets: TargetsParam * parameters: obj * ?position: TimelinePosition -> Timeline
+    abstract set: targets: TargetsParam * parameters: obj * ?position: TimelineAnimationPosition -> Timeline
     /// <remarks>@param callback</remarks>
     /// <remarks>@param position</remarks>
     /// <remarks>@return</remarks>
-    abstract call: callback: Func<Timer, obj option, obj> * ?position: TimelinePosition -> Timeline
+    abstract call: callback: Func<Timer, obj> * ?position: TimelinePosition -> Timeline
     /// <remarks>@param labelName</remarks>
     /// <remarks>@param position</remarks>
     /// <remarks>@return</remarks>
@@ -1234,7 +1243,7 @@ type Timeline =
     abstract revert: unit -> Timeline
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
-    abstract ``then``: ?callback: Func<obj, obj option, obj> -> obj
+    abstract ``then``: ?callback: Func<obj, obj> -> obj
     /// <remarks>@type {Number}</remarks>
     abstract deltaTime: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -1245,8 +1254,6 @@ type Timeline =
     abstract _startTime: float with get, set
     /// <remarks>@type {Number}</remarks>
     abstract _lastTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
-    abstract _scheduledTime: float with get, set
     /// <remarks>@type {Number}</remarks>
     abstract _frameDuration: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -1281,17 +1288,17 @@ type Timeline =
     /// <remarks>@type {Boolean}</remarks>
     abstract completed: bool with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onBegin: Func<Timeline, obj option, obj> with get, set
+    abstract onBegin: Func<Timeline, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onBeforeUpdate: Func<Timeline, obj option, obj> with get, set
+    abstract onBeforeUpdate: Func<Timeline, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onUpdate: Func<Timeline, obj option, obj> with get, set
+    abstract onUpdate: Func<Timeline, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onLoop: Func<Timeline, obj option, obj> with get, set
+    abstract onLoop: Func<Timeline, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onPause: Func<Timeline, obj option, obj> with get, set
+    abstract onPause: Func<Timeline, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onComplete: Func<Timeline, obj option, obj> with get, set
+    abstract onComplete: Func<Timeline, obj> with get, set
     /// <remarks>@type {Number}</remarks>
     abstract iterationDuration: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -1382,8 +1389,6 @@ type Timer =
     /// <remarks>@type {Number}</remarks>
     abstract _lastTime: float with get, set
     /// <remarks>@type {Number}</remarks>
-    abstract _scheduledTime: float with get, set
-    /// <remarks>@type {Number}</remarks>
     abstract _frameDuration: float with get, set
     /// <remarks>@type {Number}</remarks>
     abstract _fps: float with get, set
@@ -1417,17 +1422,17 @@ type Timer =
     /// <remarks>@type {Boolean}</remarks>
     abstract completed: bool with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onBegin: Func<Timer, obj option, obj> with get, set
+    abstract onBegin: Func<Timer, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onBeforeUpdate: Func<Timer, obj option, obj> with get, set
+    abstract onBeforeUpdate: Func<Timer, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onUpdate: Func<Timer, obj option, obj> with get, set
+    abstract onUpdate: Func<Timer, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onLoop: Func<Timer, obj option, obj> with get, set
+    abstract onLoop: Func<Timer, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onPause: Func<Timer, obj option, obj> with get, set
+    abstract onPause: Func<Timer, obj> with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onComplete: Func<Timer, obj option, obj> with get, set
+    abstract onComplete: Func<Timer, obj> with get, set
     /// <remarks>@type {Number}</remarks>
     abstract iterationDuration: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -1512,13 +1517,13 @@ type Timer =
     abstract complete: ?muteCallbacks: U2<float, bool> -> Timer
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
-    abstract ``then``: ?callback: Func<obj, obj option, obj> -> obj
+    abstract ``then``: ?callback: Func<obj, obj> -> obj
 
 [<Interface>]
 type DefaultsParams =
     abstract id: TimelinePosition option with get, set
     abstract keyframes: U2<obj[], PercentageKeyframes> option with get, set
-    abstract playbackEase: obj option with get, set
+    abstract playbackEase: EasingParam option with get, set
     abstract playbackRate: float option with get, set
     abstract frameRate: float option with get, set
     abstract loop: U2<float, bool> option with get, set
@@ -1526,21 +1531,21 @@ type DefaultsParams =
     abstract alternate: bool option with get, set
     abstract persist: bool option with get, set
     abstract autoplay: U2<bool, ScrollObserver> option with get, set
-    abstract duration: U2<float, FunctionValue> option with get, set
-    abstract delay: U2<float, FunctionValue> option with get, set
+    abstract duration: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> option with get, set
+    abstract delay: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> option with get, set
     abstract loopDelay: float option with get, set
     abstract ease: obj option with get, set
     abstract composition: U2<float, string> option with get, set
     abstract modifier: Func<obj, obj> option with get, set
-    abstract onBegin: Func<Tickable, obj option, obj> option with get, set
-    abstract onBeforeUpdate: Func<Tickable, obj option, obj> option with get, set
-    abstract onUpdate: Func<Tickable, obj option, obj> option with get, set
-    abstract onLoop: Func<Tickable, obj option, obj> option with get, set
-    abstract onPause: Func<Tickable, obj option, obj> option with get, set
-    abstract onComplete: Func<Tickable, obj option, obj> option with get, set
-    abstract onRender: Func<Renderable, obj option, obj> option with get, set
+    abstract onBegin: Func<Tickable, obj> option with get, set
+    abstract onBeforeUpdate: Func<Tickable, obj> option with get, set
+    abstract onUpdate: Func<Tickable, obj> option with get, set
+    abstract onLoop: Func<Tickable, obj> option with get, set
+    abstract onPause: Func<Tickable, obj> option with get, set
+    abstract onComplete: Func<Tickable, obj> option with get, set
+    abstract onRender: Func<Renderable, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: TimelinePosition, ?keyframes: U2<obj[], PercentageKeyframes>, ?playbackEase: obj, ?playbackRate: float, ?frameRate: float, ?loop: U2<float, bool>, ?reversed: bool, ?alternate: bool, ?persist: bool, ?autoplay: U2<bool, ScrollObserver>, ?duration: U2<float, FunctionValue>, ?delay: U2<float, FunctionValue>, ?loopDelay: float, ?ease: obj, ?composition: U2<float, string>, ?modifier: Func<obj, obj>, ?onBegin: Func<Tickable, obj option, obj>, ?onBeforeUpdate: Func<Tickable, obj option, obj>, ?onUpdate: Func<Tickable, obj option, obj>, ?onLoop: Func<Tickable, obj option, obj>, ?onPause: Func<Tickable, obj option, obj>, ?onComplete: Func<Tickable, obj option, obj>, ?onRender: Func<Renderable, obj option, obj>) : DefaultsParams = jsNative
+    static member Create (?id: TimelinePosition, ?keyframes: U2<obj[], PercentageKeyframes>, ?playbackEase: EasingParam, ?playbackRate: float, ?frameRate: float, ?loop: U2<float, bool>, ?reversed: bool, ?alternate: bool, ?persist: bool, ?autoplay: U2<bool, ScrollObserver>, ?duration: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>>, ?delay: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>>, ?loopDelay: float, ?ease: obj, ?composition: U2<float, string>, ?modifier: Func<obj, obj>, ?onBegin: Func<Tickable, obj>, ?onBeforeUpdate: Func<Tickable, obj>, ?onUpdate: Func<Tickable, obj>, ?onLoop: Func<Tickable, obj>, ?onPause: Func<Tickable, obj>, ?onComplete: Func<Tickable, obj>, ?onRender: Func<Renderable, obj>) : DefaultsParams = jsNative
 
 type Renderable = U2<JSAnimation, Timeline>
 
@@ -1550,6 +1555,13 @@ type CallbackArgument = obj
 
 type Revertible = obj
 
+[<Interface>]
+type TweakRegister =
+    abstract ``type``: string with get, set
+    abstract defaultValue: obj with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, defaultValue: obj) : TweakRegister = jsNative
+
 type StaggerFunction<'T> = Func<Target option, float option, Target[] option, Tween option, Timeline option, 'T>
 
 [<Interface>]
@@ -1558,13 +1570,32 @@ type StaggerParams =
     abstract from: U3<float, string, float[]> option with get, set
     abstract reversed: bool option with get, set
     abstract grid: U2<bool, float[]> option with get, set
-    abstract axis: ScrollObserverAxisCallbackResult option with get, set
+    abstract axis: StaggerParamsAxis option with get, set
     abstract ``use``: U2<string, Func<Target, float, float, float>> option with get, set
     abstract total: float option with get, set
-    abstract ease: obj option with get, set
+    abstract ease: EasingParam option with get, set
     abstract modifier: TweenModifier option with get, set
+    /// <summary>
+    /// Additive uniform noise on the
+    /// computed stagger value. Number form gives flat `+/-jitter`; tuple form
+    /// ramps the magnitude `start -&gt; end` across the from/axis/grid ordering
+    /// and respects `ease`.
+    /// </summary>
+    abstract jitter: U2<float, (float * float)> option with get, set
+    /// <summary>
+    /// Seed for jitter draws and `from: 'random'`
+    /// shuffling. `false` (default) uses Math.random. `true` seeds with `0`. A
+    /// number is used directly as the seed.
+    /// </summary>
+    abstract seed: U2<float, bool> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?start: TimelinePosition, ?from: U3<float, string, float[]>, ?reversed: bool, ?grid: U2<bool, float[]>, ?axis: ScrollObserverAxisCallbackResult, ?``use``: U2<string, Func<Target, float, float, float>>, ?total: float, ?ease: obj, ?modifier: TweenModifier) : StaggerParams = jsNative
+    static member Create (?start: TimelinePosition, ?from: U3<float, string, float[]>, ?reversed: bool, ?grid: U2<bool, float[]>, ?axis: StaggerParamsAxis, ?``use``: U2<string, Func<Target, float, float, float>>, ?total: float, ?ease: EasingParam, ?modifier: TweenModifier, ?jitter: U2<float, (float * float)>, ?seed: U2<float, bool>) : StaggerParams = jsNative
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type StaggerParamsAxis =
+    | [<CompiledName("x")>] X
+    | [<CompiledName("y")>] Y
+    | [<CompiledName("z")>] Z
 
 type DOMTarget = obj
 
@@ -1657,21 +1688,9 @@ type ElasticEasing = Func<TimelinePosition option, TimelinePosition option, Easi
 
 type EasingFunctionWithParams = U3<BackEasing, ElasticEasing, PowerEasing>
 
-/// <summary>
-/// Accepts:&lt;br&gt;
-/// - `Number` - Absolute position in milliseconds (e.g., `500` places animation at exactly 500ms)&lt;br&gt;
-/// - `'+=Number'` - Addition: Position animation X ms after the last animation (e.g., `'+=100'`)&lt;br&gt;
-/// - `'-=Number'` - Subtraction: Position animation X ms before the last animation's end (e.g., `'-=100'`)&lt;br&gt;
-/// - `'*=Number'` - Multiplier: Position animation at a fraction of the total duration (e.g., `'*=.5'` for halfway)&lt;br&gt;
-/// - `'&lt;'` - Previous end: Position animation at the end position of the previous animation&lt;br&gt;
-/// - `'&lt;&lt;'` - Previous start: Position animation at the start position of the previous animation&lt;br&gt;
-/// - `'&lt;&lt;+=Number'` - Combined: Position animation relative to previous animation's start (e.g., `'&lt;&lt;+=250'`)&lt;br&gt;
-/// - `'label'` - Label: Position animation at a named label position (e.g., `'My Label'`)&lt;br&gt;
-/// - `stagger(String|Nummber)` - Stagger multi-elements animation positions (e.g., 10, 20, 30...)
-/// </summary>
 type EasingParam = obj
 
-type WAAPIEasingParam = EasingParam
+type WAAPIEasingParam = obj
 
 [<Interface>]
 type SpringParams =
@@ -1702,34 +1721,34 @@ type SpringParams =
     /// <summary>
     /// - Callback function called when the spring currentTime hits the perceived duration
     /// </summary>
-    abstract onComplete: Func<JSAnimation, obj option, obj> option with get, set
+    abstract onComplete: Func<JSAnimation, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?mass: float, ?stiffness: float, ?damping: float, ?velocity: float, ?bounce: float, ?duration: float, ?onComplete: Func<JSAnimation, obj option, obj>) : SpringParams = jsNative
+    static member Create (?mass: float, ?stiffness: float, ?damping: float, ?velocity: float, ?bounce: float, ?duration: float, ?onComplete: Func<JSAnimation, obj>) : SpringParams = jsNative
 
-type Callback<'T> = Func<'T, obj option, obj>
+type Callback = Func<obj, obj>
 
 [<Interface>]
 type TickableCallbacks<'T> =
-    abstract onBegin: Func<'T, obj option, obj> option with get, set
-    abstract onBeforeUpdate: Func<'T, obj option, obj> option with get, set
-    abstract onUpdate: Func<'T, obj option, obj> option with get, set
-    abstract onLoop: Func<'T, obj option, obj> option with get, set
-    abstract onPause: Func<'T, obj option, obj> option with get, set
-    abstract onComplete: Func<'T, obj option, obj> option with get, set
+    abstract onBegin: Func<'T, obj> option with get, set
+    abstract onBeforeUpdate: Func<'T, obj> option with get, set
+    abstract onUpdate: Func<'T, obj> option with get, set
+    abstract onLoop: Func<'T, obj> option with get, set
+    abstract onPause: Func<'T, obj> option with get, set
+    abstract onComplete: Func<'T, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?onBegin: Func<'T, obj option, obj>, ?onBeforeUpdate: Func<'T, obj option, obj>, ?onUpdate: Func<'T, obj option, obj>, ?onLoop: Func<'T, obj option, obj>, ?onPause: Func<'T, obj option, obj>, ?onComplete: Func<'T, obj option, obj>) : TickableCallbacks<'T> = jsNative
+    static member Create (?onBegin: Func<'T, obj>, ?onBeforeUpdate: Func<'T, obj>, ?onUpdate: Func<'T, obj>, ?onLoop: Func<'T, obj>, ?onPause: Func<'T, obj>, ?onComplete: Func<'T, obj>) : TickableCallbacks<'T> = jsNative
 
 [<Interface>]
 type RenderableCallbacks<'T> =
-    abstract onRender: Func<'T, obj option, obj> option with get, set
+    abstract onRender: Func<'T, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?onRender: Func<'T, obj option, obj>) : RenderableCallbacks<'T> = jsNative
+    static member Create (?onRender: Func<'T, obj>) : RenderableCallbacks<'T> = jsNative
 
 [<Interface>]
 type TimerOptions =
     abstract id: TimelinePosition option with get, set
-    abstract duration: obj option with get, set
-    abstract delay: obj option with get, set
+    abstract duration: TweenParamValue option with get, set
+    abstract delay: TweenParamValue option with get, set
     abstract loopDelay: float option with get, set
     abstract reversed: bool option with get, set
     abstract alternate: bool option with get, set
@@ -1739,11 +1758,13 @@ type TimerOptions =
     abstract playbackRate: float option with get, set
     abstract priority: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: TimelinePosition, ?duration: obj, ?delay: obj, ?loopDelay: float, ?reversed: bool, ?alternate: bool, ?loop: U2<float, bool>, ?autoplay: U2<bool, ScrollObserver>, ?frameRate: float, ?playbackRate: float, ?priority: float) : TimerOptions = jsNative
+    static member Create (?id: TimelinePosition, ?duration: TweenParamValue, ?delay: TweenParamValue, ?loopDelay: float, ?reversed: bool, ?alternate: bool, ?loop: U2<float, bool>, ?autoplay: U2<bool, ScrollObserver>, ?frameRate: float, ?playbackRate: float, ?priority: float) : TimerOptions = jsNative
 
 type TimerParams = obj
 
-type FunctionValue = Func<Target option, float option, Target[] option, Tween option, obj>
+type FunctionValueReturn = obj
+
+type FunctionValue<'T> = Func<Target option, float option, Target[] option, Tween option, 'T>
 
 type TweenModifier = Func<float, TimelinePosition>
 
@@ -1754,7 +1775,7 @@ type Tween =
     abstract parent: JSAnimation with get, set
     abstract property: string with get, set
     abstract target: Target with get, set
-    abstract _value: TimelinePosition with get, set
+    abstract _value: obj with get, set
     abstract _toFunc: obj option with get, set
     abstract _fromFunc: obj option with get, set
     abstract _ease: EasingFunction with get, set
@@ -1773,7 +1794,11 @@ type Tween =
     abstract _startTime: float with get, set
     abstract _changeDuration: float with get, set
     abstract _absoluteStartTime: float with get, set
+    abstract _absoluteUpdateStartTime: float with get, set
+    abstract _absoluteEndTime: float with get, set
+    abstract _hasFromValue: float with get, set
     abstract _tweenType: float with get, set
+    abstract _setter: Action<obj, float, Tween> option with get, set
     abstract _valueType: float with get, set
     abstract _composition: float with get, set
     abstract _isOverlapped: float with get, set
@@ -1806,11 +1831,11 @@ type TweenDecomposedValue =
     /// </summary>
     abstract o: string with get, set
     /// <summary>
-    /// - Array of Numbers (in case of complex value type)
+    /// - Array of Numbers (complex / color value type)
     /// </summary>
     abstract d: float[] with get, set
     /// <summary>
-    /// - Strings (in case of complex value type)
+    /// - Strings (complex value type)
     /// </summary>
     abstract s: string[] with get, set
     [<ParamObject; Emit("$0")>]
@@ -1829,43 +1854,43 @@ type TweenReplaceLookups = obj
 
 type TweenAdditiveLookups = obj
 
-type TweenParamValue = EasingParam
+type TweenParamValue = obj
 
-type TweenPropValue = EasingParam
+type TweenPropValue = obj
 
 type TweenComposition = obj
 
 [<Interface>]
 type TweenParamsOptions =
-    abstract duration: obj option with get, set
-    abstract delay: obj option with get, set
+    abstract duration: TweenParamValue option with get, set
+    abstract delay: TweenParamValue option with get, set
     abstract ease: obj option with get, set
     abstract modifier: TweenModifier option with get, set
     abstract composition: TweenComposition option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?duration: obj, ?delay: obj, ?ease: obj, ?modifier: TweenModifier, ?composition: TweenComposition) : TweenParamsOptions = jsNative
+    static member Create (?duration: TweenParamValue, ?delay: TweenParamValue, ?ease: obj, ?modifier: TweenModifier, ?composition: TweenComposition) : TweenParamsOptions = jsNative
 
 [<Interface>]
 type TweenValues =
-    abstract from: obj option with get, set
-    abstract ``to``: obj option with get, set
-    abstract fromTo: obj option with get, set
+    abstract from: TweenParamValue option with get, set
+    abstract ``to``: TweenPropValue option with get, set
+    abstract fromTo: TweenPropValue option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?from: obj, ?``to``: obj, ?fromTo: obj) : TweenValues = jsNative
+    static member Create (?from: TweenParamValue, ?``to``: TweenPropValue, ?fromTo: TweenPropValue) : TweenValues = jsNative
 
 type TweenKeyValue = obj
 
 type ArraySyntaxValue = obj[]
 
-type TweenOptions = EasingParam
+type TweenOptions = obj
 
 type TweenObjectValue = obj
 
 [<Interface>]
 type PercentageKeyframeOptions =
-    abstract ease: obj option with get, set
+    abstract ease: EasingParam option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?ease: obj) : PercentageKeyframeOptions = jsNative
+    static member Create (?ease: EasingParam) : PercentageKeyframeOptions = jsNative
 
 type PercentageKeyframeParams = obj
 
@@ -1876,9 +1901,9 @@ type DurationKeyframes = obj[]
 [<Interface>]
 type AnimationOptions =
     abstract keyframes: U2<obj[], PercentageKeyframes> option with get, set
-    abstract playbackEase: obj option with get, set
+    abstract playbackEase: EasingParam option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?keyframes: U2<obj[], PercentageKeyframes>, ?playbackEase: obj) : AnimationOptions = jsNative
+    static member Create (?keyframes: U2<obj[], PercentageKeyframes>, ?playbackEase: EasingParam) : AnimationOptions = jsNative
 
 type AnimationParams = obj
 
@@ -1907,15 +1932,15 @@ type TimelinePosition = U2<string, float>
 /// - `'label'` - Label: Position animation at a named label position (e.g., `'My Label'`)&lt;br&gt;
 /// - `stagger(String|Nummber)` - Stagger multi-elements animation positions (e.g., 10, 20, 30...)
 /// </summary>
-type TimelineAnimationPosition = EasingParam
+type TimelineAnimationPosition = U4<string, float, Func<Target option, float option, Target[] option, Tween option, Timeline option, TimelinePosition>, TweakRegister>
 
 [<Interface>]
 type TimelineOptions =
     abstract defaults: DefaultsParams option with get, set
-    abstract playbackEase: obj option with get, set
+    abstract playbackEase: EasingParam option with get, set
     abstract composition: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?defaults: DefaultsParams, ?playbackEase: obj, ?composition: bool) : TimelineOptions = jsNative
+    static member Create (?defaults: DefaultsParams, ?playbackEase: EasingParam, ?composition: bool) : TimelineOptions = jsNative
 
 type TimelineParams = obj
 
@@ -1931,10 +1956,10 @@ type WAAPITweenOptions =
     abstract from: WAAPIKeyframeValue option with get, set
     abstract duration: U2<float, WAAPIFunctionValue> option with get, set
     abstract delay: U2<float, WAAPIFunctionValue> option with get, set
-    abstract ease: obj option with get, set
+    abstract ease: WAAPIEasingParam option with get, set
     abstract composition: WAAPITweenOptionsComposition option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?``to``: WAAPIKeyframeValue, ?from: WAAPIKeyframeValue, ?duration: U2<float, WAAPIFunctionValue>, ?delay: U2<float, WAAPIFunctionValue>, ?ease: obj, ?composition: WAAPITweenOptionsComposition) : WAAPITweenOptions = jsNative
+    static member Create (?``to``: WAAPIKeyframeValue, ?from: WAAPIKeyframeValue, ?duration: U2<float, WAAPIFunctionValue>, ?delay: U2<float, WAAPIFunctionValue>, ?ease: WAAPIEasingParam, ?composition: WAAPITweenOptionsComposition) : WAAPITweenOptions = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type WAAPITweenOptionsComposition =
@@ -1954,13 +1979,13 @@ type WAAPIAnimationOptions =
     abstract ease: obj option with get, set
     abstract composition: WAAPITweenOptionsComposition option with get, set
     abstract persist: bool option with get, set
-    abstract onComplete: Func<WAAPIAnimation, obj option, obj> option with get, set
+    abstract onComplete: Func<WAAPIAnimation, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?loop: U2<float, bool>, ?Reversed: bool, ?Alternate: bool, ?autoplay: U2<bool, ScrollObserver>, ?playbackRate: float, ?duration: U2<float, WAAPIFunctionValue>, ?delay: U2<float, WAAPIFunctionValue>, ?ease: obj, ?composition: WAAPITweenOptionsComposition, ?persist: bool, ?onComplete: Func<WAAPIAnimation, obj option, obj>) : WAAPIAnimationOptions = jsNative
+    static member Create (?loop: U2<float, bool>, ?Reversed: bool, ?Alternate: bool, ?autoplay: U2<bool, ScrollObserver>, ?playbackRate: float, ?duration: U2<float, WAAPIFunctionValue>, ?delay: U2<float, WAAPIFunctionValue>, ?ease: obj, ?composition: WAAPITweenOptionsComposition, ?persist: bool, ?onComplete: Func<WAAPIAnimation, obj>) : WAAPIAnimationOptions = jsNative
 
 type WAAPIAnimationParams = obj
 
-type AnimatablePropertySetter = Func<U2<float, float[]>, float option, obj, obj>
+type AnimatablePropertySetter = Func<U2<float, float[]>, float option, EasingParam option, obj>
 
 type AnimatablePropertyGetter = Func<U2<float, float[]>>
 
@@ -1971,12 +1996,12 @@ type AnimatableObject = obj
 [<Interface>]
 type AnimatablePropertyParamsOptions =
     abstract unit: string option with get, set
-    abstract duration: obj option with get, set
-    abstract ease: obj option with get, set
+    abstract duration: TweenParamValue option with get, set
+    abstract ease: EasingParam option with get, set
     abstract modifier: TweenModifier option with get, set
     abstract composition: TweenComposition option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?unit: string, ?duration: obj, ?ease: obj, ?modifier: TweenModifier, ?composition: TweenComposition) : AnimatablePropertyParamsOptions = jsNative
+    static member Create (?unit: string, ?duration: TweenParamValue, ?ease: EasingParam, ?modifier: TweenModifier, ?composition: TweenComposition) : AnimatablePropertyParamsOptions = jsNative
 
 type AnimatableParams = obj
 
@@ -2006,7 +2031,7 @@ type ScopeCleanupCallback = Func<Scope option, obj>
 
 type ScopeConstructorCallback = Func<Scope option, ScopeCleanupCallback option>
 
-type ScopeMethod = Func<obj[], ScopeCleanupCallback option>
+type ScopeMethod = Func<obj[], obj>
 
 type ScrollThresholdValue = TimelinePosition
 
@@ -2032,17 +2057,17 @@ type ScrollObserverParams =
     abstract leave: obj option with get, set
     abstract repeat: U2<bool, Func<ScrollObserver, bool>> option with get, set
     abstract debug: bool option with get, set
-    abstract onEnter: Func<ScrollObserver, obj option, obj> option with get, set
-    abstract onLeave: Func<ScrollObserver, obj option, obj> option with get, set
-    abstract onEnterForward: Func<ScrollObserver, obj option, obj> option with get, set
-    abstract onLeaveForward: Func<ScrollObserver, obj option, obj> option with get, set
-    abstract onEnterBackward: Func<ScrollObserver, obj option, obj> option with get, set
-    abstract onLeaveBackward: Func<ScrollObserver, obj option, obj> option with get, set
-    abstract onUpdate: Func<ScrollObserver, obj option, obj> option with get, set
-    abstract onResize: Func<ScrollObserver, obj option, obj> option with get, set
-    abstract onSyncComplete: Func<ScrollObserver, obj option, obj> option with get, set
+    abstract onEnter: Func<ScrollObserver, obj> option with get, set
+    abstract onLeave: Func<ScrollObserver, obj> option with get, set
+    abstract onEnterForward: Func<ScrollObserver, obj> option with get, set
+    abstract onLeaveForward: Func<ScrollObserver, obj> option with get, set
+    abstract onEnterBackward: Func<ScrollObserver, obj> option with get, set
+    abstract onLeaveBackward: Func<ScrollObserver, obj> option with get, set
+    abstract onUpdate: Func<ScrollObserver, obj> option with get, set
+    abstract onResize: Func<ScrollObserver, obj> option with get, set
+    abstract onSyncComplete: Func<ScrollObserver, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: TimelinePosition, ?sync: obj, ?container: TargetsParam, ?target: TargetsParam, ?axis: U3<string, ScrollObserverAxisCallback, Func<ScrollObserver, U2<string, ScrollObserverAxisCallback>>>, ?enter: obj, ?leave: obj, ?repeat: U2<bool, Func<ScrollObserver, bool>>, ?debug: bool, ?onEnter: Func<ScrollObserver, obj option, obj>, ?onLeave: Func<ScrollObserver, obj option, obj>, ?onEnterForward: Func<ScrollObserver, obj option, obj>, ?onLeaveForward: Func<ScrollObserver, obj option, obj>, ?onEnterBackward: Func<ScrollObserver, obj option, obj>, ?onLeaveBackward: Func<ScrollObserver, obj option, obj>, ?onUpdate: Func<ScrollObserver, obj option, obj>, ?onResize: Func<ScrollObserver, obj option, obj>, ?onSyncComplete: Func<ScrollObserver, obj option, obj>) : ScrollObserverParams = jsNative
+    static member Create (?id: TimelinePosition, ?sync: obj, ?container: TargetsParam, ?target: TargetsParam, ?axis: U3<string, ScrollObserverAxisCallback, Func<ScrollObserver, U2<string, ScrollObserverAxisCallback>>>, ?enter: obj, ?leave: obj, ?repeat: U2<bool, Func<ScrollObserver, bool>>, ?debug: bool, ?onEnter: Func<ScrollObserver, obj>, ?onLeave: Func<ScrollObserver, obj>, ?onEnterForward: Func<ScrollObserver, obj>, ?onLeaveForward: Func<ScrollObserver, obj>, ?onEnterBackward: Func<ScrollObserver, obj>, ?onLeaveBackward: Func<ScrollObserver, obj>, ?onUpdate: Func<ScrollObserver, obj>, ?onResize: Func<ScrollObserver, obj>, ?onSyncComplete: Func<ScrollObserver, obj>) : ScrollObserverParams = jsNative
 
 [<Interface>]
 type DraggableAxisParam =
@@ -2087,16 +2112,16 @@ type DraggableParams =
     abstract releaseMass: float option with get, set
     abstract releaseStiffness: float option with get, set
     abstract releaseDamping: float option with get, set
-    abstract releaseEase: obj option with get, set
+    abstract releaseEase: EasingParam option with get, set
     abstract cursor: U3<bool, DraggableCursorParams, Func<Draggable, U2<bool, DraggableCursorParams>>> option with get, set
-    abstract onGrab: Func<Draggable, obj option, obj> option with get, set
-    abstract onDrag: Func<Draggable, obj option, obj> option with get, set
-    abstract onRelease: Func<Draggable, obj option, obj> option with get, set
-    abstract onUpdate: Func<Draggable, obj option, obj> option with get, set
-    abstract onSettle: Func<Draggable, obj option, obj> option with get, set
-    abstract onSnap: Func<Draggable, obj option, obj> option with get, set
-    abstract onResize: Func<Draggable, obj option, obj> option with get, set
-    abstract onAfterResize: Func<Draggable, obj option, obj> option with get, set
+    abstract onGrab: Func<Draggable, obj> option with get, set
+    abstract onDrag: Func<Draggable, obj> option with get, set
+    abstract onRelease: Func<Draggable, obj> option with get, set
+    abstract onUpdate: Func<Draggable, obj> option with get, set
+    abstract onSettle: Func<Draggable, obj> option with get, set
+    abstract onSnap: Func<Draggable, obj> option with get, set
+    abstract onResize: Func<Draggable, obj> option with get, set
+    abstract onAfterResize: Func<Draggable, obj> option with get, set
 
 [<Interface>]
 type SplitTemplateParams =
@@ -2134,7 +2159,7 @@ type ScrambleTextParams =
     /// <summary>
     /// - the easing applied to the scramble animation
     /// </summary>
-    abstract ease: obj option with get, set
+    abstract ease: EasingParam option with get, set
     /// <summary>
     /// - where the reveal wave starts from, 'auto' (default) uses 'left' when text grows and 'right' when it shrinks
     /// </summary>
@@ -2188,7 +2213,7 @@ type ScrambleTextParams =
     /// </summary>
     abstract onChange: Action<string, float> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?text: U2<string, Func<Target, float, Target[], string>>, ?chars: U2<string, Func<Target, float, Target[], string>>, ?ease: obj, ?from: U2<float, string>, ?reversed: bool, ?cursor: U3<string, float, bool>, ?perturbation: float, ?seed: float, ?``override``: SplitValue, ?revealRate: float, ?settleDuration: float, ?settleRate: float, ?duration: U2<float, Func<Target, float, Target[], float>>, ?revealDelay: U2<float, Func<Target, float, Target[], float>>, ?delay: U2<float, Func<Target, float, Target[], float>>, ?onChange: Action<string, float>) : ScrambleTextParams = jsNative
+    static member Create (?text: U2<string, Func<Target, float, Target[], string>>, ?chars: U2<string, Func<Target, float, Target[], string>>, ?ease: EasingParam, ?from: U2<float, string>, ?reversed: bool, ?cursor: U3<string, float, bool>, ?perturbation: float, ?seed: float, ?``override``: SplitValue, ?revealRate: float, ?settleDuration: float, ?settleRate: float, ?duration: U2<float, Func<Target, float, Target[], float>>, ?revealDelay: U2<float, Func<Target, float, Target[], float>>, ?delay: U2<float, Func<Target, float, Target[], float>>, ?onChange: Action<string, float>) : ScrambleTextParams = jsNative
 
 type DrawableSVGGeometry = obj
 
@@ -2259,9 +2284,9 @@ type Utils =
     abstract random: RandomNumberGenerator
     abstract createSeededRandom: Func<float option, float option, float option, float option, RandomNumberGenerator> with get, set
     abstract randomPick: Func<U2<string, obj[]>, obj> with get, set
-    abstract shuffle: Func<obj[], obj[]> with get, set
-    abstract sync: Func<Func<Timer, obj option, obj> option, Timer> with get, set
-    abstract keepTime: Func<Func<obj[], U4<JSAnimation, Timeline, Timer, Action<obj[]>> option>, Func<obj[], U4<JSAnimation, Timeline, Timer, Action<obj[]>>>> with get, set
+    abstract shuffle: Func<obj[], RandomNumberGenerator option, obj[]> with get, set
+    abstract sync: Func<Func<Timer, obj> option, Timer> with get, set
+    abstract keepTime: Func<Func<obj[], obj>, Func<obj[], obj>> with get, set
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
@@ -2314,7 +2339,7 @@ type WAAPIAnimation =
     /// <remarks>@type {globalThis.Animation} ]</remarks>
     abstract controlAnimation: obj with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
-    abstract onComplete: Func<WAAPIAnimation, obj option, obj> with get, set
+    abstract onComplete: Func<WAAPIAnimation, obj> with get, set
     /// <remarks>@type {Number}</remarks>
     abstract duration: float with get, set
     /// <remarks>@type {Boolean}</remarks>
@@ -2358,7 +2383,7 @@ type WAAPIAnimation =
     abstract revert: unit -> WAAPIAnimation
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
-    abstract ``then``: ?callback: Func<obj, obj option, obj> -> obj
+    abstract ``then``: ?callback: Func<obj, obj> -> obj
 
 [<Interface>]
 type Waapi =
@@ -2461,13 +2486,13 @@ type Exports =
     [<Import("svg", "animejs")>]
     static member svg: Svg = jsNative
     [<Import("morphTo", "animejs")>]
-    static member morphTo (path2: TargetsParam, ?precision: float) : FunctionValue = jsNative
+    static member morphTo (path2: TargetsParam, ?precision: float) : Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn> = jsNative
     [<Import("createMotionPath", "animejs")>]
     static member createMotionPath (path: TargetsParam, ?offset: float) : SvgCreateMotionPathResult = jsNative
     [<Import("text", "animejs")>]
     static member text: Text = jsNative
     [<Import("scrambleText", "animejs")>]
-    static member scrambleText (?``params``: ScrambleTextParams) : FunctionValue = jsNative
+    static member scrambleText (?``params``: ScrambleTextParams) : Func<Target option, float option, Target[] option, Tween option, ScrambleTextTween> = jsNative
     /// <summary>
     /// A class that splits text into words and wraps them in span elements while preserving the original HTML structure.
     /// </summary>
@@ -2526,7 +2551,7 @@ type Exports =
     [<Import("randomPick", "animejs")>]
     static member randomPick (items: U2<string, obj[]>) : obj = jsNative
     [<Import("shuffle", "animejs")>]
-    static member shuffle (items: obj[]) : obj[] = jsNative
+    static member shuffle (items: obj[], ?rnd: RandomNumberGenerator) : obj[] = jsNative
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
@@ -2676,9 +2701,9 @@ type Exports =
     [<Import("remove", "animejs")>]
     static member remove (targets: TargetsParam, ?renderable: U3<JSAnimation, Timeline, WAAPIAnimation>, ?propertyName: string) : Target[] = jsNative
     [<Import("sync", "animejs")>]
-    static member sync (?callback: Func<Timer, obj option, obj>) : Timer = jsNative
+    static member sync (?callback: Func<Timer, obj>) : Timer = jsNative
     [<Import("keepTime", "animejs")>]
-    static member keepTime (``constructor``: Func<obj[], U4<JSAnimation, Timeline, Timer, Action<obj[]>> option>) : Func<obj[], U4<JSAnimation, Timeline, Timer, Action<obj[]>>> = jsNative
+    static member keepTime (``constructor``: Func<obj[], obj>) : Func<obj[], obj> = jsNative
     [<Import("WAAPIAnimation", "animejs"); EmitConstructor>]
     static member WAAPIAnimation (targets: DOMTargetsParam, ``params``: obj) : WAAPIAnimation = jsNative
     [<Import("waapi", "animejs")>]
