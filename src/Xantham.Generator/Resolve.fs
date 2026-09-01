@@ -95,6 +95,29 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                 { TypeFacts.shallow ty with
                     UnionMembers = members |> List.map _.Id },
                 members
+        elif has TypeFlags.Intersection then
+            // The constituents, followed into the table. A branding intersection (§4.6) is
+            // decided by what its object operands *contain* - a marker property or a real
+            // one - so the operands are resolved in full rather than identified.
+            let! members = ctx.Session.getTypesOfType ty.Id
+            let members = members |> ValueOption.map Array.toList |> ValueOption.defaultValue []
+
+            // The alias's arguments, for the same reason a conditional needs them: an
+            // intersection that is not a brand is a shape F# cannot write, and the phantom it
+            // becomes is worth nothing without the arity.
+            let! aliasTypeArguments = ctx.Session.getAliasTypeArgumentsOfType ty.Id
+
+            let aliasTypeArguments =
+                aliasTypeArguments
+                |> ValueOption.defaultValue [||]
+                |> Array.filter (fun argument -> argument.Flags.HasFlag TypeFlags.TypeParameter)
+                |> Array.toList
+
+            return
+                { TypeFacts.shallow ty with
+                    IntersectionMembers = members |> List.map _.Id
+                    AliasTypeArguments = aliasTypeArguments |> List.map _.Id },
+                members @ aliasTypeArguments
         elif has TypeFlags.EnumLiteral then
             // An enum member: its symbol names the F# enum case (§4.7); the value is already
             // on the response.
@@ -284,6 +307,7 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                   TypeArguments = typeArguments |> List.map _.Id
                   TupleElements = tupleElements
                   AliasTypeArguments = aliasTypeArguments |> List.map _.Id
+                  IntersectionMembers = []
                   Constraint = None
                   Default = None
                   UnionMembers = [] },

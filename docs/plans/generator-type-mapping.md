@@ -297,6 +297,39 @@ consumer must discriminate. The generator knows the position; use it.
   pattern. Detection: primitive & object-with-only-phantom-members.
 - Nonsensical/`never` intersections → whatever the checker reduces them to (`getReducedType`).
 
+*Landed (2026-09-02, phase D) — the branding half. Object-intersection flattening is still
+open; those stay `obj` with a Widened finding.* The declaration becomes the measure and the
+*uses* carry the brand:
+
+```fsharp
+[<Measure>]
+type UserId
+
+abstract get: id: string<UserId> -> string
+abstract put: id: string<UserId> * at: float<Millis> -> unit
+abstract find: ?id: string<SessionId> -> string<UserId> option
+```
+
+No abbreviation is emitted beside it: measures and type abbreviations share one name
+namespace, so `UserId` can only be spent once and the measure is what spends it. Numeric
+brands are ordinary measure applications; `string`, `bool` and `char` go through the support
+package's `[<MeasureAnnotatedAbbreviation>]` declarations, which is why generated files now
+carry `open Xantham.Fable.Core`. The idiom is recorded once — Ergonomic, at the declaration;
+uses cost nothing further, the mapping being exact in spirit.
+
+One wrinkle the fixture pinned: a brand over anything but a bare primitive *distributes*.
+`boolean & Marker` is handed back as `(true & Marker) | (false & Marker)`, and a branded
+literal union the same way. Those arms are the checker's own working and carry no names of
+their own, so a union of anonymous brands that agree on their primitive is folded back into
+the one brand it was written as — while a union of *named* brands (`UserId | SessionId`)
+stays a union, because that is what it is.
+
+The negatives matter as much: `{ a } & { b }` (no primitive), `string & { count: number }` (a
+member a caller can actually read), and a wrapper over a named type all stay `obj` and record
+the widening. Reading any of them as a brand would throw something usable away and call the
+result exact. `tests/fixtures/brand-lab` pins all of it under the live compiler, negatives
+included, and its golden compiles against the support package in the gate.
+
 ### 4.7 Enums
 
 - Numeric enum → F# `enum` with the checker's `getConstantValue` per member (Exact,
@@ -574,9 +607,14 @@ from the catalogue as D1–D12.
     enforced in *both* directions (`string<UserId>` ≠ `string<OrderId>`, and a raw `string`
     is neither), and the abbreviation does not shadow the primitive — `string` with no
     measure argument still resolves — which is what lets generated code `open` the support
-    package at the top of a file that then uses `string` on every line. Brand *detection*
-    (recognising the intersection in the checker's output) is separate work and is what
-    remains open here.
+    package at the top of a file that then uses `string` on every line.
+
+    **Landed (2026-09-02, phase D): detection too, so D11 closes.** A brand is recognised
+    structurally, never by name — exactly one primitive constituent, intersected with objects
+    whose every property is a marker: keyed by a unique symbol, so nothing can name it; named
+    with a leading underscore, so nothing is meant to; or typed `never`, so nothing can
+    construct it. Anything else is an ordinary intersection and keeps saying so. See §4.6 for
+    what the pass emits and the wrinkle that cost the most: brands distribute over unions.
 
 12. **D12 — decided (added after review).** Mixed literal unions (string + number literals
     in one union) map to a single `[<StringEnum>]` DU: Fable 5 respects

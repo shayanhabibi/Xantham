@@ -44,6 +44,15 @@ let private indexedAccess (id: int) (objectId: int) (keyId: int) =
             ObjectType = ValueSome objectId
             IndexType = ValueSome keyId }
 
+/// `P & { marker }`: a branding intersection, given the ids of its constituents.
+let private intersection (id: int) (members: int list) =
+    { Build.facts (Build.typeResponse id TypeFlags.Intersection) with IntersectionMembers = members }
+
+/// An object carrying one property, for the marker half of a brand.
+let private marker (id: int) (name: string) (valueType: int) =
+    { Build.facts (Build.typeResponse id TypeFlags.Object) with
+        Members = [ Build.resolvedMember (Build.symbol (id * 10) name SymbolFlags.Property) valueType ] }
+
 /// A generic declaration: its own target, holding its parameters as its arguments.
 let private genericDecl (id: int) (parameters: int list) (members: ResolvedMember list) =
     { Build.facts
@@ -1261,6 +1270,81 @@ let shapePassTests =
                 "the smaller twin resolves structurally, the larger references it"
 
             Expect.equal (findings |> List.map _.Tier) [] "an erased union costs no fidelity"
+
+        testCase "a primitive intersected with a marker object reads as a branded primitive" <| fun _ ->
+            // `type UserId = string & { __brand: "UserId" }`. The marker exists only to make the
+            // type nominal, which is exactly what a unit of measure is - so the reference is the
+            // primitive carrying the measure the declaration emits (§4.6, D11).
+            let model =
+                { Build.shapeModel (intersection 10 [ 1; 11 ] :: marker 11 "__brand" 1 :: Build.primitives) with
+                    DeclNames = Map.ofList [ 10, "UserId" ] }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsBranded(FsString, "UserId")) "the brand is written at the use"
+            Expect.isEmpty findings "and costs nothing: the measure says what the intersection said"
+
+        testCase "a brand the run never declared falls back to its primitive, loudly" <| fun _ ->
+            // The same intersection with no name of its own. A measure is a declaration, so an
+            // anonymous brand has nothing to carry and the nominality is what is lost.
+            let model = Build.shapeModel (intersection 10 [ 1; 11 ] :: marker 11 "__brand" 1 :: Build.primitives)
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference FsString "the primitive survives"
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the brand does not, and says so"
+
+        testCase "an intersection whose object half carries a real member is not a brand" <| fun _ ->
+            // `string & { count: number }` has a member a caller can actually read, so reading it
+            // as a brand would throw that member away and call the result exact.
+            let model =
+                { Build.shapeModel (intersection 10 [ 1; 11 ] :: marker 11 "count" 2 :: Build.primitives) with
+                    DeclNames = Map.ofList [ 10, "Counted" ] }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference FsObj "no brand, and no shape either yet"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "the widening is recorded"
+
+        testCase "a brand over a union distributes and is still one brand" <| fun _ ->
+            // `boolean & Marker` reaches us as `(true & Marker) | (false & Marker)`: the checker
+            // distributes, and the arms are its own working, carrying no names. One brand, not two.
+            let model =
+                { Build.shapeModel (
+                      { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 12; 13 ] }
+                      :: intersection 12 [ 3; 11 ]
+                      :: intersection 13 [ 3; 11 ]
+                      :: marker 11 "__brand" 1
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 10, "Verified" ] }
+
+            let reference, _ = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsBranded(FsBool, "Verified")) "the distribution is undone"
+
+        testCase "shape-aliases emits a measure, not an abbreviation, for a brand" <| fun _ ->
+            // The name can only be spent once, and the measure is what spends it: uses read
+            // `string<UserId>`, so there is no abbreviation left to write.
+            let model =
+                { Build.shapeModel (intersection 10 [ 1; 11 ] :: marker 11 "__brand" 1 :: Build.primitives) with
+                    DeclNames = Map.ofList [ 10, "UserId" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeAliases model
+
+            Expect.equal
+                (shaped.Decls
+                 |> List.choose (function
+                     | FsMeasure d -> Some(d.Name, d.Primitive)
+                     | _ -> None))
+                [ "UserId", FsString ]
+                "one measure over the primitive it brands"
+
+            Expect.isEmpty
+                (shaped.Decls |> List.choose (function FsAbbrev d -> Some d.Name | _ -> None))
+                "and no abbreviation competing for the name"
+
+            Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the idiom is recorded once, at the declaration"
 
         testCase "shape-aliases emits a phantom for a computation that names none of its parameters" <| fun _ ->
             // `type Unwrap<T> = T extends Array<infer E> ? E : T`: a conditional the checker

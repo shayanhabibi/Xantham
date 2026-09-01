@@ -7,6 +7,7 @@ module rec KeyofLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
+open Xantham.Fable.Core
 
 /// <summary>
 /// The operand every keyof in this fixture is taken over.

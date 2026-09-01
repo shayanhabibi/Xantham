@@ -7,6 +7,7 @@ module rec GlobalsLab
 open System
 open Fable.Core
 open Fable.Core.JsInterop
+open Xantham.Fable.Core
 
 /// <summary>
 /// A global type. A type reads the same wherever its name lives.

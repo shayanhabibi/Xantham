@@ -1862,12 +1862,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -1973,12 +1973,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -2660,7 +2660,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
@@ -2712,7 +2712,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -2722,7 +2722,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -3656,7 +3656,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -5279,7 +5279,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
@@ -6718,23 +6718,8 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -6758,13 +6743,28 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "pass": "shape-interfaces",
@@ -7774,12 +7774,12 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -9431,12 +9431,12 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -9510,7 +9510,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
@@ -9531,7 +9531,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
@@ -9552,7 +9552,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -9562,7 +9562,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -9716,7 +9716,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -11230,7 +11230,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -11246,7 +11246,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -11267,7 +11267,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -11288,7 +11288,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -11310,7 +11310,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -11336,7 +11336,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -11347,7 +11347,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -13563,13 +13563,13 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -13642,7 +13642,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -13693,12 +13693,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -14424,7 +14424,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -14444,7 +14444,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
           "pass": "shape-interfaces",
@@ -14491,12 +14491,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
           "pass": "shape-interfaces",
@@ -14517,12 +14517,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
           "pass": "shape-interfaces",
@@ -14569,12 +14569,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
           "pass": "shape-interfaces",
@@ -14861,6 +14861,11 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -14868,11 +14873,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -17179,7 +17179,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -19116,12 +19116,12 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -19785,7 +19785,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -21090,6 +21090,11 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -21097,11 +21102,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -21241,6 +21241,11 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -21248,11 +21253,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -28666,22 +28666,22 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -28697,22 +28697,22 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -31112,7 +31112,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -31128,7 +31128,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -31144,7 +31144,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -31160,7 +31160,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -31176,7 +31176,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -31192,7 +31192,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -31208,7 +31208,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -31486,7 +31486,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -31502,7 +31502,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -31518,7 +31518,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -31534,7 +31534,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -32051,7 +32051,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -32060,6 +32060,21 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -32072,21 +32087,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -32136,6 +32136,11 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -32143,11 +32148,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -32319,6 +32319,11 @@
       "findings": [
         {
           "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -32326,11 +32331,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -32365,6 +32365,11 @@
         },
         {
           "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -32372,11 +32377,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -32391,6 +32391,11 @@
       "findings": [
         {
           "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -32398,11 +32403,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -32597,7 +32597,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -33648,7 +33648,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -33659,7 +33659,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -33696,7 +33696,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -33732,17 +33732,17 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -34407,12 +34407,12 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -34555,12 +34555,12 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -34571,12 +34571,12 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -34587,12 +34587,12 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -34603,12 +34603,12 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -34624,12 +34624,12 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -34640,12 +34640,12 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -34698,22 +34698,22 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -34724,12 +34724,12 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -35313,7 +35313,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -36887,7 +36887,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
@@ -37001,7 +37001,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -37343,7 +37343,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
@@ -37436,7 +37436,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -37452,7 +37452,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
@@ -37780,17 +37780,17 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -37867,17 +37867,17 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -40050,7 +40050,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -40121,7 +40121,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -40187,7 +40187,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -40258,7 +40258,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -41324,12 +41324,12 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "shape-interfaces",
@@ -41405,6 +41405,11 @@
       "findings": [
         {
           "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
+        },
+        {
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -41412,11 +41417,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -43504,7 +43504,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -43981,7 +43981,7 @@
         {
           "pass": "shape-aliases",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -43992,7 +43992,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type flags Intersection not mapped yet; widened to obj"
+          "message": "intersection of object types has no F# form yet; widened to obj (\u00A74.6)"
         },
         {
           "pass": "synthesize-paramobjects",

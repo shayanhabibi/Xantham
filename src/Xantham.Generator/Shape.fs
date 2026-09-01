@@ -176,6 +176,73 @@ let private taggedUnionShape (model: ShapeModel) (facts: TypeFacts) : (string * 
             else
                 None)
 
+/// A property that exists only to make a type nominal: keyed by a unique symbol, so nothing
+/// can name it; named with a leading underscore, so nothing is meant to; or typed `never`, so
+/// nothing can construct it. An object whose every property is one of these carries nothing at
+/// runtime, which is what separates a branding intersection from a shape (§4.6).
+let private isMarkerMember (model: ShapeModel) (m: ResolvedMember) =
+    isSymbolKeyed m.Symbol.Name
+    || m.Symbol.Name.StartsWith "_"
+    || (match Map.tryFind m.TypeId model.Types with
+        | Some facts -> flag TypeFlags.Never facts
+        | None -> false)
+
+/// The primitive a branding intersection brands, where it is one (§4.6, D11): exactly one
+/// primitive constituent, intersected with objects that carry markers and nothing else. Two
+/// real shapes intersected, or a primitive intersected with an object that has a usable
+/// member, are ordinary intersections and no brand - reading those as brands would throw
+/// members away and call it exact.
+let rec private brandedPrimitive (model: ShapeModel) (facts: TypeFacts) =
+    // An intersection over anything but a bare primitive distributes: `boolean & Marker` is
+    // handed back as `(true & Marker) | (false & Marker)`, and a branded literal union the same
+    // way. The arms are the checker's own working and carry no names, so a union of anonymous
+    // brands that agree on the primitive is one brand - while a union of *named* brands
+    // (`UserId | SessionId`) is a real union and must stay one.
+    if flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) then
+        let arms = facts.UnionMembers |> List.choose (fun id -> Map.tryFind id model.Types)
+
+        if
+            arms.Length <> facts.UnionMembers.Length
+            || arms.IsEmpty
+            || arms
+               |> List.exists (fun arm ->
+                   not (flag TypeFlags.Intersection arm) || Map.containsKey arm.Response.Id model.DeclNames)
+        then
+            None
+        else
+            match arms |> List.map (brandedPrimitive model) |> List.distinct with
+            | [ single ] -> single
+            | _ -> None
+    else
+
+    let constituents =
+        facts.IntersectionMembers |> List.choose (fun id -> Map.tryFind id model.Types)
+
+    if constituents.Length <> facts.IntersectionMembers.Length then
+        None
+    else
+
+    let objects, primitives = constituents |> List.partition (flag TypeFlags.Object)
+
+    let primitive =
+        match primitives with
+        | [ only ] ->
+            // Boolean first: it is a union of `true | false` wearing the Boolean flag.
+            if flag TypeFlags.Boolean only || flag TypeFlags.BooleanLiteral only then Some FsBool
+            elif flag TypeFlags.String only || flag TypeFlags.StringLiteral only then Some FsString
+            elif flag TypeFlags.Number only || flag TypeFlags.NumberLiteral only then Some FsFloat
+            else None
+        | _ -> None
+
+    match primitive with
+    | Some primitive when
+        not objects.IsEmpty
+        && objects
+           |> List.forall (fun o -> not o.Members.IsEmpty && o.Members |> List.forall (isMarkerMember model))
+        ->
+        Some primitive
+    | _ -> None
+
 /// The widest erased union D4 allows. Fable ships `U2`-`U9`; the decision is four, because
 /// past that the consumer is doing runtime tests the type no longer helps them write.
 [<Literal>]
@@ -245,6 +312,8 @@ let rec typeRef (ctx: Context) (model: ShapeModel) (self: string option) (owner:
 
         if has TypeFlags.Boolean then
             FsBool, []
+        elif has TypeFlags.Union && (brandedPrimitive model facts).IsSome then
+            intersectionRef model owner facts
         elif has TypeFlags.Union then
             unionRef ctx model self owner facts
         elif has TypeFlags.BooleanLiteral then
@@ -310,6 +379,8 @@ let rec typeRef (ctx: Context) (model: ShapeModel) (self: string option) (owner:
             keyOfRef model owner facts
         elif has TypeFlags.IndexedAccess then
             indexedAccessRef model owner facts
+        elif has TypeFlags.Intersection then
+            intersectionRef model owner facts
         else
             FsObj, [ Finding.make Widened owner $"type flags {facts.Response.Flags} not mapped yet; widened to obj" ]
 
@@ -329,6 +400,27 @@ and private keyOfRef (model: ShapeModel) (owner: string) (facts: TypeFacts) : Fs
         FsApp("keyof", [ FsTypeVar name ]),
         [ Finding.make Ergonomic owner $"keyof over an open operand reads as keyof<'{name}> (§4.10)" ]
     | None -> FsObj, [ Finding.make Widened owner "keyof over an operand not in scope here; widened to obj" ]
+
+/// An intersection at a reference position. A brand (§4.6, D11) is the one intersection F# can
+/// state exactly: the measure its declaration emitted, applied to the primitive it brands, which
+/// enforces the same nominality TypeScript was buying and erases the same way. It costs no
+/// finding here - the declaration records the idiom once - but a brand that never got a
+/// declaration has no measure to name, and falls back to the bare primitive loudly. Intersections
+/// of object types are a separate mapping (§4.6's first bullet) and are not shaped yet.
+and private intersectionRef (model: ShapeModel) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
+    match brandedPrimitive model facts with
+    | Some primitive ->
+        match Map.tryFind facts.Response.Id model.DeclNames with
+        | Some name -> FsBranded(primitive, name), []
+        | None ->
+            primitive,
+            [ Finding.make
+                  Ergonomic
+                  owner
+                  "an unnamed brand has no measure to carry; widened to the primitive it brands (§4.6)" ]
+    | None ->
+        FsObj,
+        [ Finding.make Widened owner "intersection of object types has no F# form yet; widened to obj (§4.6)" ]
 
 /// `T[K]`. Where `K` is a key variable this signature bound as `typekeyof<'T,'R>`, the access is
 /// exactly the `'R` that idiom introduced. Everything else - `T[keyof T]`, an access over an
@@ -1521,6 +1613,7 @@ let shapeAliases: Pass<ShapeModel> =
                         | FsEnum decl -> [ decl.Name ]
                         | FsAbbrev decl -> [ decl.Name ]
                         | FsPhantom decl -> [ decl.Name ]
+                        | FsMeasure decl -> [ decl.Name ]
                         | FsExports _ -> [])
                     |> Set.ofList
 
@@ -1593,6 +1686,33 @@ let shapeAliases: Pass<ShapeModel> =
                         else
                             match Map.tryFind typeId model.Types with
                             | Some facts ->
+                                // A branding intersection is a name and nothing else in F#: a
+                                // unit of measure, spelled at the uses as `string<Name>` rather
+                                // than declared as an abbreviation, because the name can only be
+                                // spent once and the measure is what spends it (§4.6, D11).
+                                // Decided before the reference is shaped: shaping one would ask
+                                // this declaration for the measure it has not emitted yet.
+                                let brand = brandedPrimitive model facts
+
+                                if brand.IsSome then
+                                    findings <-
+                                        findings
+                                        @ [ Finding.make
+                                                Ergonomic
+                                                name
+                                                "branding intersection emitted as a unit of measure; uses read \
+                                                 as the branded primitive (§4.6, D11)" ]
+
+                                    Some(
+                                        FsMeasure
+                                            { Name = name
+                                              Docs = Map.tryFind typeId exportDocs |> Option.defaultValue ("", []) |> fst
+                                              Tags = Map.tryFind typeId exportDocs |> Option.defaultValue ("", []) |> snd
+                                              Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+                                              Primitive = brand.Value }
+                                    )
+                                else
+
                                 let typeParameters, scope, parameterFindings =
                                     declTypeParams ctx model name facts
 
@@ -2055,6 +2175,7 @@ let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
             { d with
                 TypeParameters = d.TypeParameters |> List.map typeParam
                 Carrier = reference d.Carrier }
+    | FsMeasure d -> FsMeasure { d with Primitive = reference d.Primitive }
     | FsTaggedUnion d ->
         FsTaggedUnion
             { d with
@@ -2085,6 +2206,7 @@ let private declName =
     | FsInterface d -> Some d.Name
     | FsAbbrev d -> Some d.Name
     | FsPhantom d -> Some d.Name
+    | FsMeasure d -> Some d.Name
     | FsTaggedUnion d -> Some d.Name
     | FsStringEnum d -> Some d.Name
     | FsEnum d -> Some d.Name
@@ -2240,6 +2362,7 @@ let orderDeclarations: Pass<ShapeModel> =
                 | FsEnum decl -> orderKey decl.Order decl.Name
                 | FsAbbrev decl -> orderKey decl.Order decl.Name
                 | FsPhantom decl -> orderKey decl.Order decl.Name
+                | FsMeasure decl -> orderKey decl.Order decl.Name
                 | FsExports _ -> ("￿", System.Int32.MaxValue), "￿")
 
         let exports =
@@ -2271,6 +2394,7 @@ let auditCoverage: Pass<ShapeModel> =
                         | FsEnum decl -> [ decl.Name ]
                         | FsAbbrev decl -> [ decl.Name ]
                         | FsPhantom decl -> [ decl.Name ]
+                        | FsMeasure decl -> [ decl.Name ]
                         | FsExports members -> members |> List.map _.Name)
                     |> Set.ofList
 

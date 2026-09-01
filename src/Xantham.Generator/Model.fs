@@ -343,6 +343,10 @@ type TypeFacts =
       /// form of a generic alias these are its own parameters - `type Mapper<T> = (t: T) => T`
       /// leaves the function type itself parameterless, so this is the only place `T` appears.
       AliasTypeArguments: int list
+      /// The constituents of an intersection, in the checker's order. Separate from
+      /// `UnionMembers` because the two mean opposite things and the passes that read one
+      /// must never see the other.
+      IntersectionMembers: int list
       /// A type parameter's `extends` bound, by id (§4.9). Only type parameters carry one.
       Constraint: int option
       /// A type parameter's default type argument, by id (§4.9).
@@ -363,6 +367,7 @@ module TypeFacts =
           TypeArguments = []
           TupleElements = []
           AliasTypeArguments = []
+          IntersectionMembers = []
           Constraint = None
           Default = None
           UnionMembers = [] }
@@ -417,6 +422,11 @@ type FsTypeRef =
     /// substitutes members eagerly, so this is written only when the instantiation's target is
     /// itself a declaration this run generates; otherwise the expansion stands on its own.
     | FsApp of string * FsTypeRef list
+    /// A primitive carrying a unit of measure: the F# rendering of a TypeScript branding
+    /// intersection (§4.6, D11). `string & { __brand: "UserId" }` is a value that is a string
+    /// at runtime and refuses to substitute for another string at compile time, which is what
+    /// a measure is. The measure name is a declaration this run emits.
+    | FsBranded of primitive: FsTypeRef * measure: string
     | FsNamed of string
 
 /// A literal payload carried by a StringEnum case (D12: mixed literal unions keep their
@@ -598,10 +608,24 @@ type FsPhantomDecl =
       /// intrinsic string mapping, `obj` for everything else.
       Carrier: FsTypeRef }
 
+/// A unit of measure standing for a branding intersection (§4.6, D11). It has no body: a
+/// measure is a name and nothing else, and the brand it marks is written at the *uses*, as
+/// `string<UserId>`, rather than as an abbreviation - the name can only be spent once, and a
+/// measure is what spends it.
+type FsMeasureDecl =
+    { Name: string
+      Docs: string
+      Tags: JSDocTagInfo list
+      Order: DeclOrder option
+      /// The primitive the brand is over, kept for the manifest and the doc comment: a
+      /// measure itself says nothing about what it annotates.
+      Primitive: FsTypeRef }
+
 type FsDecl =
     | FsInterface of FsInterfaceDecl
     | FsStringEnum of FsStringEnumDecl
     | FsPhantom of FsPhantomDecl
+    | FsMeasure of FsMeasureDecl
     | FsTaggedUnion of FsTaggedUnionDecl
     | FsEnum of FsEnumDecl
     | FsAbbrev of FsAbbrevDecl

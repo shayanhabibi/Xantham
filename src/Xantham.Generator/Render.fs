@@ -69,6 +69,10 @@ let rec private printTypeIn (atomic: bool) =
     | FsDelegate(args, ret) ->
         args @ [ ret ] |> List.map (printTypeIn true) |> String.concat ", " |> sprintf "Func<%s>"
     | FsTypeVar name -> $"'{name}"
+    // A brand (§4.6, D11): `string<UserId>` for the non-numeric primitives, through the
+    // support package's measure-annotated abbreviations, and an ordinary measure application
+    // for numbers. Both erase to the primitive, which is all the JavaScript ever sees.
+    | FsBranded(primitive, measure) -> $"{printTypeIn true primitive}<{qualified measure}>"
     | FsApp(name, arguments) ->
         let text = arguments |> List.map (printTypeIn true) |> String.concat ", "
         $"{qualified name}<{text}>"
@@ -295,6 +299,15 @@ let private renderAbbrev (decl: FsAbbrevDecl) =
     [ yield! docLines "" decl.Docs decl.Tags
       yield $"type {declHead decl.Name decl.TypeParameters} = {printType decl.Target}" ]
 
+/// The unit of measure a branding intersection becomes (§4.6, D11). A measure has no body:
+/// the name is the whole of it, and what it brands is written at the uses as `string<Name>`.
+/// The primitive is recorded in the doc comment because the declaration itself cannot say it.
+let private renderMeasure (decl: FsMeasureDecl) =
+    [ yield! docLines "" decl.Docs decl.Tags
+      yield $"/// <remarks>A brand over <c>{printType decl.Primitive}</c>.</remarks>"
+      yield "[<Measure>]"
+      yield $"type {ident decl.Name}" ]
+
 /// A declaration whose right-hand side is a type-level computation F# has no way to reproduce -
 /// a mapped or conditional type, or a template literal over an operand the checker left open
 /// (§4.10, §4.11). The name and the arity survive, so uses of it stay distinct from one another
@@ -354,6 +367,7 @@ let renderSource: Pass<RenderModel> =
                 | FsTaggedUnion decl -> renderTaggedUnion decl
                 | FsEnum decl -> renderEnum decl
                 | FsAbbrev decl -> renderAbbrev decl
+                | FsMeasure decl -> renderMeasure decl
                 | FsPhantom decl -> renderPhantom decl
                 | FsExports members -> renderExports model.PackageName members)
             |> List.map (String.concat "\n")
@@ -371,6 +385,7 @@ let renderSource: Pass<RenderModel> =
                   "open System"
                   "open Fable.Core"
                   "open Fable.Core.JsInterop"
+                  "open Xantham.Fable.Core"
                   ""
                   body
                   "" ]
@@ -398,6 +413,7 @@ let symbolTiers (model: RenderModel) : (string * Tier * Finding list) list =
             | FsTaggedUnion decl -> [ decl.Name ]
             | FsEnum decl -> [ decl.Name ]
             | FsAbbrev decl -> [ decl.Name ]
+            | FsMeasure decl -> [ decl.Name ]
             | FsPhantom decl -> [ decl.Name ]
             | FsExports members -> members |> List.map _.Name)
         |> List.distinct

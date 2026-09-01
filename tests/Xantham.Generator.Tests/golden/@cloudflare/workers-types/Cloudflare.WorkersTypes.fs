@@ -7,6 +7,7 @@ module rec Cloudflare.WorkersTypes
 open System
 open Fable.Core
 open Fable.Core.JsInterop
+open Xantham.Fable.Core
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type BasicImageTransformationsGravityCoordinatesMode =

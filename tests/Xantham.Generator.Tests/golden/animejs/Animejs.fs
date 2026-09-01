@@ -7,6 +7,7 @@ module rec Animejs
 open System
 open Fable.Core
 open Fable.Core.JsInterop
+open Xantham.Fable.Core
 
 /// <remarks>@import ;</remarks>
 type Animatable =

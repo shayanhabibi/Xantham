@@ -358,6 +358,44 @@ let pipelineTests =
                                  f.Symbol = name && f.Tier = Widened && f.Message.Contains "erased phantom"))
                             $"{name} says in the manifest that it is a phantom" ])
 
+        yield!
+            fixtureTests "brand-lab" (handFixture "brand-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a branding intersection becomes a measure its uses carry" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // §4.6/D11: a brand is a compile-time-only nominal distinction over a
+                      // shared runtime representation, which is what a unit of measure is - and
+                      // Fable erases both, so the JavaScript sees the primitive either way.
+                      Expect.stringContains source "[<Measure>]\ntype UserId" "the brand declares a measure"
+                      Expect.stringContains source "abstract get: id: string<UserId> -> string" "and its uses carry it"
+
+                      // Numbers take a measure natively; the other primitives go through the
+                      // support package's abbreviations, which is why the open is emitted.
+                      Expect.stringContains source "at: float<Millis>" "a numeric brand needs no support"
+                      Expect.stringContains source "open Xantham.Fable.Core" "the abbreviations are in scope"
+
+                      // Under an array, under an option, and on a bare exported function.
+                      Expect.stringContains source "abstract ids: unit -> string<UserId>[]" "a brand under an array"
+                      Expect.stringContains source "?id: string<SessionId> -> string<UserId> option" "and under an option"
+                      Expect.stringContains source "static member mint (seed: string) : string<UserId>" "and on an export"
+
+                      // `boolean & Marker` and `(\"read\" | \"write\") & Marker` are handed back
+                      // distributed, as a union of intersections. Each is still one brand.
+                      Expect.stringContains source "type Verified" "a branded boolean survives distribution"
+                      Expect.stringContains source "type Mode" "so does a branded literal union"
+
+                      // The negatives. None of these is a brand and none may be read as one.
+                      for name in [ "Merged"; "Counted"; "Wrapped" ] do
+                          Expect.isTrue
+                              (rendered.Findings
+                               |> List.exists (fun f ->
+                                   f.Symbol = name && f.Tier = Widened && f.Message.Contains "intersection of object types"))
+                              $"{name} is an ordinary intersection, and says so"
+
+                      Expect.isFalse (source.Contains "Merged>") "and none of them is written as a measure" ])
+
+
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 
         yield!
