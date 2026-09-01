@@ -14,10 +14,46 @@ There are two worlds and they meet in exactly one place:
 Symbols, types and signatures are *not* in the blob. They only exist behind a request. The
 bridge between the two is the node handle, at the bottom of this file.
 
+## A session is the snapshot and the project, bound once
+
+126 of the 142 wire methods lead with the same two arguments — a snapshot and a project — because
+that pair is what the compiler resolves everything else against. `Session<'T>` binds it once:
+
+```fsharp
+let program = Api.createProgram channel { CreateProgramParams.Default with RootFiles = ValueSome [| file "main.ts" |] }
+let session = channel.Session program        // the response already is the pair
+```
+
+The members are the wire methods with those two arguments removed, and nothing else changed:
+`session.getSourceFile(file "main.ts")` is `Api.getSourceFile` with the pair filled in.
+`Session<TscChannel>` answers synchronously and `Session<TscMailbox>` in `Async`, under the same
+names, so a call site changes transport by changing how the session was built.
+
+Three ways to move a session, since the pair is data and not identity:
+
+```fsharp
+session.WithSnapshot updated.Snapshot   // after a file changed
+session.WithProject "tsconfig.build"    // same snapshot, different project
+session.ForSymbol symbol                // the project a symbol was first observed in
+```
+
+The 16 methods that identify nothing — `initialize`, `updateSnapshot`, `createProgram`, the
+`transpile*` and config-parsing family — cannot take a snapshot they precede, so they hang off
+`session.Sessionless` rather than being absent:
+
+```fsharp
+let updated = session.Sessionless.updateSnapshot(openProjects = [| file "tsconfig.json" |])
+let session = session.WithSnapshot updated.Snapshot
+```
+
+`Session.generated.fs` comes from `tools/session-gen/generate.mjs`, deliberately a separate
+generator from the one behind `Proto*.generated.fs`: the pair is a property the schema currently
+has, not one it promises, so a change that dissolves it must shrink this layer alone.
+
 ## Getting a blob
 
 ```fsharp
-match Api.getSourceFile channel { Snapshot = snapshot.Snapshot; Project = project; File = file "main.ts" } with
+match session.getSourceFile(file "main.ts") with
 | ValueNone -> failwith "no such file in this project"
 | ValueSome ast -> Node.root ast   // Node<SourceFile>
 ```
@@ -210,9 +246,7 @@ match symbol.Flags &&& SymbolFlags.Value with
 Its `Declarations` is an array of **node handles**:
 
 ```fsharp
-let symbol =
-    Api.getSymbolAtPosition channel
-        { Snapshot = snapshot.Snapshot; Project = project; File = file "main.ts"; Position = offset }
+let symbol = session.getSymbolAtPosition(file "main.ts", offset)
 ```
 
 A handle is `"index.kind.path"` — the node's index in its file's blob, its kind ordinal, and the
@@ -238,10 +272,7 @@ Resolving a declaration to a node is then: parse the handle, fetch that file, ta
 for declaration in symbol |> ValueOption.bind _.Declarations |> ValueOption.defaultValue [||] do
     let declaration = parseHandle declaration
 
-    match Api.getSourceFile channel
-              { Snapshot = snapshot.Snapshot
-                Project = project
-                File = DocumentIdentifier.FileName declaration.Path } with
+    match session.getSourceFile(DocumentIdentifier.FileName declaration.Path) with
     | ValueNone -> ()
     | ValueSome file ->
         match Node.ofIndex<AnyNode> file declaration.Index with
@@ -253,14 +284,16 @@ for declaration in symbol |> ValueOption.bind _.Declarations |> ValueOption.defa
 with a view rather than asserting the tag you expect.
 
 Handles mean something only within the program that produced them: same snapshot, same project.
-A handle from an older snapshot may point at a different node, or at nothing.
+A handle from an older snapshot may point at a different node, or at nothing. That scope is
+exactly what a `Session` is, so a handle is safe to pass around beside the session it came from
+and nowhere else.
 
 Going the other way — you have a node and want to ask the checker about it — build the same
 string, because the `Location` field of the checker requests *is* a handle:
 
 ```fsharp
 let handle = $"{Node.index node}.{uint32 node.Kind}.{Ast.path (Node.file node)}"
-Api.getTypeAtLocation channel { Snapshot = snapshot.Snapshot; Project = project; Location = handle }
+session.getTypeAtLocation handle
 ```
 
 There is no handle helper in `Xantham.TypeScript.Wire` yet; the two snippets above are the whole

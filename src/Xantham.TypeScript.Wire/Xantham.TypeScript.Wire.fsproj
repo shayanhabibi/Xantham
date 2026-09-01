@@ -46,6 +46,11 @@
         <Compile Include="Mailbox.fs" />
         <Compile Include="ProtoApi.generated.fs" />
         <Compile Include="ProtoAsync.generated.fs" />
+        <!-- The session layer, from tools/session-gen/generate.mjs. Last, and by its own
+             generator: it binds the snapshot and project that 126 of the 142 methods repeat,
+             so it needs Api, AsyncApi and both transports already in scope, and a schema
+             change that dissolves that pair must cost this file alone. -->
+        <Compile Include="Session.generated.fs" />
     </ItemGroup>
 
     <ItemGroup>

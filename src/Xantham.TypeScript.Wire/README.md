@@ -10,6 +10,8 @@ it returns without going through JSON.
   graph, and the typed layer gives each one a tag — `Node<FunctionDeclaration>` — so narrowing is
   a compile-time question. Generated from `ast.json`, so the 351 kinds and their child slots come
   from the compiler rather than from hand-written constants.
+- **`Session<'T>`**, which binds the snapshot and project that 126 of those 142 calls repeat, so a
+  call site carries only what varies.
 - **A batching mailbox** that collects overlapping calls into one `batchRequests` round trip.
   Under load it runs 2.1–2.3× the serial path; a lone caller pays nothing for it.
 - **A virtual filesystem**, so the compiler can be pointed at sources that exist only in memory.
@@ -54,6 +56,27 @@ let ast =
         project = project,
         file = DocumentIdentifier.FileName "./my-project/index.d.ts")
 ```
+
+## Sessions
+
+Most of the API resolves everything against a snapshot and a project, and restating that pair at
+every call is most of what a call site says. `Session<'T>` binds it once and re-exposes the methods
+without it:
+
+```fsharp
+let session = channel.Session program   // the createProgram response already is the pair
+
+let ast = session.getSourceFile(DocumentIdentifier.FileName "./my-project/index.d.ts")
+let symbol = session.getSymbolAtPosition(DocumentIdentifier.FileName "./my-project/index.d.ts", 42)
+```
+
+The pair is data rather than identity, so a session moves: `session.WithSnapshot updated.Snapshot`
+after a file changed, `session.WithProject "tsconfig.build"`, and `session.ForSymbol symbol` for
+the project a symbol was first observed in. The calls that precede a snapshot and so cannot take
+one — `updateSnapshot`, `createProgram`, the `transpile*` family — live on `session.Sessionless`.
+
+`Session<TscMailbox>` is the same members returning `Async`, so the transport is chosen where the
+session is built and nowhere else.
 
 `TscMailbox` is the same surface asynchronously, and batches whatever overlaps:
 

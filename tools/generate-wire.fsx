@@ -225,6 +225,25 @@ let generateProto = input {
     }
 }
 
+/// Emits `Session.generated.fs`: `Session<'T>`, which binds the snapshot and project that most
+/// of the wire's methods repeat, and re-exposes them without it.
+///
+/// A separate generator from `generateProto`, reading the same schema, because the pair it binds
+/// is a property of the schema rather than a promise it makes. If the compiler ever splits or
+/// renames it, the proto layers stay correct and this one shrinks - which is only true while
+/// nothing here can reach into the emitter that produces them.
+let generateSession = input {
+    let! typescriptPkgDir = Options.typescriptPkgDir
+    and! parserDir = Options.parserDir
+    and! outputDir = Options.outputDir
+    Workspace.ensureTsc __REPOSITORY_DIRECTORY__ |> ignore
+    return stage "generate session" {
+        echo "Generating session layer"
+        workingDir Repo.FileSystem.``.``
+        run (cmd $"node tools/session-gen/generate.mjs {typescriptPkgDir} {parserDir} {outputDir}/Session.generated.fs")
+    }
+}
+
 rootCommand fsi.CommandLineArgs[1..] {
     command "sync" {
         command "tsc-ast" {
@@ -238,6 +257,9 @@ rootCommand fsi.CommandLineArgs[1..] {
         command "ast" {
             requireUpstream
             generateAst
+        }
+        command "session" {
+            generateSession
         }
     }
 }
