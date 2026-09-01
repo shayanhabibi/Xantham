@@ -277,7 +277,26 @@ let rec typeRef (ctx: Context) (model: ShapeModel) (self: string option) (owner:
                 // parameter of some *other* declaration has no name here to write.
                 match Map.tryFind typeId model.TypeVars with
                 | Some name -> FsTypeVar name, []
-                | None -> FsObj, [ Finding.make Widened owner "type parameter is not in scope here; widened to obj" ]
+                | None ->
+                    // Its constraint is the tightest thing still true of it, and where the
+                    // declaration bound one, `obj` is not merely loose but wrong: F# rejects
+                    // `Ai<obj>` against `'AiModelList :> AiModelListType`. Only a plain named
+                    // constraint is taken - a generic one would need an arity this position
+                    // cannot supply - and another declaration's parameter can never be
+                    // constrained by this same parameter, so the substitution cannot cycle.
+                    let constraintName =
+                        facts.Constraint
+                        |> Option.filter (fun boundId -> boundId <> typeId)
+                        |> Option.bind (fun boundId ->
+                            match Map.tryFind boundId model.Types with
+                            | Some bound when (ownArguments bound).IsEmpty -> Map.tryFind boundId model.DeclNames
+                            | _ -> None)
+
+                    match constraintName with
+                    | Some name ->
+                        FsNamed name,
+                        [ Finding.make Widened owner $"type parameter is not in scope here; widened to its constraint {name}" ]
+                    | None -> FsObj, [ Finding.make Widened owner "type parameter is not in scope here; widened to obj" ]
         elif has TypeFlags.Object then
             objectRef ctx model self owner facts
         else

@@ -882,7 +882,9 @@ type LayoutAnimationTimingsParams =
     [<ParamObject; Emit("$0")>]
     static member Create (?delay: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>>, ?duration: U2<float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>>, ?ease: obj) : LayoutAnimationTimingsParams = jsNative
 
-type LayoutStateAnimationProperties = obj
+type LayoutStateAnimationProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> U3<string, float, Func<Target option, float option, Target[] option, Tween option, FunctionValueReturn>> with get, set
 
 type LayoutStateParams = obj
 
@@ -1599,7 +1601,9 @@ type StaggerParamsAxis =
 
 type DOMTarget = obj
 
-type JSTarget = obj
+type JSTarget =
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 type Target = obj
 
@@ -1848,7 +1852,9 @@ type TweenPropertySiblings =
     [<ParamObject; Emit("$0")>]
     static member Create (?_head: Tween, ?_tail: Tween) : TweenPropertySiblings = jsNative
 
-type TweenLookups = obj
+type TweenLookups =
+    [<EmitIndexer>]
+    abstract Item: string -> TweenPropertySiblings with get, set
 
 type TweenReplaceLookups = obj
 
@@ -1884,7 +1890,13 @@ type ArraySyntaxValue = obj[]
 
 type TweenOptions = obj
 
-type TweenObjectValue = obj
+[<Interface>]
+type TweenObjectValue =
+    abstract ``to``: obj option with get, set
+    abstract from: obj option with get, set
+    abstract fromTo: obj option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?``to``: obj, ?from: obj, ?fromTo: obj) : TweenObjectValue = jsNative
 
 [<Interface>]
 type PercentageKeyframeOptions =
@@ -1892,9 +1904,13 @@ type PercentageKeyframeOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?ease: EasingParam) : PercentageKeyframeOptions = jsNative
 
-type PercentageKeyframeParams = obj
+type PercentageKeyframeParams =
+    [<EmitIndexer>]
+    abstract Item: string -> TweenParamValue with get, set
 
-type PercentageKeyframes = obj
+type PercentageKeyframes =
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 type DurationKeyframes = obj[]
 
@@ -2319,7 +2335,7 @@ type Utils =
     abstract ``$``: Func<DOMTargetsParam, DOMTarget[]> with get, set
     abstract set: Func<TargetsParam, obj, JSAnimation> with get, set
     abstract remove: Func<TargetsParam, U3<JSAnimation, Timeline, WAAPIAnimation> option, string option, Target[]> with get, set
-    abstract cleanInlineStyles: Func<obj, obj> with get, set
+    abstract cleanInlineStyles: Func<Renderable, Renderable> with get, set
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
@@ -2413,7 +2429,7 @@ type Exports =
     [<Import("addChild", "animejs")>]
     static member addChild (parent: obj, child: obj, ?sortMethod: obj, ?prevProp: string, ?nextProp: string) : unit = jsNative
     [<Import("cleanInlineStyles", "animejs")>]
-    static member cleanInlineStyles (renderable: obj) : obj = jsNative
+    static member cleanInlineStyles (renderable: Renderable) : Renderable = jsNative
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>
     /// <remarks>@overload</remarks>

@@ -469,6 +469,30 @@ from the catalogue as D1–D12.
    guaranteed-arity default (§4.8).
 6. **D6 — decided.** Simple synthesis for checker-expanded aliases: `Partial<Options>` →
    `OptionsPartial`. Revisit if collisions or readability demand (§4.10).
+
+   *Landed (2026-09-02, phase D).* No synthesis was needed in the end: the expansion is
+   declared under the **alias's own exported name**, so `type PartialOptions =
+   Partial<Options>` emits `PartialOptions` and the collision question never arises. The
+   name only had to be invented for an expansion with no export to hang it on, and no
+   fixture has produced one yet.
+
+   What did have to change was the resolve tier. `Partial`, `Pick`, `Omit`, `Readonly` and
+   `Record` are written in `lib.es5.d.ts`, so O7 groups them as the compiler lib and the
+   identity-only shortcut skipped their members - every one of them reached the shape tier
+   looking empty and abbreviated to `obj`. But that shortcut's justification is that the
+   shape tier renders the group's types *by templated name*, and a mapped type has no name:
+   it is a type-level function with no runtime identity, and what it stands for is the
+   entry package's own operand, transformed. So an anonymous shape is now resolved by
+   content whatever group it was written in. `Partial` hoists to `option`, `Readonly` drops
+   the setter, `Pick`/`Omit` select, `Record` becomes an `[<EmitIndexer>]`, and JSDoc
+   carries through from the operand. 14 `= obj` abbreviations across the fixture ladder
+   became real shapes.
+
+   One latent bug surfaced with it, caught by the compile gate rather than by review: an
+   out-of-scope type parameter widened to `obj`, and `Ai<obj>` does not compile against
+   `'AiModelList :> AiModelListType` once the constraint is a real type rather than a
+   vanished one. It now widens to its constraint where the constraint is a plain named
+   type - still a widening, just a sound one.
 7. **D7 — decided.** Optional tuple tails are `option`-typed components (`undefined` slot),
    simplicity first; patch to shorter-array overloads or erased carriers where a real API
    rejects the slot (§4.12). *Watch item:* the behavioral test of what TS APIs accept.

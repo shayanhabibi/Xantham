@@ -152,7 +152,22 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                 |> Array.filter (fun argument -> argument.Flags.HasFlag TypeFlags.TypeParameter)
                 |> Array.toList
 
-            if GeneratorConfig.disposition ctx.Config origin <> Ship then
+            // The O7 shortcut below rests on the group's types having names to be referenced
+            // by. A mapped type has none: `Partial<Options>` is written in lib.es5.d.ts, so it
+            // groups as the compiler lib, but it is a type-level *function* with no runtime
+            // identity - what it stands for is the entry package's own operand, transformed.
+            // Deferring to a name that does not exist widens the whole expansion to obj and
+            // loses the operand with it (D6), so an anonymous shape is resolved by content
+            // whatever group it was written in.
+            let isAnonymousShape =
+                let objectFlags = ty.ObjectFlags |> ValueOption.defaultValue ObjectFlags.None
+
+                objectFlags.HasFlag ObjectFlags.Mapped
+                || match symbol with
+                   | ValueSome s -> s.Name.StartsWith "__"
+                   | ValueNone -> true
+
+            if GeneratorConfig.disposition ctx.Config origin <> Ship && not isAnonymousShape then
                 // Identity only (O7): the shape tier renders references to this group by
                 // templated name or widens them, and either way nothing reads its members.
                 return

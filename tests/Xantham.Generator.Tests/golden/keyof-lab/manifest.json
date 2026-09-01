@@ -3,8 +3,8 @@
   "module": "KeyofLab",
   "counts": {
     "exact": 5,
-    "ergonomic": 5,
-    "widened": 13,
+    "ergonomic": 10,
+    "widened": 8,
     "escape": 2
   },
   "symbols": [
@@ -90,12 +90,12 @@
     },
     {
       "name": "Registry",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         }
       ]
     },
@@ -112,45 +112,75 @@
     },
     {
       "name": "PartialOptions",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
     {
       "name": "OptionsHead",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
     {
       "name": "OptionsTail",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
     {
       "name": "FrozenOptions",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },

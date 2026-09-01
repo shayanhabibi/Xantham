@@ -253,7 +253,34 @@ let pipelineTests =
                           (Escape, "\"globals-lab:extra\"")
                           "the ambient module is an escape, not a silence" ])
 
-        yield! fixtureTests "keyof-lab" (handFixture "keyof-lab") GeneratorConfig.Default (fun _ -> [])
+        yield!
+            fixtureTests "keyof-lab" (handFixture "keyof-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a mapped type over a concrete operand is expanded, not widened (D6)" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `Partial`, `Pick`, `Omit`, `Readonly` and `Record` are written in
+                    // lib.es5.d.ts, so they group as the compiler lib - but they are type-level
+                    // functions with no runtime identity, and what they stand for is the entry
+                    // package's own operand transformed. Deferring to a name that does not
+                    // exist would widen every one of these to obj.
+                    Expect.stringContains source "abstract duration: float option with get, set" "Partial hoists to option"
+                    Expect.stringContains source "static member Create (duration: float, label: string) : OptionsHead" "Pick selects"
+                    Expect.stringContains source "static member Create (label: string, loop: bool) : OptionsTail" "Omit removes"
+                    Expect.stringContains source "abstract duration: float\n" "Readonly drops the setter"
+
+                    for widened in [ "type Registry = obj"; "type PartialOptions = obj"; "type FrozenOptions = obj" ] do
+                        Expect.isFalse (source.Contains widened) $"{widened} is no longer the emission"
+
+                  testCase "the closed keyof regime resolves without the support package" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // §4.10's first regime: the checker finishes these on its own, so they need
+                    // nothing beyond the union and literal machinery phase C already landed.
+                    Expect.stringContains source "type Duration = float" "a concrete indexed access"
+                    Expect.stringContains source "type DurationOrLabel = U2<string, float>" "over a union of keys"
+                    Expect.stringContains source "| [<CompiledName(\"duration\")>] Duration" "keyof Options is a StringEnum" ])
 
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 

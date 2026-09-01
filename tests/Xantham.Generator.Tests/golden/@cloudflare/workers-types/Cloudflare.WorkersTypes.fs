@@ -236,6 +236,12 @@ type ServiceWorkerGlobalScope =
     abstract PerformanceObserverEntryList: obj with get, set
     abstract EventTarget: obj with get, set
 
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type ServiceWorkerGlobalScopeCompressionStreamFormat =
+    | [<CompiledName("deflate")>] Deflate
+    | [<CompiledName("deflate-raw")>] DeflateRaw
+    | [<CompiledName("gzip")>] Gzip
+
 [<Interface>]
 type ServiceWorkerGlobalScopeWebSocketPairResult =
     abstract ``0``: obj with get, set
@@ -1505,19 +1511,19 @@ type KVNamespaceListResult = U2<KVNamespaceListResult2, KVNamespaceListResult3>
 [<Interface>]
 type KVNamespaceListResult2 =
     abstract list_complete: bool with get, set
-    abstract keys: KVNamespaceListKey<obj, obj>[] with get, set
+    abstract keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[] with get, set
     abstract cursor: string with get, set
     abstract cacheStatus: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (list_complete: bool, keys: KVNamespaceListKey<obj, obj>[], cursor: string, ?cacheStatus: string) : KVNamespaceListResult2 = jsNative
+    static member Create (list_complete: bool, keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[], cursor: string, ?cacheStatus: string) : KVNamespaceListResult2 = jsNative
 
 [<Interface>]
 type KVNamespaceListResult3 =
     abstract list_complete: bool with get, set
-    abstract keys: KVNamespaceListKey<obj, obj>[] with get, set
+    abstract keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[] with get, set
     abstract cacheStatus: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (list_complete: bool, keys: KVNamespaceListKey<obj, obj>[], ?cacheStatus: string) : KVNamespaceListResult3 = jsNative
+    static member Create (list_complete: bool, keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[], ?cacheStatus: string) : KVNamespaceListResult3 = jsNative
 
 type KVNamespace<'Key> =
     abstract get: key: 'Key * ?options: obj -> obj
@@ -1539,19 +1545,19 @@ type KVNamespace<'Key> =
 [<Interface>]
 type KVNamespaceListResultItem =
     abstract list_complete: bool with get, set
-    abstract keys: KVNamespaceListKey<obj, obj>[] with get, set
+    abstract keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[] with get, set
     abstract cursor: string with get, set
     abstract cacheStatus: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (list_complete: bool, keys: KVNamespaceListKey<obj, obj>[], cursor: string, ?cacheStatus: string) : KVNamespaceListResultItem = jsNative
+    static member Create (list_complete: bool, keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[], cursor: string, ?cacheStatus: string) : KVNamespaceListResultItem = jsNative
 
 [<Interface>]
 type KVNamespaceListResultItem2 =
     abstract list_complete: bool with get, set
-    abstract keys: KVNamespaceListKey<obj, obj>[] with get, set
+    abstract keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[] with get, set
     abstract cacheStatus: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (list_complete: bool, keys: KVNamespaceListKey<obj, obj>[], ?cacheStatus: string) : KVNamespaceListResultItem2 = jsNative
+    static member Create (list_complete: bool, keys: KVNamespaceListKey<obj, Ai_Cf_Leonardo_Phoenix_1_0_Output>[], ?cacheStatus: string) : KVNamespaceListResultItem2 = jsNative
 
 [<Interface>]
 type KVNamespaceListOptions =
@@ -3008,7 +3014,34 @@ type AgentMemoryMemory =
 /// <summary>
 /// Single entry in a list() response. Same shape as Memory minus full content.
 /// </summary>
-type AgentMemoryMemoryListEntry = obj
+[<Interface>]
+type AgentMemoryMemoryListEntry =
+    /// <summary>
+    /// Memory ID.
+    /// </summary>
+    abstract id: string with get, set
+    /// <summary>
+    /// Memory type.
+    /// </summary>
+    abstract ``type``: AgentMemoryMemoryType with get, set
+    /// <summary>
+    /// Text summary.
+    /// </summary>
+    abstract summary: string with get, set
+    /// <summary>
+    /// Session that created this memory.
+    /// </summary>
+    abstract sessionId: string option with get, set
+    /// <summary>
+    /// Memory creation time.
+    /// </summary>
+    abstract createdAt: obj with get, set
+    /// <summary>
+    /// Memory last-update time.
+    /// </summary>
+    abstract updatedAt: obj with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string, ``type``: AgentMemoryMemoryType, summary: string, createdAt: obj, updatedAt: obj, ?sessionId: string) : AgentMemoryMemoryListEntry = jsNative
 
 /// <summary>
 /// A scored memory candidate in a recall result.
@@ -12269,13 +12302,28 @@ type AiInternalError =
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, message: string, ?stack: string, ?cause: obj) : AiInternalError = jsNative
 
-type AiModelListType = obj
+type AiModelListType =
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 [<Interface>]
 type AiAsyncBatchResponse =
     abstract request_id: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (request_id: string) : AiAsyncBatchResponse = jsNative
+
+[<Interface>]
+type AIGatewayUniversalRequestHeadersCfAigCustomCost =
+    abstract per_token_in: float option with get, set
+    abstract per_token_out: float option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?per_token_in: float, ?per_token_out: float) : AIGatewayUniversalRequestHeadersCfAigCustomCost = jsNative
+
+[<Interface>]
+type AIGatewayUniversalRequestHeadersCfAigCustomCost2 =
+    abstract total_cost: float option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?total_cost: float) : AIGatewayUniversalRequestHeadersCfAigCustomCost2 = jsNative
 
 type Ai<'AiModelList when 'AiModelList :> AiModelListType> =
     abstract aiGatewayLogId: string option with get, set
@@ -12513,7 +12561,7 @@ type AIGatewayProviders =
 
 type AIGatewayHeaders =
     abstract ``cf-aig-metadata``: obj with get, set
-    abstract ``cf-aig-custom-cost``: U3<string, AIGatewayHeadersCfAigCustomCost, AIGatewayHeadersCfAigCustomCost2> with get, set
+    abstract ``cf-aig-custom-cost``: U3<string, AIGatewayUniversalRequestHeadersCfAigCustomCost, AIGatewayUniversalRequestHeadersCfAigCustomCost2> with get, set
     abstract ``cf-aig-cache-ttl``: U2<string, float> with get, set
     abstract ``cf-aig-skip-cache``: U2<string, bool> with get, set
     abstract ``cf-aig-cache-key``: string with get, set
@@ -12527,19 +12575,6 @@ type AIGatewayHeaders =
     abstract ``Content-Type``: string with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
-
-[<Interface>]
-type AIGatewayHeadersCfAigCustomCost =
-    abstract per_token_in: float option with get, set
-    abstract per_token_out: float option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?per_token_in: float, ?per_token_out: float) : AIGatewayHeadersCfAigCustomCost = jsNative
-
-[<Interface>]
-type AIGatewayHeadersCfAigCustomCost2 =
-    abstract total_cost: float option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?total_cost: float) : AIGatewayHeadersCfAigCustomCost2 = jsNative
 
 [<Interface>]
 type AIGatewayUniversalRequest =
@@ -16102,7 +16137,9 @@ type EmailExportedHandler<'Env, 'Props> = Func<ForwardableEmailMessage, 'Env, Ex
 /// Evaluation context for targeting rules.
 /// Keys are attribute names (e.g. "userId", "country"), values are the attribute values.
 /// </summary>
-type FlagshipEvaluationContext = obj
+type FlagshipEvaluationContext =
+    [<EmitIndexer>]
+    abstract Item: string -> U3<string, float, bool> with get, set
 
 [<Interface>]
 type FlagshipEvaluationDetails<'T> =
@@ -17080,9 +17117,22 @@ type WorkflowEntrypoint2<'Env, 'T> =
     abstract env: 'Env with get, set
     abstract run: ``event``: obj * step: WorkflowStep -> obj
 
+[<Interface>]
+type WorkflowEntrypointRunEventSchedule =
+    /// <summary>
+    /// Cron expression that triggered this event.
+    /// </summary>
+    abstract cron: string with get, set
+    /// <summary>
+    /// Timestamp of the scheduled trigger, in milliseconds since the Unix epoch.
+    /// </summary>
+    abstract scheduledTime: float with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (cron: string, scheduledTime: float) : WorkflowEntrypointRunEventSchedule = jsNative
+
 type WorkflowStep =
     abstract ``do``: name: string * callback: Func<WorkflowStepDoCallbackCtx, obj> * ?rollbackOptions: obj -> obj
-    abstract ``do``: name: string * config: obj * callback: Func<WorkflowStepDoCallbackCtx2, obj> * ?rollbackOptions: obj -> obj
+    abstract ``do``: name: string * config: obj * callback: Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx, obj> * ?rollbackOptions: obj -> obj
     abstract ``do``: name: string * config: obj * callback: Func<WorkflowStepDoCallbackCtx, obj> * ?rollbackOptions: obj -> obj
     abstract ``do``: name: string * config: WorkflowStepDoConfig * callback: Func<WorkflowStepDoCallbackCtx, obj> * ?rollbackOptions: obj -> obj
     abstract sleep: Func<string, WorkflowSleepDuration, obj> with get, set
@@ -17096,29 +17146,6 @@ type WorkflowStepDoCallbackCtx =
     abstract config: WorkflowStepDoCallbackCtxConfig with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (step: WorkflowStepDoCallbackCtxStep, attempt: float, config: WorkflowStepDoCallbackCtxConfig) : WorkflowStepDoCallbackCtx = jsNative
-
-[<Interface>]
-type WorkflowStepDoCallbackCtx2 =
-    abstract step: WorkflowStepDoCallbackCtxStep with get, set
-    abstract attempt: float with get, set
-    abstract config: WorkflowStepDoCallbackCtx2Config with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (step: WorkflowStepDoCallbackCtxStep, attempt: float, config: WorkflowStepDoCallbackCtx2Config) : WorkflowStepDoCallbackCtx2 = jsNative
-
-[<Interface>]
-type WorkflowStepDoCallbackCtx2Config =
-    abstract retries: WorkflowStepDoCallbackCtx2ConfigRetries option with get, set
-    abstract timeout: WorkflowSleepDuration option with get, set
-    abstract sensitive: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?retries: WorkflowStepDoCallbackCtx2ConfigRetries, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepDoCallbackCtx2Config = jsNative
-
-[<Interface>]
-type WorkflowStepDoCallbackCtx2ConfigRetries =
-    abstract limit: float with get, set
-    abstract backoff: GatewayRetriesBackoff option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (limit: float, ?backoff: GatewayRetriesBackoff) : WorkflowStepDoCallbackCtx2ConfigRetries = jsNative
 
 [<Interface>]
 type WorkflowStepDoCallbackCtxConfig =
@@ -17137,26 +17164,11 @@ type WorkflowStepDoCallbackCtxStep =
 
 [<Interface>]
 type WorkflowStepDoConfig =
-    abstract retries: WorkflowStepDoConfigRetries option with get, set
+    abstract retries: WorkflowStepDoRollbackOptionsRollbackConfigRetries option with get, set
     abstract timeout: WorkflowSleepDuration option with get, set
     abstract sensitive: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?retries: WorkflowStepDoConfigRetries, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepDoConfig = jsNative
-
-[<Interface>]
-type WorkflowStepDoConfigRetries =
-    abstract limit: float with get, set
-    abstract delay: obj with get, set
-    abstract backoff: GatewayRetriesBackoff option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (limit: float, delay: obj, ?backoff: GatewayRetriesBackoff) : WorkflowStepDoConfigRetries = jsNative
-
-[<Interface>]
-type WorkflowStepDoConfigRetriesDelayInput =
-    abstract ctx: WorkflowStepDoCallbackCtx2 with get, set
-    abstract error: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (ctx: WorkflowStepDoCallbackCtx2, error: obj) : WorkflowStepDoConfigRetriesDelayInput = jsNative
+    static member Create (?retries: WorkflowStepDoRollbackOptionsRollbackConfigRetries, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepDoConfig = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions<'T> =
@@ -17174,13 +17186,13 @@ type WorkflowStepDoRollbackOptions2<'T> =
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions2RollbackCtx<'T> =
-    abstract ctx: WorkflowStepDoCallbackCtx2 with get, set
+    abstract ctx: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx with get, set
     abstract error: obj with get, set
     abstract output: 'T option with get, set
     /// <remarks>@deprecated Use `ctx.step.name` and `ctx.step.count` instead.</remarks>
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: WorkflowStepDoCallbackCtx2, error: obj, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptions2RollbackCtx<'T> = jsNative
+    static member Create (ctx: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx, error: obj, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptions2RollbackCtx<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions3<'T> =
@@ -17215,6 +17227,44 @@ type WorkflowStepDoRollbackOptions4RollbackCtx<'T> =
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (ctx: WorkflowStepDoCallbackCtx, error: obj, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptions4RollbackCtx<'T> = jsNative
+
+[<Interface>]
+type WorkflowStepDoRollbackOptionsRollbackConfigRetries =
+    abstract limit: float with get, set
+    abstract delay: obj with get, set
+    abstract backoff: GatewayRetriesBackoff option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (limit: float, delay: obj, ?backoff: GatewayRetriesBackoff) : WorkflowStepDoRollbackOptionsRollbackConfigRetries = jsNative
+
+[<Interface>]
+type WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput =
+    abstract ctx: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx with get, set
+    abstract error: obj with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (ctx: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx, error: obj) : WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput = jsNative
+
+[<Interface>]
+type WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx =
+    abstract step: WorkflowStepDoCallbackCtxStep with get, set
+    abstract attempt: float with get, set
+    abstract config: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (step: WorkflowStepDoCallbackCtxStep, attempt: float, config: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig) : WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx = jsNative
+
+[<Interface>]
+type WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig =
+    abstract retries: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfigRetries option with get, set
+    abstract timeout: WorkflowSleepDuration option with get, set
+    abstract sensitive: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?retries: WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfigRetries, ?timeout: WorkflowSleepDuration, ?sensitive: string) : WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig = jsNative
+
+[<Interface>]
+type WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfigRetries =
+    abstract limit: float with get, set
+    abstract backoff: GatewayRetriesBackoff option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (limit: float, ?backoff: GatewayRetriesBackoff) : WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfigRetries = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptionsRollbackCtx<'T> =
@@ -19207,7 +19257,7 @@ type Exports =
     [<Global("Base_Ai_Cf_Zai_Org_Glm_5_3_Flash"); EmitConstructor>]
     static member Base_Ai_Cf_Zai_Org_Glm_5_3_Flash () : Base_Ai_Cf_Zai_Org_Glm_5_3_Flash = jsNative
     [<Global("Ai"); EmitConstructor>]
-    static member Ai () : Ai<obj> = jsNative
+    static member Ai () : Ai<AiModelListType> = jsNative
     [<Global("AiGateway"); EmitConstructor>]
     static member AiGateway () : AiGateway = jsNative
     /// <remarks>

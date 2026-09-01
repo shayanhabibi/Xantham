@@ -169,6 +169,34 @@ let typeRefTests =
             Expect.equal reference FsObj "nothing here binds T"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
 
+        testCase "an out-of-scope type parameter widens to its constraint, not to obj" <| fun _ ->
+            // `Ai<obj>` does not compile against `'AiModelList :> AiModelListType`: where the
+            // declaration bound a constraint, obj is not merely loose but wrong.
+            let bounded = { typeParam 20 "T" with Constraint = Some 60 }
+            let timer = Build.facts (Build.typeResponse 60 TypeFlags.Object)
+
+            let model =
+                { Build.shapeModel (bounded :: timer :: Build.primitives) with
+                    DeclNames = Map.ofList [ 60, "Timer" ] }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 20
+
+            Expect.equal reference (FsNamed "Timer") "the tightest thing still true of T"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "still a widening, just a smaller one"
+
+        testCase "an out-of-scope parameter bound to a generic still widens to obj" <| fun _ ->
+            // A generic constraint would need an arity this position cannot supply.
+            let bounded = { typeParam 20 "T" with Constraint = Some 30 }
+
+            let model =
+                { Build.shapeModel (bounded :: genericDecl 30 [ 21 ] [] :: typeParam 21 "E" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 30, "Box" ] }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 20
+
+            Expect.equal reference FsObj "no arity to write Box at"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
+
         testCase "an instantiation of a declared generic is written as an application" <| fun _ ->
             let instantiation =
                 { Build.facts

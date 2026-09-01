@@ -2,10 +2,10 @@
   "package": "@cloudflare/workers-types",
   "module": "Cloudflare.WorkersTypes",
   "counts": {
-    "exact": 188,
-    "ergonomic": 649,
-    "widened": 528,
-    "escape": 40
+    "exact": 189,
+    "ergonomic": 651,
+    "widened": 526,
+    "escape": 41
   },
   "symbols": [
     {
@@ -832,6 +832,11 @@
           "message": "type parameter is not in scope here; widened to obj"
         }
       ]
+    },
+    {
+      "name": "ServiceWorkerGlobalScopeCompressionStreamFormat",
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "ServiceWorkerGlobalScopeWebSocketPairResult",
@@ -5275,7 +5280,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "message": "type parameter is not in scope here; widened to its constraint Ai_Cf_Leonardo_Phoenix_1_0_Output"
         },
         {
           "pass": "shape-interfaces",
@@ -5301,7 +5306,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "message": "type parameter is not in scope here; widened to its constraint Ai_Cf_Leonardo_Phoenix_1_0_Output"
         },
         {
           "pass": "shape-interfaces",
@@ -5803,7 +5808,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "message": "type parameter is not in scope here; widened to its constraint Ai_Cf_Leonardo_Phoenix_1_0_Output"
         },
         {
           "pass": "shape-interfaces",
@@ -5829,7 +5834,7 @@
         {
           "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "message": "type parameter is not in scope here; widened to its constraint Ai_Cf_Leonardo_Phoenix_1_0_Output"
         },
         {
           "pass": "shape-interfaces",
@@ -10179,9 +10184,24 @@
       "tier": "widened",
       "findings": [
         {
-          "pass": "shape-aliases",
+          "pass": "shape-interfaces",
           "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "message": "Date is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Date is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -31630,12 +31650,17 @@
     },
     {
       "name": "AiModelListType",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         }
       ]
     },
@@ -31643,6 +31668,58 @@
       "name": "AiAsyncBatchResponse",
       "tier": "ergonomic",
       "findings": [
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "AIGatewayUniversalRequestHeadersCfAigCustomCost",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "AIGatewayUniversalRequestHeadersCfAigCustomCost2",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
         {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -31672,7 +31749,7 @@
         {
           "pass": "shape-classes",
           "tier": "widened",
-          "message": "type parameter is not in scope here; widened to obj"
+          "message": "type parameter is not in scope here; widened to its constraint AiModelListType"
         },
         {
           "pass": "shape-interfaces",
@@ -32532,58 +32609,6 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        }
-      ]
-    },
-    {
-      "name": "AIGatewayHeadersCfAigCustomCost",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "AIGatewayHeadersCfAigCustomCost2",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -37754,12 +37779,12 @@
     },
     {
       "name": "FlagshipEvaluationContext",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         }
       ]
     },
@@ -40904,6 +40929,17 @@
       ]
     },
     {
+      "name": "WorkflowEntrypointRunEventSchedule",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
       "name": "WorkflowStep",
       "tier": "widened",
       "findings": [
@@ -41036,84 +41072,6 @@
       ]
     },
     {
-      "name": "WorkflowStepDoCallbackCtx2",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowStepDoCallbackCtx2Config",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowStepDoCallbackCtx2ConfigRetries",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
       "name": "WorkflowStepDoCallbackCtxConfig",
       "tier": "widened",
       "findings": [
@@ -41213,198 +41171,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowStepDoConfigRetries",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Promise is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "WorkflowStepDoConfigRetriesDelayInput",
-      "tier": "widened",
-      "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "Error is not among the generated declarations; widened to obj"
         },
         {
           "pass": "synthesize-paramobjects",
@@ -41667,6 +41433,276 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepDoRollbackOptionsRollbackConfigRetries",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Promise is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "Error is not among the generated declarations; widened to obj"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtx",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfig",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
+        },
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInputCtxConfigRetries",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "optional member reads as option"
         },
         {
           "pass": "synthesize-paramobjects",

@@ -78,7 +78,9 @@ type Slots =
 /// <summary>
 /// `Record` over concrete operands.
 /// </summary>
-type Registry = obj
+type Registry =
+    [<EmitIndexer>]
+    abstract Item: string -> float with get, set
 
 /// <summary>
 /// A readonly string index signature.
@@ -90,22 +92,74 @@ type FrozenBag =
 /// <summary>
 /// A mapped type over a concrete operand - the checker expands it (D6).
 /// </summary>
-type PartialOptions = obj
+[<Interface>]
+type PartialOptions =
+    /// <summary>
+    /// How long, in milliseconds.
+    /// </summary>
+    abstract duration: float option with get, set
+    /// <summary>
+    /// What to call it.
+    /// </summary>
+    abstract label: string option with get, set
+    /// <summary>
+    /// Whether to loop.
+    /// </summary>
+    abstract loop: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?duration: float, ?label: string, ?loop: bool) : PartialOptions = jsNative
 
 /// <summary>
 /// Another concrete expansion, over a chosen key set.
 /// </summary>
-type OptionsHead = obj
+[<Interface>]
+type OptionsHead =
+    /// <summary>
+    /// How long, in milliseconds.
+    /// </summary>
+    abstract duration: float with get, set
+    /// <summary>
+    /// What to call it.
+    /// </summary>
+    abstract label: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (duration: float, label: string) : OptionsHead = jsNative
 
 /// <summary>
 /// A concrete omission.
 /// </summary>
-type OptionsTail = obj
+[<Interface>]
+type OptionsTail =
+    /// <summary>
+    /// What to call it.
+    /// </summary>
+    abstract label: string with get, set
+    /// <summary>
+    /// Whether to loop.
+    /// </summary>
+    abstract loop: bool with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (label: string, loop: bool) : OptionsTail = jsNative
 
 /// <summary>
 /// Readonly over a concrete operand.
 /// </summary>
-type FrozenOptions = obj
+[<Interface>]
+type FrozenOptions =
+    /// <summary>
+    /// How long, in milliseconds.
+    /// </summary>
+    abstract duration: float
+    /// <summary>
+    /// What to call it.
+    /// </summary>
+    abstract label: string
+    /// <summary>
+    /// Whether to loop.
+    /// </summary>
+    abstract loop: bool
+    [<ParamObject; Emit("$0")>]
+    static member Create (duration: float, label: string, loop: bool) : FrozenOptions = jsNative
 
 /// <summary>
 /// A conditional over a concrete operand - already resolved by the checker.
