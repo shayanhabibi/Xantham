@@ -99,6 +99,14 @@ Wire-driven inventory, no mapping decisions at all.
   `getAliasedSymbol` to origin) appears exactly once; declaration merging is already done
   because we harvest *symbols*, not declaration nodes.
 
+- **An ambient declaration in a `.d.ts` module is exported without the keyword**, and the
+  harvest is right to take it. `declare const secret: number` beside an `export declare
+  function` looks local and is not: `getExportsOfModule` returns it, and `import { secret }`
+  from the module type-checks with no diagnostic. Verified against stock TypeScript 5.9.3 as
+  well as the 7.x dev compiler the wire drives, because it reads like over-collection and the
+  "fix" - filtering the harvest to declarations carrying an `export` modifier - would quietly
+  delete real bindings. Written down here so it is not fixed twice.
+
 ### Tier 2 — Resolve (what the checker says everything is)
 
 - **Artifacts:** type table `Map<TypeId, TypeFacts>` where `TypeFacts` wraps `TypeResponse`
