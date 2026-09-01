@@ -539,7 +539,9 @@ Fable F# tuples *are* JS arrays — a happy exact match:
   names per the archive's `NamePath` scheme).
 - JSDoc → XML doc comments (`getDocumentationComment`, `getJsDocTags`); `@deprecated` →
   `[<Obsolete>]`; `@see`/`@example` carried into `<remarks>`/`<example>`. The tier
-  annotation from §1 also lands here.
+  annotation from §1 also lands here. JSDoc is markdown and XML docs are not, so a fenced
+  block becomes `<code>` (its info string as `lang="ts"`), in both the summary and the tags;
+  a fence the comment leaves open is closed at its end so the XML stays balanced.
 
 ---
 

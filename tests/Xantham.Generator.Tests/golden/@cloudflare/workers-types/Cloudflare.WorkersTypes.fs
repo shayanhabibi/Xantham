@@ -3270,7 +3270,7 @@ type AgentMemoryProfile =
 /// </summary>
 /// <remarks>
 /// @example
-/// ```ts
+/// <code lang="ts">
 /// export default {
 ///   async fetch(_request: Request, env: Env): Promise&lt;Response&gt; {
 ///     const profile = await env.MEMORY.getProfile("wrangler-e2e");
@@ -3278,7 +3278,7 @@ type AgentMemoryProfile =
 ///     return Response.json(summary);
 ///   },
 /// };
-/// ```
+/// </code>
 /// </remarks>
 type AgentMemoryNamespace =
     /// <summary>
@@ -4316,7 +4316,7 @@ type AiSearchJobs =
 /// </summary>
 /// <remarks>
 /// @example
-/// ```ts
+/// <code lang="ts">
 /// // Via namespace binding
 /// const instance = env.AI_SEARCH.get("blog");
 /// const results = await instance.search({
@@ -4327,7 +4327,7 @@ type AiSearchJobs =
 /// const results = await env.BLOG_SEARCH.search({
 ///   messages: [{ role: "user", content: "How does caching work?" }],
 /// });
-/// ```
+/// </code>
 /// </remarks>
 type AiSearchInstance =
     /// <summary>
@@ -4387,7 +4387,7 @@ type AiSearchInstance =
 /// </summary>
 /// <remarks>
 /// @example
-/// ```ts
+/// <code lang="ts">
 /// // Access an instance within the namespace
 /// const blog = env.AI_SEARCH.get("blog");
 /// const results = await blog.search({ query: "How does caching work?" });
@@ -4409,7 +4409,7 @@ type AiSearchInstance =
 ///
 /// // Delete an instance
 /// await env.AI_SEARCH.delete("tenant-123");
-/// ```
+/// </code>
 /// </remarks>
 type AiSearchNamespace =
     /// <summary>
@@ -4431,7 +4431,7 @@ type AiSearchNamespace =
     /// <remarks>@returns Instance service for the newly created instance.</remarks>
     /// <remarks>
     /// @example
-    /// ```ts
+    /// <code lang="ts">
     /// // Create with built-in storage (upload items manually)
     /// const instance = await env.AI_SEARCH.create({ id: "my-search" });
     ///
@@ -4441,7 +4441,7 @@ type AiSearchNamespace =
     ///   type: "web-crawler",
     ///   source: "https://developers.cloudflare.com",
     /// });
-    /// ```
+    /// </code>
     /// </remarks>
     abstract create: config: AiSearchConfig -> JS.Promise<AiSearchInstance>
     /// <summary>
@@ -16185,7 +16185,7 @@ type FlagshipEvaluationError =
 /// </summary>
 /// <remarks>
 /// @example
-/// ```typescript
+/// <code lang="typescript">
 /// // Get a boolean flag value with a default
 /// const enabled = await env.FLAGS.getBooleanValue('my-feature', false);
 ///
@@ -16198,7 +16198,7 @@ type FlagshipEvaluationError =
 /// // Get full evaluation details including variant and reason
 /// const details = await env.FLAGS.getBooleanDetails('my-feature', false);
 /// console.log(details.variant, details.reason);
-/// ```
+/// </code>
 /// </remarks>
 type Flagship =
     /// <summary>
@@ -17335,13 +17335,13 @@ type SecretsStoreSecret =
 ///   `await env.STREAM.video(id).captions.*`
 ///
 /// Example usage:
-/// ```ts
+/// <code lang="ts">
 /// await env.STREAM.video(id).downloads.generate();
 ///
 /// const video = env.STREAM.video(id)
 /// const captions = video.captions.list();
 /// const videoDetails = video.details()
-/// ```
+/// </code>
 /// </summary>
 type StreamBinding =
     /// <summary>
@@ -18695,13 +18695,13 @@ type WebSearchSearchResponse =
 /// Declared in wrangler with a single object (there is exactly one corpus, the
 /// public web, so there is no name, namespace, or instance to specify):
 ///
-/// ```jsonc
+/// <code lang="jsonc">
 /// { "web_search": { "binding": "WEBSEARCH" } }
-/// ```
+/// </code>
 /// </summary>
 /// <remarks>
 /// @example
-/// ```ts
+/// <code lang="ts">
 /// const { items, metadata } = await env.WEBSEARCH.search({
 ///   query: "Cloudflare Workers",
 /// });
@@ -18712,7 +18712,7 @@ type WebSearchSearchResponse =
 /// // Read content yourself; pay-per-crawl and other publisher
 /// // controls apply at the fetch site, not at search time.
 /// const page = await fetch(top.url);
-/// ```
+/// </code>
 /// </remarks>
 type WebSearch =
     /// <summary>
@@ -19055,7 +19055,7 @@ type Exports =
     /// </summary>
     /// <remarks>
     /// @example
-    /// ```ts
+    /// <code lang="ts">
     /// export default {
     ///   async fetch(_request: Request, env: Env): Promise&lt;Response&gt; {
     ///     const profile = await env.MEMORY.getProfile("wrangler-e2e");
@@ -19063,7 +19063,7 @@ type Exports =
     ///     return Response.json(summary);
     ///   },
     /// };
-    /// ```
+    /// </code>
     /// </remarks>
     [<Global("AgentMemoryNamespace"); EmitConstructor>]
     static member AgentMemoryNamespace () : AgentMemoryNamespace = jsNative
@@ -19102,7 +19102,7 @@ type Exports =
     /// </summary>
     /// <remarks>
     /// @example
-    /// ```ts
+    /// <code lang="ts">
     /// // Via namespace binding
     /// const instance = env.AI_SEARCH.get("blog");
     /// const results = await instance.search({
@@ -19113,7 +19113,7 @@ type Exports =
     /// const results = await env.BLOG_SEARCH.search({
     ///   messages: [{ role: "user", content: "How does caching work?" }],
     /// });
-    /// ```
+    /// </code>
     /// </remarks>
     [<Global("AiSearchInstance"); EmitConstructor>]
     static member AiSearchInstance () : AiSearchInstance = jsNative
@@ -19126,7 +19126,7 @@ type Exports =
     /// </summary>
     /// <remarks>
     /// @example
-    /// ```ts
+    /// <code lang="ts">
     /// // Access an instance within the namespace
     /// const blog = env.AI_SEARCH.get("blog");
     /// const results = await blog.search({ query: "How does caching work?" });
@@ -19148,7 +19148,7 @@ type Exports =
     ///
     /// // Delete an instance
     /// await env.AI_SEARCH.delete("tenant-123");
-    /// ```
+    /// </code>
     /// </remarks>
     [<Global("AiSearchNamespace"); EmitConstructor>]
     static member AiSearchNamespace () : AiSearchNamespace = jsNative
@@ -19308,7 +19308,7 @@ type Exports =
     /// </summary>
     /// <remarks>
     /// @example
-    /// ```typescript
+    /// <code lang="typescript">
     /// // Get a boolean flag value with a default
     /// const enabled = await env.FLAGS.getBooleanValue('my-feature', false);
     ///
@@ -19321,7 +19321,7 @@ type Exports =
     /// // Get full evaluation details including variant and reason
     /// const details = await env.FLAGS.getBooleanDetails('my-feature', false);
     /// console.log(details.variant, details.reason);
-    /// ```
+    /// </code>
     /// </remarks>
     [<Global("Flagship"); EmitConstructor>]
     static member Flagship () : Flagship = jsNative
@@ -19356,13 +19356,13 @@ type Exports =
     /// Declared in wrangler with a single object (there is exactly one corpus, the
     /// public web, so there is no name, namespace, or instance to specify):
     ///
-    /// ```jsonc
+    /// <code lang="jsonc">
     /// { "web_search": { "binding": "WEBSEARCH" } }
-    /// ```
+    /// </code>
     /// </summary>
     /// <remarks>
     /// @example
-    /// ```ts
+    /// <code lang="ts">
     /// const { items, metadata } = await env.WEBSEARCH.search({
     ///   query: "Cloudflare Workers",
     /// });
@@ -19373,7 +19373,7 @@ type Exports =
     /// // Read content yourself; pay-per-crawl and other publisher
     /// // controls apply at the fetch site, not at search time.
     /// const page = await fetch(top.url);
-    /// ```
+    /// </code>
     /// </remarks>
     [<Global("WebSearch"); EmitConstructor>]
     static member WebSearch () : WebSearch = jsNative

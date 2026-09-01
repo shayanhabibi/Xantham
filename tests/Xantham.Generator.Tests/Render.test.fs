@@ -283,6 +283,89 @@ let renderTests =
 
             Expect.equal (renderAll model |> Map.find "TestPkg.fs") expected "the source golden"
 
+        testCase "markdown code fences in a doc comment become XML <code> blocks" <| fun _ ->
+            // JSDoc is markdown; XML docs are not. A fence left verbatim reads as three
+            // backticks in a tooltip, so it is rewritten - the info string, where given,
+            // as the `lang` attribute.
+            let model =
+                { baseModel with
+                    Decls =
+                        [ FsAbbrev
+                            { Name = "Handle"
+                              Docs =
+                                String.concat
+                                    "\n"
+                                    [ "Opens a handle."
+                                      ""
+                                      "```typescript"
+                                      "const h = open<T>(\"file\")"
+                                      "```"
+                                      ""
+                                      "```"
+                                      "plain fence"
+                                      "```" ]
+                              Tags =
+                                [ { Name = "example"
+                                    Text = ValueSome(String.concat "\n" [ "```js"; "open()"; "```" ]) } ]
+                              Order = None
+                              TypeParameters = []
+                              Target = FsString } ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+
+            Expect.stringContains
+                source
+                (String.concat
+                    "\n"
+                    [ "/// <summary>"
+                      "/// Opens a handle."
+                      "///"
+                      "/// <code lang=\"typescript\">"
+                      "/// const h = open&lt;T&gt;(\"file\")"
+                      "/// </code>"
+                      "///"
+                      "/// <code>"
+                      "/// plain fence"
+                      "/// </code>"
+                      "/// </summary>" ])
+                "the summary's fences, the block's own text still escaped"
+
+            Expect.stringContains
+                source
+                (String.concat
+                    "\n"
+                    [ "/// <remarks>"
+                      "/// @example"
+                      "/// <code lang=\"js\">"
+                      "/// open()"
+                      "/// </code>"
+                      "/// </remarks>" ])
+                "a tag's fences too"
+
+        testCase "an unclosed code fence still closes before the doc comment ends" <| fun _ ->
+            let model =
+                { baseModel with
+                    Decls =
+                        [ FsAbbrev
+                            { Name = "Handle"
+                              Docs = String.concat "\n" [ "Truncated."; "```ts"; "open()" ]
+                              Tags = []
+                              Order = None
+                              TypeParameters = []
+                              Target = FsString } ] }
+
+            Expect.stringContains
+                (renderAll model |> Map.find "TestPkg.fs")
+                (String.concat
+                    "\n"
+                    [ "/// <summary>"
+                      "/// Truncated."
+                      "/// <code lang=\"ts\">"
+                      "/// open()"
+                      "/// </code>"
+                      "/// </summary>" ])
+                "unbalanced XML would break every consumer"
+
         testCase "the manifest reports per-symbol tiers with pass provenance" <| fun _ ->
             let model =
                 { baseModel with

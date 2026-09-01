@@ -109,6 +109,41 @@ let private xmlEscape (text: string) =
 
 let private splitLines (text: string) = text.Replace("\r\n", "\n").Split '\n'
 
+/// A markdown fence line: three or more backticks, and whatever info string follows them.
+let private (|CodeFence|_|) (line: string) =
+    let trimmed = line.Trim()
+    let ticks = trimmed |> Seq.takeWhile ((=) '`') |> Seq.length
+
+    if ticks >= 3 then
+        Some(ticks, trimmed.Substring(ticks).Trim())
+    else
+        None
+
+/// The body of a doc comment, XML-escaped, with markdown fences rewritten as `<code>` blocks -
+/// JSDoc is markdown, XML docs are not, and a fence left alone reads as three backticks in
+/// every tooltip. The info string's first word, where there is one, becomes `lang`. A fence
+/// left open by the comment closes at its end, because unbalanced XML breaks the consumers.
+let private docBody (indent: string) (lines: string seq) =
+    let escaped (line: string) = $"{indent}/// {xmlEscape line}".TrimEnd()
+
+    let opener (info: string) =
+        match info.Split([| ' '; '\t' |]) |> Array.head with
+        | "" -> "<code>"
+        | language -> $"""<code lang="{xmlEscape (language.Replace("\"", ""))}">"""
+
+    let rec walk fence lines =
+        match lines with
+        | [] -> if fence > 0 then [ $"{indent}/// </code>" ] else []
+        | line :: rest ->
+            match line, fence with
+            | CodeFence(ticks, info), 0 -> $"{indent}/// {opener info}" :: walk ticks rest
+            // Markdown closes a block on a bare fence at least as long as the one that opened
+            // it; anything else inside the block is code, backticks and all.
+            | CodeFence(ticks, ""), _ when ticks >= fence -> $"{indent}/// </code>" :: walk 0 rest
+            | line, _ -> escaped line :: walk fence rest
+
+    walk 0 (List.ofSeq lines)
+
 /// JSDoc as XML docs: the comment as `<summary>`, each tag as a `<remarks>` line or block.
 /// The tier annotation lands in the manifest, not here.
 let private docLines (indent: string) (docs: string) (tags: JSDocTagInfo list) =
@@ -116,10 +151,7 @@ let private docLines (indent: string) (docs: string) (tags: JSDocTagInfo list) =
 
       if summary <> "" then
           yield $"{indent}/// <summary>"
-
-          for line in splitLines summary do
-              yield $"{indent}/// {xmlEscape line}".TrimEnd()
-
+          yield! docBody indent (splitLines summary)
           yield $"{indent}/// </summary>"
 
       for tag in tags do
@@ -132,10 +164,7 @@ let private docLines (indent: string) (docs: string) (tags: JSDocTagInfo list) =
           | lines ->
               yield $"{indent}/// <remarks>"
               yield $"{indent}/// @{tag.Name}"
-
-              for line in lines do
-                  yield $"{indent}/// {xmlEscape line}".TrimEnd()
-
+              yield! docBody indent lines
               yield $"{indent}/// </remarks>" ]
 
 /// A parameter of a static emission (`Exports` members, `Create` overloads): F# optional
