@@ -420,11 +420,21 @@ Phases — each ends with the compile gate green on its fixtures:
     abbreviation in scope over generated code, and it is gated rather than assumed:
     `tests/Xantham.Generator.CompileGate/BrandIdioms.fs` compiles plain and branded
     primitives side by side under `open Xantham.Fable.Core`.
-  - **Not yet done, and the rest of phase D is what does it:** nothing *generated* references
-    the package. The revival makes the idioms available and gated; teaching the shape tier to
-    emit `keyof<'T>` / `typekeyof<'T,'U>` for the keyof regimes is the next rung, and
-    *detecting* a brand in the checker's output - as opposed to being able to render one - is
-    still ahead.
+  **Rungs landed since (each verified end to end and committed on its own):**
+  - *Keyof regimes (2026-09-01).* The shape tier emits `keyof<'T>` and `typekeyof<'T,'U>`,
+    so generated output references the support package for the first time.
+  - *Phantoms (2026-09-02).* A declaration whose right-hand side is a type-level computation
+    keeps its name and arity as `[<Erase>] type X<'T> = private X__ of obj`, rather than
+    vanishing into an escape. `keyof-lab` went from two escapes to none and `workers-types`
+    from 41 to 38, recovering `DurableObjectClass<'T>`, `Fetcher<'T,'Reserved>`,
+    `D1Result<'T>` and friends.
+  - *Brands (2026-09-02).* Detection in the checker's output, structural rather than by
+    name, so a branding intersection emits `[<Measure>] type UserId` and its uses read
+    `string<UserId>`. Generated files now `open Xantham.Fable.Core`; `tests/fixtures/brand-
+    lab` pins the idiom and its negatives under the live compiler. D11 closes.
+  **Still ahead in D:** the group dispositions that would give the six widened
+  `workers-types` aliases their shape back, the Fable *run* gate, and the `type-fest` and
+  `solid-js` rungs D9 wants for calibration.
 - **E — hardening.** Dedup/naming at scale, fidelity-manifest UX, determinism under the
   full litmus ladder, `@types/three` and `typescript` rungs.
 
