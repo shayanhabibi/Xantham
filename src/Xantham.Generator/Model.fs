@@ -271,9 +271,10 @@ module TypeFacts =
 
 /// The type ids an export resolves to. A symbol can be both a type and a value (a class), so
 /// the two are separate fields rather than one.
+[<Struct>]
 type ExportTypeIds =
-    { Declared: int option
-      Value: int option }
+    { Declared: int voption
+      Value: int voption }
 
 type ResolveModel =
     { Harvest: HarvestModel
@@ -315,9 +316,10 @@ type FsParam =
       Type: FsTypeRef }
 
 /// How a value export is bound to its JavaScript module.
+[<Struct>]
 type ImportBinding =
     | ImportDefault
-    | ImportNamed of string
+    | ImportNamed of name: string
 
 /// One member of the `Exports` erased type: a top-level exported function.
 type FsExportMember =
@@ -364,6 +366,7 @@ type RenderModel =
       /// so rendering stays pure.
       Files: (string * string) list }
 
+[<Struct>]
 type TierCounts =
     { Exact: int
       Ergonomic: int

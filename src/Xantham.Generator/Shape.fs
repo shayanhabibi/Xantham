@@ -153,7 +153,7 @@ let shapeInterfaces: Pass<ShapeModel> =
 
                             let declared =
                                 Map.tryFind export.Symbol.Id model.ExportTypes
-                                |> Option.bind _.Declared
+                                |> Option.bind (_.Declared >> ValueOption.toOption)
                                 |> Option.bind (fun typeId -> Map.tryFind typeId model.Types)
 
                             match declared with
@@ -220,7 +220,7 @@ let shapeExports: Pass<ShapeModel> =
 
                             let valueFacts =
                                 Map.tryFind export.Symbol.Id model.ExportTypes
-                                |> Option.bind _.Value
+                                |> Option.bind (_.Value >> ValueOption.toOption)
                                 |> Option.bind (fun typeId -> Map.tryFind typeId model.Types)
 
                             match valueFacts with
