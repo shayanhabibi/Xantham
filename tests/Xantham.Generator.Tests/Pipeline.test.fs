@@ -1421,4 +1421,36 @@ let pipelineTests =
                       Expect.isEmpty
                           (rendered.Findings |> List.filter (fun f -> f.Key = "SE002"))
                           "a configured runtime was not derived, so there is nothing to report" ])
+        // The fixture behind docs/fable5-workarounds.md. Each declaration is one documented
+        // Fable 5 loss; the assertions pin the emitted shape the document quotes, and the run
+        // gate proves the workaround against tests/fixtures/fable-workaround-lab/index.js.
+        yield!
+            fixtureTests
+                "fable-workaround-lab"
+                (handFixture "fable-workaround-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "the shapes the workaround document quotes are the shapes emitted" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "type Outcome = U2<Err, Ok>"
+                              "an undiscriminated union of two object arms"
+
+                          Expect.equal (inheritsOf source "Circle") [ "Shape" ] "the is-a relation a downcast would want"
+
+                          Expect.stringContains
+                              source
+                              "static member limit: float = jsNative"
+                              "a settable static, emitted get-only"
+
+                          Expect.stringContains source "abstract value: string option" "string | null hoisted to option"
+
+                          Expect.stringContains
+                              source
+                              "abstract notify: count: float -> string"
+                              "a member the consumer has to supply" ])
+
     ]

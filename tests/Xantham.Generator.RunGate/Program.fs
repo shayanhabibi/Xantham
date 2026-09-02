@@ -244,6 +244,143 @@ let private taggedUnions () =
             (width, height, radius)
     | PhaseBLab.Shape.Circle radius -> check $"a JavaScript-built round-rect matched Circle {radius}" false
 
+/// The workarounds of docs/fable5-workarounds.md, each read back through
+/// `tests/fixtures/fable-workaround-lab/index.js`. Where the document says the direct F#
+/// spelling misbehaves, the misbehaviour is checked beside the workaround: a workaround is worth
+/// what the failure it avoids is worth, and only running both settles which is which. The FABLE
+/// "Cannot type test (evals to false)" warnings this module produces are that failure, reported
+/// by the compiler that causes it.
+let private workarounds () =
+    // 1. An erased union over two interface arms. Fable can type-test a primitive and cannot
+    // type-test an erased interface, so the `Ok` test folds to `false` and the match collapses
+    // to its other branch - unconditionally, for every value.
+    let asOk = FableWorkaroundLab.Exports.run false
+
+    let branch =
+        match asOk with
+        | U2.Case1 _ -> "Err"
+        | U2.Case2 _ -> "Ok"
+
+    equal "a U2 over two interfaces matches one arm whatever the value is" "Err" branch
+
+    let readOutcome (outcome: FableWorkaroundLab.Outcome) =
+        if emitJsExpr outcome "\"value\" in $0" then
+            Choice1Of2(unbox<FableWorkaroundLab.Ok> outcome)
+        else
+            Choice2Of2(unbox<FableWorkaroundLab.Err> outcome)
+
+    match readOutcome (FableWorkaroundLab.Exports.run false) with
+    | Choice1Of2 ok -> equal "discriminating in JavaScript reaches the arm the value has" "yes" ok.value
+    | Choice2Of2 _ -> check "discriminating in JavaScript reaches the Ok arm" false
+
+    match readOutcome (FableWorkaroundLab.Exports.run true) with
+    | Choice2Of2 err -> equal "and the other arm" "no" err.reason
+    | Choice1Of2 _ -> check "discriminating in JavaScript reaches the Err arm" false
+
+    // 2. `:?` against an interface this run declares. The emitted object carries no F# type, so
+    // the test is a compile-time `false` however the value was built.
+    let shapes = FableWorkaroundLab.Exports.shapes ()
+
+    check
+        "a downcast to an inheriting interface is false for a value that is one"
+        (not (shapes[1] :? FableWorkaroundLab.Circle))
+
+    let asCircle (shape: FableWorkaroundLab.Shape) : FableWorkaroundLab.Circle option =
+        if emitJsExpr shape "\"radius\" in $0" then
+            Some !!shape
+        else
+            None
+
+    equal "narrowing on the member the extension adds reaches it" (Some 2.0) (asCircle shapes[1] |> Option.map _.radius)
+    equal "and refuses a value that only satisfies the base" None (asCircle shapes[0] |> Option.map _.radius)
+
+    // 3. A settable static and a mutable global. Fable compiles an assignment through
+    // `[<Import>]` or `[<Global>]` as a *call*, so both bind get-only.
+    equal "a settable static reads through the binding" 100.0 FableWorkaroundLab.Budget.limit
+    let budgetClass: obj = import "Budget" "fable-workaround-lab"
+    budgetClass?limit <- 250.0
+    equal "and the constructor object it is read off can be written" 250.0 FableWorkaroundLab.Budget.limit
+
+    emitJsStatement 55.0 "globalThis.counter = $0"
+    equal "a mutable global is written the same way, through globalThis" 55.0 GlobalsLab.Exports.counter
+    emitJsStatement 41.0 "globalThis.counter = $0"
+
+    // 4. `string | null` and `value?: string` are the same F# type, and `None` is `undefined`.
+    let slots = FableWorkaroundLab.Exports.slots ()
+    equal "a present string reads as Some" (Some "a") slots[0].value
+    equal "an explicit null reads as None" None slots[1].value
+    equal "and an absent property reads as None too" None slots[2].value
+    equal "though JavaScript still tells the two apart" "null" (FableWorkaroundLab.Exports.describe slots[1])
+    equal "as it does the absent one" "absent" (FableWorkaroundLab.Exports.describe slots[2])
+
+    equal
+        "None omits the property rather than writing null"
+        "absent"
+        (FableWorkaroundLab.Exports.describe (FableWorkaroundLab.Slot.Create()))
+
+    // The value that is `None` to F# and `null` to JavaScript: the only thing that reaches a
+    // declaration whose type is `string | null` with the null it declares.
+    let asNull: string option = emitJsExpr () "null"
+
+    equal
+        "a null passed through the option reaches the property as null"
+        "null"
+        (FableWorkaroundLab.Exports.describe (FableWorkaroundLab.Slot.Create(?value = asNull)))
+
+    let explicitNull: FableWorkaroundLab.Slot = !! createObj [ "value" ==> (null: obj) ]
+
+    equal
+        "and a hand-built literal is the same, for a member with no Create"
+        "null"
+        (FableWorkaroundLab.Exports.describe explicitNull)
+
+    equal "which F# still reads back as None" None explicitNull.value
+
+    // 5. Implementing a generated interface. An object expression is a class instance: the
+    // members sit on the prototype, so JavaScript that enumerates or serialises finds nothing.
+    let viaObjectExpression =
+        { new FableWorkaroundLab.Listener with
+            member _.name
+                with get () = "oe"
+                and set _ = ()
+
+            member _.notify count = $"oe:{count}"
+        }
+
+    equal
+        "an object expression carries no own enumerable property"
+        "{}||oe:1"
+        (FableWorkaroundLab.Exports.invite viaObjectExpression)
+
+    let viaLiteral: FableWorkaroundLab.Listener =
+        !!{|
+            name = "lit"
+            notify = System.Func<float, string>(fun count -> $"lit:{count}")
+        |}
+
+    equal
+        "an anonymous record is the plain object the declaration described"
+        """{"name":"lit"}|name,notify|lit:1"""
+        (FableWorkaroundLab.Exports.invite viaLiteral)
+
+    // 6. Equality. `=` on a generated interface is Fable's structural `equals`, which walks the
+    // JavaScript object.
+    let first = FableWorkaroundLab.Exports.fresh ()
+    let second = FableWorkaroundLab.Exports.fresh ()
+    check "= holds between two distinct objects with the same fields" (first = second)
+    check "identity is obj.ReferenceEquals, and it separates them" (not (obj.ReferenceEquals(first, second)))
+
+    let threw =
+        try
+            FableWorkaroundLab.Exports.cyclic () = FableWorkaroundLab.Exports.cyclic ()
+            |> ignore
+
+            false
+        with _ ->
+            true
+
+    check "and the same = does not terminate on a self-referencing object" threw
+
 [<EntryPoint>]
 let main _ =
     globals ()
@@ -253,6 +390,7 @@ let main _ =
     constructorObjects ()
     heritage ()
     taggedUnions ()
+    workarounds ()
 
     match failures with
     | [] ->
