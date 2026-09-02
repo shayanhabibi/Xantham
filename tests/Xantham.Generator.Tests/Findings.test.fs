@@ -81,6 +81,8 @@ let findingsTests =
                     "TR049 TypeReference.EmptyIntersectionOperandReduced exact"
                     "TR050 TypeReference.IntersectionCallableFlattened ergonomic"
                     "TR051 TypeReference.IntersectionOperandsIdentical exact"
+                    "TR052 TypeReference.AnonymousInMappedGroup widened"
+                    "TR053 TypeReference.MappedNameArityMismatch widened"
                     "TP001 TypeParameters.UnnamedTypeParameter widened"
                     "TP002 TypeParameters.ConstraintDropped ergonomic"
                     "TP003 TypeParameters.GenericFunctionHoisted ergonomic"
@@ -134,7 +136,10 @@ let findingsTests =
                     "RA004 RepairArity.ArityMismatch widened"
                     "RA005 RepairArity.ReadWithoutWrite ergonomic"
                     "RA006 RepairArity.AliasKeptAsPhantom widened"
-                    "AC001 AuditCoverage.ExportNotRepresented escape" ]
+                    "AC001 AuditCoverage.ExportNotRepresented escape"
+                    "GE001 EmitGroups.GroupShipped exact"
+                    "GE002 EmitGroups.ShippedGroupWithoutDeclarations widened"
+                    "GE003 EmitGroups.GroupModuleCollision escape" ]
 
               Expect.equal table expected "keys are positional: append new cases, never insert or reorder"
 

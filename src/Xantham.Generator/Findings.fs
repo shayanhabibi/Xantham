@@ -242,6 +242,12 @@ type TypeReference =
     /// Wave four, lane P. Every operand of a flattened property is the same type, so the
     /// property renders that type.
     | [<Exact>] IntersectionOperandsIdentical
+    /// Wave five, lane R. An anonymous shape in a mapped group. The destination binds names,
+    /// and an anonymous shape has none.
+    | [<Widened>] AnonymousInMappedGroup
+    /// Wave five, lane R. The destination binding takes a different number of type arguments
+    /// than the site applies.
+    | [<Widened>] MappedNameArityMismatch of name: string * given: int
 
     interface IFindingKind with
         member this.Message =
@@ -316,6 +322,10 @@ type TypeReference =
             | IntersectionCallableFlattened signatures ->
                 $"intersection of callable operands rendered from its {signatures} call signatures"
             | IntersectionOperandsIdentical -> "every operand of the flattened property is the same type"
+            | AnonymousInMappedGroup ->
+                "anonymous shape in a mapped group; the destination binds names and this type has none"
+            | MappedNameArityMismatch(name, given) ->
+                $"{name} is applied to {given} type arguments that its mapped destination does not take; widened to obj"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
@@ -653,6 +663,27 @@ type AuditCoverage =
             match this with
             | ExportNotRepresented -> "export not represented in the generated output"
 
+/// Group emission (O7): which groups a run writes as their own module, and what stops one.
+[<Prefix "GE">]
+type EmitGroups =
+    /// Wave five, lane S. A group other than the entry package emitted as its own module.
+    | [<Exact>] GroupShipped of group: string * declarations: int
+    /// Wave five, lane S. A group configured `ship` that no reference reached.
+    | [<Widened>] ShippedGroupWithoutDeclarations of group: string
+    /// Wave five, lane S. Two groups template one module name, so one run would write the name
+    /// twice (`@types/three` and `three` both derive `Three`).
+    | [<Escape>] GroupModuleCollision of group: string * moduleName: string
+
+    interface IFindingKind with
+        member this.Message =
+            match this with
+            | GroupShipped(group, declarations) ->
+                $"{group} is shipped as its own module, carrying {declarations} declarations"
+            | ShippedGroupWithoutDeclarations group ->
+                $"{group} is configured ship and no reference reached it; the module is not written"
+            | GroupModuleCollision(group, moduleName) ->
+                $"{group} templates the module {moduleName}, which another group in this run already writes"
+
 module FindingCatalogue =
     /// Every finding union, in the order the manifest legend lists them. The snapshot test
     /// enumerates these; a union missing here has keys nothing guards.
@@ -675,6 +706,7 @@ module FindingCatalogue =
             typeof<DedupeOverloads>
             typeof<RepairArity>
             typeof<AuditCoverage>
+            typeof<EmitGroups>
         ]
 
     /// Pass name -> the key prefix of the union that pass owns. Passes without a union never
