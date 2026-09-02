@@ -1863,7 +1863,7 @@ let shapePassTests =
         testCase "the pipeline fold stamps findings with the pass that made them" <| fun _ ->
             let degrading: Pass<int> =
                 { Name = "always-degrades"
-                  Run = fun _ n -> async { return Degraded(n + 1, [ Finding.make Widened "x" "because" ]) } }
+                  Run = fun _ n -> async { return Degraded(n + 1, [ Finding.make "x" TypeReference.AnyToObj ]) } }
 
             let model, findings =
                 Async.RunSynchronously(Pipeline.runTier Build.context [ degrading ] 0)

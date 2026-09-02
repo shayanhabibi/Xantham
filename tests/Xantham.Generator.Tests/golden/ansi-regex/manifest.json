@@ -7,14 +7,30 @@
     "widened": 1,
     "escape": 0
   },
+  "passes": [
+    {
+      "pass": "SE - shape-exports",
+      "total": 2,
+      "ergonomic": 1,
+      "widened": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 1,
+      "ergonomic": 1
+    }
+  ],
   "symbols": [
     {
       "name": "Options",
+      "file": "index.d.ts",
       "tier": "ergonomic",
       "findings": [
         {
+          "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
+          "symbol": "Options",
           "message": "ParamObject Create synthesized (D3)"
         }
       ]
@@ -24,13 +40,17 @@
       "tier": "widened",
       "findings": [
         {
+          "key": "TR023",
           "pass": "shape-exports",
           "tier": "widened",
+          "symbol": "ansiRegex()",
           "message": "RegExp is not among the generated declarations; widened to obj"
         },
         {
+          "key": "TR032",
           "pass": "shape-exports",
           "tier": "ergonomic",
+          "symbol": "ansiRegex(options)",
           "message": "null/undefined union members hoisted to option"
         }
       ]

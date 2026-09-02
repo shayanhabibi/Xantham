@@ -201,7 +201,11 @@ its language server fails on `.archive/` and on `Library.fs`. Use `fslangmcp` in
   per-construct mapping. Update the phase record in the same commit as the behaviour.
 - A mapping that loses something says so. Findings are graded `Exact | Ergonomic | Widened |
   Escape` per symbol and land in `manifest.json`; silently widening is the failure mode the
-  manifest exists to prevent.
+  manifest exists to prevent. Every finding is a case of a union in
+  `src/Xantham.Generator/Findings.fs`, one union per pass (plus `TypeReference`, `TypeParameters`
+  and `Members` for the shared helpers). The manifest key (`SI001`) is the union's prefix plus
+  the case's position, so **unions are append-only** — `Findings.test.fs` snapshots the table.
+  A new finding is a new case with a tier attribute and a message arm; never a bare string.
 - Expecto for .NET tests. The compile gate is deliberately *not* one — it is a plain project,
   so it runs on every build rather than only under `dotnet test`.
 

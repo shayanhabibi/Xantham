@@ -101,12 +101,11 @@ let harvestGlobals: Pass<HarvestModel> =
                         |> Array.map (fun symbol ->
                             let what =
                                 if symbol.Name.StartsWith "\"" then
-                                    "an ambient module declaration; its members are importable from that \
-                                     specifier, which the generator does not emit yet"
+                                    HarvestGlobals.AmbientModuleDropped
                                 else
-                                    "its name cannot be written as an F# declaration"
+                                    HarvestGlobals.UnwritableGlobalDropped
 
-                            Finding.make Escape symbol.Name $"global dropped - {what}")
+                            Finding.make symbol.Name what)
                         |> Array.toList
 
                     let harvested =
@@ -124,11 +123,7 @@ let harvestGlobals: Pass<HarvestModel> =
                         return
                             Degraded(
                                 model,
-                                [ Finding.make
-                                      Escape
-                                      "<module>"
-                                      $"{ctx.EntryFile} declares neither a module nor any ambient global - \
-                                        nothing harvested" ]
+                                [ Finding.make "<module>" (HarvestGlobals.NothingHarvested ctx.EntryFile) ]
                             )
                     else
                         let model = { model with Exports = harvested }

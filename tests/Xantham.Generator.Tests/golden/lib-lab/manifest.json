@@ -7,35 +7,63 @@
     "widened": 4,
     "escape": 0
   },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 3,
+      "ergonomic": 3
+    },
+    {
+      "pass": "SE - shape-exports",
+      "total": 14,
+      "ergonomic": 9,
+      "widened": 5
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 1,
+      "ergonomic": 1
+    }
+  ],
   "symbols": [
     {
       "name": "Store",
+      "file": "index.d.ts",
       "tier": "ergonomic",
       "findings": [
         {
+          "key": "TR024",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
+          "symbol": "Store.load()",
           "message": "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0; the extras are dropped"
         },
         {
+          "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "null/undefined union members hoisted to option"
+          "symbol": "Store.pending",
+          "message": "optional member reads as option"
         },
         {
+          "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "message": "optional member reads as option"
+          "symbol": "Store.pending",
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
     {
       "name": "Box",
+      "file": "index.d.ts",
       "tier": "ergonomic",
       "findings": [
         {
+          "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
+          "symbol": "Box",
           "message": "ParamObject Create synthesized (D3)"
         }
       ]
@@ -65,13 +93,17 @@
       "tier": "widened",
       "findings": [
         {
+          "key": "TR014",
           "pass": "shape-exports",
           "tier": "widened",
+          "symbol": "cache(seen)",
           "message": "type flags NonPrimitive not mapped yet; widened to obj"
         },
         {
+          "key": "TR014",
           "pass": "shape-exports",
           "tier": "widened",
+          "symbol": "cache(store)",
           "message": "type flags NonPrimitive not mapped yet; widened to obj"
         }
       ]
@@ -86,13 +118,17 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "key": "TR024",
           "pass": "shape-exports",
           "tier": "ergonomic",
+          "symbol": "view()",
           "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
+          "key": "TR024",
           "pass": "shape-exports",
           "tier": "ergonomic",
+          "symbol": "view(over)",
           "message": "DataView carries 1 type arguments where JS.DataView takes 0; the extras are dropped"
         }
       ]
@@ -102,13 +138,17 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "key": "TR024",
           "pass": "shape-exports",
           "tier": "ergonomic",
+          "symbol": "stream()",
           "message": "AsyncIterator carries 3 type arguments where JS.AsyncIterator takes 1; the extras are dropped"
         },
         {
+          "key": "TR024",
           "pass": "shape-exports",
           "tier": "ergonomic",
+          "symbol": "stream(source)",
           "message": "AsyncIterable carries 3 type arguments where JS.AsyncIterable takes 1; the extras are dropped"
         }
       ]
@@ -123,13 +163,17 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "key": "TR024",
           "pass": "shape-exports",
           "tier": "ergonomic",
+          "symbol": "bytes()",
           "message": "Float64Array carries 1 type arguments where JS.Float64Array takes 0; the extras are dropped"
         },
         {
+          "key": "TR024",
           "pass": "shape-exports",
           "tier": "ergonomic",
+          "symbol": "bytes(input)",
           "message": "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0; the extras are dropped"
         }
       ]
@@ -139,8 +183,10 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "key": "TR025",
           "pass": "shape-exports",
           "tier": "ergonomic",
+          "symbol": "thenable()",
           "message": "PromiseLike reads as JS.Promise; a bare thenable is not one"
         }
       ]
@@ -150,13 +196,17 @@
       "tier": "ergonomic",
       "findings": [
         {
+          "key": "TR025",
           "pass": "shape-exports",
           "tier": "ergonomic",
+          "symbol": "frozen(entries)",
           "message": "ReadonlyMap reads as JS.Map; the readonly restriction is not carried"
         },
         {
+          "key": "TR025",
           "pass": "shape-exports",
           "tier": "ergonomic",
+          "symbol": "frozen(values)",
           "message": "ReadonlySet reads as JS.Set; the readonly restriction is not carried"
         }
       ]
@@ -186,8 +236,10 @@
       "tier": "widened",
       "findings": [
         {
+          "key": "TR023",
           "pass": "shape-exports",
           "tier": "widened",
+          "symbol": "each(values)",
           "message": "Iterable is not among the generated declarations; widened to obj"
         }
       ]
@@ -197,8 +249,10 @@
       "tier": "widened",
       "findings": [
         {
+          "key": "TR023",
           "pass": "shape-exports",
           "tier": "widened",
+          "symbol": "select(over)",
           "message": "Range is not among the generated declarations; widened to obj"
         }
       ]
@@ -208,8 +262,10 @@
       "tier": "widened",
       "findings": [
         {
+          "key": "TR023",
           "pass": "shape-exports",
           "tier": "widened",
+          "symbol": "respond()",
           "message": "Response is not among the generated declarations; widened to obj"
         }
       ]

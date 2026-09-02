@@ -57,6 +57,7 @@ let moduleName (ctx: Context) =
 let toRender (ctx: Context) (shape: ShapeModel) (findings: Finding list) : RenderModel =
     { ModuleName = moduleName ctx
       PackageName = ctx.PackageName
+      PackageDir = ctx.PackageDir
       Decls = shape.Decls
       Findings = findings
       Files = [] }

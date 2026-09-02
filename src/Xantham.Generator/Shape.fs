@@ -346,7 +346,7 @@ type private Descent() =
 let rec typeRef (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (typeId: int) : FsTypeRef * Finding list =
     if not (Descent.Path.Add typeId) then
         FsObj,
-        [ Finding.make Widened owner "type refers to itself through unnamed shapes; widened to obj" ]
+        [ Finding.make owner TypeReference.SelfReferenceThroughUnnamed ]
     else
         try
             typeRefOnPath ctx model self owner typeId
@@ -357,8 +357,8 @@ and private typeRefOnPath (ctx: Context) (model: ShapeModel) (self: string optio
     match Map.tryFind typeId model.Types with
     | None ->
         match Map.tryFind typeId model.NotFollowed with
-        | Some reason -> FsObj, [ Finding.make Widened owner $"type not resolved ({reason}); widened to obj" ]
-        | None -> FsObj, [ Finding.make Escape owner $"type#{typeId} missing from the type table; widened to obj" ]
+        | Some reason -> FsObj, [ Finding.make owner (TypeReference.TypeNotResolved reason) ]
+        | None -> FsObj, [ Finding.make owner (TypeReference.MissingFromTypeTable typeId) ]
     | Some facts ->
         let has f = flag f facts
 
@@ -372,12 +372,12 @@ and private typeRefOnPath (ctx: Context) (model: ShapeModel) (self: string optio
             FsBool, []
         elif has TypeFlags.EnumLiteral then
             match literalOf facts with
-            | Some(LitNumber _) -> FsFloat, [ Finding.make Widened owner "lone enum member widened to float" ]
-            | _ -> FsString, [ Finding.make Widened owner "lone enum member widened to string" ]
+            | Some(LitNumber _) -> FsFloat, [ Finding.make owner TypeReference.LoneEnumMemberToFloat ]
+            | _ -> FsString, [ Finding.make owner TypeReference.LoneEnumMemberToString ]
         elif has TypeFlags.StringLiteral then
-            FsString, [ Finding.make Widened owner "string literal type widened to string (doc-noted, §4.2)" ]
+            FsString, [ Finding.make owner TypeReference.StringLiteralToString ]
         elif has TypeFlags.NumberLiteral then
-            FsFloat, [ Finding.make Widened owner "numeric literal type widened to float (doc-noted, §4.2)" ]
+            FsFloat, [ Finding.make owner TypeReference.NumericLiteralToFloat ]
         elif has TypeFlags.String then
             FsString, []
         elif has TypeFlags.Number then
@@ -385,14 +385,14 @@ and private typeRefOnPath (ctx: Context) (model: ShapeModel) (self: string optio
         elif has TypeFlags.Void || has TypeFlags.Undefined || has TypeFlags.Never then
             FsUnit, []
         elif has TypeFlags.Any then
-            FsObj, [ Finding.make Escape owner "any maps to obj" ]
+            FsObj, [ Finding.make owner TypeReference.AnyToObj ]
         elif has TypeFlags.Unknown then
-            FsObj, [ Finding.make Widened owner "unknown maps to obj (D8)" ]
+            FsObj, [ Finding.make owner TypeReference.UnknownToObj ]
         elif has TypeFlags.TypeParameter then
             if facts.Response.IsThisType = ValueSome true then
                 match self with
-                | Some name -> FsNamed name, [ Finding.make Ergonomic owner "polymorphic this reads as the declaring type" ]
-                | None -> FsObj, [ Finding.make Widened owner "this type outside a declaration; widened to obj" ]
+                | Some name -> FsNamed name, [ Finding.make owner TypeReference.PolymorphicThisAsDeclaringType ]
+                | None -> FsObj, [ Finding.make owner TypeReference.ThisOutsideDeclaration ]
             else
                 // A key variable is not bound as a variable at all: `K extends keyof T` is
                 // written as the support package's idiom over the operand (§4.10).
@@ -423,8 +423,8 @@ and private typeRefOnPath (ctx: Context) (model: ShapeModel) (self: string optio
                     match constraintName with
                     | Some name ->
                         FsNamed name,
-                        [ Finding.make Widened owner $"type parameter is not in scope here; widened to its constraint {name}" ]
-                    | None -> FsObj, [ Finding.make Widened owner "type parameter is not in scope here; widened to obj" ]
+                        [ Finding.make owner (TypeReference.TypeParameterOutOfScopeToConstraint name) ]
+                    | None -> FsObj, [ Finding.make owner TypeReference.TypeParameterOutOfScope ]
         elif has TypeFlags.Object then
             objectRef ctx model self owner facts
         elif has TypeFlags.Index then
@@ -434,7 +434,7 @@ and private typeRefOnPath (ctx: Context) (model: ShapeModel) (self: string optio
         elif has TypeFlags.Intersection then
             intersectionRef ctx model self owner facts
         else
-            FsObj, [ Finding.make Widened owner $"type flags {facts.Response.Flags} not mapped yet; widened to obj" ]
+            FsObj, [ Finding.make owner (TypeReference.TypeFlagsNotMapped(string facts.Response.Flags)) ]
 
 /// `keyof T` at an operand the checker could not finish (§4.10). A closed `keyof` never gets
 /// here - the checker hands those back already expanded into their union of literal keys, which
@@ -450,8 +450,8 @@ and private keyOfRef (model: ShapeModel) (owner: string) (facts: TypeFacts) : Fs
     match operand with
     | Some name ->
         FsApp("keyof", [ FsTypeVar name ]),
-        [ Finding.make Ergonomic owner $"keyof over an open operand reads as keyof<'{name}> (§4.10)" ]
-    | None -> FsObj, [ Finding.make Widened owner "keyof over an operand not in scope here; widened to obj" ]
+        [ Finding.make owner (TypeReference.KeyOfOpenOperand name) ]
+    | None -> FsObj, [ Finding.make owner TypeReference.KeyOfOperandOutOfScope ]
 
 /// An intersection at a reference position. A brand (§4.6, D11) is the one intersection F# can
 /// state exactly: the measure its declaration emitted, applied to the primitive it brands, which
@@ -466,10 +466,7 @@ and private intersectionRef (ctx: Context) (model: ShapeModel) (self: string opt
         | Some name -> FsBranded(primitive, name), []
         | None ->
             primitive,
-            [ Finding.make
-                  Ergonomic
-                  owner
-                  "an unnamed brand has no measure to carry; widened to the primitive it brands (§4.6)" ]
+            [ Finding.make owner TypeReference.UnnamedBrandToPrimitive ]
     | None ->
         // A flattened intersection is declared under a name (§4.6), exactly as a hoisted
         // anonymous object is, and is applied over the parameters it reads the same way.
@@ -481,11 +478,11 @@ and private intersectionRef (ctx: Context) (model: ShapeModel) (self: string opt
         | _ ->
             let reason =
                 if facts.Members.IsEmpty && facts.IndexInfos.IsEmpty then
-                    "intersection over a non-object operand has no members to flatten; widened to obj (§4.6)"
+                    TypeReference.IntersectionOverNonObject
                 else
-                    "intersection of object types not declared by this run; widened to obj (§4.6)"
+                    TypeReference.IntersectionNotDeclared
 
-            FsObj, [ Finding.make Widened owner reason ]
+            FsObj, [ Finding.make owner reason ]
 
 /// `T[K]`. Where `K` is a key variable this signature bound as `typekeyof<'T,'R>`, the access is
 /// exactly the `'R` that idiom introduced. Everything else - `T[keyof T]`, an access over an
@@ -503,7 +500,7 @@ and private indexedAccessRef (model: ShapeModel) (owner: string) (facts: TypeFac
 
     match binding, objectName with
     | Some(TypedKeyOf(operand, result)), Some name when operand = name -> FsTypeVar result, []
-    | _ -> FsObj, [ Finding.make Widened owner "indexed access has no F# form here; widened to obj" ]
+    | _ -> FsObj, [ Finding.make owner TypeReference.IndexedAccessNoForm ]
 
 and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
     match arrayElement facts with
@@ -545,12 +542,12 @@ and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (
                 FsNamed $"{Naming.groupModule ctx.PackageName facts.Origin}.{typeName}", []
             | Reference, None ->
                 FsObj,
-                [ Finding.make Widened owner "anonymous type in a referenced group cannot be templated; widened to obj" ]
+                [ Finding.make owner TypeReference.AnonymousInReferencedGroup ]
             | (Ship | Widen), Some "globalThis" ->
-                FsObj, [ Finding.make Widened owner "typeof globalThis is the whole global scope; widened to obj" ]
+                FsObj, [ Finding.make owner TypeReference.GlobalThisToObj ]
             | (Ship | Widen), _ ->
                 let shown = facts.SymbolName |> Option.defaultValue "an anonymous object type"
-                FsObj, [ Finding.make Widened owner $"{shown} is not among the generated declarations; widened to obj" ]
+                FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations shown) ]
 
 /// A tuple as an F# tuple (D7, §4.12) - Fable compiles the two to the same JS array, so a
 /// fixed tuple is Exact. Element labels are cosmetic and drop.
@@ -605,14 +602,11 @@ and private libBinding (ctx: Context) (model: ShapeModel) (self: string option) 
 
             let dropped =
                 if arguments.Length > arity then
-                    [ Finding.make
-                          Ergonomic
-                          owner
-                          $"{name} carries {arguments.Length} type arguments where {fsharpName} takes {arity}; the extras are dropped" ]
+                    [ Finding.make owner (TypeReference.LibExtraTypeArgumentsDropped(name, arguments.Length, fsharpName, arity)) ]
                 else
                     []
 
-            let lossy = loss |> List.map (Finding.make Ergonomic owner)
+            let lossy = loss |> List.map (fun note -> Finding.make owner (TypeReference.LibBindingLoss note))
 
             Some(reference, findings @ dropped @ lossy)
     | _ -> None
@@ -673,19 +667,13 @@ and private appliedRefTo
             | Some bound, FsObj ->
                 findings <-
                     findings
-                    @ [ Finding.make
-                            Widened
-                            owner
-                            $"argument to {name}'s constrained parameter widened to obj; written as the constraint {bound}" ]
+                    @ [ Finding.make owner (TypeReference.ConstrainedArgumentWidened(name, bound)) ]
 
                 FsNamed bound
             | Some bound, FsTypeVar variable when statedConstraint argument <> Some bound ->
                 findings <-
                     findings
-                    @ [ Finding.make
-                            Widened
-                            owner
-                            $"'{variable} is not bound with {name}'s constraint; the argument is written as the constraint {bound}" ]
+                    @ [ Finding.make owner (TypeReference.ArgumentNotBoundWithConstraint(variable, name, bound)) ]
 
                 FsNamed bound
             | _ -> reference)
@@ -708,29 +696,29 @@ and private tupleRef (ctx: Context) (model: ShapeModel) (self: string option) (o
             | [ single ] -> single
             | _ -> FsObj
 
-        FsArray element, findings @ [ Finding.make Widened owner reason ]
+        FsArray element, findings @ [ Finding.make owner reason ]
 
     if tupleElementFlags facts |> List.exists isVariadicElement then
-        widenToArray "tuple with a rest element widened to an array (§4.12 leaves the erased carrier to a fixture)"
+        widenToArray TypeReference.TupleRestToArray
     else
         match components with
         // F# has no zero- or one-component tuple, so neither maps; an array is the honest
         // shape for both, and both are vanishingly rare.
         | []
-        | [ _ ] -> widenToArray $"{components.Length}-element tuple has no F# tuple form; widened to an array"
+        | [ _ ] -> widenToArray (TypeReference.TupleArityNoForm components.Length)
         | components -> FsTuple components, findings
 
 /// A callback as a delegate (D5): guaranteed arity at the boundary. Only the first signature
 /// shapes the delegate; further overloads on a callback are a finding.
 and private delegateRef (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
     match facts.CallSignatures with
-    | [] -> FsObj, [ Finding.make Widened owner "callable type without signatures; widened to obj" ]
+    | [] -> FsObj, [ Finding.make owner TypeReference.CallableWithoutSignatures ]
     | signature :: rest ->
         let mutable findings =
             if rest.IsEmpty then
                 []
             else
-                [ Finding.make Widened owner $"callback with {rest.Length + 1} overloads shaped from the first" ]
+                [ Finding.make owner (TypeReference.CallbackOverloadsFromFirst(rest.Length + 1)) ]
 
         let parameters =
             signature.Parameters
@@ -759,10 +747,10 @@ and private unionRef (ctx: Context) (model: ShapeModel) (self: string option) (o
                 | FsOption _ -> reference
                 | reference -> FsOption reference
 
-            wrapped, Finding.make Ergonomic owner "null/undefined union members hoisted to option" :: findings
+            wrapped, Finding.make owner TypeReference.NullableHoistedToOption :: findings
 
     match remaining with
-    | [] -> FsUnit, [ Finding.make Widened owner "union of only null/undefined members maps to unit" ]
+    | [] -> FsUnit, [ Finding.make owner TypeReference.OnlyNullUndefinedToUnit ]
     | [ single ] ->
         let inner, findings = typeRef ctx model self owner single
         wrap inner findings
@@ -803,21 +791,18 @@ and private erasedUnionRef (ctx: Context) (model: ShapeModel) (self: string opti
         |> List.distinct
 
     match arms with
-    | [] -> FsObj, findings @ [ Finding.make Widened owner "empty union widened to obj" ]
+    | [] -> FsObj, findings @ [ Finding.make owner TypeReference.EmptyUnionToObj ]
     | [ single ] -> single, findings
     | arms when arms |> List.contains FsObj ->
         FsObj,
         findings
-        @ [ Finding.make Widened owner "union with an obj arm widened to obj (an erased union over obj is no safer)" ]
+        @ [ Finding.make owner TypeReference.UnionWithObjArm ]
     | arms when arms.Length <= ErasedUnionArity ->
         FsErasedUnion arms, findings
     | arms ->
         FsObj,
         findings
-        @ [ Finding.make
-                Widened
-                owner
-                $"union of {arms.Length} distinct types widened to obj (D4 caps the erased union at {ErasedUnionArity})" ]
+        @ [ Finding.make owner (TypeReference.UnionTooWide(arms.Length, ErasedUnionArity)) ]
 
 /// An optional member or parameter reads as `option`, one level deep however the optionality
 /// arrived (a `?` marker, an `undefined` union member, or both).
@@ -865,7 +850,7 @@ let private typeParamsOf
             | None ->
                 findings <-
                     findings
-                    @ [ Finding.make Widened owner $"type parameter #{id} has no name to write; its uses widen to obj" ]
+                    @ [ Finding.make owner (TypeParameters.UnnamedTypeParameter id) ]
 
                 None)
 
@@ -912,7 +897,7 @@ let private typeParamsOf
             | Some _ ->
                 findings <-
                     findings
-                    @ [ Finding.make Ergonomic owner $"constraint on '{name}' has no F# form and is dropped (§4.9)" ]
+                    @ [ Finding.make owner (TypeParameters.ConstraintDropped name) ]
 
                 { Name = name; Constraint = None }
             | None -> { Name = name; Constraint = None })
@@ -946,7 +931,7 @@ let private aliasTypeParams (ctx: Context) (model: ShapeModel) (owner: string) (
 
     let hoistFindings =
         if hoisted |> List.exists (fun id -> not (List.contains id declared)) then
-            [ Finding.make Ergonomic owner "generic function type hoisted onto the alias; F# has no rank-2 form (§4.9)" ]
+            [ Finding.make owner TypeParameters.GenericFunctionHoisted ]
         else
             []
 
@@ -1083,17 +1068,13 @@ let private shapeSignature
 
             keyFindings <-
                 keyFindings
-                @ [ Finding.make
-                        Ergonomic
-                        owner
-                        $"key over '{operandName}' with its indexed access reads as \
-                          typekeyof<'{operandName},'{result}> (§4.10)" ]
+                @ [ Finding.make owner (TypeParameters.KeyWithIndexedAccess(operandName, result)) ]
         else
             keyVars <- Map.add key (KeyOf operandName) keyVars
 
             keyFindings <-
                 keyFindings
-                @ [ Finding.make Ergonomic owner $"key over '{operandName}' reads as keyof<'{operandName}> (§4.10)" ]
+                @ [ Finding.make owner (TypeParameters.KeyOverOperand operandName) ]
 
     let typeParameters = typeParameters @ looseParameters @ resultParameters
 
@@ -1139,7 +1120,7 @@ let private shapeSignature
             let optional = admitsOptional && inTail
 
             if p.Optional then
-                findings <- findings @ [ Finding.make Ergonomic paramOwner "optional parameter reads as option" ]
+                findings <- findings @ [ Finding.make paramOwner Members.OptionalParameterAsOption ]
 
             { Name = Naming.memberName p.Symbol.Name
               Optional = optional
@@ -1161,7 +1142,7 @@ let private shapeSignature
     for p in erased do
         findings <-
             findings
-            @ [ Finding.make Widened owner $"type parameter '{p.Name}' is erased: every use of it widened away" ]
+            @ [ Finding.make owner (TypeParameters.TypeParameterErased p.Name) ]
 
     live, parameters, returns, findings
 
@@ -1178,7 +1159,7 @@ let private shapeMembers (ctx: Context) (model: ShapeModel) (self: string) (fact
                 // The name is cut at the checker id (`__@iterator@1469` -> `__@iterator`):
                 // the id is session-specific and would break run-to-run determinism.
                 let stable = m.Symbol.Name.Substring(0, m.Symbol.Name.LastIndexOf '@')
-                emit (Finding.make Widened $"{self}.{stable}" "symbol-keyed member dropped (unrepresentable in F#)")
+                emit (Finding.make $"{self}.{stable}" Members.SymbolKeyedMemberDropped)
                 false
             else
                 true)
@@ -1214,7 +1195,7 @@ let private shapeMembers (ctx: Context) (model: ShapeModel) (self: string) (fact
                 findings <- findings @ refFindings
 
                 if m.Optional then
-                    emit (Finding.make Ergonomic owner "optional member reads as option")
+                    emit (Finding.make owner Members.OptionalMemberAsOption)
 
                 [ FsProperty
                       { Name = Naming.memberName m.Symbol.Name
@@ -1234,7 +1215,7 @@ let private shapeMembers (ctx: Context) (model: ShapeModel) (self: string) (fact
             let value, valueFindings = typeRef ctx model (Some self) owner info.ValueTypeId
             findings <- findings @ keyFindings @ valueFindings
 
-            emit (Finding.make Ergonomic owner "index signature reads as an EmitIndexer Item member (§4.10)")
+            emit (Finding.make owner Members.IndexSignatureAsIndexer)
 
             FsIndexer
                 { Key = key
@@ -1638,10 +1619,7 @@ let classifyLiteralUnions: Pass<ShapeModel> =
                                         | literal ->
                                             findings <-
                                                 findings
-                                                @ [ Finding.make
-                                                        Exact
-                                                        name
-                                                        "non-string literal case carries CompiledValue (D12)" ]
+                                                @ [ Finding.make name ClassifyLiteralUnions.NonStringLiteralCase ]
 
                                             { Name = caseName
                                               CompiledName = None
@@ -1710,10 +1688,7 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                 if not (tagged |> List.forall (fst >> isPlainData)) then
                                     findings <-
                                         findings
-                                        @ [ Finding.make
-                                                Ergonomic
-                                                name
-                                                $"discriminated by '{tag}', but an arm is not plain data; left as an erased union" ]
+                                        @ [ Finding.make name (DetectTaggedUnions.ArmNotPlainData tag) ]
 
                                     None
                                 else
@@ -1742,7 +1717,7 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                         caseNames
 
                                 findings <-
-                                    findings @ [ Finding.make Exact name $"discriminated union on '{tag}' (D4)" ]
+                                    findings @ [ Finding.make name (DetectTaggedUnions.TaggedUnion tag) ]
 
                                 Some(
                                     FsTaggedUnion
@@ -1768,13 +1743,13 @@ let detectTaggedUnions: Pass<ShapeModel> =
 /// the abbreviation being defined.
 let private delegateRefFor (ctx: Context) (model: ShapeModel) (name: string) (facts: TypeFacts) : FsTypeRef * Finding list =
     match facts.CallSignatures with
-    | [] -> FsObj, [ Finding.make Widened name "callable type without signatures; widened to obj" ]
+    | [] -> FsObj, [ Finding.make name TypeReference.CallableWithoutSignatures ]
     | signature :: rest ->
         let overloadFindings =
             if rest.IsEmpty then
                 []
             else
-                [ Finding.make Widened name $"callback with {rest.Length + 1} overloads shaped from the first" ]
+                [ Finding.make name (TypeReference.CallbackOverloadsFromFirst(rest.Length + 1)) ]
 
         // The signature's own parameters are discarded here rather than written: a delegate
         // type has nowhere to put them. `aliasTypeParams` has already hoisted them onto the
@@ -1916,26 +1891,17 @@ let shapeInterfaces: Pass<ShapeModel> =
                             if not facts.CallSignatures.IsEmpty then
                                 findings <-
                                     findings
-                                    @ [ Finding.make
-                                            Widened
-                                            name
-                                            "callable-and-properties hybrid loses its call signatures (Invoke emission is future work)" ]
+                                    @ [ Finding.make name ShapeInterfaces.HybridLosesCallSignatures ]
 
                             if not facts.BaseTypes.IsEmpty then
                                 findings <-
                                     findings
-                                    @ [ Finding.make
-                                            Ergonomic
-                                            name
-                                            "base members flattened into the interface (the is-a relation is not emitted)" ]
+                                    @ [ Finding.make name ShapeInterfaces.BaseMembersFlattened ]
 
                             if flag TypeFlags.Intersection facts then
                                 findings <-
                                     findings
-                                    @ [ Finding.make
-                                            Ergonomic
-                                            name
-                                            $"intersection of {facts.IntersectionMembers.Length} object types flattened into one interface (the is-a relation to its operands is not emitted, §4.6)" ]
+                                    @ [ Finding.make name (ShapeInterfaces.IntersectionFlattened facts.IntersectionMembers.Length) ]
 
                             let docs, tags =
                                 Map.tryFind typeId fallbackDocs |> Option.defaultValue ("", [])
@@ -2095,11 +2061,7 @@ let shapeAliases: Pass<ShapeModel> =
                                 if brand.IsSome then
                                     findings <-
                                         findings
-                                        @ [ Finding.make
-                                                Ergonomic
-                                                name
-                                                "branding intersection emitted as a unit of measure; uses read \
-                                                 as the branded primitive (§4.6, D11)" ]
+                                        @ [ Finding.make name ShapeAliases.BrandAsMeasure ]
 
                                     Some(
                                         FsMeasure
@@ -2151,11 +2113,7 @@ let shapeAliases: Pass<ShapeModel> =
                                 then
                                     findings <-
                                         findings
-                                        @ [ Finding.make
-                                                Widened
-                                                name
-                                                "type-level computation over an unresolved operand; emitted as an \
-                                                 erased phantom, which casts are the only use of" ]
+                                        @ [ Finding.make name ShapeAliases.PhantomComputation ]
 
                                     Some(
                                         FsPhantom
@@ -2224,7 +2182,7 @@ let shapeClasses: Pass<ShapeModel> =
                             match valueFacts with
                             | None ->
                                 findings <-
-                                    findings @ [ Finding.make Escape name "class export without a value type; constructor dropped" ]
+                                    findings @ [ Finding.make name ShapeClasses.ClassWithoutValueType ]
 
                                 []
                             | Some facts ->
@@ -2235,10 +2193,7 @@ let shapeClasses: Pass<ShapeModel> =
                                 for m in statics do
                                     findings <-
                                         findings
-                                        @ [ Finding.make
-                                                Widened
-                                                $"{name}.{m.Symbol.Name}"
-                                                "static class member dropped (statics emission awaits a fixture)" ]
+                                        @ [ Finding.make $"{name}.{m.Symbol.Name}" ShapeClasses.StaticMemberDropped ]
 
                                 facts.ConstructSignatures
                                 |> List.map (fun signature ->
@@ -2300,7 +2255,7 @@ let shapeExports: Pass<ShapeModel> =
 
                             match valueFacts with
                             | None ->
-                                emit (Finding.make Escape name "no value type in the table; export dropped")
+                                emit (Finding.make name ShapeExports.NoValueType)
                                 []
                             | Some facts when not facts.CallSignatures.IsEmpty ->
                                 facts.CallSignatures
@@ -2389,7 +2344,7 @@ let synthesizeParamObjects: Pass<ShapeModel> =
 
                             findings <-
                                 findings
-                                @ [ Finding.make Ergonomic decl.Name "ParamObject Create synthesized (D3)" ]
+                                @ [ Finding.make decl.Name SynthesizeParamObjects.ParamObjectSynthesized ]
 
                             FsInterface
                                 { decl with
@@ -2452,10 +2407,7 @@ let dedupeOverloads: Pass<ShapeModel> =
                             if Set.contains key seen then
                                 findings <-
                                     findings
-                                    @ [ Finding.make
-                                            Widened
-                                            $"{owner}.{m.Name}"
-                                            "overload dropped: identical to an earlier one after widening" ]
+                                    @ [ Finding.make $"{owner}.{m.Name}" DedupeOverloads.OverloadDropped ]
 
                                 false
                             else
@@ -2490,10 +2442,7 @@ let dedupeOverloads: Pass<ShapeModel> =
                             if Set.contains key seenExports then
                                 findings <-
                                     findings
-                                    @ [ Finding.make
-                                            Widened
-                                            m.Name
-                                            "overload dropped: identical to an earlier one after widening" ]
+                                    @ [ Finding.make m.Name DedupeOverloads.OverloadDropped ]
 
                                 false
                             else
@@ -2631,11 +2580,7 @@ let private repaired (model: ShapeModel) =
         for name in dropped do
             findings <-
                 findings
-                @ [ Finding.make
-                        Widened
-                        name
-                        "generic alias dropped: its target widened away every type parameter, and F# has no \
-                         unused type variable in an abbreviation" ]
+                @ [ Finding.make name RepairArity.GenericAliasDropped ]
 
         let surviving =
             model.Decls
@@ -2659,8 +2604,8 @@ let private repaired (model: ShapeModel) =
             |> List.map (fun decl ->
                 let owner = declName decl |> Option.defaultValue "Exports"
 
-                let widen (message: string) =
-                    findings <- findings @ [ Finding.make Widened owner message ]
+                let widen (kind: RepairArity) =
+                    findings <- findings @ [ Finding.make owner kind ]
                     FsObj
 
                 // FS0252: a settable property must have a settable type, and `unit` is not one.
@@ -2677,11 +2622,7 @@ let private repaired (model: ShapeModel) =
                                         | FsProperty p when not p.ReadOnly && p.Type = FsUnit ->
                                             findings <-
                                                 findings
-                                                @ [ Finding.make
-                                                        Ergonomic
-                                                        owner
-                                                        $"{p.Name} reads but does not write: its type holds no value, \
-                                                          and F# has no setter of type unit" ]
+                                                @ [ Finding.make owner (RepairArity.ReadWithoutWrite p.Name) ]
 
                                             FsProperty { p with ReadOnly = true }
                                         | other -> other)
@@ -2698,15 +2639,15 @@ let private repaired (model: ShapeModel) =
                 |> mapDeclRefs (fun reference ->
                     match reference with
                     | FsNamed name when Set.contains name dropped ->
-                        widen $"reference to the dropped generic alias {name} widened to obj"
+                        widen (RepairArity.ReferenceToDroppedAlias name)
                     | FsApp(name, _) when Set.contains name dropped ->
-                        widen $"reference to the dropped generic alias {name} widened to obj"
+                        widen (RepairArity.ReferenceToDroppedAlias name)
                     | FsNamed name when Map.tryFind name arity |> Option.exists (fun n -> n > 0) ->
-                        widen $"{name} is generic and this position has no arguments to apply; widened to obj"
+                        widen (RepairArity.GenericWithoutArguments name)
                     | FsApp(name, arguments) when
                         Map.tryFind name arity |> Option.exists (fun n -> n <> arguments.Length)
                         ->
-                        widen $"{name} applied to {arguments.Length} arguments but declares {arity[name]}; widened to obj"
+                        widen (RepairArity.ArityMismatch(name, arguments.Length, arity[name]))
                     | other -> other))
 
         { model with Decls = decls }, findings
@@ -2802,7 +2743,7 @@ let auditCoverage: Pass<ShapeModel> =
                     model.Harvest.Exports
                     |> List.filter (fun export -> not (Set.contains (name export) generated))
                     |> List.map (fun export ->
-                        Finding.make Escape (name export) "export not represented in the generated output")
+                        Finding.make (name export) AuditCoverage.ExportNotRepresented)
 
                 return
                     if List.isEmpty missing then

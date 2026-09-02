@@ -162,8 +162,9 @@ rewrites could fuse — do not fuse them; the seam is the test point.
   to the generator. Output is almost entirely declarations (interfaces, DUs, abbreviations,
   `jsNative` stubs, tiny inline bodies), which is the easy 95% of F# printing; the compile
   gate (§5) absorbs the correctness risk on every fixture.
-- Also renders `manifest.json` — the fidelity report: per-symbol tier, findings, pass
-  provenance — and the run report (counts of Exact/Ergonomic/Widened/Escape).
+- Also renders `manifest.json` — the fidelity report: per-symbol tier, declaring file, findings
+  with their catalogue key (`SI001`), pass, qualified symbol and message — the run report
+  (counts of Exact/Ergonomic/Widened/Escape) and a per-pass tally of findings by tier.
 - **Invariant:** byte-identical output for identical input (model ordering already fixed by
   `order-declarations`; renderer adds nothing nondeterministic).
 

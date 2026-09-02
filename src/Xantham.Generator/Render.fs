@@ -5,7 +5,9 @@
 /// clock, the environment, or hash order.
 module Xantham.Generator.Render
 
+open System
 open System.Text.Json
+open System.Text.Json.Serialization
 open Xantham.TypeScript.Wire.Proto
 
 /// F# keywords and reserved words that force backticks when a JavaScript name collides.
@@ -538,29 +540,111 @@ let private tierLabel =
     | Widened -> "widened"
     | Escape -> "escape"
 
-// The manifest's shape, spelled as records so the property order is fixed by declaration.
-type ManifestFinding = { pass: string; tier: string; message: string }
+// The manifest's shape, spelled as records so property order is fixed by declaration. A pass
+// is labelled with the prefix of the union it owns (`SI - shape-interfaces`). `file`
+// is null where a symbol has no declaration to point at (drops, table-level findings) and is
+// then omitted from the JSON.
+type ManifestFinding =
+    { key: string
+      pass: string
+      tier: string
+      symbol: string
+      message: string }
 
-type ManifestCounts = { exact: int; ergonomic: int; widened: int; escape: int }
+type ManifestCounts =
+    { exact: int
+      ergonomic: int
+      widened: int
+      escape: int }
 
-type ManifestSymbol = { name: string; tier: string; findings: ManifestFinding list }
+/// A pass's tallies: only the non-zero ones are written, so a pass that raised nothing at any
+/// tier is just its label.
+type ManifestPass =
+    { pass: string
+      total: Nullable<int>
+      exact: Nullable<int>
+      ergonomic: Nullable<int>
+      widened: Nullable<int>
+      escape: Nullable<int> }
+
+type ManifestSymbol =
+    { name: string
+      file: string
+      tier: string
+      findings: ManifestFinding list }
 
 type Manifest =
     { package: string
       ``module``: string
       counts: ManifestCounts
+      passes: ManifestPass list
       symbols: ManifestSymbol list }
 
 let private manifestOptions =
     let options = JsonSerializerOptions(WriteIndented = true)
     options.NewLine <- "\n" // byte-identical output whatever the OS
+    options.DefaultIgnoreCondition <- JsonIgnoreCondition.WhenWritingNull
     options
+
+/// The declaration file a symbol came from, as the manifest reports it: relative to the package
+/// for the package's own files, from `node_modules/` down for anything installed, and the bare
+/// pseudo-path for the compiler's bundled libs. Never an absolute path, so the goldens hold.
+let private sourceFile (packageDir: string) (order: DeclOrder option) : string =
+    match order with
+    | None -> null
+    | Some order ->
+        let path = order.File.Replace('\\', '/')
+        let root = packageDir.Replace('\\', '/').TrimEnd '/' + "/"
+
+        if path.StartsWith(root, StringComparison.OrdinalIgnoreCase) then
+            path.Substring root.Length
+        else
+            match path.LastIndexOf "/node_modules/" with
+            | -1 -> path.Substring(path.LastIndexOf '/' + 1)
+            | at -> path.Substring(at + 1)
+
+/// Declaration name -> the file it was declared in, for every declaration that carries an order.
+let private declFiles (model: RenderModel) : Map<string, string> =
+    model.Decls
+    |> List.choose (function
+        | FsInterface decl -> Some(decl.Name, decl.Order)
+        | FsStringEnum decl -> Some(decl.Name, decl.Order)
+        | FsTaggedUnion decl -> Some(decl.Name, decl.Order)
+        | FsEnum decl -> Some(decl.Name, decl.Order)
+        | FsAbbrev decl -> Some(decl.Name, decl.Order)
+        | FsMeasure decl -> Some(decl.Name, decl.Order)
+        | FsPhantom decl -> Some(decl.Name, decl.Order)
+        | FsExports _ -> None)
+    |> List.choose (fun (name, order) ->
+        match sourceFile model.PackageDir order with
+        | null -> None
+        | file -> Some(name, file))
+    |> Map.ofList
+
+/// Per-pass tallies of the findings each pass raised, in execution order.
+let private passTallies (findings: Finding list) : ManifestPass list =
+    let byPass = findings |> List.groupBy _.Pass |> Map.ofList
+
+    [ for pass in findings |> List.map _.Pass |> List.distinct ->
+          let raised = byPass[pass]
+
+          // Zero is absence: the field is omitted rather than written as 0.
+          let nonZero count = if count = 0 then Nullable() else Nullable count
+          let count tier = raised |> List.filter (fun f -> f.Tier = tier) |> List.length |> nonZero
+
+          { pass = FindingCatalogue.passLabel pass
+            total = nonZero raised.Length
+            exact = count Exact
+            ergonomic = count Ergonomic
+            widened = count Widened
+            escape = count Escape } ]
 
 /// The fidelity report: which pass widened what, and why, per exported symbol.
 let renderManifest: Pass<RenderModel> =
     Pass.pure' "render-manifest" (fun _ model ->
         let rows = symbolTiers model
         let tallies = counts rows
+        let files = declFiles model
 
         let manifest =
             { package = model.PackageName
@@ -570,14 +654,18 @@ let renderManifest: Pass<RenderModel> =
                   ergonomic = tallies.Ergonomic
                   widened = tallies.Widened
                   escape = tallies.Escape }
+              passes = passTallies model.Findings
               symbols =
                 [ for name, tier, findings in rows ->
                       { name = name
+                        file = files |> Map.tryFind name |> Option.toObj
                         tier = tierLabel tier
                         findings =
-                          [ for finding in findings |> List.sortBy (fun f -> f.Pass, f.Symbol, f.Message) ->
-                                { pass = finding.Pass
+                          [ for finding in findings |> List.sortBy (fun f -> f.Pass, f.Symbol, f.Key, f.Message) ->
+                                { key = finding.Key
+                                  pass = finding.Pass
                                   tier = tierLabel finding.Tier
+                                  symbol = finding.Symbol
                                   message = finding.Message } ] } ] }
 
         let json = JsonSerializer.Serialize(manifest, manifestOptions) + "\n"

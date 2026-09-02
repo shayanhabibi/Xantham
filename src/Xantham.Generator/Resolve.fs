@@ -109,7 +109,7 @@ let resolveExportTypes: Pass<ResolveModel> =
                           for facet, response in [ "declared type", declared; "value type", value ] do
                               match response with
                               | Some(Error reason) ->
-                                  Finding.make Escape export.ExportName $"{facet} not resolved: {reason}"
+                                  Finding.make export.ExportName (ResolveExportTypes.FacetNotResolved(facet, reason))
                               | _ -> () ]
 
                 let model =
@@ -524,10 +524,7 @@ let resolveTypeTable: Pass<ResolveModel> =
                             // widens under its own owner's name (`typeRefOnPath`).
                             let findings =
                                 findings
-                                @ [ Finding.make
-                                        Widened
-                                        "<type-table>"
-                                        $"{fresh.Length} types not resolved: beyond the depth cutoff ({FollowDepth}) -                                           the frontier of instantiations still growing after that many generations" ]
+                                @ [ Finding.make "<type-table>" (ResolveTypeTable.FrontierNotResolved(fresh.Length, FollowDepth)) ]
 
                             return table, notFollowed, findings
                         | fresh ->
@@ -566,7 +563,7 @@ let resolveTypeTable: Pass<ResolveModel> =
                                 findings
                                 @ [ for ty, result in results do
                                         match result with
-                                        | Error reason -> Finding.make Widened $"type#{ty.Id}" $"not resolved: {reason}"
+                                        | Error reason -> Finding.make $"type#{ty.Id}" (ResolveTypeTable.TypeNotResolved reason)
                                         | Ok _ -> () ]
 
                             let derived = fresh |> List.fold (fun set ty -> Set.add ty.Id set) derived

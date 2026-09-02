@@ -13,6 +13,7 @@ let private renderAll (model: RenderModel) =
 let private baseModel =
     { ModuleName = "TestPkg"
       PackageName = "test-pkg"
+      PackageDir = "/pkg/test-pkg"
       Decls = []
       Findings = []
       Files = [] }
@@ -449,7 +450,7 @@ let renderTests =
                               { Name = "Options"
                                 Docs = ""
                                 Tags = []
-                                Order = None
+                                Order = Some { File = "/pkg/test-pkg/index.d.ts"; NodeIndex = 3 }
                                 TypeParameters = []
                                 Inherits = []
                                 Members = []
@@ -457,12 +458,10 @@ let renderTests =
                     Findings =
                         [ { Pass = "shape-interfaces"
                             Symbol = "Options.legacy"
-                            Tier = Widened
-                            Message = "legacy widened" }
+                            Kind = TypeReference.TypeNotResolved "legacy" }
                           { Pass = "audit-coverage"
                             Symbol = "Dropped"
-                            Tier = Escape
-                            Message = "export not represented in the generated output" } ] }
+                            Kind = AuditCoverage.ExportNotRepresented } ] }
 
             let expected =
                 String.concat
@@ -476,15 +475,30 @@ let renderTests =
                       "    \"widened\": 1,"
                       "    \"escape\": 1"
                       "  },"
+                      "  \"passes\": ["
+                      "    {"
+                      "      \"pass\": \"SI - shape-interfaces\","
+                      "      \"total\": 1,"
+                      "      \"widened\": 1"
+                      "    },"
+                      "    {"
+                      "      \"pass\": \"AC - audit-coverage\","
+                      "      \"total\": 1,"
+                      "      \"escape\": 1"
+                      "    }"
+                      "  ],"
                       "  \"symbols\": ["
                       "    {"
                       "      \"name\": \"Options\","
+                      "      \"file\": \"index.d.ts\","
                       "      \"tier\": \"widened\","
                       "      \"findings\": ["
                       "        {"
+                      "          \"key\": \"TR002\","
                       "          \"pass\": \"shape-interfaces\","
                       "          \"tier\": \"widened\","
-                      "          \"message\": \"legacy widened\""
+                      "          \"symbol\": \"Options.legacy\","
+                      "          \"message\": \"type not resolved (legacy); widened to obj\""
                       "        }"
                       "      ]"
                       "    },"
@@ -493,8 +507,10 @@ let renderTests =
                       "      \"tier\": \"escape\","
                       "      \"findings\": ["
                       "        {"
+                      "          \"key\": \"AC001\","
                       "          \"pass\": \"audit-coverage\","
                       "          \"tier\": \"escape\","
+                      "          \"symbol\": \"Dropped\","
                       "          \"message\": \"export not represented in the generated output\""
                       "        }"
                       "      ]"

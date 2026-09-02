@@ -9,6 +9,7 @@
              order the tiers run, then the fold that sequences them. The generated binding table
              comes before the model because the model's naming contract reads it. -->
         <Compile Include="BrowserBindingTable.generated.fs" />
+        <Compile Include="Findings.fs" />
         <Compile Include="Model.fs" />
         <Compile Include="Bootstrap.fs" />
         <Compile Include="Harvest.fs" />

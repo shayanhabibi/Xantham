@@ -5,36 +5,6 @@ open System.Text.Json
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 
-/// How faithfully a generated construct represents its TypeScript source, per
-/// `docs/plans/generator-type-mapping.md` §1. Declaration order is severity order: a symbol's
-/// tier is the worst tier among its findings, and structural comparison on this type is that
-/// "worst".
-type Tier =
-    /// The F# type accepts and rejects exactly what TypeScript does.
-    | Exact
-    /// Meaning preserved, spelling made idiomatic - e.g. `null | undefined` hoisted to `option`.
-    | Ergonomic
-    /// Information TypeScript had was dropped - e.g. a union collapsed to `obj`.
-    | Widened
-    /// The construct is not represented; the consumer is on their own.
-    | Escape
-
-/// One thing a pass had to say about a symbol: a widening, a drop, or an ergonomic rewrite.
-/// Findings are the raw material of the fidelity manifest - a silent drop is a bug by
-/// definition, so every non-Exact emission produces one of these.
-type Finding =
-    { /// The pass that produced the finding. Stamped by `Pipeline.runTier`, so passes leave it
-      /// empty and cannot misreport themselves.
-      Pass: string
-      /// The symbol concerned, qualified from the exported name down: `Options.onlyFirst`.
-      Symbol: string
-      Tier: Tier
-      Message: string }
-
-module Finding =
-    /// A finding not yet stamped with its pass; the pipeline fold fills `Pass` in.
-    let make tier symbol message =
-        { Pass = ""; Symbol = symbol; Tier = tier; Message = message }
 
 /// The package boundary a symbol or type originates from, classified from its declaration's
 /// file path (decision O7). Resolution depth and reference rendering are decided per group.
@@ -814,6 +784,9 @@ type ShapeModel =
 type RenderModel =
     { ModuleName: string
       PackageName: string
+      /// Absolute path of the package generated from; the manifest writes declaration files
+      /// relative to it.
+      PackageDir: string
       Decls: FsDecl list
       /// Every finding of every earlier tier, stamped with its pass.
       Findings: Finding list
