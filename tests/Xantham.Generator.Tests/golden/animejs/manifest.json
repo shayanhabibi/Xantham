@@ -16,23 +16,25 @@
     {
       "pass": "shape-callbacks",
       "total": 31,
+      "exact": 1,
       "ergonomic": 22,
-      "widened": 3,
+      "widened": 2,
       "escape": 6
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 2433,
-      "exact": 4,
-      "ergonomic": 1317,
-      "widened": 793,
-      "escape": 319
+      "total": 2517,
+      "exact": 26,
+      "ergonomic": 1395,
+      "widened": 761,
+      "escape": 335
     },
     {
       "pass": "SA - shape-aliases",
       "total": 149,
-      "ergonomic": 25,
-      "widened": 124
+      "exact": 9,
+      "ergonomic": 28,
+      "widened": 112
     },
     {
       "pass": "SC - shape-classes",
@@ -112,32 +114,32 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
-          "key": "TR018",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "DurationKeyframesItem.[]",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "union of 10 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
-          "key": "TR018",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "DurationKeyframesItem.[]",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "union of 8 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "DurationKeyframesItem.[]",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "DurationKeyframesItem.[]",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -546,13 +548,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DurationKeyframesItem.ease",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -560,11 +555,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "DurationKeyframesItem.ease",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "DurationKeyframesItem.ease",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -2048,13 +2050,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "LayoutAnimationTimingsParams.ease",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -2062,11 +2057,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "LayoutAnimationTimingsParams.ease",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "LayoutAnimationTimingsParams.ease",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -2587,13 +2589,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "LayoutStateParams.ease",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -2601,11 +2596,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "LayoutStateParams.ease",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "LayoutStateParams.ease",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -3035,13 +3037,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "LayoutSpecificAnimationParams.ease",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -3049,11 +3044,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "LayoutSpecificAnimationParams.ease",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "LayoutSpecificAnimationParams.ease",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -3252,18 +3254,11 @@
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "LayoutAnimationParams.delay",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "LayoutAnimationParams.delay",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
           "key": "TR032",
@@ -3278,6 +3273,76 @@
           "tier": "widened",
           "symbol": "LayoutAnimationParams.delay",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.delay",
+          "message": "intersection of callable operands rendered from its 1 call signatures"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.delay",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.delay(index)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.delay(index)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.delay(prevTween)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.delay(prevTween)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.delay(target)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.delay(target)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.delay(targets)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.delay(targets)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "MB003",
@@ -3329,18 +3394,11 @@
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "LayoutAnimationParams.duration",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "LayoutAnimationParams.duration",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
           "key": "TR032",
@@ -3355,6 +3413,76 @@
           "tier": "widened",
           "symbol": "LayoutAnimationParams.duration",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.duration",
+          "message": "intersection of callable operands rendered from its 1 call signatures"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.duration",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.duration(index)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.duration(index)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.duration(prevTween)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.duration(prevTween)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.duration(target)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.duration(target)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.duration(targets)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.duration(targets)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "MB003",
@@ -3665,13 +3793,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "LayoutAnimationParams.ease",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -3679,11 +3800,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "LayoutAnimationParams.ease",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "LayoutAnimationParams.ease",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -3805,11 +3933,11 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "LayoutAnimationParams.onBeforeUpdate",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
           "key": "TR032",
@@ -3819,6 +3947,20 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.onBeforeUpdate",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "LayoutAnimationParams.onBeforeUpdate()",
+          "message": "any maps to obj"
+        },
+        {
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -3826,11 +3968,11 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "LayoutAnimationParams.onBegin",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
           "key": "TR032",
@@ -3838,6 +3980,20 @@
           "tier": "ergonomic",
           "symbol": "LayoutAnimationParams.onBegin",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.onBegin",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "LayoutAnimationParams.onBegin()",
+          "message": "any maps to obj"
         },
         {
           "key": "MB003",
@@ -3847,11 +4003,11 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "LayoutAnimationParams.onComplete",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
           "key": "TR032",
@@ -3859,6 +4015,20 @@
           "tier": "ergonomic",
           "symbol": "LayoutAnimationParams.onComplete",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.onComplete",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "LayoutAnimationParams.onComplete()",
+          "message": "any maps to obj"
         },
         {
           "key": "MB003",
@@ -3868,11 +4038,11 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "LayoutAnimationParams.onLoop",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
           "key": "TR032",
@@ -3880,6 +4050,20 @@
           "tier": "ergonomic",
           "symbol": "LayoutAnimationParams.onLoop",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.onLoop",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "LayoutAnimationParams.onLoop()",
+          "message": "any maps to obj"
         },
         {
           "key": "MB003",
@@ -3889,11 +4073,11 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "LayoutAnimationParams.onPause",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
           "key": "TR032",
@@ -3901,6 +4085,20 @@
           "tier": "ergonomic",
           "symbol": "LayoutAnimationParams.onPause",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.onPause",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "LayoutAnimationParams.onPause()",
+          "message": "any maps to obj"
         },
         {
           "key": "MB003",
@@ -3931,11 +4129,11 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "LayoutAnimationParams.onUpdate",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
           "key": "TR032",
@@ -3943,6 +4141,20 @@
           "tier": "ergonomic",
           "symbol": "LayoutAnimationParams.onUpdate",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "LayoutAnimationParams.onUpdate",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "LayoutAnimationParams.onUpdate()",
+          "message": "any maps to obj"
         },
         {
           "key": "MB003",
@@ -4169,18 +4381,11 @@
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "AutoLayoutParams.delay",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AutoLayoutParams.delay",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
           "key": "TR032",
@@ -4195,6 +4400,76 @@
           "tier": "widened",
           "symbol": "AutoLayoutParams.delay",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.delay",
+          "message": "intersection of callable operands rendered from its 1 call signatures"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.delay",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.delay(index)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.delay(index)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.delay(prevTween)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.delay(prevTween)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.delay(target)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.delay(target)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.delay(targets)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.delay(targets)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "MB003",
@@ -4246,18 +4521,11 @@
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "AutoLayoutParams.duration",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AutoLayoutParams.duration",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
           "key": "TR032",
@@ -4272,6 +4540,76 @@
           "tier": "widened",
           "symbol": "AutoLayoutParams.duration",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.duration",
+          "message": "intersection of callable operands rendered from its 1 call signatures"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.duration",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.duration(index)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.duration(index)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.duration(prevTween)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.duration(prevTween)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.duration(target)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.duration(target)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.duration(targets)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.duration(targets)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "MB003",
@@ -4582,13 +4920,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AutoLayoutParams.ease",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -4596,11 +4927,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "AutoLayoutParams.ease",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "AutoLayoutParams.ease",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -4722,11 +5060,11 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "AutoLayoutParams.onBeforeUpdate",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
           "key": "TR032",
@@ -4736,6 +5074,20 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.onBeforeUpdate",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "AutoLayoutParams.onBeforeUpdate()",
+          "message": "any maps to obj"
+        },
+        {
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -4743,11 +5095,11 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "AutoLayoutParams.onBegin",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
           "key": "TR032",
@@ -4755,6 +5107,20 @@
           "tier": "ergonomic",
           "symbol": "AutoLayoutParams.onBegin",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.onBegin",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "AutoLayoutParams.onBegin()",
+          "message": "any maps to obj"
         },
         {
           "key": "MB003",
@@ -4764,11 +5130,11 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "AutoLayoutParams.onComplete",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
           "key": "TR032",
@@ -4776,6 +5142,20 @@
           "tier": "ergonomic",
           "symbol": "AutoLayoutParams.onComplete",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.onComplete",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "AutoLayoutParams.onComplete()",
+          "message": "any maps to obj"
         },
         {
           "key": "MB003",
@@ -4785,11 +5165,11 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "AutoLayoutParams.onLoop",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
           "key": "TR032",
@@ -4797,6 +5177,20 @@
           "tier": "ergonomic",
           "symbol": "AutoLayoutParams.onLoop",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.onLoop",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "AutoLayoutParams.onLoop()",
+          "message": "any maps to obj"
         },
         {
           "key": "MB003",
@@ -4806,11 +5200,11 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "AutoLayoutParams.onPause",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
           "key": "TR032",
@@ -4818,6 +5212,20 @@
           "tier": "ergonomic",
           "symbol": "AutoLayoutParams.onPause",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.onPause",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "AutoLayoutParams.onPause()",
+          "message": "any maps to obj"
         },
         {
           "key": "MB003",
@@ -4848,11 +5256,11 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "AutoLayoutParams.onUpdate",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
           "key": "TR032",
@@ -4860,6 +5268,20 @@
           "tier": "ergonomic",
           "symbol": "AutoLayoutParams.onUpdate",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AutoLayoutParams.onUpdate",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "AutoLayoutParams.onUpdate()",
+          "message": "any maps to obj"
         },
         {
           "key": "MB003",
@@ -6463,13 +6885,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DefaultsParams.ease",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -6477,11 +6892,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "DefaultsParams.ease",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "DefaultsParams.ease",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -6944,11 +7366,11 @@
           "message": "any maps to obj"
         },
         {
-          "key": "TR018",
+          "key": "TR050",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "CallbackArgument.refresh",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "intersection of callable operands rendered from its 1 call signatures"
         },
         {
           "key": "TR032",
@@ -6965,11 +7387,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
+          "key": "TR050",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "CallbackArgument.revert",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "intersection of callable operands rendered from its 1 call signatures"
         },
         {
           "key": "TR032",
@@ -6993,11 +7415,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
+          "key": "TR050",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "CallbackArgument.stretch",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "intersection of callable operands rendered from its 1 call signatures"
         },
         {
           "key": "TR032",
@@ -7049,10 +7471,38 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CallbackArgument.then",
+          "message": "intersection of callable operands rendered from its 1 call signatures"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "CallbackArgument.then()",
+          "message": "any maps to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CallbackArgument.then(callback)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "CallbackArgument.then(callback)()",
+          "message": "any maps to obj"
+        },
+        {
           "key": "TR018",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "CallbackArgument.then",
+          "symbol": "CallbackArgument.then(callback)(self)",
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         }
       ]
@@ -7483,11 +7933,11 @@
           "message": "any maps to obj"
         },
         {
-          "key": "TR018",
+          "key": "TR050",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "CallbackArgumentHeadParent.refresh",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "intersection of callable operands rendered from its 1 call signatures"
         },
         {
           "key": "TR032",
@@ -7504,11 +7954,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
+          "key": "TR050",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "CallbackArgumentHeadParent.revert",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "intersection of callable operands rendered from its 1 call signatures"
         },
         {
           "key": "TR032",
@@ -7532,11 +7982,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
+          "key": "TR050",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "CallbackArgumentHeadParent.stretch",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "intersection of callable operands rendered from its 1 call signatures"
         },
         {
           "key": "TR032",
@@ -7588,10 +8038,38 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CallbackArgumentHeadParent.then",
+          "message": "intersection of callable operands rendered from its 1 call signatures"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "CallbackArgumentHeadParent.then()",
+          "message": "any maps to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CallbackArgumentHeadParent.then(callback)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "CallbackArgumentHeadParent.then(callback)()",
+          "message": "any maps to obj"
+        },
+        {
           "key": "TR018",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "CallbackArgumentHeadParent.then",
+          "symbol": "CallbackArgumentHeadParent.then(callback)(self)",
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         }
       ]
@@ -8619,18 +9097,11 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
+          "key": "TR049",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "EasingParam",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "EasingParam",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         }
       ]
     },
@@ -9011,18 +9482,11 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
+          "key": "TR049",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "WAAPIEasingParam",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WAAPIEasingParam",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         }
       ]
     },
@@ -9830,18 +10294,18 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR018",
+          "key": "TR036",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "FunctionValueReturn",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "union of 7 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "FunctionValueReturn",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         }
       ]
     },
@@ -10008,18 +10472,18 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR018",
+          "key": "TR036",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "TweenParamValue",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "union of 6 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "TweenParamValue",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -10057,18 +10521,18 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR018",
+          "key": "TR036",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "TweenPropValue",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "union of 7 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "TweenPropValue",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -10127,18 +10591,11 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
+          "key": "TR049",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "TweenComposition",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "TweenComposition",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         }
       ]
     },
@@ -10498,13 +10955,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "TweenParamsOptions.ease",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -10512,11 +10962,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "TweenParamsOptions.ease",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "TweenParamsOptions.ease",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -10988,13 +11445,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "TweenKeyValue.ease",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -11002,11 +11452,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "TweenKeyValue.ease",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "TweenKeyValue.ease",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -11107,18 +11564,18 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR018",
+          "key": "TR036",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ArraySyntaxValue",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "union of 8 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "ArraySyntaxValue",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -11156,32 +11613,32 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR018",
+          "key": "TR036",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "TweenOptions",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "union of 8 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
-          "key": "TR018",
+          "key": "TR036",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "TweenOptions",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "union of 8 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "TweenOptions",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "TweenOptions",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -11254,13 +11711,6 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "TweenObjectValue.from",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -11268,11 +11718,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "TweenObjectValue.from",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 7 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "TweenObjectValue.from",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -11310,13 +11767,6 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "TweenObjectValue.fromTo",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -11324,11 +11774,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "TweenObjectValue.fromTo",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 7 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "TweenObjectValue.fromTo",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -11366,13 +11823,6 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "TweenObjectValue.to",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -11380,11 +11830,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "TweenObjectValue.to",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 7 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "TweenObjectValue.to",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -11547,32 +12004,32 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
-          "key": "TR018",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "AnimationParams.[]",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "union of 14 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
-          "key": "TR018",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "AnimationParams.[]",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "union of 8 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "AnimationParams.[]",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "AnimationParams.[]",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR008",
@@ -12016,13 +12473,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AnimationParams.ease",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -12030,11 +12480,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "AnimationParams.ease",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "AnimationParams.ease",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -12833,18 +13290,18 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR018",
+          "key": "TR036",
           "pass": "shape-callbacks",
           "tier": "widened",
           "symbol": "WAAPIFunctionValue()",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "union of 7 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-callbacks",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "WAAPIFunctionValue()",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         }
       ]
     },
@@ -13434,13 +13891,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WAAPIAnimationOptions.ease",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -13448,11 +13898,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WAAPIAnimationOptions.ease",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "WAAPIAnimationOptions.ease",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "MB003",
@@ -13574,18 +14031,18 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
-          "key": "TR018",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WAAPIAnimationParams.[]",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "union of 14 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "WAAPIAnimationParams.[]",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR008",
@@ -14029,13 +14486,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WAAPIAnimationParams.ease",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -14043,11 +14493,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WAAPIAnimationParams.ease",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "WAAPIAnimationParams.ease",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "MB003",
@@ -14147,11 +14604,32 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "AnimatableProperty",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "AnimatableProperty",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "AnimatableProperty(duration)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "AnimatableProperty(ease)",
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -14175,11 +14653,32 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "AnimatableObject.[]",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AnimatableObject.[]",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AnimatableObject.[](duration)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AnimatableObject.[](ease)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR032",
@@ -14294,18 +14793,18 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
-          "key": "TR018",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "AnimatableParams.[]",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "union of 9 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "AnimatableParams.[]",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR008",
@@ -15151,13 +15650,6 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ScrollObserverParams.sync",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -15165,11 +15657,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "ScrollObserverParams.sync",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 6 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "ScrollObserverParams.sync",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "MB003",
@@ -19483,11 +19982,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "DrawableSVGGeometry.setAttribute",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.setAttribute",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
         },
         {
           "key": "TR032",
@@ -19715,11 +20221,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Utils.clamp",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Utils.clamp",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
         },
         {
           "key": "TR012",
@@ -19764,18 +20277,32 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Utils.damp",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
-          "key": "TR018",
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Utils.damp",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Utils.degToRad",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Utils.degToRad",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
         },
         {
           "key": "TR032",
@@ -19841,39 +20368,74 @@
           "message": "any maps to obj"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Utils.lerp",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
-          "key": "TR018",
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Utils.lerp",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Utils.mapRange",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
-          "key": "TR018",
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Utils.mapRange",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Utils.padEnd",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
-          "key": "TR018",
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Utils.padEnd",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Utils.padStart",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
-          "key": "TR018",
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Utils.padStart",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Utils.radToDeg",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Utils.radToDeg",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
         },
         {
           "key": "TR013",
@@ -19939,18 +20501,32 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Utils.round",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
         },
         {
-          "key": "TR018",
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Utils.round",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Utils.roundPad",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Utils.roundPad",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
         },
         {
           "key": "TR008",
@@ -19974,11 +20550,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Utils.snap",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Utils.snap",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
         },
         {
           "key": "TR031",
@@ -20044,11 +20627,18 @@
           "message": "any maps to obj"
         },
         {
-          "key": "TR018",
+          "key": "TR031",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Utils.wrap",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+          "message": "callback with 2 overloads shaped from the first"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Utils.wrap",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
         }
       ]
     },

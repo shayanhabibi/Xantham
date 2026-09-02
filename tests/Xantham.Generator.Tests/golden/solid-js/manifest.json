@@ -3,8 +3,8 @@
   "module": "SolidJs",
   "counts": {
     "exact": 20,
-    "ergonomic": 60,
-    "widened": 74,
+    "ergonomic": 61,
+    "widened": 73,
     "escape": 19
   },
   "passes": [
@@ -26,17 +26,18 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 487,
-      "exact": 7,
+      "total": 486,
+      "exact": 14,
       "ergonomic": 359,
-      "widened": 80,
+      "widened": 72,
       "escape": 41
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 257,
+      "total": 255,
+      "exact": 4,
       "ergonomic": 14,
-      "widened": 242,
+      "widened": 236,
       "escape": 1
     },
     {
@@ -72,13 +73,6 @@
           "message": "type refers to itself through unnamed shapes; widened to obj"
         },
         {
-          "key": "TR018",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "JSXElement",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-aliases",
           "tier": "ergonomic",
@@ -86,11 +80,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "JSXElement",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-aliases",
+          "tier": "exact",
+          "symbol": "JSXElement",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         }
       ]
     },
@@ -2391,18 +2392,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
+          "key": "TR051",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "InitializedResourceOptions.initialValue",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "InitializedResourceOptions.initialValue",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "every operand of the flattened property is the same type"
         },
         {
           "key": "MB003",
@@ -4068,15 +4062,8 @@
     {
       "name": "ResolvedJSXElement",
       "file": "types/reactive/signal.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "key": "TR018",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "ResolvedJSXElement",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
         {
           "key": "TR032",
           "pass": "shape-aliases",
@@ -4085,11 +4072,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "ResolvedJSXElement",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         }
       ]
     },
@@ -4099,13 +4086,6 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR018",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "ResolvedChildren",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-aliases",
           "tier": "ergonomic",
@@ -4120,11 +4100,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ResolvedChildren",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-aliases",
+          "tier": "exact",
+          "symbol": "ResolvedChildren",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         }
       ]
     },
@@ -5891,18 +5878,11 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
+          "key": "TR049",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "ValidComponent",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "ValidComponent",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -6177,13 +6157,6 @@
           "message": "constraint on \u0027TRenderFunction\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ShowProps.children",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -6198,11 +6171,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "ShowProps.children",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 6 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
           "key": "TR046",
@@ -6210,6 +6183,13 @@
           "tier": "ergonomic",
           "symbol": "ShowProps.children",
           "message": "RequiredParameter resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "ShowProps.children",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "MB003",
@@ -6268,13 +6248,6 @@
           "message": "constraint on \u0027TRenderFunction\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ShowProps2.children",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -6289,11 +6262,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "ShowProps2.children",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 6 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
           "key": "TR046",
@@ -6301,6 +6274,13 @@
           "tier": "ergonomic",
           "symbol": "ShowProps2.children",
           "message": "RequiredParameter resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "ShowProps2.children",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "MB003",
@@ -6373,13 +6353,6 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "MatchProps.children",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -6394,11 +6367,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "MatchProps.children",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 6 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "MatchProps.children",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -6471,13 +6451,6 @@
           "message": "constraint on \u0027TRenderFunction\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "MatchProps2.children",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -6492,11 +6465,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "MatchProps2.children",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 6 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
           "key": "TR046",
@@ -6504,6 +6477,13 @@
           "tier": "ergonomic",
           "symbol": "MatchProps2.children",
           "message": "RequiredParameter resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "MatchProps2.children",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "MB003",
@@ -6548,13 +6528,6 @@
           "message": "constraint on \u0027TRenderFunction\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "MatchProps3.children",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -6569,11 +6542,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "MatchProps3.children",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 6 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
           "key": "TR046",
@@ -6581,6 +6554,13 @@
           "tier": "ergonomic",
           "symbol": "MatchProps3.children",
           "message": "RequiredParameter resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "MatchProps3.children",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",
@@ -6611,13 +6591,6 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ErrorBoundaryProps.fallback",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -6632,11 +6605,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "ErrorBoundaryProps.fallback",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 6 distinct types widened to obj (D4 caps the erased union at 4)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "ErrorBoundaryProps.fallback",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "TR032",

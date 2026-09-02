@@ -3,8 +3,8 @@
   "module": "Cloudflare.WorkersTypes",
   "counts": {
     "exact": 252,
-    "ergonomic": 1031,
-    "widened": 374,
+    "ergonomic": 1040,
+    "widened": 365,
     "escape": 115
   },
   "passes": [
@@ -44,10 +44,10 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 7826,
-      "exact": 57,
+      "total": 7785,
+      "exact": 72,
       "ergonomic": 6903,
-      "widened": 716,
+      "widened": 660,
       "escape": 150
     },
     {
@@ -12062,6 +12062,13 @@
           "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
+          "key": "TR051",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "R2BucketGetOptions.onlyIf",
+          "message": "every operand of the flattened property is the same type"
+        },
+        {
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -12410,6 +12417,13 @@
           "tier": "ergonomic",
           "symbol": "R2BucketPutOptions.md5",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR051",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "R2BucketPutOptions.onlyIf",
+          "message": "every operand of the flattened property is the same type"
         },
         {
           "key": "MB003",
@@ -25042,18 +25056,11 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "RoleScopedChatInput.role",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "RoleScopedChatInput.role",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "SP001",
@@ -25105,18 +25112,11 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "AiTextGenerationToolLegacyInputParameters.type",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationToolLegacyInputParameters.type",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "SP001",
@@ -25182,18 +25182,11 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "AiTextGenerationToolInput.type",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationToolInput.type",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "SP001",
@@ -25245,18 +25238,11 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "AiTextGenerationToolInputFunctionParameters.type",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationToolInputFunctionParameters.type",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "SP001",
@@ -32675,7 +32661,7 @@
     {
       "name": "Ai_Cf_Unum_Uform_Gen2_Qwen_500M_Input2",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB003",
@@ -32692,18 +32678,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "Ai_Cf_Unum_Uform_Gen2_Qwen_500M_Input2.image",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Unum_Uform_Gen2_Qwen_500M_Input2.image",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "MB003",
@@ -34484,7 +34463,7 @@
     {
       "name": "Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Prompt",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB003",
@@ -34508,13 +34487,6 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Prompt.image",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -34522,11 +34494,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Prompt.image",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "MB003",
@@ -34680,7 +34652,7 @@
     {
       "name": "Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB003",
@@ -34718,13 +34690,6 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.image",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -34732,11 +34697,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages.image",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "MB003",
@@ -66588,7 +66553,7 @@
     {
       "name": "EmailDestinations2",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SI003",
@@ -66626,53 +66591,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
+          "key": "TR051",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "EmailDestinations2.to",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2.to",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2.to",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2.to",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2.to",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "key": "TR048",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2.to",
-          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
-        },
-        {
-          "key": "TR048",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2.to",
-          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
+          "message": "every operand of the flattened property is the same type"
         },
         {
           "key": "SP001",
@@ -66686,7 +66609,7 @@
     {
       "name": "EmailDestinations3",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SI003",
@@ -66710,53 +66633,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
+          "key": "TR051",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "EmailDestinations3.cc",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations3.cc",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations3.cc",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations3.cc",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations3.cc",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "key": "TR048",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations3.cc",
-          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
-        },
-        {
-          "key": "TR048",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations3.cc",
-          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
+          "message": "every operand of the flattened property is the same type"
         },
         {
           "key": "MB003",
@@ -66784,7 +66665,7 @@
     {
       "name": "EmailDestinations4",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SI003",
@@ -66794,53 +66675,11 @@
           "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
-          "key": "TR018",
+          "key": "TR051",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "EmailDestinations4.bcc",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations4.bcc",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations4.bcc",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations4.bcc",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations4.bcc",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "key": "TR048",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations4.bcc",
-          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
-        },
-        {
-          "key": "TR048",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations4.bcc",
-          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
+          "message": "every operand of the flattened property is the same type"
         },
         {
           "key": "MB003",
@@ -66972,7 +66811,7 @@
     {
       "name": "EmailMessageBuilder2",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SI003",
@@ -67080,53 +66919,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
+          "key": "TR051",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "EmailMessageBuilder2.to",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder2.to",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder2.to",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder2.to",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder2.to",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "key": "TR048",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder2.to",
-          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
-        },
-        {
-          "key": "TR048",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder2.to",
-          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
+          "message": "every operand of the flattened property is the same type"
         },
         {
           "key": "SP001",
@@ -67140,7 +66937,7 @@
     {
       "name": "EmailMessageBuilder3",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SI003",
@@ -67178,53 +66975,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
+          "key": "TR051",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "EmailMessageBuilder3.cc",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder3.cc",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder3.cc",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder3.cc",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder3.cc",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "key": "TR048",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder3.cc",
-          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
-        },
-        {
-          "key": "TR048",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder3.cc",
-          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
+          "message": "every operand of the flattened property is the same type"
         },
         {
           "key": "MB003",
@@ -67308,7 +67063,7 @@
     {
       "name": "EmailMessageBuilder4",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SI003",
@@ -67332,53 +67087,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR018",
+          "key": "TR051",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "EmailMessageBuilder4.bcc",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder4.bcc",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder4.bcc",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder4.bcc",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder4.bcc",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "key": "TR048",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder4.bcc",
-          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
-        },
-        {
-          "key": "TR048",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailMessageBuilder4.bcc",
-          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
+          "message": "every operand of the flattened property is the same type"
         },
         {
           "key": "MB003",

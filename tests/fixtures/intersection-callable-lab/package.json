@@ -1,0 +1,6 @@
+{
+    "name": "intersection-callable-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture exercising the callable intersections of docs/plans/generator-type-mapping.md 4.6 - an overload set assembled from two function types, read at a member position and at an export position, beside the hybrid that carries properties and flattens instead. Tracked in git, no npm install, so the goldens pin every idiom under the live compiler."
+}

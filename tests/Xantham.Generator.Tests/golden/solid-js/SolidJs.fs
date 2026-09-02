@@ -368,14 +368,14 @@ type ResourceOptionsSsrLoadFrom =
 
 [<Interface>]
 type InitializedResourceOptions<'T, 'S> =
-    abstract initialValue: obj with get, set
+    abstract initialValue: 'T with get, set
     abstract name: string option with get, set
     abstract deferStream: bool option with get, set
     abstract ssrLoadFrom: ResourceOptionsSsrLoadFrom option with get, set
     abstract storage: Func<'T option, (Func<'T option> * Action<obj[]>)> option with get, set
     abstract onHydrated: Action<'S option, InitializedResourceOptionsOnHydratedInfo<'T>> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<'T option, (Func<'T option> * Action<obj[]>)>, ?onHydrated: Action<'S option, InitializedResourceOptionsOnHydratedInfo<'T>>) : InitializedResourceOptions<'T, 'S> = jsNative
+    static member Create (initialValue: 'T, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<'T option, (Func<'T option> * Action<obj[]>)>, ?onHydrated: Action<'S option, InitializedResourceOptionsOnHydratedInfo<'T>>) : InitializedResourceOptions<'T, 'S> = jsNative
 
 [<Interface>]
 type InitializedResourceOptionsOnHydratedInfo<'T> =
@@ -586,7 +586,7 @@ type ContextProviderProps<'T> =
     [<ParamObject; Emit("$0")>]
     static member Create (value: 'T, ?children: JSXElement) : ContextProviderProps<'T> = jsNative
 
-type ResolvedJSXElement = obj option
+type ResolvedJSXElement = U4<float, bool, Browser.Types.Node, string> option
 
 type ResolvedChildren = obj option
 
@@ -643,7 +643,7 @@ type FlowComponent<'P, 'C> = private FlowComponent__ of Func<obj, JSXElement opt
 [<Erase>]
 type PropsWithChildren<'P> = private PropsWithChildren__ of obj
 
-type ValidComponent = obj
+type ValidComponent = U2<string, Func<obj, JSXElement option>>
 
 /// <summary>
 /// Takes the props of the passed component and returns its type

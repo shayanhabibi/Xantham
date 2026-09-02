@@ -375,6 +375,30 @@ the widening. Reading any of them as a brand would throw something usable away a
 result exact. `tests/fixtures/brand-lab` pins all of it under the live compiler, negatives
 included, and its golden compiles against the support package in the gate.
 
+*Landed (wave four, lane P) — three of the four intersections that used to widen.*
+`docs/plans/generator-tr018-recon.md` attributed every `TR018` site to one of four causes; three
+of them now have an answer, and the fourth (a type-parameter operand) is left as the contract it
+always was.
+
+- **An operand that declares nothing reduces away** (`TR049`, Exact). `"in" | "out" | (string &
+  {})` is TypeScript's autocomplete idiom, and `string` is the type it means — so `type Ease =
+  string` replaces `type Ease = obj`, and the whole union stops widening with it. The operand has
+  to be anonymous and empty at every instantiation: a named operand may have arrived
+  identity-only from a group this run only references, and an operand standing over a type
+  parameter fills in at each use. `tests/fixtures/intersection-empty-lab` pins the idiom in the
+  `{}` and `Record<never, never>` spellings, beside the operands that carry something.
+- **Callable operands render from their signatures** (`TR050`, Ergonomic). `typeof round &
+  Chained` is an overload set, and an export position already wrote it as two overloads; a member
+  position now reads the same signatures as a delegate (D5), reporting the overloads past the
+  first exactly as any other callback does. `tests/fixtures/intersection-callable-lab` pins the
+  two positions against each other.
+- **Operands agreeing on a member's declared type give the member that type** (`TR051`, Exact).
+  Where `{ to?: U } & { to: U }` flattens, the checker types `to` as the two declarations
+  intersected and distributes that over `U`'s arms, producing a cross product of arms that each
+  widen. One equality test over the operands' declarations answers it: `U`, required, no
+  distribution. Optionality is the only difference the test tolerates, and the required
+  declaration is the answer.
+
 ### 4.7 Enums
 
 - Numeric enum → F# `enum` with the checker's `getConstantValue` per member (Exact,

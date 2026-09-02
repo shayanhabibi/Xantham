@@ -1435,6 +1435,151 @@ let shapePassTests =
                 [ "intersection over a non-object operand has no members to flatten; widened to obj (§4.6)" ]
                 "and owned"
 
+        testCase "an empty operand reduces away and the remaining operand is the type" <| fun _ ->
+            // `string & {}`: the object operand declares nothing, so the intersection is
+            // `string`, and a union carrying one keeps the literals beside it (§4.6).
+            let empty = Build.facts (Build.typeResponse 80 TypeFlags.Object)
+
+            let idiom =
+                { Build.facts (Build.typeResponse 81 TypeFlags.Intersection) with IntersectionMembers = [ 1; 80 ] }
+
+            let model = Build.shapeModel (empty :: idiom :: Build.primitives)
+            let reference, findings = Spec.typeRef Build.context model None "Ease" 81
+            Expect.equal reference FsString "the operand that declares something is the type"
+
+            Expect.equal
+                (findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                [ "TR049", "Ease" ]
+                "and the reduction is owned"
+
+        testCase "an operand carrying a real member is not an empty operand" <| fun _ ->
+            // `string & { count: number }`: a member is a shape the mapping owes the reader,
+            // so the intersection stands and widens as it did.
+            let counted =
+                { Build.facts (Build.typeResponse 82 TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol 820 "count" SymbolFlags.Property) 2 ] }
+
+            let branded =
+                { Build.facts (Build.typeResponse 83 TypeFlags.Intersection) with IntersectionMembers = [ 1; 82 ] }
+
+            let model = Build.shapeModel (counted :: branded :: Build.primitives)
+            let reference, findings = Spec.typeRef Build.context model None "Counted" 83
+            Expect.equal reference FsObj "widened"
+
+            Expect.equal
+                (findings |> List.map _.Key)
+                [ "TR018" ]
+                "under the case that describes it"
+
+        testCase "an intersection of callable operands renders from its call signatures" <| fun _ ->
+            // `typeof round & Chained`: both operands carry signatures and no properties, so
+            // the checker hands the intersection both, and D5 writes the first as a delegate.
+            let callable id parameters =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                    CallSignatures = [ Build.signature parameters 2 ] }
+
+            let value = Build.resolvedMember (Build.symbol 900 "value" SymbolFlags.Property) 2
+            let length = Build.resolvedMember (Build.symbol 901 "length" SymbolFlags.Property) 2
+
+            let overloaded =
+                { Build.facts (Build.typeResponse 92 TypeFlags.Intersection) with
+                    IntersectionMembers = [ 90; 91 ]
+                    CallSignatures =
+                        [ Build.signature [ value; length ] 2; Build.signature [ length ] 2 ] }
+
+            let model =
+                Build.shapeModel (callable 90 [ value; length ] :: callable 91 [ length ] :: overloaded :: Build.primitives)
+
+            let reference, findings = Spec.typeRef Build.context model None "Utils.round" 92
+            Expect.equal reference (FsDelegate([ FsFloat; FsFloat ], FsFloat)) "the first signature shapes the delegate"
+
+            Expect.equal
+                (findings |> List.map (fun finding -> finding.Key, finding.Message))
+                [
+                    "TR031", "callback with 2 overloads shaped from the first"
+                    "TR050", "intersection of callable operands rendered from its 2 call signatures"
+                ]
+                "and both the overload loss and the flattening are owned"
+
+        testCase "operands agreeing on a member's declared type give the member that type" <| fun _ ->
+            // `{ to?: U } & { to: U }`: the checker types the flattened `to` as the two
+            // declarations intersected and distributes that over `U`'s arms. The operands
+            // declare one type, so that type is the answer (§4.6).
+            let union id members =
+                { Build.facts (Build.typeResponse id TypeFlags.Union) with UnionMembers = members }
+
+            let operand id memberTypeId optional =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                    Members =
+                        [ { Build.resolvedMember (Build.symbol (id * 10) "to" SymbolFlags.Property) memberTypeId with
+                              Optional = optional } ] }
+
+            let flattened =
+                { Build.facts (Build.typeResponse 76 TypeFlags.Intersection) with IntersectionMembers = [ 70; 71 ] }
+
+            let destinations =
+                { Build.facts (Build.typeResponse 77 TypeFlags.Intersection) with
+                    IntersectionMembers = [ 72; 73 ]
+                    Members = [ Build.resolvedMember (Build.symbol 770 "to" SymbolFlags.Property) 76 ] }
+
+            let model =
+                { Build.shapeModel (
+                    [
+                        union 70 [ 1; 2 ]
+                        union 71 [ 1; 2; 5 ]
+                        operand 72 71 true
+                        operand 73 70 false
+                        flattened
+                        destinations
+                    ]
+                    @ Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 77, "Destinations" ] }
+
+            let shaped, findings = Build.runPass Interfaces.shapeInterfaces model
+
+            let decl =
+                shaped.Decls
+                |> List.pick (function
+                    | FsInterface d when d.Name = "Destinations" -> Some d
+                    | _ -> None)
+
+            Expect.equal
+                (decl.Members
+                 |> List.choose (function
+                     | FsProperty property -> Some property.Type
+                     | _ -> None))
+                [ FsErasedUnion [ FsString; FsFloat ] ]
+                "the member reads the type both operands declare"
+
+            Expect.contains
+                (findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                ("TR051", "Destinations.to")
+                "and the agreement is owned"
+
+        testCase "operands disagreeing on a member's declared type leave it flattened" <| fun _ ->
+            let operand id memberTypeId =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol (id * 10) "to" SymbolFlags.Property) memberTypeId ] }
+
+            let flattened =
+                { Build.facts (Build.typeResponse 78 TypeFlags.Intersection) with IntersectionMembers = [ 1; 2 ] }
+
+            let destinations =
+                { Build.facts (Build.typeResponse 79 TypeFlags.Intersection) with
+                    IntersectionMembers = [ 74; 75 ]
+                    Members = [ Build.resolvedMember (Build.symbol 790 "to" SymbolFlags.Property) 78 ] }
+
+            let model =
+                { Build.shapeModel ([ operand 74 1; operand 75 2; flattened; destinations ] @ Build.primitives) with
+                    DeclNames = Map.ofList [ 79, "Destinations" ] }
+
+            let _, findings = Build.runPass Interfaces.shapeInterfaces model
+
+            Expect.isEmpty
+                (findings |> List.filter (fun finding -> finding.Key = "TR051"))
+                "two declared types are two types"
+
         testCase "classify-literal-unions makes a StringEnum with CompiledName per case" <| fun _ ->
             let union =
                 { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 7; 8 ] }

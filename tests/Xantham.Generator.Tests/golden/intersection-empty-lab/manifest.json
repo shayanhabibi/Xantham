@@ -1,0 +1,171 @@
+{
+  "package": "intersection-empty-lab",
+  "module": "IntersectionEmptyLab",
+  "counts": {
+    "exact": 2,
+    "ergonomic": 2,
+    "widened": 4,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SA - shape-aliases",
+      "total": 12,
+      "exact": 4,
+      "ergonomic": 1,
+      "widened": 7
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 1,
+      "ergonomic": 1
+    }
+  ],
+  "symbols": [
+    {
+      "name": "Ease",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR006",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "Ease",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR006",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "Ease",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-aliases",
+          "tier": "exact",
+          "symbol": "Ease",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
+        }
+      ]
+    },
+    {
+      "name": "Loose",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": [
+        {
+          "key": "TR049",
+          "pass": "shape-aliases",
+          "tier": "exact",
+          "symbol": "Loose",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
+        }
+      ]
+    },
+    {
+      "name": "Size",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR006",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "Size",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR006",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "Size",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-aliases",
+          "tier": "exact",
+          "symbol": "Size",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
+        }
+      ]
+    },
+    {
+      "name": "Weight",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR007",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "Weight",
+          "message": "numeric literal type widened to float (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR007",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "Weight",
+          "message": "numeric literal type widened to float (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-aliases",
+          "tier": "exact",
+          "symbol": "Weight",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
+        }
+      ]
+    },
+    {
+      "name": "Counted",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR018",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "Counted",
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+        }
+      ]
+    },
+    {
+      "name": "UserId",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SA001",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "UserId",
+          "message": "branding intersection emitted as a unit of measure; uses read as the branded primitive (\u00A74.6, D11)"
+        }
+      ]
+    },
+    {
+      "name": "Padded",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Padded",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "ease",
+      "tier": "exact",
+      "findings": []
+    }
+  ]
+}
