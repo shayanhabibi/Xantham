@@ -4,8 +4,8 @@
   "counts": {
     "exact": 252,
     "ergonomic": 1032,
-    "widened": 371,
-    "escape": 117
+    "widened": 373,
+    "escape": 115
   },
   "passes": [
     {
@@ -81,14 +81,9 @@
     },
     {
       "pass": "RA - repair-arity",
-      "total": 21,
+      "total": 23,
       "ergonomic": 4,
-      "widened": 17
-    },
-    {
-      "pass": "AC - audit-coverage",
-      "total": 2,
-      "escape": 2
+      "widened": 19
     }
   ],
   "symbols": [
@@ -70223,6 +70218,34 @@
       ]
     },
     {
+      "name": "PagesFunction",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "PagesFunction",
+          "message": "PagesFunctionContext is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA006",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "PagesFunction",
+          "message": "PagesFunction resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "symbol": "PagesFunction",
+          "message": "constraint on \u0027Params\u0027 has no F# form and is dropped (\u00A74.9)"
+        }
+      ]
+    },
+    {
       "name": "PagesFunctionContext",
       "file": "index.d.ts",
       "tier": "escape",
@@ -70401,6 +70424,34 @@
           "tier": "ergonomic",
           "symbol": "EventPluginContext",
           "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "PagesPluginFunction",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "PagesPluginFunction",
+          "message": "PagesPluginFunctionContext is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA006",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "PagesPluginFunction",
+          "message": "PagesPluginFunction resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "symbol": "PagesPluginFunction",
+          "message": "constraint on \u0027Params\u0027 has no F# form and is dropped (\u00A74.9)"
         }
       ]
     },
@@ -76904,60 +76955,6 @@
           "tier": "exact",
           "symbol": "ExportedHandlerFetchRequestItem",
           "message": "anonymous shape is an instantiation of IncomingRequestCfProperties; written as an application"
-        }
-      ]
-    },
-    {
-      "name": "PagesFunction",
-      "tier": "escape",
-      "findings": [
-        {
-          "key": "AC001",
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "symbol": "PagesFunction",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "key": "RA001",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "PagesFunction",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "PagesFunction",
-          "message": "constraint on \u0027Params\u0027 has no F# form and is dropped (\u00A74.9)"
-        }
-      ]
-    },
-    {
-      "name": "PagesPluginFunction",
-      "tier": "escape",
-      "findings": [
-        {
-          "key": "AC001",
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "symbol": "PagesPluginFunction",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "key": "RA001",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "PagesPluginFunction",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "PagesPluginFunction",
-          "message": "constraint on \u0027Params\u0027 has no F# form and is dropped (\u00A74.9)"
         }
       ]
     },
