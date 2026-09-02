@@ -1,0 +1,6 @@
+{
+  "name": "hoist-conditional-lab",
+  "type": "module",
+  "types": "index.d.ts",
+  "description": "Wave three lab: a generic alias whose intersection body carries a deferred conditional operand, paired against the same shape with the operand written directly. Both chains run through a polymorphic-`this` member, so the pair isolates the conditional operand as the only difference between a bounded hoist and a runaway one."
+}

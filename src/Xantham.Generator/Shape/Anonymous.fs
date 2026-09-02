@@ -5,6 +5,42 @@ open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
+/// An operand whose resolution waits on an argument: a conditional, an indexed access, a
+/// `keyof`, a template literal, a string mapping or a substitution. Under the alias's own
+/// parameters it stays in this deferred form, and every application carries whatever it
+/// resolved to in its place.
+let private isDeferredOperand (facts: TypeFacts) =
+    flag TypeFlags.Conditional facts
+    || flag TypeFlags.IndexedAccess facts
+    || flag TypeFlags.Index facts
+    || flag TypeFlags.TemplateLiteral facts
+    || flag TypeFlags.StringMapping facts
+    || flag TypeFlags.Substitution facts
+
+/// Whether an intersection branches on one of its own arguments. This is narrower than "no
+/// members", which a type-parameter operand also produces: `solid-js`'s `FlowProps<P, C> = P &
+/// { children: C }` reads false and each of its applications is hoisted on its own, while
+/// `three`'s `Node<TNodeType>` reads true and its applications go back to one declaration.
+let private hasConditionalOperand (model: ShapeModel) (facts: TypeFacts) =
+    facts.IntersectionMembers
+    |> List.exists (fun id ->
+        match Map.tryFind id model.Types with
+        | Some operand -> flag TypeFlags.Conditional operand
+        | None -> false)
+
+/// A generic alias over an intersection, in the form the checker declared it. `isFlattenable`
+/// is the usual reading, and a conditional operand is the exception it misses: an intersection
+/// surrenders its members only once every operand resolves, so `three`'s `Node<TNodeType> =
+/// NodeInterface<…> & (unknown extends TNodeType ? {} : NodeExtensions<TNodeType>)` is
+/// memberless at its declaration and four members wide at `Node<number>`. Both are the same
+/// alias (`docs/plans/generator-three-rung.md` §11.4).
+let private isAliasIntersectionForm (model: ShapeModel) (facts: TypeFacts) =
+    isFlattenable model facts
+    || (flag TypeFlags.Intersection facts
+        && (brandedPrimitive model facts).IsNone
+        && (arrayElement model facts).IsNone
+        && hasConditionalOperand model facts)
+
 /// The declaration form of every generic *alias* over an intersection: alias symbol -> the
 /// smallest type id carrying it that binds parameters of its own. The checker creates an
 /// alias's declared type before it can instantiate it, so the smallest such id is the declared
@@ -18,7 +54,7 @@ let private aliasDeclarationForms (model: ShapeModel) : Map<int, int> =
             match facts.Response.AliasSymbol with
             | ValueSome alias when
                 not (Map.containsKey alias forms)
-                && isFlattenable model facts
+                && isAliasIntersectionForm model facts
                 && not (List.isEmpty (declParamIds facts))
                 ->
                 Map.add alias typeId forms
@@ -32,6 +68,29 @@ let private unifyAlias (model: ShapeModel) (parameters: Set<int>) (declared: int
     let mutable subst = Map.empty
     let mutable ok = true
     let mutable seen = Set.empty
+
+    /// The operand pairs two intersections share. A deferred operand resolves to `{}` under
+    /// some arguments and the checker keeps no `{}` in an intersection, so an application
+    /// carries between `declared - deferred` and `declared` operands; the pairing that fits
+    /// the application's own count is the one the checker produced.
+    let alignOperands (declaredFacts: TypeFacts) (instanceFacts: TypeFacts) =
+        let declaredOperands = declaredFacts.IntersectionMembers
+        let instanceOperands = instanceFacts.IntersectionMembers
+
+        if declaredOperands.Length = instanceOperands.Length then
+            Some(List.zip declaredOperands instanceOperands)
+        else
+            let surviving =
+                declaredOperands
+                |> List.filter (fun id ->
+                    match Map.tryFind id model.Types with
+                    | Some operand -> not (isDeferredOperand operand)
+                    | None -> true)
+
+            if surviving.Length = instanceOperands.Length then
+                Some(List.zip surviving instanceOperands)
+            else
+                None
 
     let rec go (left: int) (right: int) =
         if ok && not (Set.contains (left, right) seen) then
@@ -51,6 +110,12 @@ let private unifyAlias (model: ShapeModel) (parameters: Set<int>) (declared: int
                 match Map.tryFind left model.Types, Map.tryFind right model.Types with
                 | Some declaredFacts, Some instanceFacts ->
                     match declaredFacts.Response.Target, instanceFacts.Response.Target with
+                    // A deferred operand and its resolution, which stand in the same place and
+                    // share no structure: `(unknown extends TNodeType ? {} : NodeExtensions<
+                    // TNodeType>)` arrives at `Node<number>` as `NodeExtensions<number>`, and
+                    // the checker keeps neither branch nor argument on the deferred form. The
+                    // pair binds nothing and the walk continues on the remaining operands.
+                    | _ when isDeferredOperand declaredFacts -> ()
                     // Two references to the same generic: the arguments are what differ.
                     | ValueSome declaredTarget, ValueSome instanceTarget when
                         declaredTarget = instanceTarget
@@ -61,9 +126,12 @@ let private unifyAlias (model: ShapeModel) (parameters: Set<int>) (declared: int
                     | _ when
                         flag TypeFlags.Intersection declaredFacts
                         && flag TypeFlags.Intersection instanceFacts
-                        && declaredFacts.IntersectionMembers.Length = instanceFacts.IntersectionMembers.Length
                         ->
-                        List.iter2 go declaredFacts.IntersectionMembers instanceFacts.IntersectionMembers
+                        match alignOperands declaredFacts instanceFacts with
+                        | Some pairs ->
+                            pairs
+                            |> List.iter (fun (declaredOperand, instanceOperand) -> go declaredOperand instanceOperand)
+                        | None -> ok <- false
                     // An anonymous operand written inline in the alias body. `D1Response & {
                     // results: T[] }` instantiates its second operand in place, and the checker
                     // gives an instantiated anonymous object no `Target` to compare it by, so
@@ -211,6 +279,26 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 // `Ready<'T>` once and instantiations are applications of it (§4.9).
                 match facts.Response.Target with
                 | ValueSome target when target <> typeId && Map.containsKey target model.Types -> walk path order target
+                | _ -> ()
+
+                // The same rule for the declaration form of an alias whose body defers on a
+                // conditional, which reaches this point nameless: it surrenders no members, so
+                // `needsName` passes over it, and `three` exports neither `Node` nor `VarNode`
+                // from the entry that would have named it (§11.4). The first application names
+                // the family and every application after it is a reference; without the name
+                // each one hoists a strictly larger shape until the depth cutoff stops it.
+                match facts.Response.AliasSymbol with
+                | ValueSome alias when isFlattenable model facts ->
+                    match Map.tryFind alias aliasForms with
+                    | Some declared when
+                        declared <> typeId
+                        && not (Map.containsKey declared names)
+                        && (match Map.tryFind declared model.Types with
+                            | Some declaredFacts -> hasConditionalOperand model declaredFacts
+                            | None -> false)
+                        ->
+                        claim path declared order
+                    | _ -> ()
                 | _ -> ()
 
                 if needsName facts then
