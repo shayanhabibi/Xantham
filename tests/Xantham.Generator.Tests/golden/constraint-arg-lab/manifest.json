@@ -1,0 +1,162 @@
+{
+  "package": "constraint-arg-lab",
+  "module": "ConstraintArgLab",
+  "counts": {
+    "exact": 1,
+    "ergonomic": 3,
+    "widened": 4,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 4,
+      "exact": 1,
+      "widened": 3
+    },
+    {
+      "pass": "SA - shape-aliases",
+      "total": 3,
+      "widened": 3
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 4,
+      "ergonomic": 4
+    }
+  ],
+  "symbols": [
+    {
+      "name": "Lengthy",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Lengthy",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Holder",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Holder",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "HeldString",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR044",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "HeldString",
+          "message": "string does not inherit Holder\u0027s constraint Lengthy; the argument is written as the constraint"
+        }
+      ]
+    },
+    {
+      "name": "HeldTuple",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR044",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "HeldTuple",
+          "message": "string * float does not inherit Holder\u0027s constraint Lengthy; the argument is written as the constraint"
+        }
+      ]
+    },
+    {
+      "name": "HeldArray",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR044",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "HeldArray",
+          "message": "float[] does not inherit Holder\u0027s constraint Lengthy; the argument is written as the constraint"
+        }
+      ]
+    },
+    {
+      "name": "Sized",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI005",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "Sized",
+          "message": "base Lengthy is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Sized",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "HeldSized",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "Shelf",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR044",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Shelf.arr",
+          "message": "float[] does not inherit Holder\u0027s constraint Lengthy; the argument is written as the constraint"
+        },
+        {
+          "key": "TR044",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Shelf.str",
+          "message": "string does not inherit Holder\u0027s constraint Lengthy; the argument is written as the constraint"
+        },
+        {
+          "key": "TR044",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Shelf.tup",
+          "message": "string * float does not inherit Holder\u0027s constraint Lengthy; the argument is written as the constraint"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Shelf",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    }
+  ]
+}

@@ -221,6 +221,9 @@ type TransitionState =
 
 type Accessor<'T> = Func<'T>
 
+[<Erase>]
+type Setter<'T, 'U> = private Setter__ of Func<obj, obj>
+
 type Signal<'T> = Func<'T> * Func<obj, obj>
 
 [<Interface>]

@@ -1,0 +1,1 @@
+{ "name": "constraint-arg-lab", "type": "module", "types": "index.d.ts", "description": "Wave three lab: a type argument that structurally satisfies a still-written constraint but has no nominal F# form for it." }

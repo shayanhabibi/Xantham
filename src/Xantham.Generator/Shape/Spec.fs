@@ -329,6 +329,46 @@ let internal tupleElementFlags (facts: TypeFacts) =
     else
         facts.TypeArguments |> List.map (fun _ -> ElementFlags.Required)
 
+/// A signature whose tuple-typed rest parameter is written out as the parameters it stands for
+/// (§4.12). `(...args: [value: T]) => R` is TypeScript's spelling of `(value: T) => R` and
+/// `(...args: []) => R` of `() => R`: each element becomes an ordinary parameter, an optional
+/// element an optional one. A tuple carrying a variadic element keeps the rest form.
+let internal expandTupleRest (model: ShapeModel) (signature: ResolvedSignature) : ResolvedSignature =
+    match signature.HasRest, List.tryLast signature.Parameters with
+    | true, Some rest ->
+        match Map.tryFind rest.TypeId model.Types with
+        | Some facts when isTuple facts && not (tupleElementFlags facts |> List.exists isVariadicElement) ->
+            let flags = tupleElementFlags facts
+
+            // One element keeps the rest parameter's own name; several are told apart by
+            // position, the tuple's labels being cosmetic and absent from the wire.
+            let elementName index =
+                if flags.Length = 1 then
+                    rest.Symbol.Name
+                else
+                    $"{rest.Symbol.Name}{index}"
+
+            let expanded =
+                List.mapi2
+                    (fun index (element: ElementFlags) typeId ->
+                        { rest with
+                            Symbol =
+                                { rest.Symbol with
+                                    Name = elementName index
+                                }
+                            Optional = element.HasFlag ElementFlags.Optional
+                            TypeId = typeId
+                        })
+                    flags
+                    facts.TypeArguments
+
+            { signature with
+                Parameters = List.truncate (signature.Parameters.Length - 1) signature.Parameters @ expanded
+                HasRest = false
+            }
+        | _ -> signature
+    | _ -> signature
+
 /// The generic declaration an instantiation points back at, when this run declares it. A
 /// generic declaration is its own target, so only a genuine instantiation matches.
 let internal instantiationOf (model: ShapeModel) (facts: TypeFacts) =
@@ -408,6 +448,31 @@ let internal constraintProvenNominal (model: ShapeModel) (parameterId: int) (bou
     match Map.tryFind parameterId model.Types |> Option.bind _.Default with
     | Some fallback when fallback <> parameterId -> satisfiesNominally model boundId fallback
     | _ -> true
+
+/// A reference as the phrase a finding message names it by. Source-file spelling - module
+/// qualification, line breaks, the tick on a variable - belongs to the renderer.
+let rec internal typeSpelling (reference: FsTypeRef) : string =
+    let spell (separator: string) items =
+        items |> List.map typeSpelling |> String.concat separator
+
+    let commas = spell ", "
+
+    match reference with
+    | FsBool -> "bool"
+    | FsString -> "string"
+    | FsFloat -> "float"
+    | FsBigInt -> "bigint"
+    | FsUnit -> "unit"
+    | FsObj -> "obj"
+    | FsOption inner -> $"{typeSpelling inner} option"
+    | FsArray inner -> $"{typeSpelling inner}[]"
+    | FsTuple items -> spell " * " items
+    | FsErasedUnion arms -> $"U{arms.Length}<{commas arms}>"
+    | FsDelegate(arguments, returns) -> $"Func<{commas (arguments @ [ returns ])}>"
+    | FsTypeVar name -> $"'{name}"
+    | FsApp(name, arguments) -> $"{name}<{commas arguments}>"
+    | FsBranded(primitive, measure) -> $"{typeSpelling primitive}<{measure}>"
+    | FsNamed name -> name
 
 // ---------------------------------------------------------------------------------------------
 // Type references.
@@ -845,6 +910,15 @@ and internal appliedRefTo
 
     let satisfies = satisfiesNominally model
 
+    // The forms F# seals against a `:>` constraint. The arms below decide the rest by name.
+    let sealedForm =
+        function
+        | FsObj
+        | FsTypeVar _
+        | FsNamed _
+        | FsApp _ -> false
+        | _ -> true
+
     let parameters =
         if parameters.Length = arguments.Length then
             parameters |> List.map Some
@@ -879,6 +953,18 @@ and internal appliedRefTo
                     findings
                     @ [
                         Finding.make owner (TypeReference.ArgumentNotASubtypeOfConstraint(shown, name, bound))
+                    ]
+
+                FsNamed bound
+            // TypeScript admits a primitive against a structural bound - `string` has `length` -
+            // where `:>` admits it nowhere, so a sealed form is written as the constraint too.
+            | Some(boundId, bound), _ when sealedForm reference && not (satisfies boundId argument) ->
+                findings <-
+                    findings
+                    @ [
+                        Finding.make
+                            owner
+                            (TypeReference.ArgumentNotASubtypeOfConstraint(typeSpelling reference, name, bound))
                     ]
 
                 FsNamed bound
@@ -939,7 +1025,7 @@ and internal delegateRef
     : FsTypeRef * Finding list =
     match facts.CallSignatures with
     | [] -> FsObj, [ Finding.make owner TypeReference.CallableWithoutSignatures ]
-    | signature :: rest ->
+    | first :: rest ->
         let mutable findings =
             if rest.IsEmpty then
                 []
@@ -947,6 +1033,8 @@ and internal delegateRef
                 [
                     Finding.make owner (TypeReference.CallbackOverloadsFromFirst(rest.Length + 1))
                 ]
+
+        let signature = expandTupleRest model first
 
         let parameters =
             signature.Parameters
@@ -1160,12 +1248,49 @@ let internal declTypeParams (ctx: Context) (model: ShapeModel) (owner: string) (
 /// The parameters a callback alias binds, which include the signature's own. F# has no rank-2
 /// form, so a generic *function type* - `type F = <T>(t: T) => T` - can only be approximated
 /// by hoisting the variable onto the alias, which is worth a finding.
+///
+/// Several call signatures may declare the same name, and F# rejects a head naming one variable
+/// twice (FS0037). Declarations sharing a name and a bound are written as one variable, which
+/// every signature's uses bind to; a name declared under two bounds keeps a slot per bound, and
+/// `repair-arity` prices the head F# refuses.
 let internal aliasTypeParams (ctx: Context) (model: ShapeModel) (owner: string) (facts: TypeFacts) =
     let declared = declParamIds facts
     let hoisted = facts.CallSignatures |> List.collect _.TypeParameters |> List.distinct
+    let ids = declared @ hoisted |> List.distinct
+
+    // Declarations sharing a name *and* a bound share a variable; a name declared under two
+    // bounds keeps a slot per bound, where one variable would retype a signature. An unnamed
+    // parameter answers only to itself, so each still reports its own erasure.
+    let identity id =
+        let facts = Map.tryFind id model.Types
+
+        match facts |> Option.bind _.SymbolName with
+        | Some name -> Ok(name, facts |> Option.bind _.Constraint)
+        | None -> Error id
+
+    let groups = ids |> List.groupBy identity
+
+    let collapsed =
+        groups
+        |> List.choose (fun (identity, group) ->
+            match identity, group with
+            | Ok(name, _), _ :: (_ :: _ as tail) -> Some(name, tail, group.Length)
+            | _ -> None)
 
     let parameters, scope, findings =
-        declared @ hoisted |> List.distinct |> typeParamsOf ctx model owner
+        groups |> List.map (snd >> List.head) |> typeParamsOf ctx model owner
+
+    // Each collapsed id names the variable the head writes, so every signature's uses bind to it.
+    let scope =
+        collapsed
+        |> List.fold
+            (fun bound (name, tail, _) -> tail |> List.fold (fun bound id -> Map.add id name bound) bound)
+            scope
+
+    let collapseFindings =
+        collapsed
+        |> List.map (fun (name, _, declared) ->
+            Finding.make owner (TypeParameters.DuplicateTypeParameterCollapsed(name, declared)))
 
     let hoistFindings =
         if hoisted |> List.exists (fun id -> not (List.contains id declared)) then
@@ -1173,7 +1298,7 @@ let internal aliasTypeParams (ctx: Context) (model: ShapeModel) (owner: string) 
         else
             []
 
-    parameters, scope, findings @ hoistFindings
+    parameters, scope, findings @ collapseFindings @ hoistFindings
 
 /// The type variables a rendered reference actually names.
 let rec internal typeVarsOf (reference: FsTypeRef) : Set<string> =
@@ -1257,15 +1382,18 @@ let internal resultName (taken: Set<string>) =
 // ---------------------------------------------------------------------------------------------
 
 /// A resolved signature as an F# type-parameter list, parameter list and return reference.
-/// Rest parameters are marked from the signature flag; their array types read as-is. A
-/// signature's *own* parameters (§4.9) bind here, not at the declaration: `get<T>(source: T)`.
+/// Rest parameters are marked from the signature flag; their array types read as-is, and a
+/// tuple-typed one is written out as the parameters it stands for. A signature's *own*
+/// parameters (§4.9) bind here, not at the declaration: `get<T>(source: T)`.
 let internal shapeSignature
     (ctx: Context)
     (model: ShapeModel)
     (self: string option)
     (owner: string)
-    (signature: ResolvedSignature)
+    (declared: ResolvedSignature)
     : FsTypeParam list * FsParam list * FsTypeRef * Finding list =
+    let signature = expandTupleRest model declared
+
     // §4.10, the open keyof regime: a `K extends keyof T` variable is not bound as an F#
     // variable - a bare `'K` would let any type through and drag `T[K]` to obj. The support
     // package's `keyof<'T>` is written at its uses instead.
