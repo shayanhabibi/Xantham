@@ -4,10 +4,6 @@
       "mcp__fslangmcp",
       "Read(./.archive/README.md)"
     ],
-    "ask": [
-      "Read(./.archive/**)",
-      "Grep(./.archive/**)"
-    ],
     "deny": [
       "Bash(git push:*)",
       "Bash(rtk git push:*)",
@@ -18,9 +14,16 @@
       "Bash(gh pr review:*)",
       "Bash(gh pr merge:*)",
       "Bash(gh release create:*)"
+    ],
+    "ask": [
+      "Read(./.archive/**)",
+      "Grep(./.archive/**)"
     ]
   },
   "enabledMcpjsonServers": [
     "fslangmcp"
-  ]
+  ],
+  "enabledPlugins": {
+    "comment-hygiene@roboz0r": true
+  }
 }
