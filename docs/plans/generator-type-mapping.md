@@ -479,6 +479,17 @@ absence under the live compiler.
   or is a variable not bound with the same named constraint (a `typekeyof` result), is
   written as the constraint itself, with a finding - F# rejects `Listener<obj>` against
   `'E :> Event` outright (landed 2026-09-02).
+  A constraint the run can see is unsatisfiable is not written at all. TypeScript's `extends`
+  is structural and `:>` is nominal, so `class Geometry<Attributes extends Wide = Narrow>` -
+  where `Narrow` and `Wide` are two `Record<string, …>` aliases with no `inherit` between them -
+  renders a head that rejects the declaration's own default, and the default is what every bare
+  `Geometry` resolves to. The bound is dropped from the head with `TP008`, Ergonomic, and the
+  same test silences the argument substitution above: a constraint the head does not write is
+  one nothing has to satisfy, so the argument TypeScript resolved survives rather than widening
+  to the bound. Distinct from `TP002`, which is a constraint with no F# form at all
+  (`extends keyof T`, `extends string`); this one has a form and is still not provable.
+  `tests/fixtures/nominal-lab` pins it, with the two negatives - a bound the argument *is*, and
+  a bound the argument `inherit`s - that must keep their `:>` (landed 2026-09-02, wave two).
 - **Default type arguments** (`interface Foo<T = string>`) — F# permits same-name types with
   different generic arity: emit `type Foo<'T> = ...` *and* `type Foo = Foo<string>` (an
   abbreviation per defaulted suffix). Ergonomic, cheap, and exactly how consumers expect it

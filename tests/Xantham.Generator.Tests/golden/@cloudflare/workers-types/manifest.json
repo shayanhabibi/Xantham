@@ -43,9 +43,9 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 8024,
+      "total": 8025,
       "exact": 57,
-      "ergonomic": 6992,
+      "ergonomic": 6993,
       "widened": 825,
       "escape": 150
     },
@@ -57,8 +57,8 @@
     },
     {
       "pass": "SC - shape-classes",
-      "total": 56,
-      "ergonomic": 44,
+      "total": 57,
+      "ergonomic": 45,
       "widened": 4,
       "escape": 8
     },
@@ -52465,6 +52465,20 @@
           "tier": "widened",
           "symbol": "Ai.run",
           "message": "overload dropped: identical to an earlier one after widening"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-classes",
+          "tier": "ergonomic",
+          "symbol": "Ai",
+          "message": "constraint AiModelListType on \u0027AiModelList\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Ai",
+          "message": "constraint AiModelListType on \u0027AiModelList\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR032",

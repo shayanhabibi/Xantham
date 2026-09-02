@@ -144,7 +144,7 @@ type AllExtendOptions =
 /// <remarks>@category Utilities</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type AllExtend<'TArray, 'Type, 'Options when 'Options :> AllExtendOptions> = private AllExtend__ of obj
+type AllExtend<'TArray, 'Type, 'Options> = private AllExtend__ of obj
 
 /// <summary>
 /// Create a type with all fields from a union of object types.
@@ -1289,7 +1289,7 @@ type ConditionalPickDeepOptionsCondition =
 /// </remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type ConditionalPickDeep<'Type, 'Condition, 'Options when 'Options :> ConditionalPickDeepOptions> = private ConditionalPickDeep__ of obj
+type ConditionalPickDeep<'Type, 'Condition, 'Options> = private ConditionalPickDeep__ of obj
 
 /// <summary>
 /// Pick keys from the shape that matches the given <c>Condition</c>.
@@ -1490,7 +1490,7 @@ type ConditionalSimplify<'Type, 'ExcludeType, 'IncludeType> = private Conditiona
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type DelimiterCase<'Value, 'Delimiter, 'Options when 'Options :> WordsOptions> = private DelimiterCase__ of obj
+type DelimiterCase<'Value, 'Delimiter, 'Options> = private DelimiterCase__ of obj
 
 /// <summary>
 /// Convert object properties to a custom string delimiter casing recursively.
@@ -1553,7 +1553,7 @@ type DelimiterCase<'Value, 'Delimiter, 'Options when 'Options :> WordsOptions> =
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type DelimiterCasedPropertiesDeep<'Value, 'Delimiter, 'Options when 'Options :> WordsOptions> = private DelimiterCasedPropertiesDeep__ of obj
+type DelimiterCasedPropertiesDeep<'Value, 'Delimiter, 'Options> = private DelimiterCasedPropertiesDeep__ of obj
 
 /// <summary>
 /// Convert object properties to a custom string delimiter casing.
@@ -1590,7 +1590,7 @@ type DelimiterCasedPropertiesDeep<'Value, 'Delimiter, 'Options when 'Options :> 
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type DelimiterCasedProperties<'Value, 'Delimiter, 'Options when 'Options :> WordsOptions> = private DelimiterCasedProperties__ of obj
+type DelimiterCasedProperties<'Value, 'Delimiter, 'Options> = private DelimiterCasedProperties__ of obj
 
 /// <summary>
 /// Omits keys from a type, distributing the operation over a union.
@@ -2038,7 +2038,7 @@ type ExceptOptions =
 /// </remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type Except<'ObjectType, 'KeysType, 'Options when 'Options :> ExceptOptions> = private Except__ of obj
+type Except<'ObjectType, 'KeysType, 'Options> = private Except__ of obj
 
 /// <summary>
 /// A stricter version of <c>Exclude&lt;T, U&gt;</c> that excludes types only when they are exactly identical.
@@ -2387,7 +2387,7 @@ type ExtendsStrictOptions =
 /// <remarks>@see {@link ExtendsStrictOptions}</remarks>
 /// <remarks>@category Improved Built-in</remarks>
 [<Erase>]
-type ExtendsStrict<'Left, 'Right, 'Options when 'Options :> ExtendsStrictOptions> = private ExtendsStrict__ of obj
+type ExtendsStrict<'Left, 'Right, 'Options> = private ExtendsStrict__ of obj
 
 /// <summary>
 /// A stricter version of <c>Extract&lt;T, U&gt;</c> that extracts types only when they are exactly identical.
@@ -2709,7 +2709,7 @@ type GetOptions =
 /// <remarks>@category Array</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type Get<'BaseType, 'Path, 'Options when 'Options :> GetOptions> = private Get__ of obj
+type Get<'BaseType, 'Path, 'Options> = private Get__ of obj
 
 /// <summary>
 /// Declare locally scoped properties on <c>globalThis</c>.
@@ -4057,7 +4057,7 @@ type IsTupleOptions =
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsTuple<'TArray, 'Options when 'Options :> IsTupleOptions> = private IsTuple__ of obj
+type IsTuple<'TArray, 'Options> = private IsTuple__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is <c>undefined</c>.
@@ -4480,7 +4480,7 @@ type Jsonify<'T> = private Jsonify__ of obj
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type KebabCase<'Value, 'Options when 'Options :> WordsOptions> = private KebabCase__ of obj
+type KebabCase<'Value, 'Options> = private KebabCase__ of obj
 
 /// <summary>
 /// Convert object properties to kebab case recursively.
@@ -4543,7 +4543,7 @@ type KebabCase<'Value, 'Options when 'Options :> WordsOptions> = private KebabCa
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type KebabCasedPropertiesDeep<'Value, 'Options when 'Options :> WordsOptions> = private KebabCasedPropertiesDeep__ of obj
+type KebabCasedPropertiesDeep<'Value, 'Options> = private KebabCasedPropertiesDeep__ of obj
 
 /// <summary>
 /// Convert top-level object properties to kebab case.
@@ -4580,7 +4580,7 @@ type KebabCasedPropertiesDeep<'Value, 'Options when 'Options :> WordsOptions> = 
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type KebabCasedProperties<'Value, 'Options when 'Options :> WordsOptions> = private KebabCasedProperties__ of obj
+type KebabCasedProperties<'Value, 'Options> = private KebabCasedProperties__ of obj
 
 /// <summary>
 /// Get keys of the given type as strings.
@@ -5080,7 +5080,7 @@ type MergeDeepOptionsArrayMergeMode =
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type MergeDeep<'Destination, 'Source, 'Options when 'Options :> MergeDeepOptions> = private MergeDeep__ of obj
+type MergeDeep<'Destination, 'Source, 'Options> = private MergeDeep__ of obj
 
 /// <summary>
 /// Create a type that has mutually exclusive keys.
@@ -6738,7 +6738,7 @@ type PartialDeepOptions =
 /// <remarks>@category Set</remarks>
 /// <remarks>@category Map</remarks>
 [<Erase>]
-type PartialDeep<'T, 'Options when 'Options :> PartialDeepOptions> = private PartialDeep__ of obj
+type PartialDeep<'T, 'Options> = private PartialDeep__ of obj
 
 /// <remarks>@see {@link PartialOnUndefinedDeep}</remarks>
 [<Interface>]
@@ -6785,7 +6785,7 @@ type PartialOnUndefinedDeepOptions =
 /// </remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type PartialOnUndefinedDeep<'T, 'Options when 'Options :> PartialOnUndefinedDeepOptions> = private PartialOnUndefinedDeep__ of obj
+type PartialOnUndefinedDeep<'T, 'Options> = private PartialOnUndefinedDeep__ of obj
 
 /// <summary>
 /// Convert a string literal to pascal-case.
@@ -7105,7 +7105,7 @@ type PathsOptions =
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type Paths<'T, 'Options when 'Options :> PathsOptions> = private Paths__ of obj
+type Paths<'T, 'Options> = private Paths__ of obj
 
 /// <summary>
 /// Pick properties from a deeply-nested object.
@@ -7744,7 +7744,7 @@ type RemovePrefixOptions =
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type RemovePrefix<'S, 'Prefix, 'Options when 'Options :> RemovePrefixOptions> = private RemovePrefix__ of obj
+type RemovePrefix<'S, 'Prefix, 'Options> = private RemovePrefix__ of obj
 
 /// <remarks>@see {@link RemoveSuffix}</remarks>
 [<Interface>]
@@ -7831,7 +7831,7 @@ type RemoveSuffixOptions =
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type RemoveSuffix<'S, 'Suffix, 'Options when 'Options :> RemoveSuffixOptions> = private RemoveSuffix__ of obj
+type RemoveSuffix<'S, 'Suffix, 'Options> = private RemoveSuffix__ of obj
 
 /// <summary>
 /// Rename keys in an object type according to a map of old-to-new names.
@@ -8001,7 +8001,7 @@ type ReplaceOptions =
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type Replace<'Input, 'Search, 'Replacement, 'Options when 'Options :> ReplaceOptions> = private Replace__ of obj
+type Replace<'Input, 'Search, 'Replacement, 'Options> = private Replace__ of obj
 
 /// <summary>
 /// Create a type that requires all of the given keys or none of the given keys, while keeping the remaining keys as is.
@@ -8287,7 +8287,7 @@ type SchemaOptions =
 /// <remarks>@see {@link SchemaOptions}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type Schema<'Type, 'Value, 'Options when 'Options :> SchemaOptions> = private Schema__ of obj
+type Schema<'Type, 'Value, 'Options> = private Schema__ of obj
 
 /// <summary>
 /// Convert a string literal to screaming-snake-case.
@@ -8308,7 +8308,7 @@ type Schema<'Type, 'Value, 'Options when 'Options :> SchemaOptions> = private Sc
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type ScreamingSnakeCase<'Value, 'Options when 'Options :> WordsOptions> = private ScreamingSnakeCase__ of obj
+type ScreamingSnakeCase<'Value, 'Options> = private ScreamingSnakeCase__ of obj
 
 [<Interface>]
 type SetFieldTypeOptions =
@@ -8711,7 +8711,7 @@ type SharedUnionFieldsDeepOptions =
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Union</remarks>
 [<Erase>]
-type SharedUnionFieldsDeep<'Union, 'Options when 'Options :> SharedUnionFieldsDeepOptions> = private SharedUnionFieldsDeep__ of obj
+type SharedUnionFieldsDeep<'Union, 'Options> = private SharedUnionFieldsDeep__ of obj
 
 /// <summary>
 /// Create a type with shared fields from a union of object types.
@@ -9006,7 +9006,7 @@ type SingleKeyObject<'ObjectType> = private SingleKeyObject__ of obj
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type SnakeCase<'Value, 'Options when 'Options :> WordsOptions> = private SnakeCase__ of obj
+type SnakeCase<'Value, 'Options> = private SnakeCase__ of obj
 
 /// <summary>
 /// Convert object properties to snake case recursively.
@@ -9069,7 +9069,7 @@ type SnakeCase<'Value, 'Options when 'Options :> WordsOptions> = private SnakeCa
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SnakeCasedPropertiesDeep<'Value, 'Options when 'Options :> WordsOptions> = private SnakeCasedPropertiesDeep__ of obj
+type SnakeCasedPropertiesDeep<'Value, 'Options> = private SnakeCasedPropertiesDeep__ of obj
 
 /// <summary>
 /// Convert top-level object properties to snake case.
@@ -9106,7 +9106,7 @@ type SnakeCasedPropertiesDeep<'Value, 'Options when 'Options :> WordsOptions> = 
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SnakeCasedProperties<'Value, 'Options when 'Options :> WordsOptions> = private SnakeCasedProperties__ of obj
+type SnakeCasedProperties<'Value, 'Options> = private SnakeCasedProperties__ of obj
 
 /// <remarks>@see {@link SomeExtend}</remarks>
 [<Interface>]
@@ -9192,7 +9192,7 @@ type SomeExtendOptions =
 /// <remarks>@category Utilities</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type SomeExtend<'TArray, 'Type, 'Options when 'Options :> SomeExtendOptions> = private SomeExtend__ of obj
+type SomeExtend<'TArray, 'Type, 'Options> = private SomeExtend__ of obj
 
 /// <summary>
 /// Splits an array into three parts, where the first contains all elements before the rest element, the second is the [<c>rest</c>](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types) element itself, and the third contains all elements after the rest element.
@@ -9282,7 +9282,7 @@ type SplitOptions =
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type Split<'S, 'Delimiter, 'Options when 'Options :> SplitOptions> = private Split__ of obj
+type Split<'S, 'Delimiter, 'Options> = private Split__ of obj
 
 /// <summary>
 /// Mimic the type inferred by TypeScript when merging two objects or two arrays/tuples using the spread syntax.
@@ -9502,7 +9502,7 @@ type StringToArrayOptions =
 /// <remarks>@see {@link StringToArrayOptions}</remarks>
 /// <remarks>@category String</remarks>
 [<Erase>]
-type StringToArray<'S, 'Options when 'Options :> StringToArrayOptions> = private StringToArray__ of obj
+type StringToArray<'S, 'Options> = private StringToArray__ of obj
 
 /// <summary>
 /// Converts a numeric string to a number.
@@ -11769,7 +11769,7 @@ type WordsOptions =
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type Words<'Sentence, 'Options when 'Options :> WordsOptions> = private Words__ of obj
+type Words<'Sentence, 'Options> = private Words__ of obj
 
 /// <summary>
 /// Create a deeply mutable version of an <c>object</c>/<c>ReadonlyMap</c>/<c>ReadonlySet</c>/<c>ReadonlyArray</c> type. The inverse of <c>ReadonlyDeep&lt;T&gt;</c>. Use <c>Writable&lt;T&gt;</c> if you only need one level deep.

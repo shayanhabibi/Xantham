@@ -898,6 +898,16 @@ Phases — each ends with the compile gate green on its fixtures:
       argument that reaches its bound through neither bases nor intersection operands is
       written as the bound instead (`TR044`), the same substitution an argument that widened
       to `obj` already gets. Two sites, both in `workers-types`.
+    - *Wave two, lane C: and a bound the run can see is unsatisfiable is not written.* The
+      substitution above is the right answer when the head's constraint is real, and the wrong
+      one when it is not: `class Geometry<Attributes extends Wide = Narrow>` renders a bound
+      that rejects its own default, so every bare `Geometry` was substituted up to
+      `Geometry<Wide>` - 328 sites on the `@types/three` rung, all of them
+      `BufferGeometry<NormalBufferAttributes, …>`. `inherit` cannot reach them, because the two
+      types are `Record<string, …>` aliases with no declared base. The head drops the bound
+      instead (`TP008`, Ergonomic) and `TR044` reads the same predicate, so it falls silent on
+      exactly the constraints the head no longer writes and the resolved argument survives.
+      `TP008` 0 → 33, `TR044` unmoved at 2; `tests/fixtures/nominal-lab` pins it.
     Measured: `workers-types` `SI002` 77 → 20 with `SI005` (an emitted is-a relation, Exact)
     at 57, `TR044` 0 → 2, `TR024` 105 → 114 (a base reference now goes through `typeRef`, so
     its type arguments raise lib-binding findings), exact 260 → 261 and ergonomic 967 → 966,

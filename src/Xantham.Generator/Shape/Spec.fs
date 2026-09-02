@@ -322,6 +322,46 @@ let internal isFlattenable (model: ShapeModel) (facts: TypeFacts) =
     && (brandedPrimitive model facts).IsNone
     && not (facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
 
+/// Whether an argument *is* the bound, or reaches it through the bases and intersection
+/// operands `shape-interfaces` emits as `inherit`. An instantiation is asked of its target,
+/// the declaration carrying the heritage. This is F# subtyping, not TypeScript's: it is the
+/// question `:>` asks, and it is asked in two places - of an argument at a reference, and of a
+/// parameter's own default when the head is written.
+let internal satisfiesNominally (model: ShapeModel) (boundId: int) (argument: int) =
+    let boundName = Map.tryFind boundId model.DeclNames
+
+    let rec walk seen typeId =
+        typeId = boundId
+        || (boundName.IsSome && Map.tryFind typeId model.DeclNames = boundName)
+        || (not (Set.contains typeId seen)
+            && (match Map.tryFind typeId model.Types with
+                | Some facts ->
+                    facts.BaseTypes
+                    @ facts.IntersectionMembers
+                    @ (facts.Response.Target |> ValueOption.toOption |> Option.toList)
+                    |> List.exists (walk (Set.add typeId seen))
+                | None -> false))
+
+    walk Set.empty argument
+
+/// TypeScript's `extends` is structural and F#'s `:>` is nominal, so a constraint is only
+/// worth writing where some nominal relation could hold (§4.9). The declaration's own default
+/// argument is the one argument the run always knows about and the one every bare use resolves
+/// to: `class Geometry<Attributes extends Wide = Narrow>` is written `Geometry<Narrow>` at
+/// every bare site, so a default that does not inherit its own bound makes the bound reject
+/// the declaration's ordinary use. That is `three`'s `BufferGeometry<NormalBufferAttributes>`,
+/// 328 times.
+///
+/// The answer is read at both ends of the same constraint, which is what keeps `TP008` and
+/// `TR044` from contradicting each other: where this is false the head drops the bound
+/// (`TP008`) *and* the reference stops rewriting arguments to it (`TR044` falls silent), so
+/// the argument TypeScript resolved survives. Where it is true the head keeps `:>` and
+/// `TR044` still widens whatever cannot satisfy it.
+let internal constraintProvenNominal (model: ShapeModel) (parameterId: int) (boundId: int) =
+    match Map.tryFind parameterId model.Types |> Option.bind _.Default with
+    | Some fallback when fallback <> parameterId -> satisfiesNominally model boundId fallback
+    | _ -> true
+
 // ---------------------------------------------------------------------------------------------
 // Type references.
 // ---------------------------------------------------------------------------------------------
@@ -676,10 +716,13 @@ and internal appliedRefTo
     : FsTypeRef * Finding list =
     let mutable findings = []
 
+    // A constraint the head does not write is a constraint nothing has to satisfy, so this
+    // reads the same `constraintProvenNominal` the head does: dropped there, silent here.
     let statedConstraint (typeId: int) =
         Map.tryFind typeId model.Types
         |> Option.bind _.Constraint
         |> Option.filter (fun boundId -> boundId <> typeId)
+        |> Option.filter (constraintProvenNominal model typeId)
         |> Option.bind (fun boundId ->
             match Map.tryFind boundId model.Types with
             | Some bound when
@@ -692,25 +735,7 @@ and internal appliedRefTo
                 Map.tryFind boundId model.DeclNames |> Option.map (fun name -> boundId, name)
             | _ -> None)
 
-    /// Whether an argument is the bound, or reaches it through the bases and intersection
-    /// operands `shape-interfaces` emits as `inherit`. An instantiation is asked of its
-    /// target, the declaration carrying the heritage.
-    let satisfies (boundId: int) (argument: int) =
-        let boundName = Map.tryFind boundId model.DeclNames
-
-        let rec walk seen typeId =
-            typeId = boundId
-            || (boundName.IsSome && Map.tryFind typeId model.DeclNames = boundName)
-            || (not (Set.contains typeId seen)
-                && (match Map.tryFind typeId model.Types with
-                    | Some facts ->
-                        facts.BaseTypes
-                        @ facts.IntersectionMembers
-                        @ (facts.Response.Target |> ValueOption.toOption |> Option.toList)
-                        |> List.exists (walk (Set.add typeId seen))
-                    | None -> false))
-
-        walk Set.empty argument
+    let satisfies = satisfiesNominally model
 
     let parameters =
         if parameters.Length = arguments.Length then
@@ -951,9 +976,10 @@ let internal typeParamsOf
     let parameters =
         named
         |> List.map (fun (id, name) ->
+            let boundId = Map.tryFind id model.Types |> Option.bind _.Constraint
+
             let bound =
-                Map.tryFind id model.Types
-                |> Option.bind _.Constraint
+                boundId
                 |> Option.map (fun boundId ->
                     // Only something that becomes an interface can be an F# base type. A union
                     // renders as a sealed `U_n` or StringEnum, so FS0698 rejects
@@ -972,7 +998,21 @@ let internal typeParamsOf
                     else
                         FsObj, [])
 
+            // The bound has an F# form and is still not written: nominally it would reject the
+            // declaration's own default argument, so `:>` here is FS0001 waiting to happen at
+            // every bare use (§4.9). Distinct from `TP002`, where there is no F# form at all.
+            let provable =
+                boundId
+                |> Option.map (constraintProvenNominal model id)
+                |> Option.defaultValue true
+
             match bound with
+            | Some((FsNamed shown | FsApp(shown, _)), _) when not provable ->
+                findings <-
+                    findings
+                    @ [ Finding.make owner (TypeParameters.ConstraintNotProvenNominal(name, shown)) ]
+
+                { Name = name; Constraint = None }
             | Some((FsNamed _ | FsApp _) as reference, boundFindings) ->
                 findings <- findings @ boundFindings
 

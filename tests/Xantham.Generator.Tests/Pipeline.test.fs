@@ -1078,6 +1078,49 @@ let pipelineTests =
                           "abstract self: unit -> Plain<'TValue>"
                           "bare polymorphic `this` still reads as its own declaration" ])
 
+        // Wave two lane C's fixture. `docs/plans/generator-three-rung.md` §9 blocker 3: a
+        // structural `extends` constraint whose argument satisfies it structurally but not
+        // nominally. TypeScript accepts `Geometry<Narrow>` where `Narrow extends Wide`
+        // structurally; F#'s `:>` is nominal, so the rendered head is 328 FS0001 on the `three`
+        // rung. These lines reproduce it, and carry the two negatives a fix must not move.
+        yield!
+            fixtureTests "nominal-lab" (handFixture "nominal-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a constraint no nominal relation supports is dropped from the head" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // `Narrow` and `Wide` are two `[<EmitIndexer>]` interfaces with no
+                      // `inherit` between them, so `'Attributes :> Wide` would reject the
+                      // declaration's own default argument. The parameter stays free instead.
+                      Expect.stringContains source "type Geometry<'Attributes> =" "the head carries no bound"
+                      Expect.isFalse (source.Contains "'Attributes :>") "and states no nominal relation"
+
+                      Expect.isTrue
+                          (rendered.Findings
+                           |> List.exists (fun f ->
+                               f.Key = "TP008" && f.Message.Contains "Wide" && f.Message.Contains "Attributes"))
+                          "the drop is recorded against the parameter and its bound"
+
+                  testCase "a constraint the run can prove keeps its `:>`" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // The negatives. `exact<T extends Base>` is only ever applied to `Base`
+                      // itself, and `Derived` `inherit`s `Base` (SI005), so both relations hold
+                      // nominally and neither may be dropped by the fix.
+                      Expect.stringContains source "exact<'T when 'T :> Base>" "a bound the argument is"
+                      Expect.isTrue
+                          (inheritsOf source "Derived" |> List.contains "Base")
+                          "and one the argument inherits"
+
+                  testCase "the use site keeps the default argument the declaration states" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // With no bound on the head there is nothing to widen the argument to, so
+                      // `g` reads as the type TypeScript resolved it to rather than as `Wide`.
+                      Expect.stringContains source "static member g: Geometry<Narrow>" "the default, written out" ])
+
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 
         // workers-types is a global type library that *replaces* the DOM lib: its README

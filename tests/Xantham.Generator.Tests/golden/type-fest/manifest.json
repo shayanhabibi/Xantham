@@ -21,8 +21,8 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 600,
-      "ergonomic": 174,
+      "total": 629,
+      "ergonomic": 203,
       "widened": 426
     },
     {
@@ -111,6 +111,13 @@
           "tier": "ergonomic",
           "symbol": "AllExtend",
           "message": "constraint on \u0027TArray\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "AllExtend",
+          "message": "constraint AllExtendOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR014",
@@ -828,6 +835,13 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "ConditionalPickDeep",
+          "message": "constraint ConditionalPickDeepOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
+        },
+        {
           "key": "TR014",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -919,6 +933,13 @@
           "message": "constraint on \u0027Delimiter\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "DelimiterCase",
+          "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
+        },
+        {
           "key": "TR014",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -947,6 +968,13 @@
           "message": "constraint on \u0027Delimiter\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "DelimiterCasedPropertiesDeep",
+          "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
+        },
+        {
           "key": "TR014",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -973,6 +1001,13 @@
           "tier": "ergonomic",
           "symbol": "DelimiterCasedProperties",
           "message": "constraint on \u0027Delimiter\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "DelimiterCasedProperties",
+          "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR014",
@@ -1185,6 +1220,13 @@
           "message": "constraint on \u0027KeysType\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "Except",
+          "message": "constraint ExceptOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
+        },
+        {
           "key": "TR018",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -1358,6 +1400,13 @@
           "tier": "widened",
           "symbol": "ExtendsStrict",
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "ExtendsStrict",
+          "message": "constraint ExtendsStrictOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR014",
@@ -1561,6 +1610,13 @@
           "tier": "ergonomic",
           "symbol": "Get",
           "message": "constraint on \u0027Path\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "Get",
+          "message": "constraint GetOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR014",
@@ -2487,6 +2543,13 @@
           "message": "constraint on \u0027TArray\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "IsTuple",
+          "message": "constraint IsTupleOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
+        },
+        {
           "key": "TR014",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -2872,6 +2935,13 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "KebabCase",
+          "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
+        },
+        {
           "key": "TR014",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -2893,6 +2963,13 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "KebabCasedPropertiesDeep",
+          "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
+        },
+        {
           "key": "TR014",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -2912,6 +2989,13 @@
           "tier": "widened",
           "symbol": "KebabCasedProperties",
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "KebabCasedProperties",
+          "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR014",
@@ -3184,6 +3268,13 @@
           "tier": "widened",
           "symbol": "MergeDeep",
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "MergeDeep",
+          "message": "constraint MergeDeepOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR014",
@@ -6256,6 +6347,13 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "PartialDeep",
+          "message": "constraint PartialDeepOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
+        },
+        {
           "key": "TR014",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -6303,6 +6401,13 @@
           "tier": "widened",
           "symbol": "PartialOnUndefinedDeep",
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "PartialOnUndefinedDeep",
+          "message": "constraint PartialOnUndefinedDeepOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR014",
@@ -6478,6 +6583,13 @@
           "tier": "widened",
           "symbol": "Paths",
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "Paths",
+          "message": "constraint PathsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR014",
@@ -9077,6 +9189,13 @@
           "message": "constraint on \u0027S\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "RemovePrefix",
+          "message": "constraint RemovePrefixOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
+        },
+        {
           "key": "TR014",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -9138,6 +9257,13 @@
           "tier": "ergonomic",
           "symbol": "RemoveSuffix",
           "message": "constraint on \u0027Suffix\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "RemoveSuffix",
+          "message": "constraint RemoveSuffixOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR014",
@@ -9243,6 +9369,13 @@
           "tier": "ergonomic",
           "symbol": "Replace",
           "message": "constraint on \u0027Search\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "Replace",
+          "message": "constraint ReplaceOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR014",
@@ -9455,6 +9588,13 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "Schema",
+          "message": "constraint SchemaOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
+        },
+        {
           "key": "TR014",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -9474,6 +9614,13 @@
           "tier": "widened",
           "symbol": "ScreamingSnakeCase",
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "ScreamingSnakeCase",
+          "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR014",
@@ -9798,6 +9945,13 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "SharedUnionFieldsDeep",
+          "message": "constraint SharedUnionFieldsDeepOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
+        },
+        {
           "key": "TR014",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -9896,6 +10050,13 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "SnakeCase",
+          "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
+        },
+        {
           "key": "TR014",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -9917,6 +10078,13 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "SnakeCasedPropertiesDeep",
+          "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
+        },
+        {
           "key": "TR014",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -9936,6 +10104,13 @@
           "tier": "widened",
           "symbol": "SnakeCasedProperties",
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "SnakeCasedProperties",
+          "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR014",
@@ -9992,6 +10167,13 @@
           "tier": "ergonomic",
           "symbol": "SomeExtend",
           "message": "constraint on \u0027TArray\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "SomeExtend",
+          "message": "constraint SomeExtendOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR014",
@@ -10090,6 +10272,13 @@
           "tier": "ergonomic",
           "symbol": "Split",
           "message": "constraint on \u0027S\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "Split",
+          "message": "constraint SplitOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR014",
@@ -10272,6 +10461,13 @@
           "tier": "ergonomic",
           "symbol": "StringToArray",
           "message": "constraint on \u0027S\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "StringToArray",
+          "message": "constraint StringToArrayOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR014",
@@ -13603,6 +13799,13 @@
           "tier": "ergonomic",
           "symbol": "Words",
           "message": "constraint on \u0027Sentence\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP008",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "Words",
+          "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
           "key": "TR014",
