@@ -31,10 +31,8 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                    |> List.forall (function
                                        | FsProperty _ -> true
                                        // An index signature has no name to bind a Create
-                                       // parameter to, so a type carrying one is not plain data.
-                                       // A constructor object already has the `Create` members
-                                       // its construct signatures gave it (§4.4), and a
-                                       // synthesized one would collide with them.
+                                       // parameter to; a constructor object already has the
+                                       // `Create` members its construct signatures gave (§4.4).
                                        | FsMethod _
                                        | FsConstructor _
                                        | FsIndexer _ -> false)

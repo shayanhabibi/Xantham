@@ -5,25 +5,14 @@ open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
-/// F# interfaces for every named object type with members: exported interfaces and class
-/// instance sides alike, plus the synthesized anonymous shapes. Heritage is both `inherit`ed
-/// and flattened: the checker's property list already includes the inherited members, so they
-/// are declared here in full, and a base this run also declares as an interface is `inherit`ed
-/// beside them (§4.4) so that the derived type upcasts to it. A base that has no F# name here,
-/// names something this run does not declare, or would close a cycle stays flattened alone,
-/// with a finding saying which of the three it is.
-/// What `shape-interfaces` declares under a name: an object shape with members - not an array,
-/// a tuple, or a named instantiation (`type StringBox = Box<string>`, an abbreviation of the
-/// application rather than a second copy of the expansion, which `shape-aliases` writes) - or
-/// an intersection of object types flattened into one interface (§4.6). An index signature is
-/// shape too: `interface Bag { [key: string]: number }` has no properties at all, and without
-/// that it would reach `shape-aliases` looking empty and abbreviate to obj (§4.10).
+/// What `shape-interfaces` declares under a name: an object shape with members, or an
+/// intersection of object types flattened into one (§4.6). Not an array, a tuple, or a named
+/// instantiation. An index signature counts: `interface Bag { [key: string]: number }`.
 let private declaresInterface (model: ShapeModel) (facts: TypeFacts) =
     (flag TypeFlags.Object facts
      // A constructor object is shape even with no properties of its own: `interface F { new
-     // (): X }` has no members and one construct signature, and is an interface of one
-     // `Create`. Without this it would reach `shape-aliases` looking empty and abbreviate to
-     // `obj` (§4.4), the same trap an index signature falls into just below.
+     // (): X }` has no members and one construct signature, and becomes an interface of one
+     // `Create` (§4.4).
      && not (
          facts.Members.IsEmpty
          && facts.IndexInfos.IsEmpty
@@ -35,10 +24,8 @@ let private declaresInterface (model: ShapeModel) (facts: TypeFacts) =
     || isFlattenable model facts
 
 /// Whether one declaration name already reaches another through the `inherit` edges emitted so
-/// far. F# refuses a cyclic inheritance relation outright (FS0954), and while TypeScript admits
-/// no cyclic heritage, an F# name is not a type id - a declaration reached twice, or two ids
-/// hash-consed onto one name, can close a loop the source never wrote. The walk carries its own
-/// visited set so an already-broken graph cannot make it diverge.
+/// far. F# refuses cyclic inheritance (FS0954), and an F# name is not a type id, so two ids
+/// hash-consed onto one name can close a loop the source never wrote.
 let private reaches (graph: Map<string, string list>) (from: string) (target: string) =
     let rec walk seen name =
         name = target
@@ -49,6 +36,9 @@ let private reaches (graph: Map<string, string list>) (from: string) (target: st
 
     walk Set.empty from
 
+/// F# interfaces for every named object type with members: exported interfaces, class instance
+/// sides, and synthesized anonymous shapes. Inherited members are declared in full, and a base
+/// this run declares is `inherit`ed beside them (§4.4); any other base is flattened alone.
 let shapeInterfaces: Pass<ShapeModel> =
     {
         Name = "shape-interfaces"
@@ -99,14 +89,9 @@ let shapeInterfaces: Pass<ShapeModel> =
 
                                 findings <- findings @ memberFindings
 
-                                // §4.4's heritage rule and §4.6's is-a relation, through one
+                                // §4.4's heritage rule and §4.6's is-a relation through one
                                 // gate: a declared base and an intersection operand are both a
-                                // type this declaration *is*, and F# can say so exactly when
-                                // this run declares that type as an interface. The members are
-                                // still declared here in full - F# admits the redeclaration,
-                                // and it is what keeps `Create` and the member list exact when
-                                // a sibling base or operand is not inheritable (a lib binding,
-                                // a callable, an anonymous shape folded in).
+                                // type this declaration *is*. Members are declared in full too.
                                 let inheritable (operandId: int) =
                                     match typeRef ctx { model with TypeVars = scope } None name operandId with
                                     | (FsNamed operand | FsApp(operand, _)) as reference, refFindings ->

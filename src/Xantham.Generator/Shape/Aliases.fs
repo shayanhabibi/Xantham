@@ -5,10 +5,9 @@ open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
-/// `typeRef` with the type's own naming suppressed, for the right side of an abbreviation -
-/// otherwise every abbreviation would just name itself. Declared unions with the same member
-/// set may only be matched at a *smaller* type id (the canonical twin), so alias chains
-/// strictly decrease and can never cycle - the smallest twin widens structurally instead.
+/// `typeRef` with the type's own naming suppressed, for the right side of an abbreviation.
+/// Declared unions with the same member set may only be matched at a *smaller* type id, so
+/// alias chains strictly decrease; the smallest twin widens structurally instead.
 let private typeRefIgnoringSelf
     (ctx: Context)
     (model: ShapeModel)
@@ -138,12 +137,9 @@ let shapeAliases: Pass<ShapeModel> =
                             else
                                 match Map.tryFind typeId model.Types with
                                 | Some facts ->
-                                    // A branding intersection is a name and nothing else in F#: a
-                                    // unit of measure, spelled at the uses as `string<Name>` rather
-                                    // than declared as an abbreviation, because the name can only be
-                                    // spent once and the measure is what spends it (§4.6, D11).
-                                    // Decided before the reference is shaped: shaping one would ask
-                                    // this declaration for the measure it has not emitted yet.
+                                    // A branding intersection is a name and nothing else in F#:
+                                    // a unit of measure, spelled at the uses as `string<Name>`
+                                    // rather than declared as an abbreviation (§4.6, D11).
                                     let brand = brandedPrimitive model facts
 
                                     if brand.IsSome then
@@ -191,14 +187,9 @@ let shapeAliases: Pass<ShapeModel> =
 
                                         let order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
 
-                                        // A generic declaration whose right side names none of its
-                                        // parameters is a type-level computation the checker could not
-                                        // finish: `DeepPartial<T>`, `Unwrap<T>`, `` `x-${T}` ``. F# has
-                                        // no unused type variable in an abbreviation, so this used to be
-                                        // dropped outright and every use of it widened to obj. An erased
-                                        // phantom keeps the name and the arity - enough for uses to stay
-                                        // distinct - and admits, by having no members at all, that a cast
-                                        // is the only thing anyone can do with it (§4.10, §4.11).
+                                        // A right side that does not mention its parameters is a
+                                        // type-level computation the checker could not finish
+                                        // (`DeepPartial<T>`); a phantom keeps name and arity.
                                         if
                                             not typeParameters.IsEmpty
                                             && typeParameters

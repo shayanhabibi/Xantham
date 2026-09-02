@@ -5,21 +5,9 @@ open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
-/// Names the *constructor objects* (§4.4) this run reaches at a reference position, so that
-/// `typeof Request` in a member type has a declaration to name instead of widening to `obj`.
-/// F# has no first-class type for a class's static side, so the object is declared as an
-/// interface of its own - `RequestConstructor` - whose `Create` members are its construct
-/// signatures and whose properties are the class's statics.
-///
-/// Only *reference* positions count. Naming every constructor object the harvest can see would
-/// add one interface per exported class, duplicating what `shape-classes` already emits, and
-/// the resulting declarations would be referenced by nothing: the entry package of
-/// `@cloudflare/workers-types` alone has 154 of them. A class export's own value type is left
-/// out for the same reason; a non-class export's is not, because `declare const Pair: { new
-/// (): P }` has no other route to a name and `Exports.Pair` would otherwise read `obj`.
-///
-/// Runs after `synthesize-anonymous` so that instance sides are already named and a
-/// constructor object can be called after the thing it constructs.
+/// Names the *constructor objects* (§4.4) reached at a reference position - `typeof Request` in
+/// a member type - as an interface `RequestConstructor` whose `Create` members are its construct
+/// signatures. A class export's own value type is left out; `shape-classes` already emits it.
 let nameConstructorObjects: Pass<ShapeModel> =
     Pass.pure' "name-constructor-objects" (fun ctx model ->
         let fallback = defaultExportName ctx
@@ -87,9 +75,8 @@ let nameConstructorObjects: Pass<ShapeModel> =
                 $"{stem}Constructor"
 
         /// A shape this run is entitled to declare: the entry package's own, or an anonymous
-        /// one, which belongs to whatever transformed it (D6) rather than to the file it was
-        /// written in. A referenced group's is that group's to declare, and an identity-only
-        /// one has no signatures to read in the first place.
+        /// one, which belongs to whatever transformed it (D6). A referenced group's is that
+        /// group's to declare; an identity-only one carries no signatures.
         let declarable (facts: TypeFacts) =
             GeneratorConfig.disposition ctx.Config facts.Origin = Ship
             || facts.SymbolName |> Option.forall isSyntheticName

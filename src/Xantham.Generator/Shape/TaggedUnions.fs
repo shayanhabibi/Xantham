@@ -5,17 +5,9 @@ open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
-/// Declarations for the unions the checker proves are discriminated (D4, §4.5(2)): an F# DU
-/// carrying one payload per case, tagged so Fable erases it straight back to the underlying
-/// object. Runs after `classify-literal-unions` because the two are disjoint - a union of
-/// literals has no members to carry a discriminant - and before `shape-aliases`, which would
-/// otherwise abbreviate the same name structurally.
-///
-/// Each case carries the arm's own properties as case fields, because that is what Fable's
-/// erasure actually writes: `Circle(radius = 2.0)` becomes `{ kind: "circle", radius: 2 }`. An
-/// arm that is not plain data has no such form - a method would have to arrive as a delegate
-/// field, which reads back as a value rather than a callable member - so a union with one is
-/// left to `shape-aliases`, where it stays an erased union over the arm types.
+/// Declarations for the unions the checker proves are discriminated (D4, §4.5(2)): an F# DU of
+/// one payload per case, erased by Fable back to the object - `Circle(radius = 2.0)` becomes
+/// `{ kind: "circle", radius: 2 }`. An arm that is not plain data is left to `shape-aliases`.
 let detectTaggedUnions: Pass<ShapeModel> =
     {
         Name = "detect-tagged-unions"

@@ -14,13 +14,9 @@ let private shapedMemberName (m: FsMember) =
     | FsIndexer _ -> "Item"
     | FsConstructor _ -> "Create"
 
-/// Whether F# admits a static beside an instance member of the same name. It does so between
-/// two methods and nowhere else, which is lucky, because method-over-method is the case that
-/// occurs in the wild (`Response.json` is both). Verified against fsc rather than recalled:
-/// property over property is FS0441, method over property FS0434, and a static property under
-/// an abstract method *declares* cleanly but is FS3214 at every use, the abstract member having
-/// shadowed it - the worst of the three, because the golden would compile and the consumer
-/// would not.
+/// Whether F# admits a static beside an instance member of the same name. Only between two
+/// methods (`Response.json` is both): property over property is FS0441, method over property
+/// FS0434, and a static property under an abstract method is FS3214 at every use.
 let private staticFitsBeside (instance: FsMember) (isMethod: bool) =
     match instance with
     | FsMethod _ -> isMethod
@@ -29,9 +25,8 @@ let private staticFitsBeside (instance: FsMember) (isMethod: bool) =
     | FsConstructor _ -> false
 
 /// A class's static, bound through a dotted selector off whatever the class itself binds to:
-/// `[<Import("Counter.MAX", "pkg")>]` is `import { Counter }` and then `Counter.MAX`, and
-/// `[<Global("Gadget.SPEED")>]` is the bare `Gadget.SPEED`. Verified under Fable for all three
-/// binding kinds, the default export included (`default.MAX` reads off the default import).
+/// `[<Import("Counter.MAX", "pkg")>]` is `import { Counter }` then `Counter.MAX`, and
+/// `[<Global("Gadget.SPEED")>]` is the bare `Gadget.SPEED`; `default.MAX` reads off the default.
 let private staticBinding (binding: ImportBinding) (key: string) =
     match binding with
     | ImportDefault -> ImportNamed $"{Naming.defaultImportKey}.{key}"
@@ -40,8 +35,7 @@ let private staticBinding (binding: ImportBinding) (key: string) =
 
 /// Constructor members on `Exports` for exported classes: `Exports.Name(...)` is
 /// `new Name(...)` through `[<EmitConstructor>]` (§4.4). The same pass shapes the class's
-/// *statics* - the properties of that constructor object - onto the class's own interface, so
-/// a consumer writes `Counter.MAX` the way TypeScript does.
+/// *statics* onto its own interface, so a consumer writes `Counter.MAX` as TypeScript does.
 let shapeClasses: Pass<ShapeModel> =
     {
         Name = "shape-classes"
@@ -64,10 +58,9 @@ let shapeClasses: Pass<ShapeModel> =
 
                     let mutable statics: Map<string, FsExportMember list> = Map.empty
 
-                    /// One static, shaped: a member of the constructor object is a method where
-                    /// the checker says so and it has a signature, and a get-only property
-                    /// otherwise - Fable compiles an assignment to an imported static as a
-                    /// *call*, so there is no honest setter to emit.
+                    /// One static, shaped: a method where the checker says so and it has a
+                    /// signature, a get-only property otherwise - Fable compiles an assignment
+                    /// to an imported static as a *call*, so there is no setter to emit.
                     let shapeStatic (export: HarvestedExport) (name: string) (m: ResolvedMember) =
                         let key = Naming.memberName m.Symbol.Name
                         let owner = $"{name}.{key}"
@@ -131,9 +124,8 @@ let shapeClasses: Pass<ShapeModel> =
 
                                 if hasAny SymbolFlags.Method m.Symbol.Flags then
                                     // A method the checker gave no call signatures: its type is
-                                    // declared in a group this run resolves identity-only, so
-                                    // there is nothing to shape a method from. It is not a
-                                    // settable static, and `StaticReadOnly` would say it was.
+                                    // declared in a group resolved identity-only, so there is
+                                    // nothing to shape a method from.
                                     let declaredIn =
                                         Map.tryFind m.TypeId model.Types
                                         |> Option.bind (fun facts -> GeneratorConfig.groupKey facts.Origin)

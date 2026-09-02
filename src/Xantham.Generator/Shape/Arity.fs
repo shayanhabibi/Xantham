@@ -9,10 +9,8 @@ open Xantham.Generator.Shape.Spec
 // Arity repair: the two ways a shaped declaration can still be un-writable F#.
 // ---------------------------------------------------------------------------------------------
 
-/// Every type reference inside a reference, rebuilt through `f` (applied outside-in, so a
-/// widening stops the descent). Written once because both repairs below rewrite references in
-/// place, and a hand-rolled traversal per repair is how a new `FsTypeRef` case gets silently
-/// skipped by one of them.
+/// Every type reference inside a reference, rebuilt through `f`, applied outside-in so a
+/// widening stops the descent.
 let rec private mapRef (f: FsTypeRef -> FsTypeRef) (reference: FsTypeRef) : FsTypeRef =
     let recur = mapRef f
 
@@ -231,22 +229,9 @@ let private repaired (model: ShapeModel) =
 
     { model with Decls = decls }, findings
 
-/// The last two ways a shaped model still fails to be F#, both repaired by widening - the type
-/// exists, but this position cannot say which instantiation of it, and `obj` is what that means.
-///
-/// *A generic abbreviation whose target does not mention its parameters* is FS0035: F# has no
-/// unused type variables in an abbreviation. It arises when the right side widened -
-/// `type Params<'P> = obj` after `P`'s only use dropped to `obj`. Dropping the parameter instead
-/// would silently change the alias's arity at every application, so the declaration goes and its
-/// references widen.
-///
-/// *A generic declaration named bare* is FS0033: `PagesFunctionContext` needs three arguments,
-/// and a member of some *other* declaration has no names to write for them. §4.9 already widens
-/// an out-of-scope type *variable* to `obj` for the same reason; this is that rule one level up,
-/// at the declaration head.
-///
-/// Runs after `order-declarations`, which is what folds the export members into an `FsExports`
-/// declaration: references written there need the same repair as any other.
+/// The last two ways a shaped model still fails to be F#, both repaired by widening to `obj`.
+/// FS0035: a generic abbreviation whose target dropped its parameters (`type Params<'P> = obj`)
+/// goes, and its references widen. FS0033: a generic declaration named bare also widens.
 let repairArity: Pass<ShapeModel> =
     {
         Name = "repair-arity"

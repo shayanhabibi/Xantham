@@ -5,10 +5,9 @@ open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
-/// The type-parameter ids a declaration reads without binding, in first-use order (§4.9).
-/// A signature's own parameters are bound inside it; another *named* declaration binds its
-/// own, so the walk stops there and reads only the arguments it is applied with. A hoisted
-/// anonymous declaration is walked into: what it reads, its parent reads through it.
+/// The type-parameter ids a declaration reads without binding, in first-use order (§4.9). A
+/// signature's own parameters are bound inside it, and another named declaration binds its own,
+/// so the walk stops there; a hoisted anonymous declaration is walked into.
 let private freeTypeParams (model: ShapeModel) (root: int) : int list =
     let mutable found = []
     let mutable visited = Set.empty
@@ -74,9 +73,7 @@ let private freeTypeParams (model: ShapeModel) (root: int) : int list =
 
 /// Declares each hoisted object type over the type parameters it reads from the scope it was
 /// written in (§4.9, `DeclParams`). `each<T, U>(props: { items: T[]; render: (item: T) => U })`
-/// names `EachProps` for the parameter, and `EachProps` binds nothing - so it is declared as
-/// `EachProps<'T, 'U>` and the parameter position applies them back, where `'T` and `'U` are
-/// in scope. Without this every such member widened its parameter to obj.
+/// declares `EachProps<'T, 'U>`, and the parameter position applies them back.
 let bindFreeTypeParams: Pass<ShapeModel> =
     Pass.pure' "bind-free-type-params" (fun ctx model ->
         let bound =

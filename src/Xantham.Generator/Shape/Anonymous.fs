@@ -6,10 +6,8 @@ open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
 /// Walks the type graph reachable from the exports in deterministic order and names what needs
-/// a declaration but has none: anonymous entry-group object types with members, and literal
-/// unions (hash-consing by type id, §4.4). Named non-exported entry types keep their own name;
-/// path-derived names cover the anonymous rest; collisions take a numeric suffix in visit
-/// order.
+/// a declaration but has none (§4.4, hash-consed by type id). Non-exported named entry types
+/// keep their name; the anonymous rest take path-derived ones, with a numeric suffix on clash.
 let synthesizeAnonymous: Pass<ShapeModel> =
     Pass.pure' "synthesize-anonymous" (fun ctx model ->
         let mutable names = model.DeclNames
@@ -50,13 +48,8 @@ let synthesizeAnonymous: Pass<ShapeModel> =
                 isLiteralUnion facts
             elif flag TypeFlags.Object facts then
                 // Entry-group object shapes with members become interfaces; callbacks stay
-                // inline as delegates, arrays as arrays, tuples as F# tuples (D7). Constructor
-                // objects (a class's static side) get their constructors on `Exports`, not a
-                // declaration.
-                // An anonymous shape is the entry package's whatever file its node sits in:
-                // `Record<string, boolean>` is written in `lib.es5.d.ts`, but what it stands
-                // for is this package's operand, transformed (D6) - the resolve tier already
-                // reads it by content, and the disposition of the lib is not its to inherit.
+                // inline as delegates, arrays as arrays, tuples as F# tuples (D7). An anonymous
+                // shape belongs to the entry package whatever file its node sits in (D6).
                 (GeneratorConfig.disposition ctx.Config facts.Origin = Ship
                  || facts.SymbolName |> Option.forall isSyntheticName)
                 && not (isPureCallback facts)
@@ -73,9 +66,7 @@ let synthesizeAnonymous: Pass<ShapeModel> =
             elif flag TypeFlags.Intersection facts then
                 // An intersection of object types is one flattened interface (§4.6): the
                 // resolve tier read its members off the intersection itself, so it names and
-                // declares like any anonymous shape. A brand is a measure, named elsewhere;
-                // an intersection with no members (a type-parameter operand) has nothing to
-                // declare and widens at the reference.
+                // declares like any anonymous shape. An operand-only intersection widens.
                 isFlattenable model facts
             else
                 false
@@ -87,11 +78,9 @@ let synthesizeAnonymous: Pass<ShapeModel> =
                 match Map.tryFind typeId model.Types with
                 | None -> ()
                 | Some facts ->
-                    // The generic declaration behind an instantiation is named ahead of it,
-                    // so that `Ready<T>` reached only through `Resource<T> = Ready<T> | ...`
-                    // declares `Ready<'T>` once and every instantiation is written as an
-                    // application of it (§4.9) - never a second copy of the expansion under
-                    // a made-up name.
+                    // The generic declaration behind an instantiation is named ahead of it, so
+                    // `Ready<T>` reached only through `Resource<T> = Ready<T> | ...` declares
+                    // `Ready<'T>` once and instantiations are applications of it (§4.9).
                     match facts.Response.Target with
                     | ValueSome target when target <> typeId && Map.containsKey target model.Types ->
                         walk path order target
@@ -114,21 +103,14 @@ let synthesizeAnonymous: Pass<ShapeModel> =
 
                     // An instantiation of a named declaration reads only its arguments: its
                     // members are the declaration's, substituted, and shaping happens there.
-                    // Walking them would claim names for substituted anonymous member types
-                    // that nothing then references.
                     if (instantiationOf { model with DeclNames = names } facts).IsSome then
                         for argument in facts.TypeArguments do
                             walk (into "Item") order argument
                     else
 
-                        // A tuple declaration reads only its components, so its members - `length`
-                        // and the numeric indices - are not part of the shape and must not claim
-                        // names: `[number, number?]` would otherwise declare its own `1 | 2` length
-                        // as an enum nothing references. An array reads only its element, for the
-                        // same reason: `Array<T>`'s own members are the lib's, and the anonymous
-                        // shape behind its `[Symbol.unscopables]` is nothing a declaration reads.
-                        // A symbol-keyed member is dropped at render (unrepresentable), so its
-                        // type is not shape either - and its name carries a session-specific id.
+                        // A tuple reads only its components and an array only its element, so
+                        // `length`, the numeric indices and `Array<T>`'s lib members claim no
+                        // names. A symbol-keyed member is dropped at render, so nor does its type.
                         if not (isTuple facts) && (arrayElement facts).IsNone then
                             for m in facts.Members do
                                 if not (isSymbolKeyed m.Symbol.Name) then

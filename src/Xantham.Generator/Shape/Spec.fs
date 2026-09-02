@@ -1,7 +1,6 @@
 ﻿/// The facts and mappings every shaping pass is written against: what a resolved type *is*
 /// (literal, tuple, callback, branded primitive, constructor object, tagged union), the F#
-/// reference it maps to, the type parameters it declares, and the member and signature
-/// shaping the declaration passes share. Passes hold the policy; this holds what they read.
+/// reference it maps to, its declared type parameters, and shared member and signature shaping.
 module Xantham.Generator.Shape.Spec
 
 open Xantham.Generator
@@ -111,13 +110,9 @@ let internal namedUnionByMembers (model: ShapeModel) (memberIds: int list) : str
                 None
         | _ -> None)
 
-/// A *constructor object* (§4.4): the static side of a class, and the type `typeof X` names at
-/// a member position. It carries construct signatures; its properties are the class's statics,
-/// and `prototype` is the instance side, which is a declaration of its own.
-///
-/// A group resolved identity-only has no signatures at all, so a lib or dependency type never
-/// reads as one here - which is what keeps this from claiming to know a shape it never asked
-/// the checker for.
+/// A *constructor object* (§4.4): the static side of a class, carrying construct signatures.
+/// Its properties are the class's statics; `prototype` is the instance side, a declaration of
+/// its own. An identity-only group carries no signatures, so a lib type is not one.
 let internal isConstructorObject (facts: TypeFacts) =
     flag TypeFlags.Object facts && not facts.ConstructSignatures.IsEmpty
 
@@ -143,18 +138,9 @@ let internal isSyntheticName (name: string) =
 /// the embedded checker id is session-specific - keeping one would also break determinism.
 let internal isSymbolKeyed (name: string) = name.StartsWith "__@"
 
-/// The discriminant of a tagged union (D4, §4.5(2)), when the checker proves there is one:
-/// every non-nullish member is an object type carrying the same property, and that property's
-/// type is a string literal that is *distinct* across the members. Returns the property name
-/// as TypeScript spells it, paired with each member's facts and its tag value, in the union's
-/// own member order.
-///
-/// §4.5 says to detect this aggressively, and this is why: Fable erases the DU back to the
-/// object, so the mapping costs nothing at runtime and buys pattern matching - the single
-/// biggest ergonomic win available anywhere in the catalogue.
-///
-/// Candidate properties are considered in the *first* member's declaration order, so a union
-/// discriminated by two properties at once picks the same one on every run.
+/// The discriminant of a tagged union (D4, §4.5(2)): the property every non-nullish object
+/// member carries with a *distinct* string-literal type. Returns its TypeScript spelling with
+/// each member's facts and tag value in member order; ties break on the first member's order.
 let internal taggedUnionShape (model: ShapeModel) (facts: TypeFacts) : (string * (TypeFacts * string) list) option =
     let members =
         facts.UnionMembers
@@ -200,10 +186,9 @@ let internal taggedUnionShape (model: ShapeModel) (facts: TypeFacts) : (string *
             else
                 None)
 
-/// A property that exists only to make a type nominal: keyed by a unique symbol, so nothing
-/// can name it; named with a leading underscore, so nothing is meant to; or typed `never`, so
-/// nothing can construct it. An object whose every property is one of these carries nothing at
-/// runtime, which is what separates a branding intersection from a shape (§4.6).
+/// A property that exists only to make a type nominal: keyed by a unique symbol, spelled with a
+/// leading underscore, or typed `never`. An object of only these carries nothing at runtime,
+/// separating a branding intersection from a shape (§4.6).
 let internal isMarkerMember (model: ShapeModel) (m: ResolvedMember) =
     isSymbolKeyed m.Symbol.Name
     || m.Symbol.Name.StartsWith "_"
@@ -212,16 +197,12 @@ let internal isMarkerMember (model: ShapeModel) (m: ResolvedMember) =
         | None -> false)
 
 /// The primitive a branding intersection brands, where it is one (§4.6, D11): exactly one
-/// primitive constituent, intersected with objects that carry markers and nothing else. Two
-/// real shapes intersected, or a primitive intersected with an object that has a usable
-/// member, are ordinary intersections and no brand - reading those as brands would throw
-/// members away and call it exact.
+/// primitive constituent, intersected with objects carrying markers and nothing else. Two real
+/// shapes, or a primitive with an object having a usable member, are ordinary intersections.
 let rec internal brandedPrimitive (model: ShapeModel) (facts: TypeFacts) =
-    // An intersection over anything but a bare primitive distributes: `boolean & Marker` is
-    // handed back as `(true & Marker) | (false & Marker)`, and a branded literal union the same
-    // way. The arms are the checker's own working and carry no names, so a union of anonymous
-    // brands that agree on the primitive is one brand - while a union of *named* brands
-    // (`UserId | SessionId`) is a real union and must stay one.
+    // An intersection over anything but a bare primitive distributes: `boolean & Marker` comes
+    // back as `(true & Marker) | (false & Marker)`. The arms carry no names, so a union of
+    // anonymous brands agreeing on the primitive is one brand; `UserId | SessionId` is not.
     if flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) then
         let arms = facts.UnionMembers |> List.choose (fun id -> Map.tryFind id model.Types)
 
@@ -304,10 +285,6 @@ let internal tupleElementFlags (facts: TypeFacts) =
 
 /// The generic declaration an instantiation points back at, when this run declares it. A
 /// generic declaration is its own target, so only a genuine instantiation matches.
-///
-/// The checker substitutes members eagerly, so `Box<string>` arrives fully expanded and would
-/// read perfectly well as a structure of its own; writing it as an application instead keeps
-/// the two spellings tied together, which is what §4.9 asks for.
 let internal instantiationOf (model: ShapeModel) (facts: TypeFacts) =
     // Only a *reference* - `Ready<T>` over an interface or class - is an application. An
     // anonymous object type instantiated in some other scope also carries its original as a
@@ -349,16 +326,9 @@ let internal isFlattenable (model: ShapeModel) (facts: TypeFacts) =
 // Type references.
 // ---------------------------------------------------------------------------------------------
 
-/// The type ids on the current reference descent, so that a shape reached from itself is cut
-/// rather than followed forever.
-///
-/// A *named* cycle terminates on its own: the declaration is in `DeclNames` and the second
-/// visit renders as the name. An unnamed one has no such floor - `lib.dom.d.ts` writes several,
-/// and every one of them is a union whose arm is an anonymous object with a member back in the
-/// union - so the descent must remember where it has been. Per-thread because the shape tier
-/// runs its passes sequentially but the pipeline is `Async`, and the state is a path, not a
-/// cache: an id is removed on the way out, so a type referenced twice side by side is shaped
-/// twice, as it must be.
+/// The type ids on the current reference descent, cutting a shape reached from itself. A named
+/// cycle terminates through `DeclNames`; an unnamed one, as `lib.dom.d.ts` writes, needs this.
+/// A path, not a cache: an id is removed on the way out, so side-by-side uses shape twice.
 type internal Descent() =
     [<System.ThreadStatic; DefaultValue>]
     static val mutable private path: System.Collections.Generic.HashSet<int>
@@ -370,11 +340,8 @@ type internal Descent() =
         Descent.path
 
 /// The F# type written at a reference position, with the findings any widening produces.
-/// `self` is the name of the declaration being shaped, so a polymorphic `this` return can
-/// resolve to it. Flag-test order matters: `boolean` (a union wearing the Boolean flag) before
-/// the union case, unions before the literal tests, literals before their base primitives, and
-/// `unique symbol` before `symbol` - the two are distinct bits, but reading them in that order
-/// keeps each pair's message about the narrower construct.
+/// `self` is the name of the declaration being shaped, so a polymorphic `this` return resolves
+/// to it. A type carries several flags at once, so the arm order below picks which finding.
 let rec typeRef
     (ctx: Context)
     (model: ShapeModel)
@@ -428,38 +395,29 @@ and internal typeRefOnPath
         elif has TypeFlags.Number then
             FsFloat, []
         elif has TypeFlags.BigInt then
-            // Exact, and the one intrinsic here whose mapping costs nothing: F# `bigint` is
-            // the native JavaScript `BigInt` under Fable 5 (proven by the run gate, not by
-            // the compile gate - the F# type says nothing about what the erasure did).
+            // F# `bigint` is the native JavaScript `BigInt` under Fable 5, proven by the run
+            // gate rather than the compile gate.
             FsBigInt, []
         elif has TypeFlags.TemplateLiteral then
-            // `` `on${string}` `` is a string at runtime, and the generator already knows how
-            // to keep that much: the same trade TR006 makes for a string *literal* type
-            // (§4.11). What is lost is the pattern, not the type - widening to `obj` threw
-            // away both. A *closed* template literal never reaches here: the checker expands
-            // one over finite unions into its union of literals, which takes the StringEnum
-            // path and stays exact.
+            // `` `on${string}` `` is a string at runtime; the pattern is what is lost (§4.11).
+            // A *closed* template literal does not reach here: the checker expands one over
+            // finite unions into its union of literals, which takes the StringEnum path.
             FsString, [ Finding.make owner TypeReference.TemplateLiteralToString ]
         elif has TypeFlags.StringMapping then
             // `Uppercase<T>` over an operand the checker could not finish. Same argument: the
             // result is a string, and only the transform is lost.
             FsString, [ Finding.make owner TypeReference.StringMappingToString ]
         elif has TypeFlags.NonPrimitive then
-            // TypeScript's `object` - anything that is not a primitive. `obj` is the mapping
-            // §4.1 asks for and there is no closer one, but it is still a widening in the
-            // direction that matters: `obj` admits the primitives `object` was written to
-            // exclude. Reported as that, rather than as an unmapped flag.
+            // TypeScript's `object`. `obj` is the mapping §4.1 asks for, and still a widening:
+            // `obj` admits the primitives `object` was written to exclude.
             FsObj, [ Finding.make owner TypeReference.ObjectTypeToObj ]
         elif has TypeFlags.UniqueESSymbol then
             // A `unique symbol` is a nominal singleton. Nothing shipped binds even the
-            // ordinary one (below), and F# has no form for the identity on top of it, so
-            // both halves of the loss are named.
+            // ordinary one (below), and F# has no form for the identity on top of it.
             FsObj, [ Finding.make owner TypeReference.UniqueSymbolNoBinding ]
         elif has TypeFlags.ESSymbol then
-            // `symbol`. §4.1 wanted `JS.Symbol`, but Fable.Core 5.2.0 declares no such type -
-            // checked against the shipped assembly rather than recalled - and inventing a
-            // binding for a name the pinned package does not have is what the compile gate
-            // exists to catch. Widened, with the reason.
+            // `symbol`. §4.1 wanted `JS.Symbol`, which Fable.Core 5.2.0 does not declare, so
+            // this widens rather than binding a name the pinned package lacks.
             FsObj, [ Finding.make owner TypeReference.SymbolNoBinding ]
         elif has TypeFlags.Void || has TypeFlags.Undefined || has TypeFlags.Never then
             FsUnit, []
@@ -485,12 +443,9 @@ and internal typeRefOnPath
                     match Map.tryFind typeId model.TypeVars with
                     | Some name -> FsTypeVar name, []
                     | None ->
-                        // Its constraint is the tightest thing still true of it, and where the
-                        // declaration bound one, `obj` is not merely loose but wrong: F# rejects
-                        // `Ai<obj>` against `'AiModelList :> AiModelListType`. Only a plain named
-                        // constraint is taken - a generic one would need an arity this position
-                        // cannot supply - and another declaration's parameter can never be
-                        // constrained by this same parameter, so the substitution cannot cycle.
+                        // Its constraint is the tightest thing still true of it, and `obj` is
+                        // wrong where the declaration bound one: F# rejects `Ai<obj>` against
+                        // `'AiModelList :> AiModelListType`. Only a plain named constraint fits.
                         let constraintName =
                             facts.Constraint
                             |> Option.filter (fun boundId -> boundId <> typeId)
@@ -518,11 +473,9 @@ and internal typeRefOnPath
                 Finding.make owner (TypeReference.TypeFlagsNotMapped(string facts.Response.Flags))
             ]
 
-/// `keyof T` at an operand the checker could not finish (§4.10). A closed `keyof` never gets
-/// here - the checker hands those back already expanded into their union of literal keys, which
-/// shapes as a StringEnum - so this is the open regime, where the only honest carrier is the
-/// support package's `keyof<'T>`: erased to the string it is at runtime, and phantom-typed by
-/// the operand so a key of one type cannot be passed where another's is wanted.
+/// `keyof T` at an operand the checker could not finish (§4.10). A closed `keyof` arrives
+/// already expanded into its union of literal keys and shapes as a StringEnum; this open regime
+/// maps to the support package's `keyof<'T>`, erased to a string and phantom-typed by operand.
 and internal keyOfRef (model: ShapeModel) (owner: string) (facts: TypeFacts) : FsTypeRef * Finding list =
     let operand =
         facts.Response.Target
@@ -533,12 +486,9 @@ and internal keyOfRef (model: ShapeModel) (owner: string) (facts: TypeFacts) : F
     | Some name -> FsApp("keyof", [ FsTypeVar name ]), [ Finding.make owner (TypeReference.KeyOfOpenOperand name) ]
     | None -> FsObj, [ Finding.make owner TypeReference.KeyOfOperandOutOfScope ]
 
-/// An intersection at a reference position. A brand (§4.6, D11) is the one intersection F# can
-/// state exactly: the measure its declaration emitted, applied to the primitive it brands, which
-/// enforces the same nominality TypeScript was buying and erases the same way. It costs no
-/// finding here - the declaration records the idiom once - but a brand that never got a
-/// declaration has no measure to name, and falls back to the bare primitive loudly. Intersections
-/// of object types are a separate mapping (§4.6's first bullet) and are not shaped yet.
+/// An intersection at a reference position. A brand (§4.6, D11) maps to the measure its
+/// declaration emitted, applied to the primitive it brands; an undeclared brand falls back to
+/// the bare primitive with a finding. Object intersections are a separate mapping (§4.6).
 and internal intersectionRef
     (ctx: Context)
     (model: ShapeModel)
@@ -648,31 +598,9 @@ and internal objectRef
                             let shown = facts.SymbolName |> Option.defaultValue "an anonymous object type"
                             FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations shown) ]
 
-/// A tuple as an F# tuple (D7, §4.12) - Fable compiles the two to the same JS array, so a
-/// fixed tuple is Exact. Element labels are cosmetic and drop.
-///
-/// Optional tail elements need no work of their own: the checker hands `[string, number?]`
-/// over as `string` and `number | undefined`, so D1's hoist has already made that component an
-/// `option`. That is exactly D7's decision - an `undefined` slot rather than a shorter array -
-/// falling out of the representation instead of being imposed on it.
-///
-/// A rest or variadic element has no F# tuple form at all, so it widens to an array: the
-/// element type when every component agrees, `obj[]` otherwise. §4.12 recommends an erased
-/// carrier with typed accessors instead; that waits for a fixture that needs one, the way
-/// class statics do.
-/// A compiler-lib type a shipped Fable package already binds - `Promise` -> `JS.Promise<'T>`
-/// from `Fable.Core`, `EventTarget` -> `Browser.Types.EventTarget` from the `Fable.Browser.*`
-/// family - which is the compiler-lib group's disposition for the half of `lib.d.ts` that has
-/// a binding at all.
-///
-/// The two tables are consulted in that order and do not fall through to each other: a name the
-/// ECMAScript table knows is answered by it, arity rule included, because that table's `None`
-/// means "this is not that type" rather than "look elsewhere".
-///
-/// The arity comparison is the safety argument, not a formality: TypeScript's lib made
-/// `Uint8Array` generic in a buffer parameter Fable's abbreviation does not take, so a mapping
-/// that ignored arity would emit code that does not compile. Extra arguments are dropped with
-/// a finding; too few means this is some other type wearing a familiar name, and it widens.
+/// A compiler-lib type a shipped Fable package already binds - `Promise` -> `JS.Promise<'T>`,
+/// `EventTarget` -> `Browser.Types.EventTarget`. The ECMAScript table answers first and does
+/// not fall through. Extra type arguments drop with a finding; too few widens.
 and internal libBinding (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (facts: TypeFacts) =
     match facts.Origin, facts.SymbolName with
     | CompilerLib, Some name when GeneratorConfig.disposition ctx.Config CompilerLib <> Ship ->
@@ -727,22 +655,9 @@ and internal appliedRef
     : FsTypeRef * Finding list =
     appliedRefTo ctx model self owner name [] arguments
 
-/// An application of a generic declaration whose own parameters are known, so that each
-/// argument can be checked against the constraint the declaration will state (§4.9). Where
-/// the declaration writes `'Event :> Event`, F# rejects `Listener<obj>` outright, and a type
-/// variable without that constraint just the same - so an argument that widened to `obj`, or
-/// that is a variable bound without the constraint (a `typekeyof` result, another
-/// declaration's unconstrained parameter), is written as the constraint itself: the tightest
-/// thing still true of it, as an out-of-scope parameter already is. Only a constraint that
-/// the declaration states - a plain named interface of this run - is substituted; one it
-/// dropped needs no help.
-///
-/// A *named* argument is the third case, and F# nominal subtyping is what makes it one:
-/// `WorkerGlobalScopeEventMap` has the members `EventCurrentTargetItem`'s index signature asks
-/// for, which is all TypeScript wants, but it does not inherit it, so `EventTarget<
-/// WorkerGlobalScopeEventMap>` is FS0001. It goes the same way as the other two - written as
-/// the constraint, with a finding - and "is a subtype" is read off the declared bases rather
-/// than assumed, since that is exactly the relation `shape-interfaces` emits as `inherit`.
+/// An application of a generic declaration whose own parameters are known, so each argument is
+/// checked against the constraint the declaration states (§4.9). An argument that widened to
+/// `obj`, or whose declared bases exclude the constraint, is written as the constraint itself.
 and internal appliedRefTo
     (ctx: Context)
     (model: ShapeModel)
@@ -771,9 +686,8 @@ and internal appliedRefTo
             | _ -> None)
 
     /// Whether an argument is the bound, or reaches it through the bases and intersection
-    /// operands `shape-interfaces` turns into `inherit` lines - the F# subtyping the
-    /// application needs. An instantiation is asked of its target, which is the declaration
-    /// that carries the heritage.
+    /// operands `shape-interfaces` emits as `inherit`. An instantiation is asked of its
+    /// target, the declaration carrying the heritage.
     let satisfies (boundId: int) (argument: int) =
         let boundName = Map.tryFind boundId model.DeclNames
 
@@ -832,6 +746,9 @@ and internal appliedRefTo
 
     FsApp(name, mapped), findings
 
+/// A tuple as an F# tuple (D7, §4.12): Fable compiles the two to the same JS array, so a fixed
+/// tuple is Exact and element labels drop. `[string, number?]` arrives as `number | undefined`,
+/// already an `option`. A rest element widens to the shared element type, or `obj[]`.
 and internal tupleRef
     (ctx: Context)
     (model: ShapeModel)
@@ -939,22 +856,9 @@ and internal unionRef
             | Some name -> wrap (FsNamed name) []
             | None -> let reference, findings = erasedUnionRef ctx model self owner remaining in wrap reference findings
 
-/// An unnamed heterogeneous union as Fable's `U2`-`U4` (D4, §4.5(4)). The threshold is four.
-///
-/// The arms are the members' own F# types, deduplicated: `boolean` re-expands to `true | false`
-/// inside a union, and several string-literal members all widen to `string`, so the arm count
-/// is only known after mapping. A union that collapses to one arm *is* that type - which is how
-/// an unnamed literal union comes out `string` rather than `obj`.
-///
-/// One arm widening to `obj` collapses the whole union: `U2<obj, Foo>` type-checks against
-/// anything at all, so it would trade a legible `obj` for an illegible one.
-///
-/// D4 asks for this by position - erased-union constructors at input, discriminable values at
-/// output. `U_n` is both at once: `U2.Case1 x` is the input-position constructor §4.5 names,
-/// and the DU is matchable on the way out. The position-specific thing still missing is
-/// expanding an input union into overloads, which is a member rewrite rather than a reference
-/// mapping, and which the Create budget's lesson about quadratic overload sets argues for
-/// leaving until a fixture asks.
+/// An unnamed heterogeneous union as Fable's `U2`-`U4` (D4, §4.5(4)). Arms are the members' own
+/// F# types, deduplicated after mapping, so an unnamed literal union collapses to `string`.
+/// One arm widening to `obj` collapses the whole union to `obj`.
 and internal erasedUnionRef
     (ctx: Context)
     (model: ShapeModel)
@@ -1005,15 +909,9 @@ and internal isOptionalParam (p: ResolvedMember) (reference: FsTypeRef) =
 // Generics (§4.9).
 // ---------------------------------------------------------------------------------------------
 
-/// A declaration's own type parameters, and the scope its members must be shaped under.
-///
-/// Both come from the same walk because they have to agree: a parameter that earns a name is
-/// the one a member is allowed to reference, and one that does not must not be in scope, or
-/// the member would name a variable the declaration never binds.
-///
-/// A constraint survives only if it maps to a named type, which is the only bound F# can
-/// state. `extends string` and `extends keyof T` are dropped with a finding: F# has no form
-/// for them, and the nearest approximation would reject code TypeScript accepts.
+/// A declaration's own type parameters, and the scope its members must be shaped under. Both
+/// come from one walk so they agree: a member may reference exactly the parameters that earn a
+/// name. A constraint survives only where it maps to a named type; `extends keyof T` drops.
 let internal typeParamsOf
     (ctx: Context)
     (model: ShapeModel)
@@ -1051,10 +949,8 @@ let internal typeParamsOf
                 |> Option.bind _.Constraint
                 |> Option.map (fun boundId ->
                     // Only something that becomes an interface can be an F# base type. A union
-                    // renders as an erased `U_n` or a StringEnum and both are sealed, so
-                    // `'T :> Renderable` is not merely loose - FS0698 rejects it outright.
-                    // Tuples, arrays and delegates are sealed the same way. `FsObj` here falls
-                    // into the drop below, which is where the finding is written.
+                    // renders as a sealed `U_n` or StringEnum, so FS0698 rejects
+                    // `'T :> Renderable`; tuples, arrays and delegates are sealed the same way.
                     let expressible =
                         match Map.tryFind boundId model.Types with
                         | Some bound ->
@@ -1102,9 +998,8 @@ let internal declTypeParams (ctx: Context) (model: ShapeModel) (owner: string) (
     |> typeParamsOf ctx model owner
 
 /// The parameters a callback alias binds, which include the signature's own. F# has no rank-2
-/// form, so a generic *function type* - `type F = <T>(t: T) => T`, where each caller picks `T`
-/// - can only be approximated by hoisting the variable onto the alias, and that shift is worth
-/// a finding. A generic alias to a plain function type binds nothing extra and costs nothing.
+/// form, so a generic *function type* - `type F = <T>(t: T) => T` - can only be approximated
+/// by hoisting the variable onto the alias, which is worth a finding.
 let internal aliasTypeParams (ctx: Context) (model: ShapeModel) (owner: string) (facts: TypeFacts) =
     let declared = declParamIds facts
     let hoisted = facts.CallSignatures |> List.collect _.TypeParameters |> List.distinct
@@ -1202,12 +1097,8 @@ let internal resultName (taken: Set<string>) =
 // ---------------------------------------------------------------------------------------------
 
 /// A resolved signature as an F# type-parameter list, parameter list and return reference.
-/// Rest parameters are marked from the signature flag; their array types read as-is.
-///
-/// A signature's *own* parameters (§4.9) are bound here rather than at the declaration:
-/// `get<T>(source: T)` is a generic function, and F# writes that on the member. Without this
-/// they were out of scope at every position that used them and the whole signature widened to
-/// obj - `get` read `(source: obj, key: obj) : obj`, which is not a typed accessor at all.
+/// Rest parameters are marked from the signature flag; their array types read as-is. A
+/// signature's *own* parameters (§4.9) bind here, not at the declaration: `get<T>(source: T)`.
 let internal shapeSignature
     (ctx: Context)
     (model: ShapeModel)
@@ -1215,10 +1106,9 @@ let internal shapeSignature
     (owner: string)
     (signature: ResolvedSignature)
     : FsTypeParam list * FsParam list * FsTypeRef * Finding list =
-    // §4.10, the open keyof regime: a `K extends keyof T` variable is deliberately *not* bound
-    // as an F# variable. Its bound is the whole of what it means, and F# cannot state it, so a
-    // bare `'K` would be an unconstrained variable that lets any type through and drags `T[K]`
-    // down to obj with it. The support package's idiom is written at its uses instead.
+    // §4.10, the open keyof regime: a `K extends keyof T` variable is not bound as an F#
+    // variable - a bare `'K` would let any type through and drag `T[K]` to obj. The support
+    // package's `keyof<'T>` is written at its uses instead.
     let candidates = keyCandidates model signature.TypeParameters
 
     let plain =
@@ -1286,15 +1176,9 @@ let internal shapeSignature
             let rest = signature.HasRest && i = parameterCount - 1
             p, paramOwner, reference, rest, (not rest && isOptionalParam p reference))
 
-    // F# optional parameters are a tail: `?a: T, b: U` is FS1212. TypeScript forbids a `?`
-    // before a required parameter too, but `undefined` in a parameter's type is admitted
-    // anywhere (`createResource(source: S | undefined, fetcher, options?)`), and that is
-    // what `isOptionalParam` reads as optional. Only the trailing run gets the `?`; an
-    // admitting parameter ahead of a required one stays required, of `option` type - which
-    // is what the union hoist already made it, so nothing is lost.
-    // A `[<ParamArray>]` parameter is not optional, and it is last, so a signature with a rest
-    // parameter has no tail for `?` to go on: `setTimeout(callback, ?msDelay, ...args)` is
-    // FS1212 as surely as `?a, b` is, and `msDelay` stays required, of `option` type.
+    // F# optional parameters are a tail: `?a: T, b: U` is FS1212, and a rest parameter leaves
+    // no tail at all - `setTimeout(callback, ?msDelay, ...args)` the same. `undefined` in a
+    // type is admitted anywhere, so an earlier admitting parameter stays required, of `option`.
     let optionalTail =
         if signature.HasRest then
             0
