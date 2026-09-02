@@ -4608,7 +4608,7 @@ type KebabCasedProperties<'Value, 'Options when 'Options :> WordsOptions> = priv
 /// </code>
 /// </remarks>
 /// <remarks>@category Object</remarks>
-type KeyAsString = obj
+type KeyAsString = string
 
 /// <summary>
 /// Create a union of all keys from a given type, even those exclusive to specific union members.
@@ -6445,7 +6445,7 @@ type PackageJsonFunding =
 
 type PackageJsonImports =
     [<EmitIndexer>]
-    abstract Item: obj -> U3<string, U2<string, PackageJsonExportsItem>[], PackageJsonExportsItem> option with get, set
+    abstract Item: string -> U3<string, U2<string, PackageJsonExportsItem>[], PackageJsonExportsItem> option with get, set
 
 [<Interface>]
 type PackageJsonLicensesItem =

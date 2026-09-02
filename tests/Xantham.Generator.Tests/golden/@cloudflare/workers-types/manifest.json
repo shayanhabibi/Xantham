@@ -3,8 +3,8 @@
   "module": "Cloudflare.WorkersTypes",
   "counts": {
     "exact": 260,
-    "ergonomic": 967,
-    "widened": 380,
+    "ergonomic": 972,
+    "widened": 375,
     "escape": 107
   },
   "passes": [
@@ -38,22 +38,22 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 8128,
+      "total": 8107,
       "ergonomic": 7086,
-      "widened": 903,
+      "widened": 882,
       "escape": 139
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 85,
+      "total": 84,
       "ergonomic": 31,
-      "widened": 54
+      "widened": 53
     },
     {
       "pass": "SC - shape-classes",
-      "total": 58,
+      "total": 56,
       "ergonomic": 44,
-      "widened": 6,
+      "widened": 4,
       "escape": 8
     },
     {
@@ -3290,25 +3290,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR014",
+          "key": "TR036",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Attribute.value",
-          "message": "type flags BigInt not mapped yet; widened to obj"
-        },
-        {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Attribute.value",
-          "message": "type flags BigInt not mapped yet; widened to obj"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Attribute.value",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "union of 8 distinct types widened to obj (D4 caps the erased union at 4)"
         },
         {
           "key": "SP001",
@@ -3738,11 +3724,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR014",
+          "key": "TR040",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "ExportedHandlerTailStreamHandlerResultItemEventItem.message",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -3842,18 +3828,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "FetchEventInfo.cfJson",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "FetchEventInfo.cfJson",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "FetchEventInfo.cfJson",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "TR006",
@@ -8814,20 +8800,6 @@
           "message": "any maps to obj"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DigestStream.bytesWritten",
-          "message": "type flags BigInt not mapped yet; widened to obj"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DigestStream.bytesWritten",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
           "key": "TR024",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -13774,7 +13746,7 @@
     {
       "name": "QueuingStrategy",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB003",
@@ -13784,25 +13756,11 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "QueuingStrategy.highWaterMark",
-          "message": "type flags BigInt not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "QueuingStrategy.highWaterMark",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "QueuingStrategy.highWaterMark",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "key": "MB003",
@@ -13817,20 +13775,6 @@
           "tier": "ergonomic",
           "symbol": "QueuingStrategy.size",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "QueuingStrategy.size()",
-          "message": "type flags BigInt not mapped yet; widened to obj"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "QueuingStrategy.size()",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "key": "SP001",
@@ -14106,25 +14050,11 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "UnderlyingSource.expectedLength",
-          "message": "type flags BigInt not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "UnderlyingSource.expectedLength",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "UnderlyingSource.expectedLength",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "key": "MB003",
@@ -14865,22 +14795,8 @@
     {
       "name": "FixedLengthStream",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "key": "TR014",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "FixedLengthStream(expectedLength)",
-          "message": "type flags BigInt not mapped yet; widened to obj"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "FixedLengthStream(expectedLength)",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
         {
           "key": "TR032",
           "pass": "shape-classes",
@@ -14963,7 +14879,7 @@
     {
       "name": "IdentityTransformStreamQueuingStrategy",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB003",
@@ -14973,25 +14889,11 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "IdentityTransformStreamQueuingStrategy.highWaterMark",
-          "message": "type flags BigInt not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "IdentityTransformStreamQueuingStrategy.highWaterMark",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "IdentityTransformStreamQueuingStrategy.highWaterMark",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "key": "SP001",
@@ -16775,7 +16677,7 @@
     {
       "name": "SocketOptions",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB003",
@@ -16785,25 +16687,11 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SocketOptions.highWaterMark",
-          "message": "type flags BigInt not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "SocketOptions.highWaterMark",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SocketOptions.highWaterMark",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "key": "MB003",
@@ -17301,20 +17189,6 @@
           "tier": "ergonomic",
           "symbol": "Container.exec(options)",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Container.setInactivityTimeout(durationMs)",
-          "message": "type flags BigInt not mapped yet; widened to obj"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Container.setInactivityTimeout(durationMs)",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "key": "TR032",
@@ -18428,11 +18302,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR014",
+          "key": "TR040",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Performance.toJSON()",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         }
       ]
     },
@@ -18463,11 +18337,11 @@
           "message": "base members flattened into the interface (the is-a relation is not emitted)"
         },
         {
-          "key": "TR014",
+          "key": "TR040",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "PerformanceNodeTiming.toJSON()",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         }
       ]
     },
@@ -18512,11 +18386,11 @@
           "message": "any maps to obj"
         },
         {
-          "key": "TR014",
+          "key": "TR040",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "PerformanceMark.toJSON()",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         }
       ]
     },
@@ -18540,11 +18414,11 @@
           "message": "any maps to obj"
         },
         {
-          "key": "TR014",
+          "key": "TR040",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "PerformanceMeasure.toJSON()",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         }
       ]
     },
@@ -18680,11 +18554,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR014",
+          "key": "TR040",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "PerformanceEntry.toJSON()",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         }
       ]
     },
@@ -18708,11 +18582,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR014",
+          "key": "TR040",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "PerformanceResourceTiming.toJSON()",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         }
       ]
     },
@@ -25682,13 +25556,6 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationInput.tools",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -25701,6 +25568,13 @@
           "tier": "widened",
           "symbol": "AiTextGenerationInput.tools",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "AiTextGenerationInput.tools",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -34348,18 +34222,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Openai_Whisper_Large_V3_Turbo_InputAudio.body",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Openai_Whisper_Large_V3_Turbo_InputAudio.body",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Openai_Whisper_Large_V3_Turbo_InputAudio.body",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -36081,18 +35955,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_OutputToolCallsItem.arguments",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_OutputToolCallsItem.arguments",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_OutputToolCallsItem.arguments",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -37128,18 +37002,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Output2ToolCallsItem.arguments",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Output2ToolCallsItem.arguments",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_Output2ToolCallsItem.arguments",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -38365,18 +38239,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_OutputToolCallsItem.arguments",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_OutputToolCallsItem.arguments",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_OutputToolCallsItem.arguments",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -38896,18 +38770,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Qwen_Qwq_32B_Prompt.guided_json",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Qwen_Qwq_32B_Prompt.guided_json",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Qwen_Qwq_32B_Prompt.guided_json",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -39085,18 +38959,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Qwen_Qwq_32B_Messages.guided_json",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Qwen_Qwq_32B_Messages.guided_json",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Qwen_Qwq_32B_Messages.guided_json",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -39302,18 +39176,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Qwen_Qwq_32B_OutputToolCallsItem.arguments",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Qwen_Qwq_32B_OutputToolCallsItem.arguments",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Qwen_Qwq_32B_OutputToolCallsItem.arguments",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -39833,18 +39707,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Prompt.guided_json",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Prompt.guided_json",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Prompt.guided_json",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -40022,18 +39896,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.guided_json",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.guided_json",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_Messages.guided_json",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -40239,18 +40113,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_OutputToolCallsItem.arguments",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_OutputToolCallsItem.arguments",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_OutputToolCallsItem.arguments",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -40672,18 +40546,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Google_Gemma_3_12B_It_Prompt.guided_json",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Google_Gemma_3_12B_It_Prompt.guided_json",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Google_Gemma_3_12B_It_Prompt.guided_json",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -40861,18 +40735,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Google_Gemma_3_12B_It_Messages.guided_json",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Google_Gemma_3_12B_It_Messages.guided_json",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Google_Gemma_3_12B_It_Messages.guided_json",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -41078,18 +40952,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Google_Gemma_3_12B_It_OutputToolCallsItem.arguments",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Google_Gemma_3_12B_It_OutputToolCallsItem.arguments",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Google_Gemma_3_12B_It_OutputToolCallsItem.arguments",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -42001,18 +41875,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Prompt.guided_json",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Prompt.guided_json",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Prompt.guided_json",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -42246,18 +42120,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.guided_json",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.guided_json",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages.guided_json",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -42463,18 +42337,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Prompt_Inner.guided_json",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Prompt_Inner.guided_json",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Prompt_Inner.guided_json",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -42666,18 +42540,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.guided_json",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.guided_json",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_Inner.guided_json",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -42953,18 +42827,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_OutputToolCallsItemFunction.arguments",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_OutputToolCallsItemFunction.arguments",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_OutputToolCallsItemFunction.arguments",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -45583,11 +45457,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR014",
+          "key": "TR040",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Ai_Cf_Deepgram_Nova_3_InputAudio.body",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "SP001",
@@ -46244,11 +46118,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR014",
+          "key": "TR040",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Ai_Cf_Pipecat_Ai_Smart_Turn_V2_Input2Audio.body",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "SP001",
@@ -50982,18 +50856,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Black_Forest_Labs_Flux_2_Dev_InputMultipart.body",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Black_Forest_Labs_Flux_2_Dev_InputMultipart.body",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Black_Forest_Labs_Flux_2_Dev_InputMultipart.body",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -51087,18 +50961,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Black_Forest_Labs_Flux_2_Klein_4B_InputMultipart.body",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Black_Forest_Labs_Flux_2_Klein_4B_InputMultipart.body",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Black_Forest_Labs_Flux_2_Klein_4B_InputMultipart.body",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -51192,18 +51066,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Black_Forest_Labs_Flux_2_Klein_9B_InputMultipart.body",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Black_Forest_Labs_Flux_2_Klein_9B_InputMultipart.body",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Black_Forest_Labs_Flux_2_Klein_9B_InputMultipart.body",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -51798,18 +51672,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiOptions.extraHeaders",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AiOptions.extraHeaders",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "AiOptions.extraHeaders",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -51921,7 +51795,7 @@
     {
       "name": "GatewayOptionsMetadata",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -51931,25 +51805,11 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "GatewayOptionsMetadata.[]",
-          "message": "type flags BigInt not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "GatewayOptionsMetadata.[]",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "GatewayOptionsMetadata.[]",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         }
       ]
     },
@@ -52305,13 +52165,6 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AIGatewayUniversalRequestHeaders.[]",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -52324,6 +52177,13 @@
           "tier": "widened",
           "symbol": "AIGatewayUniversalRequestHeaders.[]",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "AIGatewayUniversalRequestHeaders.[]",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -52731,18 +52591,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiGatewayRunOptions.extraHeaders",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AiGatewayRunOptions.extraHeaders",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "AiGatewayRunOptions.extraHeaders",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -52822,18 +52682,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiRunOptions.extraHeaders",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AiRunOptions.extraHeaders",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "AiRunOptions.extraHeaders",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -52948,18 +52808,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiRunOptions2.extraHeaders",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AiRunOptions2.extraHeaders",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "AiRunOptions2.extraHeaders",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -53074,18 +52934,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiRunOptions3.extraHeaders",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AiRunOptions3.extraHeaders",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "AiRunOptions3.extraHeaders",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -54149,18 +54009,18 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AIGatewayHeaders.[]",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR035",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "AIGatewayHeaders.[]",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "AIGatewayHeaders.[]",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         }
       ]
     },
@@ -73920,109 +73780,102 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoConfigRetries.delay()",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
           "key": "SP001",
@@ -74396,214 +74249,200 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
-        },
-        {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkflowStepDoRollbackOptionsRollbackConfigRetries.delay()",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
           "key": "SP001",
@@ -76740,18 +76579,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ConversionRequestOptions.extraHeaders",
-          "message": "type flags NonPrimitive not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "ConversionRequestOptions.extraHeaders",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR040",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "ConversionRequestOptions.extraHeaders",
+          "message": "TypeScript\u0027s object maps to obj, which also admits the primitives object excludes (\u00A74.1)"
         },
         {
           "key": "MB003",
@@ -77871,109 +77710,102 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "WorkflowSleepDuration",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "WorkflowSleepDuration",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "WorkflowSleepDuration",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "WorkflowSleepDuration",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "WorkflowSleepDuration",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "WorkflowSleepDuration",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "WorkflowSleepDuration",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "WorkflowSleepDuration",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "WorkflowSleepDuration",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "WorkflowSleepDuration",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "WorkflowSleepDuration",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "WorkflowSleepDuration",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "WorkflowSleepDuration",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "WorkflowSleepDuration",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WorkflowSleepDuration",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         }
       ]
     },

@@ -5152,7 +5152,7 @@ type DrawableSVGGeometry =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/assignedSlot)
     /// </summary>
     abstract assignedSlot: obj option
-    abstract draw: obj with get, set
+    abstract draw: string with get, set
 
 type UtilityFunction = Func<obj[], TimelinePosition>
 

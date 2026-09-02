@@ -20,6 +20,12 @@ let private numberLiteral (id: int) (value: float) =
         { Build.typeResponse id TypeFlags.NumberLiteral with
             Value = JsonValue.Create value }
 
+/// An intrinsic carrying nothing but its flag - `bigint`, `object`, `symbol`, and the
+/// type-level computations (`` `on${string}` ``, `Uppercase<T>`) the checker hands back with no
+/// structure to read.
+let private intrinsic (id: int) (flags: TypeFlags) =
+    Build.facts (Build.typeResponse id flags)
+
 /// A tuple type over the given component ids, with one element flag each.
 let private tuple (id: int) (components: int list) (flags: ElementFlags list) =
     { Build.facts
@@ -79,6 +85,73 @@ let typeRefTests =
                 let reference, findings = Shape.typeRef Build.context model None "x" typeId
                 Expect.equal reference expected $"type {typeId}"
                 Expect.isEmpty findings $"type {typeId} findings"
+
+        // The flags the tier used to answer with a bare `TypeFlagsNotMapped`. Each is asserted
+        // on its key as well as its tier, because half the point of the work was that the
+        // manifest stop overstating the damage: an exact mapping raises nothing at all, and a
+        // lossy one names the construct and what was lost rather than a flag name.
+        testCase "a template literal reads as the string it is at runtime (§4.11)" <| fun _ ->
+            let model = Build.shapeModel (intrinsic 10 TypeFlags.TemplateLiteral :: Build.primitives)
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference FsString "`on${string}` is a string"
+            Expect.equal (findings |> List.map _.Key) [ "TR037" ] "the template-literal finding, not TR014"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened: it accepts strings the pattern does not"
+            Expect.stringContains (List.head findings).Message "pattern" "and the message says which half was lost"
+
+        testCase "an intrinsic string mapping reads as string too" <| fun _ ->
+            let model = Build.shapeModel (intrinsic 10 TypeFlags.StringMapping :: Build.primitives)
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference FsString "Uppercase<T> is a string"
+            Expect.equal (findings |> List.map _.Key) [ "TR038" ] "named as the mapping it is"
+
+        testCase "bigint maps exactly and raises nothing" <| fun _ ->
+            // Fable 5 compiles F# `bigint` to the native JavaScript BigInt (the run gate reads
+            // that off node). An exact mapping must not appear in the manifest at all.
+            let model = Build.shapeModel (intrinsic 10 TypeFlags.BigInt :: Build.primitives)
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference FsBigInt "bigint"
+            Expect.isEmpty findings "nothing is lost, so nothing is reported"
+
+        testCase "a bigint literal widens to bigint, as its string and number peers do" <| fun _ ->
+            let model = Build.shapeModel (intrinsic 10 TypeFlags.BigIntLiteral :: Build.primitives)
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference FsBigInt "2n"
+            Expect.equal (findings |> List.map _.Key) [ "TR039" ] "the literal's own widening"
+            Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
+
+        testCase "TypeScript's object maps to obj, and says that is still a widening" <| fun _ ->
+            let model = Build.shapeModel (intrinsic 10 TypeFlags.NonPrimitive :: Build.primitives)
+            let reference, findings = Shape.typeRef Build.context model None "x" 10
+
+            Expect.equal reference FsObj "there is no closer F# type"
+            Expect.equal (findings |> List.map _.Key) [ "TR040" ] "reported as the mapping it is, not as an unmapped flag"
+            Expect.stringContains (List.head findings).Message "primitives" "obj admits what object excludes"
+
+        testCase "symbol and unique symbol widen, each naming its own construct" <| fun _ ->
+            // Fable.Core 5.2.0 declares no `JS.Symbol`, checked against the shipped assembly.
+            let model =
+                Build.shapeModel (
+                    intrinsic 10 TypeFlags.ESSymbol
+                    :: intrinsic 11 TypeFlags.UniqueESSymbol
+                    :: Build.primitives
+                )
+
+            let plain, plainFindings = Shape.typeRef Build.context model None "x" 10
+            let unique, uniqueFindings = Shape.typeRef Build.context model None "x" 11
+
+            Expect.equal plain FsObj "symbol"
+            Expect.equal unique FsObj "unique symbol"
+            Expect.equal (plainFindings |> List.map _.Key) [ "TR041" ] "symbol"
+            Expect.equal (uniqueFindings |> List.map _.Key) [ "TR042" ] "unique symbol"
+
+            Expect.stringContains
+                (List.head uniqueFindings).Message
+                "unique"
+                "a unique symbol loses its identity on top of its type"
 
         testCase "a union with undefined hoists to option with an ergonomic finding" <| fun _ ->
             let union =

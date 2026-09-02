@@ -542,6 +542,10 @@ type FsTypeRef =
     | FsBool
     | FsString
     | FsFloat
+    /// TypeScript's `bigint`. Exact: Fable 5 compiles F# `bigint` to the native JavaScript
+    /// `BigInt` - read off the emitted `BigInt.js` (`typeof x === "bigint"`, `fromInt32 n` is
+    /// `BigInt(n)`) and run against a JS object handing one over, not recalled.
+    | FsBigInt
     | FsUnit
     | FsObj
     | FsOption of FsTypeRef

@@ -21,9 +21,9 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 608,
+      "total": 606,
       "ergonomic": 176,
-      "widened": 432
+      "widened": 430
     },
     {
       "pass": "SP - synthesize-paramobjects",
@@ -2956,11 +2956,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "KeyAsString",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         }
       ]
     },
@@ -5509,18 +5509,18 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "PackageJsonImports.[]",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "PackageJsonImports.[]",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "PackageJsonImports.[]",
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         }
       ]
     },
@@ -6571,20 +6571,6 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR014",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "Primitive",
-          "message": "type flags BigInt not mapped yet; widened to obj"
-        },
-        {
-          "key": "TR014",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "Primitive",
-          "message": "type flags ESSymbol not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-aliases",
           "tier": "ergonomic",
@@ -6597,6 +6583,13 @@
           "tier": "widened",
           "symbol": "Primitive",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR041",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "Primitive",
+          "message": "symbol has no binding in Fable.Core 5.2.0; widened to obj (\u00A74.1)"
         }
       ]
     },
@@ -10400,13 +10393,6 @@
           "message": "type refers to itself through unnamed shapes; widened to obj"
         },
         {
-          "key": "TR014",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "StructuredCloneable",
-          "message": "type flags BigInt not mapped yet; widened to obj"
-        },
-        {
           "key": "TR023",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -13500,11 +13486,11 @@
           "message": "unknown maps to obj (D8)"
         },
         {
-          "key": "TR014",
+          "key": "TR041",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "UnknownRecord.[]",
-          "message": "type flags ESSymbol not mapped yet; widened to obj"
+          "message": "symbol has no binding in Fable.Core 5.2.0; widened to obj (\u00A74.1)"
         }
       ]
     },

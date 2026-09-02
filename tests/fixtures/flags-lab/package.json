@@ -1,0 +1,7 @@
+{
+  "name": "flags-lab",
+  "type": "module",
+  "types": "index.d.ts",
+  "main": "index.js",
+  "description": "Hand-authored fixture for the TypeScript type flags the shape tier used to refuse (docs/plans/generator-architecture.md phase E, mapping document 4.1/4.2/4.11): template literals and string mappings, bigint and its literals, `object`, `symbol` and `unique symbol`. Tracked in git, no npm install, so the goldens pin every case - and its negatives - under the live compiler; index.js is the run gate's runtime for the bigint claim."
+}

@@ -211,11 +211,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR014",
+          "key": "TR042",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "orderIdTag",
-          "message": "type flags UniqueESSymbol not mapped yet; widened to obj"
+          "message": "unique symbol has no binding in Fable.Core 5.2.0 and no F# form for its identity; widened to obj"
         }
       ]
     },

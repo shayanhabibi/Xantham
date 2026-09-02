@@ -139,6 +139,9 @@ let rec private printTypeIn (atomic: bool) =
     | FsBool -> "bool"
     | FsString -> "string"
     | FsFloat -> "float"
+    // FSharp.Core's abbreviation for `System.Numerics.BigInteger`, which Fable compiles to the
+    // native JavaScript `BigInt`; no open is needed for it.
+    | FsBigInt -> "bigint"
     | FsUnit -> "unit"
     | FsObj -> "obj"
     | FsOption inner -> $"{printTypeIn true inner} option"

@@ -16893,11 +16893,11 @@
           "message": "dispatchEvent is not among the generated declarations; widened to obj"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "DrawableSVGGeometry.draw",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         },
         {
           "key": "TR032",

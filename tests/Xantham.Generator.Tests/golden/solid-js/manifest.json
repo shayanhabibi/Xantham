@@ -1211,11 +1211,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR014",
+          "key": "TR042",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "JSX.SERIALIZABLE",
-          "message": "type flags UniqueESSymbol not mapped yet; widened to obj"
+          "message": "unique symbol has no binding in Fable.Core 5.2.0 and no F# form for its identity; widened to obj"
         },
         {
           "key": "SP001",
@@ -4105,11 +4105,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR014",
+          "key": "TR041",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Context.id",
-          "message": "type flags ESSymbol not mapped yet; widened to obj"
+          "message": "symbol has no binding in Fable.Core 5.2.0; widened to obj (\u00A74.1)"
         },
         {
           "key": "SP001",
@@ -7605,11 +7605,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR014",
+          "key": "TR042",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "$PROXY",
-          "message": "type flags UniqueESSymbol not mapped yet; widened to obj"
+          "message": "unique symbol has no binding in Fable.Core 5.2.0 and no F# form for its identity; widened to obj"
         }
       ]
     },
@@ -7618,11 +7618,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR014",
+          "key": "TR042",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "$TRACK",
-          "message": "type flags UniqueESSymbol not mapped yet; widened to obj"
+          "message": "unique symbol has no binding in Fable.Core 5.2.0 and no F# form for its identity; widened to obj"
         }
       ]
     },
@@ -7631,11 +7631,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR014",
+          "key": "TR042",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "$DEVCOMP",
-          "message": "type flags UniqueESSymbol not mapped yet; widened to obj"
+          "message": "unique symbol has no binding in Fable.Core 5.2.0 and no F# form for its identity; widened to obj"
         }
       ]
     },

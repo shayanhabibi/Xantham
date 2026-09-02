@@ -356,11 +356,11 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR037",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Prefixed",
-          "message": "type flags TemplateLiteral not mapped yet; widened to obj"
+          "message": "template literal type reads as the string it is at runtime; the pattern is not carried (\u00A74.11)"
         }
       ]
     },
