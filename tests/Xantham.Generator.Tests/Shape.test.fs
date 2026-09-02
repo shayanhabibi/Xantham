@@ -801,6 +801,122 @@ let typeRefTests =
 
             Expect.equal reference FsObj "nothing to template with"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "reported, not silent"
+
+        // Wave five, lane R: O7's `map`. A group's table redirects the names it carries to a
+        // binding somebody already wrote; every other name of the group keeps its widening.
+        let mappedLib names =
+            { Build.context with
+                Config =
+                    { GeneratorConfig.Default with
+                        Groups = Map.ofList [ "typescript/lib", GroupDisposition.Map(Map.ofList names) ] } }
+
+        testCase "a mapped group's type is written as the binding its table names" <| fun _ ->
+            let external =
+                { Build.facts (Build.typeResponse 21 TypeFlags.Object) with
+                    Origin = CompilerLib
+                    SymbolName = Some "RegExp" }
+
+            let context =
+                mappedLib
+                    [ "RegExp",
+                      {
+                          FSharpName = "System.Text.RegularExpressions.Regex"
+                          Arity = 0
+                      } ]
+
+            Expect.equal
+                (Spec.typeRef context (Build.shapeModel [ external ]) None "x" 21)
+                (FsNamed "System.Text.RegularExpressions.Regex", [])
+                "the destination, exact"
+
+        testCase "a mapped generic is applied at the arity its destination takes" <| fun _ ->
+            let external =
+                { Build.facts (Build.typeResponse 21 TypeFlags.Object) with
+                    Origin = CompilerLib
+                    SymbolName = Some "WeakRef"
+                    TypeArguments = [ 1 ] }
+
+            let context =
+                mappedLib
+                    [ "WeakRef",
+                      {
+                          FSharpName = "System.WeakReference"
+                          Arity = 1
+                      } ]
+
+            let model = Build.shapeModel (Build.primitives @ [ external ])
+
+            Expect.equal
+                (Spec.typeRef context model None "x" 21)
+                (FsApp("System.WeakReference", [ FsString ]), [])
+                "the argument is shaped at its position"
+
+        testCase "an arity the destination does not take widens rather than applying" <| fun _ ->
+            let external =
+                { Build.facts (Build.typeResponse 21 TypeFlags.Object) with
+                    Origin = CompilerLib
+                    SymbolName = Some "Iterator"
+                    TypeArguments = [ 1; 2; 4 ] }
+
+            let context =
+                mappedLib
+                    [ "Iterator",
+                      {
+                          FSharpName = "System.Collections.Generic.IEnumerator"
+                          Arity = 1
+                      } ]
+
+            let model = Build.shapeModel (Build.primitives @ [ external ])
+            let reference, findings = Spec.typeRef context model None "x" 21
+
+            Expect.equal reference FsObj "an application that would not compile is not written"
+            Expect.equal (findings |> List.map _.Key) [ "TR053" ] "the arity mismatch is reported"
+            Expect.stringContains findings.Head.Message "3 type arguments" "and says what the site applied"
+
+        testCase "a name outside the table keeps the widening the group had" <| fun _ ->
+            let external =
+                { Build.facts (Build.typeResponse 21 TypeFlags.Object) with
+                    Origin = CompilerLib
+                    SymbolName = Some "Response" }
+
+            let context =
+                mappedLib
+                    [ "RegExp",
+                      {
+                          FSharpName = "System.Text.RegularExpressions.Regex"
+                          Arity = 0
+                      } ]
+
+            let reference, findings = Spec.typeRef context (Build.shapeModel [ external ]) None "x" 21
+
+            Expect.equal reference FsObj "mapping is per name"
+            Expect.equal (findings |> List.map _.Key) [ "TR023" ] "reported as any unbound name is"
+
+        testCase "an anonymous type in a mapped group widens, with a finding of its own" <| fun _ ->
+            let external =
+                { Build.facts (Build.typeResponse 22 TypeFlags.Object) with Origin = Dependency "left-pad" }
+
+            let context =
+                { Build.context with
+                    Config =
+                        { GeneratorConfig.Default with
+                            Groups =
+                                Map.ofList
+                                    [ "left-pad",
+                                      GroupDisposition.Map(
+                                          Map.ofList
+                                              [ "Padded",
+                                                {
+                                                    FSharpName = "Pad.Padded"
+                                                    Arity = 0
+                                                } ]
+                                      ) ] } }
+
+            let reference, findings = Spec.typeRef context (Build.shapeModel [ external ]) None "x" 22
+
+            Expect.equal reference FsObj "the destination binds names and this type has none"
+            Expect.equal (findings |> List.map _.Key) [ "TR052" ] "reported, not silent"
+
     ]
 
 /// The Options-and-ansiRegex shape of the ansi-regex fixture, built by hand: an aliased

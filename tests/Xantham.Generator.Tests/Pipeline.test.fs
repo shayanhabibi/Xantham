@@ -61,6 +61,13 @@ let private handFixture (name: string) =
     let path = Path.Combine(root, "tests", "fixtures", name)
     if Directory.Exists path then Some path else None
 
+/// A hand-authored fixture's own `xantham.json`, so the committed golden gates the configured
+/// spelling itself rather than a configuration built beside it.
+let private fixtureConfig (package: string option) =
+    package
+    |> Option.map GeneratorConfig.load
+    |> Option.defaultValue GeneratorConfig.Default
+
 /// The `inherit` lines a rendered declaration carries, in emission order. Reading them off the
 /// source rather than the model is deliberate: §4.4's is-a relation is only real if it survives
 /// to the file the compile gate builds.
@@ -311,6 +318,53 @@ let configTests =
             Expect.equal (derived "@cloudflare/workers-types") "@cloudflare/workers-types" "another scope is not @types"
             Expect.equal (derived "phase-b-lab") "phase-b-lab" "and so is a lab"
 
+        // Wave five, lane R. A group's value is a string for the dispositions that need no
+        // detail, and an object for the one that does: a mapped group has to say which name
+        // goes where, and at what arity.
+        testCase "a mapped group carries the table its destinations need" <| fun _ ->
+            withConfig
+                """{
+                    "groups": {
+                        "typescript/lib": "reference",
+                        "@types/node": {
+                            "map": {
+                                "Buffer": "Node.Buffer.Buffer",
+                                "Readable": { "name": "Node.Stream.Readable", "arity": 1 }
+                            }
+                        }
+                    }
+                }"""
+            <| fun config ->
+                Expect.equal (Map.find "typescript/lib" config.Groups) Reference "a string group is unchanged"
+
+                Expect.equal
+                    (Map.find "@types/node" config.Groups)
+                    (GroupDisposition.Map(
+                        Map.ofList
+                            [
+                                "Buffer",
+                                {
+                                    FSharpName = "Node.Buffer.Buffer"
+                                    Arity = 0
+                                }
+                                "Readable",
+                                {
+                                    FSharpName = "Node.Stream.Readable"
+                                    Arity = 1
+                                }
+                            ]
+                    ))
+                    "a bare destination takes no type arguments; one that does states its arity"
+
+        testCase "a mapped group without a table is refused, not read as a widening" <| fun _ ->
+            Expect.throws
+                (fun () -> withConfig """{ "groups": { "@types/node": "map" } }""" ignore)
+                "the table is the disposition"
+
+            Expect.throws
+                (fun () -> withConfig """{ "groups": { "@types/node": { "widen": {} } } }""" ignore)
+                "and an object group is a mapped one"
+
         testCase "a configured runtime package wins over the derivation" <| fun _ ->
             let config =
                 { GeneratorConfig.Default with
@@ -319,6 +373,9 @@ let configTests =
             Expect.equal (GeneratorConfig.runtimePackage config "@types/three") "not-derivable" "config decides"
             Expect.equal (GeneratorConfig.runtimePackage GeneratorConfig.Default "@types/three") "three" "unset derives"
     ]
+
+/// Wave five, lane R: the `map` disposition, generated under the lab's own `xantham.json`.
+let private groupMapLab = handFixture "group-map-lab"
 
 [<Tests>]
 let pipelineTests =
@@ -989,6 +1046,58 @@ let pipelineTests =
                       Expect.isTrue (says "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0") "the dropped buffer parameter"
                       Expect.isTrue (says "PromiseLike reads as JS.Promise") "a thenable is not a promise"
                       Expect.isTrue (says "ReadonlyMap reads as JS.Map") "and readonly is not carried" ])
+
+
+        yield!
+            fixtureTests "group-map-lab" groupMapLab (fixtureConfig groupMapLab) (fun package ->
+                [ testCase "a mapped group is redirected to the bindings its table names" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate (fixtureConfig groupMapLab) package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // O7's `map`: the group resolves to identity only, and each name the
+                      // table carries is written as the destination somebody already bound.
+                      Expect.stringContains
+                          source
+                          "static member compile (pattern: System.Text.RegularExpressions.Regex) : System.Text.RegularExpressions.Regex"
+                          "a destination taking no type arguments"
+
+                      Expect.stringContains
+                          source
+                          "static member hold (handle: Handle) : System.WeakReference<Handle>"
+                          "a generic destination at the arity its table states"
+
+                      // The destination composes wherever an ordinary reference does.
+                      Expect.stringContains source "abstract patterns: System.Text.RegularExpressions.Regex[]" "under an array"
+                      Expect.stringContains source "abstract held: System.WeakReference<Handle> option" "under an option"
+                      Expect.stringContains source "abstract boxed: Box<System.Text.RegularExpressions.Regex>" "and through a generic this run declares"
+
+                  testCase "a mapped group carries only the names its table carries" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate (fixtureConfig groupMapLab) package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let says key fragment =
+                          rendered.Findings
+                          |> List.exists (fun finding ->
+                              finding.Key = (key: string) && finding.Message.Contains(fragment: string))
+
+                      // A name outside the table keeps the widening the group had, so mapping
+                      // is per name rather than per group.
+                      Expect.stringContains source "static member respond () : obj" "an unmapped name widens"
+                      Expect.isTrue (says "TR023" "Response is not among the generated declarations") "and says so"
+
+                      // The arity rule: the destination takes one argument and the site applies
+                      // three, so the application is not written at all.
+                      Expect.stringContains source "static member walk (over: obj) : unit" "an arity the destination does not take"
+                      Expect.isTrue (says "TR053" "Iterator is applied to 3 type arguments") "reported with the arity applied"
+
+                  testCase "the pinned Fable tables answer ahead of a mapped group's own" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate (fixtureConfig groupMapLab) package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // Mapping the compiler lib extends `Naming.LibBindings` and
+                      // `Naming.BrowserBindings` by name; it does not replace either.
+                      Expect.stringContains source "static member fetchOne (url: string) : JS.Promise<string>" "the ECMAScript table"
+                      Expect.stringContains source "static member handle (target: Browser.Types.EventTarget) : unit" "and the DOM table" ])
 
 
         yield!
