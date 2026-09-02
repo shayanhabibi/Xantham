@@ -492,6 +492,17 @@ Covered in §8. 737 imports point at a package with no runtime. Needs a `Generat
 `RuntimePackage: string option`, defaulting to the package name with a `@types/` prefix stripped —
 plus a test that a types-only package renders its runtime specifier.
 
+**Landed (wave two, lane D).** `RuntimePackage` is the `runtime` key of `xantham.json`; unset, it
+derives the specifier from the package name, and the derivation had to be DefinitelyTyped's whole
+convention rather than a prefix strip: DT publishes one flat `@types` scope, so it folds a scoped
+package's scope into the name (`@types/babel__core` is the types of `@babel/core`), and a
+`__` therefore unfolds back to `@scope/name`. Nothing in a DT manifest states the runtime name, so
+the convention is the only evidence on disk; `runtime` overrides it for anything it cannot
+describe. `tests/fixtures/types-only-lab` pins it, and `SE002` reports a derived specifier once
+per run — the alternative, once per import, is the same sentence 737 times on `three`. No corpus
+golden moved: not one rung is a `@types/*` package, and the derivation is the identity on every
+other name.
+
 ---
 
 ## 10. Recommendation

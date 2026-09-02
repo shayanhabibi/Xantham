@@ -446,14 +446,14 @@ let private renderMember (m: FsMember) =
 
 /// One bound member - an `Exports` member or a class static - as its attribute line and its
 /// signature. Both hold an `ImportBinding` and neither has an F# body, so they render the same.
-let private renderBound (packageName: string) (m: FsExportMember) =
+let private renderBound (runtimePackage: string) (m: FsExportMember) =
     [
         yield! docLines "    " m.Docs m.Tags
 
         // The binding attribute, optionally carrying a second attribute inside the same
         // brackets: a global is named off `globalThis` and imports nothing.
         let attribute (also: string) =
-            let package = stringLit packageName
+            let package = stringLit runtimePackage
 
             match m.Binding with
             | ImportDefault -> $"    [<Import({stringLit Naming.defaultImportKey}, {package}){also}>]"
@@ -476,7 +476,7 @@ let private renderBound (packageName: string) (m: FsExportMember) =
                 $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
     ]
 
-let private renderInterface (packageName: string) (decl: FsInterfaceDecl) =
+let private renderInterface (runtimePackage: string) (decl: FsInterfaceDecl) =
     [
         yield! docLines "" decl.Docs decl.Tags
 
@@ -509,7 +509,7 @@ let private renderInterface (packageName: string) (decl: FsInterfaceDecl) =
             // Class statics (§4.4), last so that the instance surface reads first and a
             // generated Create keeps the place it has held since phase B.
             for m in statics do
-                yield! renderBound packageName m
+                yield! renderBound runtimePackage m
     ]
 
 let private renderStringEnum (decl: FsStringEnumDecl) =
@@ -598,14 +598,14 @@ let private renderPhantom (decl: FsPhantomDecl) =
         yield $"type {declHead decl.Name decl.TypeParameters} = private {case} of {printType decl.Carrier}"
     ]
 
-let private renderExports (packageName: string) (members: FsExportMember list) =
+let private renderExports (runtimePackage: string) (members: FsExportMember list) =
     [
         yield "/// <summary>The package's value exports, each bound to its import.</summary>"
         yield "[<Erase>]"
         yield "type Exports ="
 
         for m in members do
-            yield! renderBound packageName m
+            yield! renderBound runtimePackage m
     ]
 
 /// The one `.fs` file of the walking skeleton: header, opens, declarations in the order the
@@ -615,14 +615,14 @@ let renderSource: Pass<RenderModel> =
         let body =
             model.Decls
             |> List.map (function
-                | FsInterface decl -> renderInterface model.PackageName decl
+                | FsInterface decl -> renderInterface model.RuntimePackage decl
                 | FsStringEnum decl -> renderStringEnum decl
                 | FsTaggedUnion decl -> renderTaggedUnion decl
                 | FsEnum decl -> renderEnum decl
                 | FsAbbrev decl -> renderAbbrev decl
                 | FsMeasure decl -> renderMeasure decl
                 | FsPhantom decl -> renderPhantom decl
-                | FsExports members -> renderExports model.PackageName members)
+                | FsExports members -> renderExports model.RuntimePackage members)
             |> List.map (String.concat "\n")
             |> String.concat "\n\n"
 

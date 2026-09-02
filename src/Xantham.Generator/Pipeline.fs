@@ -62,6 +62,7 @@ let toRender (ctx: Context) (shape: ShapeModel) (findings: Finding list) : Rende
     {
         ModuleName = moduleName ctx
         PackageName = ctx.PackageName
+        RuntimePackage = GeneratorConfig.runtimePackage ctx.Config ctx.PackageName
         PackageDir = ctx.PackageDir
         Decls = shape.Decls
         Findings = findings

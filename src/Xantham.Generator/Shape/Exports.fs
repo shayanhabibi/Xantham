@@ -17,6 +17,17 @@ let shapeExports: Pass<ShapeModel> =
 
                     let emit finding = findings <- findings @ [ finding ]
 
+                    // Once per run, not once per import: `@types/three` renders 737 of them and
+                    // they all name the same specifier, so a per-import finding would say one
+                    // thing 737 times. `<module>` is the run-level symbol `harvest-globals`
+                    // already uses. Raised only where the runtime package was *derived* - a
+                    // configured `runtime` is a decision someone made and recorded, not a
+                    // convention this run had to guess from a name.
+                    let runtimePackage = GeneratorConfig.runtimePackage ctx.Config ctx.PackageName
+
+                    if ctx.Config.RuntimePackage.IsNone && runtimePackage <> ctx.PackageName then
+                        emit (Finding.make "<module>" (ShapeExports.RuntimeSpecifierDerived runtimePackage))
+
                     let fallback = defaultExportName ctx
 
                     let members =
