@@ -79,9 +79,17 @@ let start (config: GeneratorConfig) (packageDir: string) : Async<TscMailbox * Co
         try
             let! _ = AsyncApi.initialize mailbox
 
+            let compilerOptions =
+                match config.Lib with
+                | None -> CompilerOptions.Default
+                | Some lib ->
+                    { CompilerOptions.Default with
+                        Lib = ValueSome(List.toArray lib) }
+
             let! program =
                 mailbox.createProgram (
-                    CreateProgramOptions.Default,
+                    { CreateProgramOptions.Default with
+                        CompilerOptions = compilerOptions },
                     rootFiles = [| DocumentIdentifier.FileName entry |]
                 )
 

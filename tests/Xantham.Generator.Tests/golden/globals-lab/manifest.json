@@ -3,8 +3,8 @@
   "module": "GlobalsLab",
   "counts": {
     "exact": 3,
-    "ergonomic": 4,
-    "widened": 1,
+    "ergonomic": 6,
+    "widened": 0,
     "escape": 1
   },
   "symbols": [
@@ -63,17 +63,23 @@
     },
     {
       "name": "Bag",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "BagLoose",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         }
       ]
     },

@@ -192,6 +192,38 @@ let private unexplainedDrops (rendered: RenderModel) =
     let explained = symbolsOf (fun finding -> finding.Pass <> "audit-coverage")
     Set.difference audited explained |> Set.toList
 
+/// `xantham.json` is authored by hand next to the package manifest (O4); a missing file is the
+/// default, and every key it does carry has to round-trip into the config record.
+[<Tests>]
+let configTests =
+    let withConfig (json: string) (test: GeneratorConfig -> unit) =
+        let dir = Path.Combine(Path.GetTempPath(), "xantham-config-" + Guid.NewGuid().ToString "N")
+        Directory.CreateDirectory dir |> ignore
+
+        try
+            File.WriteAllText(Path.Combine(dir, "xantham.json"), json)
+            test (GeneratorConfig.load dir)
+        finally
+            Directory.Delete(dir, true)
+
+    testList "generator config" [
+        testCase "a missing file is the default" <| fun _ ->
+            let dir = Path.Combine(Path.GetTempPath(), "xantham-config-" + Guid.NewGuid().ToString "N")
+            Expect.equal (GeneratorConfig.load dir) GeneratorConfig.Default "nothing configured"
+
+        testCase "lib is the compiler's lib option, as tsconfig spells it" <| fun _ ->
+            // A global type library that replaces the DOM (`@cloudflare/workers-types`) has to
+            // be generated without it, or every name it shares with `lib.dom.d.ts` merges into
+            // the compiler lib and is not the package's to harvest.
+            withConfig """{ "lib": ["esnext", "webworker"], /* comment */ "groups": { "typescript/lib": "reference" } }"""
+            <| fun config ->
+                Expect.equal config.Lib (Some [ "esnext"; "webworker" ]) "lib carried through in order"
+                Expect.equal (Map.find "typescript/lib" config.Groups) Reference "groups still parsed beside it"
+
+        testCase "lib that is not an array of strings is an error, not a silent default" <| fun _ ->
+            Expect.throws (fun () -> withConfig """{ "lib": "esnext" }""" ignore) "a bare string is refused"
+    ]
+
 [<Tests>]
 let pipelineTests =
     testList "generator e2e" [
@@ -577,14 +609,23 @@ let pipelineTests =
 
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 
+        // workers-types is a global type library that *replaces* the DOM lib: its README
+        // prescribes `"lib": ["esnext"]`, and with the DOM loaded every name it shares with
+        // `lib.dom.d.ts` (`Headers`, `Response`, `Event`, `Crypto` - most of its 154 classes)
+        // merges with the lib's declaration, groups as the compiler lib by its first
+        // declaration, and never reaches the harvest. The rung runs the way a consumer would.
+        let workersTypesConfig =
+            { GeneratorConfig.Default with
+                Lib = Some [ "esnext" ] }
+
         yield!
             fixtureTests
                 "@cloudflare/workers-types"
                 (npmFixture "@cloudflare/workers-types")
-                GeneratorConfig.Default
+                workersTypesConfig
                 (fun package ->
                     [ testCase "a package that declares no module is harvested from global scope" <| fun _ ->
-                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let rendered = Async.RunSynchronously(Pipeline.generate workersTypesConfig package)
                           let source = rendered.Files |> List.head |> snd
 
                           // The whole point of the rung: workers-types has no module symbol, so
@@ -593,10 +634,19 @@ let pipelineTests =
                           Expect.stringContains source "[<Global(\"Cloudflare\")>]" "a declared global binds with Global"
                           Expect.isFalse (source.Contains "[<Import(") "a global library imports nothing"
 
+                      testCase "a class that shares a DOM name is the package's own to harvest" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate workersTypesConfig package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          for name in [ "Headers"; "Response"; "Event"; "Crypto" ] do
+                              Expect.isTrue
+                                  (source.Contains($"\ntype {name} =") || source.Contains($"\nand {name} ="))
+                                  $"{name} is declared by the package, not merged away into the DOM lib"
+
                       testCase "no declaration of workers-types is dropped without saying why" <| fun _ ->
                           // This rung cannot claim zero escapes - ambient module declarations and
                           // generic aliases whose parameters all widened away do get dropped.
-                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let rendered = Async.RunSynchronously(Pipeline.generate workersTypesConfig package)
 
                           Expect.isEmpty
                               (unexplainedDrops rendered)

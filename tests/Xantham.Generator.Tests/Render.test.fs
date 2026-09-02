@@ -140,6 +140,32 @@ let renderTests =
 
             Expect.stringContains source "type Mapper<'T> = Func<'T, 'T>" "a generic abbreviation"
 
+        testCase "constraints are one trailing when-clause, whichever parameters carry them" <| fun _ ->
+            // `<'A when 'A :> X, 'B>` is a syntax error: F# admits one `when` after the last
+            // parameter, its constraints joined by `and`.
+            let model =
+                { baseModel with
+                    Decls =
+                        [ FsInterface
+                              { Name = "Labelled"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters =
+                                  [ { Name = "T"; Constraint = Some(FsNamed "Named") }
+                                    { Name = "U"; Constraint = None }
+                                    { Name = "V"; Constraint = Some(FsApp("Box", [ FsTypeVar "U" ])) } ]
+                                Inherits = []
+                                Members = []
+                                CreateOverloads = [] } ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+
+            Expect.stringContains
+                source
+                "type Labelled<'T, 'U, 'V when 'T :> Named and 'V :> Box<'U>> ="
+                "parameters first, then every constraint in one clause"
+
         testCase "a qualified templated name escapes per segment" <| fun _ ->
             Expect.equal (Render.printType (FsNamed "TypeScript.Lib.RegExp")) "TypeScript.Lib.RegExp" "qualified"
             Expect.equal (Render.printType (FsNamed "Pkg.type")) "Pkg.``type``" "keyword segment"

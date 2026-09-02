@@ -13,10 +13,14 @@ open Xantham.Fable.Core
 type Animatable =
     abstract targets: Target[] with get, set
     /// <remarks>@type {Record&lt;String, JSAnimation&gt;}</remarks>
-    abstract animations: obj with get, set
+    abstract animations: AnimatableAnimations with get, set
     /// <remarks>@type {JSAnimation|null}</remarks>
     abstract callbacks: JSAnimation option with get, set
     abstract revert: unit -> Animatable
+
+type AnimatableAnimations =
+    [<EmitIndexer>]
+    abstract Item: string -> JSAnimation with get, set
 
 type Clock =
     /// <remarks>@type {Number}</remarks>
@@ -133,6 +137,10 @@ type ScrollContainer =
 type ScrollObserverAxisCallbackResult =
     | [<CompiledName("x")>] X
     | [<CompiledName("y")>] Y
+
+type TimelineLabels =
+    [<EmitIndexer>]
+    abstract Item: string -> float with get, set
 
 type JSAnimation =
     /// <remarks>@type {Tween}</remarks>
@@ -1120,13 +1128,13 @@ type Scope =
     /// <remarks>@type {Number}</remarks>
     abstract onceIndex: float with get, set
     /// <remarks>@type {Record&lt;String, ScopeMethod&gt;}</remarks>
-    abstract methods: obj with get, set
+    abstract methods: ScopeMethods with get, set
     /// <remarks>@type {Record&lt;String, Boolean&gt;}</remarks>
-    abstract matches: obj with get, set
+    abstract matches: ScopeMatches with get, set
     /// <remarks>@type {Record&lt;String, MediaQueryList&gt;}</remarks>
-    abstract mediaQueryLists: obj with get, set
+    abstract mediaQueryLists: ScopeMediaQueryLists with get, set
     /// <remarks>@type {Record&lt;String, any&gt;}</remarks>
-    abstract data: obj with get, set
+    abstract data: ScopeData with get, set
     /// <remarks>@param revertible</remarks>
     abstract register: revertible: Revertible -> unit
     /// <remarks>@template T</remarks>
@@ -1162,6 +1170,26 @@ type Scope =
     /// <remarks>@param e</remarks>
     abstract handleEvent: e: Browser.Types.Event -> unit
     abstract revert: unit -> unit
+
+type ScopeData =
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
+
+type ScopeMatches =
+    [<EmitIndexer>]
+    abstract Item: string -> bool with get, set
+
+type ScopeMediaQueryLists =
+    [<EmitIndexer>]
+    abstract Item: string -> Browser.Types.MediaQueryList with get, set
+
+type ScopeMethods =
+    [<EmitIndexer>]
+    abstract Item: string -> ScopeMethod with get, set
+
+type ScopeParamsMediaQueries =
+    [<EmitIndexer>]
+    abstract Item: string -> string with get, set
 
 [<Interface>]
 type Svg =
@@ -1279,7 +1307,7 @@ type Segmenter =
 
 type Timeline =
     /// <remarks>@type {Record&lt;String, Number&gt;}</remarks>
-    abstract labels: obj with get, set
+    abstract labels: TimelineLabels with get, set
     /// <remarks>@type {DefaultsParams}</remarks>
     abstract defaults: DefaultsParams with get, set
     /// <remarks>@type {Boolean}</remarks>
@@ -1859,7 +1887,7 @@ type CallbackArgument =
     /// <remarks>@return</remarks>
     abstract refresh: obj with get, set
     /// <remarks>@type {Record&lt;String, Number&gt;}</remarks>
-    abstract labels: obj with get, set
+    abstract labels: TimelineLabels with get, set
     /// <remarks>@type {DefaultsParams}</remarks>
     abstract defaults: DefaultsParams with get, set
     /// <remarks>@type {Boolean}</remarks>
@@ -2317,7 +2345,7 @@ type CallbackArgumentHeadParent =
     inherit Timeline
     inherit JSAnimation
     /// <remarks>@type {Record&lt;String, Number&gt;}</remarks>
-    abstract labels: obj with get, set
+    abstract labels: TimelineLabels with get, set
     /// <remarks>@type {DefaultsParams}</remarks>
     abstract defaults: DefaultsParams with get, set
     /// <remarks>@type {Boolean}</remarks>
@@ -2571,7 +2599,7 @@ type CallbackArgumentHeadPrev =
     inherit Timeline
     inherit Tween
     /// <remarks>@type {Record&lt;String, Number&gt;}</remarks>
-    abstract labels: obj with get, set
+    abstract labels: TimelineLabels with get, set
     /// <remarks>@type {DefaultsParams}</remarks>
     abstract defaults: DefaultsParams with get, set
     /// <remarks>@type {Boolean}</remarks>
@@ -3396,7 +3424,7 @@ type AnimatableObject =
     inherit Animatable
     abstract targets: Target[] with get, set
     /// <remarks>@type {Record&lt;String, JSAnimation&gt;}</remarks>
-    abstract animations: obj with get, set
+    abstract animations: AnimatableAnimations with get, set
     /// <remarks>@type {JSAnimation|null}</remarks>
     abstract callbacks: JSAnimation option with get, set
     abstract revert: unit -> AnimatableObject
@@ -3446,9 +3474,9 @@ type AngularRef =
 type ScopeParams =
     abstract root: obj option with get, set
     abstract defaults: DefaultsParams option with get, set
-    abstract mediaQueries: obj option with get, set
+    abstract mediaQueries: ScopeParamsMediaQueries option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?root: obj, ?defaults: DefaultsParams, ?mediaQueries: obj) : ScopeParams = jsNative
+    static member Create (?root: obj, ?defaults: DefaultsParams, ?mediaQueries: ScopeParamsMediaQueries) : ScopeParams = jsNative
 
 type ScopedCallback<'T> = Func<Scope, 'T>
 

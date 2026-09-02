@@ -517,13 +517,17 @@ let resolveTypeTable: Pass<ResolveModel> =
                                     (fun map ty -> Map.add ty.Id $"beyond the depth cutoff ({FollowDepth})" map)
                                     notFollowed
 
+                            // One finding for the frontier, not one per type: a type here has
+                            // no name to report under, and its checker id is assigned in the
+                            // order answers arrived, so a finding keyed by it differs run to
+                            // run. The count is stable; the reference that reads one of these
+                            // widens under its own owner's name (`typeRefOnPath`).
                             let findings =
                                 findings
-                                @ [ for ty in fresh ->
-                                        Finding.make
-                                            Widened
-                                            $"type#{ty.Id}"
-                                            $"not resolved: beyond the depth cutoff ({FollowDepth})" ]
+                                @ [ Finding.make
+                                        Widened
+                                        "<type-table>"
+                                        $"{fresh.Length} types not resolved: beyond the depth cutoff ({FollowDepth}) -                                           the frontier of instantiations still growing after that many generations" ]
 
                             return table, notFollowed, findings
                         | fresh ->

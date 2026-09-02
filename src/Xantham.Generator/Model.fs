@@ -68,9 +68,18 @@ type GeneratorConfig =
       ModuleName: string option
       /// Disposition per group, keyed as `xantham.json` spells them: npm name for a
       /// dependency, `typescript/lib` for the compiler lib.
-      Groups: Map<string, GroupDisposition> }
+      Groups: Map<string, GroupDisposition>
+      /// The compiler's `lib` option, as `tsconfig.json` spells it (`["esnext"]`). `None` is the
+      /// compiler's default, which includes the DOM. A global type library that redeclares DOM
+      /// names (`@cloudflare/workers-types`) must set this to what its README prescribes: with
+      /// the DOM loaded, every such name merges with the lib's declaration, is grouped as the
+      /// compiler lib by its first declaration, and is not the package's to harvest.
+      Lib: string list option }
 
-    static member Default = { ModuleName = None; Groups = Map.empty }
+    static member Default =
+        { ModuleName = None
+          Groups = Map.empty
+          Lib = None }
 
 module GeneratorConfig =
     let private jsonOptions =
@@ -106,7 +115,23 @@ module GeneratorConfig =
                     |> Map.ofSeq
                 | _ -> Map.empty
 
-            { ModuleName = field "module"; Groups = groups }
+            let lib =
+                match doc.RootElement.TryGetProperty "lib" with
+                | true, v when v.ValueKind = JsonValueKind.Array ->
+                    v.EnumerateArray()
+                    |> Seq.map (fun e ->
+                        if e.ValueKind = JsonValueKind.String then
+                            e.GetString()
+                        else
+                            failwith "xantham.json: lib must be an array of strings")
+                    |> Seq.toList
+                    |> Some
+                | true, _ -> failwith "xantham.json: lib must be an array of strings"
+                | _ -> None
+
+            { ModuleName = field "module"
+              Groups = groups
+              Lib = lib }
 
     /// The key a group is addressed by under `xantham.json`'s `groups`; `None` for the groups
     /// that are not configurable (the entry package always ships).

@@ -1762,6 +1762,10 @@ type SplitPropsResultItem<'T> =
     [<EmitIndexer>]
     abstract Item: float -> obj with get, set
 
+type SplitPropsResultItem0<'T> =
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
+
 [<Interface>]
 type LazyFnResultItem<'T> =
     abstract ``default``: 'T with get, set
@@ -1842,7 +1846,7 @@ type ErrorBoundaryProps =
 
 type SharedConfig =
     abstract context: SharedConfigContext option with get, set
-    abstract resources: obj option with get, set
+    abstract resources: SharedConfigResources option with get, set
     abstract load: Func<string, obj> option with get, set
     abstract has: Func<string, bool> option with get, set
     abstract gather: Action<string> option with get, set
@@ -1859,6 +1863,10 @@ type SharedConfigContext =
     abstract count: float with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (id: string, count: float) : SharedConfigContext = jsNative
+
+type SharedConfigResources =
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 [<Interface>]
 type SuspenseListProps =

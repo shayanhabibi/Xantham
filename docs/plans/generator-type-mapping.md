@@ -252,6 +252,10 @@ Policy question with a recommended default:
   into the member's `[<ParamObject>]` argument list, with the F# parameter names matching
   the literal's member names (that is what `ParamObject` emits, so the call site reproduces
   the TS object literal exactly). Anonymous records are not the default representation.
+  An index-only literal (`Record<string, boolean>`, `{ [key: string]: T }`) is a declaration
+  of one `[<EmitIndexer>]` member, and an anonymous shape is named whatever file its node
+  sits in: a mapped type written in `lib.es5.d.ts` stands for this package's operand (D6;
+  landed 2026-09-02).
 - **Construction ergonomics** — for every "plain data" interface (no methods, no call
   signatures), also emit a `[<ParamObject>]` `Create` static or a companion `create`
   function so consumers don't hand-build objects via `createObj`. This is the single biggest
@@ -374,6 +378,10 @@ included, and its golden compiles against the support package in the gate.
   boundary, and in Fable 5 this works well in practice. **Decided (D5):** default to
   **delegates** (`System.Func<..>`/`System.Action<..>`) anyway, for simplicity and
   guaranteed arity. Curried-lambda emission remains a candidate config toggle later.
+- **Rest parameters and optionals** - `[<ParamArray>]` is required and last, so a signature
+  with a rest parameter has no optional tail: `setTimeout(cb, delay?, ...args)` keeps `delay`
+  required, of `option` type, where `?delay` ahead of the rest would be FS1212 (landed
+  2026-09-02).
 - **Overloads** → overloaded abstract members / static members (legal in F#). Where
   overloads differ only in literal-typed params (the `addEventListener` pattern:
   `on(event: "click", cb: MouseCb)`), emit one member per literal with a synthesized name
@@ -452,6 +460,11 @@ absence under the live compiler.
   hash-cons the constraint object type into a named interface, then `:>` it; or drop the
   constraint (Widened) with doc note. `T extends keyof U` → `typekeyof`/`keyof` idioms
   (§4.10). `T extends string` → measure-tagged `string<'T>`? — open; probably drop.
+  The head writes the parameters first and one `when` clause after the last, constraints
+  joined by `and`. A constraint binds the application too: an argument that widened to `obj`,
+  or is a variable not bound with the same named constraint (a `typekeyof` result), is
+  written as the constraint itself, with a finding - F# rejects `Listener<obj>` against
+  `'E :> Event` outright (landed 2026-09-02).
 - **Default type arguments** (`interface Foo<T = string>`) — F# permits same-name types with
   different generic arity: emit `type Foo<'T> = ...` *and* `type Foo = Foo<string>` (an
   abbreviation per defaulted suffix). Ergonomic, cheap, and exactly how consumers expect it

@@ -51,9 +51,13 @@ type Loose<'P> =
 /// </summary>
 [<Interface>]
 type Bag =
-    abstract loose: obj with get, set
+    abstract loose: BagLoose with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (loose: obj) : Bag = jsNative
+    static member Create (loose: BagLoose) : Bag = jsNative
+
+type BagLoose =
+    [<EmitIndexer>]
+    abstract Item: string -> string with get, set
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

@@ -525,7 +525,15 @@ and private objectRef (ctx: Context) (model: ShapeModel) (self: string option) (
         else
 
         match instantiationOf model facts with
-        | Some(name, arguments) -> appliedRef ctx model self owner name arguments
+        | Some(name, arguments) ->
+            let parameters =
+                facts.Response.Target
+                |> ValueOption.toOption
+                |> Option.bind (fun target -> Map.tryFind target model.Types)
+                |> Option.map ownArguments
+                |> Option.defaultValue []
+
+            appliedRefTo ctx model self owner name parameters arguments
         | None ->
             match libBinding ctx model self owner facts with
             | Some result -> result
@@ -611,14 +619,76 @@ and private libBinding (ctx: Context) (model: ShapeModel) (self: string option) 
 
 /// A generic name applied to type arguments, each shaped at this position (§4.9).
 and private appliedRef (ctx: Context) (model: ShapeModel) (self: string option) (owner: string) (name: string) (arguments: int list) : FsTypeRef * Finding list =
+    appliedRefTo ctx model self owner name [] arguments
+
+/// An application of a generic declaration whose own parameters are known, so that each
+/// argument can be checked against the constraint the declaration will state (§4.9). Where
+/// the declaration writes `'Event :> Event`, F# rejects `Listener<obj>` outright, and a type
+/// variable without that constraint just the same - so an argument that widened to `obj`, or
+/// that is a variable bound without the constraint (a `typekeyof` result, another
+/// declaration's unconstrained parameter), is written as the constraint itself: the tightest
+/// thing still true of it, as an out-of-scope parameter already is. Only a constraint that
+/// the declaration states - a plain named interface of this run - is substituted; one it
+/// dropped needs no help.
+and private appliedRefTo
+    (ctx: Context)
+    (model: ShapeModel)
+    (self: string option)
+    (owner: string)
+    (name: string)
+    (parameters: int list)
+    (arguments: int list)
+    : FsTypeRef * Finding list =
     let mutable findings = []
 
+    let statedConstraint (typeId: int) =
+        Map.tryFind typeId model.Types
+        |> Option.bind _.Constraint
+        |> Option.filter (fun boundId -> boundId <> typeId)
+        |> Option.bind (fun boundId ->
+            match Map.tryFind boundId model.Types with
+            | Some bound when
+                flag TypeFlags.Object bound
+                && (ownArguments bound).IsEmpty
+                && (arrayElement bound).IsNone
+                && not (isTuple bound)
+                && not (isPureCallback bound)
+                ->
+                Map.tryFind boundId model.DeclNames
+            | _ -> None)
+
+    let parameters =
+        if parameters.Length = arguments.Length then
+            parameters |> List.map Some
+        else
+            arguments |> List.map (fun _ -> None)
+
     let mapped =
-        arguments
-        |> List.map (fun argument ->
+        List.zip parameters arguments
+        |> List.map (fun (parameter, argument) ->
             let reference, argumentFindings = typeRef ctx model self owner argument
             findings <- findings @ argumentFindings
-            reference)
+
+            match parameter |> Option.bind statedConstraint, reference with
+            | Some bound, FsObj ->
+                findings <-
+                    findings
+                    @ [ Finding.make
+                            Widened
+                            owner
+                            $"argument to {name}'s constrained parameter widened to obj; written as the constraint {bound}" ]
+
+                FsNamed bound
+            | Some bound, FsTypeVar variable when statedConstraint argument <> Some bound ->
+                findings <-
+                    findings
+                    @ [ Finding.make
+                            Widened
+                            owner
+                            $"'{variable} is not bound with {name}'s constraint; the argument is written as the constraint {bound}" ]
+
+                FsNamed bound
+            | _ -> reference)
 
     FsApp(name, mapped), findings
 
@@ -1050,12 +1120,17 @@ let private shapeSignature
     // what `isOptionalParam` reads as optional. Only the trailing run gets the `?`; an
     // admitting parameter ahead of a required one stays required, of `option` type - which
     // is what the union hoist already made it, so nothing is lost.
+    // A `[<ParamArray>]` parameter is not optional, and it is last, so a signature with a rest
+    // parameter has no tail for `?` to go on: `setTimeout(callback, ?msDelay, ...args)` is
+    // FS1212 as surely as `?a, b` is, and `msDelay` stays required, of `option` type.
     let optionalTail =
-        referenced
-        |> List.rev
-        |> List.takeWhile (fun (_, _, _, rest, admitsOptional) -> rest || admitsOptional)
-        |> List.filter (fun (_, _, _, rest, _) -> not rest)
-        |> List.length
+        if signature.HasRest then
+            0
+        else
+            referenced
+            |> List.rev
+            |> List.takeWhile (fun (_, _, _, _, admitsOptional) -> admitsOptional)
+            |> List.length
 
     let parameters =
         referenced
@@ -1244,12 +1319,19 @@ let synthesizeAnonymous: Pass<ShapeModel> =
                 // inline as delegates, arrays as arrays, tuples as F# tuples (D7). Constructor
                 // objects (a class's static side) get their constructors on `Exports`, not a
                 // declaration.
-                GeneratorConfig.disposition ctx.Config facts.Origin = Ship
+                // An anonymous shape is the entry package's whatever file its node sits in:
+                // `Record<string, boolean>` is written in `lib.es5.d.ts`, but what it stands
+                // for is this package's operand, transformed (D6) - the resolve tier already
+                // reads it by content, and the disposition of the lib is not its to inherit.
+                (GeneratorConfig.disposition ctx.Config facts.Origin = Ship
+                 || facts.SymbolName |> Option.forall isSyntheticName)
                 && not (isPureCallback facts)
                 && (arrayElement facts).IsNone
                 && not (isTuple facts)
                 && facts.ConstructSignatures.IsEmpty
-                && not facts.Members.IsEmpty
+                // An index signature is shape too: `Record<string, boolean>` has no members
+                // and one index signature, and is an interface of one `Item`.
+                && not (facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
                 // An instantiation of a generic this run declares is written as an
                 // application (§4.9). Naming it would declare the expansion a second time
                 // under a made-up name and lose the tie to the generic it came from.
@@ -1306,10 +1388,15 @@ let synthesizeAnonymous: Pass<ShapeModel> =
                     // A tuple declaration reads only its components, so its members - `length`
                     // and the numeric indices - are not part of the shape and must not claim
                     // names: `[number, number?]` would otherwise declare its own `1 | 2` length
-                    // as an enum nothing references.
-                    if not (isTuple facts) then
+                    // as an enum nothing references. An array reads only its element, for the
+                    // same reason: `Array<T>`'s own members are the lib's, and the anonymous
+                    // shape behind its `[Symbol.unscopables]` is nothing a declaration reads.
+                    // A symbol-keyed member is dropped at render (unrepresentable), so its
+                    // type is not shape either - and its name carries a session-specific id.
+                    if not (isTuple facts) && (arrayElement facts).IsNone then
                         for m in facts.Members do
-                            walk (into (Naming.pascalSegment m.Symbol.Name)) order m.TypeId
+                            if not (isSymbolKeyed m.Symbol.Name) then
+                                walk (into (Naming.pascalSegment m.Symbol.Name)) order m.TypeId
 
                     // An index signature's value is shape the declaration reads too:
                     // `Record<string, A & B>` reaches its intersection nowhere else.

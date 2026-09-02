@@ -3,24 +3,30 @@
   "module": "Animejs",
   "counts": {
     "exact": 73,
-    "ergonomic": 68,
-    "widened": 36,
-    "escape": 51
+    "ergonomic": 76,
+    "widened": 34,
+    "escape": 52
   },
   "symbols": [
     {
       "name": "Animatable",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
         {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "AnimatableAnimations",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         }
       ]
     },
@@ -441,6 +447,17 @@
       "name": "ScrollObserverAxisCallbackResult",
       "tier": "exact",
       "findings": []
+    },
+    {
+      "name": "TimelineLabels",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        }
+      ]
     },
     {
       "name": "JSAnimation",
@@ -3617,32 +3634,72 @@
     },
     {
       "name": "Scope",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "pass": "shape-classes",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "ScopeData",
+      "tier": "escape",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        }
+      ]
+    },
+    {
+      "name": "ScopeMatches",
+      "tier": "ergonomic",
+      "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        }
+      ]
+    },
+    {
+      "name": "ScopeMediaQueryLists",
+      "tier": "ergonomic",
+      "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        }
+      ]
+    },
+    {
+      "name": "ScopeMethods",
+      "tier": "ergonomic",
+      "findings": [
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        }
+      ]
+    },
+    {
+      "name": "ScopeParamsMediaQueries",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         }
       ]
     },
@@ -4008,11 +4065,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -4874,11 +4926,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
         },
@@ -5267,11 +5314,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "escape",
           "message": "any maps to obj"
         },
@@ -5455,11 +5497,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -10163,11 +10200,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         }
@@ -10495,11 +10527,6 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "optional member reads as option"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",

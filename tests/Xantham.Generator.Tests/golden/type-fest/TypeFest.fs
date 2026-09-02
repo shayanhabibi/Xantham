@@ -4378,11 +4378,15 @@ type JsonValue = obj option
 /// <remarks>@category JSON</remarks>
 type Jsonifiable = obj option
 
+type Jsonifiable2 =
+    [<EmitIndexer>]
+    abstract Item: string -> Jsonifiable option with get, set
+
 [<Interface>]
-type JsonifiableItem =
+type Jsonifiable2Item =
     abstract toJSON: Func<Jsonifiable option> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (toJSON: Func<Jsonifiable option>) : JsonifiableItem = jsNative
+    static member Create (toJSON: Func<Jsonifiable option>) : Jsonifiable2Item = jsNative
 
 /// <summary>
 /// Transform a type to one that is assignable to the <c>JsonValue</c> type.
@@ -6169,17 +6173,17 @@ type PackageJson =
     ///
     /// [Read more.](https://nodejs.org/api/packages.html#subpath-exports)
     /// </summary>
-    abstract exports: obj option with get, set
+    abstract exports: U3<string, U2<string, PackageJsonExportsItem>[], PackageJsonExportsItem> option with get, set
     /// <summary>
     /// Subpath imports to define internal package import maps that only apply to import specifiers from within the package itself.
     ///
     /// [Read more.](https://nodejs.org/api/packages.html#subpath-imports)
     /// </summary>
-    abstract imports: obj option with get, set
+    abstract imports: PackageJsonImports option with get, set
     /// <summary>
     /// The executable files that should be installed into the <c>PATH</c>.
     /// </summary>
-    abstract bin: obj option with get, set
+    abstract bin: U2<string, PackageJsonBin> option with get, set
     /// <summary>
     /// Filenames to put in place for the <c>man</c> program to find.
     /// </summary>
@@ -6203,23 +6207,23 @@ type PackageJson =
     /// <summary>
     /// The dependencies of the package.
     /// </summary>
-    abstract dependencies: obj option with get, set
+    abstract dependencies: PackageJsonDependencies option with get, set
     /// <summary>
     /// Additional tooling dependencies that are not required for the package to work. Usually test, build, or documentation tooling.
     /// </summary>
-    abstract devDependencies: obj option with get, set
+    abstract devDependencies: PackageJsonDependencies option with get, set
     /// <summary>
     /// Dependencies that are skipped if they fail to install.
     /// </summary>
-    abstract optionalDependencies: obj option with get, set
+    abstract optionalDependencies: PackageJsonDependencies option with get, set
     /// <summary>
     /// Dependencies that will usually be required by the package user directly or via another dependency.
     /// </summary>
-    abstract peerDependencies: obj option with get, set
+    abstract peerDependencies: PackageJsonDependencies option with get, set
     /// <summary>
     /// Indicate peer dependencies that are optional.
     /// </summary>
-    abstract peerDependenciesMeta: obj option with get, set
+    abstract peerDependenciesMeta: PackageJsonPeerDependenciesMeta option with get, set
     /// <summary>
     /// Package names that are bundled when the package is published.
     /// </summary>
@@ -6231,7 +6235,7 @@ type PackageJson =
     /// <summary>
     /// Overrides is used to support selective version overrides using npm, which lets you define custom package versions or ranges inside your dependencies.
     /// </summary>
-    abstract overrides: obj option with get, set
+    abstract overrides: PackageJsonOverrides option with get, set
     /// <summary>
     /// Engines that this package runs on.
     /// </summary>
@@ -6288,7 +6292,7 @@ type PackageJson =
     /// <summary>
     /// A hint to JavaScript bundlers or component tools when packaging modules for client side use.
     /// </summary>
-    abstract browser: obj option with get, set
+    abstract browser: U2<string, PackageJsonBrowser> option with get, set
     /// <summary>
     /// Denote which files in your project are "pure" and therefore safe for Webpack to prune if unused.
     ///
@@ -6302,7 +6306,7 @@ type PackageJson =
     /// <summary>
     /// Version selection map of TypeScript.
     /// </summary>
-    abstract typesVersions: obj option with get, set
+    abstract typesVersions: PackageJsonTypesVersions option with get, set
     /// <summary>
     /// Location of the bundled TypeScript declaration file. Alias of <c>types</c>.
     /// </summary>
@@ -6316,7 +6320,7 @@ type PackageJson =
     /// <summary>
     /// Selective version resolutions. Allows the definition of custom package versions inside dependencies without manual edits in the <c>yarn.lock</c> file.
     /// </summary>
-    abstract resolutions: obj option with get, set
+    abstract resolutions: PackageJsonDependencies option with get, set
     /// <summary>
     /// JSPM configuration.
     /// </summary>
@@ -6332,6 +6336,14 @@ type PackageJsonAuthor =
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, ?url: string, ?email: string) : PackageJsonAuthor = jsNative
 
+type PackageJsonBin =
+    [<EmitIndexer>]
+    abstract Item: string -> string option with get, set
+
+type PackageJsonBrowser =
+    [<EmitIndexer>]
+    abstract Item: string -> U2<string, bool> option with get, set
+
 [<Interface>]
 type PackageJsonBugs =
     /// <summary>
@@ -6344,6 +6356,10 @@ type PackageJsonBugs =
     abstract email: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?url: string, ?email: string) : PackageJsonBugs = jsNative
+
+type PackageJsonDependencies =
+    [<EmitIndexer>]
+    abstract Item: string -> string option with get, set
 
 [<Interface>]
 type PackageJsonDevEngines =
@@ -6410,6 +6426,10 @@ type PackageJsonEsnext =
     [<EmitIndexer>]
     abstract Item: string -> string option with get, set
 
+type PackageJsonExportsItem =
+    [<EmitIndexer>]
+    abstract Item: string -> U3<string, U2<string, PackageJsonExportsItem>[], PackageJsonExportsItem> option with get, set
+
 [<Interface>]
 type PackageJsonFunding =
     /// <summary>
@@ -6423,12 +6443,24 @@ type PackageJsonFunding =
     [<ParamObject; Emit("$0")>]
     static member Create (url: string, ?``type``: obj) : PackageJsonFunding = jsNative
 
+type PackageJsonImports =
+    [<EmitIndexer>]
+    abstract Item: obj -> U3<string, U2<string, PackageJsonExportsItem>[], PackageJsonExportsItem> option with get, set
+
 [<Interface>]
 type PackageJsonLicensesItem =
     abstract ``type``: string option with get, set
     abstract url: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?``type``: string, ?url: string) : PackageJsonLicensesItem = jsNative
+
+type PackageJsonOverrides =
+    [<EmitIndexer>]
+    abstract Item: string -> U2<string, PackageJsonOverrides> option with get, set
+
+type PackageJsonPeerDependenciesMeta =
+    [<EmitIndexer>]
+    abstract Item: string -> PackageJsonPeerDependenciesMetaItem option with get, set
 
 [<Interface>]
 type PackageJsonPeerDependenciesMetaItem =
@@ -6475,6 +6507,7 @@ type PackageJsonRepository =
     static member Create (``type``: string, url: string, ?directory: string) : PackageJsonRepository = jsNative
 
 type PackageJsonScripts =
+    inherit PackageJsonBin
     /// <summary>
     /// Run **before** the package is published (Also run on local <c>npm install</c> without any arguments).
     /// </summary>
@@ -6594,6 +6627,14 @@ type PackageJsonScripts =
 type PackageJsonType =
     | [<CompiledName("commonjs")>] Commonjs
     | [<CompiledName("module")>] Module
+
+type PackageJsonTypesVersions =
+    [<EmitIndexer>]
+    abstract Item: string -> PackageJsonTypesVersionsItem option with get, set
+
+type PackageJsonTypesVersionsItem =
+    [<EmitIndexer>]
+    abstract Item: string -> string[] option with get, set
 
 [<Interface>]
 type PackageJsonWorkspaces =
@@ -9572,6 +9613,12 @@ type Stringified<'ObjectType> = private Stringified__ of obj
 /// <remarks>@category Structured clone</remarks>
 type StructuredCloneable = obj option
 
+type StructuredCloneable2 =
+    [<EmitIndexer>]
+    abstract Item: string -> StructuredCloneable option
+    [<EmitIndexer>]
+    abstract Item: float -> StructuredCloneable option
+
 /// <summary>
 /// Returns the difference between two numbers.
 ///
@@ -10363,7 +10410,7 @@ type TsConfigJsonCompilerOptions =
     /// <summary>
     /// Specify path mapping to be computed relative to baseUrl option.
     /// </summary>
-    abstract paths: obj option with get, set
+    abstract paths: TsConfigJsonCompilerOptionsPaths option with get, set
     /// <summary>
     /// List of TypeScript language server plugins to load.
     /// </summary>
@@ -10904,6 +10951,10 @@ type TsConfigJsonCompilerOptionsNewLine =
     | LF
     | [<CompiledName("crlf")>] Crlf
     | [<CompiledName("lf")>] Lf
+
+type TsConfigJsonCompilerOptionsPaths =
+    [<EmitIndexer>]
+    abstract Item: string -> string[] with get, set
 
 [<Interface>]
 type TsConfigJsonCompilerOptionsPluginsItem =

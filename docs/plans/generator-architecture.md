@@ -247,7 +247,9 @@ New projects (names step around the archive, which is invisible to the solution 
   a **JSON Schema generated from the config record itself** so the file self-documents and
   editors check it. The generator core is a library function taking the config record; the
   CLI (`xantham generate <package-dir> [-o <out>] [--config <path>]`) and the scratch
-  harness are both thin shells over it, and the CLI is deferred to phase C.
+  harness are both thin shells over it, and the CLI is deferred to phase C. Keys so far:
+  `module`, `groups` (O7), and `lib` - the compiler's option as `tsconfig.json` spells it,
+  for a global type library that replaces the DOM rather than extending it (phase E).
 
 Phases — each ends with the compile gate green on its fixtures:
 
@@ -619,6 +621,64 @@ Phases — each ends with the compile gate green on its fixtures:
     name to inherit. Not done: instantiations of a *generic* intersection alias still
     re-expand under a suffixed name (`CreateResourceOptions2..4` in `solid-js`), the same
     deferred item as generic alias applications generally.
+  - *A global type library generated without the DOM (2026-09-02).* `@cloudflare/workers-types`
+    replaces `lib.dom.d.ts` rather than extending it - its README prescribes
+    `"lib": ["esnext"]` - and the rung had been generated with the compiler's default lib
+    loaded. Every name the package shares with the DOM (`Headers`, `Response`, `Event`,
+    `Crypto`, `EventTarget`: most of its 154 classes) merged with the lib's declaration, was
+    grouped as the compiler lib by its first declaration's path, and never reached the harvest.
+    `audit-coverage` cannot see the drop of something never harvested, so the rung's "no silent
+    drops" claim was true of two thirds of the package. `xantham.json` now carries `lib`, as
+    `tsconfig.json` spells it, the bootstrap hands it to `createProgram`, and the rung is
+    configured `["esnext"]`. What generating it that way found, each pinned in `generics-lab`
+    and by the gate:
+    - *Index-only anonymous objects were never named.* `Record<string, boolean>` has no members
+      and one index signature, and `synthesize-anonymous` asked for members; and the mapped
+      type's own node sits in `lib.es5.d.ts`, so it inherited the lib's `widen` disposition
+      although the resolve tier reads it by content (D6). Both conditions are lifted: an
+      anonymous shape is the entry package's whatever file its node is in. The largest
+      "`__type` is not among the generated declarations" finding fell from 208 to 31 sites in
+      `workers-types` (what is left is `typeof Request` constructor objects, and `{}`), and
+      `animejs`, `type-fest`, `solid-js` and `globals-lab` each gained indexer interfaces for
+      members that had been `obj`. The naming walk had to stop descending into an array's
+      members and skip symbol-keyed members: lib `Array<T>`'s `[Symbol.unscopables]` is an
+      anonymous object too, and the walk named eleven copies of it after a session-specific id.
+    - *A `when` clause between two parameters.* `PagesPluginFunction<Env, Params, Data extends
+      Record<string, unknown>, PluginArgs>` rendered `<'Env, 'Params, 'Data when 'Data :> ...,
+      'PluginArgs>`, a syntax error no earlier golden had reached because a constrained
+      parameter had always been last. The head is parameters first, then one clause with the
+      constraints joined by `and`.
+    - *Constraints bind applications too.* `EventListenerObject<'Event when 'Event :> Event>`
+      is the declaration; `EventListenerObject<obj>` (an indexed access over an out-of-scope
+      map, widened) and `EventListenerObject<'R>` (a `typekeyof` result variable, unconstrained)
+      are FS0001 at the reference. An argument that widened to `obj`, or is a variable not bound
+      with the stated constraint, is written as the constraint itself - the substitution an
+      out-of-scope parameter already gets - with a finding. 20 sites.
+    - *No `?` ahead of `[<ParamArray>]`.* `setTimeout(callback, msDelay?, ...args)` is FS1212:
+      the rest parameter is required and last, so a signature with one has no optional tail at
+      all, and `msDelay` stays required, of `option` type.
+    - *A finding keyed by a checker id is not deterministic.* Without the DOM,
+      `ReadableStream`'s method-level generics re-instantiate themselves every generation
+      (`pipeThrough<T>` returns `ReadableStream<T>`), and the frontier the depth cutoff records
+      was 261 types at every cutoff tried (12, 24, 48) - the runaway the cutoff exists for, and
+      nothing the shape tier renders, since an instantiation reads only its arguments. But each
+      was a finding on `type#<id>`, and ids are assigned in the order answers arrive, so the
+      manifest differed run to run. The frontier is one counted finding on `<type-table>` now;
+      a reference that reads a cut-off type still widens under its owner's name.
+    - *The fixture installer never applied the pins.* `xantham-fixtures.fsx` wrote `"*"` into
+      each fixture's manifest and installed whatever npm had that morning, so a fresh
+      `build.fsx -- test` on the day a rung published (`workers-types` 5.20260902.1) failed
+      the drift guard rather than the goldens. A pinned rung is installed as `name@version
+      --save-exact` now; unpinned fixtures still float.
+    Measured: `workers-types` 1515 → 1714 symbols (the classes and what they reach), exact
+    232 → 260, widened 454 → 384, escape 44 → 107 (`any` on the newly harvested classes, owned
+    as such), golden 26k → 30k lines. Not done, and now visible: `typeof X` constructor objects
+    as member types (31 sites, the whole `ServiceWorkerGlobalScope` constructor table); 81
+    static class members (`DOMException.INDEX_SIZE_ERR`) still awaiting statics emission; and
+    the one `Record<string, unknown>` shared by many members is named after the first path
+    that reached it (`RequestInitCfPropertiesBase`) - hash-consing by id names a lib mapped
+    type as if it were the package's own literal, and an alias-aware name (`Record` and its
+    arguments) would read better.
 
 ## 7. Decisions (2026-09-01)
 

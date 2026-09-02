@@ -262,20 +262,24 @@ let private renderAbstractSignature (parameters: FsParam list) (returns: FsTypeR
 
 /// A declaration's name with its type parameters and their constraints (§4.9), as written at
 /// the point of definition: `Box<'T>`, `Node<'T when 'T :> Element>`. A generic *member*
-/// writes its own parameters the same way - `abstract read<'K> : ...`.
+/// writes its own parameters the same way - `abstract read<'K> : ...`. F# admits one `when`
+/// clause, after the last parameter, with the constraints joined by `and` - a clause between
+/// two parameters (`<'A when 'A :> X, 'B>`) is a syntax error.
 let private declHead (name: string) (typeParameters: FsTypeParam list) =
     if typeParameters.IsEmpty then
         ident name
     else
-        let parameters =
-            typeParameters
-            |> List.map (fun p ->
-                match p.Constraint with
-                | Some bound -> $"'{p.Name} when '{p.Name} :> {printTypeIn true bound}"
-                | None -> $"'{p.Name}")
-            |> String.concat ", "
+        let parameters = typeParameters |> List.map (fun p -> $"'{p.Name}") |> String.concat ", "
 
-        $"{ident name}<{parameters}>"
+        let constraints =
+            typeParameters
+            |> List.choose (fun p -> p.Constraint |> Option.map (fun bound -> $"'{p.Name} :> {printTypeIn true bound}"))
+
+        match constraints with
+        | [] -> $"{ident name}<{parameters}>"
+        | constraints ->
+            let joined = String.concat " and " constraints
+            $"{ident name}<{parameters} when {joined}>"
 
 /// The same declaration written at a reference position, where the parameters appear bare:
 /// `Box<'T>`. A constraint belongs to the definition only, so it is not repeated here.

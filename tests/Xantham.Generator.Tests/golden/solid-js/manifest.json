@@ -4,8 +4,8 @@
   "counts": {
     "exact": 20,
     "ergonomic": 60,
-    "widened": 68,
-    "escape": 25
+    "widened": 69,
+    "escape": 26
   },
   "symbols": [
     {
@@ -4547,19 +4547,19 @@
       "tier": "widened",
       "findings": [
         {
+          "pass": "repair-arity",
+          "tier": "widened",
+          "message": "SplitPropsResultItem0 is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "pass": "repair-arity",
+          "tier": "widened",
+          "message": "SplitPropsResultItem0 is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
         },
         {
           "pass": "shape-interfaces",
@@ -4765,6 +4765,27 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "message": "with is not among the generated declarations; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "SplitPropsResultItem0",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "indexed access has no F# form here; widened to obj"
         }
       ]
     },
@@ -5299,11 +5320,6 @@
         },
         {
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "message": "null/undefined union members hoisted to option"
         },
@@ -5322,6 +5338,22 @@
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "SharedConfigResources",
+      "tier": "escape",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "message": "any maps to obj"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         }
       ]
     },

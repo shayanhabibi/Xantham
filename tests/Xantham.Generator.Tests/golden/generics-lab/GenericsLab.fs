@@ -65,6 +65,44 @@ type HandleItem<'T> =
     abstract set: Action<'T> with get, set
     abstract reset: unit -> unit
 
+/// <summary>
+/// A named bound: the only kind of constraint F# can state.
+/// </summary>
+[<Interface>]
+type Named =
+    abstract name: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (name: string) : Named = jsNative
+
+/// <summary>
+/// A constrained parameter that is not the last: F# writes one <c>when</c> clause after the parameter list.
+/// </summary>
+[<Interface>]
+type Labelled<'T, 'U when 'T :> Named> =
+    abstract subject: 'T with get, set
+    abstract label: 'U with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (subject: 'T, label: 'U) : Labelled<'T, 'U> = jsNative
+
+/// <summary>
+/// An application of a constrained generic whose argument is a <c>typekeyof</c> result: the argument is written as the constraint.
+/// </summary>
+type Registry<'M> =
+    abstract pick<'R>: key: typekeyof<'M, 'R> -> Labelled<Named, typekeyof<'M, 'R>>
+
+/// <summary>
+/// An index-only anonymous object, written in the compiler lib: an interface of one indexer, not <c>obj</c>.
+/// </summary>
+[<Interface>]
+type Manifest =
+    abstract flags: ManifestFlags with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (flags: ManifestFlags) : Manifest = jsNative
+
+type ManifestFlags =
+    [<EmitIndexer>]
+    abstract Item: string -> bool with get, set
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -73,3 +111,8 @@ type Exports =
     /// </summary>
     [<Import("each", "generics-lab")>]
     static member each<'T, 'U> (props: EachProps<'T, 'U>) : 'U[] = jsNative
+    /// <summary>
+    /// An optional parameter ahead of a rest parameter: F# has no tail for the <c>?</c>, so it stays required, of option type.
+    /// </summary>
+    [<Import("schedule", "generics-lab")>]
+    static member schedule (callback: Action<float[]>, delay: float option, [<ParamArray>] args: float[]) : float = jsNative

@@ -57,6 +57,20 @@ let fixtures = [
     Fixture "animejs"
     Fixture "agents"
 ]
+/// The versions `tests/fixtures/pins.json` pins the litmus rungs at (JSONC, like every other
+/// configuration Xantham reads). A pinned fixture is installed as `name@version`, exactly, so
+/// that a fresh install reproduces the committed goldens; an unpinned one floats. The e2e
+/// suite reports an install that disagrees with this file as drift rather than as a golden
+/// diff, so installing anything else here just fails later, more confusingly.
+let pins: Map<string, string> =
+    let path = Path.Combine(fixturesDir, "pins.json")
+    if not (File.Exists path) then Map.empty else
+    let options = JsonDocumentOptions(CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true)
+    use doc = JsonDocument.Parse(File.ReadAllText path, options)
+    doc.RootElement.EnumerateObject()
+    |> Seq.map (fun property -> property.Name, property.Value.GetString())
+    |> Map.ofSeq
+
 let fixtureGroups =
     fixtures
     |> List.groupBy (fun (Fixture fixture) ->
@@ -116,15 +130,19 @@ module Stage =
                     doc.WriteTo(writer)
                     )
             }
+            let spec =
+                match Map.tryFind fixture pins with
+                | Some version -> $"{fixture}@{version} --save-exact"
+                | None -> ""
             if cleanInstall then
                 stage "npm clean install" {
                     workingDir fixturePath
-                    run "npm install --no-audit --no-fund --no-package-lock --clean-install"
+                    run $"npm install {spec} --no-audit --no-fund --no-package-lock --clean-install"
                 }
             else
                 stage "npm install" {
                     workingDir fixturePath
-                    run "npm install --no-audit --no-fund --no-package-lock"
+                    run $"npm install {spec} --no-audit --no-fund --no-package-lock"
                 }
         }
     }

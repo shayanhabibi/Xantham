@@ -9,12 +9,91 @@ open Fable.Core
 open Fable.Core.JsInterop
 open Xantham.Fable.Core
 
+/// <summary>
+/// The **<c>DOMException</c>** interface represents an abnormal event (called an exception) that occurs as a result of calling a method or accessing a property of a web API. This is how error conditions are described in web APIs.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/DOMException)
+/// </summary>
+[<Interface>]
+type DOMException =
+    /// <summary>
+    /// The **<c>message</c>** read-only property of the DOMException interface returns a string representing a message or description associated with the given error name.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/DOMException/message)
+    /// </summary>
+    abstract message: string
+    /// <summary>
+    /// The **<c>name</c>** read-only property of the DOMException interface returns a string that contains one of the strings associated with an error name.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/DOMException/name)
+    /// </summary>
+    abstract name: string
+    /// <summary>
+    /// The **<c>code</c>** read-only property of the DOMException interface returns one of the legacy error code constants, or 0 if none match.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/DOMException/code)</remarks>
+    abstract code: float
+    abstract stack: obj with get, set
+    abstract cause: obj option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (message: string, name: string, code: float, stack: obj, ?cause: obj) : DOMException = jsNative
+
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type BasicImageTransformationsGravityCoordinatesMode =
     | [<CompiledName("box-center")>] BoxCenter
     | [<CompiledName("remainder")>] Remainder
 
-type FetchEventRequestItem =
+type EventCurrentTargetItem =
+    [<EmitIndexer>]
+    abstract Item: string -> Event with get, set
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type IncomingRequestCfPropertiesTLSClientAuthCertRevoked =
+    | [<CompiledName("0")>] N0
+    | [<CompiledName("1")>] N1
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type IncomingRequestCfPropertiesTLSClientAuthCertVerified =
+    | FAILED
+    | [<CompiledName("FAILED:certificate has expired")>] FAILEDCertificateHasExpired
+    | [<CompiledName("FAILED:certificate is not yet valid")>] FAILEDCertificateIsNotYetValid
+    | [<CompiledName("FAILED:self signed certificate")>] FAILEDSelfSignedCertificate
+    | [<CompiledName("FAILED:unable to verify the first certificate")>] FAILEDUnableToVerifyTheFirstCertificate
+    | SUCCESS
+
+[<Interface>]
+type ReadableStreamBYOBReaderReadAtLeastResultItem<'T when 'T :> JS.ArrayBufferView> =
+    abstract ``done``: bool with get, set
+    abstract value: 'T with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``done``: bool, value: 'T) : ReadableStreamBYOBReaderReadAtLeastResultItem<'T> = jsNative
+
+[<Interface>]
+type ReadableStreamBYOBReaderReadResultItem<'T when 'T :> JS.ArrayBufferView> =
+    abstract ``done``: bool with get, set
+    abstract value: 'T with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``done``: bool, value: 'T) : ReadableStreamBYOBReaderReadResultItem<'T> = jsNative
+
+[<Interface>]
+type ReadableStreamDefaultReaderReadResultItem<'R> =
+    abstract ``done``: bool with get, set
+    abstract value: 'R with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``done``: bool, value: 'R) : ReadableStreamDefaultReaderReadResultItem<'R> = jsNative
+
+[<Interface>]
+type ReadableStreamDefaultReaderReadResultItem2 =
+    abstract ``done``: bool with get, set
+    abstract value: unit option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``done``: bool, ?value: unit) : ReadableStreamDefaultReaderReadResultItem2 = jsNative
+
+type RequestFetcher =
+    abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, URL> * ?init: RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> -> JS.Promise<Response>
+    abstract connect: address: U2<string, SocketAddress> * ?options: SocketOptions -> Socket
+
+type RequestFetcherFetchInitItem =
     inherit IncomingRequestCfPropertiesBase
     inherit IncomingRequestCfPropertiesBotManagementEnterprise
     inherit IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<obj>
@@ -89,7 +168,7 @@ type FetchEventRequestItem =
     /// <summary>
     /// Results of Cloudflare's Bot Management analysis
     /// </summary>
-    abstract botManagement: FetchEventRequestItemBotManagement with get, set
+    abstract botManagement: RequestFetcherFetchInitItemBotManagement with get, set
     /// <summary>
     /// Duplicate of <c>botManagement.score</c>.
     /// </summary>
@@ -112,7 +191,7 @@ type FetchEventRequestItem =
     /// The country code <c>"T1"</c> is used for requests originating on TOR.
     /// </summary>
     /// <remarks>@example "GB"</remarks>
-    abstract country: FetchEventRequestItemCountry option with get, set
+    abstract country: RequestFetcherFetchInitItemCountry option with get, set
     /// <summary>
     /// If present, this property indicates that the request originated in the EU
     /// </summary>
@@ -184,7 +263,7 @@ type FetchEventRequestItem =
     abstract Item: string -> obj with get, set
 
 [<Interface>]
-type FetchEventRequestItemBotManagement =
+type RequestFetcherFetchInitItemBotManagement =
     inherit IncomingRequestCfPropertiesBotManagementBase
     /// <summary>
     /// Cloudflare’s [level of certainty](https://developers.cloudflare.com/bots/concepts/bot-score/) that a request comes from a bot,
@@ -216,10 +295,10 @@ type FetchEventRequestItemBotManagement =
     /// </summary>
     abstract ja3Hash: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (score: float, verifiedBot: bool, corporateProxy: bool, staticResource: bool, detectionIds: float[], ja3Hash: string) : FetchEventRequestItemBotManagement = jsNative
+    static member Create (score: float, verifiedBot: bool, corporateProxy: bool, staticResource: bool, detectionIds: float[], ja3Hash: string) : RequestFetcherFetchInitItemBotManagement = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type FetchEventRequestItemCountry =
+type RequestFetcherFetchInitItemCountry =
     | AD
     | AE
     | AF
@@ -472,18 +551,17 @@ type FetchEventRequestItemCountry =
     | ZW
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type IncomingRequestCfPropertiesTLSClientAuthCertRevoked =
-    | [<CompiledName("0")>] N0
-    | [<CompiledName("1")>] N1
+type RequestInitCache =
+    | [<CompiledName("no-cache")>] NoCache
+    | [<CompiledName("no-store")>] NoStore
 
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type IncomingRequestCfPropertiesTLSClientAuthCertVerified =
-    | FAILED
-    | [<CompiledName("FAILED:certificate has expired")>] FAILEDCertificateHasExpired
-    | [<CompiledName("FAILED:certificate is not yet valid")>] FAILEDCertificateIsNotYetValid
-    | [<CompiledName("FAILED:self signed certificate")>] FAILEDSelfSignedCertificate
-    | [<CompiledName("FAILED:unable to verify the first certificate")>] FAILEDUnableToVerifyTheFirstCertificate
-    | SUCCESS
+type RequestInitCfPropertiesBase =
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
+
+type RequestInitCfPropertiesCacheTtlByStatus =
+    [<EmitIndexer>]
+    abstract Item: string -> float with get, set
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type RequestInitCfPropertiesGrpcWeb =
@@ -584,29 +662,305 @@ type RequestInitCfPropertiesPolish =
     | [<CompiledName("lossy")>] Lossy
     | [<CompiledName("off")>] Off
 
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type RequestInitEncodeResponseBody =
+    | [<CompiledName("automatic")>] Automatic
+    | [<CompiledName("manual")>] Manual
+
+type RequestInitHeaders =
+    [<EmitIndexer>]
+    abstract Item: string -> string with get, set
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type ResponseType =
+    | [<CompiledName("default")>] Default
+    | [<CompiledName("error")>] Error
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type SocketSecureTransport =
+    | [<CompiledName("off")>] Off
+    | [<CompiledName("on")>] On
+    | [<CompiledName("starttls")>] Starttls
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type WebSocketBinaryType =
+    | [<CompiledName("arraybuffer")>] Arraybuffer
+    | [<CompiledName("blob")>] Blob
+
 [<Interface>]
 type WorkerGlobalScopeEventMap =
     abstract fetch: FetchEvent with get, set
     abstract scheduled: ScheduledEvent with get, set
     abstract queue: QueueEvent<obj> with get, set
-    abstract unhandledrejection: obj with get, set
-    abstract rejectionhandled: obj with get, set
+    abstract unhandledrejection: PromiseRejectionEvent with get, set
+    abstract rejectionhandled: PromiseRejectionEvent with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (fetch: FetchEvent, scheduled: ScheduledEvent, queue: QueueEvent<obj>, unhandledrejection: obj, rejectionhandled: obj) : WorkerGlobalScopeEventMap = jsNative
+    static member Create (fetch: FetchEvent, scheduled: ScheduledEvent, queue: QueueEvent<obj>, unhandledrejection: PromiseRejectionEvent, rejectionhandled: PromiseRejectionEvent) : WorkerGlobalScopeEventMap = jsNative
 
-[<Interface>]
 type WorkerGlobalScope =
     abstract EventTarget: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (EventTarget: obj) : WorkerGlobalScope = jsNative
+    /// <summary>
+    /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
+    /// </summary>
+    abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<Action<obj>, EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
+    /// </summary>
+    abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<Action<obj>, EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
+    /// </summary>
+    abstract dispatchEvent: ``event``: U4<FetchEvent, PromiseRejectionEvent, QueueEvent<obj>, ScheduledEvent> -> bool
 
-[<Interface>]
-type WorkerGlobalScope2 =
-    abstract prototype: WorkerGlobalScope with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (prototype: WorkerGlobalScope) : WorkerGlobalScope2 = jsNative
+type Console =
+    abstract ``assert``: condition: bool option * [<ParamArray>] data: obj[] -> unit
+    /// <summary>
+    /// The **<c>console.clear()</c>** static method clears the console if possible.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/clear_static)
+    /// </summary>
+    abstract clear: unit -> unit
+    /// <summary>
+    /// The **<c>console.count()</c>** static method logs the number of times that this particular call to count() has been called.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/count_static)
+    /// </summary>
+    abstract count: ?label: string -> unit
+    /// <summary>
+    /// The **<c>console.countReset()</c>** static method resets counter used with console.count().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/countReset_static)
+    /// </summary>
+    abstract countReset: ?label: string -> unit
+    /// <summary>
+    /// The **<c>console.debug()</c>** static method outputs a message to the console at the "debug" log level. The message is only displayed to the user if the console is configured to display debug output. In most cases, the log level is configured within the console UI. This log level might correspond to the Debug or Verbose log level.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/debug_static)
+    /// </summary>
+    abstract debug: [<ParamArray>] data: obj[] -> unit
+    /// <summary>
+    /// The **<c>console.dir()</c>** static method displays a list of the properties of the specified JavaScript object. In browser consoles, the output is presented as a hierarchical listing with disclosure triangles that let you see the contents of child objects.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/dir_static)
+    /// </summary>
+    abstract dir: item: obj * options: obj -> unit
+    /// <summary>
+    /// The **<c>console.dirxml()</c>** static method displays an interactive tree of the descendant elements of the specified XML/HTML element. If it is not possible to display as an element the JavaScript Object view is shown instead. The output is presented as a hierarchical listing of expandable nodes that let you see the contents of child nodes.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/dirxml_static)
+    /// </summary>
+    abstract dirxml: [<ParamArray>] data: obj[] -> unit
+    /// <summary>
+    /// The **<c>console.error()</c>** static method outputs a message to the console at the "error" log level. The message is only displayed to the user if the console is configured to display error output. In most cases, the log level is configured within the console UI. The message may be formatted as an error, with red colors and call stack information.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/error_static)
+    /// </summary>
+    abstract error: [<ParamArray>] data: obj[] -> unit
+    /// <summary>
+    /// The **<c>console.group()</c>** static method creates a new inline group in the Web console log, causing any subsequent console messages to be indented by an additional level, until console.groupEnd() is called.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/group_static)
+    /// </summary>
+    abstract group: [<ParamArray>] data: obj[] -> unit
+    /// <summary>
+    /// The **<c>console.groupCollapsed()</c>** static method creates a new inline group in the console. Unlike console.group(), however, the new group is created collapsed. The user will need to use the disclosure button next to it to expand it, revealing the entries created in the group.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/groupCollapsed_static)
+    /// </summary>
+    abstract groupCollapsed: [<ParamArray>] data: obj[] -> unit
+    /// <summary>
+    /// The **<c>console.groupEnd()</c>** static method exits the current inline group in the console. See Using groups in the console in the console documentation for details and examples.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/groupEnd_static)
+    /// </summary>
+    abstract groupEnd: unit -> unit
+    /// <summary>
+    /// The **<c>console.info()</c>** static method outputs a message to the console at the "info" log level. The message is only displayed to the user if the console is configured to display info output. In most cases, the log level is configured within the console UI. The message may receive special formatting, such as a small "i" icon next to it.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/info_static)
+    /// </summary>
+    abstract info: [<ParamArray>] data: obj[] -> unit
+    /// <summary>
+    /// The **<c>console.log()</c>** static method outputs a message to the console.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/log_static)
+    /// </summary>
+    abstract log: [<ParamArray>] data: obj[] -> unit
+    /// <summary>
+    /// The **<c>console.table()</c>** static method displays tabular data as a table.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/table_static)
+    /// </summary>
+    abstract table: tabularData: obj * ?properties: string[] -> unit
+    /// <summary>
+    /// The **<c>console.time()</c>** static method starts a timer you can use to track how long an operation takes. You give each timer a unique name, and may have up to 10,000 timers running on a given page. When you call console.timeEnd() with the same name, the browser will output the time, in milliseconds, that elapsed since the timer was started.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/time_static)
+    /// </summary>
+    abstract time: ?label: string -> unit
+    /// <summary>
+    /// The **<c>console.timeEnd()</c>** static method stops a timer that was previously started by calling console.time().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/timeEnd_static)
+    /// </summary>
+    abstract timeEnd: ?label: string -> unit
+    /// <summary>
+    /// The **<c>console.timeLog()</c>** static method logs the current value of a timer that was previously started by calling console.time().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/timeLog_static)
+    /// </summary>
+    abstract timeLog: label: string option * [<ParamArray>] data: obj[] -> unit
+    abstract timeStamp: ?label: string -> unit
+    /// <summary>
+    /// The **<c>console.trace()</c>** static method outputs a stack trace to the console.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/trace_static)
+    /// </summary>
+    abstract trace: [<ParamArray>] data: obj[] -> unit
+    /// <summary>
+    /// The **<c>console.warn()</c>** static method outputs a warning message to the console at the "warning" log level. The message is only displayed to the user if the console is configured to display warning output. In most cases, the log level is configured within the console UI. The message may receive special formatting, such as yellow colors and a warning icon.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/console/warn_static)
+    /// </summary>
+    abstract warn: [<ParamArray>] data: obj[] -> unit
+
+type BufferSource = U2<JS.ArrayBuffer, JS.ArrayBufferView>
 
 type TypedArray = obj
+
+[<Interface>]
+type CompileError =
+    abstract name: string with get, set
+    abstract message: string with get, set
+    abstract stack: string option with get, set
+    abstract cause: obj option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (name: string, message: string, ?stack: string, ?cause: obj) : CompileError = jsNative
+
+type Global =
+    abstract value: obj with get, set
+    abstract valueOf: unit -> obj
+
+[<Interface>]
+type GlobalDescriptor =
+    abstract value: GlobalDescriptorValue with get, set
+    abstract ``mutable``: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (value: GlobalDescriptorValue, ?``mutable``: bool) : GlobalDescriptor = jsNative
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type GlobalDescriptorValue =
+    | [<CompiledName("anyfunc")>] Anyfunc
+    | [<CompiledName("externref")>] Externref
+    | [<CompiledName("f32")>] F32
+    | [<CompiledName("f64")>] F64
+    | [<CompiledName("i32")>] I32
+    | [<CompiledName("i64")>] I64
+    | [<CompiledName("v128")>] V128
+
+[<Interface>]
+type Instance =
+    abstract exports: InstanceExports
+    [<ParamObject; Emit("$0")>]
+    static member Create (exports: InstanceExports) : Instance = jsNative
+
+type InstanceExports =
+    [<EmitIndexer>]
+    abstract Item: string -> U4<JS.Function, Global, Memory, Table> with get, set
+
+type Memory =
+    abstract buffer: JS.ArrayBuffer
+    abstract grow: delta: float -> float
+
+[<Interface>]
+type MemoryDescriptor =
+    abstract initial: float with get, set
+    abstract maximum: float option with get, set
+    abstract shared: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (initial: float, ?maximum: float, ?shared: bool) : MemoryDescriptor = jsNative
+
+[<Interface>]
+type ModuleExportDescriptor =
+    abstract kind: ModuleExportDescriptorKind with get, set
+    abstract name: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (kind: ModuleExportDescriptorKind, name: string) : ModuleExportDescriptor = jsNative
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type ModuleExportDescriptorKind =
+    | [<CompiledName("function")>] Function
+    | [<CompiledName("global")>] Global
+    | [<CompiledName("memory")>] Memory
+    | [<CompiledName("table")>] Table
+
+[<Interface>]
+type ModuleImportDescriptor =
+    abstract kind: ModuleExportDescriptorKind with get, set
+    abstract ``module``: string with get, set
+    abstract name: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (kind: ModuleExportDescriptorKind, ``module``: string, name: string) : ModuleImportDescriptor = jsNative
+
+[<Interface>]
+type RuntimeError =
+    abstract name: string with get, set
+    abstract message: string with get, set
+    abstract stack: string option with get, set
+    abstract cause: obj option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (name: string, message: string, ?stack: string, ?cause: obj) : RuntimeError = jsNative
+
+type Table =
+    abstract length: float
+    abstract get: index: float -> obj
+    abstract grow: delta: float * value: obj -> float
+    abstract set: index: float * value: obj -> unit
+
+[<Interface>]
+type TableDescriptor =
+    abstract element: TableDescriptorElement with get, set
+    abstract initial: float with get, set
+    abstract maximum: float option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (element: TableDescriptorElement, initial: float, ?maximum: float) : TableDescriptor = jsNative
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type TableDescriptorElement =
+    | [<CompiledName("anyfunc")>] Anyfunc
+    | [<CompiledName("externref")>] Externref
+
+[<Interface>]
+type WebAssembly =
+    abstract CompileError: obj with get, set
+    abstract RuntimeError: obj with get, set
+    abstract Global: obj with get, set
+    abstract Instance: obj with get, set
+    abstract Memory: obj with get, set
+    abstract Module: obj with get, set
+    abstract Table: obj with get, set
+    abstract instantiate: Func<obj, WebAssemblyInstanceImports option, JS.Promise<Instance>> with get, set
+    abstract validate: Func<BufferSource, bool> with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (CompileError: obj, RuntimeError: obj, Global: obj, Instance: obj, Memory: obj, Module: obj, Table: obj, instantiate: Func<obj, WebAssemblyInstanceImports option, JS.Promise<Instance>>, validate: Func<BufferSource, bool>) : WebAssembly = jsNative
+
+type WebAssemblyInstanceImports =
+    [<EmitIndexer>]
+    abstract Item: string -> WebAssemblyInstanceImportsItem with get, set
+
+type WebAssemblyInstanceImportsItem =
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
+
+type CloudflareCompatibilityFlags =
+    [<EmitIndexer>]
+    abstract Item: string -> bool with get, set
 
 /// <summary>
 /// The **<c>ServiceWorkerGlobalScope</c>** interface of the Service Worker API represents the global execution context of a service worker.
@@ -616,24 +970,24 @@ type TypedArray = obj
 /// </summary>
 type ServiceWorkerGlobalScope =
     abstract DOMException: obj with get, set
-    abstract WorkerGlobalScope: WorkerGlobalScope2 with get, set
+    abstract WorkerGlobalScope: obj with get, set
     abstract btoa: data: string -> string
     abstract atob: data: string -> string
     abstract setTimeout: callback: Action<obj[]> * ?msDelay: float -> float
-    abstract setTimeout<'Args>: callback: Action<'Args> * ?msDelay: float * [<ParamArray>] args: 'Args -> float
+    abstract setTimeout<'Args>: callback: Action<'Args> * msDelay: float option * [<ParamArray>] args: 'Args -> float
     abstract clearTimeout: ?timeoutId: float -> unit
     abstract setInterval: callback: Action<obj[]> * ?msDelay: float -> float
-    abstract setInterval<'Args>: callback: Action<'Args> * ?msDelay: float * [<ParamArray>] args: 'Args -> float
+    abstract setInterval<'Args>: callback: Action<'Args> * msDelay: float option * [<ParamArray>] args: 'Args -> float
     abstract clearInterval: ?timeoutId: float -> unit
     abstract queueMicrotask: task: JS.Function -> unit
-    abstract structuredClone<'T>: value: 'T * ?options: obj -> 'T
+    abstract structuredClone<'T>: value: 'T * ?options: StructuredSerializeOptions -> 'T
     abstract reportError: error: obj -> unit
-    abstract fetch: input: obj * ?init: obj -> JS.Promise<obj>
+    abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, URL> * ?init: RequestInit<RequestInitCfProperties> -> JS.Promise<Response>
     abstract self: ServiceWorkerGlobalScope with get, set
-    abstract crypto: obj with get, set
-    abstract caches: obj with get, set
-    abstract scheduler: obj with get, set
-    abstract performance: Browser.Types.Performance with get, set
+    abstract crypto: Crypto with get, set
+    abstract caches: CacheStorage with get, set
+    abstract scheduler: Scheduler with get, set
+    abstract performance: Performance with get, set
     abstract Cloudflare: Cloudflare with get, set
     abstract origin: string
     abstract Event: obj with get, set
@@ -683,7 +1037,7 @@ type ServiceWorkerGlobalScope =
     abstract AbortSignal: obj with get, set
     abstract TextDecoder: obj with get, set
     abstract TextEncoder: obj with get, set
-    abstract navigator: Browser.Types.Navigator with get, set
+    abstract navigator: Navigator with get, set
     abstract Navigator: obj with get, set
     abstract URL: obj with get, set
     abstract URLSearchParams: obj with get, set
@@ -707,6 +1061,24 @@ type ServiceWorkerGlobalScope =
     abstract PerformanceObserver: obj with get, set
     abstract PerformanceObserverEntryList: obj with get, set
     abstract EventTarget: obj with get, set
+    /// <summary>
+    /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
+    /// </summary>
+    abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<Action<obj>, EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
+    /// </summary>
+    abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<Action<obj>, EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
+    /// </summary>
+    abstract dispatchEvent: ``event``: U4<FetchEvent, PromiseRejectionEvent, QueueEvent<obj>, ScheduledEvent> -> bool
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type ServiceWorkerGlobalScopeCompressionStreamFormat =
@@ -714,18 +1086,191 @@ type ServiceWorkerGlobalScopeCompressionStreamFormat =
     | [<CompiledName("deflate-raw")>] DeflateRaw
     | [<CompiledName("gzip")>] Gzip
 
+type ServiceWorkerGlobalScopeRequestInputItem =
+    inherit IncomingRequestCfPropertiesBase
+    inherit IncomingRequestCfPropertiesBotManagementEnterprise
+    inherit IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>
+    inherit IncomingRequestCfPropertiesGeographicInformation
+    inherit IncomingRequestCfPropertiesCloudflareAccessOrApiShield
+    /// <summary>
+    /// [ASN](https://www.iana.org/assignments/as-numbers/as-numbers.xhtml) of the incoming request.
+    /// </summary>
+    /// <remarks>@example 395747</remarks>
+    abstract asn: float option with get, set
+    /// <summary>
+    /// The organization which owns the ASN of the incoming request.
+    /// </summary>
+    /// <remarks>@example "Google Cloud"</remarks>
+    abstract asOrganization: string option with get, set
+    /// <summary>
+    /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
+    /// </summary>
+    /// <remarks>@example "gzip, deflate, br"</remarks>
+    abstract clientAcceptEncoding: string option with get, set
+    /// <summary>
+    /// The number of milliseconds it took for the request to reach your worker.
+    /// </summary>
+    /// <remarks>@example 22</remarks>
+    abstract clientTcpRtt: float option with get, set
+    /// <summary>
+    /// The three-letter [IATA](https://en.wikipedia.org/wiki/IATA_airport_code)
+    /// airport code of the data center that the request hit.
+    /// </summary>
+    /// <remarks>@example "DFW"</remarks>
+    abstract colo: string with get, set
+    /// <summary>
+    /// Represents the upstream's response to a
+    /// [TCP <c>keepalive</c> message](https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html)
+    /// from cloudflare.
+    ///
+    /// For workers with no upstream, this will always be <c>1</c>.
+    /// </summary>
+    /// <remarks>@example 3</remarks>
+    abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
+    /// <summary>
+    /// The HTTP Protocol the request used.
+    /// </summary>
+    /// <remarks>@example "HTTP/2"</remarks>
+    abstract httpProtocol: string with get, set
+    /// <summary>
+    /// The browser-requested prioritization information in the request object.
+    ///
+    /// If no information was set, defaults to the empty string <c>""</c>
+    /// </summary>
+    /// <remarks>@example "weight=192;exclusive=0;group=3;group-weight=127"</remarks>
+    /// <remarks>@default ""</remarks>
+    abstract requestPriority: string with get, set
+    /// <summary>
+    /// The TLS version of the connection to Cloudflare.
+    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
+    /// </summary>
+    /// <remarks>@example "TLSv1.3"</remarks>
+    abstract tlsVersion: string with get, set
+    /// <summary>
+    /// The cipher for the connection to Cloudflare.
+    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
+    /// </summary>
+    /// <remarks>@example "AEAD-AES128-GCM-SHA256"</remarks>
+    abstract tlsCipher: string with get, set
+    /// <summary>
+    /// Metadata containing the [<c>HELLO</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2) and [<c>FINISHED</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9) messages from this request's TLS handshake.
+    ///
+    /// If the incoming request was served over plaintext (without TLS) this field is undefined.
+    /// </summary>
+    abstract tlsExportedAuthenticator: IncomingRequestCfPropertiesExportedAuthenticatorMetadata option with get, set
+    /// <summary>
+    /// Results of Cloudflare's Bot Management analysis
+    /// </summary>
+    abstract botManagement: RequestFetcherFetchInitItemBotManagement with get, set
+    /// <summary>
+    /// Duplicate of <c>botManagement.score</c>.
+    /// </summary>
+    /// <remarks>@deprecated</remarks>
+    abstract clientTrustScore: float with get, set
+    /// <summary>
+    /// Custom metadata set per-host in [Cloudflare for SaaS](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/).
+    ///
+    /// This field is only present if you have Cloudflare for SaaS enabled on your account
+    /// and you have followed the [required steps to enable it]((https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/)).
+    /// </summary>
+    abstract hostMetadata: U2<RequestInitCfProperties, RequestFetcherFetchInitItem> option with get, set
+    /// <summary>
+    /// The [ISO 3166-1 Alpha 2](https://www.iso.org/iso-3166-country-codes.html) country code the request originated from.
+    ///
+    /// If your worker is [configured to accept TOR connections](https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing), this may also be <c>"T1"</c>, indicating a request that originated over TOR.
+    ///
+    /// If Cloudflare is unable to determine where the request originated this property is omitted.
+    ///
+    /// The country code <c>"T1"</c> is used for requests originating on TOR.
+    /// </summary>
+    /// <remarks>@example "GB"</remarks>
+    abstract country: RequestFetcherFetchInitItemCountry option with get, set
+    /// <summary>
+    /// If present, this property indicates that the request originated in the EU
+    /// </summary>
+    /// <remarks>@example "1"</remarks>
+    abstract isEUCountry: string option with get, set
+    /// <summary>
+    /// A two-letter code indicating the continent the request originated from.
+    /// </summary>
+    /// <remarks>@example "AN"</remarks>
+    abstract continent: ContinentCode option with get, set
+    /// <summary>
+    /// The city the request originated from
+    /// </summary>
+    /// <remarks>@example "Austin"</remarks>
+    abstract city: string option with get, set
+    /// <summary>
+    /// Postal code of the incoming request
+    /// </summary>
+    /// <remarks>@example "78701"</remarks>
+    abstract postalCode: string option with get, set
+    /// <summary>
+    /// Latitude of the incoming request
+    /// </summary>
+    /// <remarks>@example "30.27130"</remarks>
+    abstract latitude: string option with get, set
+    /// <summary>
+    /// Longitude of the incoming request
+    /// </summary>
+    /// <remarks>@example "-97.74260"</remarks>
+    abstract longitude: string option with get, set
+    /// <summary>
+    /// Timezone of the incoming request
+    /// </summary>
+    /// <remarks>@example "America/Chicago"</remarks>
+    abstract timezone: string option with get, set
+    /// <summary>
+    /// If known, the ISO 3166-2 name for the first level region associated with
+    /// the IP address of the incoming request
+    /// </summary>
+    /// <remarks>@example "Texas"</remarks>
+    abstract region: string option with get, set
+    /// <summary>
+    /// If known, the ISO 3166-2 code for the first-level region associated with
+    /// the IP address of the incoming request
+    /// </summary>
+    /// <remarks>@example "TX"</remarks>
+    abstract regionCode: string option with get, set
+    /// <summary>
+    /// Metro code (DMA) of the incoming request
+    /// </summary>
+    /// <remarks>@example "635"</remarks>
+    abstract metroCode: string option with get, set
+    /// <summary>
+    /// Information about the client certificate presented to Cloudflare.
+    ///
+    /// This is populated when the incoming request is served over TLS using
+    /// either Cloudflare Access or API Shield (mTLS)
+    /// and the presented SSL certificate has a valid
+    /// [Certificate Serial Number](https://ldapwiki.com/wiki/Certificate%20Serial%20Number)
+    /// (i.e., not <c>null</c> or <c>""</c>).
+    ///
+    /// Otherwise, a set of placeholder values are used.
+    ///
+    /// The property <c>certPresented</c> will be set to <c>"1"</c> when
+    /// the object is populated (i.e. the above conditions were met).
+    /// </summary>
+    abstract tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder> with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
+
 [<Interface>]
 type ServiceWorkerGlobalScopeWebSocketPairResult =
-    abstract ``0``: Browser.Types.WebSocket with get, set
-    abstract ``1``: Browser.Types.WebSocket with get, set
+    abstract ``0``: WebSocket with get, set
+    abstract ``1``: WebSocket with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``0``: Browser.Types.WebSocket, ``1``: Browser.Types.WebSocket) : ServiceWorkerGlobalScopeWebSocketPairResult = jsNative
+    static member Create (``0``: WebSocket, ``1``: WebSocket) : ServiceWorkerGlobalScopeWebSocketPairResult = jsNative
+
+type TraceItemTailAttributes =
+    [<EmitIndexer>]
+    abstract Item: string -> U3<string, float, bool> with get, set
 
 [<Interface>]
 type Cloudflare =
-    abstract compatibilityFlags: obj
+    abstract compatibilityFlags: CloudflareCompatibilityFlags
     [<ParamObject; Emit("$0")>]
-    static member Create (compatibilityFlags: obj) : Cloudflare = jsNative
+    static member Create (compatibilityFlags: CloudflareCompatibilityFlags) : Cloudflare = jsNative
 
 type TestController = obj
 
@@ -759,6 +1304,12 @@ type ExecutionContext<'Props> =
     abstract access: CloudflareAccessContext option
     abstract tracing: Tracing with get, set
     abstract abort: reason: obj -> unit
+
+type SpanSetAttributesAttributes =
+    [<EmitIndexer>]
+    abstract Item: string -> U3<string, float, bool> option with get, set
+
+type ExportedHandlerFetchHandler<'Env, 'CfHostMetadata, 'Props> = Func<Request<'CfHostMetadata, obj>, 'Env, ExecutionContext<'Props>, U2<JS.Promise<Response>, Response>>
 
 type ExportedHandlerFetchHandlerRequestItem<'CfHostMetadata> =
     inherit IncomingRequestCfPropertiesBase
@@ -835,7 +1386,7 @@ type ExportedHandlerFetchHandlerRequestItem<'CfHostMetadata> =
     /// <summary>
     /// Results of Cloudflare's Bot Management analysis
     /// </summary>
-    abstract botManagement: FetchEventRequestItemBotManagement with get, set
+    abstract botManagement: RequestFetcherFetchInitItemBotManagement with get, set
     /// <summary>
     /// Duplicate of <c>botManagement.score</c>.
     /// </summary>
@@ -858,7 +1409,7 @@ type ExportedHandlerFetchHandlerRequestItem<'CfHostMetadata> =
     /// The country code <c>"T1"</c> is used for requests originating on TOR.
     /// </summary>
     /// <remarks>@example "GB"</remarks>
-    abstract country: FetchEventRequestItemCountry option with get, set
+    abstract country: RequestFetcherFetchInitItemCountry option with get, set
     /// <summary>
     /// If present, this property indicates that the request originated in the EU
     /// </summary>
@@ -930,12 +1481,6 @@ type ExportedHandlerFetchHandlerRequestItem<'CfHostMetadata> =
     abstract Item: string -> obj with get, set
 
 type ExportedHandlerConnectHandler<'Env, 'Props> = Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type SocketSecureTransport =
-    | [<CompiledName("off")>] Off
-    | [<CompiledName("on")>] On
-    | [<CompiledName("starttls")>] Starttls
 
 type ExportedHandlerTailHandler<'Env, 'Props> = Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
 
@@ -1273,7 +1818,7 @@ type EmailAttachment3 =
 
 [<Interface>]
 type ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> =
-    abstract fetch: Func<obj, 'Env, ExecutionContext<'Props>, obj> option with get, set
+    abstract fetch: Func<Request<'CfHostMetadata, obj>, 'Env, ExecutionContext<'Props>, U2<JS.Promise<Response>, Response>> option with get, set
     abstract connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
@@ -1283,7 +1828,7 @@ type ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> =
     abstract email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?fetch: Func<obj, 'Env, ExecutionContext<'Props>, obj>, ?connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tailStream: Func<TailEvent2<Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?test: Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>) : ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> = jsNative
+    static member Create (?fetch: Func<Request<'CfHostMetadata, obj>, 'Env, ExecutionContext<'Props>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tailStream: Func<TailEvent2<Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?test: Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>) : ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> = jsNative
 
 type ExportedHandlerFetchRequestItem<'CfHostMetadata> =
     inherit IncomingRequestCfPropertiesBase
@@ -1360,7 +1905,7 @@ type ExportedHandlerFetchRequestItem<'CfHostMetadata> =
     /// <summary>
     /// Results of Cloudflare's Bot Management analysis
     /// </summary>
-    abstract botManagement: FetchEventRequestItemBotManagement with get, set
+    abstract botManagement: RequestFetcherFetchInitItemBotManagement with get, set
     /// <summary>
     /// Duplicate of <c>botManagement.score</c>.
     /// </summary>
@@ -1383,7 +1928,7 @@ type ExportedHandlerFetchRequestItem<'CfHostMetadata> =
     /// The country code <c>"T1"</c> is used for requests originating on TOR.
     /// </summary>
     /// <remarks>@example "GB"</remarks>
-    abstract country: FetchEventRequestItemCountry option with get, set
+    abstract country: RequestFetcherFetchInitItemCountry option with get, set
     /// <summary>
     /// If present, this property indicates that the request originated in the EU
     /// </summary>
@@ -1455,6 +2000,20 @@ type ExportedHandlerFetchRequestItem<'CfHostMetadata> =
     abstract Item: string -> obj with get, set
 
 [<Interface>]
+type StructuredSerializeOptions =
+    abstract transfer: obj[] option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?transfer: obj[]) : StructuredSerializeOptions = jsNative
+
+type Navigator =
+    abstract sendBeacon: url: string * ?body: BodyInit -> bool
+    abstract userAgent: string
+    abstract hardwareConcurrency: float
+    abstract platform: string
+    abstract language: string
+    abstract languages: string[]
+
+[<Interface>]
 type AlarmInvocationInfo =
     abstract isRetry: bool
     abstract retryCount: float
@@ -1497,19 +2056,15 @@ type CloudflareAccessContext =
     abstract getIdentity: unit -> JS.Promise<CloudflareAccessIdentity option>
 
 type ColoLocalActorNamespace =
-    abstract get: actorId: string -> ColoLocalActorNamespaceGetResult
-
-type ColoLocalActorNamespaceGetResult =
-    abstract fetch: input: obj * ?init: obj -> JS.Promise<obj>
-    abstract connect: address: U2<string, SocketAddress> * ?options: SocketOptions -> Socket
+    abstract get: actorId: string -> RequestFetcher
 
 type DurableObject =
-    abstract fetch: request: obj -> obj
+    abstract fetch: request: Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> -> U2<JS.Promise<Response>, Response>
     abstract connect: Func<Socket, JS.Promise<unit> option> option with get, set
     abstract alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option> option with get, set
-    abstract webSocketMessage: Func<Browser.Types.WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
-    abstract webSocketClose: Func<Browser.Types.WebSocket, float, string, bool, JS.Promise<unit> option> option with get, set
-    abstract webSocketError: Func<Browser.Types.WebSocket, obj, JS.Promise<unit> option> option with get, set
+    abstract webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
+    abstract webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option> option with get, set
+    abstract webSocketError: Func<WebSocket, obj, JS.Promise<unit> option> option with get, set
 
 [<Erase>]
 type DurableObjectStub<'T> = private DurableObjectStub__ of obj
@@ -1596,27 +2151,27 @@ type ContainerExecOptionsStdout =
 type ContainerStartOptions =
     abstract entrypoint: string[] option with get, set
     abstract enableInternet: bool with get, set
-    abstract env: obj option with get, set
+    abstract env: RequestInitHeaders option with get, set
     abstract instance: U2<string, ContainerStartResources> option with get, set
-    abstract labels: obj option with get, set
+    abstract labels: RequestInitHeaders option with get, set
     abstract directorySnapshots: ContainerDirectorySnapshotRestoreParams[] option with get, set
     abstract image: string with get, set
     abstract containerSnapshot: unit option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (enableInternet: bool, image: string, ?entrypoint: string[], ?env: obj, ?instance: U2<string, ContainerStartResources>, ?labels: obj, ?directorySnapshots: ContainerDirectorySnapshotRestoreParams[], ?containerSnapshot: unit) : ContainerStartOptions = jsNative
+    static member Create (enableInternet: bool, image: string, ?entrypoint: string[], ?env: RequestInitHeaders, ?instance: U2<string, ContainerStartResources>, ?labels: RequestInitHeaders, ?directorySnapshots: ContainerDirectorySnapshotRestoreParams[], ?containerSnapshot: unit) : ContainerStartOptions = jsNative
 
 [<Interface>]
 type ContainerStartOptions2 =
     abstract entrypoint: string[] option with get, set
     abstract enableInternet: bool with get, set
-    abstract env: obj option with get, set
+    abstract env: RequestInitHeaders option with get, set
     abstract instance: U2<string, ContainerStartResources> option with get, set
-    abstract labels: obj option with get, set
+    abstract labels: RequestInitHeaders option with get, set
     abstract directorySnapshots: ContainerDirectorySnapshotRestoreParams[] option with get, set
     abstract image: unit option with get, set
     abstract containerSnapshot: ContainerSnapshotRestoreParams option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (enableInternet: bool, ?entrypoint: string[], ?env: obj, ?instance: U2<string, ContainerStartResources>, ?labels: obj, ?directorySnapshots: ContainerDirectorySnapshotRestoreParams[], ?image: unit, ?containerSnapshot: ContainerSnapshotRestoreParams) : ContainerStartOptions2 = jsNative
+    static member Create (enableInternet: bool, ?entrypoint: string[], ?env: RequestInitHeaders, ?instance: U2<string, ContainerStartResources>, ?labels: RequestInitHeaders, ?directorySnapshots: ContainerDirectorySnapshotRestoreParams[], ?image: unit, ?containerSnapshot: ContainerSnapshotRestoreParams) : ContainerStartOptions2 = jsNative
 
 type DurableObjectState<'Props> =
     abstract waitUntil: promise: JS.Promise<obj> -> unit
@@ -1627,15 +2182,23 @@ type DurableObjectState<'Props> =
     abstract container: Container option with get, set
     abstract facets: DurableObjectFacets with get, set
     abstract blockConcurrencyWhile<'T>: callback: Func<JS.Promise<'T>> -> JS.Promise<'T>
-    abstract acceptWebSocket: ws: Browser.Types.WebSocket * ?tags: string[] -> unit
-    abstract getWebSockets: ?tag: string -> Browser.Types.WebSocket[]
+    abstract acceptWebSocket: ws: WebSocket * ?tags: string[] -> unit
+    abstract getWebSockets: ?tag: string -> WebSocket[]
     abstract setWebSocketAutoResponse: ?maybeReqResp: WebSocketRequestResponsePair -> unit
     abstract getWebSocketAutoResponse: unit -> WebSocketRequestResponsePair option
-    abstract getWebSocketAutoResponseTimestamp: ws: Browser.Types.WebSocket -> JS.Date option
+    abstract getWebSocketAutoResponseTimestamp: ws: WebSocket -> JS.Date option
     abstract setHibernatableWebSocketEventTimeout: ?timeoutMs: float -> unit
     abstract getHibernatableWebSocketEventTimeout: unit -> float option
-    abstract getTags: ws: Browser.Types.WebSocket -> string[]
+    abstract getTags: ws: WebSocket -> string[]
     abstract abort: ?reason: string * ?options: DurableObjectAbortOptions -> unit
+
+type DurableObjectStoragePutEntries<'T> =
+    [<EmitIndexer>]
+    abstract Item: string -> 'T with get, set
+
+type DurableObjectTransactionPutEntries<'T> =
+    [<EmitIndexer>]
+    abstract Item: string -> 'T with get, set
 
 [<Interface>]
 type SqlStorageCursorNextResult<'T> =
@@ -1763,6 +2326,153 @@ type AnalyticsEngineDataPoint =
     [<ParamObject; Emit("$0")>]
     static member Create (?indexes: U2<string, JS.ArrayBuffer> option[], ?doubles: float[], ?blobs: U2<string, JS.ArrayBuffer> option[]) : AnalyticsEngineDataPoint = jsNative
 
+/// <summary>
+/// The **<c>Event</c>** interface represents an event which takes place on an EventTarget.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event)
+/// </summary>
+type Event =
+    /// <summary>
+    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
+    /// </summary>
+    abstract ``type``: string
+    /// <summary>
+    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
+    /// </summary>
+    abstract eventPhase: float
+    /// <summary>
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
+    /// </summary>
+    abstract composed: bool
+    /// <summary>
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// </summary>
+    abstract bubbles: bool
+    /// <summary>
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
+    /// </summary>
+    abstract cancelable: bool
+    /// <summary>
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
+    /// </summary>
+    abstract defaultPrevented: bool
+    /// <summary>
+    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
+    abstract returnValue: bool
+    /// <summary>
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
+    /// </summary>
+    abstract currentTarget: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
+    /// </summary>
+    abstract target: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
+    abstract srcElement: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
+    /// </summary>
+    abstract timeStamp: float
+    /// <summary>
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
+    /// </summary>
+    abstract isTrusted: bool
+    /// <summary>
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    abstract cancelBubble: bool with get, set
+    /// <summary>
+    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
+    /// </summary>
+    abstract stopImmediatePropagation: unit -> unit
+    /// <summary>
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
+    /// </summary>
+    abstract preventDefault: unit -> unit
+    /// <summary>
+    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
+    /// </summary>
+    abstract stopPropagation: unit -> unit
+    /// <summary>
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// </summary>
+    abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+
+[<Interface>]
+type EventInit =
+    abstract bubbles: bool option with get, set
+    abstract cancelable: bool option with get, set
+    abstract composed: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?bubbles: bool, ?cancelable: bool, ?composed: bool) : EventInit = jsNative
+
+type EventListener<'EventType when 'EventType :> Event> = Action<'EventType>
+
+type EventListenerObject<'EventType when 'EventType :> Event> =
+    abstract handleEvent: ``event``: 'EventType -> unit
+
+type EventListenerOrEventListenerObject<'EventType when 'EventType :> Event> = U2<Action<'EventType>, EventListenerObject<'EventType>>
+
+/// <summary>
+/// The **<c>EventTarget</c>** interface is implemented by objects that can receive events and may have listeners for them. In other words, any target of events implements the three methods associated with this interface.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget)
+/// </summary>
+type EventTarget<'EventMap when 'EventMap :> EventCurrentTargetItem> =
+    /// <summary>
+    /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
+    /// </summary>
+    abstract addEventListener<'R>: ``type``: typekeyof<'EventMap, 'R> * handler: U2<Action<'R>, EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
+    /// </summary>
+    abstract removeEventListener<'R>: ``type``: typekeyof<'EventMap, 'R> * handler: U2<Action<'R>, EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
+    /// </summary>
+    abstract dispatchEvent: ``event``: obj -> bool
+
 [<Interface>]
 type EventTargetEventListenerOptions =
     abstract capture: bool option with get, set
@@ -1774,21 +2484,92 @@ type EventTargetAddEventListenerOptions =
     abstract capture: bool option with get, set
     abstract passive: bool option with get, set
     abstract once: bool option with get, set
-    abstract signal: obj option with get, set
+    abstract signal: AbortSignal option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?capture: bool, ?passive: bool, ?once: bool, ?signal: obj) : EventTargetAddEventListenerOptions = jsNative
+    static member Create (?capture: bool, ?passive: bool, ?once: bool, ?signal: AbortSignal) : EventTargetAddEventListenerOptions = jsNative
 
 [<Interface>]
 type EventTargetHandlerObject =
-    abstract handleEvent: Func<Browser.Types.Event, obj> with get, set
+    abstract handleEvent: Func<Event, obj> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (handleEvent: Func<Browser.Types.Event, obj>) : EventTargetHandlerObject = jsNative
+    static member Create (handleEvent: Func<Event, obj>) : EventTargetHandlerObject = jsNative
+
+/// <summary>
+/// The **<c>AbortController</c>** interface represents a controller object that allows you to abort one or more Web requests as and when desired.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortController)
+/// </summary>
+type AbortController =
+    /// <summary>
+    /// The **<c>signal</c>** read-only property of the AbortController interface returns an AbortSignal object instance, which can be used to communicate with/abort an asynchronous operation as desired.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortController/signal)
+    /// </summary>
+    abstract signal: AbortSignal
+    /// <summary>
+    /// The **<c>abort()</c>** method of the AbortController interface aborts an asynchronous operation before it has completed. This is able to abort fetch requests, the consumption of any response bodies, or streams.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortController/abort)
+    /// </summary>
+    abstract abort: reason: obj -> unit
+
+/// <summary>
+/// The **<c>AbortSignal</c>** interface represents a signal object that allows you to communicate with an asynchronous operation (such as a fetch request) and abort it if required via an AbortController object.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal)
+/// </summary>
+type AbortSignal =
+    /// <summary>
+    /// The **<c>aborted</c>** read-only property returns a value that indicates whether the asynchronous operations the signal is communicating with are aborted (true) or not (false).
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal/aborted)
+    /// </summary>
+    abstract aborted: bool
+    /// <summary>
+    /// The **<c>reason</c>** read-only property returns a JavaScript value that indicates the abort reason.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal/reason)
+    /// </summary>
+    abstract reason: obj
+    abstract onabort: obj with get, set
+    /// <summary>
+    /// The **<c>throwIfAborted()</c>** method throws the signal's abort reason if the signal has been aborted; otherwise it does nothing.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal/throwIfAborted)
+    /// </summary>
+    abstract throwIfAborted: unit -> unit
+    /// <summary>
+    /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
+    /// </summary>
+    abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<Action<Event>, EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
+    /// </summary>
+    abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<Action<Event>, EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
+    /// </summary>
+    abstract dispatchEvent: ``event``: Event -> bool
+
+/// <summary>
+/// The **<c>Scheduler</c>** interface of the Prioritized Task Scheduling API provides methods for scheduling prioritized tasks.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Scheduler)
+/// </summary>
+type Scheduler =
+    abstract wait: delay: float * ?maybeOptions: SchedulerWaitOptions -> JS.Promise<unit>
 
 [<Interface>]
 type SchedulerWaitOptions =
-    abstract signal: obj option with get, set
+    abstract signal: AbortSignal option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?signal: obj) : SchedulerWaitOptions = jsNative
+    static member Create (?signal: AbortSignal) : SchedulerWaitOptions = jsNative
 
 /// <summary>
 /// The **<c>ExtendableEvent</c>** interface extends the lifetime of the install and activate events dispatched on the global scope as part of the service worker lifecycle. This ensures that any functional events (like FetchEvent) are not dispatched until it upgrades database schemas and deletes the outdated cache entries.
@@ -1803,40 +2584,11 @@ type ExtendableEvent =
     /// </summary>
     abstract waitUntil: promise: JS.Promise<obj> -> unit
     /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
     /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: Browser.Types.EventTarget option
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
+    abstract ``type``: string
     /// <summary>
     /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
     ///
@@ -1844,27 +2596,51 @@ type ExtendableEvent =
     /// </summary>
     abstract eventPhase: float
     /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
     /// </summary>
-    abstract isTrusted: bool
+    abstract composed: bool
+    /// <summary>
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// </summary>
+    abstract bubbles: bool
+    /// <summary>
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
+    /// </summary>
+    abstract cancelable: bool
+    /// <summary>
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
+    /// </summary>
+    abstract defaultPrevented: bool
     /// <summary>
     /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool with get, set
+    abstract returnValue: bool
     /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: Browser.Types.EventTarget option
+    abstract currentTarget: EventTarget<EventCurrentTargetItem> option
     /// <summary>
     /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
-    abstract target: Browser.Types.EventTarget option
+    abstract target: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
+    abstract srcElement: EventTarget<EventCurrentTargetItem> option
     /// <summary>
     /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
@@ -1872,44 +2648,154 @@ type ExtendableEvent =
     /// </summary>
     abstract timeStamp: float
     /// <summary>
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
+    /// </summary>
+    abstract isTrusted: bool
+    /// <summary>
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    abstract cancelBubble: bool with get, set
+    /// <summary>
+    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
+    /// </summary>
+    abstract stopImmediatePropagation: unit -> unit
+    /// <summary>
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
+    /// </summary>
+    abstract preventDefault: unit -> unit
+    /// <summary>
+    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
+    /// </summary>
+    abstract stopPropagation: unit -> unit
+    /// <summary>
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// </summary>
+    abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+
+/// <summary>
+/// The **<c>CustomEvent</c>** interface can be used to attach custom data to an event generated by an application.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CustomEvent)
+/// </summary>
+type CustomEvent<'T> =
+    /// <summary>
+    /// The read-only **<c>detail</c>** property of the CustomEvent interface returns any data passed when initializing the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CustomEvent/detail)
+    /// </summary>
+    abstract detail: 'T
+    /// <summary>
     /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
     /// </summary>
     abstract ``type``: string
     /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
     /// </summary>
-    abstract composedPath: obj with get, set
+    abstract eventPhase: float
     /// <summary>
-    /// The **<c>Event.initEvent()</c>** method is used to initialize the value of an event created using Document.createEvent().
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/initEvent)</remarks>
-    abstract initEvent: obj with get, set
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
     /// </summary>
-    abstract preventDefault: obj with get, set
+    abstract composed: bool
+    /// <summary>
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// </summary>
+    abstract bubbles: bool
+    /// <summary>
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
+    /// </summary>
+    abstract cancelable: bool
+    /// <summary>
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
+    /// </summary>
+    abstract defaultPrevented: bool
+    /// <summary>
+    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
+    abstract returnValue: bool
+    /// <summary>
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
+    /// </summary>
+    abstract currentTarget: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
+    /// </summary>
+    abstract target: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
+    abstract srcElement: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
+    /// </summary>
+    abstract timeStamp: float
+    /// <summary>
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
+    /// </summary>
+    abstract isTrusted: bool
+    /// <summary>
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    abstract cancelBubble: bool with get, set
     /// <summary>
     /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
     /// </summary>
-    abstract stopImmediatePropagation: obj with get, set
+    abstract stopImmediatePropagation: unit -> unit
+    /// <summary>
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
+    /// </summary>
+    abstract preventDefault: unit -> unit
     /// <summary>
     /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
     /// </summary>
-    abstract stopPropagation: obj with get, set
-    abstract NONE: float
-    abstract CAPTURING_PHASE: float
-    abstract AT_TARGET: float
-    abstract BUBBLING_PHASE: float
+    abstract stopPropagation: unit -> unit
+    /// <summary>
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// </summary>
+    abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
 
 [<Interface>]
 type CustomEventCustomEventInit =
@@ -1920,11 +2806,121 @@ type CustomEventCustomEventInit =
     [<ParamObject; Emit("$0")>]
     static member Create (?bubbles: bool, ?cancelable: bool, ?composed: bool, ?detail: obj) : CustomEventCustomEventInit = jsNative
 
+/// <summary>
+/// The **<c>Blob</c>** interface represents a blob, which is a file-like object of immutable, raw data; they can be read as text or binary data, or converted into a ReadableStream so its methods can be used for processing the data.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob)
+/// </summary>
+type Blob =
+    /// <summary>
+    /// The **<c>size</c>** read-only property of the Blob interface returns the size of the Blob or File in bytes.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/size)
+    /// </summary>
+    abstract size: float
+    /// <summary>
+    /// The **<c>type</c>** read-only property of the Blob interface returns the MIME type of the file.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/type)
+    /// </summary>
+    abstract ``type``: string
+    /// <summary>
+    /// The **<c>slice()</c>** method of the Blob interface creates and returns a new Blob object which contains data from a subset of the blob on which it's called.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/slice)
+    /// </summary>
+    abstract slice: ?start: float * ?``end``: float * ?``type``: string -> Blob
+    /// <summary>
+    /// The **<c>arrayBuffer()</c>** method of the Blob interface returns a Promise that resolves with the contents of the blob as binary data contained in an ArrayBuffer.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/arrayBuffer)
+    /// </summary>
+    abstract arrayBuffer: unit -> JS.Promise<JS.ArrayBuffer>
+    /// <summary>
+    /// The **<c>bytes()</c>** method of the Blob interface returns a Promise that resolves with a Uint8Array containing the contents of the blob as an array of bytes.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/bytes)
+    /// </summary>
+    abstract bytes: unit -> JS.Promise<JS.Uint8Array>
+    /// <summary>
+    /// The **<c>text()</c>** method of the Blob interface returns a Promise that resolves with a string containing the contents of the blob, interpreted as UTF-8.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/text)
+    /// </summary>
+    abstract text: unit -> JS.Promise<string>
+    /// <summary>
+    /// The **<c>stream()</c>** method of the Blob interface returns a ReadableStream which upon reading returns the data contained within the Blob.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/stream)
+    /// </summary>
+    abstract stream: unit -> ReadableStream<obj>
+
 [<Interface>]
 type BlobOptions =
     abstract ``type``: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?``type``: string) : BlobOptions = jsNative
+
+/// <summary>
+/// The **<c>File</c>** interface provides information about files and allows JavaScript in a web page to access their content.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/File)
+/// </summary>
+type File =
+    /// <summary>
+    /// The **<c>name</c>** read-only property of the File interface returns the name of the file represented by a File object. For security reasons, the path is excluded from this property.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/File/name)
+    /// </summary>
+    abstract name: string
+    /// <summary>
+    /// The **<c>lastModified</c>** read-only property of the File interface provides the last modified date of the file as the number of milliseconds since the Unix epoch (January 1, 1970 at midnight). Files without a known last modified date return the current date.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/File/lastModified)
+    /// </summary>
+    abstract lastModified: float
+    /// <summary>
+    /// The **<c>size</c>** read-only property of the Blob interface returns the size of the Blob or File in bytes.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/size)
+    /// </summary>
+    abstract size: float
+    /// <summary>
+    /// The **<c>type</c>** read-only property of the Blob interface returns the MIME type of the file.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/type)
+    /// </summary>
+    abstract ``type``: string
+    /// <summary>
+    /// The **<c>slice()</c>** method of the Blob interface creates and returns a new Blob object which contains data from a subset of the blob on which it's called.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/slice)
+    /// </summary>
+    abstract slice: ?start: float * ?``end``: float * ?``type``: string -> Blob
+    /// <summary>
+    /// The **<c>arrayBuffer()</c>** method of the Blob interface returns a Promise that resolves with the contents of the blob as binary data contained in an ArrayBuffer.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/arrayBuffer)
+    /// </summary>
+    abstract arrayBuffer: unit -> JS.Promise<JS.ArrayBuffer>
+    /// <summary>
+    /// The **<c>bytes()</c>** method of the Blob interface returns a Promise that resolves with a Uint8Array containing the contents of the blob as an array of bytes.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/bytes)
+    /// </summary>
+    abstract bytes: unit -> JS.Promise<JS.Uint8Array>
+    /// <summary>
+    /// The **<c>text()</c>** method of the Blob interface returns a Promise that resolves with a string containing the contents of the blob, interpreted as UTF-8.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/text)
+    /// </summary>
+    abstract text: unit -> JS.Promise<string>
+    /// <summary>
+    /// The **<c>stream()</c>** method of the Blob interface returns a ReadableStream which upon reading returns the data contained within the Blob.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob/stream)
+    /// </summary>
+    abstract stream: unit -> ReadableStream<obj>
 
 [<Interface>]
 type FileOptions =
@@ -1933,16 +2929,231 @@ type FileOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?``type``: string, ?lastModified: float) : FileOptions = jsNative
 
+/// <summary>
+/// The Cache API allows fine grained control of reading and writing from the Cloudflare global network cache.
+///
+/// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/cache/)
+/// </summary>
+type CacheStorage =
+    /// <summary>
+    /// The **<c>open()</c>** method of the CacheStorage interface returns a Promise that resolves to the Cache object matching the cacheName.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CacheStorage/open)
+    /// </summary>
+    abstract ``open``: cacheName: string -> JS.Promise<Cache>
+    abstract ``default``: Cache
+
+/// <summary>
+/// The Cache API allows fine grained control of reading and writing from the Cloudflare global network cache.
+///
+/// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/cache/)
+/// </summary>
+type Cache =
+    abstract delete: request: U3<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, URL> * ?options: CacheQueryOptions -> JS.Promise<bool>
+    abstract ``match``: request: U3<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, URL> * ?options: CacheQueryOptions -> JS.Promise<Response option>
+    abstract put: request: U3<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, URL> * response: Response -> JS.Promise<unit>
+
+[<Interface>]
+type CacheQueryOptions =
+    abstract ignoreMethod: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?ignoreMethod: bool) : CacheQueryOptions = jsNative
+
+/// <summary>
+/// The Web Crypto API provides a set of low-level functions for common cryptographic tasks.
+/// The Workers runtime implements the full surface of this API, but with some differences in
+/// the [supported algorithms](https://developers.cloudflare.com/workers/runtime-apis/web-crypto/#supported-algorithms)
+/// compared to those implemented in most browsers.
+///
+/// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/web-crypto/)
+/// </summary>
+type Crypto =
+    /// <summary>
+    /// The **<c>Crypto.subtle</c>** read-only property returns a SubtleCrypto which can then be used to perform low-level cryptographic operations.
+    /// Available only in secure contexts.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Crypto/subtle)
+    /// </summary>
+    abstract subtle: SubtleCrypto
+    /// <summary>
+    /// The **<c>Crypto.getRandomValues()</c>** method lets you get cryptographically strong random values. The array given as the parameter is filled with random numbers (random in its cryptographic meaning).
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Crypto/getRandomValues)
+    /// </summary>
+    abstract getRandomValues<'T>: buffer: 'T -> 'T
+    /// <summary>
+    /// The **<c>randomUUID()</c>** method of the Crypto interface is used to generate a v4 UUID using a cryptographically secure random number generator.
+    /// Available only in secure contexts.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Crypto/randomUUID)
+    /// </summary>
+    abstract randomUUID: unit -> string
+    abstract DigestStream: obj with get, set
+
+/// <summary>
+/// The **<c>SubtleCrypto</c>** interface of the Web Crypto API provides a number of low-level cryptographic functions.
+/// Available only in secure contexts.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SubtleCrypto)
+/// </summary>
+type SubtleCrypto =
+    /// <summary>
+    /// The **<c>encrypt()</c>** method of the SubtleCrypto interface encrypts data.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SubtleCrypto/encrypt)
+    /// </summary>
+    abstract encrypt: algorithm: U2<string, SubtleCryptoEncryptAlgorithm> * key: CryptoKey * plainText: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<JS.ArrayBuffer>
+    /// <summary>
+    /// The **<c>decrypt()</c>** method of the SubtleCrypto interface decrypts some encrypted data. It takes as arguments a key to decrypt with, some optional extra parameters, and the data to decrypt (also known as "ciphertext"). It returns a Promise which will be fulfilled with the decrypted data (also known as "plaintext").
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SubtleCrypto/decrypt)
+    /// </summary>
+    abstract decrypt: algorithm: U2<string, SubtleCryptoEncryptAlgorithm> * key: CryptoKey * cipherText: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<JS.ArrayBuffer>
+    /// <summary>
+    /// The **<c>sign()</c>** method of the SubtleCrypto interface generates a digital signature.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SubtleCrypto/sign)
+    /// </summary>
+    abstract sign: algorithm: U2<string, SubtleCryptoSignAlgorithm> * key: CryptoKey * data: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<JS.ArrayBuffer>
+    /// <summary>
+    /// The **<c>verify()</c>** method of the SubtleCrypto interface verifies a digital signature.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SubtleCrypto/verify)
+    /// </summary>
+    abstract verify: algorithm: U2<string, SubtleCryptoSignAlgorithm> * key: CryptoKey * signature: U2<JS.ArrayBuffer, JS.ArrayBufferView> * data: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<bool>
+    /// <summary>
+    /// The **<c>digest()</c>** method of the SubtleCrypto interface generates a digest of the given data, using the specified hash function. A digest is a short fixed-length value derived from some variable-length input. Cryptographic digests should exhibit collision-resistance, meaning that it's hard to come up with two different inputs that have the same digest value.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SubtleCrypto/digest)
+    /// </summary>
+    abstract digest: algorithm: U2<string, SubtleCryptoHashAlgorithm> * data: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<JS.ArrayBuffer>
+    /// <summary>
+    /// The **<c>generateKey()</c>** method of the SubtleCrypto interface is used to generate a new key (for symmetric algorithms) or key pair (for public-key algorithms).
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SubtleCrypto/generateKey)
+    /// </summary>
+    abstract generateKey: algorithm: U2<string, SubtleCryptoGenerateKeyAlgorithm> * extractable: bool * keyUsages: string[] -> JS.Promise<U2<CryptoKey, CryptoKeyPair>>
+    /// <summary>
+    /// The **<c>deriveKey()</c>** method of the SubtleCrypto interface can be used to derive a secret key from a master key.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SubtleCrypto/deriveKey)
+    /// </summary>
+    abstract deriveKey: algorithm: U2<string, SubtleCryptoDeriveKeyAlgorithm> * baseKey: CryptoKey * derivedKeyAlgorithm: U2<string, SubtleCryptoImportKeyAlgorithm> * extractable: bool * keyUsages: string[] -> JS.Promise<CryptoKey>
+    /// <summary>
+    /// The **<c>deriveBits()</c>** method of the SubtleCrypto interface can be used to derive an array of bits from a base key.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SubtleCrypto/deriveBits)
+    /// </summary>
+    abstract deriveBits: algorithm: U2<string, SubtleCryptoDeriveKeyAlgorithm> * baseKey: CryptoKey * ?length: float -> JS.Promise<JS.ArrayBuffer>
+    /// <summary>
+    /// The **<c>importKey()</c>** method of the SubtleCrypto interface imports a key: that is, it takes as input a key in an external, portable format and gives you a CryptoKey object that you can use in the Web Crypto API.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SubtleCrypto/importKey)
+    /// </summary>
+    abstract importKey: format: string * keyData: U3<JS.ArrayBuffer, JS.ArrayBufferView, JsonWebKey> * algorithm: U2<string, SubtleCryptoImportKeyAlgorithm> * extractable: bool * keyUsages: string[] -> JS.Promise<CryptoKey>
+    /// <summary>
+    /// The **<c>exportKey()</c>** method of the SubtleCrypto interface exports a key: that is, it takes as input a CryptoKey object and gives you the key in an external, portable format.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SubtleCrypto/exportKey)
+    /// </summary>
+    abstract exportKey: format: string * key: CryptoKey -> JS.Promise<U2<JS.ArrayBuffer, JsonWebKey>>
+    /// <summary>
+    /// The **<c>wrapKey()</c>** method of the SubtleCrypto interface "wraps" a key. This means that it exports the key in an external, portable format, then encrypts the exported key. Wrapping a key helps protect it in untrusted environments, such as inside an otherwise unprotected data store or in transmission over an unprotected network.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SubtleCrypto/wrapKey)
+    /// </summary>
+    abstract wrapKey: format: string * key: CryptoKey * wrappingKey: CryptoKey * wrapAlgorithm: U2<string, SubtleCryptoEncryptAlgorithm> -> JS.Promise<JS.ArrayBuffer>
+    /// <summary>
+    /// The **<c>unwrapKey()</c>** method of the SubtleCrypto interface "unwraps" a key. This means that it takes as its input a key that has been exported and then encrypted (also called "wrapped"). It decrypts the key and then imports it, returning a CryptoKey object that can be used in the Web Crypto API.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SubtleCrypto/unwrapKey)
+    /// </summary>
+    abstract unwrapKey: format: string * wrappedKey: U2<JS.ArrayBuffer, JS.ArrayBufferView> * unwrappingKey: CryptoKey * unwrapAlgorithm: U2<string, SubtleCryptoEncryptAlgorithm> * unwrappedKeyAlgorithm: U2<string, SubtleCryptoImportKeyAlgorithm> * extractable: bool * keyUsages: string[] -> JS.Promise<CryptoKey>
+    abstract timingSafeEqual: a: U2<JS.ArrayBuffer, JS.ArrayBufferView> * b: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> bool
+
+/// <summary>
+/// The **<c>CryptoKey</c>** interface of the Web Crypto API represents a cryptographic key obtained from one of the SubtleCrypto methods generateKey(), deriveKey(), importKey(), or unwrapKey().
+/// Available only in secure contexts.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CryptoKey)
+/// </summary>
+[<Interface>]
+type CryptoKey =
+    /// <summary>
+    /// The read-only **<c>type</c>** property of the CryptoKey interface indicates which kind of key is represented by the object. It can have the following values:
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CryptoKey/type)
+    /// </summary>
+    abstract ``type``: string
+    /// <summary>
+    /// The read-only **<c>extractable</c>** property of the CryptoKey interface indicates whether or not the key may be extracted using SubtleCrypto.exportKey() or SubtleCrypto.wrapKey().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CryptoKey/extractable)
+    /// </summary>
+    abstract extractable: bool
+    /// <summary>
+    /// The read-only **<c>algorithm</c>** property of the CryptoKey interface returns an object describing the algorithm for which this key can be used, and any associated extra parameters.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CryptoKey/algorithm)
+    /// </summary>
+    abstract algorithm: obj
+    /// <summary>
+    /// The read-only **<c>usages</c>** property of the CryptoKey interface indicates what can be done with the key.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CryptoKey/usages)
+    /// </summary>
+    abstract usages: string[]
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, extractable: bool, algorithm: obj, usages: string[]) : CryptoKey = jsNative
+
+[<Interface>]
+type CryptoKeyPair =
+    abstract publicKey: CryptoKey with get, set
+    abstract privateKey: CryptoKey with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (publicKey: CryptoKey, privateKey: CryptoKey) : CryptoKeyPair = jsNative
+
+[<Interface>]
+type JsonWebKey =
+    abstract kty: string with get, set
+    abstract ``use``: string option with get, set
+    abstract key_ops: string[] option with get, set
+    abstract alg: string option with get, set
+    abstract ext: bool option with get, set
+    abstract crv: string option with get, set
+    abstract x: string option with get, set
+    abstract y: string option with get, set
+    abstract d: string option with get, set
+    abstract n: string option with get, set
+    abstract e: string option with get, set
+    abstract p: string option with get, set
+    abstract q: string option with get, set
+    abstract dp: string option with get, set
+    abstract dq: string option with get, set
+    abstract qi: string option with get, set
+    abstract oth: RsaOtherPrimesInfo[] option with get, set
+    abstract k: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (kty: string, ?``use``: string, ?key_ops: string[], ?alg: string, ?ext: bool, ?crv: string, ?x: string, ?y: string, ?d: string, ?n: string, ?e: string, ?p: string, ?q: string, ?dp: string, ?dq: string, ?qi: string, ?oth: RsaOtherPrimesInfo[], ?k: string) : JsonWebKey = jsNative
+
+[<Interface>]
+type RsaOtherPrimesInfo =
+    abstract r: string option with get, set
+    abstract d: string option with get, set
+    abstract t: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?r: string, ?d: string, ?t: string) : RsaOtherPrimesInfo = jsNative
+
 [<Interface>]
 type SubtleCryptoDeriveKeyAlgorithm =
     abstract name: string with get, set
     abstract salt: U2<JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
     abstract iterations: float option with get, set
     abstract hash: U2<string, SubtleCryptoHashAlgorithm> option with get, set
-    abstract ``$public``: obj option with get, set
+    abstract ``$public``: CryptoKey option with get, set
     abstract info: U2<JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, ?salt: U2<JS.ArrayBuffer, JS.ArrayBufferView>, ?iterations: float, ?hash: U2<string, SubtleCryptoHashAlgorithm>, ?``$public``: obj, ?info: U2<JS.ArrayBuffer, JS.ArrayBufferView>) : SubtleCryptoDeriveKeyAlgorithm = jsNative
+    static member Create (name: string, ?salt: U2<JS.ArrayBuffer, JS.ArrayBufferView>, ?iterations: float, ?hash: U2<string, SubtleCryptoHashAlgorithm>, ?``$public``: CryptoKey, ?info: U2<JS.ArrayBuffer, JS.ArrayBufferView>) : SubtleCryptoDeriveKeyAlgorithm = jsNative
 
 [<Interface>]
 type SubtleCryptoEncryptAlgorithm =
@@ -2038,7 +3249,6 @@ type CryptoKeyArbitraryKeyAlgorithm =
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, ?hash: CryptoKeyKeyAlgorithm, ?namedCurve: string, ?length: float) : CryptoKeyArbitraryKeyAlgorithm = jsNative
 
-[<Interface>]
 type DigestStream =
     abstract digest: JS.Promise<JS.ArrayBuffer>
     abstract bytesWritten: obj
@@ -2053,27 +3263,61 @@ type DigestStream =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/abort)
     /// </summary>
-    abstract abort: obj with get, set
+    abstract abort: reason: obj -> JS.Promise<unit>
     /// <summary>
     /// The **<c>close()</c>** method of the WritableStream interface closes the associated stream. All chunks written before this method is called are sent before the returned promise is fulfilled.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/close)
     /// </summary>
-    abstract close: obj with get, set
+    abstract close: unit -> JS.Promise<unit>
     /// <summary>
     /// The **<c>getWriter()</c>** method of the WritableStream interface returns a new instance of WritableStreamDefaultWriter and locks the stream to that instance. While the stream is locked, no other writer can be acquired until this one is released.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/getWriter)
     /// </summary>
-    abstract getWriter: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (digest: JS.Promise<JS.ArrayBuffer>, bytesWritten: obj, locked: bool, abort: obj, close: obj, getWriter: obj) : DigestStream = jsNative
+    abstract getWriter: unit -> WritableStreamDefaultWriter<U2<JS.ArrayBuffer, JS.ArrayBufferView>>
 
 [<Interface>]
 type DigestStreamOptions =
     abstract toWellFormed: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?toWellFormed: bool) : DigestStreamOptions = jsNative
+
+/// <summary>
+/// The **<c>TextDecoder</c>** interface represents a decoder for a specific text encoding, such as UTF-8, ISO-8859-2, or GBK. A decoder takes an array of bytes as input and returns a JavaScript string.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TextDecoder)
+/// </summary>
+type TextDecoder =
+    /// <summary>
+    /// The **<c>TextDecoder.decode()</c>** method returns a string containing text decoded from the buffer passed as a parameter.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TextDecoder/decode)
+    /// </summary>
+    abstract decode: ?input: U2<JS.ArrayBuffer, JS.ArrayBufferView> * ?options: TextDecoderDecodeOptions -> string
+    abstract encoding: string
+    abstract fatal: bool
+    abstract ignoreBOM: bool
+
+/// <summary>
+/// The **<c>TextEncoder</c>** interface enables you to encode a JavaScript string using UTF-8.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TextEncoder)
+/// </summary>
+type TextEncoder =
+    /// <summary>
+    /// The **<c>TextEncoder.encode()</c>** method takes a string as input, and returns a Uint8Array containing the string encoded using UTF-8.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TextEncoder/encode)
+    /// </summary>
+    abstract encode: ?input: string -> JS.Uint8Array
+    /// <summary>
+    /// The **<c>TextEncoder.encodeInto()</c>** method takes a string to encode and a destination Uint8Array to put resulting UTF-8 encoded text into, and returns an object indicating the progress of the encoding. This is potentially more performant than the encode() method — especially when the target buffer is a view into a Wasm heap.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TextEncoder/encodeInto)
+    /// </summary>
+    abstract encodeInto: input: string * buffer: JS.Uint8Array -> TextEncoderEncodeIntoResult
+    abstract encoding: string
 
 [<Interface>]
 type TextDecoderConstructorOptions =
@@ -2089,6 +3333,150 @@ type TextDecoderDecodeOptions =
     static member Create (stream: bool) : TextDecoderDecodeOptions = jsNative
 
 [<Interface>]
+type TextEncoderEncodeIntoResult =
+    abstract read: float with get, set
+    abstract written: float with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (read: float, written: float) : TextEncoderEncodeIntoResult = jsNative
+
+/// <summary>
+/// The **<c>ErrorEvent</c>** interface represents events providing information related to errors in scripts or in files.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ErrorEvent)
+/// </summary>
+type ErrorEvent =
+    /// <summary>
+    /// The **<c>filename</c>** read-only property of the ErrorEvent interface returns a string containing the name of the script file in which the error occurred.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ErrorEvent/filename)
+    /// </summary>
+    abstract filename: string
+    /// <summary>
+    /// The **<c>message</c>** read-only property of the ErrorEvent interface returns a string containing a human-readable error message describing the problem.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ErrorEvent/message)
+    /// </summary>
+    abstract message: string
+    /// <summary>
+    /// The **<c>lineno</c>** read-only property of the ErrorEvent interface returns an integer containing the line number of the script file on which the error occurred.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ErrorEvent/lineno)
+    /// </summary>
+    abstract lineno: float
+    /// <summary>
+    /// The **<c>colno</c>** read-only property of the ErrorEvent interface returns an integer containing the column number of the script file on which the error occurred.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ErrorEvent/colno)
+    /// </summary>
+    abstract colno: float
+    /// <summary>
+    /// The **<c>error</c>** read-only property of the ErrorEvent interface returns a JavaScript value, such as an Error or DOMException, representing the error associated with this event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ErrorEvent/error)
+    /// </summary>
+    abstract error: obj
+    /// <summary>
+    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
+    /// </summary>
+    abstract ``type``: string
+    /// <summary>
+    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
+    /// </summary>
+    abstract eventPhase: float
+    /// <summary>
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
+    /// </summary>
+    abstract composed: bool
+    /// <summary>
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// </summary>
+    abstract bubbles: bool
+    /// <summary>
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
+    /// </summary>
+    abstract cancelable: bool
+    /// <summary>
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
+    /// </summary>
+    abstract defaultPrevented: bool
+    /// <summary>
+    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
+    abstract returnValue: bool
+    /// <summary>
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
+    /// </summary>
+    abstract currentTarget: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
+    /// </summary>
+    abstract target: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
+    abstract srcElement: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
+    /// </summary>
+    abstract timeStamp: float
+    /// <summary>
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
+    /// </summary>
+    abstract isTrusted: bool
+    /// <summary>
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    abstract cancelBubble: bool with get, set
+    /// <summary>
+    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
+    /// </summary>
+    abstract stopImmediatePropagation: unit -> unit
+    /// <summary>
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
+    /// </summary>
+    abstract preventDefault: unit -> unit
+    /// <summary>
+    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
+    /// </summary>
+    abstract stopPropagation: unit -> unit
+    /// <summary>
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// </summary>
+    abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+
+[<Interface>]
 type ErrorEventErrorEventInit =
     abstract bubbles: bool option with get, set
     abstract cancelable: bool option with get, set
@@ -2101,6 +3489,346 @@ type ErrorEventErrorEventInit =
     [<ParamObject; Emit("$0")>]
     static member Create (?bubbles: bool, ?cancelable: bool, ?composed: bool, ?message: string, ?filename: string, ?lineno: float, ?colno: float, ?error: obj) : ErrorEventErrorEventInit = jsNative
 
+/// <summary>
+/// The **<c>MessageEvent</c>** interface represents a message received by a target object.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessageEvent)
+/// </summary>
+type MessageEvent =
+    /// <summary>
+    /// The **<c>data</c>** read-only property of the MessageEvent interface represents the data sent by the message emitter.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessageEvent/data)
+    /// </summary>
+    abstract data: obj
+    /// <summary>
+    /// The **<c>origin</c>** read-only property of the MessageEvent interface is a string representing the origin of the message emitter.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessageEvent/origin)
+    /// </summary>
+    abstract origin: string option
+    /// <summary>
+    /// The **<c>lastEventId</c>** read-only property of the MessageEvent interface is a string representing a unique ID for the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessageEvent/lastEventId)
+    /// </summary>
+    abstract lastEventId: string
+    /// <summary>
+    /// The **<c>source</c>** read-only property of the MessageEvent interface is a MessageEventSource (which can be a WindowProxy, MessagePort, or ServiceWorker object) representing the message emitter.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessageEvent/source)
+    /// </summary>
+    abstract source: MessagePort option
+    /// <summary>
+    /// The **<c>ports</c>** read-only property of the MessageEvent interface is an array of MessagePort objects containing all MessagePort objects sent with the message, in order.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessageEvent/ports)
+    /// </summary>
+    abstract ports: MessagePort[]
+    /// <summary>
+    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
+    /// </summary>
+    abstract ``type``: string
+    /// <summary>
+    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
+    /// </summary>
+    abstract eventPhase: float
+    /// <summary>
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
+    /// </summary>
+    abstract composed: bool
+    /// <summary>
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// </summary>
+    abstract bubbles: bool
+    /// <summary>
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
+    /// </summary>
+    abstract cancelable: bool
+    /// <summary>
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
+    /// </summary>
+    abstract defaultPrevented: bool
+    /// <summary>
+    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
+    abstract returnValue: bool
+    /// <summary>
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
+    /// </summary>
+    abstract currentTarget: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
+    /// </summary>
+    abstract target: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
+    abstract srcElement: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
+    /// </summary>
+    abstract timeStamp: float
+    /// <summary>
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
+    /// </summary>
+    abstract isTrusted: bool
+    /// <summary>
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    abstract cancelBubble: bool with get, set
+    /// <summary>
+    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
+    /// </summary>
+    abstract stopImmediatePropagation: unit -> unit
+    /// <summary>
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
+    /// </summary>
+    abstract preventDefault: unit -> unit
+    /// <summary>
+    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
+    /// </summary>
+    abstract stopPropagation: unit -> unit
+    /// <summary>
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// </summary>
+    abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+
+[<Interface>]
+type MessageEventInit =
+    abstract bubbles: bool option with get, set
+    abstract cancelable: bool option with get, set
+    abstract composed: bool option with get, set
+    abstract data: obj option with get, set
+    abstract origin: string option with get, set
+    abstract lastEventId: string option with get, set
+    abstract source: MessagePort option with get, set
+    abstract ports: MessagePort[] option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?bubbles: bool, ?cancelable: bool, ?composed: bool, ?data: obj, ?origin: string, ?lastEventId: string, ?source: MessagePort, ?ports: MessagePort[]) : MessageEventInit = jsNative
+
+/// <summary>
+/// The **<c>PromiseRejectionEvent</c>** interface represents events which are sent to the global script context when JavaScript Promises are rejected. These events are particularly useful for telemetry and debugging purposes.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PromiseRejectionEvent)
+/// </summary>
+type PromiseRejectionEvent =
+    /// <summary>
+    /// The PromiseRejectionEvent interface's **<c>promise</c>** read-only property indicates the JavaScript Promise which was rejected. You can examine the event's PromiseRejectionEvent.reason property to learn why the promise was rejected.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PromiseRejectionEvent/promise)
+    /// </summary>
+    abstract promise: JS.Promise<obj>
+    /// <summary>
+    /// The PromiseRejectionEvent **<c>reason</c>** read-only property is any JavaScript value or Object which provides the reason passed into Promise.reject(). This in theory provides information about why the promise was rejected.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PromiseRejectionEvent/reason)
+    /// </summary>
+    abstract reason: obj
+    /// <summary>
+    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
+    /// </summary>
+    abstract ``type``: string
+    /// <summary>
+    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
+    /// </summary>
+    abstract eventPhase: float
+    /// <summary>
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
+    /// </summary>
+    abstract composed: bool
+    /// <summary>
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// </summary>
+    abstract bubbles: bool
+    /// <summary>
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
+    /// </summary>
+    abstract cancelable: bool
+    /// <summary>
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
+    /// </summary>
+    abstract defaultPrevented: bool
+    /// <summary>
+    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
+    abstract returnValue: bool
+    /// <summary>
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
+    /// </summary>
+    abstract currentTarget: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
+    /// </summary>
+    abstract target: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
+    abstract srcElement: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
+    /// </summary>
+    abstract timeStamp: float
+    /// <summary>
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
+    /// </summary>
+    abstract isTrusted: bool
+    /// <summary>
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    abstract cancelBubble: bool with get, set
+    /// <summary>
+    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
+    /// </summary>
+    abstract stopImmediatePropagation: unit -> unit
+    /// <summary>
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
+    /// </summary>
+    abstract preventDefault: unit -> unit
+    /// <summary>
+    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
+    /// </summary>
+    abstract stopPropagation: unit -> unit
+    /// <summary>
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// </summary>
+    abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+
+/// <summary>
+/// The **<c>FormData</c>** interface provides a way to construct a set of key/value pairs representing form fields and their values, which can be sent using the fetch(), XMLHttpRequest.send() or navigator.sendBeacon() methods. It uses the same format a form would use if the encoding type were set to "multipart/form-data".
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FormData)
+/// </summary>
+type FormData =
+    /// <summary>
+    /// The **<c>append()</c>** method of the FormData interface appends a new value onto an existing key inside a FormData object, or adds the key if it does not already exist.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FormData/append)
+    /// </summary>
+    abstract append: name: string * value: U2<string, Blob> -> unit
+    /// <summary>
+    /// The **<c>append()</c>** method of the FormData interface appends a new value onto an existing key inside a FormData object, or adds the key if it does not already exist.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FormData/append)
+    /// </summary>
+    abstract append: name: string * value: string -> unit
+    /// <summary>
+    /// The **<c>append()</c>** method of the FormData interface appends a new value onto an existing key inside a FormData object, or adds the key if it does not already exist.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FormData/append)
+    /// </summary>
+    abstract append: name: string * value: Blob * ?filename: string -> unit
+    /// <summary>
+    /// The **<c>delete()</c>** method of the FormData interface deletes a key and its value(s) from a FormData object.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FormData/delete)
+    /// </summary>
+    abstract delete: name: string -> unit
+    /// <summary>
+    /// The **<c>get()</c>** method of the FormData interface returns the first value associated with a given key from within a FormData object. If you expect multiple values and want all of them, use the getAll() method instead.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FormData/get)
+    /// </summary>
+    abstract get: name: string -> U2<string, File> option
+    /// <summary>
+    /// The **<c>getAll()</c>** method of the FormData interface returns all the values associated with a given key from within a FormData object.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FormData/getAll)
+    /// </summary>
+    abstract getAll: name: string -> U2<string, File>[]
+    /// <summary>
+    /// The **<c>has()</c>** method of the FormData interface returns whether a FormData object contains a certain key.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FormData/has)
+    /// </summary>
+    abstract has: name: string -> bool
+    /// <summary>
+    /// The **<c>set()</c>** method of the FormData interface sets a new value for an existing key inside a FormData object, or adds the key/value if it does not already exist.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FormData/set)
+    /// </summary>
+    abstract set: name: string * value: U2<string, Blob> -> unit
+    /// <summary>
+    /// The **<c>set()</c>** method of the FormData interface sets a new value for an existing key inside a FormData object, or adds the key/value if it does not already exist.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FormData/set)
+    /// </summary>
+    abstract set: name: string * value: string -> unit
+    /// <summary>
+    /// The **<c>set()</c>** method of the FormData interface sets a new value for an existing key inside a FormData object, or adds the key/value if it does not already exist.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FormData/set)
+    /// </summary>
+    abstract set: name: string * value: Blob * ?filename: string -> unit
+    abstract entries: unit -> obj
+    abstract keys: unit -> obj
+    abstract values: unit -> obj
+    abstract forEach<'This>: callback: Action<U2<string, File>, string, FormData> * ?thisArg: 'This -> unit
+
 [<Interface>]
 type ContentOptions =
     abstract html: bool option with get, set
@@ -2110,24 +3838,24 @@ type ContentOptions =
 type HTMLRewriter =
     abstract on: selector: string * handlers: HTMLRewriterElementContentHandlers -> HTMLRewriter
     abstract onDocument: handlers: HTMLRewriterDocumentContentHandlers -> HTMLRewriter
-    abstract transform: response: obj -> obj
+    abstract transform: response: Response -> Response
 
 [<Interface>]
 type HTMLRewriterElementContentHandlers =
-    abstract element: Func<Browser.Types.Element, JS.Promise<unit> option> option with get, set
-    abstract comments: Func<Browser.Types.Comment, JS.Promise<unit> option> option with get, set
-    abstract text: Func<Browser.Types.Text, JS.Promise<unit> option> option with get, set
+    abstract element: Func<Element, JS.Promise<unit> option> option with get, set
+    abstract comments: Func<Comment, JS.Promise<unit> option> option with get, set
+    abstract text: Func<Text, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?element: Func<Browser.Types.Element, JS.Promise<unit> option>, ?comments: Func<Browser.Types.Comment, JS.Promise<unit> option>, ?text: Func<Browser.Types.Text, JS.Promise<unit> option>) : HTMLRewriterElementContentHandlers = jsNative
+    static member Create (?element: Func<Element, JS.Promise<unit> option>, ?comments: Func<Comment, JS.Promise<unit> option>, ?text: Func<Text, JS.Promise<unit> option>) : HTMLRewriterElementContentHandlers = jsNative
 
 [<Interface>]
 type HTMLRewriterDocumentContentHandlers =
     abstract doctype: Func<Doctype, JS.Promise<unit> option> option with get, set
-    abstract comments: Func<Browser.Types.Comment, JS.Promise<unit> option> option with get, set
-    abstract text: Func<Browser.Types.Text, JS.Promise<unit> option> option with get, set
+    abstract comments: Func<Comment, JS.Promise<unit> option> option with get, set
+    abstract text: Func<Text, JS.Promise<unit> option> option with get, set
     abstract ``end``: Func<DocumentEnd, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?doctype: Func<Doctype, JS.Promise<unit> option>, ?comments: Func<Browser.Types.Comment, JS.Promise<unit> option>, ?text: Func<Browser.Types.Text, JS.Promise<unit> option>, ?``end``: Func<DocumentEnd, JS.Promise<unit> option>) : HTMLRewriterDocumentContentHandlers = jsNative
+    static member Create (?doctype: Func<Doctype, JS.Promise<unit> option>, ?comments: Func<Comment, JS.Promise<unit> option>, ?text: Func<Text, JS.Promise<unit> option>, ?``end``: Func<DocumentEnd, JS.Promise<unit> option>) : HTMLRewriterDocumentContentHandlers = jsNative
 
 [<Interface>]
 type Doctype =
@@ -2137,11 +3865,47 @@ type Doctype =
     [<ParamObject; Emit("$0")>]
     static member Create (?name: string, ?publicId: string, ?systemId: string) : Doctype = jsNative
 
+type Element =
+    abstract tagName: string with get, set
+    abstract attributes: obj
+    abstract removed: bool
+    abstract namespaceURI: string
+    abstract getAttribute: name: string -> string option
+    abstract hasAttribute: name: string -> bool
+    abstract setAttribute: name: string * value: string -> Element
+    abstract removeAttribute: name: string -> Element
+    abstract before: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> Element
+    abstract after: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> Element
+    abstract prepend: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> Element
+    abstract append: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> Element
+    abstract replace: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> Element
+    abstract remove: unit -> Element
+    abstract removeAndKeepContent: unit -> Element
+    abstract setInnerContent: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> Element
+    abstract onEndTag: handler: Func<EndTag, JS.Promise<unit> option> -> unit
+
 type EndTag =
     abstract name: string with get, set
-    abstract before: content: obj * ?options: ContentOptions -> EndTag
-    abstract after: content: obj * ?options: ContentOptions -> EndTag
+    abstract before: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> EndTag
+    abstract after: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> EndTag
     abstract remove: unit -> EndTag
+
+type Comment =
+    abstract text: string with get, set
+    abstract removed: bool
+    abstract before: content: string * ?options: ContentOptions -> Comment
+    abstract after: content: string * ?options: ContentOptions -> Comment
+    abstract replace: content: string * ?options: ContentOptions -> Comment
+    abstract remove: unit -> Comment
+
+type Text =
+    abstract text: string
+    abstract lastInTextNode: bool
+    abstract removed: bool
+    abstract before: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> Text
+    abstract after: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> Text
+    abstract replace: content: U3<string, ReadableStream<obj>, Response> * ?options: ContentOptions -> Text
+    abstract remove: unit -> Text
 
 type DocumentEnd =
     abstract append: content: string * ?options: ContentOptions -> DocumentEnd
@@ -2157,83 +3921,14 @@ type FetchEvent =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FetchEvent/request)
     /// </summary>
-    abstract request: obj
+    abstract request: Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>
     /// <summary>
     /// The **<c>respondWith()</c>** method of FetchEvent prevents the browser's default fetch handling, and allows you to provide a promise for a Response yourself.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FetchEvent/respondWith)
     /// </summary>
-    abstract respondWith: promise: obj -> unit
+    abstract respondWith: promise: U2<JS.Promise<Response>, Response> -> unit
     abstract passThroughOnException: unit -> unit
-    /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
-    /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: Browser.Types.EventTarget option
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
-    /// <summary>
-    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
-    /// </summary>
-    abstract eventPhase: float
-    /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
-    /// </summary>
-    abstract isTrusted: bool
-    /// <summary>
-    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool with get, set
-    /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: Browser.Types.EventTarget option
-    /// <summary>
-    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
-    /// </summary>
-    abstract target: Browser.Types.EventTarget option
-    /// <summary>
-    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
-    /// </summary>
-    abstract timeStamp: float
     /// <summary>
     /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
     ///
@@ -2241,44 +3936,331 @@ type FetchEvent =
     /// </summary>
     abstract ``type``: string
     /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
     /// </summary>
-    abstract composedPath: obj with get, set
+    abstract eventPhase: float
     /// <summary>
-    /// The **<c>Event.initEvent()</c>** method is used to initialize the value of an event created using Document.createEvent().
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/initEvent)</remarks>
-    abstract initEvent: obj with get, set
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
     /// </summary>
-    abstract preventDefault: obj with get, set
+    abstract composed: bool
+    /// <summary>
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// </summary>
+    abstract bubbles: bool
+    /// <summary>
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
+    /// </summary>
+    abstract cancelable: bool
+    /// <summary>
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
+    /// </summary>
+    abstract defaultPrevented: bool
+    /// <summary>
+    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
+    abstract returnValue: bool
+    /// <summary>
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
+    /// </summary>
+    abstract currentTarget: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
+    /// </summary>
+    abstract target: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
+    abstract srcElement: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
+    /// </summary>
+    abstract timeStamp: float
+    /// <summary>
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
+    /// </summary>
+    abstract isTrusted: bool
+    /// <summary>
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    abstract cancelBubble: bool with get, set
     /// <summary>
     /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
     /// </summary>
-    abstract stopImmediatePropagation: obj with get, set
+    abstract stopImmediatePropagation: unit -> unit
+    /// <summary>
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
+    /// </summary>
+    abstract preventDefault: unit -> unit
     /// <summary>
     /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
     /// </summary>
-    abstract stopPropagation: obj with get, set
-    abstract NONE: float
-    abstract CAPTURING_PHASE: float
-    abstract AT_TARGET: float
-    abstract BUBBLING_PHASE: float
+    abstract stopPropagation: unit -> unit
+    /// <summary>
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// </summary>
+    abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
     /// <summary>
     /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
     abstract waitUntil: promise: JS.Promise<obj> -> unit
+
+type HeadersInit = obj
+
+/// <summary>
+/// The **<c>Headers</c>** interface of the Fetch API allows you to perform various actions on HTTP request and response headers. These actions include retrieving, setting, adding to, and removing headers from the list of the request's headers.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers)
+/// </summary>
+type Headers =
+    /// <summary>
+    /// The **<c>get()</c>** method of the Headers interface returns a byte string of all the values of a header within a Headers object with a given name. If the requested header doesn't exist in the Headers object, it returns null.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/get)
+    /// </summary>
+    abstract get: name: string -> string option
+    abstract getAll: name: string -> string[]
+    /// <summary>
+    /// The **<c>getSetCookie()</c>** method of the Headers interface returns an array containing the values of all Set-Cookie headers associated with a response. This allows Headers objects to handle having multiple Set-Cookie headers, which wasn't possible prior to its implementation.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/getSetCookie)
+    /// </summary>
+    abstract getSetCookie: unit -> string[]
+    /// <summary>
+    /// The **<c>has()</c>** method of the Headers interface returns a boolean stating whether a Headers object contains a certain header.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/has)
+    /// </summary>
+    abstract has: name: string -> bool
+    /// <summary>
+    /// The **<c>set()</c>** method of the Headers interface sets a new value for an existing header inside a Headers object, or adds the header if it does not already exist.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/set)
+    /// </summary>
+    abstract set: name: string * value: string -> unit
+    /// <summary>
+    /// The **<c>append()</c>** method of the Headers interface appends a new value onto an existing header inside a Headers object, or adds the header if it does not already exist.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/append)
+    /// </summary>
+    abstract append: name: string * value: string -> unit
+    /// <summary>
+    /// The **<c>delete()</c>** method of the Headers interface deletes a header from the current Headers object.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/delete)
+    /// </summary>
+    abstract delete: name: string -> unit
+    abstract forEach<'This>: callback: Action<string, string, Headers> * ?thisArg: 'This -> unit
+    abstract entries: unit -> obj
+    abstract keys: unit -> obj
+    abstract values: unit -> obj
+
+type BodyInit = obj
+
+type Body =
+    abstract body: ReadableStream<obj> option
+    abstract bodyUsed: bool
+    abstract arrayBuffer: unit -> JS.Promise<JS.ArrayBuffer>
+    abstract bytes: unit -> JS.Promise<JS.Uint8Array>
+    abstract text: unit -> JS.Promise<string>
+    abstract json<'T>: unit -> JS.Promise<'T>
+    abstract formData: unit -> JS.Promise<FormData>
+    abstract blob: unit -> JS.Promise<Blob>
+
+/// <summary>
+/// The **<c>Response</c>** interface of the Fetch API represents the response to a request.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response)
+/// </summary>
+type Response =
+    /// <summary>
+    /// The **<c>clone()</c>** method of the Response interface creates a clone of a response object, identical in every way, but stored in a different variable.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response/clone)
+    /// </summary>
+    abstract clone: unit -> Response
+    /// <summary>
+    /// The **<c>status</c>** read-only property of the Response interface contains the HTTP status codes of the response.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response/status)
+    /// </summary>
+    abstract status: float with get, set
+    /// <summary>
+    /// The **<c>statusText</c>** read-only property of the Response interface contains the status message corresponding to the HTTP status code in Response.status.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response/statusText)
+    /// </summary>
+    abstract statusText: string with get, set
+    /// <summary>
+    /// The **<c>headers</c>** read-only property of the Response interface contains the Headers object associated with the response.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response/headers)
+    /// </summary>
+    abstract headers: Headers with get, set
+    /// <summary>
+    /// The **<c>ok</c>** read-only property of the Response interface contains a Boolean stating whether the response was successful (status in the range 200-299) or not.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response/ok)
+    /// </summary>
+    abstract ok: bool with get, set
+    /// <summary>
+    /// The **<c>redirected</c>** read-only property of the Response interface indicates whether or not the response is the result of a request you made which was redirected.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response/redirected)
+    /// </summary>
+    abstract redirected: bool with get, set
+    /// <summary>
+    /// The **<c>url</c>** read-only property of the Response interface contains the URL of the response. The value of the url property will be the final URL obtained after any redirects.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response/url)
+    /// </summary>
+    abstract url: string with get, set
+    abstract webSocket: WebSocket option with get, set
+    abstract cf: obj with get, set
+    /// <summary>
+    /// The **<c>type</c>** read-only property of the Response interface contains the type of the response. The type determines whether scripts are able to access the response body and headers.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response/type)
+    /// </summary>
+    abstract ``type``: ResponseType with get, set
+    abstract body: ReadableStream<obj> option
+    abstract bodyUsed: bool
+    abstract arrayBuffer: unit -> JS.Promise<JS.ArrayBuffer>
+    abstract bytes: unit -> JS.Promise<JS.Uint8Array>
+    abstract text: unit -> JS.Promise<string>
+    abstract json<'T>: unit -> JS.Promise<'T>
+    abstract formData: unit -> JS.Promise<FormData>
+    abstract blob: unit -> JS.Promise<Blob>
+
+[<Interface>]
+type ResponseInit =
+    abstract status: float option with get, set
+    abstract statusText: string option with get, set
+    abstract headers: HeadersInit option with get, set
+    abstract cf: obj option with get, set
+    abstract webSocket: WebSocket option with get, set
+    abstract encodeBody: RequestInitEncodeResponseBody option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?status: float, ?statusText: string, ?headers: HeadersInit, ?cf: obj, ?webSocket: WebSocket, ?encodeBody: RequestInitEncodeResponseBody) : ResponseInit = jsNative
+
+type RequestInfo<'CfHostMetadata, 'Cf> = U2<string, Request<'CfHostMetadata, 'Cf>>
+
+/// <summary>
+/// The **<c>Request</c>** interface of the Fetch API represents a resource request.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request)
+/// </summary>
+type Request<'CfHostMetadata, 'Cf> =
+    /// <summary>
+    /// The **<c>clone()</c>** method of the Request interface creates a copy of the current Request object.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request/clone)
+    /// </summary>
+    abstract clone: unit -> Request<'CfHostMetadata, 'Cf>
+    /// <summary>
+    /// The **<c>method</c>** read-only property of the Request interface contains the request's method (GET, POST, etc.)
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request/method)
+    /// </summary>
+    abstract ``method``: string with get, set
+    /// <summary>
+    /// The **<c>url</c>** read-only property of the Request interface contains the URL of the request.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request/url)
+    /// </summary>
+    abstract url: string with get, set
+    /// <summary>
+    /// The **<c>headers</c>** read-only property of the Request interface contains the Headers object associated with the request.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request/headers)
+    /// </summary>
+    abstract headers: Headers with get, set
+    /// <summary>
+    /// The **<c>redirect</c>** read-only property of the Request interface contains the mode for how redirects are handled.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request/redirect)
+    /// </summary>
+    abstract redirect: string with get, set
+    abstract fetcher: RequestFetcher option with get, set
+    /// <summary>
+    /// The read-only **<c>signal</c>** property of the Request interface returns the AbortSignal associated with the request.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request/signal)
+    /// </summary>
+    abstract signal: AbortSignal with get, set
+    abstract cf: 'Cf option with get, set
+    /// <summary>
+    /// The **<c>integrity</c>** read-only property of the Request interface contains the subresource integrity value of the request.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request/integrity)
+    /// </summary>
+    abstract integrity: string with get, set
+    /// <summary>
+    /// The **<c>keepalive</c>** read-only property of the Request interface contains the request's keepalive setting (true or false), which indicates whether the browser will keep the associated request alive if the page that initiated it is unloaded before the request is complete.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request/keepalive)
+    /// </summary>
+    abstract keepalive: bool with get, set
+    /// <summary>
+    /// The **<c>cache</c>** read-only property of the Request interface contains the cache mode of the request. It controls how the request will interact with the browser's HTTP cache.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request/cache)
+    /// </summary>
+    abstract cache: RequestInitCache option with get, set
+    abstract body: ReadableStream<obj> option
+    abstract bodyUsed: bool
+    abstract arrayBuffer: unit -> JS.Promise<JS.ArrayBuffer>
+    abstract bytes: unit -> JS.Promise<JS.Uint8Array>
+    abstract text: unit -> JS.Promise<string>
+    abstract json<'T>: unit -> JS.Promise<'T>
+    abstract formData: unit -> JS.Promise<FormData>
+    abstract blob: unit -> JS.Promise<Blob>
+
+[<Interface>]
+type RequestInit<'Cf> =
+    abstract ``method``: string option with get, set
+    abstract headers: HeadersInit option with get, set
+    abstract body: BodyInit option with get, set
+    abstract redirect: string option with get, set
+    abstract fetcher: RequestFetcher option with get, set
+    abstract cf: 'Cf option with get, set
+    abstract cache: RequestInitCache option with get, set
+    abstract integrity: string option with get, set
+    abstract signal: AbortSignal option with get, set
+    abstract encodeResponseBody: RequestInitEncodeResponseBody option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?``method``: string, ?headers: HeadersInit, ?body: BodyInit, ?redirect: string, ?fetcher: RequestFetcher, ?cf: 'Cf, ?cache: RequestInitCache, ?integrity: string, ?signal: AbortSignal, ?encodeResponseBody: RequestInitEncodeResponseBody) : RequestInit<'Cf> = jsNative
 
 [<Erase>]
 type Service<'T> = private Service__ of obj
@@ -2314,21 +4296,28 @@ type KVNamespaceListResult3<'Key, 'Metadata> =
     static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], ?cacheStatus: string) : KVNamespaceListResult3<'Key, 'Metadata> = jsNative
 
 type KVNamespace<'Key> =
-    abstract get: key: 'Key * ?options: obj -> JS.Promise<string option>
+    abstract get: key: 'Key * ?options: KVNamespaceGetOptions2 -> JS.Promise<string option>
     abstract get: key: 'Key * ``type``: string -> JS.Promise<string option>
     abstract get: key: 'Key * ?options: KVNamespaceGetOptions<string> -> JS.Promise<string option>
     abstract get: key: 'Key[] * ``type``: string -> JS.Promise<JS.Map<string, string option>>
-    abstract get: key: 'Key[] * ?options: obj -> JS.Promise<JS.Map<string, string option>>
+    abstract get: key: 'Key[] * ?options: KVNamespaceGetOptions2 -> JS.Promise<JS.Map<string, string option>>
     abstract get: key: 'Key[] * ?options: KVNamespaceGetOptions<string> -> JS.Promise<JS.Map<string, string option>>
     abstract list<'Metadata>: ?options: KVNamespaceListOptions -> JS.Promise<U2<KVNamespaceListResultItem<'Key, 'Metadata>, KVNamespaceListResultItem2<'Key, 'Metadata>>>
-    abstract put: key: 'Key * value: obj * ?options: KVNamespacePutOptions -> JS.Promise<unit>
-    abstract getWithMetadata<'Metadata>: key: 'Key * ?options: obj -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
+    abstract put: key: 'Key * value: U4<string, JS.ArrayBuffer, JS.ArrayBufferView, ReadableStream<obj>> * ?options: KVNamespacePutOptions -> JS.Promise<unit>
+    abstract getWithMetadata<'Metadata>: key: 'Key * ?options: KVNamespaceGetOptions2 -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
     abstract getWithMetadata<'Metadata>: key: 'Key * ``type``: string -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
     abstract getWithMetadata<'Metadata>: key: 'Key * options: KVNamespaceGetOptions<string> -> JS.Promise<KVNamespaceGetWithMetadataResult<string, 'Metadata>>
     abstract getWithMetadata<'Metadata>: key: 'Key[] * ``type``: string -> JS.Promise<JS.Map<string, KVNamespaceGetWithMetadataResult<string, 'Metadata>>>
-    abstract getWithMetadata<'Metadata>: key: 'Key[] * ?options: obj -> JS.Promise<JS.Map<string, KVNamespaceGetWithMetadataResult<string, 'Metadata>>>
+    abstract getWithMetadata<'Metadata>: key: 'Key[] * ?options: KVNamespaceGetOptions2 -> JS.Promise<JS.Map<string, KVNamespaceGetWithMetadataResult<string, 'Metadata>>>
     abstract getWithMetadata<'Metadata>: key: 'Key[] * ?options: KVNamespaceGetOptions<string> -> JS.Promise<JS.Map<string, KVNamespaceGetWithMetadataResult<string, 'Metadata>>>
     abstract delete: key: 'Key -> JS.Promise<unit>
+
+[<Interface>]
+type KVNamespaceGetOptions2 =
+    abstract ``type``: unit option with get, set
+    abstract cacheTtl: float option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?``type``: unit, ?cacheTtl: float) : KVNamespaceGetOptions2 = jsNative
 
 [<Interface>]
 type KVNamespaceListResultItem<'Key, 'Metadata> =
@@ -2494,40 +4483,11 @@ type QueueEvent<'Body> =
     abstract retryAll: ?options: QueueRetryOptions -> unit
     abstract ackAll: unit -> unit
     /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
     /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: Browser.Types.EventTarget option
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
+    abstract ``type``: string
     /// <summary>
     /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
     ///
@@ -2535,27 +4495,51 @@ type QueueEvent<'Body> =
     /// </summary>
     abstract eventPhase: float
     /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
     /// </summary>
-    abstract isTrusted: bool
+    abstract composed: bool
+    /// <summary>
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// </summary>
+    abstract bubbles: bool
+    /// <summary>
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
+    /// </summary>
+    abstract cancelable: bool
+    /// <summary>
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
+    /// </summary>
+    abstract defaultPrevented: bool
     /// <summary>
     /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool with get, set
+    abstract returnValue: bool
     /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: Browser.Types.EventTarget option
+    abstract currentTarget: EventTarget<EventCurrentTargetItem> option
     /// <summary>
     /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
-    abstract target: Browser.Types.EventTarget option
+    abstract target: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
+    abstract srcElement: EventTarget<EventCurrentTargetItem> option
     /// <summary>
     /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
@@ -2563,44 +4547,41 @@ type QueueEvent<'Body> =
     /// </summary>
     abstract timeStamp: float
     /// <summary>
-    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
     /// </summary>
-    abstract ``type``: string
+    abstract isTrusted: bool
     /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
     /// </summary>
-    abstract composedPath: obj with get, set
-    /// <summary>
-    /// The **<c>Event.initEvent()</c>** method is used to initialize the value of an event created using Document.createEvent().
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/initEvent)</remarks>
-    abstract initEvent: obj with get, set
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
-    /// </summary>
-    abstract preventDefault: obj with get, set
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    abstract cancelBubble: bool with get, set
     /// <summary>
     /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
     /// </summary>
-    abstract stopImmediatePropagation: obj with get, set
+    abstract stopImmediatePropagation: unit -> unit
+    /// <summary>
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
+    /// </summary>
+    abstract preventDefault: unit -> unit
     /// <summary>
     /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
     /// </summary>
-    abstract stopPropagation: obj with get, set
-    abstract NONE: float
-    abstract CAPTURING_PHASE: float
-    abstract AT_TARGET: float
-    abstract BUBBLING_PHASE: float
+    abstract stopPropagation: unit -> unit
+    /// <summary>
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// </summary>
+    abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
     /// <summary>
     /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
     ///
@@ -2656,138 +4637,118 @@ type R2Bucket =
 [<Interface>]
 type R2BucketGetOptions =
     inherit R2GetOptions
-    abstract onlyIf: obj with get, set
-    abstract range: obj option with get, set
+    abstract onlyIf: U4<Headers, R2Conditional, R2BucketGetOptionsOnlyIf, R2BucketGetOptionsOnlyIf2> with get, set
+    abstract range: U4<Headers, R2ObjectRange, R2ObjectRange2, R2ObjectRange3> option with get, set
     abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (onlyIf: obj, ?range: obj, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2BucketGetOptions = jsNative
+    static member Create (onlyIf: U4<Headers, R2Conditional, R2BucketGetOptionsOnlyIf, R2BucketGetOptionsOnlyIf2>, ?range: U4<Headers, R2ObjectRange, R2ObjectRange2, R2ObjectRange3>, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2BucketGetOptions = jsNative
 
-[<Interface>]
 type R2BucketGetOptionsOnlyIf =
+    inherit Headers
     inherit R2Conditional
-    /// <summary>
-    /// The **<c>append()</c>** method of the Headers interface appends a new value onto an existing header inside a Headers object, or adds the header if it does not already exist.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/append)
-    /// </summary>
-    abstract append: obj with get, set
-    /// <summary>
-    /// The **<c>delete()</c>** method of the Headers interface deletes a header from the current Headers object.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/delete)
-    /// </summary>
-    abstract delete: obj with get, set
     /// <summary>
     /// The **<c>get()</c>** method of the Headers interface returns a byte string of all the values of a header within a Headers object with a given name. If the requested header doesn't exist in the Headers object, it returns null.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/get)
     /// </summary>
-    abstract get: obj with get, set
+    abstract get: name: string -> string option
+    abstract getAll: name: string -> string[]
     /// <summary>
     /// The **<c>getSetCookie()</c>** method of the Headers interface returns an array containing the values of all Set-Cookie headers associated with a response. This allows Headers objects to handle having multiple Set-Cookie headers, which wasn't possible prior to its implementation.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/getSetCookie)
     /// </summary>
-    abstract getSetCookie: obj with get, set
+    abstract getSetCookie: unit -> string[]
     /// <summary>
     /// The **<c>has()</c>** method of the Headers interface returns a boolean stating whether a Headers object contains a certain header.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/has)
     /// </summary>
-    abstract has: obj with get, set
+    abstract has: name: string -> bool
     /// <summary>
     /// The **<c>set()</c>** method of the Headers interface sets a new value for an existing header inside a Headers object, or adds the header if it does not already exist.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/set)
     /// </summary>
-    abstract set: obj with get, set
-    abstract forEach: obj with get, set
+    abstract set: name: string * value: string -> unit
     /// <summary>
-    /// Returns an iterator allowing to go through all key/value pairs contained in this object.
+    /// The **<c>append()</c>** method of the Headers interface appends a new value onto an existing header inside a Headers object, or adds the header if it does not already exist.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/append)
     /// </summary>
-    abstract entries: obj with get, set
+    abstract append: name: string * value: string -> unit
     /// <summary>
-    /// Returns an iterator allowing to go through all keys of the key/value pairs contained in this object.
+    /// The **<c>delete()</c>** method of the Headers interface deletes a header from the current Headers object.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/delete)
     /// </summary>
-    abstract keys: obj with get, set
-    /// <summary>
-    /// Returns an iterator allowing to go through all values of the key/value pairs contained in this object.
-    /// </summary>
-    abstract values: obj with get, set
+    abstract delete: name: string -> unit
+    abstract forEach<'This>: callback: Action<string, string, Headers> * ?thisArg: 'This -> unit
+    abstract entries: unit -> obj
+    abstract keys: unit -> obj
+    abstract values: unit -> obj
     abstract etagMatches: string option with get, set
     abstract etagDoesNotMatch: string option with get, set
     abstract uploadedBefore: JS.Date option with get, set
     abstract uploadedAfter: JS.Date option with get, set
     abstract secondsGranularity: bool option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (append: obj, delete: obj, get: obj, getSetCookie: obj, has: obj, set: obj, forEach: obj, entries: obj, keys: obj, values: obj, ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : R2BucketGetOptionsOnlyIf = jsNative
 
-[<Interface>]
 type R2BucketGetOptionsOnlyIf2 =
     inherit R2Conditional
+    inherit Headers
     abstract etagMatches: string option with get, set
     abstract etagDoesNotMatch: string option with get, set
     abstract uploadedBefore: JS.Date option with get, set
     abstract uploadedAfter: JS.Date option with get, set
     abstract secondsGranularity: bool option with get, set
     /// <summary>
-    /// The **<c>append()</c>** method of the Headers interface appends a new value onto an existing header inside a Headers object, or adds the header if it does not already exist.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/append)
-    /// </summary>
-    abstract append: obj with get, set
-    /// <summary>
-    /// The **<c>delete()</c>** method of the Headers interface deletes a header from the current Headers object.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/delete)
-    /// </summary>
-    abstract delete: obj with get, set
-    /// <summary>
     /// The **<c>get()</c>** method of the Headers interface returns a byte string of all the values of a header within a Headers object with a given name. If the requested header doesn't exist in the Headers object, it returns null.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/get)
     /// </summary>
-    abstract get: obj with get, set
+    abstract get: name: string -> string option
+    abstract getAll: name: string -> string[]
     /// <summary>
     /// The **<c>getSetCookie()</c>** method of the Headers interface returns an array containing the values of all Set-Cookie headers associated with a response. This allows Headers objects to handle having multiple Set-Cookie headers, which wasn't possible prior to its implementation.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/getSetCookie)
     /// </summary>
-    abstract getSetCookie: obj with get, set
+    abstract getSetCookie: unit -> string[]
     /// <summary>
     /// The **<c>has()</c>** method of the Headers interface returns a boolean stating whether a Headers object contains a certain header.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/has)
     /// </summary>
-    abstract has: obj with get, set
+    abstract has: name: string -> bool
     /// <summary>
     /// The **<c>set()</c>** method of the Headers interface sets a new value for an existing header inside a Headers object, or adds the header if it does not already exist.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/set)
     /// </summary>
-    abstract set: obj with get, set
-    abstract forEach: obj with get, set
+    abstract set: name: string * value: string -> unit
     /// <summary>
-    /// Returns an iterator allowing to go through all key/value pairs contained in this object.
+    /// The **<c>append()</c>** method of the Headers interface appends a new value onto an existing header inside a Headers object, or adds the header if it does not already exist.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/append)
     /// </summary>
-    abstract entries: obj with get, set
+    abstract append: name: string * value: string -> unit
     /// <summary>
-    /// Returns an iterator allowing to go through all keys of the key/value pairs contained in this object.
+    /// The **<c>delete()</c>** method of the Headers interface deletes a header from the current Headers object.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers/delete)
     /// </summary>
-    abstract keys: obj with get, set
-    /// <summary>
-    /// Returns an iterator allowing to go through all values of the key/value pairs contained in this object.
-    /// </summary>
-    abstract values: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (append: obj, delete: obj, get: obj, getSetCookie: obj, has: obj, set: obj, forEach: obj, entries: obj, keys: obj, values: obj, ?etagMatches: string, ?etagDoesNotMatch: string, ?uploadedBefore: JS.Date, ?uploadedAfter: JS.Date, ?secondsGranularity: bool) : R2BucketGetOptionsOnlyIf2 = jsNative
+    abstract delete: name: string -> unit
+    abstract forEach<'This>: callback: Action<string, string, Headers> * ?thisArg: 'This -> unit
+    abstract entries: unit -> obj
+    abstract keys: unit -> obj
+    abstract values: unit -> obj
 
 [<Interface>]
 type R2BucketPutOptions =
     inherit R2PutOptions
-    abstract onlyIf: obj with get, set
-    abstract httpMetadata: obj option with get, set
-    abstract customMetadata: obj option with get, set
+    abstract onlyIf: U4<Headers, R2Conditional, R2BucketGetOptionsOnlyIf, R2BucketGetOptionsOnlyIf2> with get, set
+    abstract httpMetadata: U2<Headers, R2HTTPMetadata> option with get, set
+    abstract customMetadata: RequestInitHeaders option with get, set
     abstract md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
     abstract sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
     abstract sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
@@ -2796,7 +4757,7 @@ type R2BucketPutOptions =
     abstract storageClass: string option with get, set
     abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (onlyIf: obj, ?httpMetadata: obj, ?customMetadata: obj, ?md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2BucketPutOptions = jsNative
+    static member Create (onlyIf: U4<Headers, R2Conditional, R2BucketGetOptionsOnlyIf, R2BucketGetOptionsOnlyIf2>, ?httpMetadata: U2<Headers, R2HTTPMetadata>, ?customMetadata: RequestInitHeaders, ?md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2BucketPutOptions = jsNative
 
 [<Interface>]
 type R2ObjectRange =
@@ -2858,20 +4819,20 @@ type R2Object =
     abstract checksums: R2Checksums
     abstract uploaded: JS.Date
     abstract httpMetadata: R2HTTPMetadata option
-    abstract customMetadata: obj option
+    abstract customMetadata: RequestInitHeaders option
     abstract range: R2Range option
     abstract storageClass: string
     abstract ssecKeyMd5: string option
-    abstract writeHttpMetadata: headers: obj -> unit
+    abstract writeHttpMetadata: headers: Headers -> unit
 
 type R2ObjectBody =
-    abstract body: obj
+    abstract body: ReadableStream<obj>
     abstract bodyUsed: bool
     abstract arrayBuffer: unit -> JS.Promise<JS.ArrayBuffer>
     abstract bytes: unit -> JS.Promise<JS.Uint8Array>
     abstract text: unit -> JS.Promise<string>
     abstract json<'T>: unit -> JS.Promise<'T>
-    abstract blob: unit -> JS.Promise<Browser.Types.Blob>
+    abstract blob: unit -> JS.Promise<Blob>
     abstract key: string
     abstract version: string
     abstract size: float
@@ -2880,11 +4841,11 @@ type R2ObjectBody =
     abstract checksums: R2Checksums
     abstract uploaded: JS.Date
     abstract httpMetadata: R2HTTPMetadata option
-    abstract customMetadata: obj option
+    abstract customMetadata: RequestInitHeaders option
     abstract range: R2Range option
     abstract storageClass: string
     abstract ssecKeyMd5: string option
-    abstract writeHttpMetadata: headers: obj -> unit
+    abstract writeHttpMetadata: headers: Headers -> unit
 
 type R2Range = U3<R2ObjectRange, R2ObjectRange2, R2ObjectRange3>
 
@@ -2900,17 +4861,17 @@ type R2Conditional =
 
 [<Interface>]
 type R2GetOptions =
-    abstract onlyIf: obj option with get, set
-    abstract range: obj option with get, set
+    abstract onlyIf: U2<Headers, R2Conditional> option with get, set
+    abstract range: U4<Headers, R2ObjectRange, R2ObjectRange2, R2ObjectRange3> option with get, set
     abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?onlyIf: obj, ?range: obj, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2GetOptions = jsNative
+    static member Create (?onlyIf: U2<Headers, R2Conditional>, ?range: U4<Headers, R2ObjectRange, R2ObjectRange2, R2ObjectRange3>, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2GetOptions = jsNative
 
 [<Interface>]
 type R2PutOptions =
-    abstract onlyIf: obj option with get, set
-    abstract httpMetadata: obj option with get, set
-    abstract customMetadata: obj option with get, set
+    abstract onlyIf: U2<Headers, R2Conditional> option with get, set
+    abstract httpMetadata: U2<Headers, R2HTTPMetadata> option with get, set
+    abstract customMetadata: RequestInitHeaders option with get, set
     abstract md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
     abstract sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
     abstract sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
@@ -2919,16 +4880,16 @@ type R2PutOptions =
     abstract storageClass: string option with get, set
     abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?onlyIf: obj, ?httpMetadata: obj, ?customMetadata: obj, ?md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2PutOptions = jsNative
+    static member Create (?onlyIf: U2<Headers, R2Conditional>, ?httpMetadata: U2<Headers, R2HTTPMetadata>, ?customMetadata: RequestInitHeaders, ?md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2PutOptions = jsNative
 
 [<Interface>]
 type R2MultipartOptions =
-    abstract httpMetadata: obj option with get, set
-    abstract customMetadata: obj option with get, set
+    abstract httpMetadata: U2<Headers, R2HTTPMetadata> option with get, set
+    abstract customMetadata: RequestInitHeaders option with get, set
     abstract storageClass: string option with get, set
     abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?httpMetadata: obj, ?customMetadata: obj, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2MultipartOptions = jsNative
+    static member Create (?httpMetadata: U2<Headers, R2HTTPMetadata>, ?customMetadata: RequestInitHeaders, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2MultipartOptions = jsNative
 
 type R2Checksums =
     abstract md5: JS.ArrayBuffer option
@@ -2972,40 +4933,11 @@ type ScheduledEvent =
     abstract cron: string
     abstract noRetry: unit -> unit
     /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
     /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: Browser.Types.EventTarget option
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
+    abstract ``type``: string
     /// <summary>
     /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
     ///
@@ -3013,27 +4945,51 @@ type ScheduledEvent =
     /// </summary>
     abstract eventPhase: float
     /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
     /// </summary>
-    abstract isTrusted: bool
+    abstract composed: bool
+    /// <summary>
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// </summary>
+    abstract bubbles: bool
+    /// <summary>
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
+    /// </summary>
+    abstract cancelable: bool
+    /// <summary>
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
+    /// </summary>
+    abstract defaultPrevented: bool
     /// <summary>
     /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool with get, set
+    abstract returnValue: bool
     /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: Browser.Types.EventTarget option
+    abstract currentTarget: EventTarget<EventCurrentTargetItem> option
     /// <summary>
     /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
-    abstract target: Browser.Types.EventTarget option
+    abstract target: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
+    abstract srcElement: EventTarget<EventCurrentTargetItem> option
     /// <summary>
     /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
@@ -3041,44 +4997,41 @@ type ScheduledEvent =
     /// </summary>
     abstract timeStamp: float
     /// <summary>
-    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
     /// </summary>
-    abstract ``type``: string
+    abstract isTrusted: bool
     /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
     /// </summary>
-    abstract composedPath: obj with get, set
-    /// <summary>
-    /// The **<c>Event.initEvent()</c>** method is used to initialize the value of an event created using Document.createEvent().
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/initEvent)</remarks>
-    abstract initEvent: obj with get, set
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
-    /// </summary>
-    abstract preventDefault: obj with get, set
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    abstract cancelBubble: bool with get, set
     /// <summary>
     /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
     /// </summary>
-    abstract stopImmediatePropagation: obj with get, set
+    abstract stopImmediatePropagation: unit -> unit
+    /// <summary>
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
+    /// </summary>
+    abstract preventDefault: unit -> unit
     /// <summary>
     /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
     /// </summary>
-    abstract stopPropagation: obj with get, set
-    abstract NONE: float
-    abstract CAPTURING_PHASE: float
-    abstract AT_TARGET: float
-    abstract BUBBLING_PHASE: float
+    abstract stopPropagation: unit -> unit
+    /// <summary>
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// </summary>
+    abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
     /// <summary>
     /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
     ///
@@ -3092,10 +5045,456 @@ type ScheduledController =
     abstract noRetry: unit -> unit
 
 [<Interface>]
+type QueuingStrategy<'T> =
+    abstract highWaterMark: obj option with get, set
+    abstract size: Func<'T, obj> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?highWaterMark: obj, ?size: Func<'T, obj>) : QueuingStrategy<'T> = jsNative
+
+[<Interface>]
+type UnderlyingSink<'W> =
+    abstract ``type``: string option with get, set
+    abstract start: Func<WritableStreamDefaultController, JS.Promise<unit> option> option with get, set
+    abstract write: Func<'W, WritableStreamDefaultController, JS.Promise<unit> option> option with get, set
+    abstract abort: Func<obj, JS.Promise<unit> option> option with get, set
+    abstract close: Func<JS.Promise<unit> option> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?``type``: string, ?start: Func<WritableStreamDefaultController, JS.Promise<unit> option>, ?write: Func<'W, WritableStreamDefaultController, JS.Promise<unit> option>, ?abort: Func<obj, JS.Promise<unit> option>, ?close: Func<JS.Promise<unit> option>) : UnderlyingSink<'W> = jsNative
+
+[<Interface>]
+type UnderlyingByteSource =
+    abstract ``type``: string with get, set
+    abstract autoAllocateChunkSize: float option with get, set
+    abstract start: Func<ReadableByteStreamController, JS.Promise<unit> option> option with get, set
+    abstract pull: Func<ReadableByteStreamController, JS.Promise<unit> option> option with get, set
+    abstract cancel: Func<obj, JS.Promise<unit> option> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``type``: string, ?autoAllocateChunkSize: float, ?start: Func<ReadableByteStreamController, JS.Promise<unit> option>, ?pull: Func<ReadableByteStreamController, JS.Promise<unit> option>, ?cancel: Func<obj, JS.Promise<unit> option>) : UnderlyingByteSource = jsNative
+
+[<Interface>]
+type UnderlyingSource<'R> =
+    abstract ``type``: string option with get, set
+    abstract start: Func<ReadableStreamDefaultController<'R>, JS.Promise<unit> option> option with get, set
+    abstract pull: Func<ReadableStreamDefaultController<'R>, JS.Promise<unit> option> option with get, set
+    abstract cancel: Func<obj, JS.Promise<unit> option> option with get, set
+    abstract expectedLength: obj option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?``type``: string, ?start: Func<ReadableStreamDefaultController<'R>, JS.Promise<unit> option>, ?pull: Func<ReadableStreamDefaultController<'R>, JS.Promise<unit> option>, ?cancel: Func<obj, JS.Promise<unit> option>, ?expectedLength: obj) : UnderlyingSource<'R> = jsNative
+
+[<Interface>]
+type Transformer<'I, 'O> =
+    abstract readableType: string option with get, set
+    abstract writableType: string option with get, set
+    abstract start: Func<TransformStreamDefaultController<'O>, JS.Promise<unit> option> option with get, set
+    abstract transform: Func<'I, TransformStreamDefaultController<'O>, JS.Promise<unit> option> option with get, set
+    abstract flush: Func<TransformStreamDefaultController<'O>, JS.Promise<unit> option> option with get, set
+    abstract cancel: Func<obj, JS.Promise<unit> option> option with get, set
+    abstract expectedLength: float option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?readableType: string, ?writableType: string, ?start: Func<TransformStreamDefaultController<'O>, JS.Promise<unit> option>, ?transform: Func<'I, TransformStreamDefaultController<'O>, JS.Promise<unit> option>, ?flush: Func<TransformStreamDefaultController<'O>, JS.Promise<unit> option>, ?cancel: Func<obj, JS.Promise<unit> option>, ?expectedLength: float) : Transformer<'I, 'O> = jsNative
+
+[<Interface>]
+type StreamPipeOptions =
+    abstract preventAbort: bool option with get, set
+    abstract preventCancel: bool option with get, set
+    /// <summary>
+    /// Pipes this readable stream to a given writable stream destination. The way in which the piping process behaves under various error conditions can be customized with a number of passed options. It returns a promise that fulfills when the piping process completes successfully, or rejects if any errors were encountered.
+    ///
+    /// Piping a stream will lock it for the duration of the pipe, preventing any other consumer from acquiring a reader.
+    ///
+    /// Errors and closures of the source and destination streams propagate as follows:
+    ///
+    /// An error in this source readable stream will abort destination, unless preventAbort is truthy. The returned promise will be rejected with the source's error, or with any error that occurs during aborting the destination.
+    ///
+    /// An error in destination will cancel this source readable stream, unless preventCancel is truthy. The returned promise will be rejected with the destination's error, or with any error that occurs during canceling the source.
+    ///
+    /// When this source readable stream closes, destination will be closed, unless preventClose is truthy. The returned promise will be fulfilled once this process completes, unless an error is encountered while closing the destination, in which case it will be rejected with that error.
+    ///
+    /// If destination starts out closed or closing, this source readable stream will be canceled, unless preventCancel is true. The returned promise will be rejected with an error indicating piping to a closed stream failed, or with any error that occurs during canceling the source.
+    ///
+    /// The signal option can be set to an AbortSignal to allow aborting an ongoing pipe operation via the corresponding AbortController. In this case, this source readable stream will be canceled, and destination aborted, unless the respective options preventCancel or preventAbort are set.
+    /// </summary>
+    abstract preventClose: bool option with get, set
+    abstract signal: AbortSignal option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?preventAbort: bool, ?preventCancel: bool, ?preventClose: bool, ?signal: AbortSignal) : StreamPipeOptions = jsNative
+
+type ReadableStreamReadResult<'R> = U2<ReadableStreamReadResult2<'R>, ReadableStreamDefaultReaderReadResultItem2>
+
+[<Interface>]
+type ReadableStreamReadResult2<'R> =
+    abstract ``done``: bool with get, set
+    abstract value: 'R with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (``done``: bool, value: 'R) : ReadableStreamReadResult2<'R> = jsNative
+
+/// <summary>
+/// The **<c>ReadableStream</c>** interface of the Streams API represents a readable stream of byte data. The Fetch API offers a concrete instance of a ReadableStream through the body property of a Response object.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStream)
+/// </summary>
+type ReadableStream<'R> =
+    /// <summary>
+    /// The **<c>locked</c>** read-only property of the ReadableStream interface returns whether or not the readable stream is locked to a reader.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStream/locked)
+    /// </summary>
+    abstract locked: bool
+    /// <summary>
+    /// The **<c>cancel()</c>** method of the ReadableStream interface returns a Promise that resolves when the stream is canceled.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStream/cancel)
+    /// </summary>
+    abstract cancel: reason: obj -> JS.Promise<unit>
+    /// <summary>
+    /// The **<c>getReader()</c>** method of the ReadableStream interface creates a reader and locks the stream to it. While the stream is locked, no other reader can be acquired until this one is released.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStream/getReader)
+    /// </summary>
+    abstract getReader: unit -> ReadableStreamDefaultReader<'R>
+    /// <summary>
+    /// The **<c>getReader()</c>** method of the ReadableStream interface creates a reader and locks the stream to it. While the stream is locked, no other reader can be acquired until this one is released.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStream/getReader)
+    /// </summary>
+    abstract getReader: options: ReadableStreamGetReaderOptions -> ReadableStreamBYOBReader
+    /// <summary>
+    /// The **<c>pipeThrough()</c>** method of the ReadableStream interface provides a chainable way of piping the current stream through a transform stream or any other writable/readable pair.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStream/pipeThrough)
+    /// </summary>
+    abstract pipeThrough<'T>: transform: ReadableWritablePair<'T, 'R> * ?options: StreamPipeOptions -> ReadableStream<'T>
+    /// <summary>
+    /// The **<c>pipeTo()</c>** method of the ReadableStream interface pipes the current ReadableStream to a given WritableStream and returns a Promise that fulfills when the piping process completes successfully, or rejects if any errors were encountered.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStream/pipeTo)
+    /// </summary>
+    abstract pipeTo: destination: WritableStream<'R> * ?options: StreamPipeOptions -> JS.Promise<unit>
+    /// <summary>
+    /// The **<c>tee()</c>** method of the ReadableStream interface tees the current readable stream, returning a two-element array containing the two resulting branches as new ReadableStream instances.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStream/tee)
+    /// </summary>
+    abstract tee: unit -> ReadableStream<'R> * ReadableStream<'R>
+    abstract values: ?options: ReadableStreamValuesOptions -> obj
+
+/// <summary>
+/// The **<c>ReadableStreamDefaultReader</c>** interface of the Streams API represents a default reader that can be used to read stream data supplied from a network (such as a fetch request).
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultReader)
+/// </summary>
+type ReadableStreamDefaultReader<'R> =
+    abstract closed: JS.Promise<unit>
+    abstract cancel: reason: obj -> JS.Promise<unit>
+    /// <summary>
+    /// The **<c>read()</c>** method of the ReadableStreamDefaultReader interface returns a Promise providing access to the next chunk in the stream's internal queue.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultReader/read)
+    /// </summary>
+    abstract read: unit -> JS.Promise<U2<ReadableStreamDefaultReaderReadResultItem<'R>, ReadableStreamDefaultReaderReadResultItem2>>
+    /// <summary>
+    /// The **<c>releaseLock()</c>** method of the ReadableStreamDefaultReader interface releases the reader's lock on the stream.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultReader/releaseLock)
+    /// </summary>
+    abstract releaseLock: unit -> unit
+
+/// <summary>
+/// The **<c>ReadableStreamBYOBReader</c>** interface of the Streams API defines a reader for a ReadableStream that supports zero-copy reading from an underlying byte source. It is used for efficient copying from underlying sources where the data is delivered as an "anonymous" sequence of bytes, such as files.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBReader)
+/// </summary>
+type ReadableStreamBYOBReader =
+    abstract closed: JS.Promise<unit>
+    abstract cancel: reason: obj -> JS.Promise<unit>
+    /// <summary>
+    /// The **<c>read()</c>** method of the ReadableStreamBYOBReader interface is used to read data into a view on a user-supplied buffer from an associated readable byte stream. A request for data will be satisfied from the stream's internal queues if there is any data present. If the stream queues are empty, the request may be supplied as a zero-copy transfer from the underlying byte source.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBReader/read)
+    /// </summary>
+    abstract read<'T when 'T :> JS.ArrayBufferView>: view: 'T -> JS.Promise<U2<ReadableStreamBYOBReaderReadResultItem<'T>, ReadableStreamDefaultReaderReadResultItem2>>
+    /// <summary>
+    /// The **<c>releaseLock()</c>** method of the ReadableStreamBYOBReader interface releases the reader's lock on the stream. After the lock is released, the reader is no longer active.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBReader/releaseLock)
+    /// </summary>
+    abstract releaseLock: unit -> unit
+    abstract readAtLeast<'T when 'T :> JS.ArrayBufferView>: minElements: float * view: 'T -> JS.Promise<U2<ReadableStreamBYOBReaderReadAtLeastResultItem<'T>, ReadableStreamDefaultReaderReadResultItem2>>
+
+[<Interface>]
 type ReadableStreamBYOBReaderReadableStreamBYOBReaderReadOptions =
     abstract min: float option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?min: float) : ReadableStreamBYOBReaderReadableStreamBYOBReaderReadOptions = jsNative
+
+[<Interface>]
+type ReadableStreamGetReaderOptions =
+    /// <summary>
+    /// Creates a ReadableStreamBYOBReader and locks the stream to the new reader.
+    ///
+    /// This call behaves the same way as the no-argument variant, except that it only works on readable byte streams, i.e. streams which were constructed specifically with the ability to handle "bring your own buffer" reading. The returned BYOB reader provides the ability to directly read individual chunks from the stream via its read() method, into developer-supplied buffers, allowing more precise control over allocation.
+    /// </summary>
+    abstract mode: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (mode: string) : ReadableStreamGetReaderOptions = jsNative
+
+/// <summary>
+/// The **<c>ReadableStreamBYOBRequest</c>** interface of the Streams API represents a "pull request" for data from an underlying source that will made as a zero-copy transfer to a consumer (bypassing the stream's internal queues).
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBRequest)
+/// </summary>
+type ReadableStreamBYOBRequest =
+    /// <summary>
+    /// The **<c>view</c>** getter property of the ReadableStreamBYOBRequest interface returns the current view.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBRequest/view)
+    /// </summary>
+    abstract view: JS.Uint8Array option
+    /// <summary>
+    /// The **<c>respond()</c>** method of the ReadableStreamBYOBRequest interface is used to signal to the associated readable byte stream that the specified number of bytes were written into the ReadableStreamBYOBRequest.view.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBRequest/respond)
+    /// </summary>
+    abstract respond: bytesWritten: float -> unit
+    /// <summary>
+    /// The **<c>respondWithNewView()</c>** method of the ReadableStreamBYOBRequest interface specifies a new view that the consumer of the associated readable byte stream should write to instead of ReadableStreamBYOBRequest.view.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBRequest/respondWithNewView)
+    /// </summary>
+    abstract respondWithNewView: view: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> unit
+    abstract atLeast: float option
+
+/// <summary>
+/// The **<c>ReadableStreamDefaultController</c>** interface of the Streams API represents a controller allowing control of a ReadableStream's state and internal queue. Default controllers are for streams that are not byte streams.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController)
+/// </summary>
+type ReadableStreamDefaultController<'R> =
+    /// <summary>
+    /// The **<c>desiredSize</c>** read-only property of the ReadableStreamDefaultController interface returns the desired size required to fill the stream's internal queue.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController/desiredSize)
+    /// </summary>
+    abstract desiredSize: float option
+    /// <summary>
+    /// The **<c>close()</c>** method of the ReadableStreamDefaultController interface closes the associated stream.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController/close)
+    /// </summary>
+    abstract close: unit -> unit
+    /// <summary>
+    /// The **<c>enqueue()</c>** method of the ReadableStreamDefaultController interface enqueues a given chunk in the associated stream.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController/enqueue)
+    /// </summary>
+    abstract enqueue: ?chunk: 'R -> unit
+    /// <summary>
+    /// The **<c>error()</c>** method of the ReadableStreamDefaultController interface causes any future interactions with the associated stream to error.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController/error)
+    /// </summary>
+    abstract error: reason: obj -> unit
+
+/// <summary>
+/// The **<c>ReadableByteStreamController</c>** interface of the Streams API represents a controller for a readable byte stream. It allows control of the state and internal queue of a ReadableStream with an underlying byte source, and enables efficient zero-copy transfer of data from the underlying source to a consumer when the stream's internal queue is empty.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController)
+/// </summary>
+type ReadableByteStreamController =
+    /// <summary>
+    /// The **<c>byobRequest</c>** read-only property of the ReadableByteStreamController interface returns the current BYOB request, or null if there are no pending requests.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController/byobRequest)
+    /// </summary>
+    abstract byobRequest: ReadableStreamBYOBRequest option
+    /// <summary>
+    /// The **<c>desiredSize</c>** read-only property of the ReadableByteStreamController interface returns the number of bytes required to fill the stream's internal queue to its "desired size".
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController/desiredSize)
+    /// </summary>
+    abstract desiredSize: float option
+    /// <summary>
+    /// The **<c>close()</c>** method of the ReadableByteStreamController interface closes the associated stream.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController/close)
+    /// </summary>
+    abstract close: unit -> unit
+    /// <summary>
+    /// The **<c>enqueue()</c>** method of the ReadableByteStreamController interface enqueues a given chunk on the associated readable byte stream (the chunk is transferred into the stream's internal queues).
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController/enqueue)
+    /// </summary>
+    abstract enqueue: chunk: U2<JS.ArrayBuffer, JS.ArrayBufferView> -> unit
+    /// <summary>
+    /// The **<c>error()</c>** method of the ReadableByteStreamController interface causes any future interactions with the associated stream to error with the specified reason.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController/error)
+    /// </summary>
+    abstract error: reason: obj -> unit
+
+/// <summary>
+/// The **<c>WritableStreamDefaultController</c>** interface of the Streams API represents a controller allowing control of a WritableStream's state. When constructing a WritableStream, the underlying sink is given a corresponding WritableStreamDefaultController instance to manipulate.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultController)
+/// </summary>
+type WritableStreamDefaultController =
+    /// <summary>
+    /// The read-only **<c>signal</c>** property of the WritableStreamDefaultController interface returns the AbortSignal associated with the controller.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultController/signal)
+    /// </summary>
+    abstract signal: AbortSignal
+    /// <summary>
+    /// The **<c>error()</c>** method of the WritableStreamDefaultController interface causes any future interactions with the associated stream to error.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultController/error)
+    /// </summary>
+    abstract error: reason: obj -> unit
+
+/// <summary>
+/// The **<c>TransformStreamDefaultController</c>** interface of the Streams API provides methods to manipulate the associated ReadableStream and WritableStream.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController)
+/// </summary>
+type TransformStreamDefaultController<'O> =
+    /// <summary>
+    /// The **<c>desiredSize</c>** read-only property of the TransformStreamDefaultController interface returns the desired size to fill the queue of the associated ReadableStream.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController/desiredSize)
+    /// </summary>
+    abstract desiredSize: float option
+    /// <summary>
+    /// The **<c>enqueue()</c>** method of the TransformStreamDefaultController interface enqueues the given chunk in the readable side of the stream.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController/enqueue)
+    /// </summary>
+    abstract enqueue: ?chunk: 'O -> unit
+    /// <summary>
+    /// The **<c>error()</c>** method of the TransformStreamDefaultController interface errors both sides of the stream. Any further interactions with it will fail with the given error message, and any chunks in the queue will be discarded.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController/error)
+    /// </summary>
+    abstract error: reason: obj -> unit
+    /// <summary>
+    /// The **<c>terminate()</c>** method of the TransformStreamDefaultController interface closes the readable side and errors the writable side of the stream.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController/terminate)
+    /// </summary>
+    abstract terminate: unit -> unit
+
+[<Interface>]
+type ReadableWritablePair<'R, 'W> =
+    abstract readable: ReadableStream<'R> with get, set
+    /// <summary>
+    /// Provides a convenient, chainable way of piping this readable stream through a transform stream (or any other { writable, readable } pair). It simply pipes the stream into the writable side of the supplied pair, and returns the readable side for further use.
+    ///
+    /// Piping a stream will lock it for the duration of the pipe, preventing any other consumer from acquiring a reader.
+    /// </summary>
+    abstract writable: WritableStream<'W> with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (readable: ReadableStream<'R>, writable: WritableStream<'W>) : ReadableWritablePair<'R, 'W> = jsNative
+
+/// <summary>
+/// The **<c>WritableStream</c>** interface of the Streams API provides a standard abstraction for writing streaming data to a destination, known as a sink. This object comes with built-in backpressure and queuing.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream)
+/// </summary>
+type WritableStream<'W> =
+    /// <summary>
+    /// The **<c>locked</c>** read-only property of the WritableStream interface returns a boolean indicating whether the WritableStream is locked to a writer.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/locked)
+    /// </summary>
+    abstract locked: bool
+    /// <summary>
+    /// The **<c>abort()</c>** method of the WritableStream interface aborts the stream, signaling that the producer can no longer successfully write to the stream and it is to be immediately moved to an error state, with any queued writes discarded.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/abort)
+    /// </summary>
+    abstract abort: reason: obj -> JS.Promise<unit>
+    /// <summary>
+    /// The **<c>close()</c>** method of the WritableStream interface closes the associated stream. All chunks written before this method is called are sent before the returned promise is fulfilled.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/close)
+    /// </summary>
+    abstract close: unit -> JS.Promise<unit>
+    /// <summary>
+    /// The **<c>getWriter()</c>** method of the WritableStream interface returns a new instance of WritableStreamDefaultWriter and locks the stream to that instance. While the stream is locked, no other writer can be acquired until this one is released.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream/getWriter)
+    /// </summary>
+    abstract getWriter: unit -> WritableStreamDefaultWriter<'W>
+
+/// <summary>
+/// The **<c>WritableStreamDefaultWriter</c>** interface of the Streams API is the object returned by WritableStream.getWriter() and once created locks the writer to the WritableStream ensuring that no other streams can write to the underlying sink.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter)
+/// </summary>
+type WritableStreamDefaultWriter<'W> =
+    /// <summary>
+    /// The **<c>closed</c>** read-only property of the WritableStreamDefaultWriter interface returns a Promise that fulfills if the stream becomes closed, or rejects if the stream errors or the writer's lock is released.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/closed)
+    /// </summary>
+    abstract closed: JS.Promise<unit>
+    /// <summary>
+    /// The **<c>ready</c>** read-only property of the WritableStreamDefaultWriter interface returns a Promise that resolves when the desired size of the stream's internal queue transitions from non-positive to positive, signaling that it is no longer applying backpressure.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/ready)
+    /// </summary>
+    abstract ready: JS.Promise<unit>
+    /// <summary>
+    /// The **<c>desiredSize</c>** read-only property of the WritableStreamDefaultWriter interface returns the desired size required to fill the stream's internal queue.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/desiredSize)
+    /// </summary>
+    abstract desiredSize: float option
+    /// <summary>
+    /// The **<c>abort()</c>** method of the WritableStreamDefaultWriter interface aborts the stream, signaling that the producer can no longer successfully write to the stream and it is to be immediately moved to an error state, with any queued writes discarded.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/abort)
+    /// </summary>
+    abstract abort: reason: obj -> JS.Promise<unit>
+    /// <summary>
+    /// The **<c>close()</c>** method of the WritableStreamDefaultWriter interface closes the associated writable stream.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/close)
+    /// </summary>
+    abstract close: unit -> JS.Promise<unit>
+    /// <summary>
+    /// The **<c>write()</c>** method of the WritableStreamDefaultWriter interface writes a passed chunk of data to a WritableStream and its underlying sink, then returns a Promise that resolves to indicate the success or failure of the write operation.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/write)
+    /// </summary>
+    abstract write: ?chunk: 'W -> JS.Promise<unit>
+    /// <summary>
+    /// The **<c>releaseLock()</c>** method of the WritableStreamDefaultWriter interface releases the writer's lock on the corresponding stream. After the lock is released, the writer is no longer active. If the associated stream is errored when the lock is released, the writer will appear errored in the same way from now on; otherwise, the writer will appear closed.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/releaseLock)
+    /// </summary>
+    abstract releaseLock: unit -> unit
+
+/// <summary>
+/// The **<c>TransformStream</c>** interface of the Streams API represents a concrete implementation of the pipe chain transform stream concept.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream)
+/// </summary>
+[<Interface>]
+type TransformStream<'I, 'O> =
+    /// <summary>
+    /// The **<c>readable</c>** read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/readable)
+    /// </summary>
+    abstract readable: ReadableStream<'O>
+    /// <summary>
+    /// The **<c>writable</c>** read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/writable)
+    /// </summary>
+    abstract writable: WritableStream<'I>
+    [<ParamObject; Emit("$0")>]
+    static member Create (readable: ReadableStream<'O>, writable: WritableStream<'I>) : TransformStream<'I, 'O> = jsNative
 
 [<Interface>]
 type FixedLengthStream =
@@ -3104,15 +5503,15 @@ type FixedLengthStream =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/readable)
     /// </summary>
-    abstract readable: obj
+    abstract readable: ReadableStream<JS.Uint8Array>
     /// <summary>
     /// The **<c>writable</c>** read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/writable)
     /// </summary>
-    abstract writable: obj
+    abstract writable: WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>
     [<ParamObject; Emit("$0")>]
-    static member Create (readable: obj, writable: obj) : FixedLengthStream = jsNative
+    static member Create (readable: ReadableStream<JS.Uint8Array>, writable: WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>) : FixedLengthStream = jsNative
 
 [<Interface>]
 type IdentityTransformStream =
@@ -3121,15 +5520,15 @@ type IdentityTransformStream =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/readable)
     /// </summary>
-    abstract readable: obj
+    abstract readable: ReadableStream<JS.Uint8Array>
     /// <summary>
     /// The **<c>writable</c>** read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/writable)
     /// </summary>
-    abstract writable: obj
+    abstract writable: WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>
     [<ParamObject; Emit("$0")>]
-    static member Create (readable: obj, writable: obj) : IdentityTransformStream = jsNative
+    static member Create (readable: ReadableStream<JS.Uint8Array>, writable: WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>) : IdentityTransformStream = jsNative
 
 [<Interface>]
 type IdentityTransformStreamQueuingStrategy =
@@ -3143,12 +5542,149 @@ type ReadableStreamValuesOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?preventCancel: bool) : ReadableStreamValuesOptions = jsNative
 
+/// <summary>
+/// The **<c>CompressionStream</c>** interface of the Compression Streams API compresses a stream of data. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CompressionStream)
+/// </summary>
+[<Interface>]
+type CompressionStream =
+    /// <summary>
+    /// The **<c>readable</c>** read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/readable)
+    /// </summary>
+    abstract readable: ReadableStream<JS.Uint8Array>
+    /// <summary>
+    /// The **<c>writable</c>** read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/writable)
+    /// </summary>
+    abstract writable: WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>
+    [<ParamObject; Emit("$0")>]
+    static member Create (readable: ReadableStream<JS.Uint8Array>, writable: WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>) : CompressionStream = jsNative
+
+/// <summary>
+/// The **<c>DecompressionStream</c>** interface of the Compression Streams API decompresses a stream of data. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/DecompressionStream)
+/// </summary>
+[<Interface>]
+type DecompressionStream =
+    /// <summary>
+    /// The **<c>readable</c>** read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/readable)
+    /// </summary>
+    abstract readable: ReadableStream<JS.Uint8Array>
+    /// <summary>
+    /// The **<c>writable</c>** read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/writable)
+    /// </summary>
+    abstract writable: WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>
+    [<ParamObject; Emit("$0")>]
+    static member Create (readable: ReadableStream<JS.Uint8Array>, writable: WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>) : DecompressionStream = jsNative
+
+/// <summary>
+/// The **<c>TextEncoderStream</c>** interface of the Encoding API converts a stream of strings into bytes in the UTF-8 encoding. It is the streaming equivalent of TextEncoder. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TextEncoderStream)
+/// </summary>
+[<Interface>]
+type TextEncoderStream =
+    abstract encoding: string
+    /// <summary>
+    /// The **<c>readable</c>** read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/readable)
+    /// </summary>
+    abstract readable: ReadableStream<JS.Uint8Array>
+    /// <summary>
+    /// The **<c>writable</c>** read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/writable)
+    /// </summary>
+    abstract writable: WritableStream<string>
+    [<ParamObject; Emit("$0")>]
+    static member Create (encoding: string, readable: ReadableStream<JS.Uint8Array>, writable: WritableStream<string>) : TextEncoderStream = jsNative
+
+/// <summary>
+/// The **<c>TextDecoderStream</c>** interface of the Encoding API converts a stream of text in a binary encoding, such as UTF-8 etc., to a stream of strings. It is the streaming equivalent of TextDecoder. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TextDecoderStream)
+/// </summary>
+[<Interface>]
+type TextDecoderStream =
+    abstract encoding: string
+    abstract fatal: bool
+    abstract ignoreBOM: bool
+    /// <summary>
+    /// The **<c>readable</c>** read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/readable)
+    /// </summary>
+    abstract readable: ReadableStream<string>
+    /// <summary>
+    /// The **<c>writable</c>** read-only property of the TransformStream interface returns the WritableStream instance controlled by this TransformStream. This stream accepts input data that will be transformed and emitted to the readable stream.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream/writable)
+    /// </summary>
+    abstract writable: WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>
+    [<ParamObject; Emit("$0")>]
+    static member Create (encoding: string, fatal: bool, ignoreBOM: bool, readable: ReadableStream<string>, writable: WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>) : TextDecoderStream = jsNative
+
 [<Interface>]
 type TextDecoderStreamTextDecoderStreamInit =
     abstract fatal: bool option with get, set
     abstract ignoreBOM: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?fatal: bool, ?ignoreBOM: bool) : TextDecoderStreamTextDecoderStreamInit = jsNative
+
+/// <summary>
+/// The **<c>ByteLengthQueuingStrategy</c>** interface of the Streams API provides a built-in byte length queuing strategy that can be used when constructing streams.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ByteLengthQueuingStrategy)
+/// </summary>
+[<Interface>]
+type ByteLengthQueuingStrategy =
+    /// <summary>
+    /// The read-only **<c>ByteLengthQueuingStrategy.highWaterMark</c>** property returns the total number of bytes that can be contained in the internal queue before backpressure is applied.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ByteLengthQueuingStrategy/highWaterMark)
+    /// </summary>
+    abstract highWaterMark: float
+    abstract size: Func<obj, float>
+    [<ParamObject; Emit("$0")>]
+    static member Create (highWaterMark: float, size: Func<obj, float>) : ByteLengthQueuingStrategy = jsNative
+
+/// <summary>
+/// The **<c>CountQueuingStrategy</c>** interface of the Streams API provides a built-in chunk counting queuing strategy that can be used when constructing streams.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CountQueuingStrategy)
+/// </summary>
+[<Interface>]
+type CountQueuingStrategy =
+    /// <summary>
+    /// The read-only **<c>CountQueuingStrategy.highWaterMark</c>** property returns the total number of chunks that can be contained in the internal queue before backpressure is applied.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CountQueuingStrategy/highWaterMark)
+    /// </summary>
+    abstract highWaterMark: float
+    abstract size: Func<obj, float>
+    [<ParamObject; Emit("$0")>]
+    static member Create (highWaterMark: float, size: Func<obj, float>) : CountQueuingStrategy = jsNative
+
+[<Interface>]
+type QueuingStrategyInit =
+    /// <summary>
+    /// Creates a new ByteLengthQueuingStrategy with the provided high water mark.
+    ///
+    /// Note that the provided high water mark will not be validated ahead of time. Instead, if it is negative, NaN, or not a number, the resulting ByteLengthQueuingStrategy will cause the corresponding stream constructor to throw.
+    /// </summary>
+    abstract highWaterMark: float with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (highWaterMark: float) : QueuingStrategyInit = jsNative
 
 [<Interface>]
 type TracePreviewInfo =
@@ -3170,40 +5706,11 @@ type TailEvent =
     abstract events: TraceItem[]
     abstract traces: TraceItem[]
     /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
     /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: Browser.Types.EventTarget option
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
+    abstract ``type``: string
     /// <summary>
     /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
     ///
@@ -3211,27 +5718,51 @@ type TailEvent =
     /// </summary>
     abstract eventPhase: float
     /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
     /// </summary>
-    abstract isTrusted: bool
+    abstract composed: bool
+    /// <summary>
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// </summary>
+    abstract bubbles: bool
+    /// <summary>
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
+    /// </summary>
+    abstract cancelable: bool
+    /// <summary>
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
+    /// </summary>
+    abstract defaultPrevented: bool
     /// <summary>
     /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool with get, set
+    abstract returnValue: bool
     /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: Browser.Types.EventTarget option
+    abstract currentTarget: EventTarget<EventCurrentTargetItem> option
     /// <summary>
     /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
-    abstract target: Browser.Types.EventTarget option
+    abstract target: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
+    abstract srcElement: EventTarget<EventCurrentTargetItem> option
     /// <summary>
     /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
@@ -3239,44 +5770,41 @@ type TailEvent =
     /// </summary>
     abstract timeStamp: float
     /// <summary>
-    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
     /// </summary>
-    abstract ``type``: string
+    abstract isTrusted: bool
     /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
     /// </summary>
-    abstract composedPath: obj with get, set
-    /// <summary>
-    /// The **<c>Event.initEvent()</c>** method is used to initialize the value of an event created using Document.createEvent().
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/initEvent)</remarks>
-    abstract initEvent: obj with get, set
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
-    /// </summary>
-    abstract preventDefault: obj with get, set
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    abstract cancelBubble: bool with get, set
     /// <summary>
     /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
     /// </summary>
-    abstract stopImmediatePropagation: obj with get, set
+    abstract stopImmediatePropagation: unit -> unit
+    /// <summary>
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
+    /// </summary>
+    abstract preventDefault: unit -> unit
     /// <summary>
     /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
     /// </summary>
-    abstract stopPropagation: obj with get, set
-    abstract NONE: float
-    abstract CAPTURING_PHASE: float
-    abstract AT_TARGET: float
-    abstract BUBBLING_PHASE: float
+    abstract stopPropagation: unit -> unit
+    /// <summary>
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// </summary>
+    abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
     /// <summary>
     /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
     ///
@@ -3296,7 +5824,7 @@ type TraceItem =
     abstract scriptVersion: ScriptVersion option
     abstract dispatchNamespace: string option
     abstract scriptTags: string[] option
-    abstract tailAttributes: obj option
+    abstract tailAttributes: TraceItemTailAttributes option
     abstract preview: TracePreviewInfo option
     abstract durableObjectId: string option
     abstract outcome: string
@@ -3305,7 +5833,7 @@ type TraceItem =
     abstract cpuTime: float
     abstract wallTime: float
     [<ParamObject; Emit("$0")>]
-    static member Create (logs: TraceLog[], exceptions: TraceException[], diagnosticsChannelEvents: TraceDiagnosticChannelEvent[], outcome: string, executionModel: string, truncated: bool, cpuTime: float, wallTime: float, ?``event``: obj, ?eventTimestamp: float, ?scriptName: string, ?entrypoint: string, ?scriptVersion: ScriptVersion, ?dispatchNamespace: string, ?scriptTags: string[], ?tailAttributes: obj, ?preview: TracePreviewInfo, ?durableObjectId: string) : TraceItem = jsNative
+    static member Create (logs: TraceLog[], exceptions: TraceException[], diagnosticsChannelEvents: TraceDiagnosticChannelEvent[], outcome: string, executionModel: string, truncated: bool, cpuTime: float, wallTime: float, ?``event``: obj, ?eventTimestamp: float, ?scriptName: string, ?entrypoint: string, ?scriptVersion: ScriptVersion, ?dispatchNamespace: string, ?scriptTags: string[], ?tailAttributes: TraceItemTailAttributes, ?preview: TracePreviewInfo, ?durableObjectId: string) : TraceItem = jsNative
 
 [<Interface>]
 type TraceItemAlarmEventInfo =
@@ -3360,7 +5888,7 @@ type TraceItemFetchEventInfo =
 
 type TraceItemFetchEventInfoRequest =
     abstract cf: obj option
-    abstract headers: obj
+    abstract headers: RequestInitHeaders
     abstract ``method``: string
     abstract url: string
     abstract getUnredacted: unit -> TraceItemFetchEventInfoRequest
@@ -3447,6 +5975,481 @@ type TraceMetrics =
 type UnsafeTraceMetrics =
     abstract fromTrace: item: TraceItem -> TraceMetrics
 
+/// <summary>
+/// The **<c>URL</c>** interface is used to parse, construct, normalize, and encode URLs. It works by providing properties which allow you to easily read and modify the components of a URL.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
+/// </summary>
+type URL =
+    /// <summary>
+    /// The **<c>origin</c>** read-only property of the URL interface returns a string containing the Unicode serialization of the origin of the represented URL.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/origin)
+    /// </summary>
+    abstract origin: string
+    /// <summary>
+    /// The **<c>href</c>** property of the URL interface is a string containing the whole URL.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/href)
+    /// </summary>
+    abstract href: string with get, set
+    /// <summary>
+    /// The **<c>protocol</c>** property of the URL interface is a string containing the protocol or scheme of the URL, including the final ":".
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/protocol)
+    /// </summary>
+    abstract protocol: string with get, set
+    /// <summary>
+    /// The **<c>username</c>** property of the URL interface is a string containing the username component of the URL. If the URL does not have a username, this property contains an empty string, "".
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/username)
+    /// </summary>
+    abstract username: string with get, set
+    /// <summary>
+    /// The **<c>password</c>** property of the URL interface is a string containing the password component of the URL. If the URL does not have a password, this property contains an empty string, "".
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/password)
+    /// </summary>
+    abstract password: string with get, set
+    /// <summary>
+    /// The **<c>host</c>** property of the URL interface is a string containing the host, which is the hostname, and then, if the port of the URL is nonempty, a ":", followed by the port of the URL. If the URL does not have a hostname, this property contains an empty string, "".
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/host)
+    /// </summary>
+    abstract host: string with get, set
+    /// <summary>
+    /// The **<c>hostname</c>** property of the URL interface is a string containing either the domain name or IP address of the URL. If the URL does not have a hostname, this property contains an empty string, "". IPv4 and IPv6 addresses are normalized, such as stripping leading zeros, and domain names are converted to IDN.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/hostname)
+    /// </summary>
+    abstract hostname: string with get, set
+    /// <summary>
+    /// The **<c>port</c>** property of the URL interface is a string containing the port number of the URL. If the port is the default for the protocol (80 for ws: and http:, 443 for wss: and https:, and 21 for ftp:), this property contains an empty string, "".
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/port)
+    /// </summary>
+    abstract port: string with get, set
+    /// <summary>
+    /// The **<c>pathname</c>** property of the URL interface represents a location in a hierarchical structure. It is a string constructed from a list of path segments, each of which is prefixed by a / character.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/pathname)
+    /// </summary>
+    abstract pathname: string with get, set
+    /// <summary>
+    /// The **<c>search</c>** property of the URL interface is a search string, also called a query string, that is a string containing a "?" followed by the parameters of the URL. If the URL does not have a search query, this property contains an empty string, "".
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/search)
+    /// </summary>
+    abstract search: string with get, set
+    /// <summary>
+    /// The **<c>hash</c>** property of the URL interface is a string containing a "#" followed by the fragment identifier of the URL. If the URL does not have a fragment identifier, this property contains an empty string, "".
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/hash)
+    /// </summary>
+    abstract hash: string with get, set
+    /// <summary>
+    /// The **<c>searchParams</c>** read-only property of the URL interface returns a URLSearchParams object allowing access to the GET decoded query arguments contained in the URL.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/searchParams)
+    /// </summary>
+    abstract searchParams: URLSearchParams
+    /// <summary>
+    /// The **<c>toJSON()</c>** method of the URL interface returns a string containing a serialized version of the URL, although in practice it seems to have the same effect as URL.toString().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/toJSON)
+    /// </summary>
+    abstract toJSON: unit -> string
+    abstract toString: unit -> string
+
+/// <summary>
+/// The **<c>URLSearchParams</c>** interface defines utility methods to work with the query string of a URL.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLSearchParams)
+/// </summary>
+type URLSearchParams =
+    /// <summary>
+    /// The **<c>size</c>** read-only property of the URLSearchParams interface indicates the total number of search parameter entries.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLSearchParams/size)
+    /// </summary>
+    abstract size: float
+    /// <summary>
+    /// The **<c>append()</c>** method of the URLSearchParams interface appends a specified key/value pair as a new search parameter.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLSearchParams/append)
+    /// </summary>
+    abstract append: name: string * value: string -> unit
+    /// <summary>
+    /// The **<c>delete()</c>** method of the URLSearchParams interface deletes specified parameters and their associated value(s) from the list of all search parameters.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLSearchParams/delete)
+    /// </summary>
+    abstract delete: name: string * ?value: string -> unit
+    /// <summary>
+    /// The **<c>get()</c>** method of the URLSearchParams interface returns the first value associated to the given search parameter.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLSearchParams/get)
+    /// </summary>
+    abstract get: name: string -> string option
+    /// <summary>
+    /// The **<c>getAll()</c>** method of the URLSearchParams interface returns all the values associated with a given search parameter as an array.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLSearchParams/getAll)
+    /// </summary>
+    abstract getAll: name: string -> string[]
+    /// <summary>
+    /// The **<c>has()</c>** method of the URLSearchParams interface returns a boolean value that indicates whether the specified parameter is in the search parameters.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLSearchParams/has)
+    /// </summary>
+    abstract has: name: string * ?value: string -> bool
+    /// <summary>
+    /// The **<c>set()</c>** method of the URLSearchParams interface sets the value associated with a given search parameter to the given value. If there were several matching values, this method deletes the others. If the search parameter doesn't exist, this method creates it.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLSearchParams/set)
+    /// </summary>
+    abstract set: name: string * value: string -> unit
+    /// <summary>
+    /// The **<c>URLSearchParams.sort()</c>** method sorts all key/value pairs contained in this object in place and returns undefined. Key/value pairs are sorted by the values of the UTF-16 code units of the keys. This method uses a stable sorting algorithm (i.e., the relative order between key/value pairs with equal keys will be preserved).
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLSearchParams/sort)
+    /// </summary>
+    abstract sort: unit -> unit
+    abstract entries: unit -> obj
+    abstract keys: unit -> obj
+    abstract values: unit -> obj
+    abstract forEach<'This>: callback: Action<string, string, URLSearchParams> * ?thisArg: 'This -> unit
+    abstract toString: unit -> string
+
+/// <summary>
+/// The **<c>URLPattern</c>** interface of the URL Pattern API matches URLs or parts of URLs against a pattern. The pattern can contain capturing groups that extract parts of the matched URL.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLPattern)
+/// </summary>
+type URLPattern =
+    /// <summary>
+    /// The **<c>protocol</c>** read-only property of the URLPattern interface is a string containing the pattern used to match the protocol part of a URL.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLPattern/protocol)
+    /// </summary>
+    abstract protocol: string
+    /// <summary>
+    /// The **<c>username</c>** read-only property of the URLPattern interface is a string containing the pattern used to match the username part of a URL.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLPattern/username)
+    /// </summary>
+    abstract username: string
+    /// <summary>
+    /// The **<c>password</c>** read-only property of the URLPattern interface is a string containing the pattern used to match the password part of a URL.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLPattern/password)
+    /// </summary>
+    abstract password: string
+    /// <summary>
+    /// The **<c>hostname</c>** read-only property of the URLPattern interface is a string containing the pattern used to match the hostname part of a URL.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLPattern/hostname)
+    /// </summary>
+    abstract hostname: string
+    /// <summary>
+    /// The **<c>port</c>** read-only property of the URLPattern interface is a string containing the pattern used to match the port part of a URL.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLPattern/port)
+    /// </summary>
+    abstract port: string
+    /// <summary>
+    /// The **<c>pathname</c>** read-only property of the URLPattern interface is a string containing the pattern used to match the pathname part of a URL.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLPattern/pathname)
+    /// </summary>
+    abstract pathname: string
+    /// <summary>
+    /// The **<c>search</c>** read-only property of the URLPattern interface is a string containing the pattern used to match the search part of a URL.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLPattern/search)
+    /// </summary>
+    abstract search: string
+    /// <summary>
+    /// The **<c>hash</c>** read-only property of the URLPattern interface is a string containing the pattern used to match the fragment part of a URL.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLPattern/hash)
+    /// </summary>
+    abstract hash: string
+    /// <summary>
+    /// The **<c>hasRegExpGroups</c>** read-only property of the URLPattern interface is a boolean indicating whether or not any of the URLPattern components contain regular expression capturing groups.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLPattern/hasRegExpGroups)
+    /// </summary>
+    abstract hasRegExpGroups: bool
+    /// <summary>
+    /// The **<c>test()</c>** method of the URLPattern interface takes a URL string or object of URL parts, and returns a boolean indicating if the given input matches the current pattern.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLPattern/test)
+    /// </summary>
+    abstract test: ?input: U2<string, URLPatternInit> * ?baseURL: string -> bool
+    /// <summary>
+    /// The **<c>exec()</c>** method of the URLPattern interface takes a URL or object of URL parts, and returns either an object containing the results of matching the URL to the pattern, or null if the URL does not match the pattern.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLPattern/exec)
+    /// </summary>
+    abstract exec: ?input: U2<string, URLPatternInit> * ?baseURL: string -> URLPatternResult option
+
+[<Interface>]
+type URLPatternInit =
+    abstract protocol: string option with get, set
+    abstract username: string option with get, set
+    abstract password: string option with get, set
+    abstract hostname: string option with get, set
+    abstract port: string option with get, set
+    abstract pathname: string option with get, set
+    abstract search: string option with get, set
+    abstract hash: string option with get, set
+    abstract baseURL: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?protocol: string, ?username: string, ?password: string, ?hostname: string, ?port: string, ?pathname: string, ?search: string, ?hash: string, ?baseURL: string) : URLPatternInit = jsNative
+
+[<Interface>]
+type URLPatternComponentResult =
+    abstract input: string with get, set
+    abstract groups: RequestInitHeaders with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (input: string, groups: RequestInitHeaders) : URLPatternComponentResult = jsNative
+
+[<Interface>]
+type URLPatternResult =
+    abstract inputs: U2<string, URLPatternInit>[] with get, set
+    abstract protocol: URLPatternComponentResult with get, set
+    abstract username: URLPatternComponentResult with get, set
+    abstract password: URLPatternComponentResult with get, set
+    abstract hostname: URLPatternComponentResult with get, set
+    abstract port: URLPatternComponentResult with get, set
+    abstract pathname: URLPatternComponentResult with get, set
+    abstract search: URLPatternComponentResult with get, set
+    abstract hash: URLPatternComponentResult with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (inputs: U2<string, URLPatternInit>[], protocol: URLPatternComponentResult, username: URLPatternComponentResult, password: URLPatternComponentResult, hostname: URLPatternComponentResult, port: URLPatternComponentResult, pathname: URLPatternComponentResult, search: URLPatternComponentResult, hash: URLPatternComponentResult) : URLPatternResult = jsNative
+
+[<Interface>]
+type URLPatternOptions =
+    abstract ignoreCase: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?ignoreCase: bool) : URLPatternOptions = jsNative
+
+/// <summary>
+/// A **<c>CloseEvent</c>** is sent to clients using WebSockets when the connection is closed. This is delivered to the listener indicated by the WebSocket object's onclose attribute.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CloseEvent)
+/// </summary>
+type CloseEvent =
+    /// <summary>
+    /// The **<c>code</c>** read-only property of the CloseEvent interface returns a WebSocket connection close code indicating the reason the connection was closed.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CloseEvent/code)
+    /// </summary>
+    abstract code: float
+    /// <summary>
+    /// The **<c>reason</c>** read-only property of the CloseEvent interface returns the WebSocket connection close reason the server gave for closing the connection; that is, a concise human-readable prose explanation for the closure.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CloseEvent/reason)
+    /// </summary>
+    abstract reason: string
+    /// <summary>
+    /// The **<c>wasClean</c>** read-only property of the CloseEvent interface returns true if the connection closed cleanly.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CloseEvent/wasClean)
+    /// </summary>
+    abstract wasClean: bool
+    /// <summary>
+    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
+    /// </summary>
+    abstract ``type``: string
+    /// <summary>
+    /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/eventPhase)
+    /// </summary>
+    abstract eventPhase: float
+    /// <summary>
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
+    /// </summary>
+    abstract composed: bool
+    /// <summary>
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// </summary>
+    abstract bubbles: bool
+    /// <summary>
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
+    /// </summary>
+    abstract cancelable: bool
+    /// <summary>
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
+    /// </summary>
+    abstract defaultPrevented: bool
+    /// <summary>
+    /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
+    abstract returnValue: bool
+    /// <summary>
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
+    /// </summary>
+    abstract currentTarget: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
+    /// </summary>
+    abstract target: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
+    abstract srcElement: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/timeStamp)
+    /// </summary>
+    abstract timeStamp: float
+    /// <summary>
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
+    /// </summary>
+    abstract isTrusted: bool
+    /// <summary>
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    abstract cancelBubble: bool with get, set
+    /// <summary>
+    /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
+    /// </summary>
+    abstract stopImmediatePropagation: unit -> unit
+    /// <summary>
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
+    /// </summary>
+    abstract preventDefault: unit -> unit
+    /// <summary>
+    /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
+    /// </summary>
+    abstract stopPropagation: unit -> unit
+    /// <summary>
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// </summary>
+    abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+
+[<Interface>]
+type CloseEventInit =
+    abstract bubbles: bool option with get, set
+    abstract cancelable: bool option with get, set
+    abstract composed: bool option with get, set
+    abstract code: float option with get, set
+    abstract reason: string option with get, set
+    abstract wasClean: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?bubbles: bool, ?cancelable: bool, ?composed: bool, ?code: float, ?reason: string, ?wasClean: bool) : CloseEventInit = jsNative
+
+[<Interface>]
+type WebSocketEventMap =
+    abstract close: CloseEvent with get, set
+    abstract message: MessageEvent with get, set
+    abstract ``open``: Event with get, set
+    abstract error: ErrorEvent with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (close: CloseEvent, message: MessageEvent, ``open``: Event, error: ErrorEvent) : WebSocketEventMap = jsNative
+
+/// <summary>
+/// The **<c>WebSocket</c>** object provides the API for creating and managing a WebSocket connection to a server, as well as for sending and receiving data on the connection.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WebSocket)
+/// </summary>
+type WebSocket =
+    abstract accept: ?options: WebSocketAcceptOptions -> unit
+    /// <summary>
+    /// The **<c>WebSocket.send()</c>** method enqueues the specified data to be transmitted to the server over the WebSocket connection, increasing the value of bufferedAmount by the number of bytes needed to contain the data. If the data can't be sent (for example, because it needs to be buffered but the buffer is full), the socket is closed automatically. The browser will throw an exception if you call send() when the connection is in the CONNECTING state. If you call send() when the connection is in the CLOSING or CLOSED states, the browser will silently discard the data.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WebSocket/send)
+    /// </summary>
+    abstract send: message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> unit
+    /// <summary>
+    /// The **<c>WebSocket.close()</c>** method closes the WebSocket connection or connection attempt, if any. If the connection is already CLOSED, this method does nothing.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WebSocket/close)
+    /// </summary>
+    abstract close: ?code: float * ?reason: string -> unit
+    abstract serializeAttachment: attachment: obj -> unit
+    abstract deserializeAttachment: unit -> obj
+    /// <summary>
+    /// The **<c>WebSocket.readyState</c>** read-only property returns the current state of the WebSocket connection.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WebSocket/readyState)
+    /// </summary>
+    abstract readyState: float with get, set
+    /// <summary>
+    /// The **<c>WebSocket.url</c>** read-only property returns the absolute URL of the WebSocket as resolved by the constructor.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WebSocket/url)
+    /// </summary>
+    abstract url: string option with get, set
+    /// <summary>
+    /// The **<c>WebSocket.protocol</c>** read-only property returns the name of the sub-protocol the server selected; this will be one of the strings specified in the protocols parameter when creating the WebSocket object, or the empty string if no connection is established.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WebSocket/protocol)
+    /// </summary>
+    abstract protocol: string option with get, set
+    /// <summary>
+    /// The **<c>WebSocket.extensions</c>** read-only property returns the extensions selected by the server. This is currently only the empty string or a list of extensions as negotiated by the connection.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WebSocket/extensions)
+    /// </summary>
+    abstract extensions: string option with get, set
+    /// <summary>
+    /// The **<c>WebSocket.binaryType</c>** property controls the type of binary data being received over the WebSocket connection.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WebSocket/binaryType)
+    /// </summary>
+    abstract binaryType: WebSocketBinaryType with get, set
+    /// <summary>
+    /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
+    /// </summary>
+    abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<Action<obj>, EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
+    /// </summary>
+    abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<Action<obj>, EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
+    /// </summary>
+    abstract dispatchEvent: ``event``: U4<CloseEvent, ErrorEvent, Event, MessageEvent> -> bool
+
 [<Interface>]
 type WebSocketAcceptOptions =
     /// <summary>
@@ -3480,8 +6483,8 @@ type SqlStorageCursor<'T> =
     abstract rowsWritten: float
 
 type Socket =
-    abstract readable: obj
-    abstract writable: obj
+    abstract readable: ReadableStream<obj>
+    abstract writable: WritableStream<obj>
     abstract closed: JS.Promise<unit>
     abstract opened: JS.Promise<SocketInfo>
     abstract upgraded: bool
@@ -3517,12 +6520,64 @@ type SocketInfo =
     [<ParamObject; Emit("$0")>]
     static member Create (?remoteAddress: string, ?localAddress: string) : SocketInfo = jsNative
 
+/// <summary>
+/// The **<c>EventSource</c>** interface is web content's interface to server-sent events.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventSource)
+/// </summary>
+type EventSource =
+    /// <summary>
+    /// The **<c>close()</c>** method of the EventSource interface closes the connection, if one is made, and sets the EventSource.readyState attribute to 2 (closed).
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventSource/close)
+    /// </summary>
+    abstract close: unit -> unit
+    /// <summary>
+    /// The **<c>url</c>** read-only property of the EventSource interface returns a string representing the URL of the source.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventSource/url)
+    /// </summary>
+    abstract url: string
+    /// <summary>
+    /// The **<c>withCredentials</c>** read-only property of the EventSource interface returns a boolean value indicating whether the EventSource object was instantiated with CORS credentials set.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventSource/withCredentials)
+    /// </summary>
+    abstract withCredentials: bool
+    /// <summary>
+    /// The **<c>readyState</c>** read-only property of the EventSource interface returns a number representing the state of the connection.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventSource/readyState)
+    /// </summary>
+    abstract readyState: float
+    abstract onopen: obj with get, set
+    abstract onmessage: obj with get, set
+    abstract onerror: obj with get, set
+    /// <summary>
+    /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
+    /// </summary>
+    abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<Action<Event>, EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
+    /// </summary>
+    abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<Action<Event>, EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
+    /// </summary>
+    abstract dispatchEvent: ``event``: Event -> bool
+
 [<Interface>]
 type EventSourceEventSourceInit =
     abstract withCredentials: bool option with get, set
-    abstract fetcher: ColoLocalActorNamespaceGetResult option with get, set
+    abstract fetcher: RequestFetcher option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?withCredentials: bool, ?fetcher: ColoLocalActorNamespaceGetResult) : EventSourceEventSourceInit = jsNative
+    static member Create (?withCredentials: bool, ?fetcher: RequestFetcher) : EventSourceEventSourceInit = jsNative
 
 [<Interface>]
 type ExecOutput =
@@ -3535,15 +6590,15 @@ type ExecOutput =
 [<Interface>]
 type ContainerExecOptions =
     abstract cwd: string option with get, set
-    abstract env: obj option with get, set
+    abstract env: RequestInitHeaders option with get, set
     abstract user: string option with get, set
-    abstract signal: obj option with get, set
+    abstract signal: AbortSignal option with get, set
     abstract pty: U2<bool, ContainerExecPtyOptions> option with get, set
-    abstract stdin: obj option with get, set
+    abstract stdin: U2<string, ReadableStream<obj>> option with get, set
     abstract stdout: ContainerExecOptionsStdout option with get, set
     abstract stderr: ContainerExecOptionsStderr option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?cwd: string, ?env: obj, ?user: string, ?signal: obj, ?pty: U2<bool, ContainerExecPtyOptions>, ?stdin: obj, ?stdout: ContainerExecOptionsStdout, ?stderr: ContainerExecOptionsStderr) : ContainerExecOptions = jsNative
+    static member Create (?cwd: string, ?env: RequestInitHeaders, ?user: string, ?signal: AbortSignal, ?pty: U2<bool, ContainerExecPtyOptions>, ?stdin: U2<string, ReadableStream<obj>>, ?stdout: ContainerExecOptionsStdout, ?stderr: ContainerExecOptionsStderr) : ContainerExecOptions = jsNative
 
 [<Interface>]
 type ContainerExecPtyOptions =
@@ -3553,9 +6608,9 @@ type ContainerExecPtyOptions =
     static member Create (?cols: float, ?rows: float) : ContainerExecPtyOptions = jsNative
 
 type ExecProcess =
-    abstract stdin: obj option
-    abstract stdout: obj option
-    abstract stderr: obj option
+    abstract stdin: WritableStream<obj> option
+    abstract stdout: ReadableStream<obj> option
+    abstract stderr: ReadableStream<obj> option
     abstract pid: float
     abstract isPty: bool
     abstract exitCode: JS.Promise<float>
@@ -3569,13 +6624,13 @@ type Container =
     abstract monitor: unit -> JS.Promise<unit>
     abstract destroy: error: obj -> JS.Promise<unit>
     abstract signal: signo: float -> unit
-    abstract getTcpPort: port: float -> ColoLocalActorNamespaceGetResult
+    abstract getTcpPort: port: float -> RequestFetcher
     abstract setInactivityTimeout: durationMs: obj -> JS.Promise<unit>
-    abstract interceptOutboundHttp: addr: string * binding: ColoLocalActorNamespaceGetResult -> JS.Promise<unit>
-    abstract interceptAllOutboundHttp: binding: ColoLocalActorNamespaceGetResult -> JS.Promise<unit>
+    abstract interceptOutboundHttp: addr: string * binding: RequestFetcher -> JS.Promise<unit>
+    abstract interceptAllOutboundHttp: binding: RequestFetcher -> JS.Promise<unit>
     abstract snapshotDirectory: options: ContainerDirectorySnapshotOptions -> JS.Promise<ContainerDirectorySnapshot>
     abstract snapshotContainer: options: ContainerSnapshotOptions -> JS.Promise<ContainerSnapshot>
-    abstract interceptOutboundHttps: addr: string * binding: ColoLocalActorNamespaceGetResult -> JS.Promise<unit>
+    abstract interceptOutboundHttps: addr: string * binding: RequestFetcher -> JS.Promise<unit>
     abstract exec: cmd: string[] * ?options: ContainerExecOptions -> JS.Promise<ExecProcess>
 
 [<Interface>]
@@ -3626,6 +6681,72 @@ type ContainerStartResources =
     [<ParamObject; Emit("$0")>]
     static member Create (vcpu: float, memoryMib: float, diskMb: float) : ContainerStartResources = jsNative
 
+/// <summary>
+/// The **<c>MessagePort</c>** interface of the Channel Messaging API represents one of the two ports of a MessageChannel, allowing messages to be sent from one port and listening out for them arriving at the other.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessagePort)
+/// </summary>
+type MessagePort =
+    /// <summary>
+    /// The **<c>postMessage()</c>** method of the MessagePort interface sends a message from the port, and optionally, transfers ownership of objects to other browsing contexts.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessagePort/postMessage)
+    /// </summary>
+    abstract postMessage: data: obj * ?options: U2<obj[], MessagePortPostMessageOptions> -> unit
+    /// <summary>
+    /// The **<c>close()</c>** method of the MessagePort interface disconnects the port, so it is no longer active. This stops the flow of messages to that port.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessagePort/close)
+    /// </summary>
+    abstract close: unit -> unit
+    /// <summary>
+    /// The **<c>start()</c>** method of the MessagePort interface starts the sending of messages queued on the port. This method is only needed when using EventTarget.addEventListener; it is implied when using onmessage.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessagePort/start)
+    /// </summary>
+    abstract start: unit -> unit
+    abstract onmessage: obj with get, set
+    /// <summary>
+    /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
+    /// </summary>
+    abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<Action<Event>, EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
+    /// </summary>
+    abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<Action<Event>, EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
+    /// </summary>
+    abstract dispatchEvent: ``event``: Event -> bool
+
+/// <summary>
+/// The **<c>MessageChannel</c>** interface of the Channel Messaging API allows us to create a new message channel and send data through it via its two MessagePort properties.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessageChannel)
+/// </summary>
+[<Interface>]
+type MessageChannel =
+    /// <summary>
+    /// The **<c>port1</c>** read-only property of the MessageChannel interface returns the first port of the message channel — the port attached to the context that originated the channel.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessageChannel/port1)
+    /// </summary>
+    abstract port1: MessagePort
+    /// <summary>
+    /// The **<c>port2</c>** read-only property of the MessageChannel interface returns the second port of the message channel — the port attached to the context at the other end of the channel, which the message is initially sent to.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessageChannel/port2)
+    /// </summary>
+    abstract port2: MessagePort
+    [<ParamObject; Emit("$0")>]
+    static member Create (port1: MessagePort, port2: MessagePort) : MessageChannel = jsNative
+
 [<Interface>]
 type MessagePortPostMessageOptions =
     abstract transfer: obj[] option with get, set
@@ -3650,14 +6771,14 @@ type LoopbackDurableObjectNamespace =
     abstract jurisdiction: jurisdiction: DurableObjectJurisdiction -> DurableObjectNamespace<unit>
 
 type LoopbackDurableObjectNamespaceGetResult =
-    inherit ColoLocalActorNamespaceGetResult
-    abstract fetch: input: obj * ?init: obj -> JS.Promise<obj>
+    inherit RequestFetcher
+    abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, URL> * ?init: RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> -> JS.Promise<Response>
     abstract connect: address: U2<string, SocketAddress> * ?options: SocketOptions -> Socket
     abstract id: DurableObjectId
     abstract name: string option
 
 type LoopbackColoLocalActorNamespace =
-    abstract get: actorId: string -> ColoLocalActorNamespaceGetResult
+    abstract get: actorId: string -> RequestFetcher
 
 type SyncKvStorage =
     abstract get<'T>: key: string -> 'T option
@@ -3691,6 +6812,10 @@ type WorkerLoader =
     abstract get: name: string option * getCode: Func<U2<JS.Promise<WorkerLoaderWorkerCode>, WorkerLoaderWorkerCode>> -> WorkerStub
     abstract load: code: WorkerLoaderWorkerCode -> WorkerStub
 
+type WorkerLoaderWorkerCodeModules =
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
+
 [<Interface>]
 type WorkerLoaderModule =
     abstract js: string option with get, set
@@ -3710,13 +6835,13 @@ type WorkerLoaderWorkerCode =
     abstract allowExperimental: bool option with get, set
     abstract limits: workerdResourceLimits option with get, set
     abstract mainModule: string with get, set
-    abstract modules: obj with get, set
+    abstract modules: WorkerLoaderWorkerCodeModules with get, set
     abstract env: obj option with get, set
-    abstract globalOutbound: ColoLocalActorNamespaceGetResult option with get, set
-    abstract tails: ColoLocalActorNamespaceGetResult[] option with get, set
-    abstract streamingTails: ColoLocalActorNamespaceGetResult[] option with get, set
+    abstract globalOutbound: RequestFetcher option with get, set
+    abstract tails: RequestFetcher[] option with get, set
+    abstract streamingTails: RequestFetcher[] option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (compatibilityDate: string, mainModule: string, modules: obj, ?compatibilityFlags: string[], ?allowExperimental: bool, ?limits: workerdResourceLimits, ?env: obj, ?globalOutbound: ColoLocalActorNamespaceGetResult, ?tails: ColoLocalActorNamespaceGetResult[], ?streamingTails: ColoLocalActorNamespaceGetResult[]) : WorkerLoaderWorkerCode = jsNative
+    static member Create (compatibilityDate: string, mainModule: string, modules: WorkerLoaderWorkerCodeModules, ?compatibilityFlags: string[], ?allowExperimental: bool, ?limits: workerdResourceLimits, ?env: obj, ?globalOutbound: RequestFetcher, ?tails: RequestFetcher[], ?streamingTails: RequestFetcher[]) : WorkerLoaderWorkerCode = jsNative
 
 [<Interface>]
 type workerdResourceLimits =
@@ -3724,6 +6849,99 @@ type workerdResourceLimits =
     abstract subRequests: float option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?cpuMs: float, ?subRequests: float) : workerdResourceLimits = jsNative
+
+/// <summary>
+/// The Workers runtime supports a subset of the Performance API, used to measure timing and performance,
+/// as well as timing of subrequests and other operations.
+///
+/// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/performance/)
+/// </summary>
+type Performance =
+    abstract timeOrigin: float
+    abstract now: unit -> float
+    abstract eventCounts: EventCounts
+    /// <summary>
+    /// The **<c>clearMarks()</c>** method removes all or specific PerformanceMark objects from the browser's performance timeline.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Performance/clearMarks)
+    /// </summary>
+    abstract clearMarks: ?name: string -> unit
+    /// <summary>
+    /// The **<c>clearMeasures()</c>** method removes all or specific PerformanceMeasure objects from the browser's performance timeline.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Performance/clearMeasures)
+    /// </summary>
+    abstract clearMeasures: ?name: string -> unit
+    /// <summary>
+    /// The **<c>clearResourceTimings()</c>** method removes all performance entries with an entryType of "resource" from the browser's performance timeline and sets the size of the performance resource data buffer to zero.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Performance/clearResourceTimings)
+    /// </summary>
+    abstract clearResourceTimings: unit -> unit
+    /// <summary>
+    /// The **<c>getEntries()</c>** method returns an array of all PerformanceEntry objects currently present in the performance timeline.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Performance/getEntries)
+    /// </summary>
+    abstract getEntries: unit -> PerformanceEntry[]
+    /// <summary>
+    /// The **<c>getEntriesByName()</c>** method returns an array of PerformanceEntry objects currently present in the performance timeline with the given name and type.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Performance/getEntriesByName)
+    /// </summary>
+    abstract getEntriesByName: name: string * ?``type``: string -> PerformanceEntry[]
+    /// <summary>
+    /// The **<c>getEntriesByType()</c>** method returns an array of PerformanceEntry objects currently present in the performance timeline for a given type.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Performance/getEntriesByType)
+    /// </summary>
+    abstract getEntriesByType: ``type``: string -> PerformanceEntry[]
+    /// <summary>
+    /// The **<c>mark()</c>** method creates a named PerformanceMark object representing a high resolution timestamp marker in the browser's performance timeline.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Performance/mark)
+    /// </summary>
+    abstract mark: name: string * ?options: PerformanceMarkOptions -> PerformanceMark
+    /// <summary>
+    /// The **<c>measure()</c>** method creates a named PerformanceMeasure object representing a time measurement between two marks in the browser's performance timeline.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Performance/measure)
+    /// </summary>
+    abstract measure: measureName: string * ?measureOptionsOrStartMark: U2<string, PerformanceMeasureOptions> * ?maybeEndMark: string -> PerformanceMeasure
+    /// <summary>
+    /// The **<c>setResourceTimingBufferSize()</c>** method sets the desired size of the browser's resource timing buffer which stores the "resource" performance entries.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Performance/setResourceTimingBufferSize)
+    /// </summary>
+    abstract setResourceTimingBufferSize: size: float -> unit
+    /// <summary>
+    /// The **<c>toJSON()</c>** method of the Performance interface is a serializer; it returns a JSON representation of the Performance object.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Performance/toJSON)
+    /// </summary>
+    abstract toJSON: unit -> obj
+    abstract nodeTiming: PerformanceNodeTiming
+    abstract eventLoopUtilization: unit -> PerformanceEventLoopUtilization
+    abstract markResourceTiming: unit -> unit
+    abstract timerify: fn: Action -> Action
+    /// <summary>
+    /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
+    /// </summary>
+    abstract addEventListener<'Type>: ``type``: 'Type * handler: U2<Action<Event>, EventListenerObject<Event>> * ?options: U2<bool, EventTargetAddEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
+    /// </summary>
+    abstract removeEventListener<'Type>: ``type``: 'Type * handler: U2<Action<Event>, EventListenerObject<Event>> * ?options: U2<bool, EventTargetEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
+    /// </summary>
+    abstract dispatchEvent: ``event``: Event -> bool
 
 [<Interface>]
 type PerformanceEventLoopUtilization =
@@ -3749,11 +6967,11 @@ type PerformanceNodeTiming =
     /// </summary>
     abstract toJSON: unit -> obj
     /// <summary>
-    /// The read-only **<c>duration</c>** property returns a timestamp that is the duration of the performance entry. The meaning of this property depends on the value of this entry's entryType.
+    /// The read-only **<c>name</c>** property of the PerformanceEntry interface is a string representing the name for a performance entry. It acts as an identifier, but it does not have to be unique. The value depends on the subclass.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/duration)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/name)
     /// </summary>
-    abstract duration: float
+    abstract name: string
     /// <summary>
     /// The read-only **<c>entryType</c>** property returns a string representing the type of performance metric that this entry represents.
     ///
@@ -3761,17 +6979,17 @@ type PerformanceNodeTiming =
     /// </summary>
     abstract entryType: string
     /// <summary>
-    /// The read-only **<c>name</c>** property of the PerformanceEntry interface is a string representing the name for a performance entry. It acts as an identifier, but it does not have to be unique. The value depends on the subclass.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/name)
-    /// </summary>
-    abstract name: string
-    /// <summary>
     /// The read-only **<c>startTime</c>** property returns the first timestamp recorded for this PerformanceEntry. The meaning of this property depends on the value of this entry's entryType.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/startTime)
     /// </summary>
     abstract startTime: float
+    /// <summary>
+    /// The read-only **<c>duration</c>** property returns a timestamp that is the duration of the performance entry. The meaning of this property depends on the value of this entry's entryType.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/duration)
+    /// </summary>
+    abstract duration: float
 
 [<Interface>]
 type UvMetricsInfo =
@@ -3780,6 +6998,341 @@ type UvMetricsInfo =
     abstract eventsWaiting: float with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (loopCount: float, events: float, eventsWaiting: float) : UvMetricsInfo = jsNative
+
+/// <summary>
+/// **<c>PerformanceMark</c>** is an interface for PerformanceEntry objects with an entryType of "mark".
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceMark)
+/// </summary>
+type PerformanceMark =
+    /// <summary>
+    /// The read-only **<c>detail</c>** property returns arbitrary metadata that was included in the mark upon construction (either when using performance.mark() or the PerformanceMark() constructor).
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceMark/detail)
+    /// </summary>
+    abstract detail: obj
+    /// <summary>
+    /// The **<c>toJSON()</c>** method is a serializer; it returns a JSON representation of the PerformanceEntry object.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/toJSON)
+    /// </summary>
+    abstract toJSON: unit -> obj
+    /// <summary>
+    /// The read-only **<c>name</c>** property of the PerformanceEntry interface is a string representing the name for a performance entry. It acts as an identifier, but it does not have to be unique. The value depends on the subclass.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/name)
+    /// </summary>
+    abstract name: string
+    /// <summary>
+    /// The read-only **<c>entryType</c>** property returns a string representing the type of performance metric that this entry represents.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/entryType)
+    /// </summary>
+    abstract entryType: string
+    /// <summary>
+    /// The read-only **<c>startTime</c>** property returns the first timestamp recorded for this PerformanceEntry. The meaning of this property depends on the value of this entry's entryType.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/startTime)
+    /// </summary>
+    abstract startTime: float
+    /// <summary>
+    /// The read-only **<c>duration</c>** property returns a timestamp that is the duration of the performance entry. The meaning of this property depends on the value of this entry's entryType.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/duration)
+    /// </summary>
+    abstract duration: float
+
+/// <summary>
+/// **<c>PerformanceMeasure</c>** is an abstract interface for PerformanceEntry objects with an entryType of "measure". Entries of this type are created by calling performance.measure() to add a named DOMHighResTimeStamp (the measure) between two marks to the browser's performance timeline.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceMeasure)
+/// </summary>
+type PerformanceMeasure =
+    /// <summary>
+    /// The read-only **<c>detail</c>** property returns arbitrary metadata that was included in the mark upon construction (when using performance.measure().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceMeasure/detail)
+    /// </summary>
+    abstract detail: obj
+    /// <summary>
+    /// The **<c>toJSON()</c>** method is a serializer; it returns a JSON representation of the PerformanceEntry object.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/toJSON)
+    /// </summary>
+    abstract toJSON: unit -> obj
+    /// <summary>
+    /// The read-only **<c>name</c>** property of the PerformanceEntry interface is a string representing the name for a performance entry. It acts as an identifier, but it does not have to be unique. The value depends on the subclass.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/name)
+    /// </summary>
+    abstract name: string
+    /// <summary>
+    /// The read-only **<c>entryType</c>** property returns a string representing the type of performance metric that this entry represents.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/entryType)
+    /// </summary>
+    abstract entryType: string
+    /// <summary>
+    /// The read-only **<c>startTime</c>** property returns the first timestamp recorded for this PerformanceEntry. The meaning of this property depends on the value of this entry's entryType.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/startTime)
+    /// </summary>
+    abstract startTime: float
+    /// <summary>
+    /// The read-only **<c>duration</c>** property returns a timestamp that is the duration of the performance entry. The meaning of this property depends on the value of this entry's entryType.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/duration)
+    /// </summary>
+    abstract duration: float
+
+[<Interface>]
+type PerformanceMarkOptions =
+    abstract detail: obj option with get, set
+    abstract startTime: float option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?detail: obj, ?startTime: float) : PerformanceMarkOptions = jsNative
+
+[<Interface>]
+type PerformanceMeasureOptions =
+    abstract detail: obj option with get, set
+    abstract start: float option with get, set
+    abstract duration: float option with get, set
+    abstract ``end``: float option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?detail: obj, ?start: float, ?duration: float, ?``end``: float) : PerformanceMeasureOptions = jsNative
+
+/// <summary>
+/// The **<c>PerformanceObserverEntryList</c>** interface is a list of performance events that were explicitly observed via the observe() method.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceObserverEntryList)
+/// </summary>
+type PerformanceObserverEntryList =
+    /// <summary>
+    /// The **<c>getEntries()</c>** method of the PerformanceObserverEntryList interface returns a list of explicitly observed performance entry objects. The list's members are determined by the set of entry types specified in the call to the observe() method. The list is available in the observer's callback function (as the first parameter in the callback).
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceObserverEntryList/getEntries)
+    /// </summary>
+    abstract getEntries: unit -> PerformanceEntry[]
+    /// <summary>
+    /// The **<c>getEntriesByType()</c>** method of the PerformanceObserverEntryList returns a list of explicitly observed performance entry objects for a given performance entry type. The list's members are determined by the set of entry types specified in the call to the observe() method. The list is available in the observer's callback function (as the first parameter in the callback).
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceObserverEntryList/getEntriesByType)
+    /// </summary>
+    abstract getEntriesByType: ``type``: string -> PerformanceEntry[]
+    /// <summary>
+    /// The **<c>getEntriesByName()</c>** method of the PerformanceObserverEntryList interface returns a list of explicitly observed PerformanceEntry objects for a given name and entryType. The list's members are determined by the set of entry types specified in the call to the observe() method. The list is available in the observer's callback function (as the first parameter in the callback).
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceObserverEntryList/getEntriesByName)
+    /// </summary>
+    abstract getEntriesByName: name: string * ?``type``: string -> PerformanceEntry[]
+
+/// <summary>
+/// The **<c>PerformanceEntry</c>** object encapsulates a single performance metric that is part of the browser's performance timeline.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry)
+/// </summary>
+type PerformanceEntry =
+    /// <summary>
+    /// The read-only **<c>name</c>** property of the PerformanceEntry interface is a string representing the name for a performance entry. It acts as an identifier, but it does not have to be unique. The value depends on the subclass.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/name)
+    /// </summary>
+    abstract name: string
+    /// <summary>
+    /// The read-only **<c>entryType</c>** property returns a string representing the type of performance metric that this entry represents.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/entryType)
+    /// </summary>
+    abstract entryType: string
+    /// <summary>
+    /// The read-only **<c>startTime</c>** property returns the first timestamp recorded for this PerformanceEntry. The meaning of this property depends on the value of this entry's entryType.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/startTime)
+    /// </summary>
+    abstract startTime: float
+    /// <summary>
+    /// The read-only **<c>duration</c>** property returns a timestamp that is the duration of the performance entry. The meaning of this property depends on the value of this entry's entryType.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/duration)
+    /// </summary>
+    abstract duration: float
+    /// <summary>
+    /// The **<c>toJSON()</c>** method is a serializer; it returns a JSON representation of the PerformanceEntry object.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/toJSON)
+    /// </summary>
+    abstract toJSON: unit -> obj
+
+/// <summary>
+/// The **<c>PerformanceResourceTiming</c>** interface enables retrieval and analysis of detailed network timing data regarding the loading of an application's resources. An application can use the timing metrics to determine, for example, the length of time it takes to fetch a specific resource, such as an XMLHttpRequest, &lt;SVG&gt;, image, or script.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming)
+/// </summary>
+type PerformanceResourceTiming =
+    /// <summary>
+    /// The **<c>connectEnd</c>** read-only property returns the timestamp immediately after the browser finishes establishing the connection to the server to retrieve the resource. The timestamp value includes the time interval to establish the transport connection, as well as other time intervals such as TLS handshake and SOCKS authentication.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/connectEnd)
+    /// </summary>
+    abstract connectEnd: float
+    /// <summary>
+    /// The **<c>connectStart</c>** read-only property returns the timestamp immediately before the user agent starts establishing the connection to the server to retrieve the resource.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/connectStart)
+    /// </summary>
+    abstract connectStart: float
+    /// <summary>
+    /// The **<c>decodedBodySize</c>** read-only property returns the size (in octets) received from the fetch (HTTP or cache) of the message body after removing any applied content encoding (like gzip or Brotli). If the resource is retrieved from an application cache or local resources, it returns the size of the payload after removing any applied content encoding.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/decodedBodySize)
+    /// </summary>
+    abstract decodedBodySize: float
+    /// <summary>
+    /// The **<c>domainLookupEnd</c>** read-only property returns the timestamp immediately after the browser finishes the domain-name lookup for the resource.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/domainLookupEnd)
+    /// </summary>
+    abstract domainLookupEnd: float
+    /// <summary>
+    /// The **<c>domainLookupStart</c>** read-only property returns the timestamp immediately before the browser starts the domain name lookup for the resource.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/domainLookupStart)
+    /// </summary>
+    abstract domainLookupStart: float
+    /// <summary>
+    /// The **<c>encodedBodySize</c>** read-only property represents the size (in octets) received from the fetch (HTTP or cache) of the payload body before removing any applied content encodings (like gzip or Brotli). If the resource is retrieved from an application cache or a local resource, it must return the size of the payload body before removing any applied content encoding.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/encodedBodySize)
+    /// </summary>
+    abstract encodedBodySize: float
+    /// <summary>
+    /// The **<c>fetchStart</c>** read-only property represents a timestamp immediately before the browser starts to fetch the resource.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/fetchStart)
+    /// </summary>
+    abstract fetchStart: float
+    /// <summary>
+    /// The **<c>initiatorType</c>** read-only property is a string representing web platform feature that initiated the resource load.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/initiatorType)
+    /// </summary>
+    abstract initiatorType: string
+    /// <summary>
+    /// The **<c>nextHopProtocol</c>** read-only property is a string representing the network protocol used to fetch the resource, as identified by the ALPN Protocol ID (RFC7301).
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/nextHopProtocol)
+    /// </summary>
+    abstract nextHopProtocol: string
+    /// <summary>
+    /// The **<c>redirectEnd</c>** read-only property returns a timestamp immediately after receiving the last byte of the response of the last redirect.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/redirectEnd)
+    /// </summary>
+    abstract redirectEnd: float
+    /// <summary>
+    /// The **<c>redirectStart</c>** read-only property returns a timestamp representing the start time of the fetch which that initiates the redirect.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/redirectStart)
+    /// </summary>
+    abstract redirectStart: float
+    /// <summary>
+    /// The **<c>requestStart</c>** read-only property returns a timestamp of the time immediately before the browser starts requesting the resource from the server, cache, or local resource. If the transport connection fails and the browser retries the request, the value returned will be the start of the retry request.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/requestStart)
+    /// </summary>
+    abstract requestStart: float
+    /// <summary>
+    /// The **<c>responseEnd</c>** read-only property returns a timestamp immediately after the browser receives the last byte of the resource or immediately before the transport connection is closed, whichever comes first.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/responseEnd)
+    /// </summary>
+    abstract responseEnd: float
+    /// <summary>
+    /// The **<c>responseStart</c>** read-only property returns a timestamp immediately after the browser receives the first byte of the response from the server, cache, or local resource.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/responseStart)
+    /// </summary>
+    abstract responseStart: float
+    /// <summary>
+    /// The **<c>responseStatus</c>** read-only property represents the HTTP response status code returned when fetching the resource.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/responseStatus)
+    /// </summary>
+    abstract responseStatus: float
+    /// <summary>
+    /// The **<c>secureConnectionStart</c>** read-only property returns a timestamp immediately before the browser starts the handshake process to secure the current connection. If a secure connection is not used, the property returns zero.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/secureConnectionStart)
+    /// </summary>
+    abstract secureConnectionStart: float option
+    /// <summary>
+    /// The **<c>transferSize</c>** read-only property represents the size (in octets) of the fetched resource. The size includes the response header fields plus the response payload body (as defined by RFC7230).
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/transferSize)
+    /// </summary>
+    abstract transferSize: float
+    /// <summary>
+    /// The **<c>workerStart</c>** read-only property of the PerformanceResourceTiming interface returns a DOMHighResTimeStamp immediately before dispatching the FetchEvent if a Service Worker thread is already running, or immediately before starting the Service Worker thread if it is not already running. If the resource is not intercepted by a Service Worker the property will always return 0.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming/workerStart)
+    /// </summary>
+    abstract workerStart: float
+    /// <summary>
+    /// The read-only **<c>name</c>** property of the PerformanceEntry interface is a string representing the name for a performance entry. It acts as an identifier, but it does not have to be unique. The value depends on the subclass.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/name)
+    /// </summary>
+    abstract name: string
+    /// <summary>
+    /// The read-only **<c>entryType</c>** property returns a string representing the type of performance metric that this entry represents.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/entryType)
+    /// </summary>
+    abstract entryType: string
+    /// <summary>
+    /// The read-only **<c>startTime</c>** property returns the first timestamp recorded for this PerformanceEntry. The meaning of this property depends on the value of this entry's entryType.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/startTime)
+    /// </summary>
+    abstract startTime: float
+    /// <summary>
+    /// The read-only **<c>duration</c>** property returns a timestamp that is the duration of the performance entry. The meaning of this property depends on the value of this entry's entryType.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/duration)
+    /// </summary>
+    abstract duration: float
+    /// <summary>
+    /// The **<c>toJSON()</c>** method is a serializer; it returns a JSON representation of the PerformanceEntry object.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry/toJSON)
+    /// </summary>
+    abstract toJSON: unit -> obj
+
+/// <summary>
+/// The **<c>PerformanceObserver</c>** interface is used to observe performance measurement events and be notified of new performance entries as they are recorded in the browser's performance timeline.
+///
+/// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceObserver)
+/// </summary>
+type PerformanceObserver =
+    /// <summary>
+    /// The **<c>disconnect()</c>** method of the PerformanceObserver interface is used to stop the performance observer from receiving any performance entry events.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceObserver/disconnect)
+    /// </summary>
+    abstract disconnect: unit -> unit
+    /// <summary>
+    /// The **<c>observe()</c>** method of the PerformanceObserver interface is used to specify the set of performance entry types to observe.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceObserver/observe)
+    /// </summary>
+    abstract observe: ?options: PerformanceObserverObserveOptions -> unit
+    /// <summary>
+    /// The **<c>takeRecords()</c>** method of the PerformanceObserver interface returns the current list of PerformanceEntry objects stored in the performance observer, emptying it out.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceObserver/takeRecords)
+    /// </summary>
+    abstract takeRecords: unit -> PerformanceEntry[]
+    abstract supportedEntryTypes: string[]
 
 [<Interface>]
 type PerformanceObserverObserveOptions =
@@ -3790,6 +7343,15 @@ type PerformanceObserverObserveOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?buffered: bool, ?durationThreshold: float, ?entryTypes: string[], ?``type``: string) : PerformanceObserverObserveOptions = jsNative
 
+type EventCounts =
+    abstract size: float
+    abstract get: eventType: string -> float option
+    abstract has: eventType: string -> bool
+    abstract entries: unit -> obj
+    abstract keys: unit -> obj
+    abstract values: unit -> obj
+    abstract forEach: param1: Action<float, string, EventCounts> * param2: obj -> unit
+
 type Tracing =
     abstract enterSpan<'T, 'A>: name: string * callback: Func<Span, 'A, 'T> * [<ParamArray>] args: 'A -> 'T
     abstract startActiveSpan<'T, 'A>: name: string * callback: Func<Span, 'A, 'T> * [<ParamArray>] args: 'A -> 'T
@@ -3799,7 +7361,7 @@ type Tracing =
 type Span =
     abstract isTraced: bool
     abstract setAttribute: key: string * value: U3<string, float, bool> -> Span
-    abstract setAttributes: attributes: obj -> Span
+    abstract setAttributes: attributes: SpanSetAttributesAttributes -> Span
     abstract ``end``: unit -> unit
 
 /// <summary>
@@ -3854,7 +7416,7 @@ type CloudflareAccessIdentity =
     /// <summary>
     /// Device posture check results, keyed by check ID.
     /// </summary>
-    abstract devicePosture: obj option with get, set
+    abstract devicePosture: RequestInitCfPropertiesBase option with get, set
     /// <summary>
     /// True if the user connected via Cloudflare WARP.
     /// </summary>
@@ -4506,9 +8068,9 @@ type AiSearchMultiSearchChunk =
 type AiSearchMultiSearchChunkItem =
     abstract timestamp: float option with get, set
     abstract key: string with get, set
-    abstract metadata: obj option with get, set
+    abstract metadata: RequestInitCfPropertiesBase option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (key: string, ?timestamp: float, ?metadata: obj) : AiSearchMultiSearchChunkItem = jsNative
+    static member Create (key: string, ?timestamp: float, ?metadata: RequestInitCfPropertiesBase) : AiSearchMultiSearchChunkItem = jsNative
 
 type AiSearchMultiSearchChunkScoringDetails =
     /// <summary>
@@ -4702,7 +8264,7 @@ type AiSearchInstanceInfo =
     /// Sync interval in seconds.
     /// </summary>
     abstract sync_interval: AiSearchInstanceInfoSyncInterval option with get, set
-    abstract metadata: obj option with get, set
+    abstract metadata: RequestInitCfPropertiesBase option with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
@@ -4865,7 +8427,7 @@ type AiSearchConfig =
     /// Sync interval in seconds. 3600=1h, 7200=2h, 14400=4h, 21600=6h, 43200=12h, 86400=24h.
     /// </summary>
     abstract sync_interval: AiSearchInstanceInfoSyncInterval option with get, set
-    abstract metadata: obj option with get, set
+    abstract metadata: RequestInitCfPropertiesBase option with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
@@ -4916,7 +8478,7 @@ type AiSearchItemInfo =
     abstract source_id: string option with get, set
     abstract last_seen_at: string option with get, set
     abstract created_at: string option with get, set
-    abstract metadata: obj option with get, set
+    abstract metadata: RequestInitCfPropertiesBase option with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
@@ -4936,18 +8498,18 @@ type AiSearchItemInfoStatus =
 
 [<Interface>]
 type AiSearchItemContentResult =
-    abstract body: obj with get, set
+    abstract body: ReadableStream<obj> with get, set
     abstract contentType: string with get, set
     abstract filename: string with get, set
     abstract size: float with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (body: obj, contentType: string, filename: string, size: float) : AiSearchItemContentResult = jsNative
+    static member Create (body: ReadableStream<obj>, contentType: string, filename: string, size: float) : AiSearchItemContentResult = jsNative
 
 [<Interface>]
 type AiSearchUploadItemOptions =
-    abstract metadata: obj option with get, set
+    abstract metadata: RequestInitCfPropertiesBase option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?metadata: obj) : AiSearchUploadItemOptions = jsNative
+    static member Create (?metadata: RequestInitCfPropertiesBase) : AiSearchUploadItemOptions = jsNative
 
 [<Interface>]
 type AiSearchListItemsParams =
@@ -5080,9 +8642,9 @@ type AiSearchItemChunk =
 type AiSearchItemChunkItem =
     abstract timestamp: float option with get, set
     abstract key: string with get, set
-    abstract metadata: obj option with get, set
+    abstract metadata: RequestInitCfPropertiesBase option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (key: string, ?timestamp: float, ?metadata: obj) : AiSearchItemChunkItem = jsNative
+    static member Create (key: string, ?timestamp: float, ?metadata: RequestInitCfPropertiesBase) : AiSearchItemChunkItem = jsNative
 
 /// <summary>
 /// Paginated response for item chunks (offset-based).
@@ -5230,7 +8792,7 @@ type AiSearchItems =
     /// <remarks>@param content File content as a ReadableStream, Blob, or string.</remarks>
     /// <remarks>@param options Optional metadata to attach to the item.</remarks>
     /// <remarks>@returns The created item info.</remarks>
-    abstract upload: name: string * content: obj * ?options: AiSearchUploadItemOptions -> JS.Promise<AiSearchItemInfo>
+    abstract upload: name: string * content: U3<string, Blob, ReadableStream<obj>> * ?options: AiSearchUploadItemOptions -> JS.Promise<AiSearchItemInfo>
     /// <summary>
     /// Upload a file and poll until processing completes.
     /// Behaves as an upsert: if an item with the same filename already exists,
@@ -5240,7 +8802,7 @@ type AiSearchItems =
     /// <remarks>@param content File content as a ReadableStream, Blob, or string.</remarks>
     /// <remarks>@param options Optional metadata and polling configuration.</remarks>
     /// <remarks>@returns The item info after processing completes (or timeout).</remarks>
-    abstract uploadAndPoll: name: string * content: obj * ?options: AiSearchItemsUploadAndPollOptions -> JS.Promise<AiSearchItemInfo>
+    abstract uploadAndPoll: name: string * content: U3<string, Blob, ReadableStream<obj>> * ?options: AiSearchItemsUploadAndPollOptions -> JS.Promise<AiSearchItemInfo>
     /// <summary>
     /// Get an item by ID.
     /// </summary>
@@ -5256,7 +8818,7 @@ type AiSearchItems =
 [<Interface>]
 type AiSearchItemsUploadAndPollOptions =
     inherit AiSearchUploadItemOptions
-    abstract metadata: obj option with get, set
+    abstract metadata: RequestInitCfPropertiesBase option with get, set
     /// <summary>
     /// Polling interval in milliseconds (default 1000).
     /// </summary>
@@ -5266,7 +8828,7 @@ type AiSearchItemsUploadAndPollOptions =
     /// </summary>
     abstract timeoutMs: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?metadata: obj, ?pollIntervalMs: float, ?timeoutMs: float) : AiSearchItemsUploadAndPollOptions = jsNative
+    static member Create (?metadata: RequestInitCfPropertiesBase, ?pollIntervalMs: float, ?timeoutMs: float) : AiSearchItemsUploadAndPollOptions = jsNative
 
 /// <summary>
 /// Single job service for an AI Search instance.
@@ -5349,7 +8911,7 @@ type AiSearchInstance =
     /// <remarks>@returns ReadableStream of server-sent events.</remarks>
     /// <remarks>@param params Chat completions request.</remarks>
     /// <remarks>@returns Chat completion response with choices and RAG chunks.</remarks>
-    abstract chatCompletions: ``params``: AiSearchInstanceChatCompletionsParams -> JS.Promise<obj>
+    abstract chatCompletions: ``params``: AiSearchInstanceChatCompletionsParams -> JS.Promise<ReadableStream<obj>>
     /// <summary>
     /// Generate chat completions with AI Search context (streaming).
     /// Generate chat completions with AI Search context.
@@ -5364,7 +8926,7 @@ type AiSearchInstance =
     /// </summary>
     /// <remarks>@param config Partial configuration to update.</remarks>
     /// <remarks>@returns Updated instance info.</remarks>
-    abstract update: config: obj -> JS.Promise<AiSearchInstanceInfo>
+    abstract update: config: AiSearchInstanceUpdateConfig -> JS.Promise<AiSearchInstanceInfo>
     /// <summary>
     /// Get metadata about this instance.
     /// </summary>
@@ -5389,6 +8951,72 @@ type AiSearchInstanceChatCompletionsParams =
     abstract model: string option with get, set
     abstract stream: bool with get, set
     abstract ai_search_options: AiSearchOptions option with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
+
+type AiSearchInstanceUpdateConfig =
+    /// <summary>
+    /// Instance ID (1-32 chars, pattern: ^[a-z0-9_]+(?:-[a-z0-9_]+)*$)
+    /// </summary>
+    abstract id: string option with get, set
+    /// <summary>
+    /// Instance type. Omit to create with built-in storage.
+    /// </summary>
+    abstract ``type``: string option with get, set
+    /// <summary>
+    /// Source URL (required for web-crawler type).
+    /// </summary>
+    abstract source: string option with get, set
+    abstract source_params: obj option with get, set
+    /// <summary>
+    /// Token ID (UUID format)
+    /// </summary>
+    abstract token_id: string option with get, set
+    abstract ai_gateway_id: string option with get, set
+    /// <summary>
+    /// Enable query rewriting (default false)
+    /// </summary>
+    abstract rewrite_query: bool option with get, set
+    /// <summary>
+    /// Enable reranking (default false)
+    /// </summary>
+    abstract reranking: bool option with get, set
+    abstract embedding_model: string option with get, set
+    abstract ai_search_model: string option with get, set
+    abstract rewrite_model: string option with get, set
+    abstract reranking_model: string option with get, set
+    /// <remarks>@deprecated Use index_method instead.</remarks>
+    abstract hybrid_search_enabled: bool option with get, set
+    /// <summary>
+    /// Controls which storage backends are used during indexing. Defaults to vector-only.
+    /// </summary>
+    abstract index_method: AiSearchConfigIndexMethod option with get, set
+    /// <summary>
+    /// Fusion method for combining vector and keyword results. "rrf" = reciprocal rank fusion (default), "max" = maximum score.
+    /// </summary>
+    abstract fusion_method: AiSearchOptionsRetrievalFusionMethod option with get, set
+    abstract indexing_options: AiSearchConfigIndexingOptions option with get, set
+    abstract retrieval_options: AiSearchConfigRetrievalOptions option with get, set
+    abstract chunk: bool option with get, set
+    abstract chunk_size: float option with get, set
+    abstract chunk_overlap: float option with get, set
+    /// <summary>
+    /// Minimum similarity score (0-1) for a result to be included.
+    /// </summary>
+    abstract score_threshold: float option with get, set
+    abstract max_num_results: float option with get, set
+    abstract cache: bool option with get, set
+    /// <summary>
+    /// Similarity threshold for cache hits. Stricter = fewer cache hits but higher relevance.
+    /// </summary>
+    abstract cache_threshold: AiSearchOptionsCacheCacheThreshold option with get, set
+    abstract custom_metadata: AiSearchConfigCustomMetadataItem[] option with get, set
+    abstract ``namespace``: string option with get, set
+    /// <summary>
+    /// Sync interval in seconds. 3600=1h, 7200=2h, 14400=4h, 21600=6h, 43200=12h, 86400=24h.
+    /// </summary>
+    abstract sync_interval: AiSearchInstanceInfoSyncInterval option with get, set
+    abstract metadata: RequestInitCfPropertiesBase option with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
@@ -5480,7 +9108,7 @@ type AiSearchNamespace =
     /// <remarks>@returns ReadableStream of server-sent events.</remarks>
     /// <remarks>@param params Chat completions request with required <c>ai_search_options.instance_ids</c>.</remarks>
     /// <remarks>@returns Chat completion response with choices, chunks tagged by instance_id, and optional partial-failure errors.</remarks>
-    abstract chatCompletions: ``params``: AiSearchNamespaceChatCompletionsParams -> JS.Promise<obj>
+    abstract chatCompletions: ``params``: AiSearchNamespaceChatCompletionsParams -> JS.Promise<ReadableStream<obj>>
     /// <summary>
     /// Generate chat completions across multiple instances within the bound namespace (streaming).
     /// Fans out to the specified instance_ids, merges context, and generates a response.
@@ -5753,10 +9381,14 @@ type AiTextGenerationToolLegacyInput =
 [<Interface>]
 type AiTextGenerationToolLegacyInputParameters =
     abstract ``type``: obj with get, set
-    abstract properties: obj with get, set
+    abstract properties: AiTextGenerationToolLegacyInputParametersProperties with get, set
     abstract required: string[] with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: obj, properties: obj, required: string[]) : AiTextGenerationToolLegacyInputParameters = jsNative
+    static member Create (``type``: obj, properties: AiTextGenerationToolLegacyInputParametersProperties, required: string[]) : AiTextGenerationToolLegacyInputParameters = jsNative
+
+type AiTextGenerationToolLegacyInputParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> AiTextGenerationToolLegacyInputParametersPropertiesItem with get, set
 
 [<Interface>]
 type AiTextGenerationToolLegacyInputParametersPropertiesItem =
@@ -5783,10 +9415,14 @@ type AiTextGenerationToolInputFunction =
 [<Interface>]
 type AiTextGenerationToolInputFunctionParameters =
     abstract ``type``: obj with get, set
-    abstract properties: obj with get, set
+    abstract properties: AiTextGenerationToolInputFunctionParametersProperties with get, set
     abstract required: string[] with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: obj, properties: obj, required: string[]) : AiTextGenerationToolInputFunctionParameters = jsNative
+    static member Create (``type``: obj, properties: AiTextGenerationToolInputFunctionParametersProperties, required: string[]) : AiTextGenerationToolInputFunctionParameters = jsNative
+
+type AiTextGenerationToolInputFunctionParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> AiTextGenerationToolInputFunctionParametersPropertiesItem with get, set
 
 [<Interface>]
 type AiTextGenerationToolInputFunctionParametersPropertiesItem =
@@ -6242,381 +9878,6 @@ type AiTextGenerationOutputToolCalls =
     [<EmitIndexer>]
     abstract Item: float -> AiTextGenerationOutputToolCallsItem with get, set
 
-type ``AiTextGenerationOutputToolCalls@unscopables@3251`` =
-    /// <summary>
-    /// Gets or sets the length of the array. This is a number one higher than the highest index in the array.
-    /// </summary>
-    abstract length: bool option with get, set
-    /// <summary>
-    /// Returns a string representation of an array.
-    /// </summary>
-    abstract toString: bool option with get, set
-    /// <summary>
-    /// Returns a string representation of an array. The elements are converted to string using their toLocaleString methods.
-    /// </summary>
-    abstract toLocaleString: bool option with get, set
-    /// <summary>
-    /// Removes the last element from an array and returns it.
-    /// If the array is empty, undefined is returned and the array is not modified.
-    /// </summary>
-    abstract pop: bool option with get, set
-    /// <summary>
-    /// Appends new elements to the end of an array, and returns the new length of the array.
-    /// </summary>
-    /// <remarks>@param items New elements to add to the array.</remarks>
-    abstract push: bool option with get, set
-    /// <summary>
-    /// Combines two or more arrays.
-    /// This method returns a new array without modifying any existing arrays.
-    /// </summary>
-    /// <remarks>@param items Additional arrays and/or items to add to the end of the array.</remarks>
-    /// <remarks>@param items Additional arrays and/or items to add to the end of the array.</remarks>
-    abstract concat: bool option with get, set
-    /// <summary>
-    /// Adds all the elements of an array into a string, separated by the specified separator string.
-    /// </summary>
-    /// <remarks>@param separator A string used to separate one element of the array from the next in the resulting string. If omitted, the array elements are separated with a comma.</remarks>
-    abstract join: bool option with get, set
-    /// <summary>
-    /// Reverses the elements in an array in place.
-    /// This method mutates the array and returns a reference to the same array.
-    /// </summary>
-    abstract reverse: bool option with get, set
-    /// <summary>
-    /// Removes the first element from an array and returns it.
-    /// If the array is empty, undefined is returned and the array is not modified.
-    /// </summary>
-    abstract shift: bool option with get, set
-    /// <summary>
-    /// Returns a copy of a section of an array.
-    /// For both start and end, a negative index can be used to indicate an offset from the end of the array.
-    /// For example, -2 refers to the second to last element of the array.
-    /// </summary>
-    /// <remarks>
-    /// @param
-    /// start The beginning index of the specified portion of the array.
-    /// If start is undefined, then the slice begins at index 0.
-    /// </remarks>
-    /// <remarks>
-    /// @param
-    /// end The end index of the specified portion of the array. This is exclusive of the element at the index 'end'.
-    /// If end is undefined, then the slice extends to the end of the array.
-    /// </remarks>
-    abstract slice: bool option with get, set
-    /// <summary>
-    /// Sorts an array in place.
-    /// This method mutates the array and returns a reference to the same array.
-    /// </summary>
-    /// <remarks>
-    /// @param
-    /// compareFn Function used to determine the order of the elements. It is expected to return
-    /// a negative value if the first argument is less than the second argument, zero if they're equal, and a positive
-    /// value otherwise. If omitted, the elements are sorted in ascending, UTF-16 code unit order.
-    /// <code lang="ts">
-    /// [11,2,22,1].sort((a, b) =&gt; a - b)
-    /// </code>
-    /// </remarks>
-    abstract sort: bool option with get, set
-    /// <summary>
-    /// Removes elements from an array and, if necessary, inserts new elements in their place, returning the deleted elements.
-    /// </summary>
-    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
-    /// <remarks>
-    /// @param
-    /// deleteCount The number of elements to remove. Omitting this argument will remove all elements from the start
-    /// paramater location to end of the array. If value of this argument is either a negative number, zero, undefined, or a type
-    /// that cannot be converted to an integer, the function will evaluate the argument as zero and not remove any elements.
-    /// </remarks>
-    /// <remarks>@returns An array containing the elements that were deleted.</remarks>
-    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
-    /// <remarks>
-    /// @param
-    /// deleteCount The number of elements to remove. If value of this argument is either a negative number, zero,
-    /// undefined, or a type that cannot be converted to an integer, the function will evaluate the argument as zero and
-    /// not remove any elements.
-    /// </remarks>
-    /// <remarks>@param items Elements to insert into the array in place of the deleted elements.</remarks>
-    /// <remarks>@returns An array containing the elements that were deleted.</remarks>
-    abstract splice: bool option with get, set
-    /// <summary>
-    /// Inserts new elements at the start of an array, and returns the new length of the array.
-    /// </summary>
-    /// <remarks>@param items Elements to insert at the start of the array.</remarks>
-    abstract unshift: bool option with get, set
-    /// <summary>
-    /// Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
-    /// </summary>
-    /// <remarks>@param searchElement The value to locate in the array.</remarks>
-    /// <remarks>@param fromIndex The array index at which to begin the search. If fromIndex is omitted, the search starts at index 0.</remarks>
-    abstract indexOf: bool option with get, set
-    /// <summary>
-    /// Returns the index of the last occurrence of a specified value in an array, or -1 if it is not present.
-    /// </summary>
-    /// <remarks>@param searchElement The value to locate in the array.</remarks>
-    /// <remarks>@param fromIndex The array index at which to begin searching backward. If fromIndex is omitted, the search starts at the last index in the array.</remarks>
-    abstract lastIndexOf: bool option with get, set
-    /// <summary>
-    /// Determines whether all the members of an array satisfy the specified test.
-    /// </summary>
-    /// <remarks>
-    /// @param
-    /// predicate A function that accepts up to three arguments. The every method calls
-    /// the predicate function for each element in the array until the predicate returns a value
-    /// which is coercible to the Boolean value false, or until the end of the array.
-    /// </remarks>
-    /// <remarks>
-    /// @param
-    /// thisArg An object to which the this keyword can refer in the predicate function.
-    /// If thisArg is omitted, undefined is used as the this value.
-    /// </remarks>
-    /// <remarks>
-    /// @param
-    /// predicate A function that accepts up to three arguments. The every method calls
-    /// the predicate function for each element in the array until the predicate returns a value
-    /// which is coercible to the Boolean value false, or until the end of the array.
-    /// </remarks>
-    /// <remarks>
-    /// @param
-    /// thisArg An object to which the this keyword can refer in the predicate function.
-    /// If thisArg is omitted, undefined is used as the this value.
-    /// </remarks>
-    abstract every: bool option with get, set
-    /// <summary>
-    /// Determines whether the specified callback function returns true for any element of an array.
-    /// </summary>
-    /// <remarks>
-    /// @param
-    /// predicate A function that accepts up to three arguments. The some method calls
-    /// the predicate function for each element in the array until the predicate returns a value
-    /// which is coercible to the Boolean value true, or until the end of the array.
-    /// </remarks>
-    /// <remarks>
-    /// @param
-    /// thisArg An object to which the this keyword can refer in the predicate function.
-    /// If thisArg is omitted, undefined is used as the this value.
-    /// </remarks>
-    abstract some: bool option with get, set
-    /// <summary>
-    /// Performs the specified action for each element in an array.
-    /// </summary>
-    /// <remarks>@param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.</remarks>
-    /// <remarks>@param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.</remarks>
-    abstract forEach: bool option with get, set
-    /// <summary>
-    /// Calls a defined callback function on each element of an array, and returns an array that contains the results.
-    /// </summary>
-    /// <remarks>@param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.</remarks>
-    /// <remarks>@param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.</remarks>
-    abstract map: bool option with get, set
-    /// <summary>
-    /// Returns the elements of an array that meet the condition specified in a callback function.
-    /// </summary>
-    /// <remarks>@param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.</remarks>
-    /// <remarks>@param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.</remarks>
-    /// <remarks>@param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.</remarks>
-    /// <remarks>@param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.</remarks>
-    abstract filter: bool option with get, set
-    /// <summary>
-    /// Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
-    /// </summary>
-    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.</remarks>
-    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
-    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.</remarks>
-    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
-    abstract reduce: bool option with get, set
-    /// <summary>
-    /// Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
-    /// </summary>
-    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.</remarks>
-    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
-    /// <remarks>@param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.</remarks>
-    /// <remarks>@param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.</remarks>
-    abstract reduceRight: bool option with get, set
-    /// <summary>
-    /// Returns the value of the first element in the array where predicate is true, and undefined
-    /// otherwise.
-    /// </summary>
-    /// <remarks>
-    /// @param
-    /// predicate find calls predicate once for each element of the array, in ascending
-    /// order, until it finds one where predicate returns true. If such an element is found, find
-    /// immediately returns that element value. Otherwise, find returns undefined.
-    /// </remarks>
-    /// <remarks>
-    /// @param
-    /// thisArg If provided, it will be used as the this value for each invocation of
-    /// predicate. If it is not provided, undefined is used instead.
-    /// </remarks>
-    abstract find: bool option with get, set
-    /// <summary>
-    /// Returns the index of the first element in the array where predicate is true, and -1
-    /// otherwise.
-    /// </summary>
-    /// <remarks>
-    /// @param
-    /// predicate find calls predicate once for each element of the array, in ascending
-    /// order, until it finds one where predicate returns true. If such an element is found,
-    /// findIndex immediately returns that element index. Otherwise, findIndex returns -1.
-    /// </remarks>
-    /// <remarks>
-    /// @param
-    /// thisArg If provided, it will be used as the this value for each invocation of
-    /// predicate. If it is not provided, undefined is used instead.
-    /// </remarks>
-    abstract findIndex: bool option with get, set
-    /// <summary>
-    /// Changes all array elements from <c>start</c> to <c>end</c> index to a static <c>value</c> and returns the modified array
-    /// </summary>
-    /// <remarks>@param value value to fill array section with</remarks>
-    /// <remarks>
-    /// @param
-    /// start index to start filling the array at. If start is negative, it is treated as
-    /// length+start where length is the length of the array.
-    /// </remarks>
-    /// <remarks>
-    /// @param
-    /// end index to stop filling the array at. If end is negative, it is treated as
-    /// length+end.
-    /// </remarks>
-    abstract fill: bool option with get, set
-    /// <summary>
-    /// Returns the this object after copying a section of the array identified by start and end
-    /// to the same array starting at position target
-    /// </summary>
-    /// <remarks>
-    /// @param
-    /// target If target is negative, it is treated as length+target where length is the
-    /// length of the array.
-    /// </remarks>
-    /// <remarks>
-    /// @param
-    /// start If start is negative, it is treated as length+start. If end is negative, it
-    /// is treated as length+end.
-    /// </remarks>
-    /// <remarks>@param end If not specified, length of the this object is used as its default value.</remarks>
-    abstract copyWithin: bool option with get, set
-    /// <summary>
-    /// Returns an iterable of key, value pairs for every entry in the array
-    /// </summary>
-    abstract entries: bool option with get, set
-    /// <summary>
-    /// Returns an iterable of keys in the array
-    /// </summary>
-    abstract keys: bool option with get, set
-    /// <summary>
-    /// Returns an iterable of values in the array
-    /// </summary>
-    abstract values: bool option with get, set
-    /// <summary>
-    /// Determines whether an array includes a certain element, returning true or false as appropriate.
-    /// </summary>
-    /// <remarks>@param searchElement The element to search for.</remarks>
-    /// <remarks>@param fromIndex The position in this array at which to begin searching for searchElement.</remarks>
-    abstract includes: bool option with get, set
-    /// <summary>
-    /// Calls a defined callback function on each element of an array. Then, flattens the result into
-    /// a new array.
-    /// This is identical to a map followed by flat with depth 1.
-    /// </summary>
-    /// <remarks>
-    /// @param
-    /// callback A function that accepts up to three arguments. The flatMap method calls the
-    /// callback function one time for each element in the array.
-    /// </remarks>
-    /// <remarks>
-    /// @param
-    /// thisArg An object to which the this keyword can refer in the callback function. If
-    /// thisArg is omitted, undefined is used as the this value.
-    /// </remarks>
-    abstract flatMap: bool option with get, set
-    /// <summary>
-    /// Returns a new array with all sub-array elements concatenated into it recursively up to the
-    /// specified depth.
-    /// </summary>
-    /// <remarks>@param depth The maximum recursion depth</remarks>
-    abstract flat: bool option with get, set
-    /// <summary>
-    /// Returns the item located at the specified index.
-    /// </summary>
-    /// <remarks>@param index The zero-based index of the desired code unit. A negative index will count back from the last item.</remarks>
-    abstract at: bool option with get, set
-    /// <summary>
-    /// Returns the value of the last element in the array where predicate is true, and undefined
-    /// otherwise.
-    /// </summary>
-    /// <remarks>
-    /// @param
-    /// predicate findLast calls predicate once for each element of the array, in descending
-    /// order, until it finds one where predicate returns true. If such an element is found, findLast
-    /// immediately returns that element value. Otherwise, findLast returns undefined.
-    /// </remarks>
-    /// <remarks>
-    /// @param
-    /// thisArg If provided, it will be used as the this value for each invocation of
-    /// predicate. If it is not provided, undefined is used instead.
-    /// </remarks>
-    abstract findLast: bool option with get, set
-    /// <summary>
-    /// Returns the index of the last element in the array where predicate is true, and -1
-    /// otherwise.
-    /// </summary>
-    /// <remarks>
-    /// @param
-    /// predicate findLastIndex calls predicate once for each element of the array, in descending
-    /// order, until it finds one where predicate returns true. If such an element is found,
-    /// findLastIndex immediately returns that element index. Otherwise, findLastIndex returns -1.
-    /// </remarks>
-    /// <remarks>
-    /// @param
-    /// thisArg If provided, it will be used as the this value for each invocation of
-    /// predicate. If it is not provided, undefined is used instead.
-    /// </remarks>
-    abstract findLastIndex: bool option with get, set
-    /// <summary>
-    /// Returns a copy of an array with its elements reversed.
-    /// </summary>
-    abstract toReversed: bool option with get, set
-    /// <summary>
-    /// Returns a copy of an array with its elements sorted.
-    /// </summary>
-    /// <remarks>
-    /// @param
-    /// compareFn Function used to determine the order of the elements. It is expected to return
-    /// a negative value if the first argument is less than the second argument, zero if they're equal, and a positive
-    /// value otherwise. If omitted, the elements are sorted in ascending, UTF-16 code unit order.
-    /// <code lang="ts">
-    /// [11, 2, 22, 1].toSorted((a, b) =&gt; a - b) // [1, 2, 11, 22]
-    /// </code>
-    /// </remarks>
-    abstract toSorted: bool option with get, set
-    /// <summary>
-    /// Copies an array and removes elements and, if necessary, inserts new elements in their place. Returns the copied array.
-    /// Copies an array and removes elements while returning the remaining elements.
-    /// </summary>
-    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
-    /// <remarks>@param deleteCount The number of elements to remove.</remarks>
-    /// <remarks>@param items Elements to insert into the copied array in place of the deleted elements.</remarks>
-    /// <remarks>@returns The copied array.</remarks>
-    /// <remarks>@param start The zero-based location in the array from which to start removing elements.</remarks>
-    /// <remarks>@param deleteCount The number of elements to remove.</remarks>
-    /// <remarks>@returns A copy of the original array with the remaining elements.</remarks>
-    abstract toSpliced: bool option with get, set
-    /// <summary>
-    /// Copies an array, then overwrites the value at the provided index with the
-    /// given value. If the index is negative, then it replaces from the end
-    /// of the array.
-    /// </summary>
-    /// <remarks>
-    /// @param
-    /// index The index of the value to overwrite. If the index is
-    /// negative, then it replaces from the end of the array.
-    /// </remarks>
-    /// <remarks>@param value The value to write into the copied array.</remarks>
-    /// <remarks>@returns The copied array with the updated value.</remarks>
-    abstract ``with``: bool option with get, set
-    [<EmitIndexer>]
-    abstract Item: float -> bool option with get, set
-
 [<Interface>]
 type AiTextGenerationOutputToolCallsItem =
     inherit AiTextGenerationToolLegacyOutput
@@ -6861,7 +10122,7 @@ type AiTextToImageInput =
     [<ParamObject; Emit("$0")>]
     static member Create (prompt: string, ?negative_prompt: string, ?height: float, ?width: float, ?image: float[], ?image_b64: string, ?mask: float[], ?num_steps: float, ?strength: float, ?guidance: float, ?seed: float) : AiTextToImageInput = jsNative
 
-type AiTextToImageOutput = obj
+type AiTextToImageOutput = ReadableStream<JS.Uint8Array>
 
 [<Interface>]
 type BaseAiTextToImage =
@@ -6982,10 +10243,10 @@ type ChatCompletionContentPart =
 type FunctionDefinition =
     abstract name: string with get, set
     abstract description: string option with get, set
-    abstract parameters: obj option with get, set
+    abstract parameters: RequestInitCfPropertiesBase option with get, set
     abstract strict: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, ?description: string, ?parameters: obj, ?strict: bool) : FunctionDefinition = jsNative
+    static member Create (name: string, ?description: string, ?parameters: RequestInitCfPropertiesBase, ?strict: bool) : FunctionDefinition = jsNative
 
 [<Interface>]
 type ChatCompletionFunctionTool =
@@ -7118,9 +10379,9 @@ type ChatCompletionToolChoiceAllowedTools =
 [<Interface>]
 type ChatCompletionToolChoiceAllowedToolsAllowedTools =
     abstract mode: ChatCompletionToolChoiceAllowedToolsAllowedToolsMode with get, set
-    abstract tools: obj[] with get, set
+    abstract tools: RequestInitCfPropertiesBase[] with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (mode: ChatCompletionToolChoiceAllowedToolsAllowedToolsMode, tools: obj[]) : ChatCompletionToolChoiceAllowedToolsAllowedTools = jsNative
+    static member Create (mode: ChatCompletionToolChoiceAllowedToolsAllowedToolsMode, tools: RequestInitCfPropertiesBase[]) : ChatCompletionToolChoiceAllowedToolsAllowedTools = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type ChatCompletionToolChoiceAllowedToolsAllowedToolsMode =
@@ -7306,10 +10567,10 @@ type ResponseFormatJSONSchema =
 type ResponseFormatJSONSchemaJsonSchema =
     abstract name: string with get, set
     abstract description: string option with get, set
-    abstract schema: obj option with get, set
+    abstract schema: RequestInitCfPropertiesBase option with get, set
     abstract strict: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, ?description: string, ?schema: obj, ?strict: bool) : ResponseFormatJSONSchemaJsonSchema = jsNative
+    static member Create (name: string, ?description: string, ?schema: RequestInitCfPropertiesBase, ?strict: bool) : ResponseFormatJSONSchemaJsonSchema = jsNative
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseFormat =
@@ -7403,12 +10664,12 @@ type ChatCompletionsCommonOptions =
     abstract model: string option with get, set
     abstract audio: AudioParams option with get, set
     abstract frequency_penalty: float option with get, set
-    abstract logit_bias: obj option with get, set
+    abstract logit_bias: RequestInitCfPropertiesBase option with get, set
     abstract logprobs: bool option with get, set
     abstract top_logprobs: float option with get, set
     abstract max_tokens: float option with get, set
     abstract max_completion_tokens: float option with get, set
-    abstract metadata: obj option with get, set
+    abstract metadata: RequestInitCfPropertiesBase option with get, set
     abstract modalities: ChatCompletionsCommonOptionsModalitiesItem[] option with get, set
     abstract n: float option with get, set
     abstract parallel_tool_calls: bool option with get, set
@@ -7571,12 +10832,12 @@ type ChatCompletionsMessagesInput =
     abstract model: string option with get, set
     abstract audio: AudioParams option with get, set
     abstract frequency_penalty: float option with get, set
-    abstract logit_bias: obj option with get, set
+    abstract logit_bias: RequestInitCfPropertiesBase option with get, set
     abstract logprobs: bool option with get, set
     abstract top_logprobs: float option with get, set
     abstract max_tokens: float option with get, set
     abstract max_completion_tokens: float option with get, set
-    abstract metadata: obj option with get, set
+    abstract metadata: RequestInitCfPropertiesBase option with get, set
     abstract modalities: ChatCompletionsCommonOptionsModalitiesItem[] option with get, set
     abstract n: float option with get, set
     abstract parallel_tool_calls: bool option with get, set
@@ -7626,6 +10887,10 @@ type ReasoningGenerateSummary =
     | [<CompiledName("concise")>] Concise
     | [<CompiledName("detailed")>] Detailed
 
+type ResponseFormatTextJSONSchemaConfigSchema =
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
+
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type ResponseFunctionToolCallStatus =
     | [<CompiledName("completed")>] Completed
@@ -7637,6 +10902,10 @@ type ResponseInputItemMessageRole =
     | [<CompiledName("developer")>] Developer
     | [<CompiledName("system")>] System
     | [<CompiledName("user")>] User
+
+type ResponsesFunctionToolParameters =
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 /// <summary>
 /// Workers AI support for OpenAI's Responses API
@@ -7704,6 +10973,10 @@ type ResponseIncompleteDetailsReason =
     | [<CompiledName("content_filter")>] ContentFilter
     | [<CompiledName("max_output_tokens")>] MaxOutputTokens
 
+type ResponsePromptVariables =
+    [<EmitIndexer>]
+    abstract Item: string -> U3<string, ResponseInputImage, ResponseInputText> with get, set
+
 [<Interface>]
 type ResponsesOutput =
     abstract id: string option with get, set
@@ -7743,12 +11016,12 @@ type EasyInputMessage =
 [<Interface>]
 type ResponsesFunctionTool =
     abstract name: string with get, set
-    abstract parameters: obj option with get, set
+    abstract parameters: ResponsesFunctionToolParameters option with get, set
     abstract strict: bool option with get, set
     abstract ``type``: string with get, set
     abstract description: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, ``type``: string, ?parameters: obj, ?strict: bool, ?description: string) : ResponsesFunctionTool = jsNative
+    static member Create (name: string, ``type``: string, ?parameters: ResponsesFunctionToolParameters, ?strict: bool, ?description: string) : ResponsesFunctionTool = jsNative
 
 [<Interface>]
 type ResponseIncompleteDetails =
@@ -7759,10 +11032,10 @@ type ResponseIncompleteDetails =
 [<Interface>]
 type ResponsePrompt =
     abstract id: string with get, set
-    abstract variables: obj option with get, set
+    abstract variables: ResponsePromptVariables option with get, set
     abstract version: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, ?variables: obj, ?version: string) : ResponsePrompt = jsNative
+    static member Create (id: string, ?variables: ResponsePromptVariables, ?version: string) : ResponsePrompt = jsNative
 
 [<Interface>]
 type Reasoning =
@@ -7795,11 +11068,11 @@ type ResponseConversationParam =
 
 [<Interface>]
 type ResponseCreatedEvent =
-    abstract response: obj with get, set
+    abstract response: Response with get, set
     abstract sequence_number: float with get, set
     abstract ``type``: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (response: obj, sequence_number: float, ``type``: string) : ResponseCreatedEvent = jsNative
+    static member Create (response: Response, sequence_number: float, ``type``: string) : ResponseCreatedEvent = jsNative
 
 [<Interface>]
 type ResponseCustomToolCallOutput =
@@ -7829,11 +11102,11 @@ type ResponseErrorEvent =
 
 [<Interface>]
 type ResponseFailedEvent =
-    abstract response: obj with get, set
+    abstract response: Response with get, set
     abstract sequence_number: float with get, set
     abstract ``type``: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (response: obj, sequence_number: float, ``type``: string) : ResponseFailedEvent = jsNative
+    static member Create (response: Response, sequence_number: float, ``type``: string) : ResponseFailedEvent = jsNative
 
 [<Interface>]
 type ResponseFormatText =
@@ -7851,17 +11124,17 @@ type ResponseFormatJSONObject =
 type ResponseFormatTextConfig =
     | [<CompiledName("json_object")>] JsonObject
     | [<CompiledName("text")>] Text
-    | [<CompiledName("json_schema")>] JsonSchema of name: string * schema: obj * description: string option * strict: bool option
+    | [<CompiledName("json_schema")>] JsonSchema of name: string * schema: ResponseFormatTextJSONSchemaConfigSchema * description: string option * strict: bool option
 
 [<Interface>]
 type ResponseFormatTextJSONSchemaConfig =
     abstract name: string with get, set
-    abstract schema: obj with get, set
+    abstract schema: ResponseFormatTextJSONSchemaConfigSchema with get, set
     abstract ``type``: string with get, set
     abstract description: string option with get, set
     abstract strict: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, schema: obj, ``type``: string, ?description: string, ?strict: bool) : ResponseFormatTextJSONSchemaConfig = jsNative
+    static member Create (name: string, schema: ResponseFormatTextJSONSchemaConfigSchema, ``type``: string, ?description: string, ?strict: bool) : ResponseFormatTextJSONSchemaConfig = jsNative
 
 [<Interface>]
 type ResponseFunctionCallArgumentsDeltaEvent =
@@ -7930,11 +11203,11 @@ type ResponseIncludable =
 
 [<Interface>]
 type ResponseIncompleteEvent =
-    abstract response: obj with get, set
+    abstract response: Response with get, set
     abstract sequence_number: float with get, set
     abstract ``type``: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (response: obj, sequence_number: float, ``type``: string) : ResponseIncompleteEvent = jsNative
+    static member Create (response: Response, sequence_number: float, ``type``: string) : ResponseIncompleteEvent = jsNative
 
 type ResponseInput = ResponseInputItem[]
 
@@ -8143,13 +11416,13 @@ type ResponseStatus =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ResponseStreamEvent =
-    | [<CompiledName("response.completed")>] ResponseCompleted of response: obj * sequence_number: float
-    | [<CompiledName("response.created")>] ResponseCreated of response: obj * sequence_number: float
+    | [<CompiledName("response.completed")>] ResponseCompleted of response: Response * sequence_number: float
+    | [<CompiledName("response.created")>] ResponseCreated of response: Response * sequence_number: float
     | [<CompiledName("error")>] Error of code: string option * message: string * param: string option * sequence_number: float
-    | [<CompiledName("response.failed")>] ResponseFailed of response: obj * sequence_number: float
+    | [<CompiledName("response.failed")>] ResponseFailed of response: Response * sequence_number: float
     | [<CompiledName("response.function_call_arguments.delta")>] ResponseFunctionCallArgumentsDelta of delta: string * item_id: string * output_index: float * sequence_number: float
     | [<CompiledName("response.function_call_arguments.done")>] ResponseFunctionCallArgumentsDone of arguments: string * item_id: string * name: string * output_index: float * sequence_number: float
-    | [<CompiledName("response.incomplete")>] ResponseIncomplete of response: obj * sequence_number: float
+    | [<CompiledName("response.incomplete")>] ResponseIncomplete of response: Response * sequence_number: float
     | [<CompiledName("response.output_item.added")>] ResponseOutputItemAdded of item: ResponseOutputItem * output_index: float * sequence_number: float
     | [<CompiledName("response.output_item.done")>] ResponseOutputItemDone of item: ResponseOutputItem * output_index: float * sequence_number: float
     | [<CompiledName("response.reasoning_text.delta")>] ResponseReasoningTextDelta of content_index: float * delta: string * item_id: string * output_index: float * sequence_number: float
@@ -8161,11 +11434,11 @@ type ResponseStreamEvent =
 
 [<Interface>]
 type ResponseCompletedEvent =
-    abstract response: obj with get, set
+    abstract response: Response with get, set
     abstract sequence_number: float with get, set
     abstract ``type``: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (response: obj, sequence_number: float, ``type``: string) : ResponseCompletedEvent = jsNative
+    static member Create (response: Response, sequence_number: float, ``type``: string) : ResponseCompletedEvent = jsNative
 
 [<Interface>]
 type ResponseTextConfig =
@@ -9120,9 +12393,13 @@ type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem2FunctionParamete
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem2FunctionParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem2FunctionParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem2FunctionParametersProperties, ?required: string[]) : Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem2FunctionParameters = jsNative
+
+type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem2FunctionParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem2FunctionParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem2FunctionParametersPropertiesItem =
@@ -9150,9 +12427,13 @@ type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItemParameters =
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItemParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItemParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItemParametersProperties, ?required: string[]) : Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItemParameters = jsNative
+
+type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItemParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItemParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItemParametersPropertiesItem =
@@ -9448,9 +12729,13 @@ type Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItem2FunctionParame
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItem2FunctionParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItem2FunctionParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItem2FunctionParametersProperties, ?required: string[]) : Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItem2FunctionParameters = jsNative
+
+type Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItem2FunctionParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItem2FunctionParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItem2FunctionParametersPropertiesItem =
@@ -9478,9 +12763,13 @@ type Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItemParameters =
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItemParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItemParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItemParametersProperties, ?required: string[]) : Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItemParameters = jsNative
+
+type Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItemParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItemParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItemParametersPropertiesItem =
@@ -9921,9 +13210,13 @@ type Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItem2FunctionParameters 
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItem2FunctionParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItem2FunctionParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItem2FunctionParametersProperties, ?required: string[]) : Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItem2FunctionParameters = jsNative
+
+type Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItem2FunctionParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItem2FunctionParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItem2FunctionParametersPropertiesItem =
@@ -9951,9 +13244,13 @@ type Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItemParameters =
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItemParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItemParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItemParametersProperties, ?required: string[]) : Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItemParameters = jsNative
+
+type Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItemParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItemParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItemParametersPropertiesItem =
@@ -10268,9 +13565,13 @@ type Ai_Cf_Qwen_Qwq_32B_MessagesToolsItem2FunctionParameters =
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Qwen_Qwq_32B_MessagesToolsItem2FunctionParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Qwen_Qwq_32B_MessagesToolsItem2FunctionParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Qwen_Qwq_32B_MessagesToolsItem2FunctionParametersProperties, ?required: string[]) : Ai_Cf_Qwen_Qwq_32B_MessagesToolsItem2FunctionParameters = jsNative
+
+type Ai_Cf_Qwen_Qwq_32B_MessagesToolsItem2FunctionParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Qwen_Qwq_32B_MessagesToolsItem2FunctionParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwq_32B_MessagesToolsItem2FunctionParametersPropertiesItem =
@@ -10298,9 +13599,13 @@ type Ai_Cf_Qwen_Qwq_32B_MessagesToolsItemParameters =
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Qwen_Qwq_32B_MessagesToolsItemParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Qwen_Qwq_32B_MessagesToolsItemParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Qwen_Qwq_32B_MessagesToolsItemParametersProperties, ?required: string[]) : Ai_Cf_Qwen_Qwq_32B_MessagesToolsItemParameters = jsNative
+
+type Ai_Cf_Qwen_Qwq_32B_MessagesToolsItemParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Qwen_Qwq_32B_MessagesToolsItemParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwq_32B_MessagesToolsItemParametersPropertiesItem =
@@ -10603,9 +13908,13 @@ type Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItem2FunctionPa
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItem2FunctionParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItem2FunctionParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItem2FunctionParametersProperties, ?required: string[]) : Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItem2FunctionParameters = jsNative
+
+type Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItem2FunctionParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItem2FunctionParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItem2FunctionParametersPropertiesItem =
@@ -10633,9 +13942,13 @@ type Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItemParameters 
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItemParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItemParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItemParametersProperties, ?required: string[]) : Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItemParameters = jsNative
+
+type Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItemParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItemParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItemParametersPropertiesItem =
@@ -10914,9 +14227,13 @@ type Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItem2FunctionParameters =
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItem2FunctionParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItem2FunctionParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItem2FunctionParametersProperties, ?required: string[]) : Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItem2FunctionParameters = jsNative
+
+type Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItem2FunctionParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItem2FunctionParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItem2FunctionParametersPropertiesItem =
@@ -10944,9 +14261,13 @@ type Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItemParameters =
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItemParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItemParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItemParametersProperties, ?required: string[]) : Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItemParameters = jsNative
+
+type Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItemParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItemParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItemParametersPropertiesItem =
@@ -11249,9 +14570,13 @@ type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItem2FunctionParamet
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItem2FunctionParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItem2FunctionParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItem2FunctionParametersProperties, ?required: string[]) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItem2FunctionParameters = jsNative
+
+type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItem2FunctionParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItem2FunctionParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItem2FunctionParametersPropertiesItem =
@@ -11279,9 +14604,13 @@ type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItemParameters =
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItemParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItemParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItemParametersProperties, ?required: string[]) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItemParameters = jsNative
+
+type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItemParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItemParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItemParametersPropertiesItem =
@@ -11417,9 +14746,13 @@ type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItem2FunctionP
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItem2FunctionParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItem2FunctionParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItem2FunctionParametersProperties, ?required: string[]) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItem2FunctionParameters = jsNative
+
+type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItem2FunctionParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItem2FunctionParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItem2FunctionParametersPropertiesItem =
@@ -11447,9 +14780,13 @@ type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItemParameters
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItemParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItemParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItemParametersProperties, ?required: string[]) : Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItemParameters = jsNative
+
+type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItemParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItemParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItemParametersPropertiesItem =
@@ -11866,9 +15203,13 @@ type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItem2FunctionParameters =
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItem2FunctionParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItem2FunctionParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItem2FunctionParametersProperties, ?required: string[]) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItem2FunctionParameters = jsNative
+
+type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItem2FunctionParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItem2FunctionParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItem2FunctionParametersPropertiesItem =
@@ -11896,9 +15237,13 @@ type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItemParameters =
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItemParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItemParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItemParametersProperties, ?required: string[]) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItemParameters = jsNative
+
+type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItemParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItemParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItemParametersPropertiesItem =
@@ -12003,9 +15348,13 @@ type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItem2FunctionParameters =
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItem2FunctionParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItem2FunctionParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItem2FunctionParametersProperties, ?required: string[]) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItem2FunctionParameters = jsNative
+
+type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItem2FunctionParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItem2FunctionParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItem2FunctionParametersPropertiesItem =
@@ -12033,9 +15382,13 @@ type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItemParameters =
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItemParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItemParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItemParametersProperties, ?required: string[]) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItemParameters = jsNative
+
+type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItemParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItemParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItemParametersPropertiesItem =
@@ -12912,12 +16265,12 @@ type Base_Ai_Cf_Openai_Gpt_Oss_120BInputs2 =
     abstract model: string option with get, set
     abstract audio: AudioParams option with get, set
     abstract frequency_penalty: float option with get, set
-    abstract logit_bias: obj option with get, set
+    abstract logit_bias: RequestInitCfPropertiesBase option with get, set
     abstract logprobs: bool option with get, set
     abstract top_logprobs: float option with get, set
     abstract max_tokens: float option with get, set
     abstract max_completion_tokens: float option with get, set
-    abstract metadata: obj option with get, set
+    abstract metadata: RequestInitCfPropertiesBase option with get, set
     abstract modalities: ChatCompletionsCommonOptionsModalitiesItem[] option with get, set
     abstract n: float option with get, set
     abstract parallel_tool_calls: bool option with get, set
@@ -13341,9 +16694,13 @@ type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItem2FunctionParame
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItem2FunctionParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItem2FunctionParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItem2FunctionParametersProperties, ?required: string[]) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItem2FunctionParameters = jsNative
+
+type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItem2FunctionParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItem2FunctionParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItem2FunctionParametersPropertiesItem =
@@ -13371,9 +16728,13 @@ type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItemParameters =
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItemParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItemParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItemParametersProperties, ?required: string[]) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItemParameters = jsNative
+
+type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItemParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItemParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItemParametersPropertiesItem =
@@ -13478,9 +16839,13 @@ type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItem2FunctionPara
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItem2FunctionParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItem2FunctionParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItem2FunctionParametersProperties, ?required: string[]) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItem2FunctionParameters = jsNative
+
+type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItem2FunctionParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItem2FunctionParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItem2FunctionParametersPropertiesItem =
@@ -13508,9 +16873,13 @@ type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItemParameters =
     /// <summary>
     /// Definitions of each parameter.
     /// </summary>
-    abstract properties: obj with get, set
+    abstract properties: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItemParametersProperties with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, properties: obj, ?required: string[]) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItemParameters = jsNative
+    static member Create (``type``: string, properties: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItemParametersProperties, ?required: string[]) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItemParameters = jsNative
+
+type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItemParametersProperties =
+    [<EmitIndexer>]
+    abstract Item: string -> Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItemParametersPropertiesItem with get, set
 
 [<Interface>]
 type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItemParametersPropertiesItem =
@@ -14736,9 +18105,13 @@ type AiOptions =
     abstract returnRawResponse: bool option with get, set
     abstract prefix: string option with get, set
     abstract extraHeaders: obj option with get, set
-    abstract signal: obj option with get, set
+    abstract signal: AbortSignal option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?queueRequest: bool, ?websocket: bool, ?tags: string[], ?gateway: GatewayOptions, ?returnRawResponse: bool, ?prefix: string, ?extraHeaders: obj, ?signal: obj) : AiOptions = jsNative
+    static member Create (?queueRequest: bool, ?websocket: bool, ?tags: string[], ?gateway: GatewayOptions, ?returnRawResponse: bool, ?prefix: string, ?extraHeaders: obj, ?signal: AbortSignal) : AiOptions = jsNative
+
+type GatewayOptionsMetadata =
+    [<EmitIndexer>]
+    abstract Item: string -> obj option with get, set
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type GatewayRetriesBackoff =
@@ -14824,6 +18197,23 @@ type AiAsyncBatchResponse =
     [<ParamObject; Emit("$0")>]
     static member Create (request_id: string) : AiAsyncBatchResponse = jsNative
 
+type AIGatewayUniversalRequestHeaders =
+    abstract ``cf-aig-metadata``: U2<string, GatewayOptionsMetadata> option with get, set
+    abstract ``cf-aig-custom-cost``: U3<string, AIGatewayUniversalRequestHeadersCfAigCustomCost, AIGatewayUniversalRequestHeadersCfAigCustomCost2> option with get, set
+    abstract ``cf-aig-cache-ttl``: U2<string, float> option with get, set
+    abstract ``cf-aig-skip-cache``: U2<string, bool> option with get, set
+    abstract ``cf-aig-cache-key``: string option with get, set
+    abstract ``cf-aig-event-id``: string option with get, set
+    abstract ``cf-aig-request-timeout``: U2<string, float> option with get, set
+    abstract ``cf-aig-max-attempts``: U2<string, float> option with get, set
+    abstract ``cf-aig-retry-delay``: U2<string, float> option with get, set
+    abstract ``cf-aig-backoff``: string option with get, set
+    abstract ``cf-aig-collect-log``: U2<string, bool> option with get, set
+    abstract Authorization: string option with get, set
+    abstract ``Content-Type``: string option with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj option with get, set
+
 [<Interface>]
 type AIGatewayUniversalRequestHeadersCfAigCustomCost =
     abstract per_token_in: float option with get, set
@@ -14855,10 +18245,10 @@ type Ai<'AiModelList when 'AiModelList :> AiModelListType> =
     /// <remarks>@param autoragId Instance ID</remarks>
     abstract autorag: autoragId: string -> AutoRAG
     abstract run: model: keyof<'AiModelList> * inputs: AiRunInputs * options: AiRunOptions -> JS.Promise<AiAsyncBatchResponse>
-    abstract run: model: keyof<'AiModelList> * inputs: obj * options: AiRunOptions2 -> JS.Promise<obj>
-    abstract run: model: keyof<'AiModelList> * inputs: obj * options: AiRunOptions3 -> JS.Promise<obj>
-    abstract run: model: keyof<'AiModelList> * inputs: obj * ?options: AiOptions -> JS.Promise<obj>
-    abstract run: model: obj * inputs: obj * ?options: AiOptions -> JS.Promise<obj>
+    abstract run: model: keyof<'AiModelList> * inputs: obj * options: AiRunOptions2 -> JS.Promise<Response>
+    abstract run: model: keyof<'AiModelList> * inputs: obj * options: AiRunOptions3 -> JS.Promise<Response>
+    abstract run: model: keyof<'AiModelList> * inputs: obj * ?options: AiOptions -> JS.Promise<ReadableStream<obj>>
+    abstract run: model: obj * inputs: RequestInitCfPropertiesBase * ?options: AiOptions -> JS.Promise<RequestInitCfPropertiesBase>
     abstract models: ?``params``: AiModelsSearchParams -> JS.Promise<AiModelsSearchObject[]>
     abstract toMarkdown: unit -> ToMarkdownService
     abstract toMarkdown: files: MarkdownDocument[] * ?options: ConversionRequestOptions -> JS.Promise<ConversionResponse[]>
@@ -14872,9 +18262,9 @@ type AiGatewayPatchLogFeedback =
 type AiGatewayRunOptions =
     abstract gateway: UniversalGatewayOptions option with get, set
     abstract extraHeaders: obj option with get, set
-    abstract signal: obj option with get, set
+    abstract signal: AbortSignal option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?gateway: UniversalGatewayOptions, ?extraHeaders: obj, ?signal: obj) : AiGatewayRunOptions = jsNative
+    static member Create (?gateway: UniversalGatewayOptions, ?extraHeaders: obj, ?signal: AbortSignal) : AiGatewayRunOptions = jsNative
 
 [<Interface>]
 type AiRunInputs =
@@ -14908,9 +18298,9 @@ type AiRunOptions =
     abstract returnRawResponse: bool option with get, set
     abstract prefix: string option with get, set
     abstract extraHeaders: obj option with get, set
-    abstract signal: obj option with get, set
+    abstract signal: AbortSignal option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (queueRequest: bool, ?websocket: bool, ?tags: string[], ?gateway: GatewayOptions, ?returnRawResponse: bool, ?prefix: string, ?extraHeaders: obj, ?signal: obj) : AiRunOptions = jsNative
+    static member Create (queueRequest: bool, ?websocket: bool, ?tags: string[], ?gateway: GatewayOptions, ?returnRawResponse: bool, ?prefix: string, ?extraHeaders: obj, ?signal: AbortSignal) : AiRunOptions = jsNative
 
 [<Interface>]
 type AiRunOptions2 =
@@ -14938,9 +18328,9 @@ type AiRunOptions2 =
     abstract returnRawResponse: bool with get, set
     abstract prefix: string option with get, set
     abstract extraHeaders: obj option with get, set
-    abstract signal: obj option with get, set
+    abstract signal: AbortSignal option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (returnRawResponse: bool, ?queueRequest: bool, ?websocket: bool, ?tags: string[], ?gateway: GatewayOptions, ?prefix: string, ?extraHeaders: obj, ?signal: obj) : AiRunOptions2 = jsNative
+    static member Create (returnRawResponse: bool, ?queueRequest: bool, ?websocket: bool, ?tags: string[], ?gateway: GatewayOptions, ?prefix: string, ?extraHeaders: obj, ?signal: AbortSignal) : AiRunOptions2 = jsNative
 
 [<Interface>]
 type AiRunOptions3 =
@@ -14968,9 +18358,9 @@ type AiRunOptions3 =
     abstract returnRawResponse: bool option with get, set
     abstract prefix: string option with get, set
     abstract extraHeaders: obj option with get, set
-    abstract signal: obj option with get, set
+    abstract signal: AbortSignal option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (websocket: bool, ?queueRequest: bool, ?tags: string[], ?gateway: GatewayOptions, ?returnRawResponse: bool, ?prefix: string, ?extraHeaders: obj, ?signal: obj) : AiRunOptions3 = jsNative
+    static member Create (websocket: bool, ?queueRequest: bool, ?tags: string[], ?gateway: GatewayOptions, ?returnRawResponse: bool, ?prefix: string, ?extraHeaders: obj, ?signal: AbortSignal) : AiRunOptions3 = jsNative
 
 [<Interface>]
 type AutoRagListResponseItem =
@@ -15003,10 +18393,14 @@ type AutoRagSearchResponseDataItem =
     abstract file_id: string with get, set
     abstract filename: string with get, set
     abstract score: float with get, set
-    abstract attributes: obj with get, set
+    abstract attributes: AutoRagSearchResponseDataItemAttributes with get, set
     abstract content: AutoRagSearchResponseDataItemContentItem[] with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (file_id: string, filename: string, score: float, attributes: obj, content: AutoRagSearchResponseDataItemContentItem[]) : AutoRagSearchResponseDataItem = jsNative
+    static member Create (file_id: string, filename: string, score: float, attributes: AutoRagSearchResponseDataItemAttributes, content: AutoRagSearchResponseDataItemContentItem[]) : AutoRagSearchResponseDataItem = jsNative
+
+type AutoRagSearchResponseDataItemAttributes =
+    [<EmitIndexer>]
+    abstract Item: string -> U3<string, float, bool> option with get, set
 
 [<Interface>]
 type AutoRagSearchResponseDataItemContentItem =
@@ -15099,13 +18493,13 @@ type GatewayOptions =
     abstract cacheKey: string option with get, set
     abstract cacheTtl: float option with get, set
     abstract skipCache: bool option with get, set
-    abstract metadata: obj option with get, set
+    abstract metadata: GatewayOptionsMetadata option with get, set
     abstract collectLog: bool option with get, set
     abstract eventId: string option with get, set
     abstract requestTimeoutMs: float option with get, set
     abstract retries: GatewayRetries option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, ?cacheKey: string, ?cacheTtl: float, ?skipCache: bool, ?metadata: obj, ?collectLog: bool, ?eventId: string, ?requestTimeoutMs: float, ?retries: GatewayRetries) : GatewayOptions = jsNative
+    static member Create (id: string, ?cacheKey: string, ?cacheTtl: float, ?skipCache: bool, ?metadata: GatewayOptionsMetadata, ?collectLog: bool, ?eventId: string, ?requestTimeoutMs: float, ?retries: GatewayRetries) : GatewayOptions = jsNative
 
 [<Interface>]
 type UniversalGatewayOptions =
@@ -15118,21 +18512,21 @@ type UniversalGatewayOptions =
     abstract cacheKey: string option with get, set
     abstract cacheTtl: float option with get, set
     abstract skipCache: bool option with get, set
-    abstract metadata: obj option with get, set
+    abstract metadata: GatewayOptionsMetadata option with get, set
     abstract collectLog: bool option with get, set
     abstract eventId: string option with get, set
     abstract requestTimeoutMs: float option with get, set
     abstract retries: GatewayRetries option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, ?cacheKey: string, ?cacheTtl: float, ?skipCache: bool, ?metadata: obj, ?collectLog: bool, ?eventId: string, ?requestTimeoutMs: float, ?retries: GatewayRetries) : UniversalGatewayOptions = jsNative
+    static member Create (id: string, ?cacheKey: string, ?cacheTtl: float, ?skipCache: bool, ?metadata: GatewayOptionsMetadata, ?collectLog: bool, ?eventId: string, ?requestTimeoutMs: float, ?retries: GatewayRetries) : UniversalGatewayOptions = jsNative
 
 [<Interface>]
 type AiGatewayPatchLog =
     abstract score: float option with get, set
     abstract feedback: AiGatewayPatchLogFeedback option with get, set
-    abstract metadata: obj option with get, set
+    abstract metadata: GatewayOptionsMetadata option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?score: float, ?feedback: AiGatewayPatchLogFeedback, ?metadata: obj) : AiGatewayPatchLog = jsNative
+    static member Create (?score: float, ?feedback: AiGatewayPatchLogFeedback, ?metadata: GatewayOptionsMetadata) : AiGatewayPatchLog = jsNative
 
 type AiGatewayLog =
     abstract id: string with get, set
@@ -15149,7 +18543,7 @@ type AiGatewayLog =
     abstract cached: bool with get, set
     abstract tokens_in: float option with get, set
     abstract tokens_out: float option with get, set
-    abstract metadata: obj option with get, set
+    abstract metadata: GatewayOptionsMetadata option with get, set
     abstract step: float option with get, set
     abstract cost: float option with get, set
     abstract custom_cost: bool option with get, set
@@ -15185,7 +18579,7 @@ type AIGatewayProviders =
     | [<CompiledName("workers-ai")>] WorkersAi
 
 type AIGatewayHeaders =
-    abstract ``cf-aig-metadata``: obj with get, set
+    abstract ``cf-aig-metadata``: U2<string, GatewayOptionsMetadata> with get, set
     abstract ``cf-aig-custom-cost``: U3<string, AIGatewayUniversalRequestHeadersCfAigCustomCost, AIGatewayUniversalRequestHeadersCfAigCustomCost2> with get, set
     abstract ``cf-aig-cache-ttl``: U2<string, float> with get, set
     abstract ``cf-aig-skip-cache``: U2<string, bool> with get, set
@@ -15205,10 +18599,10 @@ type AIGatewayHeaders =
 type AIGatewayUniversalRequest =
     abstract provider: string with get, set
     abstract endpoint: string with get, set
-    abstract headers: obj with get, set
+    abstract headers: AIGatewayUniversalRequestHeaders with get, set
     abstract query: obj with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (provider: string, endpoint: string, headers: obj, query: obj) : AIGatewayUniversalRequest = jsNative
+    static member Create (provider: string, endpoint: string, headers: AIGatewayUniversalRequestHeaders, query: obj) : AIGatewayUniversalRequest = jsNative
 
 [<Interface>]
 type AiGatewayInternalError =
@@ -15231,7 +18625,7 @@ type AiGatewayLogNotFound =
 type AiGateway =
     abstract patchLog: logId: string * data: AiGatewayPatchLog -> JS.Promise<unit>
     abstract getLog: logId: string -> JS.Promise<AiGatewayLog>
-    abstract run: data: U2<AIGatewayUniversalRequest, AIGatewayUniversalRequest[]> * ?options: AiGatewayRunOptions -> JS.Promise<obj>
+    abstract run: data: U2<AIGatewayUniversalRequest, AIGatewayUniversalRequest[]> * ?options: AiGatewayRunOptions -> JS.Promise<Response>
     abstract getUrl: ?provider: string -> JS.Promise<string>
 
 /// <summary>
@@ -15326,7 +18720,7 @@ type ArtifactsRepoListResult =
     /// <summary>
     /// Repositories in this page (without the <c>remote</c> field).
     /// </summary>
-    abstract repos: obj[] with get, set
+    abstract repos: ArtifactsRepoListResultReposItem[] with get, set
     /// <summary>
     /// Total number of repositories in the namespace.
     /// </summary>
@@ -15336,7 +18730,48 @@ type ArtifactsRepoListResult =
     /// </summary>
     abstract cursor: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (repos: obj[], total: float, ?cursor: string) : ArtifactsRepoListResult = jsNative
+    static member Create (repos: ArtifactsRepoListResultReposItem[], total: float, ?cursor: string) : ArtifactsRepoListResult = jsNative
+
+[<Interface>]
+type ArtifactsRepoListResultReposItem =
+    /// <summary>
+    /// Unique repository ID.
+    /// </summary>
+    abstract id: string with get, set
+    /// <summary>
+    /// Repository name.
+    /// </summary>
+    abstract name: string with get, set
+    /// <summary>
+    /// Repository description, or null if not set.
+    /// </summary>
+    abstract description: string option with get, set
+    /// <summary>
+    /// Default branch name (e.g. "main").
+    /// </summary>
+    abstract defaultBranch: string with get, set
+    /// <summary>
+    /// ISO 8601 creation timestamp.
+    /// </summary>
+    abstract createdAt: string with get, set
+    /// <summary>
+    /// ISO 8601 last-updated timestamp.
+    /// </summary>
+    abstract updatedAt: string with get, set
+    /// <summary>
+    /// ISO 8601 timestamp of the last push, or null if never pushed.
+    /// </summary>
+    abstract lastPushAt: string option with get, set
+    /// <summary>
+    /// Fork source (e.g. "github:owner/repo", "artifacts:namespace/repo"), or null if not a fork.
+    /// </summary>
+    abstract source: string option with get, set
+    /// <summary>
+    /// Whether the repository is read-only.
+    /// </summary>
+    abstract readOnly: bool with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (id: string, name: string, defaultBranch: string, createdAt: string, updatedAt: string, readOnly: bool, ?description: string, ?lastPushAt: string, ?source: string) : ArtifactsRepoListResultReposItem = jsNative
 
 /// <summary>
 /// Result of creating an access token.
@@ -15829,7 +19264,7 @@ type AutoRAG =
     /// Use the standalone AI Search Workers binding instead.
     /// See https://developers.cloudflare.com/ai-search/usage/workers-binding/
     /// </remarks>
-    abstract aiSearch: ``params``: AutoRagAiSearchRequestStreaming -> JS.Promise<obj>
+    abstract aiSearch: ``params``: AutoRagAiSearchRequestStreaming -> JS.Promise<Response>
     /// <remarks>
     /// @deprecated
     /// Use the standalone AI Search Workers binding instead.
@@ -15928,7 +19363,7 @@ type BrowserRunBaseOptions =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -15967,7 +19402,7 @@ type BrowserRunBaseOptions =
     /// <remarks>@default 5</remarks>
     abstract cacheTTL: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunBaseOptions = jsNative
+    static member Create (?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunBaseOptions = jsNative
 
 [<Interface>]
 type BrowserRunBaseOptionsAddScriptTagItem =
@@ -16139,7 +19574,7 @@ type BrowserRunCommonOptions2 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -16182,7 +19617,7 @@ type BrowserRunCommonOptions2 =
     /// </summary>
     abstract url: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunCommonOptions2 = jsNative
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunCommonOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunCommonOptions3 =
@@ -16235,7 +19670,7 @@ type BrowserRunCommonOptions3 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -16278,7 +19713,7 @@ type BrowserRunCommonOptions3 =
     /// </summary>
     abstract html: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunCommonOptions3 = jsNative
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunCommonOptions3 = jsNative
 
 [<Interface>]
 type BrowserRunPuppeteerScreenshotOptions =
@@ -16371,7 +19806,7 @@ type BrowserRunScreenshotOptions2 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -16428,7 +19863,7 @@ type BrowserRunScreenshotOptions2 =
     /// </summary>
     abstract browser: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?selector: string, ?scrollPage: bool, ?screenshotOptions: BrowserRunPuppeteerScreenshotOptions, ?browser: string) : BrowserRunScreenshotOptions2 = jsNative
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?selector: string, ?scrollPage: bool, ?screenshotOptions: BrowserRunPuppeteerScreenshotOptions, ?browser: string) : BrowserRunScreenshotOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunScreenshotOptions3 =
@@ -16482,7 +19917,7 @@ type BrowserRunScreenshotOptions3 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -16539,7 +19974,7 @@ type BrowserRunScreenshotOptions3 =
     /// </summary>
     abstract browser: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?selector: string, ?scrollPage: bool, ?screenshotOptions: BrowserRunPuppeteerScreenshotOptions, ?browser: string) : BrowserRunScreenshotOptions3 = jsNative
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?selector: string, ?scrollPage: bool, ?screenshotOptions: BrowserRunPuppeteerScreenshotOptions, ?browser: string) : BrowserRunScreenshotOptions3 = jsNative
 
 type BrowserRunPDFOptions = U2<BrowserRunPDFOptions2, BrowserRunPDFOptions3>
 
@@ -16595,7 +20030,7 @@ type BrowserRunPDFOptions2 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -16644,7 +20079,7 @@ type BrowserRunPDFOptions2 =
     /// </summary>
     abstract browser: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?pdfOptions: BrowserRunPDFOptions2PdfOptions, ?browser: string) : BrowserRunPDFOptions2 = jsNative
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?pdfOptions: BrowserRunPDFOptions2PdfOptions, ?browser: string) : BrowserRunPDFOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunPDFOptions2PdfOptions =
@@ -16752,7 +20187,7 @@ type BrowserRunPDFOptions3 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -16801,7 +20236,7 @@ type BrowserRunPDFOptions3 =
     /// </summary>
     abstract browser: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?pdfOptions: BrowserRunPDFOptions2PdfOptions, ?browser: string) : BrowserRunPDFOptions3 = jsNative
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?pdfOptions: BrowserRunPDFOptions2PdfOptions, ?browser: string) : BrowserRunPDFOptions3 = jsNative
 
 type BrowserRunScrapeOptions = U2<BrowserRunScrapeOptions2, BrowserRunScrapeOptions3>
 
@@ -16856,7 +20291,7 @@ type BrowserRunScrapeOptions2 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -16903,7 +20338,7 @@ type BrowserRunScrapeOptions2 =
     /// </summary>
     abstract elements: BrowserRunScrapeOptions2ElementsItem[] with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, elements: BrowserRunScrapeOptions2ElementsItem[], ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunScrapeOptions2 = jsNative
+    static member Create (url: string, elements: BrowserRunScrapeOptions2ElementsItem[], ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunScrapeOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunScrapeOptions2ElementsItem =
@@ -16962,7 +20397,7 @@ type BrowserRunScrapeOptions3 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -17009,7 +20444,7 @@ type BrowserRunScrapeOptions3 =
     /// </summary>
     abstract elements: BrowserRunScrapeOptions2ElementsItem[] with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, elements: BrowserRunScrapeOptions2ElementsItem[], ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunScrapeOptions3 = jsNative
+    static member Create (html: string, elements: BrowserRunScrapeOptions2ElementsItem[], ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float) : BrowserRunScrapeOptions3 = jsNative
 
 type BrowserRunLinksOptions = U2<BrowserRunLinksOptions2, BrowserRunLinksOptions3>
 
@@ -17064,7 +20499,7 @@ type BrowserRunLinksOptions2 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -17117,7 +20552,7 @@ type BrowserRunLinksOptions2 =
     /// <remarks>@default false</remarks>
     abstract excludeExternalLinks: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?visibleLinksOnly: bool, ?excludeExternalLinks: bool) : BrowserRunLinksOptions2 = jsNative
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?visibleLinksOnly: bool, ?excludeExternalLinks: bool) : BrowserRunLinksOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunLinksOptions3 =
@@ -17170,7 +20605,7 @@ type BrowserRunLinksOptions3 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -17223,7 +20658,7 @@ type BrowserRunLinksOptions3 =
     /// <remarks>@default false</remarks>
     abstract excludeExternalLinks: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?visibleLinksOnly: bool, ?excludeExternalLinks: bool) : BrowserRunLinksOptions3 = jsNative
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?visibleLinksOnly: bool, ?excludeExternalLinks: bool) : BrowserRunLinksOptions3 = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type BrowserRunSnapshotFormat =
@@ -17285,7 +20720,7 @@ type BrowserRunSnapshotOptions2 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -17334,9 +20769,23 @@ type BrowserRunSnapshotOptions2 =
     /// <remarks>@default ["content","screenshot"]</remarks>
     abstract formats: BrowserRunSnapshotFormat[] option with get, set
     /// <remarks>@see https://pptr.dev/api/puppeteer.screenshotoptions</remarks>
-    abstract screenshotOptions: obj option with get, set
+    abstract screenshotOptions: BrowserRunSnapshotOptions2ScreenshotOptions option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?formats: BrowserRunSnapshotFormat[], ?screenshotOptions: obj) : BrowserRunSnapshotOptions2 = jsNative
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?formats: BrowserRunSnapshotFormat[], ?screenshotOptions: BrowserRunSnapshotOptions2ScreenshotOptions) : BrowserRunSnapshotOptions2 = jsNative
+
+[<Interface>]
+type BrowserRunSnapshotOptions2ScreenshotOptions =
+    /// <remarks>@default "png"</remarks>
+    abstract ``type``: BrowserRunPuppeteerScreenshotOptionsType option with get, set
+    abstract quality: float option with get, set
+    abstract fullPage: bool option with get, set
+    abstract clip: BrowserRunPuppeteerScreenshotOptionsClip option with get, set
+    abstract omitBackground: bool option with get, set
+    abstract optimizeForSpeed: bool option with get, set
+    abstract captureBeyondViewport: bool option with get, set
+    abstract fromSurface: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?``type``: BrowserRunPuppeteerScreenshotOptionsType, ?quality: float, ?fullPage: bool, ?clip: BrowserRunPuppeteerScreenshotOptionsClip, ?omitBackground: bool, ?optimizeForSpeed: bool, ?captureBeyondViewport: bool, ?fromSurface: bool) : BrowserRunSnapshotOptions2ScreenshotOptions = jsNative
 
 [<Interface>]
 type BrowserRunSnapshotOptions3 =
@@ -17389,7 +20838,7 @@ type BrowserRunSnapshotOptions3 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -17438,9 +20887,9 @@ type BrowserRunSnapshotOptions3 =
     /// <remarks>@default ["content","screenshot"]</remarks>
     abstract formats: BrowserRunSnapshotFormat[] option with get, set
     /// <remarks>@see https://pptr.dev/api/puppeteer.screenshotoptions</remarks>
-    abstract screenshotOptions: obj option with get, set
+    abstract screenshotOptions: BrowserRunSnapshotOptions2ScreenshotOptions option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?formats: BrowserRunSnapshotFormat[], ?screenshotOptions: obj) : BrowserRunSnapshotOptions3 = jsNative
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?formats: BrowserRunSnapshotFormat[], ?screenshotOptions: BrowserRunSnapshotOptions2ScreenshotOptions) : BrowserRunSnapshotOptions3 = jsNative
 
 /// <summary>
 /// Options for the <c>accessibilityTree</c> quick action.
@@ -17499,7 +20948,7 @@ type BrowserRunAccessibilityTreeOptions2 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -17558,7 +21007,7 @@ type BrowserRunAccessibilityTreeOptions2 =
     /// </summary>
     abstract browser: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?interestingOnly: bool, ?root: string, ?browser: string) : BrowserRunAccessibilityTreeOptions2 = jsNative
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?interestingOnly: bool, ?root: string, ?browser: string) : BrowserRunAccessibilityTreeOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunAccessibilityTreeOptions3 =
@@ -17612,7 +21061,7 @@ type BrowserRunAccessibilityTreeOptions3 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -17671,7 +21120,7 @@ type BrowserRunAccessibilityTreeOptions3 =
     /// </summary>
     abstract browser: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?interestingOnly: bool, ?root: string, ?browser: string) : BrowserRunAccessibilityTreeOptions3 = jsNative
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?interestingOnly: bool, ?root: string, ?browser: string) : BrowserRunAccessibilityTreeOptions3 = jsNative
 
 [<Interface>]
 type BrowserRunJsonBaseOptions =
@@ -17754,7 +21203,7 @@ type BrowserRunJsonOptions2 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -17814,7 +21263,7 @@ type BrowserRunJsonOptions2 =
     /// <remarks>@see https://developers.cloudflare.com/workers-ai/json-mode/</remarks>
     abstract response_format: AiTextGenerationResponseFormat option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, prompt: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptionsCustomAiItem[], ?response_format: AiTextGenerationResponseFormat) : BrowserRunJsonOptions2 = jsNative
+    static member Create (url: string, prompt: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptionsCustomAiItem[], ?response_format: AiTextGenerationResponseFormat) : BrowserRunJsonOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunJsonOptions3 =
@@ -17869,7 +21318,7 @@ type BrowserRunJsonOptions3 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -17929,7 +21378,7 @@ type BrowserRunJsonOptions3 =
     /// <remarks>@see https://developers.cloudflare.com/workers-ai/json-mode/</remarks>
     abstract response_format: AiTextGenerationResponseFormat with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, response_format: AiTextGenerationResponseFormat, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptionsCustomAiItem[], ?prompt: string) : BrowserRunJsonOptions3 = jsNative
+    static member Create (url: string, response_format: AiTextGenerationResponseFormat, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptionsCustomAiItem[], ?prompt: string) : BrowserRunJsonOptions3 = jsNative
 
 [<Interface>]
 type BrowserRunJsonOptions4 =
@@ -17984,7 +21433,7 @@ type BrowserRunJsonOptions4 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -18044,7 +21493,7 @@ type BrowserRunJsonOptions4 =
     /// <remarks>@see https://developers.cloudflare.com/workers-ai/json-mode/</remarks>
     abstract response_format: AiTextGenerationResponseFormat option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, prompt: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptionsCustomAiItem[], ?response_format: AiTextGenerationResponseFormat) : BrowserRunJsonOptions4 = jsNative
+    static member Create (html: string, prompt: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptionsCustomAiItem[], ?response_format: AiTextGenerationResponseFormat) : BrowserRunJsonOptions4 = jsNative
 
 [<Interface>]
 type BrowserRunJsonOptions5 =
@@ -18099,7 +21548,7 @@ type BrowserRunJsonOptions5 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -18159,7 +21608,7 @@ type BrowserRunJsonOptions5 =
     /// <remarks>@see https://developers.cloudflare.com/workers-ai/json-mode/</remarks>
     abstract response_format: AiTextGenerationResponseFormat with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, response_format: AiTextGenerationResponseFormat, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptionsCustomAiItem[], ?prompt: string) : BrowserRunJsonOptions5 = jsNative
+    static member Create (html: string, response_format: AiTextGenerationResponseFormat, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string, ?custom_ai: BrowserRunJsonBaseOptionsCustomAiItem[], ?prompt: string) : BrowserRunJsonOptions5 = jsNative
 
 type BrowserRunContentOptions = U2<BrowserRunContentOptions2, BrowserRunContentOptions3>
 
@@ -18215,7 +21664,7 @@ type BrowserRunContentOptions2 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -18262,7 +21711,7 @@ type BrowserRunContentOptions2 =
     /// </summary>
     abstract browser: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string) : BrowserRunContentOptions2 = jsNative
+    static member Create (url: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string) : BrowserRunContentOptions2 = jsNative
 
 [<Interface>]
 type BrowserRunContentOptions3 =
@@ -18316,7 +21765,7 @@ type BrowserRunContentOptions3 =
     /// <summary>
     /// Additional HTTP headers sent with every request.
     /// </summary>
-    abstract setExtraHTTPHeaders: obj option with get, set
+    abstract setExtraHTTPHeaders: RequestInitHeaders option with get, set
     /// <summary>
     /// Whether JavaScript is enabled on the page.
     /// </summary>
@@ -18363,7 +21812,7 @@ type BrowserRunContentOptions3 =
     /// </summary>
     abstract browser: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: obj, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string) : BrowserRunContentOptions3 = jsNative
+    static member Create (html: string, ?addScriptTag: BrowserRunBaseOptionsAddScriptTagItem[], ?addStyleTag: BrowserRunBaseOptionsAddStyleTagItem[], ?authenticate: BrowserRunBaseOptionsAuthenticate, ?cookies: BrowserRunBaseOptionsCookiesItem[], ?emulateMediaType: string, ?gotoOptions: BrowserRunBaseOptionsGotoOptions, ?rejectRequestPattern: string[], ?allowRequestPattern: string[], ?rejectResourceTypes: BrowserRunResourceType[], ?allowResourceTypes: BrowserRunResourceType[], ?setExtraHTTPHeaders: RequestInitHeaders, ?setJavaScriptEnabled: bool, ?userAgent: string, ?viewport: BrowserRunBaseOptionsViewport, ?waitForSelector: BrowserRunBaseOptionsWaitForSelector, ?waitForTimeout: float, ?bestAttempt: bool, ?actionTimeout: float, ?cacheTTL: float, ?browser: string) : BrowserRunContentOptions3 = jsNative
 
 type BrowserRunMarkdownOptions = BrowserRunContentOptions
 
@@ -18380,9 +21829,9 @@ type BrowserRunRedirectHop =
     /// <summary>
     /// Redirect response headers, including <c>location</c>.
     /// </summary>
-    abstract headers: obj with get, set
+    abstract headers: RequestInitHeaders with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, status: float, headers: obj) : BrowserRunRedirectHop = jsNative
+    static member Create (url: string, status: float, headers: RequestInitHeaders) : BrowserRunRedirectHop = jsNative
 
 [<Interface>]
 type BrowserRunResponseMeta =
@@ -18397,7 +21846,7 @@ type BrowserRunResponseMeta =
     /// <summary>
     /// Origin response headers, lowercased. Repeated headers are joined with a newline. Credential and transport-only headers that do not survive rendering are omitted.
     /// </summary>
-    abstract headers: obj option with get, set
+    abstract headers: RequestInitHeaders option with get, set
     /// <summary>
     /// URL that served the response, after any redirects the browser followed.
     /// </summary>
@@ -18407,7 +21856,7 @@ type BrowserRunResponseMeta =
     /// </summary>
     abstract redirectChain: BrowserRunRedirectHop[] option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (status: float, title: string, ?headers: obj, ?finalUrl: string, ?redirectChain: BrowserRunRedirectHop[]) : BrowserRunResponseMeta = jsNative
+    static member Create (status: float, title: string, ?headers: RequestInitHeaders, ?finalUrl: string, ?redirectChain: BrowserRunRedirectHop[]) : BrowserRunResponseMeta = jsNative
 
 /// <summary>
 /// A node in the page's accessibility tree, as exposed to assistive technology.
@@ -18664,10 +22113,10 @@ type BrowserRunJsonSuccessResponse =
     /// <summary>
     /// JSON data extracted from the page using an AI model
     /// </summary>
-    abstract result: obj with get, set
+    abstract result: RequestInitCfPropertiesBase with get, set
     abstract meta: BrowserRunResponseMeta with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (success: bool, result: obj, meta: BrowserRunResponseMeta) : BrowserRunJsonSuccessResponse = jsNative
+    static member Create (success: bool, result: RequestInitCfPropertiesBase, meta: BrowserRunResponseMeta) : BrowserRunJsonSuccessResponse = jsNative
 
 /// <summary>
 /// Success response for <c>markdown</c> action.
@@ -18727,7 +22176,7 @@ type BrowserRun =
     /// Used by libraries like <c>@cloudflare/puppeteer</c> to acquire and connect to a browser instance.
     /// </summary>
     /// <remarks>@see https://developers.cloudflare.com/browser-run/</remarks>
-    abstract fetch: input: obj * ?init: obj -> JS.Promise<obj>
+    abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, URL> * ?init: RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> -> JS.Promise<Response>
     /// <summary>
     /// Take a screenshot of a web page.
     /// Generate a PDF of a web page.
@@ -18889,7 +22338,7 @@ type BrowserRun =
     /// **Headers:**
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    abstract quickAction: action: string * options: BrowserRunScreenshotOptions -> JS.Promise<obj>
+    abstract quickAction: action: string * options: BrowserRunScreenshotOptions -> JS.Promise<Response>
     /// <summary>
     /// Take a screenshot of a web page.
     /// Generate a PDF of a web page.
@@ -19051,7 +22500,7 @@ type BrowserRun =
     /// **Headers:**
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    abstract quickAction: action: string * options: BrowserRunPDFOptions -> JS.Promise<obj>
+    abstract quickAction: action: string * options: BrowserRunPDFOptions -> JS.Promise<Response>
     /// <summary>
     /// Take a screenshot of a web page.
     /// Generate a PDF of a web page.
@@ -19213,7 +22662,7 @@ type BrowserRun =
     /// **Headers:**
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    abstract quickAction: action: string * options: BrowserRunContentOptions -> JS.Promise<obj>
+    abstract quickAction: action: string * options: BrowserRunContentOptions -> JS.Promise<Response>
     /// <summary>
     /// Take a screenshot of a web page.
     /// Generate a PDF of a web page.
@@ -19375,7 +22824,7 @@ type BrowserRun =
     /// **Headers:**
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    abstract quickAction: action: string * options: BrowserRunScrapeOptions -> JS.Promise<obj>
+    abstract quickAction: action: string * options: BrowserRunScrapeOptions -> JS.Promise<Response>
     /// <summary>
     /// Take a screenshot of a web page.
     /// Generate a PDF of a web page.
@@ -19537,7 +22986,7 @@ type BrowserRun =
     /// **Headers:**
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    abstract quickAction: action: string * options: BrowserRunLinksOptions -> JS.Promise<obj>
+    abstract quickAction: action: string * options: BrowserRunLinksOptions -> JS.Promise<Response>
     /// <summary>
     /// Take a screenshot of a web page.
     /// Generate a PDF of a web page.
@@ -19699,7 +23148,7 @@ type BrowserRun =
     /// **Headers:**
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    abstract quickAction: action: string * options: BrowserRunSnapshotOptions -> JS.Promise<obj>
+    abstract quickAction: action: string * options: BrowserRunSnapshotOptions -> JS.Promise<Response>
     /// <summary>
     /// Take a screenshot of a web page.
     /// Generate a PDF of a web page.
@@ -19861,7 +23310,7 @@ type BrowserRun =
     /// **Headers:**
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    abstract quickAction: action: string * options: BrowserRunJsonOptions -> JS.Promise<obj>
+    abstract quickAction: action: string * options: BrowserRunJsonOptions -> JS.Promise<Response>
     /// <summary>
     /// Take a screenshot of a web page.
     /// Generate a PDF of a web page.
@@ -20023,7 +23472,7 @@ type BrowserRun =
     /// **Headers:**
     /// - <c>X-Browser-Ms-Used</c>: Browser time consumed in milliseconds (set when status &lt; 500)
     /// </remarks>
-    abstract quickAction: action: string * options: BrowserRunAccessibilityTreeOptions -> JS.Promise<obj>
+    abstract quickAction: action: string * options: BrowserRunAccessibilityTreeOptions -> JS.Promise<Response>
 
 /// <summary>
 /// In addition to the properties you can set in the RequestInit dict
@@ -20062,7 +23511,7 @@ type RequestInitCfProperties =
     /// Force response to be cached for a given number of seconds based on the Origin status code.
     /// (e.g. { '200-299': 86400, '404': 1, '500-599': 0 })
     /// </summary>
-    abstract cacheTtlByStatus: obj option with get, set
+    abstract cacheTtlByStatus: RequestInitCfPropertiesCacheTtlByStatus option with get, set
     /// <summary>
     /// Controls how responses with a <c>Vary</c> header are cached for this request.
     /// </summary>
@@ -20892,7 +24341,7 @@ type IncomingRequestCfProperties<'HostMetadata> =
     /// <summary>
     /// Results of Cloudflare's Bot Management analysis
     /// </summary>
-    abstract botManagement: FetchEventRequestItemBotManagement with get, set
+    abstract botManagement: RequestFetcherFetchInitItemBotManagement with get, set
     /// <summary>
     /// Duplicate of <c>botManagement.score</c>.
     /// </summary>
@@ -20915,7 +24364,7 @@ type IncomingRequestCfProperties<'HostMetadata> =
     /// The country code <c>"T1"</c> is used for requests originating on TOR.
     /// </summary>
     /// <remarks>@example "GB"</remarks>
-    abstract country: FetchEventRequestItemCountry option with get, set
+    abstract country: RequestFetcherFetchInitItemCountry option with get, set
     /// <summary>
     /// If present, this property indicates that the request originated in the EU
     /// </summary>
@@ -21104,14 +24553,14 @@ type IncomingRequestCfPropertiesBotManagementEnterprise =
     /// <summary>
     /// Results of Cloudflare's Bot Management analysis
     /// </summary>
-    abstract botManagement: FetchEventRequestItemBotManagement with get, set
+    abstract botManagement: RequestFetcherFetchInitItemBotManagement with get, set
     /// <summary>
     /// Duplicate of <c>botManagement.score</c>.
     /// </summary>
     /// <remarks>@deprecated</remarks>
     abstract clientTrustScore: float with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (botManagement: FetchEventRequestItemBotManagement, clientTrustScore: float) : IncomingRequestCfPropertiesBotManagementEnterprise = jsNative
+    static member Create (botManagement: RequestFetcherFetchInitItemBotManagement, clientTrustScore: float) : IncomingRequestCfPropertiesBotManagementEnterprise = jsNative
 
 [<Interface>]
 type IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<'HostMetadata> =
@@ -21188,7 +24637,7 @@ type IncomingRequestCfPropertiesGeographicInformation =
     /// The country code <c>"T1"</c> is used for requests originating on TOR.
     /// </summary>
     /// <remarks>@example "GB"</remarks>
-    abstract country: FetchEventRequestItemCountry option with get, set
+    abstract country: RequestFetcherFetchInitItemCountry option with get, set
     /// <summary>
     /// If present, this property indicates that the request originated in the EU
     /// </summary>
@@ -21242,7 +24691,7 @@ type IncomingRequestCfPropertiesGeographicInformation =
     /// <remarks>@example "635"</remarks>
     abstract metroCode: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?country: FetchEventRequestItemCountry, ?isEUCountry: string, ?continent: ContinentCode, ?city: string, ?postalCode: string, ?latitude: string, ?longitude: string, ?timezone: string, ?region: string, ?regionCode: string, ?metroCode: string) : IncomingRequestCfPropertiesGeographicInformation = jsNative
+    static member Create (?country: RequestFetcherFetchInitItemCountry, ?isEUCountry: string, ?continent: ContinentCode, ?city: string, ?postalCode: string, ?latitude: string, ?longitude: string, ?timezone: string, ?region: string, ?regionCode: string, ?metroCode: string) : IncomingRequestCfPropertiesGeographicInformation = jsNative
 
 /// <summary>
 /// Data about the incoming request's TLS certificate
@@ -21749,7 +25198,7 @@ type CfProperties2<'HostMetadata> =
     /// <summary>
     /// Results of Cloudflare's Bot Management analysis
     /// </summary>
-    abstract botManagement: FetchEventRequestItemBotManagement with get, set
+    abstract botManagement: RequestFetcherFetchInitItemBotManagement with get, set
     /// <summary>
     /// Duplicate of <c>botManagement.score</c>.
     /// </summary>
@@ -21772,7 +25221,7 @@ type CfProperties2<'HostMetadata> =
     /// The country code <c>"T1"</c> is used for requests originating on TOR.
     /// </summary>
     /// <remarks>@example "GB"</remarks>
-    abstract country: FetchEventRequestItemCountry option with get, set
+    abstract country: RequestFetcherFetchInitItemCountry option with get, set
     /// <summary>
     /// If present, this property indicates that the request originated in the EU
     /// </summary>
@@ -21892,6 +25341,7 @@ type D1Response =
 
 type D1ResponseMeta =
     inherit D1Meta
+    inherit RequestInitCfPropertiesBase
     abstract duration: float with get, set
     abstract size_after: float with get, set
     abstract rows_read: float with get, set
@@ -22029,8 +25479,6 @@ type D1PreparedStatement =
     abstract raw: options: D1PreparedStatementRawOptions -> JS.Promise<obj[]>
     abstract raw<'T>: ?options: D1PreparedStatementRawOptions2 -> JS.Promise<'T[]>
 
-type Disposable = obj
-
 /// <summary>
 /// The returned data after sending an email
 /// </summary>
@@ -22066,11 +25514,11 @@ type ForwardableEmailMessage =
     /// <summary>
     /// Stream of the email message content.
     /// </summary>
-    abstract raw: obj
+    abstract raw: ReadableStream<JS.Uint8Array>
     /// <summary>
     /// An [Headers object](https://developer.mozilla.org/en-US/docs/Web/API/Headers).
     /// </summary>
-    abstract headers: obj
+    abstract headers: Headers
     /// <summary>
     /// Size of the email message content.
     /// </summary>
@@ -22087,7 +25535,7 @@ type ForwardableEmailMessage =
     /// <remarks>@param rcptTo Verified destination address.</remarks>
     /// <remarks>@param headers A [Headers object](https://developer.mozilla.org/en-US/docs/Web/API/Headers).</remarks>
     /// <remarks>@returns A promise that resolves when the email message is forwarded.</remarks>
-    abstract forward: rcptTo: string * ?headers: obj -> JS.Promise<EmailSendResult>
+    abstract forward: rcptTo: string * ?headers: Headers -> JS.Promise<EmailSendResult>
     /// <summary>
     /// Reply to the sender of this email message with a new EmailMessage object.
     /// Reply to the sender of this email message with a message built from the given
@@ -22928,12 +26376,12 @@ type EmailReplyMessageBuilder =
     abstract from: U2<string, EmailAddress> with get, set
     abstract subject: string with get, set
     abstract replyTo: U2<string, EmailAddress> option with get, set
-    abstract headers: obj option with get, set
+    abstract headers: RequestInitHeaders option with get, set
     abstract text: string option with get, set
     abstract html: string option with get, set
     abstract attachments: EmailAttachment[] option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (from: U2<string, EmailAddress>, subject: string, ?replyTo: U2<string, EmailAddress>, ?headers: obj, ?text: string, ?html: string, ?attachments: EmailAttachment[]) : EmailReplyMessageBuilder = jsNative
+    static member Create (from: U2<string, EmailAddress>, subject: string, ?replyTo: U2<string, EmailAddress>, ?headers: RequestInitHeaders, ?text: string, ?html: string, ?attachments: EmailAttachment[]) : EmailReplyMessageBuilder = jsNative
 
 /// <summary>
 /// Fields for composing an email without constructing raw MIME, for
@@ -22947,7 +26395,7 @@ type EmailMessageBuilder2 =
     abstract from: U2<string, EmailAddress> with get, set
     abstract subject: string with get, set
     abstract replyTo: U2<string, EmailAddress> option with get, set
-    abstract headers: obj option with get, set
+    abstract headers: RequestInitHeaders option with get, set
     abstract text: string option with get, set
     abstract html: string option with get, set
     abstract attachments: EmailAttachment[] option with get, set
@@ -22955,7 +26403,7 @@ type EmailMessageBuilder2 =
     abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (from: U2<string, EmailAddress>, subject: string, ``to``: obj, ?replyTo: U2<string, EmailAddress>, ?headers: obj, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder2 = jsNative
+    static member Create (from: U2<string, EmailAddress>, subject: string, ``to``: obj, ?replyTo: U2<string, EmailAddress>, ?headers: RequestInitHeaders, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder2 = jsNative
 
 [<Interface>]
 type EmailMessageBuilder3 =
@@ -22963,7 +26411,7 @@ type EmailMessageBuilder3 =
     abstract from: U2<string, EmailAddress> with get, set
     abstract subject: string with get, set
     abstract replyTo: U2<string, EmailAddress> option with get, set
-    abstract headers: obj option with get, set
+    abstract headers: RequestInitHeaders option with get, set
     abstract text: string option with get, set
     abstract html: string option with get, set
     abstract attachments: EmailAttachment[] option with get, set
@@ -22971,7 +26419,7 @@ type EmailMessageBuilder3 =
     abstract cc: obj with get, set
     abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (from: U2<string, EmailAddress>, subject: string, cc: obj, ?replyTo: U2<string, EmailAddress>, ?headers: obj, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder3 = jsNative
+    static member Create (from: U2<string, EmailAddress>, subject: string, cc: obj, ?replyTo: U2<string, EmailAddress>, ?headers: RequestInitHeaders, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder3 = jsNative
 
 [<Interface>]
 type EmailMessageBuilder4 =
@@ -22979,7 +26427,7 @@ type EmailMessageBuilder4 =
     abstract from: U2<string, EmailAddress> with get, set
     abstract subject: string with get, set
     abstract replyTo: U2<string, EmailAddress> option with get, set
-    abstract headers: obj option with get, set
+    abstract headers: RequestInitHeaders option with get, set
     abstract text: string option with get, set
     abstract html: string option with get, set
     abstract attachments: EmailAttachment[] option with get, set
@@ -22987,7 +26435,7 @@ type EmailMessageBuilder4 =
     abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     abstract bcc: obj with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (from: U2<string, EmailAddress>, subject: string, bcc: obj, ?replyTo: U2<string, EmailAddress>, ?headers: obj, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder4 = jsNative
+    static member Create (from: U2<string, EmailAddress>, subject: string, bcc: obj, ?replyTo: U2<string, EmailAddress>, ?headers: RequestInitHeaders, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder4 = jsNative
 
 /// <summary>
 /// A binding that allows a Worker to send email messages.
@@ -22999,40 +26447,11 @@ type SendEmail =
 type EmailEvent =
     abstract message: ForwardableEmailMessage
     /// <summary>
-    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
     /// </summary>
-    abstract bubbles: bool
-    /// <summary>
-    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
-    abstract cancelBubble: bool with get, set
-    /// <summary>
-    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
-    /// </summary>
-    abstract cancelable: bool
-    /// <summary>
-    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
-    /// </summary>
-    abstract composed: bool
-    /// <summary>
-    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
-    /// </summary>
-    abstract currentTarget: Browser.Types.EventTarget option
-    /// <summary>
-    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
-    /// </summary>
-    abstract defaultPrevented: bool
+    abstract ``type``: string
     /// <summary>
     /// The **<c>eventPhase</c>** read-only property of the Event interface indicates which phase of the event flow is currently being evaluated.
     ///
@@ -23040,27 +26459,51 @@ type EmailEvent =
     /// </summary>
     abstract eventPhase: float
     /// <summary>
-    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
+    /// The read-only **<c>composed</c>** property of the Event interface returns a boolean value which indicates whether or not the event will propagate across the shadow DOM boundary into the standard DOM.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composed)
     /// </summary>
-    abstract isTrusted: bool
+    abstract composed: bool
+    /// <summary>
+    /// The **<c>bubbles</c>** read-only property of the Event interface indicates whether the event bubbles up through the DOM tree or not.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/bubbles)
+    /// </summary>
+    abstract bubbles: bool
+    /// <summary>
+    /// The **<c>cancelable</c>** read-only property of the Event interface indicates whether the event can be canceled, and therefore prevented as if the event never happened.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelable)
+    /// </summary>
+    abstract cancelable: bool
+    /// <summary>
+    /// The **<c>defaultPrevented</c>** read-only property of the Event interface returns a boolean value indicating whether or not the call to Event.preventDefault() canceled the event.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/defaultPrevented)
+    /// </summary>
+    abstract defaultPrevented: bool
     /// <summary>
     /// The Event property **<c>returnValue</c>** indicates whether the default action for this event has been prevented or not.
     /// </summary>
     /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/returnValue)</remarks>
-    abstract returnValue: bool with get, set
+    abstract returnValue: bool
     /// <summary>
-    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// The **<c>currentTarget</c>** read-only property of the Event interface identifies the element to which the event handler has been attached.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/currentTarget)
     /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
-    abstract srcElement: Browser.Types.EventTarget option
+    abstract currentTarget: EventTarget<EventCurrentTargetItem> option
     /// <summary>
     /// The read-only **<c>target</c>** property of the Event interface is a reference to the object onto which the event was dispatched. It is different from Event.currentTarget when the event handler is called during the bubbling or capturing phase of the event.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/target)
     /// </summary>
-    abstract target: Browser.Types.EventTarget option
+    abstract target: EventTarget<EventCurrentTargetItem> option
+    /// <summary>
+    /// The deprecated **<c>Event.srcElement</c>** is an alias for the Event.target property. Use Event.target instead.
+    /// </summary>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/srcElement)</remarks>
+    abstract srcElement: EventTarget<EventCurrentTargetItem> option
     /// <summary>
     /// The **<c>timeStamp</c>** read-only property of the Event interface returns the time (in milliseconds) at which the event was created.
     ///
@@ -23068,44 +26511,41 @@ type EmailEvent =
     /// </summary>
     abstract timeStamp: float
     /// <summary>
-    /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
+    /// The **<c>isTrusted</c>** read-only property of the Event interface is a boolean value that is true when the event was generated by the user agent (including via user actions and programmatic methods such as HTMLElement.focus()), and false when the event was dispatched via EventTarget.dispatchEvent(). The only exception is the click event, which initializes the isTrusted property to false in user agents.
     ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/type)
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/isTrusted)
     /// </summary>
-    abstract ``type``: string
+    abstract isTrusted: bool
     /// <summary>
-    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// The **<c>cancelBubble</c>** property of the Event interface is deprecated. Use Event.stopPropagation() instead. Setting its value to true before returning from an event handler prevents propagation of the event. In later implementations, setting this to false does nothing. See Browser compatibility for details.
     /// </summary>
-    abstract composedPath: obj with get, set
-    /// <summary>
-    /// The **<c>Event.initEvent()</c>** method is used to initialize the value of an event created using Document.createEvent().
-    /// </summary>
-    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/initEvent)</remarks>
-    abstract initEvent: obj with get, set
-    /// <summary>
-    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
-    ///
-    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
-    /// </summary>
-    abstract preventDefault: obj with get, set
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    /// <remarks>@deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/cancelBubble)</remarks>
+    abstract cancelBubble: bool with get, set
     /// <summary>
     /// The **<c>stopImmediatePropagation()</c>** method of the Event interface prevents other listeners of the same event from being called.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopImmediatePropagation)
     /// </summary>
-    abstract stopImmediatePropagation: obj with get, set
+    abstract stopImmediatePropagation: unit -> unit
+    /// <summary>
+    /// The **<c>preventDefault()</c>** method of the Event interface tells the user agent that the event is being explicitly handled, so its default action, such as page scrolling, link navigation, or pasting text, should not be taken.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/preventDefault)
+    /// </summary>
+    abstract preventDefault: unit -> unit
     /// <summary>
     /// The **<c>stopPropagation()</c>** method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases. It does not, however, prevent any default behaviors from occurring; for instance, clicks on links are still processed. If you want to stop those behaviors, see the preventDefault() method. It also does not prevent propagation to other event-handlers of the current element. If you want to stop those, see stopImmediatePropagation().
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/stopPropagation)
     /// </summary>
-    abstract stopPropagation: obj with get, set
-    abstract NONE: float
-    abstract CAPTURING_PHASE: float
-    abstract AT_TARGET: float
-    abstract BUBBLING_PHASE: float
+    abstract stopPropagation: unit -> unit
+    /// <summary>
+    /// The **<c>composedPath()</c>** method of the Event interface returns the event's path which is an array of the objects on which listeners will be invoked. This does not include nodes in shadow trees if the shadow root was created with its ShadowRoot.mode closed.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
+    /// </summary>
+    abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
     /// <summary>
     /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
     ///
@@ -23397,7 +26837,7 @@ type TextOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (font: TextOptionsFont, ?size: float, ?color: string) : TextOptions = jsNative
 
-type ImageSource = obj
+type ImageSource = U2<ReadableStream<JS.Uint8Array>, TextRasterize>
 
 [<Interface>]
 type ImageTransform =
@@ -23531,34 +26971,34 @@ type ImageMetadata =
     abstract filename: string option with get, set
     abstract uploaded: string option with get, set
     abstract requireSignedURLs: bool with get, set
-    abstract meta: obj option with get, set
+    abstract meta: RequestInitCfPropertiesBase option with get, set
     abstract variants: string[] with get, set
     abstract draft: bool option with get, set
     abstract creator: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, requireSignedURLs: bool, variants: string[], ?filename: string, ?uploaded: string, ?meta: obj, ?draft: bool, ?creator: string) : ImageMetadata = jsNative
+    static member Create (id: string, requireSignedURLs: bool, variants: string[], ?filename: string, ?uploaded: string, ?meta: RequestInitCfPropertiesBase, ?draft: bool, ?creator: string) : ImageMetadata = jsNative
 
 [<Interface>]
 type ImageUploadOptions =
     abstract id: string option with get, set
     abstract filename: string option with get, set
     abstract requireSignedURLs: bool option with get, set
-    abstract metadata: obj option with get, set
+    abstract metadata: RequestInitCfPropertiesBase option with get, set
     abstract creator: string option with get, set
     /// <summary>
     /// If 'base64', the input data will be decoded from base64 before processing
     /// </summary>
     abstract encoding: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: string, ?filename: string, ?requireSignedURLs: bool, ?metadata: obj, ?creator: string, ?encoding: string) : ImageUploadOptions = jsNative
+    static member Create (?id: string, ?filename: string, ?requireSignedURLs: bool, ?metadata: RequestInitCfPropertiesBase, ?creator: string, ?encoding: string) : ImageUploadOptions = jsNative
 
 [<Interface>]
 type ImageUpdateOptions =
     abstract requireSignedURLs: bool option with get, set
-    abstract metadata: obj option with get, set
+    abstract metadata: RequestInitCfPropertiesBase option with get, set
     abstract creator: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?requireSignedURLs: bool, ?metadata: obj, ?creator: string) : ImageUpdateOptions = jsNative
+    static member Create (?requireSignedURLs: bool, ?metadata: RequestInitCfPropertiesBase, ?creator: string) : ImageUpdateOptions = jsNative
 
 [<Interface>]
 type ImageMetadataFilterOperators =
@@ -23575,9 +27015,13 @@ type ImageMetadataFilterValue = U4<string, float, bool, ImageMetadataFilterOpera
 
 [<Interface>]
 type ImageListFilter =
-    abstract metadata: obj option with get, set
+    abstract metadata: ImageListFilterMetadata option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?metadata: obj) : ImageListFilter = jsNative
+    static member Create (?metadata: ImageListFilterMetadata) : ImageListFilter = jsNative
+
+type ImageListFilterMetadata =
+    [<EmitIndexer>]
+    abstract Item: string -> ImageMetadataFilterValue with get, set
 
 [<Interface>]
 type ImageListOptions =
@@ -23601,11 +27045,11 @@ type ImageSignedUrlOptions =
 type ImageDirectUploadOptions =
     abstract id: string option with get, set
     abstract requireSignedURLs: bool option with get, set
-    abstract metadata: obj option with get, set
+    abstract metadata: RequestInitCfPropertiesBase option with get, set
     abstract creator: string option with get, set
     abstract expiresIn: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: string, ?requireSignedURLs: bool, ?metadata: obj, ?creator: string, ?expiresIn: float) : ImageDirectUploadOptions = jsNative
+    static member Create (?id: string, ?requireSignedURLs: bool, ?metadata: RequestInitCfPropertiesBase, ?creator: string, ?expiresIn: float) : ImageDirectUploadOptions = jsNative
 
 [<Interface>]
 type ImageDirectUploadResult =
@@ -23632,7 +27076,7 @@ type ImageHandle =
     /// Get the raw image data for a hosted image
     /// </summary>
     /// <remarks>@returns ReadableStream of image bytes, or null if not found</remarks>
-    abstract bytes: unit -> JS.Promise<obj option>
+    abstract bytes: unit -> JS.Promise<ReadableStream<JS.Uint8Array> option>
     /// <summary>
     /// Generate a signed delivery URL for this hosted image.
     /// </summary>
@@ -23670,7 +27114,7 @@ type HostedImagesBinding =
     /// <remarks>@returns Metadata for the uploaded image</remarks>
     /// <remarks>@throws {</remarks>
     /// <remarks>@link ImagesError} if upload fails</remarks>
-    abstract upload: image: obj * ?options: ImageUploadOptions -> JS.Promise<ImageMetadata>
+    abstract upload: image: U2<JS.ArrayBuffer, ReadableStream<JS.Uint8Array>> * ?options: ImageUploadOptions -> JS.Promise<ImageMetadata>
     /// <summary>
     /// List hosted images with pagination
     /// </summary>
@@ -23696,13 +27140,13 @@ type ImagesBinding =
     /// <remarks>@throws {</remarks>
     /// <remarks>@link ImagesError} with code 9412 if input is not an image</remarks>
     /// <remarks>@param stream The image bytes</remarks>
-    abstract info: stream: obj * ?options: ImageInputOptions -> JS.Promise<ImageInfoResponse>
+    abstract info: stream: ReadableStream<JS.Uint8Array> * ?options: ImageInputOptions -> JS.Promise<ImageInfoResponse>
     /// <summary>
     /// Begin applying a series of transformations to an image
     /// </summary>
     /// <remarks>@param stream The image bytes</remarks>
     /// <remarks>@returns A transform handle</remarks>
-    abstract input: stream: obj * ?options: ImageInputOptions -> ImageTransformer
+    abstract input: stream: ReadableStream<JS.Uint8Array> * ?options: ImageInputOptions -> ImageTransformer
     /// <summary>
     /// Begin applying a series of transformations to text
     /// </summary>
@@ -23728,7 +27172,7 @@ type ImageTransformer =
     /// </summary>
     /// <remarks>@param image The image (or transformer that will give the image) to draw</remarks>
     /// <remarks>@param options The options configuring how to draw the image</remarks>
-    abstract draw: image: obj * ?options: ImageDrawOptions -> ImageTransformer
+    abstract draw: image: U2<ImageTransformer, ReadableStream<JS.Uint8Array>> * ?options: ImageDrawOptions -> ImageTransformer
     /// <summary>
     /// Retrieve the image that results from applying the transforms to the
     /// provided input
@@ -23744,16 +27188,16 @@ type ImageTransformationOutputOptions =
 
 [<Interface>]
 type ImageTransformationResponseOptions =
-    abstract headers: obj option with get, set
+    abstract headers: HeadersInit option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?headers: obj) : ImageTransformationResponseOptions = jsNative
+    static member Create (?headers: HeadersInit) : ImageTransformationResponseOptions = jsNative
 
 type ImageTransformationResult =
     /// <summary>
     /// The image as a response, ready to store in cache or return to users
     /// </summary>
     /// <remarks>@param options Options that apply to the returned response, e.g. additional headers</remarks>
-    abstract response: ?options: ImageTransformationResponseOptions -> obj
+    abstract response: ?options: ImageTransformationResponseOptions -> Response
     /// <summary>
     /// The content type of the returned image
     /// </summary>
@@ -23761,7 +27205,7 @@ type ImageTransformationResult =
     /// <summary>
     /// The bytes of the response
     /// </summary>
-    abstract image: ?options: ImageTransformationOutputOptions -> obj
+    abstract image: ?options: ImageTransformationOutputOptions -> ReadableStream<JS.Uint8Array>
 
 [<Interface>]
 type ImagesError =
@@ -23783,7 +27227,7 @@ type MediaBinding =
     /// </summary>
     /// <remarks>@param media - The input media bytes</remarks>
     /// <remarks>@returns A MediaTransformer instance for applying transformations</remarks>
-    abstract input: media: obj -> MediaTransformer
+    abstract input: media: ReadableStream<JS.Uint8Array> -> MediaTransformer
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type MediaTransformationInputOptionsFit =
@@ -23843,12 +27287,12 @@ type MediaTransformationResult =
     /// Returns the transformed media as a readable stream of bytes.
     /// </summary>
     /// <remarks>@returns A promise containing a readable stream with the transformed media</remarks>
-    abstract media: unit -> JS.Promise<obj>
+    abstract media: unit -> JS.Promise<ReadableStream<JS.Uint8Array>>
     /// <summary>
     /// Returns the transformed media as an HTTP response object.
     /// </summary>
     /// <remarks>@returns The transformed media as a Promise&lt;Response&gt;, ready to store in cache or return to users</remarks>
-    abstract response: unit -> JS.Promise<obj>
+    abstract response: unit -> JS.Promise<Response>
     /// <summary>
     /// Returns the MIME type of the transformed media.
     /// </summary>
@@ -23909,62 +27353,76 @@ type MediaTransformationOutputOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?mode: MediaTransformationOutputOptionsMode, ?audio: bool, ?time: string, ?duration: string, ?imageCount: float, ?format: MediaTransformationOutputOptionsFormat) : MediaTransformationOutputOptions = jsNative
 
+/// <summary>
+/// Error object for media transformation operations.
+/// Extends the standard Error interface with additional media-specific information.
+/// </summary>
+[<Interface>]
+type MediaError =
+    abstract code: float
+    abstract message: string
+    abstract stack: string option
+    abstract name: string with get, set
+    abstract cause: obj option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (code: float, message: string, name: string, ?stack: string, ?cause: obj) : MediaError = jsNative
+
 [<Erase>]
 type Params<'P> = private Params__ of obj
 
 [<Interface>]
 type EventContext<'Env, 'P, 'Data> =
-    abstract request: obj with get, set
+    abstract request: Request<obj, RequestFetcherFetchInitItem> with get, set
     abstract functionPath: string with get, set
     abstract waitUntil: Action<JS.Promise<obj>> with get, set
     abstract passThroughOnException: Action with get, set
-    abstract next: Func<obj option, obj option, JS.Promise<obj>> with get, set
+    abstract next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>> option, RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> option, JS.Promise<Response>> with get, set
     abstract env: obj with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: obj, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<obj option, obj option, JS.Promise<obj>>, env: obj, ``params``: obj, data: 'Data) : EventContext<'Env, 'P, 'Data> = jsNative
+    static member Create (request: Request<obj, RequestFetcherFetchInitItem>, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>> option, RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data) : EventContext<'Env, 'P, 'Data> = jsNative
 
 [<Interface>]
-type PagesFunctionContext<'Env, 'Params, 'Data> =
-    abstract request: obj with get, set
+type PagesFunctionContext<'Env, 'Params, 'Data when 'Data :> RequestInitCfPropertiesBase> =
+    abstract request: Request<obj, RequestFetcherFetchInitItem> with get, set
     abstract functionPath: string with get, set
     abstract waitUntil: Action<JS.Promise<obj>> with get, set
     abstract passThroughOnException: Action with get, set
-    abstract next: Func<obj option, obj option, JS.Promise<obj>> with get, set
+    abstract next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>> option, RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> option, JS.Promise<Response>> with get, set
     abstract env: obj with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: obj, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<obj option, obj option, JS.Promise<obj>>, env: obj, ``params``: obj, data: 'Data) : PagesFunctionContext<'Env, 'Params, 'Data> = jsNative
+    static member Create (request: Request<obj, RequestFetcherFetchInitItem>, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>> option, RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data) : PagesFunctionContext<'Env, 'Params, 'Data> = jsNative
 
 [<Interface>]
 type EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> =
-    abstract request: obj with get, set
+    abstract request: Request<obj, RequestFetcherFetchInitItem> with get, set
     abstract functionPath: string with get, set
     abstract waitUntil: Action<JS.Promise<obj>> with get, set
     abstract passThroughOnException: Action with get, set
-    abstract next: Func<obj option, obj option, JS.Promise<obj>> with get, set
+    abstract next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>> option, RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> option, JS.Promise<Response>> with get, set
     abstract env: obj with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     abstract pluginArgs: 'PluginArgs with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: obj, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<obj option, obj option, JS.Promise<obj>>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> = jsNative
+    static member Create (request: Request<obj, RequestFetcherFetchInitItem>, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>> option, RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> = jsNative
 
 [<Interface>]
-type PagesPluginFunctionContext<'Env, 'Params, 'Data, 'PluginArgs> =
-    abstract request: obj with get, set
+type PagesPluginFunctionContext<'Env, 'Params, 'Data, 'PluginArgs when 'Data :> RequestInitCfPropertiesBase> =
+    abstract request: Request<obj, RequestFetcherFetchInitItem> with get, set
     abstract functionPath: string with get, set
     abstract waitUntil: Action<JS.Promise<obj>> with get, set
     abstract passThroughOnException: Action with get, set
-    abstract next: Func<obj option, obj option, JS.Promise<obj>> with get, set
+    abstract next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>> option, RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> option, JS.Promise<Response>> with get, set
     abstract env: obj with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     abstract pluginArgs: 'PluginArgs with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: obj, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<obj option, obj option, JS.Promise<obj>>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : PagesPluginFunctionContext<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
+    static member Create (request: Request<obj, RequestFetcherFetchInitItem>, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>> option, RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : PagesPluginFunctionContext<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
 
 [<Interface>]
 type PubSubMessage =
@@ -23983,26 +27441,26 @@ type PubSubMessage =
 [<Interface>]
 type JsonWebKeyWithKid =
     abstract kid: string
-    abstract alg: string option with get, set
-    abstract crv: string option with get, set
-    abstract d: string option with get, set
-    abstract dp: string option with get, set
-    abstract dq: string option with get, set
-    abstract e: string option with get, set
-    abstract ext: bool option with get, set
-    abstract k: string option with get, set
-    abstract key_ops: string[] option with get, set
-    abstract kty: string option with get, set
-    abstract n: string option with get, set
-    abstract oth: obj[] option with get, set
-    abstract p: string option with get, set
-    abstract q: string option with get, set
-    abstract qi: string option with get, set
+    abstract kty: string with get, set
     abstract ``use``: string option with get, set
+    abstract key_ops: string[] option with get, set
+    abstract alg: string option with get, set
+    abstract ext: bool option with get, set
+    abstract crv: string option with get, set
     abstract x: string option with get, set
     abstract y: string option with get, set
+    abstract d: string option with get, set
+    abstract n: string option with get, set
+    abstract e: string option with get, set
+    abstract p: string option with get, set
+    abstract q: string option with get, set
+    abstract dp: string option with get, set
+    abstract dq: string option with get, set
+    abstract qi: string option with get, set
+    abstract oth: RsaOtherPrimesInfo[] option with get, set
+    abstract k: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (kid: string, ?alg: string, ?crv: string, ?d: string, ?dp: string, ?dq: string, ?e: string, ?ext: bool, ?k: string, ?key_ops: string[], ?kty: string, ?n: string, ?oth: obj[], ?p: string, ?q: string, ?qi: string, ?``use``: string, ?x: string, ?y: string) : JsonWebKeyWithKid = jsNative
+    static member Create (kid: string, kty: string, ?``use``: string, ?key_ops: string[], ?alg: string, ?ext: bool, ?crv: string, ?x: string, ?y: string, ?d: string, ?n: string, ?e: string, ?p: string, ?q: string, ?dp: string, ?dq: string, ?qi: string, ?oth: RsaOtherPrimesInfo[], ?k: string) : JsonWebKeyWithKid = jsNative
 
 [<Interface>]
 type RateLimitOptions =
@@ -24059,13 +27517,13 @@ type DurableObject2<'Env, 'Props> =
     abstract ctx: DurableObjectState<'Props> with get, set
     abstract env: 'Env with get, set
     abstract alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option> option with get, set
-    abstract fetch: Func<obj, obj> option with get, set
+    abstract fetch: Func<Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, U2<JS.Promise<Response>, Response>> option with get, set
     abstract connect: Func<Socket, JS.Promise<unit> option> option with get, set
-    abstract webSocketMessage: Func<Browser.Types.WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
-    abstract webSocketClose: Func<Browser.Types.WebSocket, float, string, bool, JS.Promise<unit> option> option with get, set
-    abstract webSocketError: Func<Browser.Types.WebSocket, obj, JS.Promise<unit> option> option with get, set
+    abstract webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
+    abstract webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option> option with get, set
+    abstract webSocketError: Func<WebSocket, obj, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: DurableObjectState<'Props>, env: 'Env, ?alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option>, ?fetch: Func<obj, obj>, ?connect: Func<Socket, JS.Promise<unit> option>, ?webSocketMessage: Func<Browser.Types.WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<Browser.Types.WebSocket, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<Browser.Types.WebSocket, obj, JS.Promise<unit> option>) : DurableObject2<'Env, 'Props> = jsNative
+    static member Create (ctx: DurableObjectState<'Props>, env: 'Env, ?alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option>, ?fetch: Func<Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, JS.Promise<unit> option>, ?webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<WebSocket, obj, JS.Promise<unit> option>) : DurableObject2<'Env, 'Props> = jsNative
 
 [<Interface>]
 type RpcTarget =
@@ -24079,7 +27537,7 @@ type WorkerEntrypoint<'Env, 'Props> =
     abstract ctx: ExecutionContext<'Props> with get, set
     abstract env: 'Env with get, set
     abstract email: Func<ForwardableEmailMessage, JS.Promise<unit> option> option with get, set
-    abstract fetch: Func<obj, obj> option with get, set
+    abstract fetch: Func<Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, U2<JS.Promise<Response>, Response>> option with get, set
     abstract connect: Func<Socket, JS.Promise<unit> option> option with get, set
     abstract queue: Func<MessageBatch<obj>, JS.Promise<unit> option> option with get, set
     abstract scheduled: Func<ScheduledController, JS.Promise<unit> option> option with get, set
@@ -24088,13 +27546,23 @@ type WorkerEntrypoint<'Env, 'Props> =
     abstract test: Func<TestController, JS.Promise<unit> option> option with get, set
     abstract trace: Func<TraceItem[], JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: ExecutionContext<'Props>, env: 'Env, ?email: Func<ForwardableEmailMessage, JS.Promise<unit> option>, ?fetch: Func<obj, obj>, ?connect: Func<Socket, JS.Promise<unit> option>, ?queue: Func<MessageBatch<obj>, JS.Promise<unit> option>, ?scheduled: Func<ScheduledController, JS.Promise<unit> option>, ?tail: Func<TraceItem[], JS.Promise<unit> option>, ?tailStream: Func<TailEvent2<Onset>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?test: Func<TestController, JS.Promise<unit> option>, ?trace: Func<TraceItem[], JS.Promise<unit> option>) : WorkerEntrypoint<'Env, 'Props> = jsNative
+    static member Create (ctx: ExecutionContext<'Props>, env: 'Env, ?email: Func<ForwardableEmailMessage, JS.Promise<unit> option>, ?fetch: Func<Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, JS.Promise<unit> option>, ?queue: Func<MessageBatch<obj>, JS.Promise<unit> option>, ?scheduled: Func<ScheduledController, JS.Promise<unit> option>, ?tail: Func<TraceItem[], JS.Promise<unit> option>, ?tailStream: Func<TailEvent2<Onset>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?test: Func<TestController, JS.Promise<unit> option>, ?trace: Func<TraceItem[], JS.Promise<unit> option>) : WorkerEntrypoint<'Env, 'Props> = jsNative
 
 type WorkflowEntrypoint<'Env, 'T> =
     abstract __WORKFLOW_ENTRYPOINT_BRAND: unit
     abstract ctx: ExecutionContext<obj> with get, set
     abstract env: 'Env with get, set
-    abstract run: ``event``: obj * step: WorkflowStep -> JS.Promise<obj>
+    abstract run: ``event``: WorkflowEntrypointRunEvent * step: WorkflowStep -> JS.Promise<obj>
+
+[<Interface>]
+type WorkflowEntrypointRunEvent =
+    abstract payload: obj
+    abstract timestamp: JS.Date
+    abstract instanceId: string
+    abstract workflowName: string
+    abstract schedule: WorkflowEntrypointRunEventSchedule option
+    [<ParamObject; Emit("$0")>]
+    static member Create (payload: obj, timestamp: JS.Date, instanceId: string, workflowName: string, ?schedule: WorkflowEntrypointRunEventSchedule) : WorkflowEntrypointRunEvent = jsNative
 
 [<Interface>]
 type WorkflowEntrypointRunEventSchedule =
@@ -24193,16 +27661,16 @@ type WorkflowStepDoConfigRetries =
 [<Interface>]
 type WorkflowStepDoRollbackOptions<'T> =
     abstract rollback: Func<obj, JS.Promise<unit>> with get, set
-    abstract rollbackConfig: obj option with get, set
+    abstract rollbackConfig: WorkflowStepDoRollbackOptionsRollbackConfig option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: obj) : WorkflowStepDoRollbackOptions<'T> = jsNative
+    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: WorkflowStepDoRollbackOptionsRollbackConfig) : WorkflowStepDoRollbackOptions<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions2<'T> =
     abstract rollback: Func<obj, JS.Promise<unit>> with get, set
-    abstract rollbackConfig: obj option with get, set
+    abstract rollbackConfig: WorkflowStepDoRollbackOptionsRollbackConfig option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: obj) : WorkflowStepDoRollbackOptions2<'T> = jsNative
+    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: WorkflowStepDoRollbackOptionsRollbackConfig) : WorkflowStepDoRollbackOptions2<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions2RollbackCtx<'T> =
@@ -24217,9 +27685,9 @@ type WorkflowStepDoRollbackOptions2RollbackCtx<'T> =
 [<Interface>]
 type WorkflowStepDoRollbackOptions3<'T> =
     abstract rollback: Func<obj, JS.Promise<unit>> with get, set
-    abstract rollbackConfig: obj option with get, set
+    abstract rollbackConfig: WorkflowStepDoRollbackOptionsRollbackConfig option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: obj) : WorkflowStepDoRollbackOptions3<'T> = jsNative
+    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: WorkflowStepDoRollbackOptionsRollbackConfig) : WorkflowStepDoRollbackOptions3<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions3RollbackCtx<'T> =
@@ -24234,9 +27702,9 @@ type WorkflowStepDoRollbackOptions3RollbackCtx<'T> =
 [<Interface>]
 type WorkflowStepDoRollbackOptions4<'T> =
     abstract rollback: Func<obj, JS.Promise<unit>> with get, set
-    abstract rollbackConfig: obj option with get, set
+    abstract rollbackConfig: WorkflowStepDoRollbackOptionsRollbackConfig option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: obj) : WorkflowStepDoRollbackOptions4<'T> = jsNative
+    static member Create (rollback: Func<obj, JS.Promise<unit>>, ?rollbackConfig: WorkflowStepDoRollbackOptionsRollbackConfig) : WorkflowStepDoRollbackOptions4<'T> = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions4RollbackCtx<'T> =
@@ -24247,6 +27715,13 @@ type WorkflowStepDoRollbackOptions4RollbackCtx<'T> =
     abstract stepName: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (ctx: WorkflowStepDoCallbackCtx, error: obj, stepName: string, ?output: 'T) : WorkflowStepDoRollbackOptions4RollbackCtx<'T> = jsNative
+
+[<Interface>]
+type WorkflowStepDoRollbackOptionsRollbackConfig =
+    abstract retries: WorkflowStepDoRollbackOptionsRollbackConfigRetries option with get, set
+    abstract timeout: WorkflowSleepDuration option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?retries: WorkflowStepDoRollbackOptionsRollbackConfigRetries, ?timeout: WorkflowSleepDuration) : WorkflowStepDoRollbackOptionsRollbackConfig = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptionsRollbackConfigRetries =
@@ -24445,7 +27920,7 @@ type StreamVideo =
     /// <summary>
     /// A user modifiable key-value store.
     /// </summary>
-    abstract meta: obj with get, set
+    abstract meta: RequestInitHeaders with get, set
     /// <summary>
     /// The date and time the video was created.
     /// </summary>
@@ -24618,7 +28093,7 @@ type StreamDirectUploadCreateParams =
     /// A user modifiable key-value store used to reference other systems of record for
     /// managing videos.
     /// </summary>
-    abstract meta: obj option with get, set
+    abstract meta: RequestInitHeaders option with get, set
     /// <summary>
     /// Lists the origins allowed to display the video.
     /// </summary>
@@ -24642,7 +28117,7 @@ type StreamDirectUploadCreateParams =
     /// </summary>
     abstract watermark: StreamDirectUploadWatermark option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (maxDurationSeconds: float, ?expiry: string, ?creator: string, ?meta: obj, ?allowedOrigins: string[], ?requireSignedURLs: bool, ?thumbnailTimestampPct: float, ?scheduledDeletion: string, ?watermark: StreamDirectUploadWatermark) : StreamDirectUploadCreateParams = jsNative
+    static member Create (maxDurationSeconds: float, ?expiry: string, ?creator: string, ?meta: RequestInitHeaders, ?allowedOrigins: string[], ?requireSignedURLs: bool, ?thumbnailTimestampPct: float, ?scheduledDeletion: string, ?watermark: StreamDirectUploadWatermark) : StreamDirectUploadCreateParams = jsNative
 
 [<Interface>]
 type StreamDirectUploadWatermark =
@@ -24669,7 +28144,7 @@ type StreamUrlUploadParams =
     /// A user modifiable key-value store used to reference other systems of
     /// record for managing videos.
     /// </summary>
-    abstract meta: obj option with get, set
+    abstract meta: RequestInitHeaders option with get, set
     /// <summary>
     /// Indicates whether the video can be a accessed using the id. When
     /// set to <c>true</c>, a signed token must be generated with a signing key to view the
@@ -24696,7 +28171,7 @@ type StreamUrlUploadParams =
     /// </summary>
     abstract watermarkId: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?allowedOrigins: string[], ?creator: string, ?meta: obj, ?requireSignedURLs: bool, ?scheduledDeletion: string, ?thumbnailTimestampPct: float, ?watermarkId: string) : StreamUrlUploadParams = jsNative
+    static member Create (?allowedOrigins: string[], ?creator: string, ?meta: RequestInitHeaders, ?requireSignedURLs: bool, ?scheduledDeletion: string, ?thumbnailTimestampPct: float, ?watermarkId: string) : StreamUrlUploadParams = jsNative
 
 type StreamScopedCaptions =
     /// <summary>
@@ -24709,7 +28184,7 @@ type StreamScopedCaptions =
     /// <remarks>@throws {NotFoundError} if the video is not found</remarks>
     /// <remarks>@throws {BadRequestError} if the language or file is invalid</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract upload: language: string * input: obj -> JS.Promise<StreamCaption>
+    abstract upload: language: string * input: ReadableStream<obj> -> JS.Promise<StreamCaption>
     /// <summary>
     /// Generate captions or subtitles for the provided language via AI.
     /// </summary>
@@ -24798,7 +28273,7 @@ type StreamWatermarks =
     /// <remarks>@throws {InvalidURLError} if the URL is invalid</remarks>
     /// <remarks>@throws {TooManyWatermarksError} if the number of allowed watermarks is reached</remarks>
     /// <remarks>@throws {InternalError} if an unexpected error occurs</remarks>
-    abstract generate: input: obj * ``params``: StreamWatermarkCreateParams -> JS.Promise<StreamWatermark>
+    abstract generate: input: ReadableStream<obj> * ``params``: StreamWatermarkCreateParams -> JS.Promise<StreamWatermark>
     /// <summary>
     /// Generate a new watermark profile
     /// </summary>
@@ -24863,7 +28338,7 @@ type StreamUpdateVideoParams =
     /// A user modifiable key-value store used to reference other systems of
     /// record for managing videos.
     /// </summary>
-    abstract meta: obj option with get, set
+    abstract meta: RequestInitHeaders option with get, set
     /// <summary>
     /// Indicates whether the video can be a accessed using the id. When
     /// set to <c>true</c>, a signed token must be generated with a signing key to view the
@@ -24886,7 +28361,7 @@ type StreamUpdateVideoParams =
     /// </summary>
     abstract thumbnailTimestampPct: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?allowedOrigins: string[], ?creator: string, ?maxDurationSeconds: float, ?meta: obj, ?requireSignedURLs: bool, ?scheduledDeletion: string, ?thumbnailTimestampPct: float) : StreamUpdateVideoParams = jsNative
+    static member Create (?allowedOrigins: string[], ?creator: string, ?maxDurationSeconds: float, ?meta: RequestInitHeaders, ?requireSignedURLs: bool, ?scheduledDeletion: string, ?thumbnailTimestampPct: float) : StreamUpdateVideoParams = jsNative
 
 [<Interface>]
 type StreamCaption =
@@ -25218,9 +28693,9 @@ type TooManyWatermarksError =
 [<Interface>]
 type MarkdownDocument =
     abstract name: string with get, set
-    abstract blob: Browser.Types.Blob with get, set
+    abstract blob: Blob with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, blob: Browser.Types.Blob) : MarkdownDocument = jsNative
+    static member Create (name: string, blob: Blob) : MarkdownDocument = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type OutputFormat =
@@ -25289,6 +28764,10 @@ type VectorizeVectorMetadataValue = U4<string, float, bool, string[]>
 /// Additional information to associate with a vector.
 /// </summary>
 type VectorizeVectorMetadata = obj
+
+type VectorizeVectorMetadata2 =
+    [<EmitIndexer>]
+    abstract Item: string -> VectorizeVectorMetadataValue with get, set
 
 type VectorFloatArray = U2<JS.Float32Array, JS.Float64Array>
 
@@ -25443,9 +28922,13 @@ type VectorizeVector =
     /// <summary>
     /// Metadata associated with the vector. Includes the values of other fields and potentially additional details.
     /// </summary>
-    abstract metadata: obj option with get, set
+    abstract metadata: VectorizeVectorMetadata3 option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, values: U3<float[], JS.Float32Array, JS.Float64Array>, ?``namespace``: string, ?metadata: obj) : VectorizeVector = jsNative
+    static member Create (id: string, values: U3<float[], JS.Float32Array, JS.Float64Array>, ?``namespace``: string, ?metadata: VectorizeVectorMetadata3) : VectorizeVector = jsNative
+
+type VectorizeVectorMetadata3 =
+    [<EmitIndexer>]
+    abstract Item: string -> VectorizeVectorMetadata with get, set
 
 /// <summary>
 /// Represents a matched vector for a query along with its score and (if specified) the matching vector information.
@@ -25467,13 +28950,13 @@ type VectorizeMatch =
     /// <summary>
     /// Metadata associated with the vector. Includes the values of other fields and potentially additional details.
     /// </summary>
-    abstract metadata: obj option with get, set
+    abstract metadata: VectorizeVectorMetadata3 option with get, set
     /// <summary>
     /// The score or rank for similarity, when returned as a result
     /// </summary>
     abstract score: float with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, score: float, ?values: U3<float[], JS.Float32Array, JS.Float64Array>, ?``namespace``: string, ?metadata: obj) : VectorizeMatch = jsNative
+    static member Create (id: string, score: float, ?values: U3<float[], JS.Float32Array, JS.Float64Array>, ?``namespace``: string, ?metadata: VectorizeVectorMetadata3) : VectorizeMatch = jsNative
 
 /// <summary>
 /// A set of matching VectorizeMatch for a particular query.
@@ -25772,9 +29255,13 @@ type DynamicDispatchOptions =
     /// <summary>
     /// Arguments for outbound Worker script, if configured.
     /// </summary>
-    abstract outbound: obj option with get, set
+    abstract outbound: DynamicDispatchOptionsOutbound option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?limits: DynamicDispatchLimits, ?outbound: obj) : DynamicDispatchOptions = jsNative
+    static member Create (?limits: DynamicDispatchLimits, ?outbound: DynamicDispatchOptionsOutbound) : DynamicDispatchOptions = jsNative
+
+type DynamicDispatchOptionsOutbound =
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 type DispatchNamespace =
     /// <remarks>@param name Name of the Worker script.</remarks>
@@ -25782,7 +29269,11 @@ type DispatchNamespace =
     /// <remarks>@param options Options for Dynamic Dispatch invocation.</remarks>
     /// <remarks>@returns A Fetcher object that allows you to send requests to the Worker script.</remarks>
     /// <remarks>@throws If the Worker script does not exist in this dispatch namespace, an error will be thrown.</remarks>
-    abstract get: name: string * ?args: obj * ?options: DynamicDispatchOptions -> ColoLocalActorNamespaceGetResult
+    abstract get: name: string * ?args: DispatchNamespaceGetArgs * ?options: DynamicDispatchOptions -> RequestFetcher
+
+type DispatchNamespaceGetArgs =
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 [<Interface>]
 type InstanceStatusError =
@@ -26014,8 +29505,89 @@ type WorkflowInstance =
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
+    [<Global("onmessage")>]
+    static member onmessage: unit = jsNative
+    /// <summary>
+    /// The **<c>DOMException</c>** interface represents an abnormal event (called an exception) that occurs as a result of calling a method or accessing a property of a web API. This is how error conditions are described in web APIs.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/DOMException)
+    /// </summary>
+    [<Global("DOMException"); EmitConstructor>]
+    static member DOMException (?message: string, ?name: string) : DOMException = jsNative
+    [<Global("WorkerGlobalScope"); EmitConstructor>]
+    static member WorkerGlobalScope () : WorkerGlobalScope = jsNative
+    [<Global("console")>]
+    static member console: Console = jsNative
+    [<Global("WebAssembly")>]
+    static member WebAssembly: WebAssembly = jsNative
+    [<Global("addEventListener")>]
+    static member addEventListener<'Type> (``type``: 'Type, handler: U2<Action<obj>, EventListenerObject<Event>>, ?options: U2<bool, EventTargetAddEventListenerOptions>) : unit = jsNative
+    [<Global("removeEventListener")>]
+    static member removeEventListener<'Type> (``type``: 'Type, handler: U2<Action<obj>, EventListenerObject<Event>>, ?options: U2<bool, EventTargetEventListenerOptions>) : unit = jsNative
+    /// <summary>
+    /// The **<c>dispatchEvent()</c>** method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
+    /// </summary>
+    [<Global("dispatchEvent")>]
+    static member dispatchEvent (``event``: U4<FetchEvent, PromiseRejectionEvent, QueueEvent<obj>, ScheduledEvent>) : bool = jsNative
+    [<Global("btoa")>]
+    static member btoa (data: string) : string = jsNative
+    [<Global("atob")>]
+    static member atob (data: string) : string = jsNative
+    [<Global("setTimeout")>]
+    static member setTimeout (callback: Action<obj[]>, ?msDelay: float) : float = jsNative
+    [<Global("setTimeout")>]
+    static member setTimeout<'Args> (callback: Action<'Args>, msDelay: float option, [<ParamArray>] args: 'Args) : float = jsNative
+    [<Global("clearTimeout")>]
+    static member clearTimeout (?timeoutId: float) : unit = jsNative
+    [<Global("setInterval")>]
+    static member setInterval (callback: Action<obj[]>, ?msDelay: float) : float = jsNative
+    [<Global("setInterval")>]
+    static member setInterval<'Args> (callback: Action<'Args>, msDelay: float option, [<ParamArray>] args: 'Args) : float = jsNative
+    [<Global("clearInterval")>]
+    static member clearInterval (?timeoutId: float) : unit = jsNative
+    [<Global("queueMicrotask")>]
+    static member queueMicrotask (task: JS.Function) : unit = jsNative
+    [<Global("structuredClone")>]
+    static member structuredClone<'T> (value: 'T, ?options: StructuredSerializeOptions) : 'T = jsNative
+    [<Global("reportError")>]
+    static member reportError (error: obj) : unit = jsNative
+    [<Global("fetch")>]
+    static member fetch (input: U3<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, URL>, ?init: RequestInit<RequestInitCfProperties>) : JS.Promise<Response> = jsNative
+    [<Global("self")>]
+    static member self: ServiceWorkerGlobalScope = jsNative
+    /// <summary>
+    /// The Web Crypto API provides a set of low-level functions for common cryptographic tasks.
+    /// The Workers runtime implements the full surface of this API, but with some differences in
+    /// the [supported algorithms](https://developers.cloudflare.com/workers/runtime-apis/web-crypto/#supported-algorithms)
+    /// compared to those implemented in most browsers.
+    ///
+    /// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/web-crypto/)
+    /// </summary>
+    [<Global("crypto")>]
+    static member crypto: Crypto = jsNative
+    /// <summary>
+    /// The Cache API allows fine grained control of reading and writing from the Cloudflare global network cache.
+    ///
+    /// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/cache/)
+    /// </summary>
+    [<Global("caches")>]
+    static member caches: CacheStorage = jsNative
+    [<Global("scheduler")>]
+    static member scheduler: Scheduler = jsNative
+    /// <summary>
+    /// The Workers runtime supports a subset of the Performance API, used to measure timing and performance,
+    /// as well as timing of subrequests and other operations.
+    ///
+    /// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/performance/)
+    /// </summary>
+    [<Global("performance")>]
+    static member performance: Performance = jsNative
     [<Global("Cloudflare")>]
     static member Cloudflare: Cloudflare = jsNative
+    [<Global("origin")>]
+    static member origin: string = jsNative
     [<Global("Buffer")>]
     static member Buffer: obj = jsNative
     [<Global("process")>]
@@ -26026,6 +29598,10 @@ type Exports =
     static member setImmediate (``$function``: Action<obj[]>, [<ParamArray>] args: obj[]) : Immediate = jsNative
     [<Global("clearImmediate")>]
     static member clearImmediate (?immediate: Immediate) : unit = jsNative
+    [<Global("navigator")>]
+    static member navigator: Navigator = jsNative
+    [<Global("Navigator"); EmitConstructor>]
+    static member Navigator () : Navigator = jsNative
     [<Global("ColoLocalActorNamespace"); EmitConstructor>]
     static member ColoLocalActorNamespace () : ColoLocalActorNamespace = jsNative
     [<Global("DurableObjectNamespace"); EmitConstructor>]
@@ -26033,14 +29609,145 @@ type Exports =
     [<Global("WebSocketRequestResponsePair"); EmitConstructor>]
     static member WebSocketRequestResponsePair (request: string, response: string) : WebSocketRequestResponsePair = jsNative
     /// <summary>
+    /// The **<c>Event</c>** interface represents an event which takes place on an EventTarget.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event)
+    /// </summary>
+    [<Global("Event"); EmitConstructor>]
+    static member Event (``type``: string, ?init: EventInit) : Event = jsNative
+    /// <summary>
+    /// The **<c>EventTarget</c>** interface is implemented by objects that can receive events and may have listeners for them. In other words, any target of events implements the three methods associated with this interface.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget)
+    /// </summary>
+    [<Global("EventTarget"); EmitConstructor>]
+    static member EventTarget<'EventMap when 'EventMap :> EventCurrentTargetItem> () : EventTarget<'EventMap> = jsNative
+    /// <summary>
+    /// The **<c>AbortController</c>** interface represents a controller object that allows you to abort one or more Web requests as and when desired.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortController)
+    /// </summary>
+    [<Global("AbortController"); EmitConstructor>]
+    static member AbortController () : AbortController = jsNative
+    /// <summary>
+    /// The **<c>AbortSignal</c>** interface represents a signal object that allows you to communicate with an asynchronous operation (such as a fetch request) and abort it if required via an AbortController object.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal)
+    /// </summary>
+    [<Global("AbortSignal"); EmitConstructor>]
+    static member AbortSignal () : AbortSignal = jsNative
+    /// <summary>
     /// The **<c>ExtendableEvent</c>** interface extends the lifetime of the install and activate events dispatched on the global scope as part of the service worker lifecycle. This ensures that any functional events (like FetchEvent) are not dispatched until it upgrades database schemas and deletes the outdated cache entries.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent)
     /// </summary>
     [<Global("ExtendableEvent"); EmitConstructor>]
-    static member ExtendableEvent (``type``: string, ?eventInitDict: Browser.Types.EventInit) : ExtendableEvent = jsNative
+    static member ExtendableEvent (``type``: string, ?init: EventInit) : ExtendableEvent = jsNative
+    /// <summary>
+    /// The **<c>CustomEvent</c>** interface can be used to attach custom data to an event generated by an application.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CustomEvent)
+    /// </summary>
+    [<Global("CustomEvent"); EmitConstructor>]
+    static member CustomEvent<'T> (``type``: string, ?init: CustomEventCustomEventInit) : CustomEvent<'T> = jsNative
+    /// <summary>
+    /// The **<c>Blob</c>** interface represents a blob, which is a file-like object of immutable, raw data; they can be read as text or binary data, or converted into a ReadableStream so its methods can be used for processing the data.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Blob)
+    /// </summary>
+    [<Global("Blob"); EmitConstructor>]
+    static member Blob (?bits: U4<string, JS.ArrayBuffer, JS.ArrayBufferView, Blob>[], ?options: BlobOptions) : Blob = jsNative
+    /// <summary>
+    /// The **<c>File</c>** interface provides information about files and allows JavaScript in a web page to access their content.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/File)
+    /// </summary>
+    [<Global("File"); EmitConstructor>]
+    static member File (bits: U4<string, JS.ArrayBuffer, JS.ArrayBufferView, Blob>[] option, name: string, ?options: FileOptions) : File = jsNative
+    /// <summary>
+    /// The Cache API allows fine grained control of reading and writing from the Cloudflare global network cache.
+    ///
+    /// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/cache/)
+    /// </summary>
+    [<Global("CacheStorage"); EmitConstructor>]
+    static member CacheStorage () : CacheStorage = jsNative
+    /// <summary>
+    /// The Cache API allows fine grained control of reading and writing from the Cloudflare global network cache.
+    ///
+    /// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/cache/)
+    /// </summary>
+    [<Global("Cache"); EmitConstructor>]
+    static member Cache () : Cache = jsNative
+    /// <summary>
+    /// The Web Crypto API provides a set of low-level functions for common cryptographic tasks.
+    /// The Workers runtime implements the full surface of this API, but with some differences in
+    /// the [supported algorithms](https://developers.cloudflare.com/workers/runtime-apis/web-crypto/#supported-algorithms)
+    /// compared to those implemented in most browsers.
+    ///
+    /// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/web-crypto/)
+    /// </summary>
+    [<Global("Crypto"); EmitConstructor>]
+    static member Crypto () : Crypto = jsNative
+    /// <summary>
+    /// The **<c>SubtleCrypto</c>** interface of the Web Crypto API provides a number of low-level cryptographic functions.
+    /// Available only in secure contexts.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SubtleCrypto)
+    /// </summary>
+    [<Global("SubtleCrypto"); EmitConstructor>]
+    static member SubtleCrypto () : SubtleCrypto = jsNative
+    /// <summary>
+    /// The **<c>CryptoKey</c>** interface of the Web Crypto API represents a cryptographic key obtained from one of the SubtleCrypto methods generateKey(), deriveKey(), importKey(), or unwrapKey().
+    /// Available only in secure contexts.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CryptoKey)
+    /// </summary>
+    [<Global("CryptoKey"); EmitConstructor>]
+    static member CryptoKey () : CryptoKey = jsNative
     [<Global("DigestStream"); EmitConstructor>]
     static member DigestStream (algorithm: U2<string, SubtleCryptoHashAlgorithm>, ?options: DigestStreamOptions) : DigestStream = jsNative
+    /// <summary>
+    /// The **<c>TextDecoder</c>** interface represents a decoder for a specific text encoding, such as UTF-8, ISO-8859-2, or GBK. A decoder takes an array of bytes as input and returns a JavaScript string.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TextDecoder)
+    /// </summary>
+    [<Global("TextDecoder"); EmitConstructor>]
+    static member TextDecoder (?label: string, ?options: TextDecoderConstructorOptions) : TextDecoder = jsNative
+    /// <summary>
+    /// The **<c>TextEncoder</c>** interface enables you to encode a JavaScript string using UTF-8.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TextEncoder)
+    /// </summary>
+    [<Global("TextEncoder"); EmitConstructor>]
+    static member TextEncoder () : TextEncoder = jsNative
+    /// <summary>
+    /// The **<c>ErrorEvent</c>** interface represents events providing information related to errors in scripts or in files.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ErrorEvent)
+    /// </summary>
+    [<Global("ErrorEvent"); EmitConstructor>]
+    static member ErrorEvent (``type``: string, ?init: ErrorEventErrorEventInit) : ErrorEvent = jsNative
+    /// <summary>
+    /// The **<c>MessageEvent</c>** interface represents a message received by a target object.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessageEvent)
+    /// </summary>
+    [<Global("MessageEvent"); EmitConstructor>]
+    static member MessageEvent (``type``: string, ?initializer: MessageEventInit) : MessageEvent = jsNative
+    /// <summary>
+    /// The **<c>PromiseRejectionEvent</c>** interface represents events which are sent to the global script context when JavaScript Promises are rejected. These events are particularly useful for telemetry and debugging purposes.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PromiseRejectionEvent)
+    /// </summary>
+    [<Global("PromiseRejectionEvent"); EmitConstructor>]
+    static member PromiseRejectionEvent (``type``: string, ?init: EventInit) : PromiseRejectionEvent = jsNative
+    /// <summary>
+    /// The **<c>FormData</c>** interface provides a way to construct a set of key/value pairs representing form fields and their values, which can be sent using the fetch(), XMLHttpRequest.send() or navigator.sendBeacon() methods. It uses the same format a form would use if the encoding type were set to "multipart/form-data".
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FormData)
+    /// </summary>
+    [<Global("FormData"); EmitConstructor>]
+    static member FormData () : FormData = jsNative
     [<Global("HTMLRewriter"); EmitConstructor>]
     static member HTMLRewriter () : HTMLRewriter = jsNative
     /// <summary>
@@ -26049,23 +29756,271 @@ type Exports =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FetchEvent)
     /// </summary>
     [<Global("FetchEvent"); EmitConstructor>]
-    static member FetchEvent (``type``: string, ?eventInitDict: Browser.Types.EventInit) : FetchEvent = jsNative
+    static member FetchEvent (``type``: string, ?init: EventInit) : FetchEvent = jsNative
+    /// <summary>
+    /// The **<c>Headers</c>** interface of the Fetch API allows you to perform various actions on HTTP request and response headers. These actions include retrieving, setting, adding to, and removing headers from the list of the request's headers.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Headers)
+    /// </summary>
+    [<Global("Headers"); EmitConstructor>]
+    static member Headers (?init: HeadersInit) : Headers = jsNative
+    [<Global("Body"); EmitConstructor>]
+    static member Body () : Body = jsNative
+    /// <summary>
+    /// The **<c>Response</c>** interface of the Fetch API represents the response to a request.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response)
+    /// </summary>
+    [<Global("Response")>]
+    static member Response: obj = jsNative
+    /// <summary>
+    /// The **<c>Request</c>** interface of the Fetch API represents a resource request.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request)
+    /// </summary>
+    [<Global("Request")>]
+    static member Request: obj = jsNative
     [<Global("R2Object"); EmitConstructor>]
     static member R2Object () : R2Object = jsNative
     [<Global("ScheduledEvent"); EmitConstructor>]
-    static member ScheduledEvent (``type``: string, ?eventInitDict: Browser.Types.EventInit) : ScheduledEvent = jsNative
+    static member ScheduledEvent (``type``: string, ?init: EventInit) : ScheduledEvent = jsNative
+    /// <summary>
+    /// The **<c>ReadableStream</c>** interface of the Streams API represents a readable stream of byte data. The Fetch API offers a concrete instance of a ReadableStream through the body property of a Response object.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStream)
+    /// </summary>
+    [<Global("ReadableStream")>]
+    static member ReadableStream: obj = jsNative
+    /// <summary>
+    /// The **<c>ReadableStreamDefaultReader</c>** interface of the Streams API represents a default reader that can be used to read stream data supplied from a network (such as a fetch request).
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultReader)
+    /// </summary>
+    [<Global("ReadableStreamDefaultReader"); EmitConstructor>]
+    static member ReadableStreamDefaultReader<'R> (stream: ReadableStream<obj>) : ReadableStreamDefaultReader<'R> = jsNative
+    /// <summary>
+    /// The **<c>ReadableStreamBYOBReader</c>** interface of the Streams API defines a reader for a ReadableStream that supports zero-copy reading from an underlying byte source. It is used for efficient copying from underlying sources where the data is delivered as an "anonymous" sequence of bytes, such as files.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBReader)
+    /// </summary>
+    [<Global("ReadableStreamBYOBReader"); EmitConstructor>]
+    static member ReadableStreamBYOBReader (stream: ReadableStream<obj>) : ReadableStreamBYOBReader = jsNative
+    /// <summary>
+    /// The **<c>ReadableStreamBYOBRequest</c>** interface of the Streams API represents a "pull request" for data from an underlying source that will made as a zero-copy transfer to a consumer (bypassing the stream's internal queues).
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBRequest)
+    /// </summary>
+    [<Global("ReadableStreamBYOBRequest"); EmitConstructor>]
+    static member ReadableStreamBYOBRequest () : ReadableStreamBYOBRequest = jsNative
+    /// <summary>
+    /// The **<c>ReadableStreamDefaultController</c>** interface of the Streams API represents a controller allowing control of a ReadableStream's state and internal queue. Default controllers are for streams that are not byte streams.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController)
+    /// </summary>
+    [<Global("ReadableStreamDefaultController"); EmitConstructor>]
+    static member ReadableStreamDefaultController<'R> () : ReadableStreamDefaultController<'R> = jsNative
+    /// <summary>
+    /// The **<c>ReadableByteStreamController</c>** interface of the Streams API represents a controller for a readable byte stream. It allows control of the state and internal queue of a ReadableStream with an underlying byte source, and enables efficient zero-copy transfer of data from the underlying source to a consumer when the stream's internal queue is empty.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController)
+    /// </summary>
+    [<Global("ReadableByteStreamController"); EmitConstructor>]
+    static member ReadableByteStreamController () : ReadableByteStreamController = jsNative
+    /// <summary>
+    /// The **<c>WritableStreamDefaultController</c>** interface of the Streams API represents a controller allowing control of a WritableStream's state. When constructing a WritableStream, the underlying sink is given a corresponding WritableStreamDefaultController instance to manipulate.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultController)
+    /// </summary>
+    [<Global("WritableStreamDefaultController"); EmitConstructor>]
+    static member WritableStreamDefaultController () : WritableStreamDefaultController = jsNative
+    /// <summary>
+    /// The **<c>TransformStreamDefaultController</c>** interface of the Streams API provides methods to manipulate the associated ReadableStream and WritableStream.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController)
+    /// </summary>
+    [<Global("TransformStreamDefaultController"); EmitConstructor>]
+    static member TransformStreamDefaultController<'O> () : TransformStreamDefaultController<'O> = jsNative
+    /// <summary>
+    /// The **<c>WritableStream</c>** interface of the Streams API provides a standard abstraction for writing streaming data to a destination, known as a sink. This object comes with built-in backpressure and queuing.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStream)
+    /// </summary>
+    [<Global("WritableStream"); EmitConstructor>]
+    static member WritableStream<'W> (?underlyingSink: UnderlyingSink<obj>, ?queuingStrategy: QueuingStrategy<obj>) : WritableStream<'W> = jsNative
+    /// <summary>
+    /// The **<c>WritableStreamDefaultWriter</c>** interface of the Streams API is the object returned by WritableStream.getWriter() and once created locks the writer to the WritableStream ensuring that no other streams can write to the underlying sink.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter)
+    /// </summary>
+    [<Global("WritableStreamDefaultWriter"); EmitConstructor>]
+    static member WritableStreamDefaultWriter<'W> (stream: WritableStream<obj>) : WritableStreamDefaultWriter<'W> = jsNative
+    /// <summary>
+    /// The **<c>TransformStream</c>** interface of the Streams API represents a concrete implementation of the pipe chain transform stream concept.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TransformStream)
+    /// </summary>
+    [<Global("TransformStream"); EmitConstructor>]
+    static member TransformStream<'I, 'O> (?transformer: Transformer<'I, 'O>, ?writableStrategy: QueuingStrategy<'I>, ?readableStrategy: QueuingStrategy<'O>) : TransformStream<'I, 'O> = jsNative
     [<Global("FixedLengthStream"); EmitConstructor>]
     static member FixedLengthStream (expectedLength: obj, ?queuingStrategy: IdentityTransformStreamQueuingStrategy) : FixedLengthStream = jsNative
     [<Global("IdentityTransformStream"); EmitConstructor>]
     static member IdentityTransformStream (?queuingStrategy: IdentityTransformStreamQueuingStrategy) : IdentityTransformStream = jsNative
+    /// <summary>
+    /// The **<c>CompressionStream</c>** interface of the Compression Streams API compresses a stream of data. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CompressionStream)
+    /// </summary>
+    [<Global("CompressionStream"); EmitConstructor>]
+    static member CompressionStream (format: ServiceWorkerGlobalScopeCompressionStreamFormat) : CompressionStream = jsNative
+    /// <summary>
+    /// The **<c>DecompressionStream</c>** interface of the Compression Streams API decompresses a stream of data. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/DecompressionStream)
+    /// </summary>
+    [<Global("DecompressionStream"); EmitConstructor>]
+    static member DecompressionStream (format: ServiceWorkerGlobalScopeCompressionStreamFormat) : DecompressionStream = jsNative
+    /// <summary>
+    /// The **<c>TextEncoderStream</c>** interface of the Encoding API converts a stream of strings into bytes in the UTF-8 encoding. It is the streaming equivalent of TextEncoder. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TextEncoderStream)
+    /// </summary>
+    [<Global("TextEncoderStream"); EmitConstructor>]
+    static member TextEncoderStream () : TextEncoderStream = jsNative
+    /// <summary>
+    /// The **<c>TextDecoderStream</c>** interface of the Encoding API converts a stream of text in a binary encoding, such as UTF-8 etc., to a stream of strings. It is the streaming equivalent of TextDecoder. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/TextDecoderStream)
+    /// </summary>
+    [<Global("TextDecoderStream"); EmitConstructor>]
+    static member TextDecoderStream (?label: string, ?options: TextDecoderStreamTextDecoderStreamInit) : TextDecoderStream = jsNative
+    /// <summary>
+    /// The **<c>ByteLengthQueuingStrategy</c>** interface of the Streams API provides a built-in byte length queuing strategy that can be used when constructing streams.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ByteLengthQueuingStrategy)
+    /// </summary>
+    [<Global("ByteLengthQueuingStrategy"); EmitConstructor>]
+    static member ByteLengthQueuingStrategy (init: QueuingStrategyInit) : ByteLengthQueuingStrategy = jsNative
+    /// <summary>
+    /// The **<c>CountQueuingStrategy</c>** interface of the Streams API provides a built-in chunk counting queuing strategy that can be used when constructing streams.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CountQueuingStrategy)
+    /// </summary>
+    [<Global("CountQueuingStrategy"); EmitConstructor>]
+    static member CountQueuingStrategy (init: QueuingStrategyInit) : CountQueuingStrategy = jsNative
     [<Global("TailEvent"); EmitConstructor>]
-    static member TailEvent (``type``: string, ?eventInitDict: Browser.Types.EventInit) : TailEvent = jsNative
+    static member TailEvent (``type``: string, ?init: EventInit) : TailEvent = jsNative
+    /// <summary>
+    /// The **<c>URL</c>** interface is used to parse, construct, normalize, and encode URLs. It works by providing properties which allow you to easily read and modify the components of a URL.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
+    /// </summary>
+    [<Global("URL"); EmitConstructor>]
+    static member URL (url: U2<string, URL>, ?``base``: U2<string, URL>) : URL = jsNative
+    /// <summary>
+    /// The **<c>URLSearchParams</c>** interface defines utility methods to work with the query string of a URL.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLSearchParams)
+    /// </summary>
+    [<Global("URLSearchParams"); EmitConstructor>]
+    static member URLSearchParams (?init: obj) : URLSearchParams = jsNative
+    /// <summary>
+    /// The **<c>URLPattern</c>** interface of the URL Pattern API matches URLs or parts of URLs against a pattern. The pattern can contain capturing groups that extract parts of the matched URL.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URLPattern)
+    /// </summary>
+    [<Global("URLPattern"); EmitConstructor>]
+    static member URLPattern (?input: U2<string, URLPatternInit>, ?baseURL: U2<string, URLPatternOptions>, ?patternOptions: URLPatternOptions) : URLPattern = jsNative
+    /// <summary>
+    /// A **<c>CloseEvent</c>** is sent to clients using WebSockets when the connection is closed. This is delivered to the listener indicated by the WebSocket object's onclose attribute.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CloseEvent)
+    /// </summary>
+    [<Global("CloseEvent"); EmitConstructor>]
+    static member CloseEvent (``type``: string, ?initializer: CloseEventInit) : CloseEvent = jsNative
+    /// <summary>
+    /// The **<c>WebSocket</c>** object provides the API for creating and managing a WebSocket connection to a server, as well as for sending and receiving data on the connection.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WebSocket)
+    /// </summary>
+    [<Global("WebSocket")>]
+    static member WebSocket: obj = jsNative
     [<Global("WebSocketPair")>]
     static member WebSocketPair: obj = jsNative
     [<Global("SqlStorageStatement"); EmitConstructor>]
     static member SqlStorageStatement () : SqlStorageStatement = jsNative
     [<Global("SqlStorageCursor"); EmitConstructor>]
     static member SqlStorageCursor<'T> () : SqlStorageCursor<'T> = jsNative
+    /// <summary>
+    /// The **<c>EventSource</c>** interface is web content's interface to server-sent events.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventSource)
+    /// </summary>
+    [<Global("EventSource"); EmitConstructor>]
+    static member EventSource (url: string, ?init: EventSourceEventSourceInit) : EventSource = jsNative
+    /// <summary>
+    /// The **<c>MessagePort</c>** interface of the Channel Messaging API represents one of the two ports of a MessageChannel, allowing messages to be sent from one port and listening out for them arriving at the other.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessagePort)
+    /// </summary>
+    [<Global("MessagePort"); EmitConstructor>]
+    static member MessagePort () : MessagePort = jsNative
+    /// <summary>
+    /// The **<c>MessageChannel</c>** interface of the Channel Messaging API allows us to create a new message channel and send data through it via its two MessagePort properties.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessageChannel)
+    /// </summary>
+    [<Global("MessageChannel"); EmitConstructor>]
+    static member MessageChannel () : MessageChannel = jsNative
+    /// <summary>
+    /// The Workers runtime supports a subset of the Performance API, used to measure timing and performance,
+    /// as well as timing of subrequests and other operations.
+    ///
+    /// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/performance/)
+    /// </summary>
+    [<Global("Performance"); EmitConstructor>]
+    static member Performance () : Performance = jsNative
+    /// <summary>
+    /// **<c>PerformanceMark</c>** is an interface for PerformanceEntry objects with an entryType of "mark".
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceMark)
+    /// </summary>
+    [<Global("PerformanceMark"); EmitConstructor>]
+    static member PerformanceMark (name: string, ?maybeOptions: PerformanceMarkOptions) : PerformanceMark = jsNative
+    /// <summary>
+    /// **<c>PerformanceMeasure</c>** is an abstract interface for PerformanceEntry objects with an entryType of "measure". Entries of this type are created by calling performance.measure() to add a named DOMHighResTimeStamp (the measure) between two marks to the browser's performance timeline.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceMeasure)
+    /// </summary>
+    [<Global("PerformanceMeasure"); EmitConstructor>]
+    static member PerformanceMeasure () : PerformanceMeasure = jsNative
+    /// <summary>
+    /// The **<c>PerformanceObserverEntryList</c>** interface is a list of performance events that were explicitly observed via the observe() method.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceObserverEntryList)
+    /// </summary>
+    [<Global("PerformanceObserverEntryList"); EmitConstructor>]
+    static member PerformanceObserverEntryList () : PerformanceObserverEntryList = jsNative
+    /// <summary>
+    /// The **<c>PerformanceEntry</c>** object encapsulates a single performance metric that is part of the browser's performance timeline.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceEntry)
+    /// </summary>
+    [<Global("PerformanceEntry"); EmitConstructor>]
+    static member PerformanceEntry () : PerformanceEntry = jsNative
+    /// <summary>
+    /// The **<c>PerformanceResourceTiming</c>** interface enables retrieval and analysis of detailed network timing data regarding the loading of an application's resources. An application can use the timing metrics to determine, for example, the length of time it takes to fetch a specific resource, such as an XMLHttpRequest, &lt;SVG&gt;, image, or script.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming)
+    /// </summary>
+    [<Global("PerformanceResourceTiming"); EmitConstructor>]
+    static member PerformanceResourceTiming () : PerformanceResourceTiming = jsNative
+    /// <summary>
+    /// The **<c>PerformanceObserver</c>** interface is used to observe performance measurement events and be notified of new performance entries as they are recorded in the browser's performance timeline.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceObserver)
+    /// </summary>
+    [<Global("PerformanceObserver"); EmitConstructor>]
+    static member PerformanceObserver (callback: obj) : PerformanceObserver = jsNative
     [<Global("Span"); EmitConstructor>]
     static member Span () : Span = jsNative
     /// <summary>
@@ -26330,7 +30285,7 @@ type Exports =
     [<Global("D1PreparedStatement"); EmitConstructor>]
     static member D1PreparedStatement () : D1PreparedStatement = jsNative
     [<Global("EmailEvent"); EmitConstructor>]
-    static member EmailEvent (``type``: string, ?eventInitDict: Browser.Types.EventInit) : EmailEvent = jsNative
+    static member EmailEvent (``type``: string, ?init: EventInit) : EmailEvent = jsNative
     /// <summary>
     /// Feature flags binding for evaluating feature flags from a Cloudflare Workers script.
     /// </summary>

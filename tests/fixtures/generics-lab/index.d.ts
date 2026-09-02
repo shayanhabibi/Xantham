@@ -19,3 +19,22 @@ export type Source<S> = S | (() => S) | undefined;
 export declare function each<T, U>(props: { items: T[]; fallback?: string; render: (item: T, index: number) => U }): U[];
 /** An anonymous object type inside a generic alias. */
 export type Handle<T> = [() => T, { set: (next: T) => void; reset(): void }];
+/** A named bound: the only kind of constraint F# can state. */
+export interface Named {
+    name: string;
+}
+/** A constrained parameter that is not the last: F# writes one `when` clause after the parameter list. */
+export interface Labelled<T extends Named, U> {
+    subject: T;
+    label: U;
+}
+/** An application of a constrained generic whose argument is a `typekeyof` result: the argument is written as the constraint. */
+export interface Registry<M extends Record<string, Named>> {
+    pick<K extends keyof M>(key: K): Labelled<M[K], K>;
+}
+/** An optional parameter ahead of a rest parameter: F# has no tail for the `?`, so it stays required, of option type. */
+export declare function schedule(callback: (...args: number[]) => void, delay?: number, ...args: number[]): number;
+/** An index-only anonymous object, written in the compiler lib: an interface of one indexer, not `obj`. */
+export interface Manifest {
+    flags: Record<string, boolean>;
+}

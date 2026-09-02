@@ -3,8 +3,8 @@
   "module": "GenericsLab",
   "counts": {
     "exact": 6,
-    "ergonomic": 4,
-    "widened": 0,
+    "ergonomic": 9,
+    "widened": 1,
     "escape": 0
   },
   "symbols": [
@@ -93,9 +93,85 @@
       "findings": []
     },
     {
+      "name": "Named",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Labelled",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Registry",
+      "tier": "widened",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "constraint on \u0027M\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "key over \u0027M\u0027 with its indexed access reads as typekeyof\u003C\u0027M,\u0027R\u003E (\u00A74.10)"
+        },
+        {
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "message": "\u0027R is not bound with Labelled\u0027s constraint; the argument is written as the constraint Named"
+        }
+      ]
+    },
+    {
+      "name": "Manifest",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "ManifestFlags",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        }
+      ]
+    },
+    {
       "name": "each",
       "tier": "exact",
       "findings": []
+    },
+    {
+      "name": "schedule",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
     }
   ]
 }
