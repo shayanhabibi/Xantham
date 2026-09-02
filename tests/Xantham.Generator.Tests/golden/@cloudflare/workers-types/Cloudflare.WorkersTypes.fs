@@ -752,8 +752,12 @@ type WorkerGlobalScopeEventMap =
     [<ParamObject; Emit("$0")>]
     static member Create (fetch: FetchEvent, scheduled: ScheduledEvent, queue: QueueEvent<obj>, unhandledrejection: PromiseRejectionEvent, rejectionhandled: PromiseRejectionEvent) : WorkerGlobalScopeEventMap = jsNative
 
+type EventTargetConstructor =
+    [<EmitConstructor>]
+    abstract Create<'EventMap when 'EventMap :> EventCurrentTargetItem>: unit -> EventTarget<'EventMap>
+
 type WorkerGlobalScope =
-    abstract EventTarget: obj with get, set
+    abstract EventTarget: EventTargetConstructor with get, set
     /// <summary>
     /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
     ///
@@ -898,9 +902,21 @@ type CompileError =
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, message: string, ?stack: string, ?cause: obj) : CompileError = jsNative
 
+type CompileErrorConstructor =
+    /// <summary>
+    /// Indicates whether the argument provided is a built-in Error instance or not.
+    /// </summary>
+    abstract isError: obj with get, set
+    [<EmitConstructor>]
+    abstract Create: ?message: string -> CompileError
+
 type Global =
     abstract value: obj with get, set
     abstract valueOf: unit -> obj
+
+type GlobalConstructor =
+    [<EmitConstructor>]
+    abstract Create: descriptor: GlobalDescriptor * value: obj -> Global
 
 [<Interface>]
 type GlobalDescriptor =
@@ -925,6 +941,10 @@ type Instance =
     [<ParamObject; Emit("$0")>]
     static member Create (exports: InstanceExports) : Instance = jsNative
 
+type InstanceConstructor =
+    [<EmitConstructor>]
+    abstract Create: ``module``: obj * ?imports: WebAssemblyInstanceImports -> Instance
+
 type InstanceExports =
     [<EmitIndexer>]
     abstract Item: string -> U4<JS.Function, Global, Memory, Table> with get, set
@@ -933,6 +953,10 @@ type Memory =
     abstract buffer: JS.ArrayBuffer
     abstract grow: delta: float -> float
 
+type MemoryConstructor =
+    [<EmitConstructor>]
+    abstract Create: descriptor: MemoryDescriptor -> Memory
+
 [<Interface>]
 type MemoryDescriptor =
     abstract initial: float with get, set
@@ -940,6 +964,13 @@ type MemoryDescriptor =
     abstract shared: bool option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (initial: float, ?maximum: float, ?shared: bool) : MemoryDescriptor = jsNative
+
+type ModuleConstructor =
+    abstract customSections: ``module``: obj * sectionName: string -> JS.ArrayBuffer[]
+    abstract exports: ``module``: obj -> ModuleExportDescriptor[]
+    abstract imports: ``module``: obj -> ModuleImportDescriptor[]
+    [<EmitConstructor>]
+    abstract Create: unit -> obj
 
 [<Interface>]
 type ModuleExportDescriptor =
@@ -972,11 +1003,23 @@ type RuntimeError =
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, message: string, ?stack: string, ?cause: obj) : RuntimeError = jsNative
 
+type RuntimeErrorConstructor =
+    /// <summary>
+    /// Indicates whether the argument provided is a built-in Error instance or not.
+    /// </summary>
+    abstract isError: obj with get, set
+    [<EmitConstructor>]
+    abstract Create: ?message: string -> RuntimeError
+
 type Table =
     abstract length: float
     abstract get: index: float -> obj
     abstract grow: delta: float * value: obj -> float
     abstract set: index: float * value: obj -> unit
+
+type TableConstructor =
+    [<EmitConstructor>]
+    abstract Create: descriptor: TableDescriptor * value: obj -> Table
 
 [<Interface>]
 type TableDescriptor =
@@ -993,17 +1036,17 @@ type TableDescriptorElement =
 
 [<Interface>]
 type WebAssembly =
-    abstract CompileError: obj with get, set
-    abstract RuntimeError: obj with get, set
-    abstract Global: obj with get, set
-    abstract Instance: obj with get, set
-    abstract Memory: obj with get, set
-    abstract Module: obj with get, set
-    abstract Table: obj with get, set
+    abstract CompileError: CompileErrorConstructor with get, set
+    abstract RuntimeError: RuntimeErrorConstructor with get, set
+    abstract Global: GlobalConstructor with get, set
+    abstract Instance: InstanceConstructor with get, set
+    abstract Memory: MemoryConstructor with get, set
+    abstract Module: ModuleConstructor with get, set
+    abstract Table: TableConstructor with get, set
     abstract instantiate: Func<obj, WebAssemblyInstanceImports option, JS.Promise<Instance>> with get, set
     abstract validate: Func<BufferSource, bool> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (CompileError: obj, RuntimeError: obj, Global: obj, Instance: obj, Memory: obj, Module: obj, Table: obj, instantiate: Func<obj, WebAssemblyInstanceImports option, JS.Promise<Instance>>, validate: Func<BufferSource, bool>) : WebAssembly = jsNative
+    static member Create (CompileError: CompileErrorConstructor, RuntimeError: RuntimeErrorConstructor, Global: GlobalConstructor, Instance: InstanceConstructor, Memory: MemoryConstructor, Module: ModuleConstructor, Table: TableConstructor, instantiate: Func<obj, WebAssemblyInstanceImports option, JS.Promise<Instance>>, validate: Func<BufferSource, bool>) : WebAssembly = jsNative
 
 type WebAssemblyInstanceImports =
     [<EmitIndexer>]
@@ -1013,9 +1056,272 @@ type WebAssemblyInstanceImportsItem =
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
+type AbortControllerConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> AbortController
+
+type AbortSignalConstructor =
+    /// <summary>
+    /// The **<c>AbortSignal.abort()</c>** static method returns an AbortSignal that is already set as aborted (and which does not trigger an abort event).
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal/abort_static)
+    /// </summary>
+    abstract abort: reason: obj -> AbortSignal
+    /// <summary>
+    /// The **<c>AbortSignal.timeout()</c>** static method returns an AbortSignal that will automatically abort after a specified time.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal/timeout_static)
+    /// </summary>
+    abstract timeout: delay: float -> AbortSignal
+    /// <summary>
+    /// The **<c>AbortSignal.any()</c>** static method takes an iterable of abort signals and returns an AbortSignal. The returned abort signal is aborted when any of the input iterable abort signals are aborted. The abort reason will be set to the reason of the first signal that is aborted. If any of the given abort signals are already aborted then so will be the returned AbortSignal.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal/any_static)
+    /// </summary>
+    abstract any: signals: AbortSignal[] -> AbortSignal
+    [<EmitConstructor>]
+    abstract Create: unit -> AbortSignal
+
+type BlobConstructor =
+    [<EmitConstructor>]
+    abstract Create: ?bits: U4<string, JS.ArrayBuffer, JS.ArrayBufferView, Blob>[] * ?options: BlobOptions -> Blob
+
+type BodyConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> Body
+
+type ByteLengthQueuingStrategyConstructor =
+    [<EmitConstructor>]
+    abstract Create: init: QueuingStrategyInit -> ByteLengthQueuingStrategy
+
+type CacheConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> Cache
+
+type CacheStorageConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> CacheStorage
+
+type CloseEventConstructor =
+    abstract NONE: float
+    abstract CAPTURING_PHASE: float
+    abstract AT_TARGET: float
+    abstract BUBBLING_PHASE: float
+    [<EmitConstructor>]
+    abstract Create: ``type``: string * ?initializer: CloseEventInit -> CloseEvent
+
 type CloudflareCompatibilityFlags =
     [<EmitIndexer>]
     abstract Item: string -> bool with get, set
+
+type CompressionStreamConstructor =
+    [<EmitConstructor>]
+    abstract Create: format: ServiceWorkerGlobalScopeCompressionStreamFormat -> CompressionStream
+
+type CountQueuingStrategyConstructor =
+    [<EmitConstructor>]
+    abstract Create: init: QueuingStrategyInit -> CountQueuingStrategy
+
+type CryptoConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> Crypto
+
+type CryptoKeyConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> CryptoKey
+
+type CustomEventConstructor =
+    abstract NONE: float
+    abstract CAPTURING_PHASE: float
+    abstract AT_TARGET: float
+    abstract BUBBLING_PHASE: float
+    [<EmitConstructor>]
+    abstract Create<'T>: ``type``: string * ?init: CustomEventCustomEventInit -> CustomEvent<'T>
+
+type DOMExceptionConstructor =
+    abstract INDEX_SIZE_ERR: float
+    abstract DOMSTRING_SIZE_ERR: float
+    abstract HIERARCHY_REQUEST_ERR: float
+    abstract WRONG_DOCUMENT_ERR: float
+    abstract INVALID_CHARACTER_ERR: float
+    abstract NO_DATA_ALLOWED_ERR: float
+    abstract NO_MODIFICATION_ALLOWED_ERR: float
+    abstract NOT_FOUND_ERR: float
+    abstract NOT_SUPPORTED_ERR: float
+    abstract INUSE_ATTRIBUTE_ERR: float
+    abstract INVALID_STATE_ERR: float
+    abstract SYNTAX_ERR: float
+    abstract INVALID_MODIFICATION_ERR: float
+    abstract NAMESPACE_ERR: float
+    abstract INVALID_ACCESS_ERR: float
+    abstract VALIDATION_ERR: float
+    abstract TYPE_MISMATCH_ERR: float
+    abstract SECURITY_ERR: float
+    abstract NETWORK_ERR: float
+    abstract ABORT_ERR: float
+    abstract URL_MISMATCH_ERR: float
+    abstract QUOTA_EXCEEDED_ERR: float
+    abstract TIMEOUT_ERR: float
+    abstract INVALID_NODE_TYPE_ERR: float
+    abstract DATA_CLONE_ERR: float
+    /// <summary>
+    /// Indicates whether the argument provided is a built-in Error instance or not.
+    /// </summary>
+    abstract isError: obj with get, set
+    [<EmitConstructor>]
+    abstract Create: ?message: string * ?name: string -> DOMException
+
+type DecompressionStreamConstructor =
+    [<EmitConstructor>]
+    abstract Create: format: ServiceWorkerGlobalScopeCompressionStreamFormat -> DecompressionStream
+
+type ErrorEventConstructor =
+    abstract NONE: float
+    abstract CAPTURING_PHASE: float
+    abstract AT_TARGET: float
+    abstract BUBBLING_PHASE: float
+    [<EmitConstructor>]
+    abstract Create: ``type``: string * ?init: ErrorEventErrorEventInit -> ErrorEvent
+
+type EventConstructor =
+    abstract NONE: float
+    abstract CAPTURING_PHASE: float
+    abstract AT_TARGET: float
+    abstract BUBBLING_PHASE: float
+    [<EmitConstructor>]
+    abstract Create: ``type``: string * ?init: EventInit -> Event
+
+type EventSourceConstructor =
+    abstract CONNECTING: float
+    abstract OPEN: float
+    abstract CLOSED: float
+    abstract from: stream: ReadableStream<obj> -> EventSource
+    [<EmitConstructor>]
+    abstract Create: url: string * ?init: EventSourceEventSourceInit -> EventSource
+
+type ExtendableEventConstructor =
+    abstract NONE: float
+    abstract CAPTURING_PHASE: float
+    abstract AT_TARGET: float
+    abstract BUBBLING_PHASE: float
+    [<EmitConstructor>]
+    abstract Create: ``type``: string * ?init: EventInit -> ExtendableEvent
+
+type FetchEventConstructor =
+    abstract NONE: float
+    abstract CAPTURING_PHASE: float
+    abstract AT_TARGET: float
+    abstract BUBBLING_PHASE: float
+    [<EmitConstructor>]
+    abstract Create: ``type``: string * ?init: EventInit -> FetchEvent
+
+type FileConstructor =
+    [<EmitConstructor>]
+    abstract Create: bits: U4<string, JS.ArrayBuffer, JS.ArrayBufferView, Blob>[] option * name: string * ?options: FileOptions -> File
+
+type FixedLengthStreamConstructor =
+    [<EmitConstructor>]
+    abstract Create: expectedLength: obj * ?queuingStrategy: IdentityTransformStreamQueuingStrategy -> FixedLengthStream
+
+type FormDataConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> FormData
+
+type HTMLRewriterConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> HTMLRewriter
+
+type HeadersConstructor =
+    [<EmitConstructor>]
+    abstract Create: ?init: HeadersInit -> Headers
+
+type IdentityTransformStreamConstructor =
+    [<EmitConstructor>]
+    abstract Create: ?queuingStrategy: IdentityTransformStreamQueuingStrategy -> IdentityTransformStream
+
+type MessageChannelConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> MessageChannel
+
+type MessageEventConstructor =
+    abstract NONE: float
+    abstract CAPTURING_PHASE: float
+    abstract AT_TARGET: float
+    abstract BUBBLING_PHASE: float
+    [<EmitConstructor>]
+    abstract Create: ``type``: string * ?initializer: MessageEventInit -> MessageEvent
+
+type MessagePortConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> MessagePort
+
+type NavigatorConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> Navigator
+
+type PerformanceConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> Performance
+
+type PerformanceEntryConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> PerformanceEntry
+
+type PerformanceMarkConstructor =
+    [<EmitConstructor>]
+    abstract Create: name: string * ?maybeOptions: PerformanceMarkOptions -> PerformanceMark
+
+type PerformanceMeasureConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> PerformanceMeasure
+
+type PerformanceObserverConstructor =
+    [<EmitConstructor>]
+    abstract Create: callback: obj -> PerformanceObserver
+
+type PerformanceObserverEntryListConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> PerformanceObserverEntryList
+
+type PerformanceResourceTimingConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> PerformanceResourceTiming
+
+type PromiseRejectionEventConstructor =
+    abstract NONE: float
+    abstract CAPTURING_PHASE: float
+    abstract AT_TARGET: float
+    abstract BUBBLING_PHASE: float
+    [<EmitConstructor>]
+    abstract Create: ``type``: string * ?init: EventInit -> PromiseRejectionEvent
+
+type ReadableByteStreamControllerConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> ReadableByteStreamController
+
+type ReadableStreamBYOBReaderConstructor =
+    [<EmitConstructor>]
+    abstract Create: stream: ReadableStream<obj> -> ReadableStreamBYOBReader
+
+type ReadableStreamBYOBRequestConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> ReadableStreamBYOBRequest
+
+type ReadableStreamDefaultControllerConstructor =
+    [<EmitConstructor>]
+    abstract Create<'R>: unit -> ReadableStreamDefaultController<'R>
+
+type ReadableStreamDefaultReaderConstructor =
+    [<EmitConstructor>]
+    abstract Create<'R>: stream: ReadableStream<obj> -> ReadableStreamDefaultReader<'R>
+
+type ScheduledEventConstructor =
+    abstract NONE: float
+    abstract CAPTURING_PHASE: float
+    abstract AT_TARGET: float
+    abstract BUBBLING_PHASE: float
+    [<EmitConstructor>]
+    abstract Create: ``type``: string * ?init: EventInit -> ScheduledEvent
 
 /// <summary>
 /// The **<c>ServiceWorkerGlobalScope</c>** interface of the Service Worker API represents the global execution context of a service worker.
@@ -1024,8 +1330,8 @@ type CloudflareCompatibilityFlags =
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ServiceWorkerGlobalScope)
 /// </summary>
 type ServiceWorkerGlobalScope =
-    abstract DOMException: obj with get, set
-    abstract WorkerGlobalScope: obj with get, set
+    abstract DOMException: DOMExceptionConstructor with get, set
+    abstract WorkerGlobalScope: WorkerGlobalScopeConstructor with get, set
     abstract btoa: data: string -> string
     abstract atob: data: string -> string
     abstract setTimeout: callback: Action<obj[]> * ?msDelay: float -> float
@@ -1045,77 +1351,77 @@ type ServiceWorkerGlobalScope =
     abstract performance: Performance with get, set
     abstract Cloudflare: Cloudflare with get, set
     abstract origin: string
-    abstract Event: obj with get, set
-    abstract ExtendableEvent: obj with get, set
-    abstract CustomEvent: obj with get, set
-    abstract PromiseRejectionEvent: obj with get, set
-    abstract FetchEvent: obj with get, set
-    abstract TailEvent: obj with get, set
-    abstract TraceEvent: obj with get, set
-    abstract ScheduledEvent: obj with get, set
-    abstract MessageEvent: obj with get, set
-    abstract CloseEvent: obj with get, set
-    abstract ReadableStreamDefaultReader: obj with get, set
-    abstract ReadableStreamBYOBReader: obj with get, set
-    abstract ReadableStream: obj with get, set
-    abstract WritableStream: obj with get, set
-    abstract WritableStreamDefaultWriter: obj with get, set
-    abstract TransformStream: obj with get, set
-    abstract ByteLengthQueuingStrategy: obj with get, set
-    abstract CountQueuingStrategy: obj with get, set
-    abstract ErrorEvent: obj with get, set
-    abstract MessageChannel: obj with get, set
-    abstract MessagePort: obj with get, set
-    abstract EventSource: obj with get, set
-    abstract ReadableStreamBYOBRequest: obj with get, set
-    abstract ReadableStreamDefaultController: obj with get, set
-    abstract ReadableByteStreamController: obj with get, set
-    abstract WritableStreamDefaultController: obj with get, set
-    abstract TransformStreamDefaultController: obj with get, set
+    abstract Event: EventConstructor with get, set
+    abstract ExtendableEvent: ExtendableEventConstructor with get, set
+    abstract CustomEvent: CustomEventConstructor with get, set
+    abstract PromiseRejectionEvent: PromiseRejectionEventConstructor with get, set
+    abstract FetchEvent: FetchEventConstructor with get, set
+    abstract TailEvent: TailEventConstructor with get, set
+    abstract TraceEvent: TailEventConstructor with get, set
+    abstract ScheduledEvent: ScheduledEventConstructor with get, set
+    abstract MessageEvent: MessageEventConstructor with get, set
+    abstract CloseEvent: CloseEventConstructor with get, set
+    abstract ReadableStreamDefaultReader: ReadableStreamDefaultReaderConstructor with get, set
+    abstract ReadableStreamBYOBReader: ReadableStreamBYOBReaderConstructor with get, set
+    abstract ReadableStream: ReadableStreamConstructor with get, set
+    abstract WritableStream: WritableStreamConstructor with get, set
+    abstract WritableStreamDefaultWriter: WritableStreamDefaultWriterConstructor with get, set
+    abstract TransformStream: TransformStreamConstructor with get, set
+    abstract ByteLengthQueuingStrategy: ByteLengthQueuingStrategyConstructor with get, set
+    abstract CountQueuingStrategy: CountQueuingStrategyConstructor with get, set
+    abstract ErrorEvent: ErrorEventConstructor with get, set
+    abstract MessageChannel: MessageChannelConstructor with get, set
+    abstract MessagePort: MessagePortConstructor with get, set
+    abstract EventSource: EventSourceConstructor with get, set
+    abstract ReadableStreamBYOBRequest: ReadableStreamBYOBRequestConstructor with get, set
+    abstract ReadableStreamDefaultController: ReadableStreamDefaultControllerConstructor with get, set
+    abstract ReadableByteStreamController: ReadableByteStreamControllerConstructor with get, set
+    abstract WritableStreamDefaultController: WritableStreamDefaultControllerConstructor with get, set
+    abstract TransformStreamDefaultController: TransformStreamDefaultControllerConstructor with get, set
     abstract Buffer: obj with get, set
     abstract ``process``: obj with get, set
     abstract ``global``: ServiceWorkerGlobalScope with get, set
     abstract setImmediate: ``$function``: Action<obj[]> * [<ParamArray>] args: obj[] -> Immediate
     abstract clearImmediate: ?immediate: Immediate -> unit
-    abstract CompressionStream: obj with get, set
-    abstract DecompressionStream: obj with get, set
-    abstract TextEncoderStream: obj with get, set
-    abstract TextDecoderStream: obj with get, set
-    abstract Headers: obj with get, set
-    abstract Body: obj with get, set
-    abstract Request: obj with get, set
-    abstract Response: obj with get, set
-    abstract WebSocket: obj with get, set
-    abstract WebSocketPair: obj with get, set
-    abstract WebSocketRequestResponsePair: obj with get, set
-    abstract AbortController: obj with get, set
-    abstract AbortSignal: obj with get, set
-    abstract TextDecoder: obj with get, set
-    abstract TextEncoder: obj with get, set
+    abstract CompressionStream: CompressionStreamConstructor with get, set
+    abstract DecompressionStream: DecompressionStreamConstructor with get, set
+    abstract TextEncoderStream: TextEncoderStreamConstructor with get, set
+    abstract TextDecoderStream: TextDecoderStreamConstructor with get, set
+    abstract Headers: HeadersConstructor with get, set
+    abstract Body: BodyConstructor with get, set
+    abstract Request: RequestConstructor with get, set
+    abstract Response: ResponseConstructor with get, set
+    abstract WebSocket: WebSocketConstructor with get, set
+    abstract WebSocketPair: WebSocketPairConstructor with get, set
+    abstract WebSocketRequestResponsePair: WebSocketRequestResponsePairConstructor with get, set
+    abstract AbortController: AbortControllerConstructor with get, set
+    abstract AbortSignal: AbortSignalConstructor with get, set
+    abstract TextDecoder: TextDecoderConstructor with get, set
+    abstract TextEncoder: TextEncoderConstructor with get, set
     abstract navigator: Navigator with get, set
-    abstract Navigator: obj with get, set
-    abstract URL: obj with get, set
-    abstract URLSearchParams: obj with get, set
-    abstract URLPattern: obj with get, set
-    abstract Blob: obj with get, set
-    abstract File: obj with get, set
-    abstract FormData: obj with get, set
-    abstract Crypto: obj with get, set
-    abstract SubtleCrypto: obj with get, set
-    abstract CryptoKey: obj with get, set
-    abstract CacheStorage: obj with get, set
-    abstract Cache: obj with get, set
-    abstract FixedLengthStream: obj with get, set
-    abstract IdentityTransformStream: obj with get, set
-    abstract HTMLRewriter: obj with get, set
-    abstract Performance: obj with get, set
-    abstract PerformanceEntry: obj with get, set
-    abstract PerformanceMark: obj with get, set
-    abstract PerformanceMeasure: obj with get, set
-    abstract PerformanceResourceTiming: obj with get, set
-    abstract PerformanceObserver: obj with get, set
-    abstract PerformanceObserverEntryList: obj with get, set
-    abstract EventTarget: obj with get, set
+    abstract Navigator: NavigatorConstructor with get, set
+    abstract URL: URLConstructor with get, set
+    abstract URLSearchParams: URLSearchParamsConstructor with get, set
+    abstract URLPattern: URLPatternConstructor with get, set
+    abstract Blob: BlobConstructor with get, set
+    abstract File: FileConstructor with get, set
+    abstract FormData: FormDataConstructor with get, set
+    abstract Crypto: CryptoConstructor with get, set
+    abstract SubtleCrypto: SubtleCryptoConstructor with get, set
+    abstract CryptoKey: CryptoKeyConstructor with get, set
+    abstract CacheStorage: CacheStorageConstructor with get, set
+    abstract Cache: CacheConstructor with get, set
+    abstract FixedLengthStream: FixedLengthStreamConstructor with get, set
+    abstract IdentityTransformStream: IdentityTransformStreamConstructor with get, set
+    abstract HTMLRewriter: HTMLRewriterConstructor with get, set
+    abstract Performance: PerformanceConstructor with get, set
+    abstract PerformanceEntry: PerformanceEntryConstructor with get, set
+    abstract PerformanceMark: PerformanceMarkConstructor with get, set
+    abstract PerformanceMeasure: PerformanceMeasureConstructor with get, set
+    abstract PerformanceResourceTiming: PerformanceResourceTimingConstructor with get, set
+    abstract PerformanceObserver: PerformanceObserverConstructor with get, set
+    abstract PerformanceObserverEntryList: PerformanceObserverEntryListConstructor with get, set
+    abstract EventTarget: EventTargetConstructor with get, set
     /// <summary>
     /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
     ///
@@ -1317,9 +1623,101 @@ type ServiceWorkerGlobalScopeWebSocketPairResult =
     [<ParamObject; Emit("$0")>]
     static member Create (``0``: WebSocket, ``1``: WebSocket) : ServiceWorkerGlobalScopeWebSocketPairResult = jsNative
 
+type SubtleCryptoConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> SubtleCrypto
+
+type TailEventConstructor =
+    abstract NONE: float
+    abstract CAPTURING_PHASE: float
+    abstract AT_TARGET: float
+    abstract BUBBLING_PHASE: float
+    [<EmitConstructor>]
+    abstract Create: ``type``: string * ?init: EventInit -> TailEvent
+
+type TextDecoderConstructor =
+    [<EmitConstructor>]
+    abstract Create: ?label: string * ?options: TextDecoderConstructorOptions -> TextDecoder
+
+type TextDecoderStreamConstructor =
+    [<EmitConstructor>]
+    abstract Create: ?label: string * ?options: TextDecoderStreamTextDecoderStreamInit -> TextDecoderStream
+
+type TextEncoderConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> TextEncoder
+
+type TextEncoderStreamConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> TextEncoderStream
+
 type TraceItemTailAttributes =
     [<EmitIndexer>]
     abstract Item: string -> U3<string, float, bool> with get, set
+
+type TransformStreamConstructor =
+    [<EmitConstructor>]
+    abstract Create<'I, 'O>: ?transformer: Transformer<'I, 'O> * ?writableStrategy: QueuingStrategy<'I> * ?readableStrategy: QueuingStrategy<'O> -> TransformStream<'I, 'O>
+
+type TransformStreamDefaultControllerConstructor =
+    [<EmitConstructor>]
+    abstract Create<'O>: unit -> TransformStreamDefaultController<'O>
+
+type URLConstructor =
+    /// <summary>
+    /// The **<c>URL.canParse()</c>** static method of the URL interface returns a boolean indicating whether or not an absolute URL, or a relative URL combined with a base URL, are parsable and valid.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/canParse_static)
+    /// </summary>
+    abstract canParse: url: string * ?``base``: string -> bool
+    /// <summary>
+    /// The **<c>URL.parse()</c>** static method of the URL interface returns a newly created URL object representing the URL defined by the parameters.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/parse_static)
+    /// </summary>
+    abstract parse: url: string * ?``base``: string -> URL option
+    /// <summary>
+    /// The **<c>createObjectURL()</c>** static method of the URL interface creates a string containing a blob URL pointing to the object given in the parameter.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/createObjectURL_static)
+    /// </summary>
+    abstract createObjectURL: ``object``: U2<Blob, File> -> string
+    /// <summary>
+    /// The **<c>revokeObjectURL()</c>** static method of the URL interface releases an existing object URL which was previously created by calling URL.createObjectURL().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/revokeObjectURL_static)
+    /// </summary>
+    abstract revokeObjectURL: object_url: string -> unit
+    [<EmitConstructor>]
+    abstract Create: url: U2<string, URL> * ?``base``: U2<string, URL> -> URL
+
+type URLPatternConstructor =
+    [<EmitConstructor>]
+    abstract Create: ?input: U2<string, URLPatternInit> * ?baseURL: U2<string, URLPatternOptions> * ?patternOptions: URLPatternOptions -> URLPattern
+
+type URLSearchParamsConstructor =
+    [<EmitConstructor>]
+    abstract Create: ?init: obj -> URLSearchParams
+
+type WebSocketRequestResponsePairConstructor =
+    [<EmitConstructor>]
+    abstract Create: request: string * response: string -> WebSocketRequestResponsePair
+
+type WorkerGlobalScopeConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> WorkerGlobalScope
+
+type WritableStreamConstructor =
+    [<EmitConstructor>]
+    abstract Create<'W>: ?underlyingSink: UnderlyingSink<obj> * ?queuingStrategy: QueuingStrategy<obj> -> WritableStream<'W>
+
+type WritableStreamDefaultControllerConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> WritableStreamDefaultController
+
+type WritableStreamDefaultWriterConstructor =
+    [<EmitConstructor>]
+    abstract Create<'W>: stream: WritableStream<obj> -> WritableStreamDefaultWriter<'W>
 
 [<Interface>]
 type Cloudflare =
@@ -3092,7 +3490,11 @@ type Crypto =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Crypto/randomUUID)
     /// </summary>
     abstract randomUUID: unit -> string
-    abstract DigestStream: obj with get, set
+    abstract DigestStream: DigestStreamConstructor with get, set
+
+type DigestStreamConstructor =
+    [<EmitConstructor>]
+    abstract Create: algorithm: U2<string, SubtleCryptoHashAlgorithm> * ?options: DigestStreamOptions -> DigestStream
 
 /// <summary>
 /// The **<c>SubtleCrypto</c>** interface of the Web Crypto API provides a number of low-level cryptographic functions.
@@ -4303,6 +4705,13 @@ type Response =
     abstract formData: unit -> JS.Promise<FormData>
     abstract blob: unit -> JS.Promise<Blob>
 
+type ResponseConstructor =
+    abstract error: unit -> Response
+    abstract redirect: url: string * ?status: float -> Response
+    abstract json: any: obj * ?maybeInit: U2<Response, ResponseInit> -> Response
+    [<EmitConstructor>]
+    abstract Create: ?body: BodyInit * ?init: ResponseInit -> Response
+
 [<Interface>]
 type ResponseInit =
     abstract status: float option with get, set
@@ -4386,6 +4795,10 @@ type Request<'CfHostMetadata, 'Cf> =
     abstract json<'T>: unit -> JS.Promise<'T>
     abstract formData: unit -> JS.Promise<FormData>
     abstract blob: unit -> JS.Promise<Blob>
+
+type RequestConstructor =
+    [<EmitConstructor>]
+    abstract Create<'CfHostMetadata, 'Cf>: input: U3<string, Request<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>, U2<RequestInitCfProperties, ServiceWorkerGlobalScopeRequestInputItem>>, URL> * ?init: RequestInit<'Cf> -> Request<'CfHostMetadata, 'Cf>
 
 [<Interface>]
 type RequestInit<'Cf> =
@@ -5326,6 +5739,12 @@ type ReadableStream<'R> =
     /// </summary>
     abstract tee: unit -> ReadableStream<'R> * ReadableStream<'R>
     abstract values: ?options: ReadableStreamValuesOptions -> obj
+
+type ReadableStreamConstructor =
+    [<EmitConstructor>]
+    abstract Create: underlyingSource: UnderlyingByteSource * ?strategy: QueuingStrategy<JS.Uint8Array> -> ReadableStream<JS.Uint8Array>
+    [<EmitConstructor>]
+    abstract Create<'R>: ?underlyingSource: UnderlyingSource<'R> * ?strategy: QueuingStrategy<'R> -> ReadableStream<'R>
 
 /// <summary>
 /// The **<c>ReadableStreamDefaultReader</c>** interface of the Streams API represents a default reader that can be used to read stream data supplied from a network (such as a fetch request).
@@ -6646,6 +7065,18 @@ type WebSocket =
     /// </summary>
     abstract dispatchEvent: ``event``: U4<CloseEvent, ErrorEvent, Event, MessageEvent> -> bool
 
+type WebSocketConstructor =
+    abstract READY_STATE_CONNECTING: float
+    abstract CONNECTING: float
+    abstract READY_STATE_OPEN: float
+    abstract OPEN: float
+    abstract READY_STATE_CLOSING: float
+    abstract CLOSING: float
+    abstract READY_STATE_CLOSED: float
+    abstract CLOSED: float
+    [<EmitConstructor>]
+    abstract Create: url: string * ?protocols: U2<string, string[]> -> WebSocket
+
 [<Interface>]
 type WebSocketAcceptOptions =
     /// <summary>
@@ -6659,11 +7090,23 @@ type WebSocketAcceptOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?allowHalfOpen: bool) : WebSocketAcceptOptions = jsNative
 
+type WebSocketPairConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> ServiceWorkerGlobalScopeWebSocketPairResult
+
 type SqlStorage =
     abstract exec<'T>: query: string * [<ParamArray>] bindings: obj[] -> SqlStorageCursor<'T>
     abstract databaseSize: float
-    abstract Cursor: obj with get, set
-    abstract Statement: obj with get, set
+    abstract Cursor: SqlStorageCursorConstructor with get, set
+    abstract Statement: SqlStorageStatementConstructor with get, set
+
+type SqlStorageCursorConstructor =
+    [<EmitConstructor>]
+    abstract Create<'T>: unit -> SqlStorageCursor<'T>
+
+type SqlStorageStatementConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> SqlStorageStatement
 
 type SqlStorageStatement = obj
 
@@ -7557,11 +8000,15 @@ type EventCounts =
     abstract values: unit -> obj
     abstract forEach: param1: Action<float, string, EventCounts> * param2: obj -> unit
 
+type SpanConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> Span
+
 type Tracing =
     abstract enterSpan<'T, 'A>: name: string * callback: Func<Span, 'A, 'T> * [<ParamArray>] args: 'A -> 'T
     abstract startActiveSpan<'T, 'A>: name: string * callback: Func<Span, 'A, 'T> * [<ParamArray>] args: 'A -> 'T
     abstract startSpan: name: string -> Span
-    abstract Span: obj with get, set
+    abstract Span: SpanConstructor with get, set
 
 type Span =
     abstract isTraced: bool
@@ -27708,12 +28155,12 @@ type Rpc =
 
 [<Interface>]
 type CloudflareWorkersModule =
-    abstract RpcStub: obj
-    abstract RpcTarget: obj with get, set
-    abstract WorkerEntrypoint: obj with get, set
-    abstract DurableObject: obj with get, set
-    abstract WorkflowStep: obj with get, set
-    abstract WorkflowEntrypoint: obj with get, set
+    abstract RpcStub: CloudflareWorkersModuleRpcStubConstructor
+    abstract RpcTarget: RpcTargetConstructor with get, set
+    abstract WorkerEntrypoint: WorkerEntrypointConstructor with get, set
+    abstract DurableObject: DurableObjectConstructor with get, set
+    abstract WorkflowStep: WorkflowStepConstructor with get, set
+    abstract WorkflowEntrypoint: WorkflowEntrypointConstructor with get, set
     abstract waitUntil: Action<JS.Promise<obj>> with get, set
     abstract withEnv: Func<obj, Func<obj>, obj> with get, set
     abstract withExports: Func<obj, Func<obj>, obj> with get, set
@@ -27723,7 +28170,11 @@ type CloudflareWorkersModule =
     abstract cache: CacheContext
     abstract tracing: Tracing
     [<ParamObject; Emit("$0")>]
-    static member Create (RpcStub: obj, RpcTarget: obj, WorkerEntrypoint: obj, DurableObject: obj, WorkflowStep: obj, WorkflowEntrypoint: obj, waitUntil: Action<JS.Promise<obj>>, withEnv: Func<obj, Func<obj>, obj>, withExports: Func<obj, Func<obj>, obj>, withEnvAndExports: Func<obj, obj, Func<obj>, obj>, env: obj, exports: obj, cache: CacheContext, tracing: Tracing) : CloudflareWorkersModule = jsNative
+    static member Create (RpcStub: CloudflareWorkersModuleRpcStubConstructor, RpcTarget: RpcTargetConstructor, WorkerEntrypoint: WorkerEntrypointConstructor, DurableObject: DurableObjectConstructor, WorkflowStep: WorkflowStepConstructor, WorkflowEntrypoint: WorkflowEntrypointConstructor, waitUntil: Action<JS.Promise<obj>>, withEnv: Func<obj, Func<obj>, obj>, withExports: Func<obj, Func<obj>, obj>, withEnvAndExports: Func<obj, obj, Func<obj>, obj>, env: obj, exports: obj, cache: CacheContext, tracing: Tracing) : CloudflareWorkersModule = jsNative
+
+type CloudflareWorkersModuleRpcStubConstructor =
+    [<EmitConstructor>]
+    abstract Create<'T>: value: 'T -> obj
 
 [<Interface>]
 type DurableObject2<'Env, 'Props> =
@@ -27739,11 +28190,19 @@ type DurableObject2<'Env, 'Props> =
     [<ParamObject; Emit("$0")>]
     static member Create (ctx: DurableObjectState<'Props>, env: 'Env, ?alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option>, ?fetch: Func<Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, JS.Promise<unit> option>, ?webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<WebSocket, obj, JS.Promise<unit> option>) : DurableObject2<'Env, 'Props> = jsNative
 
+type DurableObjectConstructor =
+    [<EmitConstructor>]
+    abstract Create<'Env, 'Props>: ctx: DurableObjectState<obj> * env: 'Env -> DurableObject2<'Env, 'Props>
+
 [<Interface>]
 type RpcTarget =
     abstract __RPC_TARGET_BRAND: unit
     [<ParamObject; Emit("$0")>]
     static member Create () : RpcTarget = jsNative
+
+type RpcTargetConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> RpcTarget
 
 [<Interface>]
 type WorkerEntrypoint<'Env, 'Props> =
@@ -27762,11 +28221,19 @@ type WorkerEntrypoint<'Env, 'Props> =
     [<ParamObject; Emit("$0")>]
     static member Create (ctx: ExecutionContext<'Props>, env: 'Env, ?email: Func<ForwardableEmailMessage, JS.Promise<unit> option>, ?fetch: Func<Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, JS.Promise<unit> option>, ?queue: Func<MessageBatch<obj>, JS.Promise<unit> option>, ?scheduled: Func<ScheduledController, JS.Promise<unit> option>, ?tail: Func<TraceItem[], JS.Promise<unit> option>, ?tailStream: Func<TailEvent2<Onset>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?test: Func<TestController, JS.Promise<unit> option>, ?trace: Func<TraceItem[], JS.Promise<unit> option>) : WorkerEntrypoint<'Env, 'Props> = jsNative
 
+type WorkerEntrypointConstructor =
+    [<EmitConstructor>]
+    abstract Create<'Env, 'Props>: ctx: ExecutionContext<obj> * env: 'Env -> WorkerEntrypoint<'Env, 'Props>
+
 type WorkflowEntrypoint<'Env, 'T> =
     abstract __WORKFLOW_ENTRYPOINT_BRAND: unit
     abstract ctx: ExecutionContext<obj> with get, set
     abstract env: 'Env with get, set
     abstract run: ``event``: WorkflowEntrypointRunEvent * step: WorkflowStep -> JS.Promise<obj>
+
+type WorkflowEntrypointConstructor =
+    [<EmitConstructor>]
+    abstract Create<'Env, 'T>: ctx: ExecutionContext<obj> * env: 'Env -> WorkflowEntrypoint<'Env, 'T>
 
 [<Interface>]
 type WorkflowEntrypointRunEvent =
@@ -27799,6 +28266,10 @@ type WorkflowStep =
     abstract sleep: Func<string, WorkflowSleepDuration, JS.Promise<unit>> with get, set
     abstract sleepUntil: Func<string, U2<float, JS.Date>, JS.Promise<unit>> with get, set
     abstract waitForEvent: name: string * options: WorkflowStepWaitForEventOptions -> JS.Promise<obj>
+
+type WorkflowStepConstructor =
+    [<EmitConstructor>]
+    abstract Create: unit -> WorkflowStep
 
 [<Interface>]
 type WorkflowStepDoCallbackCtx =
@@ -29986,14 +30457,14 @@ type Exports =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response)
     /// </summary>
     [<Global("Response")>]
-    static member Response: obj = jsNative
+    static member Response: ResponseConstructor = jsNative
     /// <summary>
     /// The **<c>Request</c>** interface of the Fetch API represents a resource request.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request)
     /// </summary>
     [<Global("Request")>]
-    static member Request: obj = jsNative
+    static member Request: RequestConstructor = jsNative
     [<Global("R2Object"); EmitConstructor>]
     static member R2Object () : R2Object = jsNative
     [<Global("ScheduledEvent"); EmitConstructor>]
@@ -30004,7 +30475,7 @@ type Exports =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ReadableStream)
     /// </summary>
     [<Global("ReadableStream")>]
-    static member ReadableStream: obj = jsNative
+    static member ReadableStream: ReadableStreamConstructor = jsNative
     /// <summary>
     /// The **<c>ReadableStreamDefaultReader</c>** interface of the Streams API represents a default reader that can be used to read stream data supplied from a network (such as a fetch request).
     ///
@@ -30157,9 +30628,9 @@ type Exports =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WebSocket)
     /// </summary>
     [<Global("WebSocket")>]
-    static member WebSocket: obj = jsNative
+    static member WebSocket: WebSocketConstructor = jsNative
     [<Global("WebSocketPair")>]
-    static member WebSocketPair: obj = jsNative
+    static member WebSocketPair: WebSocketPairConstructor = jsNative
     [<Global("SqlStorageStatement"); EmitConstructor>]
     static member SqlStorageStatement () : SqlStorageStatement = jsNative
     [<Global("SqlStorageCursor"); EmitConstructor>]

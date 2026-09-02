@@ -632,10 +632,30 @@ type FsIndexerMember =
 
 /// An interface member. Overloads are consecutive `FsMethod` entries sharing a name -
 /// overloaded abstract members are legal F#.
+/// A construct signature of a *constructor object* - the thing `typeof Request` names, and the
+/// type of a `declare var Request: { new (...): Request }` (§4.4). F# has no first-class
+/// constructor-object type, so the object is declared as an interface of its own and each of
+/// its construct signatures becomes an `[<EmitConstructor>]` `Create` member: `$0` is the
+/// object the member is read off, so `scope.Request.Create(url)` reaches JavaScript as
+/// `new scope.Request(url)` rather than as a call.
+///
+/// The name is always `Create` - overloads are consecutive entries, exactly as methods are.
+type FsConstructorMember =
+    {
+        Docs: string
+        Tags: JSDocTagInfo list
+        /// The signature's own parameters: `new <T>(value: T): Box<T>` binds `T` per call, and
+        /// the constructor object itself is not generic, so this is where they go.
+        TypeParameters: FsTypeParam list
+        Parameters: FsParam list
+        Return: FsTypeRef
+    }
+
 type FsMember =
     | FsProperty of FsPropertyMember
     | FsMethod of FsMethodMember
     | FsIndexer of FsIndexerMember
+    | FsConstructor of FsConstructorMember
 
 /// How a value export is bound to its JavaScript module.
 type ImportBinding =

@@ -1,0 +1,149 @@
+{
+  "package": "ctor-lab",
+  "module": "CtorLab",
+  "counts": {
+    "exact": 5,
+    "ergonomic": 7,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 3,
+      "ergonomic": 3
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 4,
+      "ergonomic": 4
+    }
+  ],
+  "symbols": [
+    {
+      "name": "Widget",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "WidgetConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WidgetConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "Gauge",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Gauge",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "GaugeConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "GaugeConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "Scope",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Scope",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "ParcelFactory",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ParcelFactory",
+          "message": "constructor object declared as its own interface; 2 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "Parcel",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Parcel",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Solo",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "Meta",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Meta",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "scope",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "parcels",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "VERSION",
+      "tier": "exact",
+      "findings": []
+    }
+  ]
+}

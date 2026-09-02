@@ -126,6 +126,34 @@ let private statics () =
     equal "an instance method survives beside the static of its name" 42.0 (clash.json ())
     equal "and the static of that name reaches the constructor object's" 10.0 (StaticsLab.Clash.json 5.0).status
 
+/// A constructor object is an interface of its own, and `[<EmitConstructor>]` on an *abstract*
+/// member `new`s the object the member was read off (§4.4) - so a `typeof X` member is a
+/// working constructor rather than an `obj` the consumer has to escape out of.
+let private constructorObjects () =
+    // The `interface` + `declare const` spelling: the export's own value type is the object.
+    let widget = CtorLab.Exports.Widget.Create "hello"
+    let widgetClass: obj = import "Widget" "ctor-lab"
+
+    check
+        "EmitConstructor on an abstract member news the object it is read off"
+        (emitJsExpr (widget, widgetClass) "$0 instanceof $1")
+
+    equal "the constructor argument arrived" "hello" widget.label
+    equal "and the instance side still reaches its own JavaScript" "hello:2" (widget.resize 2.0).label
+    equal "a property of the constructor object is the class's static" "widget" CtorLab.Exports.Widget.DEFAULT_LABEL
+
+    // `typeof Gauge` at a member position - the construct the whole ServiceWorkerGlobalScope
+    // constructor table is made of. `$0` is `scope.Gauge`, so this is `new scope.Gauge(3)`.
+    let gauge = CtorLab.Exports.scope.Gauge.Create 3.0
+    let gaugeClass: obj = import "Gauge" "ctor-lab"
+    check "a typeof member news the class it names" (emitJsExpr (gauge, gaugeClass) "$0 instanceof $1")
+    equal "with the argument the declaration promised" 3.0 gauge.size
+    equal "and the class's static reads off the same object" "px" CtorLab.Exports.scope.Gauge.UNIT
+
+    // An interface whose only members are construct signatures, generic and overloaded.
+    equal "a generic construct signature news with its argument" "hi" (CtorLab.Exports.parcels.Create "hi").value
+    equal "and the nullary overload reaches the same constructor" "empty" (CtorLab.Exports.parcels.Create()).value
+
 let private taggedUnions () =
     let circle = PhaseBLab.Shape.Circle 2.0
     equal "a tagged-union case erases to the tagged object" """{"kind":"circle","radius":2}""" (json circle)
@@ -152,6 +180,7 @@ let main _ =
     globals ()
     imports ()
     statics ()
+    constructorObjects ()
     taggedUnions ()
 
     match failures with

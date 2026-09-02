@@ -110,6 +110,16 @@ let private namedUnionByMembers (model: ShapeModel) (memberIds: int list) : stri
                 None
         | _ -> None)
 
+/// A *constructor object* (§4.4): the static side of a class, and the type `typeof X` names at
+/// a member position. It carries construct signatures; its properties are the class's statics,
+/// and `prototype` is the instance side, which is a declaration of its own.
+///
+/// A group resolved identity-only has no signatures at all, so a lib or dependency type never
+/// reads as one here - which is what keeps this from claiming to know a shape it never asked
+/// the checker for.
+let private isConstructorObject (facts: TypeFacts) =
+    flag TypeFlags.Object facts && not facts.ConstructSignatures.IsEmpty
+
 /// An object type that is only a callback: call signatures and nothing else worth keeping.
 let private isPureCallback (facts: TypeFacts) =
     not facts.CallSignatures.IsEmpty
@@ -584,6 +594,17 @@ and private objectRef
                         | Reference, None -> FsObj, [ Finding.make owner TypeReference.AnonymousInReferencedGroup ]
                         | (Ship | Widen), Some "globalThis" ->
                             FsObj, [ Finding.make owner TypeReference.GlobalThisToObj ]
+                        | (Ship | Widen), _ when isConstructorObject facts ->
+                            // A constructor object this run did not name: the generic message
+                            // would say `__type is not among the generated declarations`, which
+                            // names the checker's placeholder rather than the construct.
+                            let constructs =
+                                facts.ConstructSignatures
+                                |> List.tryPick (fun signature -> Map.tryFind signature.ReturnTypeId model.DeclNames)
+                                |> Option.orElse (facts.SymbolName |> Option.filter (isSyntheticName >> not))
+                                |> Option.defaultValue "an anonymous class"
+
+                            FsObj, [ Finding.make owner (TypeReference.ConstructorObjectNotDeclared constructs) ]
                         | (Ship | Widen), _ ->
                             let shown = facts.SymbolName |> Option.defaultValue "an anonymous object type"
                             FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations shown) ]
@@ -1265,6 +1286,10 @@ let private shapeMembers
                 let stable = m.Symbol.Name.Substring(0, m.Symbol.Name.LastIndexOf '@')
                 emit (Finding.make $"{self}.{stable}" Members.SymbolKeyedMemberDropped)
                 false
+            elif isConstructorObject facts && m.Symbol.Name = "prototype" then
+                // On a constructor object, `prototype` is the instance side, which is a
+                // declaration of its own - `shape-classes` drops it for the same reason.
+                false
             else
                 true)
         |> List.collect (fun m ->
@@ -1334,7 +1359,29 @@ let private shapeMembers
                     ReadOnly = info.IsReadonly
                 })
 
-    members @ indexers, findings
+    // A constructor object's construct signatures become `[<EmitConstructor>] Create` members
+    // (§4.4). They come last so the declaration reads properties first, exactly as the static
+    // side is written in TypeScript, and so an existing golden's member order only grows.
+    let constructors =
+        facts.ConstructSignatures
+        |> List.map (fun signature ->
+            let owner = $"{self}.Create"
+
+            let typeParameters, parameters, returns, signatureFindings =
+                shapeSignature ctx model (Some self) owner signature
+
+            findings <- findings @ signatureFindings
+
+            FsConstructor
+                {
+                    Docs = ""
+                    Tags = []
+                    TypeParameters = typeParameters
+                    Parameters = parameters
+                    Return = returns
+                })
+
+    members @ indexers @ constructors, findings
 
 // ---------------------------------------------------------------------------------------------
 // Passes.
@@ -1526,6 +1573,171 @@ let synthesizeAnonymous: Pass<ShapeModel> =
                 for typeId in [ yield! Option.toList ids.Declared; yield! Option.toList ids.Value ] do
                     walk root export.Order typeId
             | None -> ()
+
+        { model with
+            DeclNames = names
+            DeclOrders = orders
+        })
+
+/// Names the *constructor objects* (§4.4) this run reaches at a reference position, so that
+/// `typeof Request` in a member type has a declaration to name instead of widening to `obj`.
+/// F# has no first-class type for a class's static side, so the object is declared as an
+/// interface of its own - `RequestConstructor` - whose `Create` members are its construct
+/// signatures and whose properties are the class's statics.
+///
+/// Only *reference* positions count. Naming every constructor object the harvest can see would
+/// add one interface per exported class, duplicating what `shape-classes` already emits, and
+/// the resulting declarations would be referenced by nothing: the entry package of
+/// `@cloudflare/workers-types` alone has 154 of them. A class export's own value type is left
+/// out for the same reason; a non-class export's is not, because `declare const Pair: { new
+/// (): P }` has no other route to a name and `Exports.Pair` would otherwise read `obj`.
+///
+/// Runs after `synthesize-anonymous` so that instance sides are already named and a
+/// constructor object can be called after the thing it constructs.
+let nameConstructorObjects: Pass<ShapeModel> =
+    Pass.pure' "name-constructor-objects" (fun ctx model ->
+        let fallback = defaultExportName ctx
+
+        let exportNames =
+            model.Harvest.Exports
+            |> List.fold
+                (fun found export ->
+                    if hasAny SymbolFlags.Class export.Symbol.Flags then
+                        found
+                    else
+                        match Map.tryFind export.Symbol.Id model.ExportTypes |> Option.bind _.Value with
+                        | Some typeId when not (Map.containsKey typeId found) ->
+                            Map.add typeId (fsName fallback export) found
+                        | _ -> found)
+                Map.empty
+
+        let mutable names = model.DeclNames
+        let mutable orders = model.DeclOrders
+        let mutable taken = model.DeclNames |> Map.toList |> List.map snd |> Set.ofList
+        let mutable visited = Set.empty
+        let mutable claimed = []
+
+        let claim (preferred: string) typeId order =
+            let unique =
+                if not (Set.contains preferred taken) then
+                    preferred
+                else
+                    Seq.initInfinite (fun i -> $"{preferred}{i + 2}")
+                    |> Seq.find (fun candidate -> not (Set.contains candidate taken))
+
+            names <- Map.add typeId unique names
+            orders <- Map.add typeId order orders
+            taken <- Set.add unique taken
+            claimed <- claimed @ [ typeId, unique ]
+
+        /// The name to declare a constructor object under: the export it is the value of, the
+        /// name the author gave it, the instance side it constructs, or the path that reached
+        /// it - in that order of how much the reader will recognize.
+        let preferredName (path: string) (facts: TypeFacts) =
+            let instanceName () =
+                facts.ConstructSignatures
+                |> List.tryPick (fun signature ->
+                    Map.tryFind signature.ReturnTypeId names
+                    |> Option.orElseWith (fun () ->
+                        match Map.tryFind signature.ReturnTypeId model.Types with
+                        | Some returns ->
+                            match returns.Response.Target with
+                            | ValueSome target -> Map.tryFind target names
+                            | ValueNone -> None
+                        | None -> None))
+
+            let stem =
+                Map.tryFind facts.Response.Id exportNames
+                |> Option.orElseWith (fun () -> facts.SymbolName |> Option.filter (isSyntheticName >> not))
+                |> Option.orElseWith instanceName
+                |> Option.defaultValue path
+                |> Naming.pascalSegment
+
+            // The lib spells its own static sides `ErrorConstructor` already; doubling the
+            // suffix would only make the name harder to match against the `.d.ts`.
+            if stem.EndsWith "Constructor" then
+                stem
+            else
+                $"{stem}Constructor"
+
+        /// A shape this run is entitled to declare: the entry package's own, or an anonymous
+        /// one, which belongs to whatever transformed it (D6) rather than to the file it was
+        /// written in. A referenced group's is that group's to declare, and an identity-only
+        /// one has no signatures to read in the first place.
+        let declarable (facts: TypeFacts) =
+            GeneratorConfig.disposition ctx.Config facts.Origin = Ship
+            || facts.SymbolName |> Option.forall isSyntheticName
+
+        /// The reference positions a declaration reads.
+        let positions (facts: TypeFacts) =
+            [
+                for m in facts.Members do
+                    if not (isSymbolKeyed m.Symbol.Name) then
+                        Naming.pascalSegment m.Symbol.Name, m.TypeId
+                for info in facts.IndexInfos do
+                    "Item", info.KeyTypeId
+                    "Item", info.ValueTypeId
+                for signature in facts.CallSignatures @ facts.ConstructSignatures do
+                    for p in signature.Parameters do
+                        Naming.pascalSegment p.Symbol.Name, p.TypeId
+
+                    "Result", signature.ReturnTypeId
+                for memberId in facts.UnionMembers do
+                    "", memberId
+                for memberId in facts.IntersectionMembers do
+                    "", memberId
+                for argument in facts.TypeArguments do
+                    "Item", argument
+            ]
+
+        // An unnamed shape is expanded into whatever reads it, so its positions are the reading
+        // declaration's too and the descent continues through it. A named one stops the descent:
+        // it is a root of its own.
+        let rec descend (path: string) order (typeId: int) =
+            if not (Set.contains typeId visited) then
+                visited <- Set.add typeId visited
+
+                match Map.tryFind typeId model.Types with
+                | None -> ()
+                | Some facts ->
+                    for segment, target in positions facts do
+                        consider (path + segment) order target
+
+        and consider path order typeId =
+            match Map.tryFind typeId model.Types with
+            | Some facts when isConstructorObject facts ->
+                if declarable facts && not (Map.containsKey typeId names) then
+                    claim (preferredName path facts) typeId order
+            | Some _ when not (Map.containsKey typeId names) -> descend path order typeId
+            | _ -> ()
+
+        // A non-class export's own value type is a root of its own: `declare const Pair: { new
+        // (): P }` is referenced from nowhere else, and `Exports.Pair` is exactly the position
+        // that wants the name.
+        for export in model.Harvest.Exports do
+            match Map.tryFind export.Symbol.Id model.ExportTypes |> Option.bind _.Value with
+            | None -> ()
+            | Some typeId ->
+                let path = Naming.pascalSegment (fsName fallback export)
+
+                if hasAny SymbolFlags.Class export.Symbol.Flags then
+                    // A class's own static side stays `shape-classes`'s, but a static *of type*
+                    // `typeof Other` reads through this pass like any other member position.
+                    descend path export.Order typeId
+                else
+                    consider path export.Order typeId
+
+        let exportRoots = claimed
+
+        let mutable queue = (model.DeclNames |> Map.toList |> List.sortBy fst) @ exportRoots
+
+        while not queue.IsEmpty do
+            claimed <- []
+
+            for typeId, name in queue do
+                descend name (Map.tryFind typeId orders |> Option.defaultValue None) typeId
+
+            queue <- claimed
 
         { model with
             DeclNames = names
@@ -2010,7 +2222,15 @@ let shapeCallbacks: Pass<ShapeModel> =
 /// that it would reach `shape-aliases` looking empty and abbreviate to obj (§4.10).
 let private declaresInterface (model: ShapeModel) (facts: TypeFacts) =
     (flag TypeFlags.Object facts
-     && not (facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
+     // A constructor object is shape even with no properties of its own: `interface F { new
+     // (): X }` has no members and one construct signature, and is an interface of one
+     // `Create`. Without this it would reach `shape-aliases` looking empty and abbreviate to
+     // `obj` (§4.4), the same trap an index signature falls into just below.
+     && not (
+         facts.Members.IsEmpty
+         && facts.IndexInfos.IsEmpty
+         && facts.ConstructSignatures.IsEmpty
+     )
      && (arrayElement facts).IsNone
      && not (isTuple facts)
      && (instantiationOf model facts).IsNone)
@@ -2082,6 +2302,16 @@ let shapeInterfaces: Pass<ShapeModel> =
                                                 Some reference
                                             | _ -> None)
                                         |> List.distinct
+
+                                if isConstructorObject facts then
+                                    findings <-
+                                        findings
+                                        @ [
+                                            Finding.make
+                                                name
+                                                (ShapeInterfaces.ConstructorObjectDeclared
+                                                    facts.ConstructSignatures.Length)
+                                        ]
 
                                 if not facts.CallSignatures.IsEmpty then
                                     findings <-
@@ -2385,6 +2615,7 @@ let private shapedMemberName (m: FsMember) =
     | FsProperty p -> p.Name
     | FsMethod m -> m.Name
     | FsIndexer _ -> "Item"
+    | FsConstructor _ -> "Create"
 
 /// Whether F# admits a static beside an instance member of the same name. It does so between
 /// two methods and nowhere else, which is lucky, because method-over-method is the case that
@@ -2397,7 +2628,8 @@ let private staticFitsBeside (instance: FsMember) (isMethod: bool) =
     match instance with
     | FsMethod _ -> isMethod
     | FsProperty _
-    | FsIndexer _ -> false
+    | FsIndexer _
+    | FsConstructor _ -> false
 
 /// A class's static, bound through a dotted selector off whatever the class itself binds to:
 /// `[<Import("Counter.MAX", "pkg")>]` is `import { Counter }` and then `Counter.MAX`, and
@@ -2500,7 +2732,18 @@ let shapeClasses: Pass<ShapeModel> =
                                 if m.Optional then
                                     emit (Finding.make owner Members.OptionalMemberAsOption)
 
-                                if not m.ReadOnly then
+                                if hasAny SymbolFlags.Method m.Symbol.Flags then
+                                    // A method the checker gave no call signatures: its type is
+                                    // declared in a group this run resolves identity-only, so
+                                    // there is nothing to shape a method from. It is not a
+                                    // settable static, and `StaticReadOnly` would say it was.
+                                    let declaredIn =
+                                        Map.tryFind m.TypeId model.Types
+                                        |> Option.bind (fun facts -> GeneratorConfig.groupKey facts.Origin)
+                                        |> Option.defaultValue "another group"
+
+                                    emit (Finding.make owner (ShapeClasses.StaticMethodWithoutSignatures declaredIn))
+                                elif not m.ReadOnly then
                                     emit (Finding.make owner ShapeClasses.StaticReadOnly)
 
                                 [
@@ -2712,7 +2955,11 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                        | FsProperty _ -> true
                                        // An index signature has no name to bind a Create
                                        // parameter to, so a type carrying one is not plain data.
+                                       // A constructor object already has the `Create` members
+                                       // its construct signatures gave it (§4.4), and a
+                                       // synthesized one would collide with them.
                                        | FsMethod _
+                                       | FsConstructor _
                                        | FsIndexer _ -> false)
                                 ->
                                 let parameters =
@@ -2731,6 +2978,7 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                                 Type = p.Type
                                             }
                                         | FsMethod _
+                                        | FsConstructor _
                                         | FsIndexer _ -> failwith "unreachable: filtered to properties")
 
                                 let required, optional = parameters |> List.partition (fun p -> not p.Optional)
@@ -2797,6 +3045,20 @@ let dedupeOverloads: Pass<ShapeModel> =
                             // Two `Item` overloads differing only in key type are legal and
                             // wanted - a type may index by both string and number.
                             | FsIndexer _ -> true
+                            | FsConstructor c ->
+                                // `Create` overloads collide the same way methods do, and share
+                                // their namespace: a static side with both `new (url: string)`
+                                // and a `Create(url: string)` property would be one clash.
+                                let key = ("Create", signatureKey c.Parameters).ToString()
+
+                                if Set.contains key seen then
+                                    findings <-
+                                        findings @ [ Finding.make $"{owner}.Create" DedupeOverloads.OverloadDropped ]
+
+                                    false
+                                else
+                                    seen <- Set.add key seen
+                                    true
                             | FsMethod m ->
                                 let key = (m.Name, signatureKey m.Parameters).ToString()
 
@@ -2902,6 +3164,12 @@ let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
                 { m with
                     Parameters = m.Parameters |> List.map parameter
                     Return = reference m.Return
+                }
+        | FsConstructor c ->
+            FsConstructor
+                { c with
+                    Parameters = c.Parameters |> List.map parameter
+                    Return = reference c.Return
                 }
 
     match decl with
@@ -3168,6 +3436,7 @@ let passes: Pass<ShapeModel> list =
     [
         nameExports
         synthesizeAnonymous
+        nameConstructorObjects
         bindFreeTypeParams
         classifyLiteralUnions
         detectTaggedUnions

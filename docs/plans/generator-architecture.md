@@ -720,6 +720,68 @@ Phases — each ends with the compile gate green on its fixtures:
     misleading `SC003`) rather than as a method; and `synthesize-paramobjects` still offers a
     `[<ParamObject>]` `Create` on a class whose instance type is all properties (`Box`), which
     cannot build a class instance - both predate this pass and are separate behaviour changes.
+  - *Constructor objects declared (2026-09-02).* The 31 `__type` sites the harvest entry left
+    visible, and the `DOMException.isError` finding the statics entry left visible, are the same
+    construct seen twice: `typeof X` at a member position is a *constructor object* - the static
+    side of a class, an object carrying `prototype`, the statics and the construct signatures -
+    and F# has no first-class type for it. It reached `object-ref` with no `DeclNames` entry and
+    fell out as `obj` under `TR023`, whose message printed the checker's symbol name: `__type`
+    for `declare const Widget: { new (...): Widget }`, and, worse, the *class's own name* for
+    `typeof AbortController`, which reads as though a declaration the run does emit had gone
+    missing. It had not; `AbortController` is declared, and `typeof AbortController` is a
+    different type.
+    A constructor object is now declared as its own interface, `<Stem>Constructor`, whose
+    construct signatures are `[<EmitConstructor>] abstract Create` members (`$0` is the object
+    the member is read off, so `scope.Gauge.Create 3.0` news the constructor the property holds)
+    and whose properties are the class's statics; `prototype` is the instance side, declared
+    separately, and is dropped. Three options were on the table and this is the first:
+    - *Declare the constructor object (taken).* The only one that keeps the construct
+      constructible. `[<EmitConstructor>]` on an abstract member is exactly the JavaScript this
+      is - `new` on a value - and the run gate proves it: `scope.Gauge.Create 3.0` is
+      `instanceof Gauge` and its `size` reads back.
+    - *Point the reference at the class's own declaration, where the statics already live
+      (rejected).* The member would be typed as an *instance* where a constructor stands, so
+      `new` is unreachable and `scope.Gauge.UNIT` resolves against the wrong side. Statics
+      emission binds each static through a dotted selector off the class's own binding, which
+      is a different value from the one this member holds.
+    - *Widen honestly with a better message (rejected as the primary answer, kept as the
+      fallback).* `TR037` names the class the constructor object constructs rather than
+      `__type`, and fires when the object's own declaration is not in scope.
+    Naming is a new pure pass, `name-constructor-objects`, rather than a relaxation of
+    `synthesize-anonymous` - whose `needsName` had explicitly refused any type with construct
+    signatures. The distinction is that naming is driven from *reference positions*: a class
+    that nothing ever `typeof`s keeps its static side on its own declaration, where
+    `shape-classes` puts it. Naming every constructor object the harvest can see would have
+    added 154 unreferenced `XConstructor` interfaces to `workers-types`. The name comes from
+    the export it is the value of, else its own non-synthetic symbol name, else the instance
+    type its first construct signature returns, suffixed `Constructor`.
+    `DOMException.isError` is the same fault at the static side: it is inherited from the lib's
+    `ErrorConstructor`, which this run resolves identity-only, so it has no call signatures to
+    shape a method from - and the property branch then reported `SC003` ("settable") because a
+    method symbol is not `ReadOnly`. `SC005` says what actually happened and names the group
+    whose resolution lost the signatures.
+    What it taught:
+    - *A constructor interface is not plain data.* `synthesize-paramobjects` would otherwise
+      offer it a `[<ParamObject>]` `Create`, colliding with the construct signatures' own.
+    - *An interface of construct signatures only used to be `obj`.* `shape-interfaces` declared
+      nothing for a type with no members and no indexers; `ParcelFactory` in the lab is that
+      shape, and it now carries two `Create` overloads, one of them generic.
+    Measured: `workers-types` `TR023` 229 -> 148 (-81; of those, the `__type` sites 31 -> 20),
+    `SC003` 1 -> 0, `SC005` 0 -> 1, `SI004` 0 -> 83, exact 260 -> 261, ergonomic 967 -> 1031,
+    widened 380 -> 388, escape 107 -> 117; `animejs` `TR023` 103 -> 101 with ergonomic 76 -> 80
+    and widened 34 -> 32; `type-fest` `TR023` 355 -> 351 with widened 219 -> 215; `solid-js` and
+    every existing lab unchanged. The increases are the 83 new declarations bringing their own
+    members into shaping scope - their `any` statics land as `TR008`, their optional members as
+    `TR032` - which is the loss being owned where it happens rather than hidden behind one `obj`.
+    `tests/fixtures/ctor-lab` pins the construct and its negatives (a class nothing `typeof`s,
+    `typeof` over a plain value) and is linked into both gates; the run gate grew 40 -> 49 checks.
+    Not done, and now visible: `TR037` fires nowhere in the corpus today, because every
+    constructor object a reference reaches is one this run may declare - it is the honest answer
+    held in reserve for a `Reference`-disposition compiler-lib constructor object, and only the
+    unit test exercises it. And a class's statics are now written twice wherever both an
+    `XConstructor` and the class itself exist - once as `Exports`-bound dotted selectors, once as
+    that interface's members - shaped from two different views of the same static side, and the
+    two are not cross-checked against each other.
 
 ## 7. Decisions (2026-09-01)
 

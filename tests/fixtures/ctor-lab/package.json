@@ -1,0 +1,7 @@
+{
+    "name": "ctor-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "description": "Hand-authored fixture for constructor objects (§4.4): the `interface` + `declare const` spelling, `typeof X` at a member position, an interface of construct signatures only, and the negatives - a class nothing typeofs, and `typeof` over a plain value. Tracked in git, no npm install, so the goldens pin the mapping under the live compiler and the run gate proves EmitConstructor on an abstract member actually news."
+}

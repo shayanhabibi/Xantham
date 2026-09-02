@@ -208,6 +208,7 @@ type TypeReference =
     | [<Widened>] EmptyUnionToObj
     | [<Widened>] UnionWithObjArm
     | [<Widened>] UnionTooWide of arms: int * cap: int
+    | [<Widened>] ConstructorObjectNotDeclared of constructs: string
 
     interface IFindingKind with
         member this.Message =
@@ -256,6 +257,8 @@ type TypeReference =
             | UnionWithObjArm -> "union with an obj arm widened to obj (an erased union over obj is no safer)"
             | UnionTooWide(arms, cap) ->
                 $"union of {arms} distinct types widened to obj (D4 caps the erased union at {cap})"
+            | ConstructorObjectNotDeclared constructs ->
+                $"typeof {constructs} is a constructor object this run does not declare; widened to obj (§4.4)"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
@@ -365,6 +368,11 @@ type ShapeInterfaces =
     | [<Widened>] HybridLosesCallSignatures
     | [<Ergonomic>] BaseMembersFlattened
     | [<Ergonomic>] IntersectionFlattened of operands: int
+    /// A constructor object declared as an interface of its own (§4.4): F# has no first-class
+    /// type of a class object, so `typeof Request` at a member position reads as a named
+    /// declaration whose construct signatures are `[<EmitConstructor>]` `Create` members and
+    /// whose properties are the class's statics.
+    | [<Ergonomic>] ConstructorObjectDeclared of signatures: int
 
     interface IFindingKind with
         member this.Message =
@@ -374,6 +382,8 @@ type ShapeInterfaces =
             | BaseMembersFlattened -> "base members flattened into the interface (the is-a relation is not emitted)"
             | IntersectionFlattened operands ->
                 $"intersection of {operands} object types flattened into one interface (the is-a relation to its operands is not emitted, §4.6)"
+            | ConstructorObjectDeclared signatures ->
+                $"constructor object declared as its own interface; {signatures} construct signature(s) read as EmitConstructor Create members (§4.4)"
 
 /// `shape-aliases`.
 [<Prefix("SA", "shape-aliases")>]
@@ -402,6 +412,10 @@ type ShapeClasses =
     /// A class whose instance type declares nothing has no interface of its own for the statics
     /// to sit on, and F# has no free-standing static member.
     | [<Widened>] StaticWithoutDeclaration
+    /// A static the checker calls a method, whose type the resolve tier read identity-only -
+    /// the group it is declared in is not shipped, so there are no signatures to shape from.
+    /// It is not a settable static, and saying so (`StaticReadOnly`) was misleading.
+    | [<Widened>] StaticMethodWithoutSignatures of declaredIn: string
 
     interface IFindingKind with
         member this.Message =
@@ -413,6 +427,8 @@ type ShapeClasses =
                 "a settable static is emitted read-only: Fable compiles an assignment to an imported static as a call"
             | StaticWithoutDeclaration ->
                 "static member dropped: the class declares no instance members, so this run emits no type to carry it"
+            | StaticMethodWithoutSignatures declaredIn ->
+                $"static method emitted as a value: its type is declared in {declaredIn}, which this run resolves identity-only, so there are no signatures to shape"
 
 /// `shape-exports`.
 [<Prefix("SE", "shape-exports")>]
