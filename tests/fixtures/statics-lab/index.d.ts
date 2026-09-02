@@ -3,10 +3,12 @@
 // *value* type, which is why `shape-classes` - the pass that already reads that type for its
 // construct signatures - is where they are shaped.
 //
-// Two things this fixture exists to pin. Fable binds a static through a dotted selector
-// (`[<Import("Counter.MAX", "statics-lab")>]` emits `import { Counter }` and `Counter.MAX`),
-// and F# admits a static beside an abstract member only in one of the four name-collision
-// cases. Both are verified by the run gate against `index.js`, not asserted from memory.
+// Three things this fixture exists to pin. Fable binds a get-only static through a dotted
+// selector (`[<Import("Counter.MAX", "statics-lab")>]` emits `import { Counter }` and
+// `Counter.MAX`); it binds a settable one through an attribute on the declaration, under which
+// `Counter.tick <- 8.0` compiles to `Counter.tick = 8`; and F# admits a static beside an
+// abstract member only in one of the four name-collision cases. All three are verified by the
+// run gate against `index.js`, not asserted from memory.
 
 /** A class carrying the const-like statics that almost every DOM class does. */
 export declare class Counter {
@@ -22,8 +24,9 @@ export declare class Counter {
     /** Static overloads: one JavaScript name, two signatures. */
     static of(value: number): Counter;
     static of(text: string): Counter;
-    /** A settable static. Fable compiles an assignment to an imported static as a *call*, so
-     *  this reads only, with a finding. */
+    /** A settable static: assignable, so F# gets a setter. The binding attribute moves to the
+     *  declaration for it, which is the only placement Fable compiles `<-` to a property
+     *  write. */
     static tick: number;
 }
 

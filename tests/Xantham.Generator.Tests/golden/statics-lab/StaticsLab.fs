@@ -13,6 +13,7 @@ open Xantham.Fable.Core
 /// A class carrying the const-like statics that almost every DOM class does.
 /// </summary>
 [<Interface>]
+[<Import("Counter", "statics-lab")>]
 type Counter =
     /// <summary>
     /// The count so far.
@@ -40,17 +41,20 @@ type Counter =
     [<Import("Counter.of", "statics-lab")>]
     static member ``of`` (text: string) : Counter = jsNative
     /// <summary>
-    /// A settable static. Fable compiles an assignment to an imported static as a *call*, so
-    /// this reads only, with a finding.
+    /// A settable static: assignable, so F# gets a setter. The binding attribute moves to the
+    /// declaration for it, which is the only placement Fable compiles <c>&lt;-</c> to a property
+    /// write.
     /// </summary>
-    [<Import("Counter.tick", "statics-lab")>]
-    static member tick: float = jsNative
+    static member tick
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 /// <summary>
 /// JavaScript inherits statics down the prototype chain, and the checker reports the base's
 /// statics as the subclass's own - so <c>Doubling.MAX</c> is real and is emitted again here.
 /// </summary>
 [<Interface>]
+[<Import("Doubling", "statics-lab")>]
 type Doubling =
     inherit Counter
     abstract double: unit -> Doubling
@@ -80,11 +84,13 @@ type Doubling =
     [<Import("Doubling.of", "statics-lab")>]
     static member ``of`` (text: string) : Counter = jsNative
     /// <summary>
-    /// A settable static. Fable compiles an assignment to an imported static as a *call*, so
-    /// this reads only, with a finding.
+    /// A settable static: assignable, so F# gets a setter. The binding attribute moves to the
+    /// declaration for it, which is the only placement Fable compiles <c>&lt;-</c> to a property
+    /// write.
     /// </summary>
-    [<Import("Doubling.tick", "statics-lab")>]
-    static member tick: float = jsNative
+    static member tick
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 /// <summary>
 /// A static on a generic declaration. F# warns at a *use* that cannot infer the instantiation

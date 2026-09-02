@@ -28041,9 +28041,11 @@ type WorkflowInstance =
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
+[<Global("globalThis")>]
 type Exports =
-    [<Global("onmessage")>]
-    static member onmessage: unit = jsNative
+    static member onmessage
+        with get (): unit = jsNative
+        and set (_: unit): unit = jsNative
     /// <summary>
     /// The **<c>DOMException</c>** interface represents an abnormal event (called an exception) that occurs as a result of calling a method or accessing a property of a web API. This is how error conditions are described in web APIs.
     ///
@@ -28308,15 +28310,17 @@ type Exports =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response)
     /// </summary>
-    [<Global("Response")>]
-    static member Response: ResponseConstructor = jsNative
+    static member Response
+        with get (): ResponseConstructor = jsNative
+        and set (_: ResponseConstructor): unit = jsNative
     /// <summary>
     /// The **<c>Request</c>** interface of the Fetch API represents a resource request.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request)
     /// </summary>
-    [<Global("Request")>]
-    static member Request: RequestConstructor = jsNative
+    static member Request
+        with get (): RequestConstructor = jsNative
+        and set (_: RequestConstructor): unit = jsNative
     [<Global("R2Object"); EmitConstructor>]
     static member R2Object () : R2Object = jsNative
     [<Global("ScheduledEvent"); EmitConstructor>]
@@ -28479,8 +28483,9 @@ type Exports =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WebSocket)
     /// </summary>
-    [<Global("WebSocket")>]
-    static member WebSocket: WebSocketConstructor = jsNative
+    static member WebSocket
+        with get (): WebSocketConstructor = jsNative
+        and set (_: WebSocketConstructor): unit = jsNative
     [<Global("WebSocketPair")>]
     static member WebSocketPair: WebSocketPairConstructor = jsNative
     [<Global("SqlStorageStatement"); EmitConstructor>]

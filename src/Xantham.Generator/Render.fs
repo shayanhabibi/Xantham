@@ -444,21 +444,30 @@ let private renderMember (m: FsMember) =
             yield $"    abstract {head}: {renderAbstractSignature c.Parameters c.Return}"
         ]
 
+/// One binding attribute at `indent`, optionally carrying a second attribute inside the same
+/// brackets. A global names its own path off `globalThis`; an import names its specifier.
+let private bindingAttribute (runtimePackage: string) (indent: string) (also: string) (binding: ImportBinding) =
+    let package = stringLit runtimePackage
+
+    match binding with
+    | ImportDefault -> $"{indent}[<Import({stringLit Naming.defaultImportKey}, {package}){also}>]"
+    | ImportNamed name -> $"{indent}[<Import({stringLit name}, {package}){also}>]"
+    | GlobalName name -> $"{indent}[<Global({stringLit name}){also}>]"
+
+/// The binding a declaration writes at the type level, where it holds a settable member. Under a
+/// type-level attribute Fable compiles `X.y <- v` to `X.y = v`; under a per-member one it compiles
+/// the call `X.y(v)`.
+let private hoistedBinding (members: FsExportMember list) =
+    members |> List.tryPick (fun m -> if m.Settable then Some m.Binding else None)
+
 /// One bound member - an `Exports` member or a class static - as its attribute line and its
 /// signature. Both hold an `ImportBinding` and neither has an F# body, so they render the same.
 let private renderBound (runtimePackage: string) (m: FsExportMember) =
     [
         yield! docLines "    " m.Docs m.Tags
 
-        // The binding attribute, optionally carrying a second attribute inside the same
-        // brackets: a global is named off `globalThis` and imports nothing.
         let attribute (also: string) =
-            let package = stringLit runtimePackage
-
-            match m.Binding with
-            | ImportDefault -> $"    [<Import({stringLit Naming.defaultImportKey}, {package}){also}>]"
-            | ImportNamed name -> $"    [<Import({stringLit name}, {package}){also}>]"
-            | GlobalName name -> $"    [<Global({stringLit name}){also}>]"
+            bindingAttribute runtimePackage "    " also m.Binding
 
         match m.Body with
         | ExportFunction(parameters, returns) ->
@@ -466,6 +475,13 @@ let private renderBound (runtimePackage: string) (m: FsExportMember) =
 
             yield
                 $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
+        | ExportValue reference when m.Settable ->
+            // The declaring type carries the attribute, and the member name is the JavaScript key
+            // read off whatever that names.
+            let reference = printType reference
+            yield $"    static member {ident m.Name}"
+            yield $"        with get (): {reference} = jsNative"
+            yield $"        and set (_: {reference}): unit = jsNative"
         | ExportValue reference ->
             yield attribute ""
             yield $"    static member {ident m.Name}: {printType reference} = jsNative"
@@ -484,6 +500,10 @@ let private renderInterface (runtimePackage: string) (decl: FsInterfaceDecl) =
         // interface (and needs default-interface-member runtime support to type-check).
         if not (decl.CreateOverloads.IsEmpty && decl.Statics.IsEmpty) then
             yield "[<Interface>]"
+
+        match hoistedBinding decl.Statics with
+        | Some binding -> yield bindingAttribute runtimePackage "" "" binding
+        | None -> ()
 
         match decl.Inherits, decl.Members, decl.CreateOverloads, decl.Statics with
         | [], [], [], [] ->
@@ -602,6 +622,11 @@ let private renderExports (runtimePackage: string) (members: FsExportMember list
     [
         yield "/// <summary>The package's value exports, each bound to its import.</summary>"
         yield "[<Erase>]"
+
+        match hoistedBinding members with
+        | Some binding -> yield bindingAttribute runtimePackage "" "" binding
+        | None -> ()
+
         yield "type Exports ="
 
         for m in members do

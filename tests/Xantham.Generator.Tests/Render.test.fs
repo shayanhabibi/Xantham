@@ -295,19 +295,22 @@ let renderTests =
                                             Rest = false
                                             Type = FsOption(FsNamed "Options") } ],
                                         FsNamed "Options"
-                                    ) }
+                                    )
+                                  Settable = false }
                                 { Name = "Timer"
                                   Docs = ""
                                   Tags = []
                                   TypeParameters = []
                                   Binding = ImportNamed "Timer"
-                                  Body = ExportConstructor([], FsNamed "Options") }
+                                  Body = ExportConstructor([], FsNamed "Options")
+                                  Settable = false }
                                 { Name = "globals"
                                   Docs = ""
                                   Tags = []
                                   TypeParameters = []
                                   Binding = ImportNamed "globals"
-                                  Body = ExportValue(FsArray FsFloat) } ] ] }
+                                  Body = ExportValue(FsArray FsFloat)
+                                  Settable = false } ] ] }
 
             let expected =
                 String.concat

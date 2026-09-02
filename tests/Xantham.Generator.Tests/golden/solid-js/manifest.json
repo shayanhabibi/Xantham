@@ -41,9 +41,9 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 135,
+      "total": 136,
       "ergonomic": 86,
-      "widened": 47,
+      "widened": 48,
       "escape": 2
     },
     {
@@ -1244,6 +1244,13 @@
       "file": "types/reactive/signal.d.ts",
       "tier": "escape",
       "findings": [
+        {
+          "key": "SE003",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "Owner",
+          "message": "mutable binding emitted read-only"
+        },
         {
           "key": "TR032",
           "pass": "shape-exports",

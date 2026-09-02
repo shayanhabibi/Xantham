@@ -570,7 +570,10 @@ let pipelineTests =
 
                     // The statics sit on the class's own type, so a consumer spells them the
                     // way TypeScript does - `Counter.MAX`, not `Exports.Counter_MAX`.
-                    Expect.stringContains source "[<Interface>]\ntype Counter =" "which makes the type need the attribute"
+                    Expect.stringContains
+                        source
+                        "[<Interface>]\n[<Import(\"Counter\", \"statics-lab\")>]\ntype Counter ="
+                        "which makes the type need the attribute, and the settable static a second one"
 
                   testCase "a subclass carries the statics JavaScript inherits for it" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -584,17 +587,25 @@ let pipelineTests =
 
                     Expect.stringContains source "[<Import(\"Box.EMPTY\", \"statics-lab\")>]" "the declaration is legal F#"
 
-                  testCase "a settable static reads only, and says so" <| fun _ ->
+                  testCase "a settable static gets a setter, under the declaration's own binding" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd
 
-                    Expect.stringContains source "static member tick: float = jsNative" "no setter is emitted"
+                    // The member carries no attribute of its own: a per-member `[<Import>]`
+                    // turns `Counter.tick <- 8.0` into the call `Counter.tick(8)`.
+                    Expect.stringContains
+                        source
+                        "    static member tick\n        with get (): float = jsNative\n        and set (_: float): unit = jsNative"
+                        "the setter is emitted"
+
+                    Expect.isFalse
+                        (source.Contains "[<Import(\"Counter.tick\", \"statics-lab\")>]")
+                        "and the dotted selector is gone"
 
                     Expect.contains
                         (rendered.Findings |> List.map (fun finding -> finding.Tier, finding.Message))
-                        (Widened,
-                         "a settable static is emitted read-only: Fable compiles an assignment to an imported static as a call")
-                        "the lost setter is owned"
+                        (Exact, "settable static emitted with a setter")
+                        "the setter is owned"
 
                   testCase "only method-over-method survives a static/instance name collision" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -1616,8 +1627,13 @@ let pipelineTests =
 
                           Expect.stringContains
                               source
-                              "static member limit: float = jsNative"
-                              "a settable static, emitted get-only"
+                              "[<Import(\"Budget\", \"fable-workaround-lab\")>]\ntype Budget ="
+                              "a settable static, bound through the declaration"
+
+                          Expect.stringContains
+                              source
+                              "    static member limit\n        with get (): float = jsNative\n        and set (_: float): unit = jsNative"
+                              "and emitted with a setter"
 
                           Expect.stringContains source "abstract value: string option" "string | null hoisted to option"
 
