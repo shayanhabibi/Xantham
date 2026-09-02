@@ -437,6 +437,35 @@ patch: emit `inherit` for declared bases so the nominal relation exists (which t
 from the *rendered* head when the shaper cannot prove the nominal relation, accepting the looser
 signature and taking the finding.
 
+**Landed (wave two, lane C), and half of it had landed before the branch opened.** The
+measurement first: this reconnaissance ran against `master` @ 4f08945, which predates
+`c592092 feat(generator): inherit declared base types instead of only flattening them`. That
+commit brought both halves of the "emit `inherit` for declared bases" direction — `SI005`, the
+emitted is-a relation (78 sites across the corpus), and `TR044`, which rewrites an argument that
+reaches its bound through neither bases nor intersection operands into the bound itself. Run
+against the reproducer above, the tree already compiled: `tests/fixtures/nominal-lab` rendered
+`static member g: Geometry<Wide>`, not `Geometry<Narrow>`, and `dotnet build Xantham.slnx` was
+green over it. So the FS0001 is not reachable any more — but it was paid for, at every one of the
+328 sites, by widening the argument.
+
+`inherit` cannot close the rest. `Narrow` and `Wide` are two `Record<string, …>` aliases with no
+declared base between them; there is no is-a relation to emit, which is exactly why this case was
+separated from blocker 3's `inherit`-shaped neighbours. The remaining direction is the one taken:
+**the constraint is dropped from the rendered head where the run can see it would reject the
+declaration's own default argument** (`TP008`). A type parameter's default is the argument every
+bare use resolves to — `Geometry` alone *is* `Geometry<Narrow>` — so a default that does not
+inherit its own bound makes the bound reject the declaration's ordinary use, and a constraint no
+argument can satisfy is not information, it is a compile error waiting for its first application.
+
+The same predicate is read at both ends, which is what stops `TP008` and `TR044` contradicting
+each other: where the head keeps `:>`, `TR044` still substitutes the bound for an argument that
+cannot satisfy it; where the head drops `:>`, `TR044` falls silent and the argument TypeScript
+resolved is written unchanged. On the reproducer that turns one Widened `TR044` into one Ergonomic
+`TP008` and gives `g: Geometry<Narrow>` back. Corpus: `TP008` 0 → 33 (`type-fest` 29, all of them
+the options-object idiom `<Options extends XOptions = {…}>`; `workers-types` 2, `Ai`'s
+`AiModelList extends AiModelListType = AiModels`; the lab 2), `TR044` unmoved at 2, `TP002`
+unmoved at 277, 31 rendered lines changed and no use site in any golden moved.
+
 ### Blocker 4 — a type-parameter head ending in `>` swallows the member's colon (2 `FS0010`)
 
 A method-level type parameter whose constraint is itself a generic application renders a head

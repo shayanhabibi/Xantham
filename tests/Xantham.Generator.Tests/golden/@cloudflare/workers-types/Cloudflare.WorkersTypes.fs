@@ -17937,7 +17937,7 @@ type AIGatewayUniversalRequestHeadersCfAigCustomCost2 =
     [<ParamObject; Emit("$0")>]
     static member Create (?total_cost: float) : AIGatewayUniversalRequestHeadersCfAigCustomCost2 = jsNative
 
-type Ai<'AiModelList when 'AiModelList :> AiModelListType> =
+type Ai<'AiModelList> =
     abstract aiGatewayLogId: string option with get, set
     abstract gateway: gatewayId: string -> AiGateway
     /// <remarks>
@@ -30118,7 +30118,7 @@ type Exports =
     [<Global("Base_Ai_Cf_Zai_Org_Glm_5_3_Flash"); EmitConstructor>]
     static member Base_Ai_Cf_Zai_Org_Glm_5_3_Flash () : Base_Ai_Cf_Zai_Org_Glm_5_3_Flash = jsNative
     [<Global("Ai"); EmitConstructor>]
-    static member Ai<'AiModelList when 'AiModelList :> AiModelListType> () : Ai<'AiModelList> = jsNative
+    static member Ai<'AiModelList> () : Ai<'AiModelList> = jsNative
     [<Global("AiGateway"); EmitConstructor>]
     static member AiGateway () : AiGateway = jsNative
     /// <remarks>
