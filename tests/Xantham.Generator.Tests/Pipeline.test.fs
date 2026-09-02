@@ -109,6 +109,43 @@ let private readGolden (goldenDir: string) name =
     else
         None
 
+/// Where two golden texts first differ, as a bounded report rather than as both texts.
+///
+/// `Expect.equal` on a golden prints *both* strings in full: measured on the `workers-types`
+/// golden's shape - 30k lines differing on one - that is a 2.9 MB, 60,000-line failure message
+/// for a one-line change. It is unreadable in a terminal and it is worse than unreadable to an
+/// agent, whose context window it consumes entirely. The failing line, its neighbours and the
+/// counts say everything the dump did; `git diff` is where the whole change is read.
+let private goldenMismatch (label: string) (rendered: string) (golden: string) =
+    let renderedLines = rendered.Split '\n'
+    let goldenLines = golden.Split '\n'
+
+    let differing =
+        Seq.init (max renderedLines.Length goldenLines.Length) id
+        |> Seq.filter (fun i ->
+            (if i < renderedLines.Length then renderedLines[i] else null)
+            <> (if i < goldenLines.Length then goldenLines[i] else null))
+        |> Seq.toList
+
+    match differing with
+    | [] -> None
+    | first :: _ ->
+        let window (lines: string[]) =
+            [ max 0 (first - 3) .. min (lines.Length - 1) (first + 3) ]
+            |> List.map (fun i -> $"  {i + 1,6}| {lines[i]}")
+            |> String.concat "\n"
+
+        Some(
+            $"{label} does not match its golden.\n\
+              First difference at line {first + 1}; {differing.Length} lines differ by position \
+              (golden {goldenLines.Length} lines, rendered {renderedLines.Length}). An inserted \
+              line shifts every line after it, so that count is a bound, not a hunk count.\n\
+              --- golden ---\n{window goldenLines}\n\
+              --- rendered ---\n{window renderedLines}\n\
+              Regenerate with XANTHAM_UPDATE_GOLDEN=1 and read the change through `git diff \
+              --stat` and the manifest counts - see .claude/rules/generator-fixtures.md."
+        )
+
 /// The golden diff for one fixture: every rendered file matches its committed text, byte for
 /// byte (`XANTHAM_UPDATE_GOLDEN=1` rewrites the corpus instead - review the diff).
 let private matchesGoldens (fixture: string) (config: GeneratorConfig) (package: string) =
@@ -132,7 +169,10 @@ let private matchesGoldens (fixture: string) (config: GeneratorConfig) (package:
                 failtest
                     $"golden {fixture}/{name} does not exist - run once with XANTHAM_UPDATE_GOLDEN=1 \
                       and review the diff"
-            | Some golden -> Expect.equal content golden $"{fixture}/{name} matches its golden"
+            | Some golden ->
+                match goldenMismatch $"{fixture}/{name}" content golden with
+                | Some report -> failtest report
+                | None -> ()
 
     rendered
 
