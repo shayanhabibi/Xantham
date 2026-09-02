@@ -15,6 +15,7 @@ const packages = new Map([
     ["statics-lab", path.join(fixtures, "statics-lab", "index.js")],
     ["flags-lab", path.join(fixtures, "flags-lab", "index.js")],
     ["ctor-lab", path.join(fixtures, "ctor-lab", "index.js")],
+    ["inherit-lab", path.join(fixtures, "inherit-lab", "index.js")],
 ]);
 
 registerHooks({

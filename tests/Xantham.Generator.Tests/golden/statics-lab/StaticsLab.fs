@@ -52,6 +52,7 @@ type Counter =
 /// </summary>
 [<Interface>]
 type Doubling =
+    inherit Counter
     abstract double: unit -> Doubling
     /// <summary>
     /// The count so far.

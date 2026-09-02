@@ -11,7 +11,7 @@
     {
       "pass": "SI - shape-interfaces",
       "total": 1,
-      "ergonomic": 1
+      "exact": 1
     },
     {
       "pass": "SC - shape-classes",
@@ -52,11 +52,11 @@
           "message": "a settable static is emitted read-only: Fable compiles an assignment to an imported static as a call"
         },
         {
-          "key": "SI002",
+          "key": "SI005",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "Doubling",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base Counter is inherited: the is-a relation is emitted (\u00A74.4)"
         }
       ]
     },

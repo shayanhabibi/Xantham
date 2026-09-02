@@ -270,6 +270,20 @@ Policy question with a recommended default:
 - **Callable + properties hybrids** (function with attached props) → interface with an
   `[<Emit "$0($1...)">]` `Invoke` member plus the properties. Ergonomic.
 
+*Landed (2026-09-02, phase E).* Bases and intersection operands go through one gate: a base is
+inherited exactly when its reference resolves to a name this run declares as an interface, and
+its arguments travel with it (`inherit Box<string>`; a bare `inherit Box` is FS0033). The
+members stay declared in full beside it - the checker's property list already carries them, F#
+admits the redeclaration, and it is what keeps `Create` and the member list exact when a
+sibling base is not inheritable. The three ways a base stays flattened are distinguished:
+`SI002` when it has no F# name at this position (`extends Error`), `SI006` when it names
+something outside this run (`JS.Promise`, a shipped binding this run cannot prove is an
+interface, where `inherit` would be FS0887), `SI007` when the edge would close a cycle in the
+emitted name graph (FS0954). An `inherit` whose base the arity repair later unnames is dropped
+rather than rendered as `inherit obj`. One consequence at the reference side: F# subtyping is
+nominal, so an argument that satisfies a constraint only structurally is FS0001 at the
+application and is written as the constraint instead (`TR044`).
+
 ### 4.5 Unions (non-literal)
 
 Order of preference, decided per union after §4.2's categorization:

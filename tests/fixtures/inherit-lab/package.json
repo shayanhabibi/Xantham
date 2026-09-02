@@ -1,0 +1,7 @@
+{
+    "name": "inherit-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "description": "Hand-authored fixture for declared base types (§4.4): a base this run declares becomes an F# `inherit`, the diamond and the redeclaration F# admits, a generic base applied at the inherit, a class base, and the bases that stay flattened - one with no F# name, one bound by a shipped package under a name this run did not declare, and a utility-type base. Tracked in git, no npm install, so the goldens pin the mapping under the live compiler and the compile gate proves each arrangement is legal F#."
+}

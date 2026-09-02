@@ -61,6 +61,30 @@ let private handFixture (name: string) =
     let path = Path.Combine(root, "tests", "fixtures", name)
     if Directory.Exists path then Some path else None
 
+/// The `inherit` lines a rendered declaration carries, in emission order. Reading them off the
+/// source rather than the model is deliberate: §4.4's is-a relation is only real if it survives
+/// to the file the compile gate builds.
+let private inheritsOf (source: string) (name: string) =
+    let lines = source.Replace("\r\n", "\n").Split '\n'
+
+    match
+        lines
+        |> Array.tryFindIndex (fun line -> line.StartsWith $"type {name} =" || line.StartsWith $"type {name}<")
+    with
+    | None -> failtest $"no declaration named {name} in the rendered source"
+    | Some start ->
+        lines
+        |> Array.skip (start + 1)
+        |> Array.takeWhile (fun line -> line.StartsWith "    ")
+        |> Array.choose (fun line ->
+            let trimmed = line.Trim()
+
+            if trimmed.StartsWith "inherit " then
+                Some(trimmed.Substring 8)
+            else
+                None)
+        |> List.ofArray
+
 /// The version every npm rung is pinned at, from the tracked `tests/fixtures/pins.json`. The
 /// install is untracked, so this file is the only record of what a golden was generated
 /// against; it is JSONC, like every other configuration Xantham reads.
@@ -436,6 +460,67 @@ let pipelineTests =
                         (rendered.Findings
                          |> List.filter (fun finding -> finding.Message.Contains "has no F# form yet"))
                         "the old blanket widening is gone" ])
+
+        yield!
+            fixtureTests "inherit-lab" (handFixture "inherit-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a declared base is inherited beside the members it redeclares (§4.4)" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.equal (inheritsOf source "Derived") [ "Base" ] "the is-a relation is emitted"
+
+                    Expect.stringContains
+                        source
+                        "static member Create (extra: bool, name: string, at: float) : Derived"
+                        "and the inherited members are still declared, which is what keeps Create exact"
+
+                    Expect.equal (inheritsOf source "Narrowed") [ "Base" ] "a narrowed member does not cost the edge"
+
+                  testCase "a diamond inherits both arms, and the shared member declares once each" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.equal (inheritsOf source "Pitched") [ "Loud" ] "the near arm"
+                    Expect.equal (inheritsOf source "Both") [ "Loud"; "Pitched" ] "both arms of the diamond"
+
+                    Expect.equal
+                        (source.Split("abstract volume: float").Length - 1)
+                        3
+                        "F# admits the redeclaration down every arm"
+
+                  testCase "a generic base carries its argument to the inherit" <| fun _ ->
+                    // `inherit Box` alone is FS0033: F# has no bare generic base.
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.equal (inheritsOf source "Labelled") [ "Box<'T>" ] "the parameter travels"
+                    Expect.equal (inheritsOf source "Tagged") [ "Box<string>" ] "so does a fixed argument"
+                    Expect.equal (inheritsOf source "Leaf") [ "Node" ] "a class base is the instance side's base"
+                    Expect.equal (inheritsOf source "Slim") [ "SlimBase" ] "a utility-type base is what it synthesized"
+
+                  testCase "a base this run does not declare stays flattened, and says which case it is" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.isEmpty (inheritsOf source "Failure") "Error has no F# name at this position"
+                    Expect.isEmpty (inheritsOf source "Deferred") "JS.Promise is not declared by this run"
+
+                    let byKey =
+                        rendered.Findings
+                        |> List.map (fun finding -> finding.Key, finding.Symbol, finding.Tier)
+
+                    Expect.contains byKey ("SI002", "Failure", Ergonomic) "the nameless base"
+                    Expect.contains byKey ("SI006", "Deferred", Ergonomic) "the named-but-undeclared base"
+
+                    Expect.contains
+                        (rendered.Findings |> List.map _.Message)
+                        "base JS.Promise is not declared by this run as an interface; its members are flattened in and the is-a relation is not emitted (§4.4)"
+                        "the manifest names the base that was left behind"
+
+                    Expect.isFalse
+                        (source.Contains "inherit obj")
+                        "FS0887: obj is not an interface type, so it is never inherited" ])
+
 
         yield!
             fixtureTests "statics-lab" (handFixture "statics-lab") GeneratorConfig.Default (fun package ->
