@@ -1,0 +1,182 @@
+{
+  "package": "fable-workaround-lab",
+  "module": "FableWorkaroundLab",
+  "counts": {
+    "exact": 9,
+    "ergonomic": 5,
+    "widened": 1,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 2,
+      "exact": 1,
+      "ergonomic": 1
+    },
+    {
+      "pass": "SC - shape-classes",
+      "total": 1,
+      "widened": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 6,
+      "ergonomic": 6
+    }
+  ],
+  "symbols": [
+    {
+      "name": "Ok",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Ok",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Err",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Err",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Outcome",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "Shape",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Shape",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Circle",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI005",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "Circle",
+          "message": "base Shape is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Circle",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Budget",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SC003",
+          "pass": "shape-classes",
+          "tier": "widened",
+          "symbol": "Budget.limit",
+          "message": "a settable static is emitted read-only: Fable compiles an assignment to an imported static as a call"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Budget",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Slot",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Slot.value",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Slot",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Listener",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "run",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "shapes",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "slots",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "describe",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "invite",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "fresh",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "cyclic",
+      "tier": "exact",
+      "findings": []
+    }
+  ]
+}

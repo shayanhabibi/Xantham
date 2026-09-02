@@ -1,0 +1,1 @@
+{"name":"fable-workaround-lab","type":"module","types":"index.d.ts","main":"index.js","description":"The fixture behind docs/fable5-workarounds.md: one declaration per documented Fable 5 loss, with the runtime half the run gate reads the workaround back through."}
