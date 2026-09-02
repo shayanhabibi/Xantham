@@ -16,8 +16,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 2,
-      "ergonomic": 2
+      "total": 4,
+      "ergonomic": 4
     }
   ],
   "symbols": [
@@ -87,6 +87,20 @@
           "tier": "ergonomic",
           "symbol": "TimersSchedule",
           "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "TimersSchedule",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "TimersSchedule.cancel",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },

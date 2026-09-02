@@ -3,8 +3,8 @@
   "module": "TypeFest",
   "counts": {
     "exact": 25,
-    "ergonomic": 52,
-    "widened": 223,
+    "ergonomic": 53,
+    "widened": 222,
     "escape": 2
   },
   "passes": [
@@ -20,15 +20,17 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 683,
+      "total": 679,
+      "exact": 5,
       "ergonomic": 625,
-      "widened": 58
+      "widened": 49
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 634,
+      "total": 632,
+      "exact": 1,
       "ergonomic": 236,
-      "widened": 398
+      "widened": 395
     },
     {
       "pass": "SP - synthesize-paramobjects",
@@ -3251,15 +3253,8 @@
     {
       "name": "LiteralUnion",
       "file": "source/literal-union.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "key": "SA002",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "LiteralUnion",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
         {
           "key": "TP002",
           "pass": "shape-aliases",
@@ -3268,18 +3263,11 @@
           "message": "constraint on \u0027BaseType\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR018",
+          "key": "TR049",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "LiteralUnion",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR035",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "LiteralUnion",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         }
       ]
     },
@@ -4296,13 +4284,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "PackageJson.cpu",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -4310,11 +4291,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "PackageJson.cpu",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "MB003",
@@ -4499,13 +4480,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "PackageJson.homepage",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -4513,11 +4487,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "PackageJson.homepage",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "MB003",
@@ -4779,13 +4753,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "PackageJson.os",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -4793,11 +4760,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "PackageJson.os",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "MB003",
@@ -5471,18 +5438,18 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "PackageJsonEngines.[]",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "PackageJsonEngines.[]",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR049",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "PackageJsonEngines.[]",
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "MB003",
@@ -5660,13 +5627,6 @@
           "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "PackageJsonFunding.type",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -5674,11 +5634,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR035",
+          "key": "TR049",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "PackageJsonFunding.type",
-          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+          "message": "empty intersection operand reduced away; the remaining operand is the type"
         },
         {
           "key": "SP001",

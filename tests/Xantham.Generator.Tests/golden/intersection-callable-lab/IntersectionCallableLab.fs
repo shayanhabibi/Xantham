@@ -29,8 +29,11 @@ type Timers =
     [<ParamObject; Emit("$0")>]
     static member Create (schedule: TimersSchedule) : Timers = jsNative
 
+[<Interface>]
 type TimersSchedule =
     abstract cancel: unit -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (cancel: Action) : TimersSchedule = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
