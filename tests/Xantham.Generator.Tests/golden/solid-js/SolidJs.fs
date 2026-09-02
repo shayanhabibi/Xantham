@@ -699,6 +699,9 @@ type ResourceActions<'T, 'R> =
 
 type ResourceSource<'S> = U3<bool, 'S, Func<U2<bool, 'S> option>> option
 
+[<Erase>]
+type ResourceFetcher<'S, 'T, 'R> = private ResourceFetcher__ of Func<'S, obj, U2<'T, JS.Promise<'T>>>
+
 [<Interface>]
 type ResourceFetcherInfo2<'T, 'R> =
     abstract value: 'T option with get, set
@@ -752,12 +755,18 @@ type InitializedResourceOptionsOnHydratedInfo<'T> =
     [<ParamObject; Emit("$0")>]
     static member Create (?value: 'T) : InitializedResourceOptionsOnHydratedInfo<'T> = jsNative
 
+[<Erase>]
+type ResourceReturn<'T, 'R> = private ResourceReturn__ of obj * obj
+
 [<Interface>]
 type ResourceReturnItem<'R, 'T> =
     abstract mutate: Action<obj[]> with get, set
     abstract refetch: Func<'R option, U2<'T, JS.Promise<'T option>> option> with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (mutate: Action<obj[]>, refetch: Func<'R option, U2<'T, JS.Promise<'T option>> option>) : ResourceReturnItem<'R, 'T> = jsNative
+
+[<Erase>]
+type InitializedResourceReturn<'T, 'R> = private InitializedResourceReturn__ of U3<Errored, Ready<'T>, Refreshing<'T>> * obj
 
 [<Interface>]
 type InitializedResourceReturnItem<'T, 'R> =
@@ -976,6 +985,9 @@ type Component<'P> = Func<'P, JSXElement option>
 [<Erase>]
 type VoidProps<'P> = private VoidProps__ of obj
 
+[<Erase>]
+type VoidComponent<'P> = private VoidComponent__ of Func<obj, JSXElement option>
+
 /// <summary>
 /// Extend props to allow an optional <c>children</c> prop with the usual
 /// type in JSX, <c>JSX.Element</c> (which allows elements, arrays, strings, etc.).
@@ -983,6 +995,9 @@ type VoidProps<'P> = private VoidProps__ of obj
 /// </summary>
 [<Erase>]
 type ParentProps<'P> = private ParentProps__ of obj
+
+[<Erase>]
+type ParentComponent<'P> = private ParentComponent__ of Func<obj, JSXElement option>
 
 /// <summary>
 /// Extend props to require a <c>children</c> prop with the specified type.
@@ -992,6 +1007,9 @@ type ParentProps<'P> = private ParentProps__ of obj
 /// </summary>
 [<Erase>]
 type FlowProps<'P, 'C> = private FlowProps__ of obj
+
+[<Erase>]
+type FlowComponent<'P, 'C> = private FlowComponent__ of Func<obj, JSXElement option>
 
 /// <remarks>@deprecated : use <c>ParentProps</c> instead</remarks>
 [<Erase>]

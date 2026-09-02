@@ -2369,8 +2369,10 @@ let shapePassTests =
             Expect.equal names [ "A"; "B"; "<exports>" ] "file order first, Exports last"
             Expect.isEmpty ordered.ExportMembers "consumed into the Exports decl"
 
-        testCase "repair-arity drops an alias whose target lost its parameters, and widens its uses" <| fun _ ->
-            // `type Params<'P> = obj` is FS0035, and every reference to it has to go with it.
+        testCase "repair-arity keeps an alias whose target lost its parameters, as a phantom" <| fun _ ->
+            // `type Params<'P> = obj` is FS0035. The erased phantom `shape-aliases` writes for a
+            // computation it cannot reproduce takes the unused variable, so the name and the
+            // arity survive and `Params<string>` still resolves.
             let model =
                 { Build.shapeModel [] with
                     Decls =
@@ -2401,18 +2403,118 @@ let shapePassTests =
             let repaired, findings = Build.runPass Arity.repairArity model
 
             match repaired.Decls with
-            | [ FsInterface decl ] ->
-                Expect.equal decl.Name "Context" "the alias is gone, its user stays"
+            | [ FsPhantom phantom; FsInterface decl ] ->
+                Expect.equal phantom.Name "Params" "the alias keeps its name"
+                Expect.equal (phantom.TypeParameters |> List.map _.Name) [ "P" ] "and its arity"
+                Expect.equal phantom.Carrier FsObj "the resolved target is what the private case carries"
 
                 match decl.Members with
-                | [ FsProperty p ] -> Expect.equal p.Type FsObj "the reference widened"
+                | [ FsProperty p ] -> Expect.equal p.Type (FsApp("Params", [ FsString ])) "the reference stands"
                 | members -> failtest $"expected one property, got %A{members}"
-            | decls -> failtest $"expected the interface alone, got %A{decls}"
+            | decls -> failtest $"expected the phantom and the interface, got %A{decls}"
 
             Expect.equal
-                (findings |> List.map (fun f -> f.Tier, f.Symbol))
-                [ Widened, "Params"; Widened, "Context" ]
-                "the drop and the widening are both findings"
+                (findings |> List.map (fun f -> f.Key, f.Tier, f.Symbol))
+                [ "RA006", Widened, "Params" ]
+                "the erasure is the only loss"
+
+        testCase "repair-arity erases the surplus parameter and keeps the rest of the head" <| fun _ ->
+            // `type ExcludeStrict<T, U extends T> = Exclude<T, U>` resolves to `T`: `U` is
+            // declared and never reaches the target. Dropping the declaration took the whole
+            // export with it; the phantom keeps both parameters, so `ExcludeStrict<A, B>`
+            // applies at the arity it was written with.
+            let model =
+                { Build.shapeModel [] with
+                    Decls =
+                        [ FsAbbrev
+                              { Name = "ExcludeStrict"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters =
+                                    [ { Name = "T"; Constraint = None }; { Name = "U"; Constraint = None } ]
+                                Target = FsTypeVar "T" }
+                          FsInterface
+                              { Name = "Holder"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters = []
+                                Inherits = []
+                                Members =
+                                    [ FsProperty
+                                          { Name = "narrowed"
+                                            Docs = ""
+                                            Tags = []
+                                            ReadOnly = true
+                                            Type = FsApp("ExcludeStrict", [ FsString; FsFloat ]) } ]
+                                CreateOverloads = []
+                                Statics = [] } ] }
+
+            let repaired, findings = Build.runPass Arity.repairArity model
+
+            match repaired.Decls with
+            | [ FsPhantom phantom; FsInterface decl ] ->
+                Expect.equal (phantom.TypeParameters |> List.map _.Name) [ "T"; "U" ] "both parameters stay on the head"
+                Expect.equal phantom.Carrier (FsTypeVar "T") "the one the target uses carries the value"
+
+                match decl.Members with
+                | [ FsProperty p ] ->
+                    Expect.equal p.Type (FsApp("ExcludeStrict", [ FsString; FsFloat ])) "the application keeps its arity"
+                | members -> failtest $"expected one property, got %A{members}"
+            | decls -> failtest $"expected the phantom and the interface, got %A{decls}"
+
+            Expect.equal
+                (findings |> List.map (fun f -> f.Key, f.Symbol))
+                [ "RA006", "ExcludeStrict" ]
+                "one finding, on the alias"
+
+        testCase "repair-arity leaves an alias whose target uses every parameter" <| fun _ ->
+            // The negative: `type EveryParameter<'T, 'R> = Func<'T, 'R>` is a legal abbreviation,
+            // so it stays one.
+            let model =
+                { Build.shapeModel [] with
+                    Decls =
+                        [ FsAbbrev
+                              { Name = "EveryParameter"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters =
+                                    [ { Name = "T"; Constraint = None }; { Name = "R"; Constraint = None } ]
+                                Target = FsDelegate([ FsTypeVar "T" ], FsTypeVar "R") } ] }
+
+            let repaired, findings = Build.runPass Arity.repairArity model
+
+            Expect.equal repaired.Decls model.Decls "unchanged"
+            Expect.isEmpty findings "and nothing to report"
+
+        testCase "repair-arity drops an alias whose head names one variable twice" <| fun _ ->
+            // solid-js's `Setter` arrives with `'U` four times over, one per call signature the
+            // shaping pass read the head from. F# rejects the head at either arity, so the
+            // phantom is no repair and the declaration goes, as it did before.
+            let model =
+                { Build.shapeModel [] with
+                    Decls =
+                        [ FsAbbrev
+                              { Name = "Setter"
+                                Docs = ""
+                                Tags = []
+                                Order = None
+                                TypeParameters =
+                                    [ { Name = "T"; Constraint = None }
+                                      { Name = "U"; Constraint = None }
+                                      { Name = "U"; Constraint = None } ]
+                                Target = FsDelegate([ FsObj ], FsObj) } ] }
+
+            let repaired, findings = Build.runPass Arity.repairArity model
+
+            Expect.isEmpty repaired.Decls "the declaration goes"
+
+            Expect.equal
+                (findings |> List.map (fun f -> f.Key, f.Symbol))
+                [ "RA001", "Setter" ]
+                "the drop is reported, not the phantom"
 
         testCase "repair-arity widens a generic named without its arguments" <| fun _ ->
             // FS0033: `PagesFunctionContext` takes three arguments and this position has none.

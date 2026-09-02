@@ -6,7 +6,7 @@ open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
 // ---------------------------------------------------------------------------------------------
-// Arity repair: the two ways a shaped declaration can still be un-writable F#.
+// Arity repair: the ways a shaped declaration can still be un-writable F#.
 // ---------------------------------------------------------------------------------------------
 
 /// Every type reference inside a reference, rebuilt through `f`, applied outside-in so a
@@ -131,32 +131,59 @@ let private repaired (model: ShapeModel) =
     let mutable findings = []
 
     // Only abbreviations can hit FS0035; an interface may leave a parameter unused.
-    let dropped =
+    let unused (decl: FsAbbrevDecl) =
+        let used = typeVarsOf decl.Target
+
+        not decl.TypeParameters.IsEmpty
+        && decl.TypeParameters |> List.exists (fun p -> not (Set.contains p.Name used))
+
+    // FS0037: F# rejects a parameter list naming one variable twice, at every arity, so the
+    // phantom repairs nothing there and the declaration goes.
+    let writableHead (decl: FsAbbrevDecl) =
+        let names = decl.TypeParameters |> List.map _.Name
+        (List.distinct names).Length = names.Length
+
+    let phantomed, dropped =
         model.Decls
         |> List.choose (function
-            | FsAbbrev decl when not decl.TypeParameters.IsEmpty ->
-                let used = typeVarsOf decl.Target
-
-                if decl.TypeParameters |> List.forall (fun p -> Set.contains p.Name used) then
-                    None
-                else
-                    Some decl.Name
+            | FsAbbrev decl when unused decl -> Some(decl.Name, writableHead decl)
             | _ -> None)
-        |> Set.ofList
+        |> List.partition snd
+        |> fun (kept, lost) -> Set.ofList (List.map fst kept), Set.ofList (List.map fst lost)
+
+    for name in phantomed do
+        findings <- findings @ [ Finding.make name (RepairArity.AliasKeptAsPhantom name) ]
 
     for name in dropped do
         findings <- findings @ [ Finding.make name RepairArity.GenericAliasDropped ]
 
-    let surviving =
+    // The declaration is rewritten as `shape-aliases`' erased phantom (§4.10), which admits the
+    // type variable an abbreviation may not: the head keeps every parameter, the resolved target
+    // becomes the private case's carrier, and an application of the name finds the arity it was
+    // written with.
+    let declared =
         model.Decls
-        |> List.filter (fun decl ->
-            match declName decl with
-            | Some name -> not (Set.contains name dropped)
-            | None -> true)
+        |> List.choose (function
+            | FsAbbrev decl when Set.contains decl.Name phantomed ->
+                Some(
+                    FsPhantom
+                        {
+                            Name = decl.Name
+                            Docs = decl.Docs
+                            Tags = decl.Tags
+                            Order = decl.Order
+                            TypeParameters = decl.TypeParameters
+                            Carrier = decl.Target
+                        }
+                )
+            | decl ->
+                match declName decl with
+                | Some name when Set.contains name dropped -> None
+                | _ -> Some decl)
 
-    // Arity by name, over the survivors only - a dropped alias must not look applicable.
+    // Arity by name, read after the rewrite: a phantom answers for the alias it replaced.
     let arity =
-        surviving
+        declared
         |> List.choose (function
             | FsInterface d -> Some(d.Name, d.TypeParameters.Length)
             | FsAbbrev d -> Some(d.Name, d.TypeParameters.Length)
@@ -165,7 +192,7 @@ let private repaired (model: ShapeModel) =
         |> Map.ofList
 
     let decls =
-        surviving
+        declared
         |> List.map (fun decl ->
             let owner = declName decl |> Option.defaultValue "Exports"
 
@@ -229,9 +256,12 @@ let private repaired (model: ShapeModel) =
 
     { model with Decls = decls }, findings
 
-/// The last two ways a shaped model still fails to be F#, both repaired by widening to `obj`.
-/// FS0035: a generic abbreviation whose target dropped its parameters (`type Params<'P> = obj`)
-/// goes, and its references widen. FS0033: a generic declaration named bare also widens.
+/// The ways a shaped model still fails to be F#, repaired in place. FS0035: a generic
+/// abbreviation whose target leaves a parameter unused (`type Params<'P> = obj`) is rewritten as
+/// an erased phantom, which keeps the name and the arity; where the head itself is unwritable the
+/// declaration goes and its references widen. FS0033: a generic declaration named bare, and an
+/// application at an arity the head does not declare, widen to `obj`. FS0252: a settable property
+/// of type `unit` is demoted to read-only.
 let repairArity: Pass<ShapeModel> =
     {
         Name = "repair-arity"
