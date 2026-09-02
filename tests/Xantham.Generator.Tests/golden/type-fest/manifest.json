@@ -4,8 +4,8 @@
   "counts": {
     "exact": 25,
     "ergonomic": 69,
-    "widened": 203,
-    "escape": 4
+    "widened": 205,
+    "escape": 2
   },
   "passes": [
     {
@@ -37,8 +37,8 @@
     },
     {
       "pass": "AC - audit-coverage",
-      "total": 4,
-      "escape": 4
+      "total": 2,
+      "escape": 2
     }
   ],
   "symbols": [
@@ -1318,6 +1318,34 @@
       ]
     },
     {
+      "name": "ExcludeStrict",
+      "file": "source/exclude-strict.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA006",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "ExcludeStrict",
+          "message": "ExcludeStrict resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "ExcludeStrict",
+          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "ExcludeStrict",
+          "message": "ExcludeStrict resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
+        }
+      ]
+    },
+    {
       "name": "ExclusifyUnion",
       "file": "source/exclusify-union.d.ts",
       "tier": "widened",
@@ -1454,6 +1482,34 @@
           "tier": "widened",
           "symbol": "ExtractRestElement",
           "message": "indexed access has no F# form here; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "ExtractStrict",
+      "file": "source/extract-strict.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA006",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "ExtractStrict",
+          "message": "ExtractStrict resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "ExtractStrict",
+          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "ExtractStrict",
+          "message": "ExtractStrict resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
@@ -13944,74 +14000,6 @@
           "tier": "widened",
           "symbol": "Xor",
           "message": "Xor is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
-        }
-      ]
-    },
-    {
-      "name": "ExcludeStrict",
-      "tier": "escape",
-      "findings": [
-        {
-          "key": "AC001",
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "symbol": "ExcludeStrict",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "key": "RA001",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "ExcludeStrict",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "ExcludeStrict",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR046",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "ExcludeStrict",
-          "message": "ExcludeStrict resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
-        }
-      ]
-    },
-    {
-      "name": "ExtractStrict",
-      "tier": "escape",
-      "findings": [
-        {
-          "key": "AC001",
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "symbol": "ExtractStrict",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "key": "RA001",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "ExtractStrict",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "ExtractStrict",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR046",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "ExtractStrict",
-          "message": "ExtractStrict resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },

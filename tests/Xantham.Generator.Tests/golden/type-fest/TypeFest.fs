@@ -2099,6 +2099,50 @@ type ExcludeExactly<'Union, 'Delete> = private ExcludeExactly__ of obj
 type ExcludeRestElement<'Array_> = private ExcludeRestElement__ of obj
 
 /// <summary>
+/// A stricter version of &lt;T, U&gt; that ensures every member of <c>U</c> can successfully exclude something from <c>T</c>.
+///
+/// For example, <c>ExcludeStrict&lt;string | number | boolean, number | bigint&gt;</c> will error because <c>bigint</c> cannot exclude anything from <c>string | number | boolean</c>.
+/// </summary>
+/// <remarks>
+/// @example
+/// <code>
+/// // Valid Examples
+/// import type {ExcludeStrict} from 'type-fest';
+///
+/// type Example1 = ExcludeStrict&lt;{status: 'success'; data: string[]} | {status: 'error'; error: string}, {status: 'success'}&gt;;
+/// //=&gt; {status: 'error'; error: string}
+///
+/// type Example2 = ExcludeStrict&lt;'xs' | 's' | 'm' | 'l' | 'xl', 'xs' | 's'&gt;;
+/// //=&gt; 'm' | 'l' | 'xl'
+///
+/// type Example3 = ExcludeStrict&lt;{x: number; y: number} | [number, number], unknown[]&gt;;
+/// //=&gt; {x: number; y: number}
+/// </code>
+/// </remarks>
+/// <remarks>
+/// @example
+/// <code>
+/// // Invalid Examples
+/// import type {ExcludeStrict} from 'type-fest';
+///
+/// // `'xxl'` cannot exclude anything from `'xs' | 's' | 'm' | 'l' | 'xl'`
+/// // @ts-expect-error
+/// type Example1 = ExcludeStrict&lt;'xs' | 's' | 'm' | 'l' | 'xl', 'xl' | 'xxl'&gt;;
+/// //                                                           ~~~~~~~~~~~~
+/// // Error: Type "'xl' | 'xxl'" does not satisfy the constraint 'never'.
+///
+/// // `unknown[]` cannot exclude anything from `{x: number; y: number} | {x: string; y: string}`
+/// // @ts-expect-error
+/// type Example2 = ExcludeStrict&lt;{x: number; y: number} | {x: string; y: string}, unknown[]&gt;;
+/// //                                                                             ~~~~~~~~~
+/// // Error: Type 'unknown[]' does not satisfy the constraint 'never'.
+/// </code>
+/// </remarks>
+/// <remarks>@category Improved Built-in</remarks>
+[<Erase>]
+type ExcludeStrict<'T, 'U> = private ExcludeStrict__ of 'T
+
+/// <summary>
 /// Ensure mutual exclusivity in object unions by adding other members’ keys as <c>?: never</c>.
 ///
 /// Use-cases:
@@ -2401,6 +2445,50 @@ type ExtractExactly<'Union, 'Match> = private ExtractExactly__ of obj
 /// <remarks>@see {@link SplitOnRestElement}</remarks>
 /// <remarks>@category Array</remarks>
 type ExtractRestElement = obj
+
+/// <summary>
+/// A stricter version of &lt;T, U&gt; that ensures every member of <c>U</c> can successfully extract something from <c>T</c>.
+///
+/// For example, <c>ExtractStrict&lt;string | number | boolean, number | bigint&gt;</c> will error because <c>bigint</c> cannot extract anything from <c>string | number | boolean</c>.
+/// </summary>
+/// <remarks>
+/// @example
+/// <code>
+/// // Valid Examples
+/// import type {ExtractStrict} from 'type-fest';
+///
+/// type Example1 = ExtractStrict&lt;{status: 'success'; data: string[]} | {status: 'error'; error: string}, {status: 'success'}&gt;;
+/// //=&gt; {status: 'success'; data: string[]}
+///
+/// type Example2 = ExtractStrict&lt;'xs' | 's' | 'm' | 'l' | 'xl', 'xs' | 's'&gt;;
+/// //=&gt; 'xs' | 's'
+///
+/// type Example3 = ExtractStrict&lt;{x: number; y: number} | [number, number], unknown[]&gt;;
+/// //=&gt; [number, number]
+/// </code>
+/// </remarks>
+/// <remarks>
+/// @example
+/// <code>
+/// // Invalid Examples
+/// import type {ExtractStrict} from 'type-fest';
+///
+/// // `'xxl'` cannot extract anything from `'xs' | 's' | 'm' | 'l' | 'xl'`
+/// // @ts-expect-error
+/// type Example1 = ExtractStrict&lt;'xs' | 's' | 'm' | 'l' | 'xl', 'xl' | 'xxl'&gt;;
+/// //                                                           ~~~~~~~~~~~~
+/// // Error: Type "'xl' | 'xxl'" does not satisfy the constraint 'never'.
+///
+/// // `unknown[]` cannot extract anything from `{x: number; y: number} | {x: string; y: string}`
+/// // @ts-expect-error
+/// type Example2 = ExtractStrict&lt;{x: number; y: number} | {x: string; y: string}, unknown[]&gt;;
+/// //                                                                             ~~~~~~~~~
+/// // Error: Type 'unknown[]' does not satisfy the constraint 'never'.
+/// </code>
+/// </remarks>
+/// <remarks>@category Improved Built-in</remarks>
+[<Erase>]
+type ExtractStrict<'T, 'U> = private ExtractStrict__ of 'T
 
 /// <summary>
 /// Tries to find the type of a global with the given name.

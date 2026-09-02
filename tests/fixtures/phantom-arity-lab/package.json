@@ -1,0 +1,1 @@
+{"name":"phantom-arity-lab","type":"module","types":"index.d.ts","description":"A generic alias whose resolved target uses fewer type parameters than its head declares, beside one that uses all of them. F# admits no unused type variable in an abbreviation, so the first is written as an erased phantom and keeps its arity; the second stays an abbreviation."}

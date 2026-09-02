@@ -684,6 +684,47 @@ let pipelineTests =
                         "every constructor object in the lab is declared" ])
 
         yield!
+            fixtureTests "phantom-arity-lab" (handFixture "phantom-arity-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "an alias whose target leaves a parameter unused is written as a phantom" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `Reserved` is on the left of `SurplusParameter` and nowhere on the right,
+                    // which FS0035 forbids in an abbreviation and a union admits.
+                    Expect.stringContains
+                        source
+                        "type SurplusParameter<'T, 'Reserved> = private SurplusParameter__ of"
+                        "the head keeps both parameters behind an erased private case"
+
+                    Expect.stringContains source "[<Erase>]" "erased, so the phantom costs nothing at runtime"
+
+                  testCase "an alias whose target uses every parameter stays an abbreviation" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains
+                        source
+                        "type EveryParameter<'T, 'Reserved> = Func<'T, 'Reserved>"
+                        "the negative is untouched"
+
+                  testCase "the erasure is reported once, by repair-arity" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                    let arity =
+                        rendered.Findings
+                        |> List.filter (fun finding -> finding.Key = "RA006")
+                        |> List.map (fun finding -> finding.Pass, finding.Symbol)
+
+                    Expect.equal arity [ "repair-arity", "SurplusParameter" ] "one pass owns the condition"
+
+                    Expect.isEmpty
+                        (rendered.Findings
+                         |> List.filter (fun finding ->
+                             finding.Symbol = "SurplusParameter"
+                             && (finding.Key = "SA002" || finding.Key = "RA001" || finding.Pass = "audit-coverage")))
+                        "no second report of the same erasure, and the export is represented" ])
+
+        yield!
             fixtureTests "keyof-lab" (handFixture "keyof-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "a mapped type over a concrete operand is expanded, not widened (D6)" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)

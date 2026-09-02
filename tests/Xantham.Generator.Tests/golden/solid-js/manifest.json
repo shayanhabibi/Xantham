@@ -4,8 +4,8 @@
   "counts": {
     "exact": 20,
     "ergonomic": 60,
-    "widened": 69,
-    "escape": 26
+    "widened": 75,
+    "escape": 20
   },
   "passes": [
     {
@@ -48,14 +48,14 @@
     },
     {
       "pass": "RA - repair-arity",
-      "total": 25,
+      "total": 28,
       "ergonomic": 7,
-      "widened": 18
+      "widened": 21
     },
     {
       "pass": "AC - audit-coverage",
-      "total": 7,
-      "escape": 7
+      "total": 1,
+      "escape": 1
     }
   ],
   "symbols": [
@@ -2359,6 +2359,27 @@
       ]
     },
     {
+      "name": "ResourceFetcher",
+      "file": "types/reactive/signal.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "ResourceFetcher",
+          "message": "ResourceFetcherInfo2 is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA006",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "ResourceFetcher",
+          "message": "ResourceFetcher resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
+        }
+      ]
+    },
+    {
       "name": "ResourceFetcherInfo2",
       "file": "types/reactive/signal.d.ts",
       "tier": "ergonomic",
@@ -2750,6 +2771,34 @@
       ]
     },
     {
+      "name": "ResourceReturn",
+      "file": "types/reactive/signal.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "ResourceReturn",
+          "message": "ResourceReturnItem applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA006",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "ResourceReturn",
+          "message": "ResourceReturn resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
+        },
+        {
+          "key": "TR036",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "ResourceReturn",
+          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
+        }
+      ]
+    },
+    {
       "name": "ResourceReturnItem",
       "file": "types/reactive/signal.d.ts",
       "tier": "widened",
@@ -2809,6 +2858,27 @@
           "tier": "ergonomic",
           "symbol": "ResourceReturnItem",
           "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "InitializedResourceReturn",
+      "file": "types/reactive/signal.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "InitializedResourceReturn",
+          "message": "InitializedResourceReturnItem is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA006",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "InitializedResourceReturn",
+          "message": "InitializedResourceReturn resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
         }
       ]
     },
@@ -4395,6 +4465,41 @@
       ]
     },
     {
+      "name": "VoidComponent",
+      "file": "types/render/component.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA006",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VoidComponent",
+          "message": "VoidComponent resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "symbol": "VoidComponent",
+          "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "symbol": "VoidComponent()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR018",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "VoidComponent(props)",
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+        }
+      ]
+    },
+    {
       "name": "ParentProps",
       "file": "types/render/component.d.ts",
       "tier": "widened",
@@ -4423,6 +4528,41 @@
       ]
     },
     {
+      "name": "ParentComponent",
+      "file": "types/render/component.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA006",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "ParentComponent",
+          "message": "ParentComponent resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "symbol": "ParentComponent",
+          "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "symbol": "ParentComponent()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR018",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "ParentComponent(props)",
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+        }
+      ]
+    },
+    {
       "name": "FlowProps",
       "file": "types/render/component.d.ts",
       "tier": "widened",
@@ -4446,6 +4586,41 @@
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "FlowProps",
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+        }
+      ]
+    },
+    {
+      "name": "FlowComponent",
+      "file": "types/render/component.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA006",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "FlowComponent",
+          "message": "FlowComponent resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "symbol": "FlowComponent",
+          "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "symbol": "FlowComponent()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR018",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "FlowComponent(props)",
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         }
       ]
@@ -8834,155 +9009,6 @@
       ]
     },
     {
-      "name": "FlowComponent",
-      "tier": "escape",
-      "findings": [
-        {
-          "key": "AC001",
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "symbol": "FlowComponent",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "key": "RA001",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "FlowComponent",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "FlowComponent",
-          "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "FlowComponent()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "symbol": "FlowComponent(props)",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        }
-      ]
-    },
-    {
-      "name": "InitializedResourceReturn",
-      "tier": "escape",
-      "findings": [
-        {
-          "key": "AC001",
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "symbol": "InitializedResourceReturn",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "key": "RA001",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "InitializedResourceReturn",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        }
-      ]
-    },
-    {
-      "name": "ParentComponent",
-      "tier": "escape",
-      "findings": [
-        {
-          "key": "AC001",
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "symbol": "ParentComponent",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "key": "RA001",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "ParentComponent",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "ParentComponent",
-          "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "ParentComponent()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "symbol": "ParentComponent(props)",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        }
-      ]
-    },
-    {
-      "name": "ResourceFetcher",
-      "tier": "escape",
-      "findings": [
-        {
-          "key": "AC001",
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "symbol": "ResourceFetcher",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "key": "RA001",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "ResourceFetcher",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        }
-      ]
-    },
-    {
-      "name": "ResourceReturn",
-      "tier": "escape",
-      "findings": [
-        {
-          "key": "AC001",
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "symbol": "ResourceReturn",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "key": "RA001",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "ResourceReturn",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "key": "TR036",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "ResourceReturn",
-          "message": "union of 5 distinct types widened to obj (D4 caps the erased union at 4)"
-        }
-      ]
-    },
-    {
       "name": "Setter",
       "tier": "escape",
       "findings": [
@@ -9069,47 +9095,6 @@
           "tier": "widened",
           "symbol": "Setter(args)",
           "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
-        }
-      ]
-    },
-    {
-      "name": "VoidComponent",
-      "tier": "escape",
-      "findings": [
-        {
-          "key": "AC001",
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "symbol": "VoidComponent",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "key": "RA001",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "VoidComponent",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "VoidComponent",
-          "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "VoidComponent()",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "symbol": "VoidComponent(props)",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         }
       ]
     }

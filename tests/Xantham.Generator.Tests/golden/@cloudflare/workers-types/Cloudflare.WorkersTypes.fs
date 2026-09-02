@@ -27204,6 +27204,9 @@ type EventContext<'Env, 'P, 'Data> =
     [<ParamObject; Emit("$0")>]
     static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data) : EventContext<'Env, 'P, 'Data> = jsNative
 
+[<Erase>]
+type PagesFunction<'Env, 'Params, 'Data when 'Data :> RequestInitCfPropertiesBase> = private PagesFunction__ of Func<obj, U2<JS.Promise<Response>, Response>>
+
 [<Interface>]
 type PagesFunctionContext<'Env, 'Params, 'Data when 'Data :> RequestInitCfPropertiesBase> =
     abstract request: Request<obj, IncomingRequestCfProperties<obj>> with get, set
@@ -27230,6 +27233,9 @@ type EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> =
     abstract pluginArgs: 'PluginArgs with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> = jsNative
+
+[<Erase>]
+type PagesPluginFunction<'Env, 'Params, 'Data, 'PluginArgs when 'Data :> RequestInitCfPropertiesBase> = private PagesPluginFunction__ of Func<obj, U2<JS.Promise<Response>, Response>>
 
 [<Interface>]
 type PagesPluginFunctionContext<'Env, 'Params, 'Data, 'PluginArgs when 'Data :> RequestInitCfPropertiesBase> =
