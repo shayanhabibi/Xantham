@@ -8,9 +8,9 @@
 
     <ItemGroup>
         <Compile Include="Tsc.test.fs" />
-        <Compile Include="Json.fs" />
-        <Compile Include="Live.fs" />
-        <Compile Include="Mailbox.fs" />
+        <Compile Include="Json.test.fs" />
+        <Compile Include="Live.test.fs" />
+        <Compile Include="Mailbox.test.fs" />
         <Compile Include="Typed.table.generated.fs" />
         <Compile Include="Typed.test.fs" />
         <Compile Include="Callbacks.test.fs" />
