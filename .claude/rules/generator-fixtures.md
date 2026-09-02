@@ -26,10 +26,15 @@ When given a feature task on the generator, **build the small evidence first**:
 1. A hand-authored lab fixture under `tests/fixtures/<name>-lab/`, tracked in git, pinning the
    construct under the live compiler. `intersection-lab`, `statics-lab`, `brand-lab` and
    `generics-lab` are the models. **Name it `<feature>-lab` and it is tracked, gated and
-   resolvable with no further edit anywhere**: `.gitignore` un-ignores the `*lab` family by
+   resolvable**: `.gitignore` un-ignores the `*lab` family by
    pattern, the compile gate globs every golden, and the run gate's `register.mjs` reads the
    package name out of each fixture's own `package.json`. A lab under any other name is ignored
    by git and will vanish silently.
+
+   **One registration is still needed**: a `fixtureTests "<name>-lab" (handFixture
+   "<name>-lab")` block in `Pipeline.test.fs`. Without it the fixture generates no golden and
+   nothing gates it. Every lab in the tree has one, so the block is also an append point two
+   branches can collide on - the resolution is to keep both.
 2. Per-pass unit tests in `tests/Xantham.Generator.Tests`.
 
 Both are the deliverable a reviewer actually reads, so keep them **surgical**: the fewest
