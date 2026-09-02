@@ -2,8 +2,8 @@
   "package": "@cloudflare/workers-types",
   "module": "Cloudflare.WorkersTypes",
   "counts": {
-    "exact": 260,
-    "ergonomic": 967,
+    "exact": 261,
+    "ergonomic": 966,
     "widened": 380,
     "escape": 107
   },
@@ -38,9 +38,10 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 8128,
-      "ergonomic": 7086,
-      "widened": 903,
+      "total": 8139,
+      "exact": 57,
+      "ergonomic": 7038,
+      "widened": 905,
       "escape": 139
     },
     {
@@ -124,7 +125,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "DOMException",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -964,11 +965,18 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "WorkerGlobalScope",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base EventTarget is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkerGlobalScope",
+          "message": "WorkerGlobalScopeEventMap does not inherit EventTarget\u0027s constraint EventCurrentTargetItem; the argument is written as the constraint"
         },
         {
           "key": "TR023",
@@ -1332,7 +1340,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "CompileError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -1546,7 +1554,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "RuntimeError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -1779,11 +1787,11 @@
       "tier": "escape",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "ServiceWorkerGlobalScope",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base WorkerGlobalScope is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR023",
@@ -7198,11 +7206,11 @@
           "message": "any maps to obj"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "AbortSignal",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base EventTarget is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TP002",
@@ -7303,11 +7311,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "ExtendableEvent",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base Event is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -7352,11 +7360,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "CustomEvent",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base Event is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -7569,11 +7577,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "File",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base Blob is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR024",
@@ -8800,11 +8808,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "DigestStream",
+          "message": "base WritableStream is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "TR024",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "DigestStream",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "key": "TR008",
@@ -8989,11 +9004,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "ErrorEvent",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base Event is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -9164,11 +9179,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "MessageEvent",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base Event is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -9353,11 +9368,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "PromiseRejectionEvent",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base Event is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -9954,11 +9969,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "FetchEvent",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base ExtendableEvent is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -10164,11 +10179,11 @@
           "message": "__type is not among the generated declarations; widened to obj"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "Response",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base Body is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR008",
@@ -10324,11 +10339,11 @@
           "message": "__type is not among the generated declarations; widened to obj"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "Request",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base Body is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR008",
@@ -11898,11 +11913,11 @@
       "tier": "escape",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "QueueEvent",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base ExtendableEvent is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -11965,7 +11980,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "R2Error",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -12940,11 +12955,11 @@
       "tier": "escape",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "R2ObjectBody",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base R2Object is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR008",
@@ -13729,11 +13744,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "ScheduledEvent",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base ExtendableEvent is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -14889,11 +14904,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "FixedLengthStream",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base IdentityTransformStream is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR024",
@@ -14931,11 +14946,25 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "IdentityTransformStream",
+          "message": "base TransformStream is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "TR024",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "IdentityTransformStream",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
+        },
+        {
+          "key": "TR024",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "IdentityTransformStream",
+          "message": "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0; the extras are dropped"
         },
         {
           "key": "TR024",
@@ -15036,11 +15065,25 @@
       "tier": "ergonomic",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "CompressionStream",
+          "message": "base TransformStream is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "TR024",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "CompressionStream",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
+        },
+        {
+          "key": "TR024",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CompressionStream",
+          "message": "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0; the extras are dropped"
         },
         {
           "key": "TR024",
@@ -15071,11 +15114,25 @@
       "tier": "ergonomic",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "DecompressionStream",
+          "message": "base TransformStream is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "TR024",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "DecompressionStream",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
+        },
+        {
+          "key": "TR024",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DecompressionStream",
+          "message": "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0; the extras are dropped"
         },
         {
           "key": "TR024",
@@ -15106,11 +15163,18 @@
       "tier": "ergonomic",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "TextEncoderStream",
+          "message": "base TransformStream is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "TR024",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "TextEncoderStream",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0; the extras are dropped"
         },
         {
           "key": "TR024",
@@ -15148,11 +15212,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "TextDecoderStream",
+          "message": "base TransformStream is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "TR024",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "TextDecoderStream",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
         },
         {
           "key": "TR024",
@@ -15351,11 +15422,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "TailEvent",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base ExtendableEvent is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -16309,11 +16380,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "CloseEvent",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base Event is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -16463,11 +16534,18 @@
           "message": "__type is not among the generated declarations; widened to obj"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "WebSocket",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base EventTarget is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "TR037",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WebSocket",
+          "message": "WebSocketEventMap does not inherit EventTarget\u0027s constraint EventCurrentTargetItem; the argument is written as the constraint"
         },
         {
           "key": "TR032",
@@ -16932,11 +17010,11 @@
           "message": "any maps to obj"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "EventSource",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base EventTarget is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TP002",
@@ -17483,11 +17561,11 @@
       "tier": "escape",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "MessagePort",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base EventTarget is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TP002",
@@ -17686,11 +17764,11 @@
       "tier": "ergonomic",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "LoopbackDurableObjectNamespace",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base DurableObjectNamespace is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -17767,14 +17845,14 @@
     {
       "name": "LoopbackColoLocalActorNamespace",
       "file": "index.d.ts",
-      "tier": "ergonomic",
+      "tier": "exact",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "LoopbackColoLocalActorNamespace",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base ColoLocalActorNamespace is inherited: the is-a relation is emitted (\u00A74.4)"
         }
       ]
     },
@@ -18351,11 +18429,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "Performance",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base EventTarget is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TP002",
@@ -18456,11 +18534,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "PerformanceNodeTiming",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base PerformanceEntry is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR014",
@@ -18498,11 +18576,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "PerformanceMark",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base PerformanceEntry is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR008",
@@ -18526,11 +18604,11 @@
       "tier": "escape",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "PerformanceMeasure",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base PerformanceEntry is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR008",
@@ -18694,11 +18772,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "PerformanceResourceTiming",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base PerformanceEntry is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -18896,11 +18974,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "CloudflareAccessIdentity",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base RequestInitCfPropertiesBase is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB004",
@@ -19539,7 +19617,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AiSearchInternalError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -19588,7 +19666,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AiSearchNotFoundError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -31833,11 +31911,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "ResponseFunctionToolCallItem",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base ResponseFunctionToolCall is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -52141,7 +52219,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "InferenceUpstreamError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -52190,7 +52268,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AiInternalError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -54195,7 +54273,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AiGatewayInternalError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -54244,7 +54322,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AiGatewayLogNotFound",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -54483,11 +54561,11 @@
       "tier": "ergonomic",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "ArtifactsRepo",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base ArtifactsRepoInfo is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -54605,7 +54683,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "ArtifactsError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -54906,7 +54984,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AutoRAGInternalError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -54955,7 +55033,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AutoRAGNotFoundError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -55004,7 +55082,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AutoRAGUnauthorizedError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -55053,7 +55131,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AutoRAGNameNotSetError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -64409,11 +64487,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "RequestInitCfProperties",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base RequestInitCfPropertiesBase is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB004",
@@ -64793,11 +64871,11 @@
       "tier": "ergonomic",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "RequestInitCfPropertiesVaryAcceptHeader",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base RequestInitCfPropertiesVaryHeader is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -64828,11 +64906,11 @@
       "tier": "ergonomic",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "RequestInitCfPropertiesVaryAcceptLanguageHeader",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base RequestInitCfPropertiesVaryHeader is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -65318,11 +65396,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "RequestInitCfPropertiesImageDraw",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base BasicImageTransformations is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -65766,11 +65844,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "RequestInitCfPropertiesImage",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base BasicImageTransformations is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -66613,11 +66691,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "IncomingRequestCfPropertiesBase",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base RequestInitCfPropertiesBase is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB004",
@@ -66739,11 +66817,11 @@
       "tier": "ergonomic",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "IncomingRequestCfPropertiesBotManagementEnterprise",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base IncomingRequestCfPropertiesBotManagement is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "SP001",
@@ -68056,11 +68134,11 @@
       "tier": "ergonomic",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "ForwardableEmailMessage",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base EmailMessage is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -69551,11 +69629,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "EmailEvent",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base ExtendableEvent is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -69695,7 +69773,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "FlagshipEvaluationError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -69882,7 +69960,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "HyperdriveDynamic",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB002",
@@ -71786,7 +71864,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "ImagesError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -72070,7 +72148,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "MediaError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -72458,11 +72536,11 @@
       "tier": "ergonomic",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "JsonWebKeyWithKid",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base JsonWebKey is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -75885,7 +75963,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "StreamError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -75930,11 +76008,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "InternalError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base StreamError is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -75986,11 +76064,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "BadRequestError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base StreamError is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -76042,11 +76120,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "NotFoundError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base StreamError is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -76098,11 +76176,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "ForbiddenError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base StreamError is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -76154,11 +76232,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "RateLimitedError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base StreamError is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -76210,11 +76288,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "QuotaReachedError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base StreamError is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -76266,11 +76344,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "MaxFileSizeError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base StreamError is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -76322,11 +76400,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "InvalidURLError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base StreamError is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -76378,11 +76456,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "AlreadyUploadedError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base StreamError is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -76434,11 +76512,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "TooManyWatermarksError",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base StreamError is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",

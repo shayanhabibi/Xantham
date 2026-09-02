@@ -21,8 +21,9 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 597,
-      "ergonomic": 343,
+      "total": 598,
+      "exact": 7,
+      "ergonomic": 337,
       "widened": 213,
       "escape": 41
     },
@@ -68,7 +69,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "ArrayElement",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "MB004",
@@ -400,11 +401,11 @@
       "tier": "escape",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "Computation",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base Owner is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TP002",
@@ -791,11 +792,18 @@
       "tier": "escape",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "Memo",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base Computation is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "exact",
+          "symbol": "Memo",
+          "message": "base SignalState is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -1043,11 +1051,11 @@
       "tier": "escape",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "SignalState",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base SourceMapValue is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -1824,11 +1832,11 @@
       "tier": "ergonomic",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "SignalOptions",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base MemoOptions is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -1901,11 +1909,11 @@
       "tier": "ergonomic",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "EffectOptions",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base BaseOptions is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",
@@ -1999,11 +2007,11 @@
       "tier": "ergonomic",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "MemoOptions",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base EffectOptions is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "MB003",

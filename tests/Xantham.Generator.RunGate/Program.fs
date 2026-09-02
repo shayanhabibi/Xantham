@@ -126,6 +126,39 @@ let private statics () =
     equal "an instance method survives beside the static of its name" 42.0 (clash.json ())
     equal "and the static of that name reaches the constructor object's" 10.0 (StaticsLab.Clash.json 5.0).status
 
+/// §4.4's is-a relation after erasure. F# proves the `inherit` legal; only running it proves the
+/// relation costs nothing - that an upcast to an inherited base is the identical object, that the
+/// members the flattening redeclared are all still on it, and that a class whose F# type gained an
+/// `inherit` keeps the JavaScript prototype chain it always had.
+let private heritage () =
+    let derived = InheritLab.Derived.Create(extra = true, name = "leaf", at = 2.0)
+
+    equal
+        "a Create on an inheriting interface still emits every member, inherited ones included"
+        """{"extra":true,"name":"leaf","at":2}"""
+        (json derived)
+
+    let asBase = derived :> InheritLab.Base
+    equal "an upcast to the inherited base reads the base's member" "leaf" asBase.name
+    check "and it is the same object: both interfaces are erased" (emitJsExpr (derived, asBase) "$0 === $1")
+
+    let both = InheritLab.Both.Create(label = "x", volume = 1.0, pitch = 2.0)
+    equal "a diamond upcasts down one arm" 1.0 (both :> InheritLab.Loud).volume
+    equal "and down the other" 2.0 (both :> InheritLab.Pitched).pitch
+
+    let tagged = InheritLab.Tagged.Create(tag = "t", value = "v")
+    equal "a generic base upcasts at the argument the inherit applied" "v" (tagged :> InheritLab.Box<string>).value
+
+    let leaf = InheritLab.Exports.Leaf 3.0
+    let nodeClass: obj = import "Node" "inherit-lab"
+    equal "an EmitConstructor subclass ran its base constructor" 3.0 leaf.id
+
+    check
+        "and is an instance of the JavaScript base its F# type inherits"
+        (emitJsExpr (leaf, nodeClass) "$0 instanceof $1")
+
+    equal "which the F# upcast agrees with" 3.0 (leaf :> InheritLab.Node).id
+
 let private taggedUnions () =
     let circle = PhaseBLab.Shape.Circle 2.0
     equal "a tagged-union case erases to the tagged object" """{"kind":"circle","radius":2}""" (json circle)
@@ -152,6 +185,7 @@ let main _ =
     globals ()
     imports ()
     statics ()
+    heritage ()
     taggedUnions ()
 
     match failures with

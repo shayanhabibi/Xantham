@@ -720,6 +720,54 @@ Phases — each ends with the compile gate green on its fixtures:
     misleading `SC003`) rather than as a method; and `synthesize-paramobjects` still offers a
     `[<ParamObject>]` `Create` on a class whose instance type is all properties (`Box`), which
     cannot build a class instance - both predate this pass and are separate behaviour changes.
+  - *Declared bases inherited (2026-09-02).* §4.4's heritage rule, executed: a base an
+    `extends` clause names becomes an F# `inherit` beside the members that were already
+    flattened in, so the derived type upcasts to it. `SI002` - "base has no F# name at this
+    position" - was firing 77 times in `workers-types`, the largest remaining structural loss
+    once intersections were settled, and it fired undifferentiated: a base that widened away, a
+    base a shipped package binds, and a base this run itself declares all read the same. They
+    are three cases now. §4.6's intersection operands and §4.4's bases were already the same
+    question - "is this a type the declaration *is*, and can F# say so" - so they go through one
+    gate: inheritable exactly when the reference resolves to a name this run declares as an
+    interface. Members are still declared in full beside the `inherit`, which is what keeps
+    `Create` and the member list exact when a sibling base is not inheritable.
+    `tests/fixtures/inherit-lab` pins it - the redeclaration, the narrowed member, the diamond,
+    a generic base at a variable and at a fixed argument, a class base, and the three negatives.
+    What it taught:
+    - *An F# name is not a type id, so the cycle guard is not optional.* TypeScript admits no
+      cyclic heritage, but two ids hash-consed onto one name, or one declaration reached twice,
+      can close a loop the source never wrote, and F# rejects it outright (FS0954). The edges
+      are accumulated into a name graph in declaration order and an edge the graph can already
+      walk back from is refused (`SI006`), which is enough to keep the whole graph acyclic. It
+      fires nowhere in the corpus; the unit test is synthetic, and that is the point.
+    - *The arity repair can unname a base after the edge is drawn.* A base whose reference
+      widens to `obj` would render `inherit obj`, which is FS0887 - `obj` is not an interface
+      type. The widening owns the loss already, so `repair-arity` drops any `inherit` left
+      holding something that is not a named application rather than emitting a file that
+      cannot compile.
+    - *F# subtyping is nominal where TypeScript's is structural.* `EventTarget<'EventMap when
+      'EventMap :> EventCurrentTargetItem>` had never been *applied* by a generated file
+      before; the first `inherit EventTarget<WorkerGlobalScopeEventMap>` was FS0001, because
+      the event map satisfies the bound by having its members and not by naming it. An
+      argument that reaches its bound through neither bases nor intersection operands is
+      written as the bound instead (`TR037`), the same substitution an argument that widened
+      to `obj` already gets. Two sites, both in `workers-types`.
+    Measured: `workers-types` `SI002` 77 → 20 with `SI004` (an emitted is-a relation, Exact)
+    at 57, `TR037` 0 → 2, `TR024` 105 → 114 (a base reference now goes through `typeRef`, so
+    its type arguments raise lib-binding findings), exact 260 → 261 and ergonomic 967 → 966,
+    golden 30580 → 30637 lines and `inherit` lines 107 → 164. `animejs` `SI002` 4 → 0,
+    `solid-js` 7 → 1, `statics-lab` 1 → 0; `type-fest` moved by a message rewording alone. The
+    count reads oddly because `SI002` used to fire once per *declaration* and now fires once
+    per *base*: `solid-js`'s 7 became 8 findings across 7 declarations. Both gates grew:
+    `inherit-lab` is linked into the compile gate and the run gate (40 → 49 checks), where the
+    upcast is proved to be the identical object rather than only to type-check. Not done, and
+    now visible: the 20 `SI002` left in `workers-types` are all `extends Error`, whose base is
+    the compiler lib's and which nothing shipped binds - a `JS.Error` binding would take them
+    all; `SI005` names `JS.Promise` in the lab and fires nowhere on an npm rung, so the choice
+    to refuse lib bindings an `inherit` costs nothing measurable yet; and the two `TR037` sites
+    state the is-a relation at a coarser instantiation than TypeScript's
+    (`inherit EventTarget<EventCurrentTargetItem>`, not `<WorkerGlobalScopeEventMap>`), which
+    is honest but is the one place the emitted relation is weaker than the source's.
 
 ## 7. Decisions (2026-09-01)
 

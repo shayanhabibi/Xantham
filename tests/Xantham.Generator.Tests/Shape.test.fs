@@ -277,6 +277,84 @@ let typeRefTests =
             Expect.equal reference (FsApp("Box", [ FsString ])) "Box<string>, not the expansion"
             Expect.isEmpty findings "an application is exact"
 
+        testCase "an argument that only structurally satisfies its bound is written as the bound" <| fun _ ->
+            // F# subtyping is nominal where TypeScript's is structural. An argument that merely
+            // has the constraint's members is FS0001 at the application, so it is written as the
+            // constraint - the repair an argument that widened to obj already gets. This is the
+            // hole §4.4's `inherit` opened: before it, no generated file applied such a type.
+            let member' id name = Build.resolvedMember (Build.symbol id name SymbolFlags.Property) 2
+
+            let marker =
+                { Build.facts (Build.typeResponse 60 TypeFlags.Object) with Members = [ member' 600 "at" ] }
+
+            let lookalike =
+                { Build.facts (Build.typeResponse 70 TypeFlags.Object) with Members = [ member' 700 "at" ] }
+
+            let instantiation =
+                { Build.facts
+                    { Build.typeResponse 31 TypeFlags.Object with
+                        ObjectFlags = ValueSome ObjectFlags.Reference
+                        Target = ValueSome 30 } with
+                    TypeArguments = [ 70 ] }
+
+            let model =
+                { Build.shapeModel (
+                      genericDecl 30 [ 20 ] []
+                      :: instantiation
+                      :: marker
+                      :: lookalike
+                      :: { typeParam 20 "T" with Constraint = Some 60 }
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 30, "Holder"; 60, "Marker"; 70, "Lookalike" ] }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 31
+
+            Expect.equal reference (FsApp("Holder", [ FsNamed "Marker" ])) "the argument becomes the bound it cannot state"
+
+            Expect.contains
+                (findings |> List.map (fun finding -> finding.Key, finding.Tier, finding.Message))
+                ("TR037",
+                 Widened,
+                 "Lookalike does not inherit Holder's constraint Marker; the argument is written as the constraint")
+                "and the substitution is owned by name"
+
+        testCase "an argument that inherits its bound is applied as itself" <| fun _ ->
+            // The other side of the same gate: `satisfies` walks the bases `shape-interfaces`
+            // turns into `inherit` lines, so a real subtype costs nothing at the application.
+            let member' id name = Build.resolvedMember (Build.symbol id name SymbolFlags.Property) 2
+
+            let marker =
+                { Build.facts (Build.typeResponse 60 TypeFlags.Object) with Members = [ member' 600 "at" ] }
+
+            let subtype =
+                { Build.facts (Build.typeResponse 70 TypeFlags.Object) with
+                    BaseTypes = [ 60 ]
+                    Members = [ member' 700 "at" ] }
+
+            let instantiation =
+                { Build.facts
+                    { Build.typeResponse 31 TypeFlags.Object with
+                        ObjectFlags = ValueSome ObjectFlags.Reference
+                        Target = ValueSome 30 } with
+                    TypeArguments = [ 70 ] }
+
+            let model =
+                { Build.shapeModel (
+                      genericDecl 30 [ 20 ] []
+                      :: instantiation
+                      :: marker
+                      :: subtype
+                      :: { typeParam 20 "T" with Constraint = Some 60 }
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 30, "Holder"; 60, "Marker"; 70, "Subtype" ] }
+
+            let reference, findings = Shape.typeRef Build.context model None "x" 31
+
+            Expect.equal reference (FsApp("Holder", [ FsNamed "Subtype" ])) "the argument stands"
+            Expect.isEmpty findings "a nominal subtype needs no repair"
+
         testCase "a generic declaration named at a reference re-applies its parameters" <| fun _ ->
             // `map(next: T): Box<T>` refers to the declaration itself; F# has no bare `Box`.
             let model =
@@ -754,6 +832,231 @@ let shapePassTests =
             let reference, refFindings = Shape.typeRef Build.context shaped None "x" 50
             Expect.equal reference (FsNamed "NamedTimed") "a reference names it"
             Expect.isEmpty refFindings "at no further cost"
+
+        testCase "shape-interfaces inherits a declared base beside the members it redeclares" <| fun _ ->
+            // `interface Derived extends Base`: the checker's property list on `Derived` already
+            // carries `Base`'s members, so they are declared here in full - F# admits the
+            // redeclaration, and it is what keeps `Create` and the member list exact. The base is
+            // a type this run declares, so the is-a relation is emitted beside them (§4.4).
+            let name = Build.resolvedMember (Build.symbol 401 "name" SymbolFlags.Property) 1
+            let extra = Build.resolvedMember (Build.symbol 402 "extra" SymbolFlags.Property) 3
+
+            let baseType =
+                { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                    SymbolName = Some "Base"
+                    Members = [ name ] }
+
+            let derived =
+                { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
+                    SymbolName = Some "Derived"
+                    BaseTypes = [ 40 ]
+                    Members = [ extra; name ] }
+
+            let model =
+                { Build.shapeModel (baseType :: derived :: Build.primitives) with
+                    DeclNames = Map.ofList [ 40, "Base"; 41, "Derived" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeInterfaces model
+
+            let decl =
+                shaped.Decls
+                |> List.pick (function
+                    | FsInterface d when d.Name = "Derived" -> Some d
+                    | _ -> None)
+
+            Expect.equal decl.Inherits [ FsNamed "Base" ] "the is-a relation is stated"
+
+            Expect.equal
+                (decl.Members
+                 |> List.map (function
+                     | FsProperty p -> p.Name
+                     | FsMethod m -> m.Name
+                     | FsIndexer _ -> "Item"))
+                [ "extra"; "name" ]
+                "and the inherited member is still declared here"
+
+            Expect.contains
+                (findings |> List.map (fun finding -> finding.Key, finding.Tier, finding.Message))
+                ("SI004", Exact, "base Base is inherited: the is-a relation is emitted (§4.4)")
+                "an emitted is-a relation costs nothing"
+
+        testCase "shape-interfaces applies a generic base's argument at the inherit" <| fun _ ->
+            // `interface Tagged extends Box<string>`. F# has no bare `Box`: `inherit Box` is
+            // FS0033, so the argument has to travel to the inherit or the edge cannot be drawn.
+            let value = Build.resolvedMember (Build.symbol 401 "value" SymbolFlags.Property) 1
+            let tag = Build.resolvedMember (Build.symbol 402 "tag" SymbolFlags.Property) 1
+
+            let boxDecl = genericDecl 30 [ 20 ] [ value ]
+
+            let instantiation =
+                { Build.facts
+                    { Build.typeResponse 31 TypeFlags.Object with
+                        ObjectFlags = ValueSome ObjectFlags.Reference
+                        Target = ValueSome 30 } with
+                    TypeArguments = [ 1 ] }
+
+            let tagged =
+                { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
+                    SymbolName = Some "Tagged"
+                    BaseTypes = [ 31 ]
+                    Members = [ tag; value ] }
+
+            let model =
+                { Build.shapeModel (boxDecl :: instantiation :: tagged :: typeParam 20 "T" :: Build.primitives) with
+                    DeclNames = Map.ofList [ 30, "Box"; 41, "Tagged" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeInterfaces model
+
+            let decl =
+                shaped.Decls
+                |> List.pick (function
+                    | FsInterface d when d.Name = "Tagged" -> Some d
+                    | _ -> None)
+
+            Expect.equal decl.Inherits [ FsApp("Box", [ FsString ]) ] "Box<string>, not a bare Box"
+
+            Expect.contains
+                (findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                ("SI004", "Tagged")
+                "recorded against the deriving declaration"
+
+        testCase "shape-interfaces flattens a base this run does not declare, and names it" <| fun _ ->
+            // `interface Deferred extends Promise<string>`: `Promise` resolves to the shipped
+            // `JS.Promise` binding rather than to a type this run writes as an interface, and
+            // `inherit` on something that is not an interface here is FS0887. The members
+            // flatten, and the finding says which base was left behind - not just that one was.
+            let tag = Build.resolvedMember (Build.symbol 401 "tag" SymbolFlags.Property) 1
+
+            let deferred =
+                { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
+                    SymbolName = Some "Deferred"
+                    BaseTypes = [ 40 ]
+                    Members = [ tag ] }
+
+            let model =
+                { Build.shapeModel (libType 40 "Promise" [ 1 ] :: deferred :: Build.primitives) with
+                    DeclNames = Map.ofList [ 41, "Deferred" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeInterfaces model
+
+            let decl =
+                shaped.Decls
+                |> List.pick (function
+                    | FsInterface d when d.Name = "Deferred" -> Some d
+                    | _ -> None)
+
+            Expect.isEmpty decl.Inherits "nothing here is inheritable"
+
+            Expect.contains
+                (findings |> List.map (fun finding -> finding.Key, finding.Tier, finding.Message))
+                ("SI005",
+                 Ergonomic,
+                 "base JS.Promise is not declared by this run as an interface; its members are flattened in and the is-a relation is not emitted (§4.4)")
+                "the base that was not inherited is named"
+
+        testCase "shape-interfaces flattens a base with no F# name at all" <| fun _ ->
+            // `interface Failure extends Error`: nothing shipped binds `Error`, so the base has
+            // no name at this position for an `inherit` to take. This is the undifferentiated
+            // case the two named ones split out of, and it stays that way.
+            let code = Build.resolvedMember (Build.symbol 401 "code" SymbolFlags.Property) 2
+
+            let failure =
+                { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
+                    SymbolName = Some "Failure"
+                    BaseTypes = [ 40 ]
+                    Members = [ code ] }
+
+            let model =
+                { Build.shapeModel (libType 40 "Error" [] :: failure :: Build.primitives) with
+                    DeclNames = Map.ofList [ 41, "Failure" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeInterfaces model
+
+            let decl =
+                shaped.Decls
+                |> List.pick (function
+                    | FsInterface d when d.Name = "Failure" -> Some d
+                    | _ -> None)
+
+            Expect.isEmpty decl.Inherits "nothing here is inheritable"
+
+            Expect.contains
+                (findings |> List.map (fun finding -> finding.Key, finding.Tier))
+                ("SI002", Ergonomic)
+                "the nameless case is still reported, distinctly from the named ones"
+
+        testCase "shape-interfaces refuses an inherit that would close a cycle" <| fun _ ->
+            // TypeScript admits no cyclic heritage, but an F# name is not a type id: two ids
+            // hash-consed onto one name can close a loop the source never wrote, and F# rejects a
+            // cyclic inheritance relation outright (FS0954). The second edge is the one that
+            // would close it, so it is the one refused - the first still stands.
+            let up = Build.resolvedMember (Build.symbol 401 "up" SymbolFlags.Property) 3
+            let down = Build.resolvedMember (Build.symbol 402 "down" SymbolFlags.Property) 3
+
+            let a =
+                { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                    SymbolName = Some "A"
+                    BaseTypes = [ 41 ]
+                    Members = [ up ] }
+
+            let b =
+                { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
+                    SymbolName = Some "B"
+                    BaseTypes = [ 40 ]
+                    Members = [ down ] }
+
+            let model =
+                { Build.shapeModel (a :: b :: Build.primitives) with DeclNames = Map.ofList [ 40, "A"; 41, "B" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeInterfaces model
+
+            Expect.equal
+                (shaped.Decls
+                 |> List.choose (function
+                     | FsInterface d -> Some(d.Name, d.Inherits)
+                     | _ -> None))
+                [ "A", [ FsNamed "B" ]; "B", [] ]
+                "one edge, not two: the graph stays acyclic"
+
+            Expect.contains
+                (findings |> List.map (fun finding -> finding.Key, finding.Tier, finding.Symbol))
+                ("SI006", Ergonomic, "B")
+                "and the refusal is recorded where it happened"
+
+        testCase "repair-arity drops an inherit whose base the widening just unnamed" <| fun _ ->
+            // FS0887: `inherit obj` is not an interface type, and FS0033 forbids the bare `Box`
+            // that got it there. A base the arity repair takes the name off has nothing left to
+            // inherit, so the edge goes rather than the generated file failing to compile.
+            let interfaceDecl name parameters inherits =
+                FsInterface
+                    { Name = name
+                      Docs = ""
+                      Tags = []
+                      Order = None
+                      TypeParameters = parameters |> List.map (fun p -> { Name = p; Constraint = None })
+                      Inherits = inherits
+                      Members = []
+                      CreateOverloads = []
+                      Statics = [] }
+
+            let model =
+                { Build.shapeModel [] with
+                    Decls = [ interfaceDecl "Box" [ "T" ] []; interfaceDecl "Crate" [] [ FsNamed "Box" ] ] }
+
+            let repaired, findings = Build.runPass Shape.repairArity model
+
+            Expect.equal
+                (repaired.Decls
+                 |> List.choose (function
+                     | FsInterface d -> Some(d.Name, d.Inherits)
+                     | _ -> None))
+                [ "Box", []; "Crate", [] ]
+                "the unnamed edge is dropped, not written as obj"
+
+            Expect.contains
+                (findings |> List.map (fun finding -> finding.Key, finding.Symbol))
+                ("RA003", "Crate")
+                "the widening that removed it owns the loss"
 
         testCase "an intersection over a type-parameter operand has nothing to flatten" <| fun _ ->
             // `T & { id: number }`: the resolve tier reads no members off an intersection with

@@ -536,7 +536,7 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AbstractClass",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
         },
         {
           "key": "TP002",

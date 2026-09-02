@@ -143,6 +143,7 @@ type TimelineLabels =
     abstract Item: string -> float with get, set
 
 type JSAnimation =
+    inherit Timer
     /// <remarks>@type {Tween}</remarks>
     abstract _head: Tween with get, set
     /// <remarks>@type {Tween}</remarks>
@@ -648,6 +649,7 @@ type Spring =
     abstract velocity: float with get, set
 
 type Engine =
+    inherit Clock
     /// <remarks>@type {Number}</remarks>
     abstract deltaTime: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -1306,6 +1308,7 @@ type Segmenter =
     static member Create (segment: Func<string, obj>) : Segmenter = jsNative
 
 type Timeline =
+    inherit Timer
     /// <remarks>@type {Record&lt;String, Number&gt;}</remarks>
     abstract labels: TimelineLabels with get, set
     /// <remarks>@type {DefaultsParams}</remarks>
@@ -1546,6 +1549,7 @@ type Timeline =
 /// Base class used to create Timers, Animations and Timelines
 /// </summary>
 type Timer =
+    inherit Clock
     /// <remarks>@type {Number}</remarks>
     abstract deltaTime: float with get, set
     /// <remarks>@type {Number}</remarks>

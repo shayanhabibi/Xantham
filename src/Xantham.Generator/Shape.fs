@@ -676,6 +676,13 @@ and private appliedRef
 /// thing still true of it, as an out-of-scope parameter already is. Only a constraint that
 /// the declaration states - a plain named interface of this run - is substituted; one it
 /// dropped needs no help.
+///
+/// A *named* argument is the third case, and F# nominal subtyping is what makes it one:
+/// `WorkerGlobalScopeEventMap` has the members `EventCurrentTargetItem`'s index signature asks
+/// for, which is all TypeScript wants, but it does not inherit it, so `EventTarget<
+/// WorkerGlobalScopeEventMap>` is FS0001. It goes the same way as the other two - written as
+/// the constraint, with a finding - and "is a subtype" is read off the declared bases rather
+/// than assumed, since that is exactly the relation `shape-interfaces` emits as `inherit`.
 and private appliedRefTo
     (ctx: Context)
     (model: ShapeModel)
@@ -700,8 +707,29 @@ and private appliedRefTo
                 && not (isTuple bound)
                 && not (isPureCallback bound)
                 ->
-                Map.tryFind boundId model.DeclNames
+                Map.tryFind boundId model.DeclNames |> Option.map (fun name -> boundId, name)
             | _ -> None)
+
+    /// Whether an argument is the bound, or reaches it through the bases and intersection
+    /// operands `shape-interfaces` turns into `inherit` lines - the F# subtyping the
+    /// application needs. An instantiation is asked of its target, which is the declaration
+    /// that carries the heritage.
+    let satisfies (boundId: int) (argument: int) =
+        let boundName = Map.tryFind boundId model.DeclNames
+
+        let rec walk seen typeId =
+            typeId = boundId
+            || (boundName.IsSome && Map.tryFind typeId model.DeclNames = boundName)
+            || (not (Set.contains typeId seen)
+                && (match Map.tryFind typeId model.Types with
+                    | Some facts ->
+                        facts.BaseTypes
+                        @ facts.IntersectionMembers
+                        @ (facts.Response.Target |> ValueOption.toOption |> Option.toList)
+                        |> List.exists (walk (Set.add typeId seen))
+                    | None -> false))
+
+        walk Set.empty argument
 
     let parameters =
         if parameters.Length = arguments.Length then
@@ -716,17 +744,27 @@ and private appliedRefTo
             findings <- findings @ argumentFindings
 
             match parameter |> Option.bind statedConstraint, reference with
-            | Some bound, FsObj ->
+            | Some(_, bound), FsObj ->
                 findings <-
                     findings
                     @ [ Finding.make owner (TypeReference.ConstrainedArgumentWidened(name, bound)) ]
 
                 FsNamed bound
-            | Some bound, FsTypeVar variable when statedConstraint argument <> Some bound ->
+            | Some(boundId, bound), FsTypeVar variable when statedConstraint argument <> Some(boundId, bound) ->
                 findings <-
                     findings
                     @ [
                         Finding.make owner (TypeReference.ArgumentNotBoundWithConstraint(variable, name, bound))
+                    ]
+
+                FsNamed bound
+            | Some(boundId, bound), (FsNamed shown | FsApp(shown, _)) when
+                shown <> bound && not (satisfies boundId argument)
+                ->
+                findings <-
+                    findings
+                    @ [
+                        Finding.make owner (TypeReference.ArgumentNotASubtypeOfConstraint(shown, name, bound))
                     ]
 
                 FsNamed bound
@@ -1999,9 +2037,12 @@ let shapeCallbacks: Pass<ShapeModel> =
     }
 
 /// F# interfaces for every named object type with members: exported interfaces and class
-/// instance sides alike, plus the synthesized anonymous shapes. Heritage is flattened - the
-/// checker's property list already includes inherited members, and F# rejects re-abstracted
-/// inherited members - with a finding recording the lost is-a relation.
+/// instance sides alike, plus the synthesized anonymous shapes. Heritage is both `inherit`ed
+/// and flattened: the checker's property list already includes the inherited members, so they
+/// are declared here in full, and a base this run also declares as an interface is `inherit`ed
+/// beside them (§4.4) so that the derived type upcasts to it. A base that has no F# name here,
+/// names something this run does not declare, or would close a cycle stays flattened alone,
+/// with a finding saying which of the three it is.
 /// What `shape-interfaces` declares under a name: an object shape with members - not an array,
 /// a tuple, or a named instantiation (`type StringBox = Box<string>`, an abbreviation of the
 /// application rather than a second copy of the expansion, which `shape-aliases` writes) - or
@@ -2015,6 +2056,21 @@ let private declaresInterface (model: ShapeModel) (facts: TypeFacts) =
      && not (isTuple facts)
      && (instantiationOf model facts).IsNone)
     || isFlattenable model facts
+
+/// Whether one declaration name already reaches another through the `inherit` edges emitted so
+/// far. F# refuses a cyclic inheritance relation outright (FS0954), and while TypeScript admits
+/// no cyclic heritage, an F# name is not a type id - a declaration reached twice, or two ids
+/// hash-consed onto one name, can close a loop the source never wrote. The walk carries its own
+/// visited set so an already-broken graph cannot make it diverge.
+let private reaches (graph: Map<string, string list>) (from: string) (target: string) =
+    let rec walk seen name =
+        name = target
+        || (not (Set.contains name seen)
+            && (Map.tryFind name graph
+                |> Option.defaultValue []
+                |> List.exists (walk (Set.add name seen))))
+
+    walk Set.empty from
 
 let shapeInterfaces: Pass<ShapeModel> =
     {
@@ -2043,6 +2099,11 @@ let shapeInterfaces: Pass<ShapeModel> =
                             | _ -> None)
                         |> Set.ofList
 
+                    // The `inherit` edges emitted so far, accumulated in declaration order. A
+                    // cycle is closed by whichever edge is added last, so refusing an edge the
+                    // graph can already walk back from is enough to keep the whole graph acyclic.
+                    let mutable inheritGraph: Map<string, string list> = Map.empty
+
                     let decls =
                         model.DeclNames
                         |> Map.toList
@@ -2061,34 +2122,57 @@ let shapeInterfaces: Pass<ShapeModel> =
 
                                 findings <- findings @ memberFindings
 
-                                // A flattened intersection keeps the is-a relation §4.6 warned it
-                                // would lose, where F# can state it: an operand this run declares
-                                // as an interface is inherited, so the intersection upcasts to it.
-                                // Its members are still declared here in full - F# admits the
-                                // redeclaration, and it is what keeps `Create` and the member list
-                                // exact when an operand is not an interface (a lib type, a callable,
-                                // an anonymous shape folded in).
-                                let inherits =
-                                    if not (flag TypeFlags.Intersection facts) then
-                                        []
-                                    else
-                                        facts.IntersectionMembers
-                                        |> List.choose (fun operandId ->
-                                            match typeRef ctx { model with TypeVars = scope } None name operandId with
-                                            | (FsNamed operand | FsApp(operand, _)) as reference, refFindings when
-                                                operand <> name && Set.contains operand interfaceNames
-                                                ->
-                                                findings <- findings @ refFindings
-                                                Some reference
-                                            | _ -> None)
-                                        |> List.distinct
+                                // §4.4's heritage rule and §4.6's is-a relation, through one
+                                // gate: a declared base and an intersection operand are both a
+                                // type this declaration *is*, and F# can say so exactly when
+                                // this run declares that type as an interface. The members are
+                                // still declared here in full - F# admits the redeclaration,
+                                // and it is what keeps `Create` and the member list exact when
+                                // a sibling base or operand is not inheritable (a lib binding,
+                                // a callable, an anonymous shape folded in).
+                                let inheritable (operandId: int) =
+                                    match typeRef ctx { model with TypeVars = scope } None name operandId with
+                                    | (FsNamed operand | FsApp(operand, _)) as reference, refFindings ->
+                                        if not (Set.contains operand interfaceNames) then
+                                            Error(ShapeInterfaces.BaseNotDeclaredHere operand)
+                                        elif reaches inheritGraph operand name then
+                                            Error(ShapeInterfaces.BaseWouldCycle operand)
+                                        else
+                                            Ok(operand, reference, refFindings)
+                                    | _ -> Error ShapeInterfaces.BaseMembersFlattened
+
+                                let mutable inherits = []
+
+                                // `record` is what separates the two callers: a declared base
+                                // says per base what became of it, where an intersection says
+                                // `IntersectionFlattened` once for the whole operand list.
+                                let admit (record: bool) (operandId: int) =
+                                    match inheritable operandId with
+                                    | Ok(operand, reference, refFindings) ->
+                                        if not (List.exists (fun (taken, _) -> taken = operand) inherits) then
+                                            findings <- findings @ refFindings
+                                            inherits <- inherits @ [ operand, reference ]
+
+                                            if record then
+                                                findings <-
+                                                    findings
+                                                    @ [ Finding.make name (ShapeInterfaces.BaseInherited operand) ]
+                                    | Error kind ->
+                                        if record then
+                                            findings <- findings @ [ Finding.make name kind ]
+
+                                if flag TypeFlags.Intersection facts then
+                                    for operandId in facts.IntersectionMembers do
+                                        admit false operandId
+
+                                for baseId in facts.BaseTypes do
+                                    admit true baseId
+
+                                inheritGraph <- Map.add name (inherits |> List.map fst) inheritGraph
 
                                 if not facts.CallSignatures.IsEmpty then
                                     findings <-
                                         findings @ [ Finding.make name ShapeInterfaces.HybridLosesCallSignatures ]
-
-                                if not facts.BaseTypes.IsEmpty then
-                                    findings <- findings @ [ Finding.make name ShapeInterfaces.BaseMembersFlattened ]
 
                                 if flag TypeFlags.Intersection facts then
                                     findings <-
@@ -2109,7 +2193,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                             Tags = tags
                                             Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
                                             TypeParameters = typeParameters
-                                            Inherits = inherits
+                                            Inherits = inherits |> List.map snd
                                             Members = members
                                             CreateOverloads = []
                                             Statics = []
@@ -3045,6 +3129,23 @@ let private repaired (model: ShapeModel) =
                         }
                 | other -> other
 
+            // FS0887: `inherit obj` is not an interface type. A base the widening above just
+            // took the name off has nothing left to inherit, and the widening owns that loss
+            // already, so the edge goes rather than the generated file failing to compile.
+            let dropWidenedInherits (decl: FsDecl) =
+                match decl with
+                | FsInterface d ->
+                    FsInterface
+                        { d with
+                            Inherits =
+                                d.Inherits
+                                |> List.filter (function
+                                    | FsNamed _
+                                    | FsApp _ -> true
+                                    | _ -> false)
+                        }
+                | other -> other
+
             decl
             |> demoteUnitSetters
             |> mapDeclRefs (fun reference ->
@@ -3055,7 +3156,8 @@ let private repaired (model: ShapeModel) =
                     widen (RepairArity.GenericWithoutArguments name)
                 | FsApp(name, arguments) when Map.tryFind name arity |> Option.exists (fun n -> n <> arguments.Length) ->
                     widen (RepairArity.ArityMismatch(name, arguments.Length, arity[name]))
-                | other -> other))
+                | other -> other)
+            |> dropWidenedInherits)
 
     { model with Decls = decls }, findings
 

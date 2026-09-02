@@ -23,7 +23,8 @@
     {
       "pass": "SI - shape-interfaces",
       "total": 2371,
-      "ergonomic": 1241,
+      "exact": 4,
+      "ergonomic": 1237,
       "widened": 813,
       "escape": 317
     },
@@ -719,11 +720,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "JSAnimation",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base Timer is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -1334,11 +1335,11 @@
       "tier": "escape",
       "findings": [
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "Engine",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base Clock is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR008",
@@ -5609,11 +5610,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "Timeline",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base Timer is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",
@@ -5854,11 +5855,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SI002",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "ergonomic",
+          "tier": "exact",
           "symbol": "Timer",
-          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+          "message": "base Clock is inherited: the is-a relation is emitted (\u00A74.4)"
         },
         {
           "key": "TR032",

@@ -753,6 +753,7 @@ type WorkerGlobalScopeEventMap =
     static member Create (fetch: FetchEvent, scheduled: ScheduledEvent, queue: QueueEvent<obj>, unhandledrejection: PromiseRejectionEvent, rejectionhandled: PromiseRejectionEvent) : WorkerGlobalScopeEventMap = jsNative
 
 type WorkerGlobalScope =
+    inherit EventTarget<EventCurrentTargetItem>
     abstract EventTarget: obj with get, set
     /// <summary>
     /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
@@ -1024,6 +1025,7 @@ type CloudflareCompatibilityFlags =
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ServiceWorkerGlobalScope)
 /// </summary>
 type ServiceWorkerGlobalScope =
+    inherit WorkerGlobalScope
     abstract DOMException: obj with get, set
     abstract WorkerGlobalScope: obj with get, set
     abstract btoa: data: string -> string
@@ -2584,6 +2586,7 @@ type AbortController =
 /// </summary>
 [<Interface>]
 type AbortSignal =
+    inherit EventTarget<EventCurrentTargetItem>
     /// <summary>
     /// The **<c>aborted</c>** read-only property returns a value that indicates whether the asynchronous operations the signal is communicating with are aborted (true) or not (false).
     ///
@@ -2664,6 +2667,7 @@ type SchedulerWaitOptions =
 /// </summary>
 [<Interface>]
 type ExtendableEvent =
+    inherit Event
     /// <summary>
     /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
     ///
@@ -2786,6 +2790,7 @@ type ExtendableEvent =
 /// </summary>
 [<Interface>]
 type CustomEvent<'T> =
+    inherit Event
     /// <summary>
     /// The read-only **<c>detail</c>** property of the CustomEvent interface returns any data passed when initializing the event.
     ///
@@ -2971,6 +2976,7 @@ type BlobOptions =
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/File)
 /// </summary>
 type File =
+    inherit Blob
     /// <summary>
     /// The **<c>name</c>** read-only property of the File interface returns the name of the file represented by a File object. For security reasons, the path is excluded from this property.
     ///
@@ -3354,6 +3360,7 @@ type CryptoKeyArbitraryKeyAlgorithm =
     static member Create (name: string, ?hash: CryptoKeyKeyAlgorithm, ?namedCurve: string, ?length: float) : CryptoKeyArbitraryKeyAlgorithm = jsNative
 
 type DigestStream =
+    inherit WritableStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>>
     abstract digest: JS.Promise<JS.ArrayBuffer>
     abstract bytesWritten: obj
     /// <summary>
@@ -3450,6 +3457,7 @@ type TextEncoderEncodeIntoResult =
 /// </summary>
 [<Interface>]
 type ErrorEvent =
+    inherit Event
     /// <summary>
     /// The **<c>filename</c>** read-only property of the ErrorEvent interface returns a string containing the name of the script file in which the error occurred.
     ///
@@ -3609,6 +3617,7 @@ type ErrorEventErrorEventInit =
 /// </summary>
 [<Interface>]
 type MessageEvent =
+    inherit Event
     /// <summary>
     /// The **<c>data</c>** read-only property of the MessageEvent interface represents the data sent by the message emitter.
     ///
@@ -3768,6 +3777,7 @@ type MessageEventInit =
 /// </summary>
 [<Interface>]
 type PromiseRejectionEvent =
+    inherit Event
     /// <summary>
     /// The PromiseRejectionEvent interface's **<c>promise</c>** read-only property indicates the JavaScript Promise which was rejected. You can examine the event's PromiseRejectionEvent.reason property to learn why the promise was rejected.
     ///
@@ -4048,6 +4058,7 @@ type DocumentEnd =
 /// </summary>
 [<Interface>]
 type FetchEvent =
+    inherit ExtendableEvent
     /// <summary>
     /// The **<c>request</c>** read-only property of the FetchEvent interface returns the Request that triggered the event handler.
     ///
@@ -4244,6 +4255,7 @@ type Body =
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Response)
 /// </summary>
 type Response =
+    inherit Body
     /// <summary>
     /// The **<c>clone()</c>** method of the Response interface creates a clone of a response object, identical in every way, but stored in a different variable.
     ///
@@ -4322,6 +4334,7 @@ type RequestInfo<'CfHostMetadata, 'Cf> = U2<string, Request<'CfHostMetadata, 'Cf
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Request)
 /// </summary>
 type Request<'CfHostMetadata, 'Cf> =
+    inherit Body
     /// <summary>
     /// The **<c>clone()</c>** method of the Request interface creates a copy of the current Request object.
     ///
@@ -4617,6 +4630,7 @@ type Message<'Body> =
     abstract ack: unit -> unit
 
 type QueueEvent<'Body> =
+    inherit ExtendableEvent
     abstract messages: Message<'Body>[]
     abstract queue: string
     abstract metadata: MessageBatchMetadata
@@ -4966,6 +4980,7 @@ type R2Object =
     abstract writeHttpMetadata: headers: Headers -> unit
 
 type R2ObjectBody =
+    inherit R2Object
     abstract body: ReadableStream<obj>
     abstract bodyUsed: bool
     abstract arrayBuffer: unit -> JS.Promise<JS.ArrayBuffer>
@@ -5070,6 +5085,7 @@ type R2UploadPartOptions =
 
 [<Interface>]
 type ScheduledEvent =
+    inherit ExtendableEvent
     abstract scheduledTime: float
     abstract cron: string
     abstract noRetry: unit -> unit
@@ -5647,6 +5663,7 @@ type TransformStream<'I, 'O> =
 
 [<Interface>]
 type FixedLengthStream =
+    inherit IdentityTransformStream
     /// <summary>
     /// The **<c>readable</c>** read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
     ///
@@ -5664,6 +5681,7 @@ type FixedLengthStream =
 
 [<Interface>]
 type IdentityTransformStream =
+    inherit TransformStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>, JS.Uint8Array>
     /// <summary>
     /// The **<c>readable</c>** read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
     ///
@@ -5698,6 +5716,7 @@ type ReadableStreamValuesOptions =
 /// </summary>
 [<Interface>]
 type CompressionStream =
+    inherit TransformStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>, JS.Uint8Array>
     /// <summary>
     /// The **<c>readable</c>** read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
     ///
@@ -5720,6 +5739,7 @@ type CompressionStream =
 /// </summary>
 [<Interface>]
 type DecompressionStream =
+    inherit TransformStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>, JS.Uint8Array>
     /// <summary>
     /// The **<c>readable</c>** read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
     ///
@@ -5742,6 +5762,7 @@ type DecompressionStream =
 /// </summary>
 [<Interface>]
 type TextEncoderStream =
+    inherit TransformStream<string, JS.Uint8Array>
     abstract encoding: string
     /// <summary>
     /// The **<c>readable</c>** read-only property of the TransformStream interface returns the ReadableStream instance controlled by this TransformStream. This stream emits the transformed output data.
@@ -5765,6 +5786,7 @@ type TextEncoderStream =
 /// </summary>
 [<Interface>]
 type TextDecoderStream =
+    inherit TransformStream<U2<JS.ArrayBuffer, JS.ArrayBufferView>, string>
     abstract encoding: string
     abstract fatal: bool
     abstract ignoreBOM: bool
@@ -5853,6 +5875,7 @@ type ScriptVersion =
 
 [<Interface>]
 type TailEvent =
+    inherit ExtendableEvent
     abstract events: TraceItem[]
     abstract traces: TraceItem[]
     /// <summary>
@@ -6429,6 +6452,7 @@ type URLPatternOptions =
 /// </summary>
 [<Interface>]
 type CloseEvent =
+    inherit Event
     /// <summary>
     /// The **<c>code</c>** read-only property of the CloseEvent interface returns a WebSocket connection close code indicating the reason the connection was closed.
     ///
@@ -6582,6 +6606,7 @@ type WebSocketEventMap =
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/WebSocket)
 /// </summary>
 type WebSocket =
+    inherit EventTarget<EventCurrentTargetItem>
     abstract accept: ?options: WebSocketAcceptOptions -> unit
     /// <summary>
     /// The **<c>WebSocket.send()</c>** method enqueues the specified data to be transmitted to the server over the WebSocket connection, increasing the value of bufferedAmount by the number of bytes needed to contain the data. If the data can't be sent (for example, because it needs to be buffered but the buffer is full), the socket is closed automatically. The browser will throw an exception if you call send() when the connection is in the CONNECTING state. If you call send() when the connection is in the CLOSING or CLOSED states, the browser will silently discard the data.
@@ -6723,6 +6748,7 @@ type SocketInfo =
 /// </summary>
 [<Interface>]
 type EventSource =
+    inherit EventTarget<EventCurrentTargetItem>
     /// <summary>
     /// The **<c>close()</c>** method of the EventSource interface closes the connection, if one is made, and sets the EventSource.readyState attribute to 2 (closed).
     ///
@@ -6892,6 +6918,7 @@ type ContainerStartResources =
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessagePort)
 /// </summary>
 type MessagePort =
+    inherit EventTarget<EventCurrentTargetItem>
     /// <summary>
     /// The **<c>postMessage()</c>** method of the MessagePort interface sends a message from the port, and optionally, transfers ownership of objects to other browsing contexts.
     ///
@@ -6968,6 +6995,7 @@ type LoopbackServiceStub<'T> = private LoopbackServiceStub__ of obj
 type LoopbackDurableObjectClass<'T> = private LoopbackDurableObjectClass__ of obj
 
 type LoopbackDurableObjectNamespace =
+    inherit DurableObjectNamespace<unit>
     abstract newUniqueId: ?options: DurableObjectNamespaceNewUniqueIdOptions -> DurableObjectId
     abstract idFromName: name: string -> DurableObjectId
     abstract idFromString: id: string -> DurableObjectId
@@ -6983,6 +7011,7 @@ type LoopbackDurableObjectNamespaceGetResult =
     abstract name: string option
 
 type LoopbackColoLocalActorNamespace =
+    inherit ColoLocalActorNamespace
     abstract get: actorId: string -> RequestFetcher
 
 type SyncKvStorage =
@@ -7062,6 +7091,7 @@ type workerdResourceLimits =
 /// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/performance/)
 /// </summary>
 type Performance =
+    inherit EventTarget<EventCurrentTargetItem>
     abstract timeOrigin: float
     abstract now: unit -> float
     abstract eventCounts: EventCounts
@@ -7157,6 +7187,7 @@ type PerformanceEventLoopUtilization =
     static member Create (idle: float, active: float, utilization: float) : PerformanceEventLoopUtilization = jsNative
 
 type PerformanceNodeTiming =
+    inherit PerformanceEntry
     abstract nodeStart: float
     abstract v8Start: float
     abstract bootstrapComplete: float
@@ -7210,6 +7241,7 @@ type UvMetricsInfo =
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceMark)
 /// </summary>
 type PerformanceMark =
+    inherit PerformanceEntry
     /// <summary>
     /// The read-only **<c>detail</c>** property returns arbitrary metadata that was included in the mark upon construction (either when using performance.mark() or the PerformanceMark() constructor).
     ///
@@ -7253,6 +7285,7 @@ type PerformanceMark =
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceMeasure)
 /// </summary>
 type PerformanceMeasure =
+    inherit PerformanceEntry
     /// <summary>
     /// The read-only **<c>detail</c>** property returns arbitrary metadata that was included in the mark upon construction (when using performance.measure().
     ///
@@ -7374,6 +7407,7 @@ type PerformanceEntry =
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming)
 /// </summary>
 type PerformanceResourceTiming =
+    inherit PerformanceEntry
     /// <summary>
     /// The **<c>connectEnd</c>** read-only property returns the timestamp immediately after the browser finishes establishing the connection to the server to retrieve the resource. The timestamp value includes the time interval to establish the transport connection, as well as other time intervals such as TLS handshake and SOCKS authentication.
     ///
@@ -7578,6 +7612,7 @@ type Span =
 /// available properties, but additional provider-specific fields may be present.
 /// </summary>
 type CloudflareAccessIdentity =
+    inherit RequestInitCfPropertiesBase
     /// <summary>
     /// The user's email address, if available from the identity provider.
     /// </summary>
@@ -11382,6 +11417,7 @@ type ResponseFunctionToolCall =
 
 [<Interface>]
 type ResponseFunctionToolCallItem =
+    inherit ResponseFunctionToolCall
     abstract id: string with get, set
     abstract arguments: string with get, set
     abstract call_id: string with get, set
@@ -19063,6 +19099,7 @@ type ArtifactsTokenListResult =
 /// Methods may throw <c>ArtifactsError</c> with code <c>INTERNAL_ERROR</c> if an unexpected service error occurs.
 /// </summary>
 type ArtifactsRepo =
+    inherit ArtifactsRepoInfo
     /// <summary>
     /// Create an access token for this repo.
     /// </summary>
@@ -23689,6 +23726,7 @@ type BrowserRun =
 /// playground.
 /// </summary>
 type RequestInitCfProperties =
+    inherit RequestInitCfPropertiesBase
     abstract cacheEverything: bool option with get, set
     /// <summary>
     /// A request's cache key is what determines if two requests are
@@ -23833,6 +23871,7 @@ type RequestInitCfPropertiesVaryHeader =
 /// </summary>
 [<Interface>]
 type RequestInitCfPropertiesVaryAcceptHeader =
+    inherit RequestInitCfPropertiesVaryHeader
     /// <summary>
     /// Media types to keep when normalizing the <c>Accept</c> request header.
     ///
@@ -23851,6 +23890,7 @@ type RequestInitCfPropertiesVaryAcceptHeader =
 /// </summary>
 [<Interface>]
 type RequestInitCfPropertiesVaryAcceptLanguageHeader =
+    inherit RequestInitCfPropertiesVaryHeader
     /// <summary>
     /// Language tags to keep when normalizing the <c>Accept-Language</c> request
     /// header.
@@ -24042,6 +24082,7 @@ type BasicImageTransformationsGravityCoordinates =
     static member Create (?x: float, ?y: float, ?mode: BasicImageTransformationsGravityCoordinatesMode) : BasicImageTransformationsGravityCoordinates = jsNative
 
 type RequestInitCfPropertiesImageDraw =
+    inherit BasicImageTransformations
     /// <summary>
     /// Absolute URL of the image file to use for the drawing. It can be any of
     /// the supported file formats. For drawing of watermarks or non-rectangular
@@ -24236,6 +24277,7 @@ type RequestInitCfPropertiesImageDraw =
     abstract upscale: RequestInitCfPropertiesImageDrawUpscale option with get, set
 
 type RequestInitCfPropertiesImage =
+    inherit BasicImageTransformations
     /// <summary>
     /// Quality setting from 1-100 (useful values are in 60-90 range). Lower values
     /// make images look worse, but load faster. The default is 85. It applies only
@@ -24641,6 +24683,7 @@ type IncomingRequestCfProperties<'HostMetadata> =
     abstract Item: string -> obj with get, set
 
 type IncomingRequestCfPropertiesBase =
+    inherit RequestInitCfPropertiesBase
     /// <summary>
     /// [ASN](https://www.iana.org/assignments/as-numbers/as-numbers.xhtml) of the incoming request.
     /// </summary>
@@ -24755,6 +24798,7 @@ type IncomingRequestCfPropertiesBotManagement =
 
 [<Interface>]
 type IncomingRequestCfPropertiesBotManagementEnterprise =
+    inherit IncomingRequestCfPropertiesBotManagement
     /// <summary>
     /// Results of Cloudflare's Bot Management analysis
     /// </summary>
@@ -25716,6 +25760,7 @@ type EmailMessage =
 /// An email message that is sent to a consumer Worker and can be rejected/forwarded.
 /// </summary>
 type ForwardableEmailMessage =
+    inherit EmailMessage
     /// <summary>
     /// Stream of the email message content.
     /// </summary>
@@ -26651,6 +26696,7 @@ type SendEmail =
 
 [<Interface>]
 type EmailEvent =
+    inherit ExtendableEvent
     abstract message: ForwardableEmailMessage
     /// <summary>
     /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
@@ -27654,6 +27700,7 @@ type PubSubMessage =
 
 [<Interface>]
 type JsonWebKeyWithKid =
+    inherit JsonWebKey
     abstract kid: string
     abstract kty: string with get, set
     abstract ``use``: string option with get, set
@@ -28796,6 +28843,7 @@ type StreamError =
 
 [<Interface>]
 type InternalError =
+    inherit StreamError
     abstract name: string with get, set
     abstract cause: obj option with get, set
     abstract code: float
@@ -28807,6 +28855,7 @@ type InternalError =
 
 [<Interface>]
 type BadRequestError =
+    inherit StreamError
     abstract name: string with get, set
     abstract cause: obj option with get, set
     abstract code: float
@@ -28818,6 +28867,7 @@ type BadRequestError =
 
 [<Interface>]
 type NotFoundError =
+    inherit StreamError
     abstract name: string with get, set
     abstract cause: obj option with get, set
     abstract code: float
@@ -28829,6 +28879,7 @@ type NotFoundError =
 
 [<Interface>]
 type ForbiddenError =
+    inherit StreamError
     abstract name: string with get, set
     abstract cause: obj option with get, set
     abstract code: float
@@ -28840,6 +28891,7 @@ type ForbiddenError =
 
 [<Interface>]
 type RateLimitedError =
+    inherit StreamError
     abstract name: string with get, set
     abstract cause: obj option with get, set
     abstract code: float
@@ -28851,6 +28903,7 @@ type RateLimitedError =
 
 [<Interface>]
 type QuotaReachedError =
+    inherit StreamError
     abstract name: string with get, set
     abstract cause: obj option with get, set
     abstract code: float
@@ -28862,6 +28915,7 @@ type QuotaReachedError =
 
 [<Interface>]
 type MaxFileSizeError =
+    inherit StreamError
     abstract name: string with get, set
     abstract cause: obj option with get, set
     abstract code: float
@@ -28873,6 +28927,7 @@ type MaxFileSizeError =
 
 [<Interface>]
 type InvalidURLError =
+    inherit StreamError
     abstract name: string with get, set
     abstract cause: obj option with get, set
     abstract code: float
@@ -28884,6 +28939,7 @@ type InvalidURLError =
 
 [<Interface>]
 type AlreadyUploadedError =
+    inherit StreamError
     abstract name: string with get, set
     abstract cause: obj option with get, set
     abstract code: float
@@ -28895,6 +28951,7 @@ type AlreadyUploadedError =
 
 [<Interface>]
 type TooManyWatermarksError =
+    inherit StreamError
     abstract name: string with get, set
     abstract cause: obj option with get, set
     abstract code: float

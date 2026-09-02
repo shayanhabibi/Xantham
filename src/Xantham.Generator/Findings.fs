@@ -208,6 +208,10 @@ type TypeReference =
     | [<Widened>] EmptyUnionToObj
     | [<Widened>] UnionWithObjArm
     | [<Widened>] UnionTooWide of arms: int * cap: int
+    /// F# subtyping is nominal where TypeScript's is structural: an argument that merely has
+    /// the constraint's members is FS0001 at the application, so it is written as the
+    /// constraint, the way an argument that widened to `obj` already is.
+    | [<Widened>] ArgumentNotASubtypeOfConstraint of argument: string * name: string * bound: string
 
     interface IFindingKind with
         member this.Message =
@@ -256,6 +260,8 @@ type TypeReference =
             | UnionWithObjArm -> "union with an obj arm widened to obj (an erased union over obj is no safer)"
             | UnionTooWide(arms, cap) ->
                 $"union of {arms} distinct types widened to obj (D4 caps the erased union at {cap})"
+            | ArgumentNotASubtypeOfConstraint(argument, name, bound) ->
+                $"{argument} does not inherit {name}'s constraint {bound}; the argument is written as the constraint"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
@@ -363,17 +369,40 @@ type DetectTaggedUnions =
 [<Prefix("SI", "shape-interfaces")>]
 type ShapeInterfaces =
     | [<Widened>] HybridLosesCallSignatures
+    /// The undifferentiated case the three below split out of: a base with no F# name at this
+    /// position at all. Its members are still flattened in, so nothing of the member set is
+    /// lost - only the upcast.
     | [<Ergonomic>] BaseMembersFlattened
     | [<Ergonomic>] IntersectionFlattened of operands: int
+    /// §4.4's heritage rule, emitted: the base is a declaration this run writes as an
+    /// interface, so the derived type upcasts to it. Its members are declared again beside the
+    /// `inherit` - F# admits the redeclaration - which is what keeps `Create` and the member
+    /// list exact when a *second* base is not inheritable.
+    | [<Exact>] BaseInherited of name: string
+    /// A base that names something, but not something this run declares as an interface: a
+    /// `Fable.Core.JS.*` or `Browser.Types.*` binding, a referenced group's templated name, an
+    /// abbreviation over a non-object type. `inherit` on a non-interface is FS0887, and this
+    /// run cannot prove which of those a foreign name is, so its members are flattened.
+    | [<Ergonomic>] BaseNotDeclaredHere of name: string
+    /// A base that reaches this declaration again through the inherit graph. TypeScript has no
+    /// cyclic heritage, but two type ids can share one F# name, so the graph is checked rather
+    /// than assumed: `inherit` here is FS0954, so the base stays flattened.
+    | [<Ergonomic>] BaseWouldCycle of name: string
 
     interface IFindingKind with
         member this.Message =
             match this with
             | HybridLosesCallSignatures ->
                 "callable-and-properties hybrid loses its call signatures (Invoke emission is future work)"
-            | BaseMembersFlattened -> "base members flattened into the interface (the is-a relation is not emitted)"
+            | BaseMembersFlattened ->
+                "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (§4.4)"
             | IntersectionFlattened operands ->
                 $"intersection of {operands} object types flattened into one interface (the is-a relation to its operands is not emitted, §4.6)"
+            | BaseInherited name -> $"base {name} is inherited: the is-a relation is emitted (§4.4)"
+            | BaseNotDeclaredHere name ->
+                $"base {name} is not declared by this run as an interface; its members are flattened in and the is-a relation is not emitted (§4.4)"
+            | BaseWouldCycle name ->
+                $"base {name} reaches this declaration again; inheriting it is FS0954, so its members are flattened in instead (§4.4)"
 
 /// `shape-aliases`.
 [<Prefix("SA", "shape-aliases")>]

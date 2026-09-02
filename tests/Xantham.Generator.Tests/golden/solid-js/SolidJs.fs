@@ -388,6 +388,7 @@ type JSXElement = obj option
 
 [<Interface>]
 type Computation<'Init, 'Next> =
+    inherit Owner
     abstract fn: Func<'Init, 'Next> with get, set
     abstract state: ComputationState with get, set
     abstract tState: ComputationState option with get, set
@@ -441,6 +442,8 @@ type DEVHooks =
 
 [<Interface>]
 type Memo<'Prev, 'Next> =
+    inherit SignalState<'Next>
+    inherit Computation<'Next, 'Next>
     abstract value: 'Next with get, set
     abstract tOwned: Computation<U2<'Next, 'Prev>, 'Next>[] option with get, set
     abstract name: string option with get, set
@@ -469,6 +472,7 @@ type Memo<'Prev, 'Next> =
 
 [<Interface>]
 type SignalState<'T> =
+    inherit SourceMapValue
     abstract value: 'T with get, set
     abstract observers: Computation<obj, obj>[] option with get, set
     abstract observerSlots: float[] option with get, set
@@ -602,6 +606,7 @@ type BaseOptions =
 
 [<Interface>]
 type SignalOptions<'T> =
+    inherit MemoOptions<'T>
     abstract ``internal``: bool option with get, set
     abstract name: string option with get, set
     abstract equals: U2<bool, Func<'T, 'T, bool>> option with get, set
@@ -612,6 +617,7 @@ type NoInfer = obj
 
 [<Interface>]
 type EffectOptions =
+    inherit BaseOptions
     abstract name: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (?name: string) : EffectOptions = jsNative
@@ -628,6 +634,7 @@ type CreateEffectOptions =
 
 [<Interface>]
 type MemoOptions<'T> =
+    inherit EffectOptions
     abstract equals: U2<bool, Func<'T, 'T, bool>> option with get, set
     abstract name: string option with get, set
     [<ParamObject; Emit("$0")>]

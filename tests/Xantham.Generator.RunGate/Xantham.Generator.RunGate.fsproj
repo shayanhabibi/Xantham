@@ -31,6 +31,7 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\globals-lab\GlobalsLab.fs" Link="globals-lab\GlobalsLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\lab\PhaseBLab.fs" Link="lab\PhaseBLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\statics-lab\StaticsLab.fs" Link="statics-lab\StaticsLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\inherit-lab\InheritLab.fs" Link="inherit-lab\InheritLab.fs" />
         <Compile Include="Program.fs" />
         <None Include="register.mjs" />
     </ItemGroup>
