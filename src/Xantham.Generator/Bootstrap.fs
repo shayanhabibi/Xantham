@@ -84,22 +84,26 @@ let start (config: GeneratorConfig) (packageDir: string) : Async<TscMailbox * Co
                 | None -> CompilerOptions.Default
                 | Some lib ->
                     { CompilerOptions.Default with
-                        Lib = ValueSome(List.toArray lib) }
+                        Lib = ValueSome(List.toArray lib)
+                    }
 
             let! program =
                 mailbox.createProgram (
                     { CreateProgramOptions.Default with
-                        CompilerOptions = compilerOptions },
+                        CompilerOptions = compilerOptions
+                    },
                     rootFiles = [| DocumentIdentifier.FileName entry |]
                 )
 
             return
                 mailbox,
-                { Session = mailbox.Session program
-                  Config = config
-                  PackageDir = packageDir
-                  PackageName = packageName packageDir
-                  EntryFile = entry }
+                {
+                    Session = mailbox.Session program
+                    Config = config
+                    PackageDir = packageDir
+                    PackageName = packageName packageDir
+                    EntryFile = entry
+                }
         with e ->
             (mailbox :> System.IDisposable).Dispose()
             return raise e

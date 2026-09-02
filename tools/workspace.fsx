@@ -29,8 +29,7 @@ let RequireTscEnvVar = "XANTHAM_REQUIRE_TSC"
 /// The `.git` entry of a linked worktree is a file holding `gitdir: <path>`; in the main
 /// checkout it is a directory. Detection rides on that rather than on the worktree living
 /// under `.claude/worktrees/`, so it survives a worktree parked anywhere.
-let isLinkedWorktree (root: string) =
-    File.Exists(Path.Combine(root, ".git"))
+let isLinkedWorktree (root: string) = File.Exists(Path.Combine(root, ".git"))
 
 /// The checkout that owns the repository, resolved through the worktree's `commondir`:
 /// `<main>/.git/worktrees/<name>/commondir` holds `../..`, and the main working tree is the
@@ -54,7 +53,9 @@ let mainCheckout (root: string) : string option =
         if gitDir = "" || not (File.Exists commonDir) then
             None
         else
-            let common = Path.GetFullPath(Path.Combine(gitDir, File.ReadAllText(commonDir).Trim()))
+            let common =
+                Path.GetFullPath(Path.Combine(gitDir, File.ReadAllText(commonDir).Trim()))
+
             let checkout = Path.GetDirectoryName common
 
             if Directory.Exists checkout then Some checkout else None
@@ -62,9 +63,11 @@ let mainCheckout (root: string) : string option =
 /// Roots to search, nearest first: the checkout we are running in, then - only when that is a
 /// linked worktree - the main checkout whose install we are entitled to borrow.
 let searchRoots (root: string) =
-    [ yield Path.GetFullPath root
-      if isLinkedWorktree root then
-          yield! (mainCheckout root |> Option.toList) ]
+    [
+        yield Path.GetFullPath root
+        if isLinkedWorktree root then
+            yield! (mainCheckout root |> Option.toList)
+    ]
 
 let private rid =
     let platform =
@@ -83,7 +86,8 @@ let private rid =
 
 /// Platform package and executable stem, most current layout first. Mirrors `Tsc.locate` in
 /// src/Xantham.TypeScript.Wire/Library.fs - keep the two lists in step.
-let private layouts = [ $"typescript-{rid}", "tsc"; $"native-preview-{rid}", "tsgo" ]
+let private layouts =
+    [ $"typescript-{rid}", "tsc"; $"native-preview-{rid}", "tsgo" ]
 
 let private extension = if OperatingSystem.IsWindows() then ".exe" else ""
 
@@ -91,7 +95,9 @@ let private extension = if OperatingSystem.IsWindows() then ".exe" else ""
 let tscExeIn (root: string) =
     layouts
     |> List.tryPick (fun (package, stem) ->
-        let path = Path.Combine(root, "node_modules", "@typescript", package, "lib", stem + extension)
+        let path =
+            Path.Combine(root, "node_modules", "@typescript", package, "lib", stem + extension)
+
         if File.Exists path then Some path else None)
 
 /// The directory the compiler's `lib.*.d.ts` files ship in. TypeScript 7 keeps them in the
@@ -108,7 +114,10 @@ let tscLibDir (root: string) =
         | exe when not (String.IsNullOrWhiteSpace exe) && File.Exists exe -> Some exe
         | _ -> None
 
-    match pinned |> Option.orElseWith (fun () -> searchRoots root |> List.tryPick tscExeIn) with
+    match
+        pinned
+        |> Option.orElseWith (fun () -> searchRoots root |> List.tryPick tscExeIn)
+    with
     | Some exe -> Path.GetDirectoryName exe
     | None -> Path.Combine(Path.GetFullPath root, "node_modules", "@typescript", $"typescript-{rid}", "lib")
 

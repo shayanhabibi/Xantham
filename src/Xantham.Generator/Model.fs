@@ -34,22 +34,26 @@ type GroupDisposition =
 /// Per-package generator configuration, read from `xantham.json` next to the package manifest
 /// when present (decision O4 in `docs/plans/generator-architecture.md`).
 type GeneratorConfig =
-    { /// Overrides the F# module name otherwise derived from the package name.
-      ModuleName: string option
-      /// Disposition per group, keyed as `xantham.json` spells them: npm name for a
-      /// dependency, `typescript/lib` for the compiler lib.
-      Groups: Map<string, GroupDisposition>
-      /// The compiler's `lib` option, as `tsconfig.json` spells it (`["esnext"]`). `None` is the
-      /// compiler's default, which includes the DOM. A global type library that redeclares DOM
-      /// names (`@cloudflare/workers-types`) must set this to what its README prescribes: with
-      /// the DOM loaded, every such name merges with the lib's declaration, is grouped as the
-      /// compiler lib by its first declaration, and is not the package's to harvest.
-      Lib: string list option }
+    {
+        /// Overrides the F# module name otherwise derived from the package name.
+        ModuleName: string option
+        /// Disposition per group, keyed as `xantham.json` spells them: npm name for a
+        /// dependency, `typescript/lib` for the compiler lib.
+        Groups: Map<string, GroupDisposition>
+        /// The compiler's `lib` option, as `tsconfig.json` spells it (`["esnext"]`). `None` is the
+        /// compiler's default, which includes the DOM. A global type library that redeclares DOM
+        /// names (`@cloudflare/workers-types`) must set this to what its README prescribes: with
+        /// the DOM loaded, every such name merges with the lib's declaration, is grouped as the
+        /// compiler lib by its first declaration, and is not the package's to harvest.
+        Lib: string list option
+    }
 
     static member Default =
-        { ModuleName = None
-          Groups = Map.empty
-          Lib = None }
+        {
+            ModuleName = None
+            Groups = Map.empty
+            Lib = None
+        }
 
 module GeneratorConfig =
     let private jsonOptions =
@@ -99,9 +103,11 @@ module GeneratorConfig =
                 | true, _ -> failwith "xantham.json: lib must be an array of strings"
                 | _ -> None
 
-            { ModuleName = field "module"
-              Groups = groups
-              Lib = lib }
+            {
+                ModuleName = field "module"
+                Groups = groups
+                Lib = lib
+            }
 
     /// The key a group is addressed by under `xantham.json`'s `groups`; `None` for the groups
     /// that are not configurable (the entry package always ships).
@@ -137,7 +143,9 @@ module Naming =
 
     /// A package's module name: `@scope/pkg-name` -> `Scope.PkgName`.
     let packageModule (packageName: string) =
-        packageName.TrimStart('@').Split('/') |> Array.map pascalSegment |> String.concat "."
+        packageName.TrimStart('@').Split('/')
+        |> Array.map pascalSegment
+        |> String.concat "."
 
     /// The compiler-lib group's module.
     [<Literal>]
@@ -172,40 +180,44 @@ module Naming =
     module LibBindings =
         /// Name, F# arity, and the loss to record - `None` when the mapping gives up nothing.
         let private table =
-            [ "Promise", ("JS.Promise", 1, None)
-              // A thenable is not a promise: TypeScript's `PromiseLike` is the structural
-              // supertype, and reading one as `JS.Promise` claims methods it may not have.
-              "PromiseLike", ("JS.Promise", 1, Some "PromiseLike reads as JS.Promise; a bare thenable is not one")
-              "Map", ("JS.Map", 2, None)
-              "ReadonlyMap", ("JS.Map", 2, Some "ReadonlyMap reads as JS.Map; the readonly restriction is not carried")
-              "WeakMap", ("JS.WeakMap", 2, None)
-              "Set", ("JS.Set", 1, None)
-              "ReadonlySet", ("JS.Set", 1, Some "ReadonlySet reads as JS.Set; the readonly restriction is not carried")
-              "WeakSet", ("JS.WeakSet", 1, None)
-              "Date", ("JS.Date", 0, None)
-              "Function", ("JS.Function", 0, None)
-              "Object", ("JS.Object", 0, None)
-              "Math", ("JS.Math", 0, None)
-              "JSON", ("JS.JSON", 0, None)
-              "Console", ("JS.Console", 0, None)
-              "PropertyDescriptor", ("JS.PropertyDescriptor", 0, None)
-              "ArrayBuffer", ("JS.ArrayBuffer", 0, None)
-              "ArrayBufferView", ("JS.ArrayBufferView", 0, None)
-              "DataView", ("JS.DataView", 0, None)
-              "Int8Array", ("JS.Int8Array", 0, None)
-              "Uint8Array", ("JS.Uint8Array", 0, None)
-              "Uint8ClampedArray", ("JS.Uint8ClampedArray", 0, None)
-              "Int16Array", ("JS.Int16Array", 0, None)
-              "Uint16Array", ("JS.Uint16Array", 0, None)
-              "Int32Array", ("JS.Int32Array", 0, None)
-              "Uint32Array", ("JS.Uint32Array", 0, None)
-              "Float32Array", ("JS.Float32Array", 0, None)
-              "Float64Array", ("JS.Float64Array", 0, None)
-              "BigInt64Array", ("JS.BigInt64Array", 0, None)
-              "AsyncIterable", ("JS.AsyncIterable", 1, None)
-              "AsyncIterator", ("JS.AsyncIterator", 1, None)
-              "AsyncGenerator", ("JS.AsyncGenerator", 1, None)
-              "IteratorResult", ("JS.IteratorResult", 1, None) ]
+            [
+                "Promise", ("JS.Promise", 1, None)
+                // A thenable is not a promise: TypeScript's `PromiseLike` is the structural
+                // supertype, and reading one as `JS.Promise` claims methods it may not have.
+                "PromiseLike", ("JS.Promise", 1, Some "PromiseLike reads as JS.Promise; a bare thenable is not one")
+                "Map", ("JS.Map", 2, None)
+                "ReadonlyMap",
+                ("JS.Map", 2, Some "ReadonlyMap reads as JS.Map; the readonly restriction is not carried")
+                "WeakMap", ("JS.WeakMap", 2, None)
+                "Set", ("JS.Set", 1, None)
+                "ReadonlySet",
+                ("JS.Set", 1, Some "ReadonlySet reads as JS.Set; the readonly restriction is not carried")
+                "WeakSet", ("JS.WeakSet", 1, None)
+                "Date", ("JS.Date", 0, None)
+                "Function", ("JS.Function", 0, None)
+                "Object", ("JS.Object", 0, None)
+                "Math", ("JS.Math", 0, None)
+                "JSON", ("JS.JSON", 0, None)
+                "Console", ("JS.Console", 0, None)
+                "PropertyDescriptor", ("JS.PropertyDescriptor", 0, None)
+                "ArrayBuffer", ("JS.ArrayBuffer", 0, None)
+                "ArrayBufferView", ("JS.ArrayBufferView", 0, None)
+                "DataView", ("JS.DataView", 0, None)
+                "Int8Array", ("JS.Int8Array", 0, None)
+                "Uint8Array", ("JS.Uint8Array", 0, None)
+                "Uint8ClampedArray", ("JS.Uint8ClampedArray", 0, None)
+                "Int16Array", ("JS.Int16Array", 0, None)
+                "Uint16Array", ("JS.Uint16Array", 0, None)
+                "Int32Array", ("JS.Int32Array", 0, None)
+                "Uint32Array", ("JS.Uint32Array", 0, None)
+                "Float32Array", ("JS.Float32Array", 0, None)
+                "Float64Array", ("JS.Float64Array", 0, None)
+                "BigInt64Array", ("JS.BigInt64Array", 0, None)
+                "AsyncIterable", ("JS.AsyncIterable", 1, None)
+                "AsyncIterator", ("JS.AsyncIterator", 1, None)
+                "AsyncGenerator", ("JS.AsyncGenerator", 1, None)
+                "IteratorResult", ("JS.IteratorResult", 1, None)
+            ]
             |> Map.ofList
 
         /// The binding for a lib name, if Fable.Core has one: its F# name, its arity, and the
@@ -293,8 +305,7 @@ module Naming =
     /// The DU case name for a numeric-literal union member (D12): `1` -> `N1`,
     /// `1.5` -> `N1_5`, `-1` -> `NMinus1`.
     let enumCaseOfNumber (value: float) =
-        let text =
-            value.ToString("R", System.Globalization.CultureInfo.InvariantCulture)
+        let text = value.ToString("R", System.Globalization.CultureInfo.InvariantCulture)
 
         "N" + text.Replace("-", "Minus").Replace(".", "_")
 
@@ -314,16 +325,18 @@ module Naming =
 /// Everything a pass may reach for, created once per run by `Bootstrap.start`. Passes never
 /// create programs; the session here is the only wire access they have.
 type Context =
-    { /// The bound snapshot and project over the batching mailbox. Pure passes never touch it,
-      /// which is what lets their tests fabricate a `Context` without a live compiler.
-      Session: Session<TscMailbox>
-      Config: GeneratorConfig
-      /// Absolute path of the package being generated from.
-      PackageDir: string
-      /// The `name` field of the package manifest, or the directory name without one.
-      PackageName: string
-      /// Absolute path of the declaration entry point the program was created over.
-      EntryFile: string }
+    {
+        /// The bound snapshot and project over the batching mailbox. Pure passes never touch it,
+        /// which is what lets their tests fabricate a `Context` without a live compiler.
+        Session: Session<TscMailbox>
+        Config: GeneratorConfig
+        /// Absolute path of the package being generated from.
+        PackageDir: string
+        /// The `name` field of the package manifest, or the directory name without one.
+        PackageName: string
+        /// Absolute path of the declaration entry point the program was created over.
+        EntryFile: string
+    }
 
 /// What a pass produced: the advanced model, or the model plus the findings that say where the
 /// pass fell short of Exact.
@@ -334,14 +347,18 @@ type PassOutcome<'Model> =
 /// A nano-pass: one conceptual transformation over its tier's model, in the pipeline's uniform
 /// async shape whether it talks to the compiler or not.
 type Pass<'Model> =
-    { Name: string
-      Run: Context -> 'Model -> Async<PassOutcome<'Model>> }
+    {
+        Name: string
+        Run: Context -> 'Model -> Async<PassOutcome<'Model>>
+    }
 
 module Pass =
     /// Lifts a pure rewrite into the pipeline's uniform async shape.
     let pure' name (f: Context -> 'M -> 'M) : Pass<'M> =
-        { Name = name
-          Run = fun ctx m -> async { return Advanced(f ctx m) } }
+        {
+            Name = name
+            Run = fun ctx m -> async { return Advanced(f ctx m) }
+        }
 
 // ---------------------------------------------------------------------------------------------
 // Tier 1 - Harvest: what the author exported. Wire-driven inventory, no mapping decisions.
@@ -366,19 +383,23 @@ type ExportOrigin =
 /// appear once under the name they are exported as. A global type library has no module to
 /// export from, and its ambient declarations arrive here too - see `ExportOrigin`.
 type HarvestedExport =
-    { /// The name the entry module exports it under - `"default"` for a default export, and
-      /// the declared name for an ambient global, which is exported under nothing.
-      ExportName: string
-      /// The origin symbol (`getAliasedSymbol` applied until stable).
-      Symbol: SymbolResponse
-      /// `getDocumentationComment`, already rendered to plain text by the wire.
-      Docs: string
-      Tags: JSDocTagInfo list
-      Origin: ExportOrigin
-      Order: DeclOrder option }
+    {
+        /// The name the entry module exports it under - `"default"` for a default export, and
+        /// the declared name for an ambient global, which is exported under nothing.
+        ExportName: string
+        /// The origin symbol (`getAliasedSymbol` applied until stable).
+        Symbol: SymbolResponse
+        /// `getDocumentationComment`, already rendered to plain text by the wire.
+        Docs: string
+        Tags: JSDocTagInfo list
+        Origin: ExportOrigin
+        Order: DeclOrder option
+    }
 
 type HarvestModel =
-    { Exports: HarvestedExport list }
+    {
+        Exports: HarvestedExport list
+    }
 
     static member Empty: HarvestModel = { Exports = [] }
 
@@ -389,107 +410,121 @@ type HarvestModel =
 /// A property or parameter, resolved: the symbol plus the derived facts every shape pass
 /// would otherwise re-ask the wire for.
 type ResolvedMember =
-    { Symbol: SymbolResponse
-      Docs: string
-      Tags: JSDocTagInfo list
-      Optional: bool
-      ReadOnly: bool
-      TypeId: int }
+    {
+        Symbol: SymbolResponse
+        Docs: string
+        Tags: JSDocTagInfo list
+        Optional: bool
+        ReadOnly: bool
+        TypeId: int
+    }
 
 /// One index signature (`[key: string]: V`) as the resolve tier records it. These are
 /// invisible to property enumeration - `getPropertiesOfType` returns nothing for a type whose
 /// only content is an index signature - so a type can carry these and no members at all, and
 /// the shape tier has to consult both before deciding a type has no shape worth declaring.
 type ResolvedIndex =
-    { KeyTypeId: int
-      ValueTypeId: int
-      IsReadonly: bool }
+    {
+        KeyTypeId: int
+        ValueTypeId: int
+        IsReadonly: bool
+    }
 
 type ResolvedSignature =
-    { Parameters: ResolvedMember list
-      /// The signature's last parameter is a rest parameter (`...args`).
-      HasRest: bool
-      /// The signature's own type parameters (§4.9). A generic *function* carries them here
-      /// rather than on its type, which is where a callback alias's `T` lives.
-      TypeParameters: int list
-      ReturnTypeId: int }
+    {
+        Parameters: ResolvedMember list
+        /// The signature's last parameter is a rest parameter (`...args`).
+        HasRest: bool
+        /// The signature's own type parameters (§4.9). A generic *function* carries them here
+        /// rather than on its type, which is where a callback alias's `T` lives.
+        TypeParameters: int list
+        ReturnTypeId: int
+    }
 
 /// A `TypeResponse` plus the derived facts of the kinds the skeleton resolves: object members,
 /// call signatures, union membership. Everything else stays on the raw response.
 type TypeFacts =
-    { Response: TypeResponse
-      /// The group the type's own symbol is declared in (O7). Meaningful for object types;
-      /// primitives and unions stay `Unclassified`, which dispositions as the entry group.
-      Origin: PackageId
-      /// Name of the type's own symbol where it has one - what a `reference` emission
-      /// templates with, and what a widening finding names.
-      SymbolName: string option
-      Members: ResolvedMember list
-      /// Index signatures (§4.10). Kept apart from `Members` because they are not properties:
-      /// they have no name, and a type may carry one with no members at all.
-      IndexInfos: ResolvedIndex list
-      CallSignatures: ResolvedSignature list
-      ConstructSignatures: ResolvedSignature list
-      /// `extends` bases of an interface or class instance type, by id.
-      BaseTypes: int list
-      /// Type arguments of a generic reference, resolved for *every* group - an external
-      /// `Array<T>` carries entry-package types that must still be reached (O7 note).
-      TypeArguments: int list
-      /// A tuple's per-element flags, in element order, copied off its *target* - the wire
-      /// carries them there, not on the reference. The target itself is deliberately left out
-      /// of the table: deriving it drags all of `Array.prototype` in again for every distinct
-      /// tuple shape, and nothing but these flags is wanted from it.
-      TupleElements: ElementFlags list
-      /// The arguments the type's *alias* was written with, by id (§4.9). On the declaration
-      /// form of a generic alias these are its own parameters - `type Mapper<T> = (t: T) => T`
-      /// leaves the function type itself parameterless, so this is the only place `T` appears.
-      AliasTypeArguments: int list
-      /// The constituents of an intersection, in the checker's order. Separate from
-      /// `UnionMembers` because the two mean opposite things and the passes that read one
-      /// must never see the other.
-      IntersectionMembers: int list
-      /// A type parameter's `extends` bound, by id (§4.9). Only type parameters carry one.
-      Constraint: int option
-      /// A type parameter's default type argument, by id (§4.9).
-      Default: int option
-      UnionMembers: int list }
+    {
+        Response: TypeResponse
+        /// The group the type's own symbol is declared in (O7). Meaningful for object types;
+        /// primitives and unions stay `Unclassified`, which dispositions as the entry group.
+        Origin: PackageId
+        /// Name of the type's own symbol where it has one - what a `reference` emission
+        /// templates with, and what a widening finding names.
+        SymbolName: string option
+        Members: ResolvedMember list
+        /// Index signatures (§4.10). Kept apart from `Members` because they are not properties:
+        /// they have no name, and a type may carry one with no members at all.
+        IndexInfos: ResolvedIndex list
+        CallSignatures: ResolvedSignature list
+        ConstructSignatures: ResolvedSignature list
+        /// `extends` bases of an interface or class instance type, by id.
+        BaseTypes: int list
+        /// Type arguments of a generic reference, resolved for *every* group - an external
+        /// `Array<T>` carries entry-package types that must still be reached (O7 note).
+        TypeArguments: int list
+        /// A tuple's per-element flags, in element order, copied off its *target* - the wire
+        /// carries them there, not on the reference. The target itself is deliberately left out
+        /// of the table: deriving it drags all of `Array.prototype` in again for every distinct
+        /// tuple shape, and nothing but these flags is wanted from it.
+        TupleElements: ElementFlags list
+        /// The arguments the type's *alias* was written with, by id (§4.9). On the declaration
+        /// form of a generic alias these are its own parameters - `type Mapper<T> = (t: T) => T`
+        /// leaves the function type itself parameterless, so this is the only place `T` appears.
+        AliasTypeArguments: int list
+        /// The constituents of an intersection, in the checker's order. Separate from
+        /// `UnionMembers` because the two mean opposite things and the passes that read one
+        /// must never see the other.
+        IntersectionMembers: int list
+        /// A type parameter's `extends` bound, by id (§4.9). Only type parameters carry one.
+        Constraint: int option
+        /// A type parameter's default type argument, by id (§4.9).
+        Default: int option
+        UnionMembers: int list
+    }
 
 module TypeFacts =
     /// Facts before derivation: the response alone.
     let shallow (response: TypeResponse) =
-        { Response = response
-          Origin = Unclassified
-          SymbolName = None
-          Members = []
-          IndexInfos = []
-          CallSignatures = []
-          ConstructSignatures = []
-          BaseTypes = []
-          TypeArguments = []
-          TupleElements = []
-          AliasTypeArguments = []
-          IntersectionMembers = []
-          Constraint = None
-          Default = None
-          UnionMembers = [] }
+        {
+            Response = response
+            Origin = Unclassified
+            SymbolName = None
+            Members = []
+            IndexInfos = []
+            CallSignatures = []
+            ConstructSignatures = []
+            BaseTypes = []
+            TypeArguments = []
+            TupleElements = []
+            AliasTypeArguments = []
+            IntersectionMembers = []
+            Constraint = None
+            Default = None
+            UnionMembers = []
+        }
 
 /// The type ids an export resolves to. A symbol can be both a type and a value (a class), so
 /// the two are separate fields rather than one.
 type ExportTypeIds =
-    { Declared: int option
-      Value: int option }
+    {
+        Declared: int option
+        Value: int option
+    }
 
 type ResolveModel =
-    { Harvest: HarvestModel
-      /// Export symbol id -> the type ids the checker gave for it.
-      ExportTypes: Map<int, ExportTypeIds>
-      /// The type table. Closed: every id referenced by a `TypeFacts` is a key here or in
-      /// `NotFollowed` - that closure is the tier's invariant.
-      Types: Map<int, TypeFacts>
-      /// Ids deliberately not resolved, with the reason - the depth cutoff, or a response the
-      /// compiler could not encode - so a reader of the table can tell "not followed" from
-      /// "missing".
-      NotFollowed: Map<int, string> }
+    {
+        Harvest: HarvestModel
+        /// Export symbol id -> the type ids the checker gave for it.
+        ExportTypes: Map<int, ExportTypeIds>
+        /// The type table. Closed: every id referenced by a `TypeFacts` is a key here or in
+        /// `NotFollowed` - that closure is the tier's invariant.
+        Types: Map<int, TypeFacts>
+        /// Ids deliberately not resolved, with the reason - the depth cutoff, or a response the
+        /// compiler could not encode - so a reader of the table can tell "not followed" from
+        /// "missing".
+        NotFollowed: Map<int, string>
+    }
 
 // ---------------------------------------------------------------------------------------------
 // Tier 3 - Shape: F#-shaped declarations. The minimal IR the walking skeleton renders.
@@ -539,11 +574,13 @@ type FsLiteral =
     | LitBool of bool
 
 type FsPropertyMember =
-    { Name: string
-      Docs: string
-      Tags: JSDocTagInfo list
-      ReadOnly: bool
-      Type: FsTypeRef }
+    {
+        Name: string
+        Docs: string
+        Tags: JSDocTagInfo list
+        ReadOnly: bool
+        Type: FsTypeRef
+    }
 
 /// A type parameter (§4.9), bound by a declaration or by a generic signature of its own. The
 /// constraint is carried only when F# can express it - a subtype constraint against another
@@ -551,34 +588,42 @@ type FsPropertyMember =
 /// keyof T`) are dropped with a finding rather than approximated, because a wrong constraint
 /// rejects correct code.
 type FsTypeParam =
-    { Name: string
-      Constraint: FsTypeRef option }
+    {
+        Name: string
+        Constraint: FsTypeRef option
+    }
 
 type FsParam =
-    { Name: string
-      Optional: bool
-      /// A rest parameter: rendered `[<ParamArray>]` on static emissions and abstract members
-      /// alike, so Fable spreads the array at the call.
-      Rest: bool
-      Type: FsTypeRef }
+    {
+        Name: string
+        Optional: bool
+        /// A rest parameter: rendered `[<ParamArray>]` on static emissions and abstract members
+        /// alike, so Fable spreads the array at the call.
+        Rest: bool
+        Type: FsTypeRef
+    }
 
 type FsMethodMember =
-    { Name: string
-      Docs: string
-      Tags: JSDocTagInfo list
-      /// The method's *own* parameters, where it is generic independently of its declaration:
-      /// `read<K extends keyof T>(key: K)` binds `K` here and reads `T` from the interface.
-      TypeParameters: FsTypeParam list
-      Parameters: FsParam list
-      Return: FsTypeRef }
+    {
+        Name: string
+        Docs: string
+        Tags: JSDocTagInfo list
+        /// The method's *own* parameters, where it is generic independently of its declaration:
+        /// `read<K extends keyof T>(key: K)` binds `K` here and reads `T` from the interface.
+        TypeParameters: FsTypeParam list
+        Parameters: FsParam list
+        Return: FsTypeRef
+    }
 
 /// A TypeScript index signature rendered as F#: an `Item` member under `[<EmitIndexer>]`, so
 /// `bag["key"]` is what reaches JavaScript rather than a `.Item(...)` call (§4.10). A readonly
 /// signature drops the setter.
 type FsIndexerMember =
-    { Key: FsTypeRef
-      Value: FsTypeRef
-      ReadOnly: bool }
+    {
+        Key: FsTypeRef
+        Value: FsTypeRef
+        ReadOnly: bool
+    }
 
 /// An interface member. Overloads are consecutive `FsMethod` entries sharing a name -
 /// overloaded abstract members are legal F#.
@@ -606,41 +651,49 @@ type FsExportBody =
 
 /// One member of the `Exports` erased type.
 type FsExportMember =
-    { Name: string
-      Docs: string
-      Tags: JSDocTagInfo list
-      /// A top-level generic function binds its parameters on the member: `Exports` itself is
-      /// not generic, so `get<T>(source: T)` has nowhere else to put `T`.
-      TypeParameters: FsTypeParam list
-      Binding: ImportBinding
-      Body: FsExportBody }
+    {
+        Name: string
+        Docs: string
+        Tags: JSDocTagInfo list
+        /// A top-level generic function binds its parameters on the member: `Exports` itself is
+        /// not generic, so `get<T>(source: T)` has nowhere else to put `T`.
+        TypeParameters: FsTypeParam list
+        Binding: ImportBinding
+        Body: FsExportBody
+    }
 
 type FsInterfaceDecl =
-    { Name: string
-      Docs: string
-      Tags: JSDocTagInfo list
-      Order: DeclOrder option
-      TypeParameters: FsTypeParam list
-      /// Base interfaces (`extends`, or a class base) - rendered as `inherit` lines.
-      Inherits: FsTypeRef list
-      Members: FsMember list
-      /// `[<ParamObject; Emit("$0")>]` Create overloads for plain-data interfaces (D3) -
-      /// parameter lists mirroring the members, so consumers never hand-build objects.
-      CreateOverloads: FsParam list list }
+    {
+        Name: string
+        Docs: string
+        Tags: JSDocTagInfo list
+        Order: DeclOrder option
+        TypeParameters: FsTypeParam list
+        /// Base interfaces (`extends`, or a class base) - rendered as `inherit` lines.
+        Inherits: FsTypeRef list
+        Members: FsMember list
+        /// `[<ParamObject; Emit("$0")>]` Create overloads for plain-data interfaces (D3) -
+        /// parameter lists mirroring the members, so consumers never hand-build objects.
+        CreateOverloads: FsParam list list
+    }
 
 /// One case of a `[<StringEnum>]` DU. `CompiledName` carries the literal when it differs from
 /// the case name; `CompiledValue` carries a non-string literal (D12).
 type FsUnionCase =
-    { Name: string
-      CompiledName: string option
-      CompiledValue: FsLiteral option }
+    {
+        Name: string
+        CompiledName: string option
+        CompiledValue: FsLiteral option
+    }
 
 type FsStringEnumDecl =
-    { Name: string
-      Docs: string
-      Tags: JSDocTagInfo list
-      Order: DeclOrder option
-      Cases: FsUnionCase list }
+    {
+        Name: string
+        Docs: string
+        Tags: JSDocTagInfo list
+        Order: DeclOrder option
+        Cases: FsUnionCase list
+    }
 
 /// One field of a tagged-union case. The name is the JS property key verbatim: Fable emits the
 /// field under its F# name, and backtick escaping is transparent there (`` ``type`` `` reaches
@@ -657,42 +710,50 @@ type FsTaggedField = { Name: string; Type: FsTypeRef }
 /// Carrying the arm type as a single payload field instead does *not* work - Fable wraps it as
 /// `{ kind: "circle", Item: x }`, an object no TypeScript signature would accept.
 type FsTaggedCase =
-    { Name: string
-      CompiledName: string option
-      Fields: FsTaggedField list }
+    {
+        Name: string
+        CompiledName: string option
+        Fields: FsTaggedField list
+    }
 
 /// A discriminated union the checker proved is tagged (D4, §4.5(2)): every member is an object
 /// type carrying the same property, and that property's type is a distinct string literal in
 /// each. Fable erases the DU to a plain object literal, so this is Exact *and* pattern-matchable
 /// - by far the best consumer experience, which is why §4.5 says to detect it aggressively.
 type FsTaggedUnionDecl =
-    { Name: string
-      Docs: string
-      Tags: JSDocTagInfo list
-      Order: DeclOrder option
-      /// The discriminant property's name, as TypeScript spells it.
-      Tag: string
-      Cases: FsTaggedCase list }
+    {
+        Name: string
+        Docs: string
+        Tags: JSDocTagInfo list
+        Order: DeclOrder option
+        /// The discriminant property's name, as TypeScript spells it.
+        Tag: string
+        Cases: FsTaggedCase list
+    }
 
 /// A numeric TS enum as an F# enum - `type E = A = 1` (§4.7).
 type FsEnumDecl =
-    { Name: string
-      Docs: string
-      Tags: JSDocTagInfo list
-      Order: DeclOrder option
-      Cases: (string * int) list }
+    {
+        Name: string
+        Docs: string
+        Tags: JSDocTagInfo list
+        Order: DeclOrder option
+        Cases: (string * int) list
+    }
 
 /// A type abbreviation: an exported alias whose right side is a reference, not a shape of its
 /// own (callback aliases to delegates, alias-of-alias, primitive aliases).
 type FsAbbrevDecl =
-    { Name: string
-      Docs: string
-      Tags: JSDocTagInfo list
-      Order: DeclOrder option
-      /// The alias's own type parameters, in declaration order (§4.9). A generic alias binds
-      /// them on its left side exactly as TypeScript does: `type Callback<'T> = Func<'T, obj>`.
-      TypeParameters: FsTypeParam list
-      Target: FsTypeRef }
+    {
+        Name: string
+        Docs: string
+        Tags: JSDocTagInfo list
+        Order: DeclOrder option
+        /// The alias's own type parameters, in declaration order (§4.9). A generic alias binds
+        /// them on its left side exactly as TypeScript does: `type Callback<'T> = Func<'T, obj>`.
+        TypeParameters: FsTypeParam list
+        Target: FsTypeRef
+    }
 
 /// A declaration TypeScript *computes* and F# cannot reproduce: a mapped type, a conditional or
 /// a template literal at an operand the checker could not resolve (§4.10, §4.11). There is no
@@ -701,27 +762,31 @@ type FsAbbrevDecl =
 /// stay distinct from each other and from `obj`. Its single case is private, so the only way in
 /// or out is a cast, which is exactly the guarantee the generator can honestly make.
 type FsPhantomDecl =
-    { Name: string
-      Docs: string
-      Tags: JSDocTagInfo list
-      Order: DeclOrder option
-      TypeParameters: FsTypeParam list
-      /// What the value is at runtime once erased: `string` for a template literal or an
-      /// intrinsic string mapping, `obj` for everything else.
-      Carrier: FsTypeRef }
+    {
+        Name: string
+        Docs: string
+        Tags: JSDocTagInfo list
+        Order: DeclOrder option
+        TypeParameters: FsTypeParam list
+        /// What the value is at runtime once erased: `string` for a template literal or an
+        /// intrinsic string mapping, `obj` for everything else.
+        Carrier: FsTypeRef
+    }
 
 /// A unit of measure standing for a branding intersection (§4.6, D11). It has no body: a
 /// measure is a name and nothing else, and the brand it marks is written at the *uses*, as
 /// `string<UserId>`, rather than as an abbreviation - the name can only be spent once, and a
 /// measure is what spends it.
 type FsMeasureDecl =
-    { Name: string
-      Docs: string
-      Tags: JSDocTagInfo list
-      Order: DeclOrder option
-      /// The primitive the brand is over, kept for the manifest and the doc comment: a
-      /// measure itself says nothing about what it annotates.
-      Primitive: FsTypeRef }
+    {
+        Name: string
+        Docs: string
+        Tags: JSDocTagInfo list
+        Order: DeclOrder option
+        /// The primitive the brand is over, kept for the manifest and the doc comment: a
+        /// measure itself says nothing about what it annotates.
+        Primitive: FsTypeRef
+    }
 
 type FsDecl =
     | FsInterface of FsInterfaceDecl
@@ -747,65 +812,73 @@ type KeyBinding =
     | TypedKeyOf of operand: string * result: string
 
 type ShapeModel =
-    { Harvest: HarvestModel
-      ExportTypes: Map<int, ExportTypeIds>
-      Types: Map<int, TypeFacts>
-      NotFollowed: Map<int, string>
-      /// Type id -> the F# type name this run declares for it - exports named first, then
-      /// synthesized names for reachable anonymous shapes (hash-consing by id, §4.4). What
-      /// lets a reference come out as `FsNamed` rather than an expansion.
-      DeclNames: Map<int, string>
-      /// Type id -> the source order its declaration sorts under: the export's own order, or
-      /// for a synthesized declaration the order of the export that first reached it.
-      DeclOrders: Map<int, DeclOrder option>
-      /// Type id -> the type-parameter ids a declaration reads without binding, in first-use
-      /// order (§4.9). An anonymous object type hoisted out of a generic scope - the `props`
-      /// of `each<T, U>(props: { items: T[]; render: (item: T) => U })` - binds nothing of
-      /// its own, so it is declared over these and every reference applies them back.
-      DeclParams: Map<int, int list>
-      /// `Exports` members accumulated by the class/function/value passes, keyed by harvest
-      /// position so `order-declarations` can assemble them in source order.
-      ExportMembers: (int * FsExportMember) list
-      /// Type-parameter id -> the name it is in scope under, for the declaration currently
-      /// being shaped. Scope lives on the model rather than in `typeRef`'s arguments because
-      /// it is a property of *where* the reference is written, not of the reference: a pass
-      /// binds it once around a declaration and every nested `typeRef` inherits it.
-      TypeVars: Map<int, string>
-      /// Type-parameter id -> the support-package idiom its uses are written as, for the
-      /// signature currently being shaped (§4.10). Scoped like `TypeVars`, and for the same
-      /// reason: `K extends keyof T` binds nothing outside the signature that declared it.
-      KeyVars: Map<int, KeyBinding>
-      Decls: FsDecl list }
+    {
+        Harvest: HarvestModel
+        ExportTypes: Map<int, ExportTypeIds>
+        Types: Map<int, TypeFacts>
+        NotFollowed: Map<int, string>
+        /// Type id -> the F# type name this run declares for it - exports named first, then
+        /// synthesized names for reachable anonymous shapes (hash-consing by id, §4.4). What
+        /// lets a reference come out as `FsNamed` rather than an expansion.
+        DeclNames: Map<int, string>
+        /// Type id -> the source order its declaration sorts under: the export's own order, or
+        /// for a synthesized declaration the order of the export that first reached it.
+        DeclOrders: Map<int, DeclOrder option>
+        /// Type id -> the type-parameter ids a declaration reads without binding, in first-use
+        /// order (§4.9). An anonymous object type hoisted out of a generic scope - the `props`
+        /// of `each<T, U>(props: { items: T[]; render: (item: T) => U })` - binds nothing of
+        /// its own, so it is declared over these and every reference applies them back.
+        DeclParams: Map<int, int list>
+        /// `Exports` members accumulated by the class/function/value passes, keyed by harvest
+        /// position so `order-declarations` can assemble them in source order.
+        ExportMembers: (int * FsExportMember) list
+        /// Type-parameter id -> the name it is in scope under, for the declaration currently
+        /// being shaped. Scope lives on the model rather than in `typeRef`'s arguments because
+        /// it is a property of *where* the reference is written, not of the reference: a pass
+        /// binds it once around a declaration and every nested `typeRef` inherits it.
+        TypeVars: Map<int, string>
+        /// Type-parameter id -> the support-package idiom its uses are written as, for the
+        /// signature currently being shaped (§4.10). Scoped like `TypeVars`, and for the same
+        /// reason: `K extends keyof T` binds nothing outside the signature that declared it.
+        KeyVars: Map<int, KeyBinding>
+        Decls: FsDecl list
+    }
 
 // ---------------------------------------------------------------------------------------------
 // Tier 4 - Render: source text plus the fidelity manifest.
 // ---------------------------------------------------------------------------------------------
 
 type RenderModel =
-    { ModuleName: string
-      PackageName: string
-      /// Absolute path of the package generated from; the manifest writes declaration files
-      /// relative to it.
-      PackageDir: string
-      Decls: FsDecl list
-      /// Every finding of every earlier tier, stamped with its pass.
-      Findings: Finding list
-      /// Rendered output: file name -> content. Written to disk by `Pipeline.run`, not here,
-      /// so rendering stays pure.
-      Files: (string * string) list }
+    {
+        ModuleName: string
+        PackageName: string
+        /// Absolute path of the package generated from; the manifest writes declaration files
+        /// relative to it.
+        PackageDir: string
+        Decls: FsDecl list
+        /// Every finding of every earlier tier, stamped with its pass.
+        Findings: Finding list
+        /// Rendered output: file name -> content. Written to disk by `Pipeline.run`, not here,
+        /// so rendering stays pure.
+        Files: (string * string) list
+    }
 
 type TierCounts =
-    { Exact: int
-      Ergonomic: int
-      Widened: int
-      Escape: int }
+    {
+        Exact: int
+        Ergonomic: int
+        Widened: int
+        Escape: int
+    }
 
 /// What a run reports back: where the fidelity manifest's numbers come from.
 type RunReport =
-    { ModuleName: string
-      OutputFiles: string list
-      Findings: Finding list
-      Counts: TierCounts }
+    {
+        ModuleName: string
+        OutputFiles: string list
+        Findings: Finding list
+        Counts: TierCounts
+    }
 
 // ---------------------------------------------------------------------------------------------
 // Placement: reading a symbol's declaration handle for where it came from. Used by two tiers -
@@ -842,7 +915,10 @@ module Grouping =
     /// standard-lib file is the expensive failure, while a mis-grouped oddball is a visible
     /// finding.
     let classify (packageDir: string) (symbol: SymbolResponse voption) : PackageId =
-        match symbol |> ValueOption.bind (fun s -> declOrder s.Declarations |> ValueOption.ofOption) with
+        match
+            symbol
+            |> ValueOption.bind (fun s -> declOrder s.Declarations |> ValueOption.ofOption)
+        with
         // `typeof globalThis` (type-fest's `GlobalThis`) is the checker's own symbol for the
         // global scope: it declares nothing anywhere, so by path it would be unclassified and
         // shipped - as one interface carrying every global there is, a third of the file

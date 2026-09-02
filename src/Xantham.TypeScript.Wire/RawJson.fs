@@ -37,7 +37,8 @@ type RawJsonConverter() =
             RawJsonConverter.pooledWriter <-
                 new Utf8JsonWriter(
                     RawJsonConverter.pooledBuffer,
-                    JsonWriterOptions(Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping))
+                    JsonWriterOptions(Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping)
+                )
 
         let buffer = RawJsonConverter.pooledBuffer
         let writer = RawJsonConverter.pooledWriter

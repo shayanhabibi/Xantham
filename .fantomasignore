@@ -1,0 +1,12 @@
+﻿# Ignore generated files
+*.generated.fs
+
+# Ignore the golden corpus
+**/golden/**/*.fs
+
+# Ignore archive files
+.archive/
+
+# Ignore expecto style
+*.tests.fs
+*.test.fs

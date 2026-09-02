@@ -27,24 +27,28 @@ let runTier (ctx: Context) (passes: Pass<'Model> list) (model: 'Model) : Async<'
 
 /// Harvest -> Resolve: the harvest is carried, the tables start empty.
 let toResolve (harvest: HarvestModel) : ResolveModel =
-    { Harvest = harvest
-      ExportTypes = Map.empty
-      Types = Map.empty
-      NotFollowed = Map.empty }
+    {
+        Harvest = harvest
+        ExportTypes = Map.empty
+        Types = Map.empty
+        NotFollowed = Map.empty
+    }
 
 /// Resolve -> Shape: everything resolved is carried, the declarations start empty.
 let toShape (resolve: ResolveModel) : ShapeModel =
-    { Harvest = resolve.Harvest
-      ExportTypes = resolve.ExportTypes
-      Types = resolve.Types
-      NotFollowed = resolve.NotFollowed
-      DeclNames = Map.empty
-      DeclOrders = Map.empty
-      DeclParams = Map.empty
-      ExportMembers = []
-      TypeVars = Map.empty
-      KeyVars = Map.empty
-      Decls = [] }
+    {
+        Harvest = resolve.Harvest
+        ExportTypes = resolve.ExportTypes
+        Types = resolve.Types
+        NotFollowed = resolve.NotFollowed
+        DeclNames = Map.empty
+        DeclOrders = Map.empty
+        DeclParams = Map.empty
+        ExportMembers = []
+        TypeVars = Map.empty
+        KeyVars = Map.empty
+        Decls = []
+    }
 
 /// The generated module's name: the config override, or the entry package's name under the
 /// O7 naming contract (`@scope/pkg-name` -> `Scope.PkgName`).
@@ -55,12 +59,14 @@ let moduleName (ctx: Context) =
 
 /// Shape -> Render: declarations plus every finding of every earlier tier.
 let toRender (ctx: Context) (shape: ShapeModel) (findings: Finding list) : RenderModel =
-    { ModuleName = moduleName ctx
-      PackageName = ctx.PackageName
-      PackageDir = ctx.PackageDir
-      Decls = shape.Decls
-      Findings = findings
-      Files = [] }
+    {
+        ModuleName = moduleName ctx
+        PackageName = ctx.PackageName
+        PackageDir = ctx.PackageDir
+        Decls = shape.Decls
+        Findings = findings
+        Files = []
+    }
 
 /// Runs the whole pipeline against a package directory and returns the rendered model without
 /// touching the output directory - what tests diff against goldens.
@@ -77,7 +83,10 @@ let generate (config: GeneratorConfig) (packageDir: string) : Async<RenderModel>
         let! rendered, renderFindings = runTier ctx Render.passes render
 
         // Render passes are pure printers; a finding here means one widened silently earlier.
-        return { rendered with Findings = rendered.Findings @ renderFindings }
+        return
+            { rendered with
+                Findings = rendered.Findings @ renderFindings
+            }
     }
 
 let private utf8NoBom = Text.UTF8Encoding false
@@ -92,8 +101,10 @@ let run (config: GeneratorConfig) (packageDir: string) (outDir: string) : Async<
             File.WriteAllText(Path.Combine(outDir, name), content, utf8NoBom)
 
         return
-            { ModuleName = rendered.ModuleName
-              OutputFiles = rendered.Files |> List.map fst
-              Findings = rendered.Findings
-              Counts = Render.counts (Render.symbolTiers rendered) }
+            {
+                ModuleName = rendered.ModuleName
+                OutputFiles = rendered.Files |> List.map fst
+                Findings = rendered.Findings
+                Counts = Render.counts (Render.symbolTiers rendered)
+            }
     }

@@ -13,19 +13,107 @@ open Xantham.TypeScript.Wire.Proto
 /// F# keywords and reserved words that force backticks when a JavaScript name collides.
 let private keywords =
     Set.ofList
-        [ "abstract"; "and"; "as"; "assert"; "base"; "begin"; "class"; "default"; "delegate"
-          "do"; "done"; "downcast"; "downto"; "elif"; "else"; "end"; "exception"; "extern"
-          "false"; "finally"; "fixed"; "for"; "fun"; "function"; "global"; "if"; "in"
-          "inherit"; "inline"; "interface"; "internal"; "lazy"; "let"; "match"; "member"
-          "module"; "mutable"; "namespace"; "new"; "not"; "null"; "of"; "open"; "or"
-          "override"; "private"; "public"; "rec"; "return"; "select"; "static"; "struct"
-          "then"; "to"; "true"; "try"; "type"; "upcast"; "use"; "val"; "void"; "when"
-          "while"; "with"; "yield"; "atomic"; "break"; "checked"; "component"; "const"
-          "constraint"; "constructor"; "continue"; "eager"; "event"; "external"; "functor"
-          "include"; "method"; "mixin"; "object"; "parallel"; "params"; "process"; "protected"
-          "pure"; "sealed"; "tailcall"; "trait"; "virtual"
-          // Inherited from OCaml: keywords rather than operators, so they need backticks too.
-          "asr"; "land"; "lor"; "lsl"; "lsr"; "lxor"; "mod"; "sig" ]
+        [
+            "abstract"
+            "and"
+            "as"
+            "assert"
+            "base"
+            "begin"
+            "class"
+            "default"
+            "delegate"
+            "do"
+            "done"
+            "downcast"
+            "downto"
+            "elif"
+            "else"
+            "end"
+            "exception"
+            "extern"
+            "false"
+            "finally"
+            "fixed"
+            "for"
+            "fun"
+            "function"
+            "global"
+            "if"
+            "in"
+            "inherit"
+            "inline"
+            "interface"
+            "internal"
+            "lazy"
+            "let"
+            "match"
+            "member"
+            "module"
+            "mutable"
+            "namespace"
+            "new"
+            "not"
+            "null"
+            "of"
+            "open"
+            "or"
+            "override"
+            "private"
+            "public"
+            "rec"
+            "return"
+            "select"
+            "static"
+            "struct"
+            "then"
+            "to"
+            "true"
+            "try"
+            "type"
+            "upcast"
+            "use"
+            "val"
+            "void"
+            "when"
+            "while"
+            "with"
+            "yield"
+            "atomic"
+            "break"
+            "checked"
+            "component"
+            "const"
+            "constraint"
+            "constructor"
+            "continue"
+            "eager"
+            "event"
+            "external"
+            "functor"
+            "include"
+            "method"
+            "mixin"
+            "object"
+            "parallel"
+            "params"
+            "process"
+            "protected"
+            "pure"
+            "sealed"
+            "tailcall"
+            "trait"
+            "virtual"
+            // Inherited from OCaml: keywords rather than operators, so they need backticks too.
+            "asr"
+            "land"
+            "lor"
+            "lsl"
+            "lsr"
+            "lxor"
+            "mod"
+            "sig"
+        ]
 
 let private identifierShaped =
     System.Text.RegularExpressions.Regex @"^[A-Za-z_][A-Za-z0-9_']*$"
@@ -67,9 +155,15 @@ let rec private printTypeIn (atomic: bool) =
     // returned, `Func` otherwise.
     | FsDelegate([], FsUnit) -> "Action"
     | FsDelegate(args, FsUnit) ->
-        args |> List.map (printTypeIn true) |> String.concat ", " |> sprintf "Action<%s>"
+        args
+        |> List.map (printTypeIn true)
+        |> String.concat ", "
+        |> sprintf "Action<%s>"
     | FsDelegate(args, ret) ->
-        args @ [ ret ] |> List.map (printTypeIn true) |> String.concat ", " |> sprintf "Func<%s>"
+        args @ [ ret ]
+        |> List.map (printTypeIn true)
+        |> String.concat ", "
+        |> sprintf "Func<%s>"
     | FsTypeVar name -> $"'{name}"
     // A brand (§4.6, D11): `string<UserId>` for the non-numeric primitives, through the
     // support package's measure-annotated abbreviations, and an ordinary measure application
@@ -87,12 +181,7 @@ let printType = printTypeIn false
 /// An F# string literal with the escapes source text needs.
 let stringLit (text: string) =
     let escaped =
-        text
-            .Replace("\\", "\\\\")
-            .Replace("\"", "\\\"")
-            .Replace("\n", "\\n")
-            .Replace("\r", "\\r")
-            .Replace("\t", "\\t")
+        text.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "\\r").Replace("\t", "\\t")
 
     $"\"{escaped}\""
 
@@ -102,8 +191,7 @@ let printLiteral =
     | LitString text -> stringLit text
     | LitBool true -> "true"
     | LitBool false -> "false"
-    | LitNumber value when System.Double.IsInteger value && abs value < 2147483648.0 ->
-        string (int value)
+    | LitNumber value when System.Double.IsInteger value && abs value < 2147483648.0 -> string (int value)
     | LitNumber value -> value.ToString("R", System.Globalization.CultureInfo.InvariantCulture)
 
 let private xmlEscape (text: string) =
@@ -150,11 +238,14 @@ let private inlineCode (line: string) =
             | -1 -> index <- index + opening
             | closing ->
                 rendered.Append(xmlEscape line[prose .. index - 1]) |> ignore
-                rendered.Append($"<c>{xmlEscape line[index + opening .. closing - 1]}</c>") |> ignore
+
+                rendered.Append($"<c>{xmlEscape line[index + opening .. closing - 1]}</c>")
+                |> ignore
+
                 index <- closing + opening
                 prose <- index
 
-    rendered.Append(xmlEscape line[prose ..]).ToString()
+    rendered.Append(xmlEscape line[prose..]).ToString()
 
 /// A markdown fence line: three or more backticks, and whatever info string follows them.
 let private (|CodeFence|_|) (line: string) =
@@ -173,8 +264,11 @@ let private (|CodeFence|_|) (line: string) =
 let private docBody (indent: string) (lines: string seq) =
     // Inside a block every character is already code, backticks included; outside it a code
     // span becomes `<c>`.
-    let escaped (line: string) = $"{indent}/// {xmlEscape line}".TrimEnd()
-    let prose (line: string) = $"{indent}/// {inlineCode line}".TrimEnd()
+    let escaped (line: string) =
+        $"{indent}/// {xmlEscape line}".TrimEnd()
+
+    let prose (line: string) =
+        $"{indent}/// {inlineCode line}".TrimEnd()
 
     let opener (info: string) =
         match info.Split([| ' '; '\t' |]) |> Array.head with
@@ -198,25 +292,32 @@ let private docBody (indent: string) (lines: string seq) =
 /// JSDoc as XML docs: the comment as `<summary>`, each tag as a `<remarks>` line or block.
 /// The tier annotation lands in the manifest, not here.
 let private docLines (indent: string) (docs: string) (tags: JSDocTagInfo list) =
-    [ let summary = docs.Trim()
+    [
+        let summary = docs.Trim()
 
-      if summary <> "" then
-          yield $"{indent}/// <summary>"
-          yield! docBody indent (splitLines summary)
-          yield $"{indent}/// </summary>"
+        if summary <> "" then
+            yield $"{indent}/// <summary>"
+            yield! docBody indent (splitLines summary)
+            yield $"{indent}/// </summary>"
 
-      for tag in tags do
-          let text = tag.Text |> ValueOption.defaultValue ""
+        for tag in tags do
+            let text = tag.Text |> ValueOption.defaultValue ""
 
-          match splitLines text with
-          | [| single |] ->
-              let content = if single = "" then $"@{tag.Name}" else $"@{tag.Name} {single}"
-              yield $"{indent}/// <remarks>{inlineCode content}</remarks>"
-          | lines ->
-              yield $"{indent}/// <remarks>"
-              yield $"{indent}/// @{tag.Name}"
-              yield! docBody indent lines
-              yield $"{indent}/// </remarks>" ]
+            match splitLines text with
+            | [| single |] ->
+                let content =
+                    if single = "" then
+                        $"@{tag.Name}"
+                    else
+                        $"@{tag.Name} {single}"
+
+                yield $"{indent}/// <remarks>{inlineCode content}</remarks>"
+            | lines ->
+                yield $"{indent}/// <remarks>"
+                yield $"{indent}/// @{tag.Name}"
+                yield! docBody indent lines
+                yield $"{indent}/// </remarks>"
+    ]
 
 /// A parameter of a static emission (`Exports` members, `Create` overloads): F# optional
 /// syntax, `[<ParamArray>]` on a rest tail.
@@ -271,11 +372,14 @@ let private declHead (name: string) (typeParameters: FsTypeParam list) =
     if typeParameters.IsEmpty then
         ident name
     else
-        let parameters = typeParameters |> List.map (fun p -> $"'{p.Name}") |> String.concat ", "
+        let parameters =
+            typeParameters |> List.map (fun p -> $"'{p.Name}") |> String.concat ", "
 
         let constraints =
             typeParameters
-            |> List.choose (fun p -> p.Constraint |> Option.map (fun bound -> $"'{p.Name} :> {printTypeIn true bound}"))
+            |> List.choose (fun p ->
+                p.Constraint
+                |> Option.map (fun bound -> $"'{p.Name} :> {printTypeIn true bound}"))
 
         match constraints with
         | [] -> $"{ident name}<{parameters}>"
@@ -289,111 +393,134 @@ let private declRef (name: string) (typeParameters: FsTypeParam list) =
     if typeParameters.IsEmpty then
         ident name
     else
-        let parameters = typeParameters |> List.map (fun p -> $"'{p.Name}") |> String.concat ", "
+        let parameters =
+            typeParameters |> List.map (fun p -> $"'{p.Name}") |> String.concat ", "
+
         $"{ident name}<{parameters}>"
 
 let private renderMember (m: FsMember) =
     match m with
     | FsProperty p ->
-        [ yield! docLines "    " p.Docs p.Tags
-          let mutability = if p.ReadOnly then "" else " with get, set"
-          yield $"    abstract {ident p.Name}: {printType p.Type}{mutability}" ]
+        [
+            yield! docLines "    " p.Docs p.Tags
+            let mutability = if p.ReadOnly then "" else " with get, set"
+            yield $"    abstract {ident p.Name}: {printType p.Type}{mutability}"
+        ]
     | FsMethod m ->
-        [ yield! docLines "    " m.Docs m.Tags
-          yield $"    abstract {declHead m.Name m.TypeParameters}: {renderAbstractSignature m.Parameters m.Return}" ]
+        [
+            yield! docLines "    " m.Docs m.Tags
+            yield $"    abstract {declHead m.Name m.TypeParameters}: {renderAbstractSignature m.Parameters m.Return}"
+        ]
     | FsIndexer i ->
         // `[<EmitIndexer>]` is what makes this reach JavaScript as `bag[key]` rather than a
         // method call; the member must be named `Item` for F# indexer syntax to bind to it.
-        [ yield "    [<EmitIndexer>]"
-          let mutability = if i.ReadOnly then "" else " with get, set"
-          yield $"    abstract Item: {printType i.Key} -> {printType i.Value}{mutability}" ]
+        [
+            yield "    [<EmitIndexer>]"
+            let mutability = if i.ReadOnly then "" else " with get, set"
+            yield $"    abstract Item: {printType i.Key} -> {printType i.Value}{mutability}"
+        ]
 
 let private renderInterface (decl: FsInterfaceDecl) =
-    [ yield! docLines "" decl.Docs decl.Tags
+    [
+        yield! docLines "" decl.Docs decl.Tags
 
-      // A static Create with a body makes F# infer a class; the attribute keeps the type an
-      // interface (and needs default-interface-member runtime support to type-check).
-      if not decl.CreateOverloads.IsEmpty then
-          yield "[<Interface>]"
+        // A static Create with a body makes F# infer a class; the attribute keeps the type an
+        // interface (and needs default-interface-member runtime support to type-check).
+        if not decl.CreateOverloads.IsEmpty then
+            yield "[<Interface>]"
 
-      match decl.Inherits, decl.Members, decl.CreateOverloads with
-      | [], [], [] ->
-          yield $"type {declHead decl.Name decl.TypeParameters} ="
-          yield "    interface end"
-      | inherits, members, creates ->
-          yield $"type {declHead decl.Name decl.TypeParameters} ="
+        match decl.Inherits, decl.Members, decl.CreateOverloads with
+        | [], [], [] ->
+            yield $"type {declHead decl.Name decl.TypeParameters} ="
+            yield "    interface end"
+        | inherits, members, creates ->
+            yield $"type {declHead decl.Name decl.TypeParameters} ="
 
-          for baseRef in inherits do
-              yield $"    inherit {printType baseRef}"
+            for baseRef in inherits do
+                yield $"    inherit {printType baseRef}"
 
-          for m in members do
-              yield! renderMember m
+            for m in members do
+                yield! renderMember m
 
-          // D3/§4.4 construction ergonomics: the ParamObject Create compiles a call into the
-          // object literal the TS API expects; `$0` emits the (erased) argument object itself.
-          for overload in creates do
-              yield "    [<ParamObject; Emit(\"$0\")>]"
-              yield
-                  $"    static member Create {renderParamList overload} : {declRef decl.Name decl.TypeParameters} = jsNative" ]
+            // D3/§4.4 construction ergonomics: the ParamObject Create compiles a call into the
+            // object literal the TS API expects; `$0` emits the (erased) argument object itself.
+            for overload in creates do
+                yield "    [<ParamObject; Emit(\"$0\")>]"
+
+                yield
+                    $"    static member Create {renderParamList overload} : {declRef decl.Name decl.TypeParameters} = jsNative"
+    ]
 
 let private renderStringEnum (decl: FsStringEnumDecl) =
-    [ yield! docLines "" decl.Docs decl.Tags
-      yield "[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]"
-      yield $"type {ident decl.Name} ="
+    [
+        yield! docLines "" decl.Docs decl.Tags
+        yield "[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]"
+        yield $"type {ident decl.Name} ="
 
-      for case in decl.Cases do
-          let attributes =
-              [ match case.CompiledName with
-                | Some name -> $"CompiledName({stringLit name})"
-                | None -> ()
-                match case.CompiledValue with
-                | Some value -> $"CompiledValue({printLiteral value})"
-                | None -> () ]
+        for case in decl.Cases do
+            let attributes =
+                [
+                    match case.CompiledName with
+                    | Some name -> $"CompiledName({stringLit name})"
+                    | None -> ()
+                    match case.CompiledValue with
+                    | Some value -> $"CompiledValue({printLiteral value})"
+                    | None -> ()
+                ]
 
-          match attributes with
-          | [] -> yield $"    | {ident case.Name}"
-          | attributes -> yield $"""    | [<{String.concat "; " attributes}>] {ident case.Name}""" ]
+            match attributes with
+            | [] -> yield $"    | {ident case.Name}"
+            | attributes -> yield $"""    | [<{String.concat "; " attributes}>] {ident case.Name}"""
+    ]
 
 /// A tagged union (D4, §4.5(2)). `RequireQualifiedAccess` for the same reason the StringEnum
 /// emission takes it: one generated module holds every declaration a package has, and bare
 /// case names collide across unions - and here with the member interfaces the cases carry.
 let private renderTaggedUnion (decl: FsTaggedUnionDecl) =
-    [ yield! docLines "" decl.Docs decl.Tags
-      yield $"[<RequireQualifiedAccess; TypeScriptTaggedUnion({stringLit decl.Tag}, CaseRules.None)>]"
-      yield $"type {ident decl.Name} ="
+    [
+        yield! docLines "" decl.Docs decl.Tags
+        yield $"[<RequireQualifiedAccess; TypeScriptTaggedUnion({stringLit decl.Tag}, CaseRules.None)>]"
+        yield $"type {ident decl.Name} ="
 
-      for case in decl.Cases do
-          // Named fields, so the JS keys survive: Fable emits each field under its own name.
-          let fields =
-              case.Fields
-              |> List.map (fun field -> $"{ident field.Name}: {printTypeIn true field.Type}")
-              |> String.concat " * "
+        for case in decl.Cases do
+            // Named fields, so the JS keys survive: Fable emits each field under its own name.
+            let fields =
+                case.Fields
+                |> List.map (fun field -> $"{ident field.Name}: {printTypeIn true field.Type}")
+                |> String.concat " * "
 
-          let carries = if case.Fields.IsEmpty then "" else $" of {fields}"
+            let carries = if case.Fields.IsEmpty then "" else $" of {fields}"
 
-          match case.CompiledName with
-          | Some tag -> yield $"    | [<CompiledName({stringLit tag})>] {ident case.Name}{carries}"
-          | None -> yield $"    | {ident case.Name}{carries}" ]
+            match case.CompiledName with
+            | Some tag -> yield $"    | [<CompiledName({stringLit tag})>] {ident case.Name}{carries}"
+            | None -> yield $"    | {ident case.Name}{carries}"
+    ]
 
 let private renderEnum (decl: FsEnumDecl) =
-    [ yield! docLines "" decl.Docs decl.Tags
-      yield $"type {ident decl.Name} ="
+    [
+        yield! docLines "" decl.Docs decl.Tags
+        yield $"type {ident decl.Name} ="
 
-      for name, value in decl.Cases do
-          yield $"    | {ident name} = {value}" ]
+        for name, value in decl.Cases do
+            yield $"    | {ident name} = {value}"
+    ]
 
 let private renderAbbrev (decl: FsAbbrevDecl) =
-    [ yield! docLines "" decl.Docs decl.Tags
-      yield $"type {declHead decl.Name decl.TypeParameters} = {printType decl.Target}" ]
+    [
+        yield! docLines "" decl.Docs decl.Tags
+        yield $"type {declHead decl.Name decl.TypeParameters} = {printType decl.Target}"
+    ]
 
 /// The unit of measure a branding intersection becomes (§4.6, D11). A measure has no body:
 /// the name is the whole of it, and what it brands is written at the uses as `string<Name>`.
 /// The primitive is recorded in the doc comment because the declaration itself cannot say it.
 let private renderMeasure (decl: FsMeasureDecl) =
-    [ yield! docLines "" decl.Docs decl.Tags
-      yield $"/// <remarks>A brand over <c>{printType decl.Primitive}</c>.</remarks>"
-      yield "[<Measure>]"
-      yield $"type {ident decl.Name}" ]
+    [
+        yield! docLines "" decl.Docs decl.Tags
+        yield $"/// <remarks>A brand over <c>{printType decl.Primitive}</c>.</remarks>"
+        yield "[<Measure>]"
+        yield $"type {ident decl.Name}"
+    ]
 
 /// A declaration whose right-hand side is a type-level computation F# has no way to reproduce -
 /// a mapped or conditional type, or a template literal over an operand the checker left open
@@ -404,43 +531,49 @@ let private renderPhantom (decl: FsPhantomDecl) =
     // module a package generates into.
     let case = ident (decl.Name + "__")
 
-    [ yield! docLines "" decl.Docs decl.Tags
-      yield "[<Erase>]"
-      yield $"type {declHead decl.Name decl.TypeParameters} = private {case} of {printType decl.Carrier}" ]
+    [
+        yield! docLines "" decl.Docs decl.Tags
+        yield "[<Erase>]"
+        yield $"type {declHead decl.Name decl.TypeParameters} = private {case} of {printType decl.Carrier}"
+    ]
 
 /// The import name a default export binds under - the JavaScript key, not an F# name.
 let private defaultExportKey = "default"
 
 let private renderExports (packageName: string) (members: FsExportMember list) =
-    [ yield "/// <summary>The package's value exports, each bound to its import.</summary>"
-      yield "[<Erase>]"
-      yield "type Exports ="
+    [
+        yield "/// <summary>The package's value exports, each bound to its import.</summary>"
+        yield "[<Erase>]"
+        yield "type Exports ="
 
-      for m in members do
-          yield! docLines "    " m.Docs m.Tags
+        for m in members do
+            yield! docLines "    " m.Docs m.Tags
 
-          // The binding attribute, optionally carrying a second attribute inside the same
-          // brackets: a global is named off `globalThis` and imports nothing.
-          let attribute (also: string) =
-              let package = stringLit packageName
+            // The binding attribute, optionally carrying a second attribute inside the same
+            // brackets: a global is named off `globalThis` and imports nothing.
+            let attribute (also: string) =
+                let package = stringLit packageName
 
-              match m.Binding with
-              | ImportDefault -> $"    [<Import({stringLit defaultExportKey}, {package}){also}>]"
-              | ImportNamed name -> $"    [<Import({stringLit name}, {package}){also}>]"
-              | GlobalName name -> $"    [<Global({stringLit name}){also}>]"
+                match m.Binding with
+                | ImportDefault -> $"    [<Import({stringLit defaultExportKey}, {package}){also}>]"
+                | ImportNamed name -> $"    [<Import({stringLit name}, {package}){also}>]"
+                | GlobalName name -> $"    [<Global({stringLit name}){also}>]"
 
-          match m.Body with
-          | ExportFunction(parameters, returns) ->
-              yield attribute ""
-              yield
-                  $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
-          | ExportValue reference ->
-              yield attribute ""
-              yield $"    static member {ident m.Name}: {printType reference} = jsNative"
-          | ExportConstructor(parameters, returns) ->
-              yield attribute "; EmitConstructor"
-              yield
-                  $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative" ]
+            match m.Body with
+            | ExportFunction(parameters, returns) ->
+                yield attribute ""
+
+                yield
+                    $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
+            | ExportValue reference ->
+                yield attribute ""
+                yield $"    static member {ident m.Name}: {printType reference} = jsNative"
+            | ExportConstructor(parameters, returns) ->
+                yield attribute "; EmitConstructor"
+
+                yield
+                    $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
+    ]
 
 /// The one `.fs` file of the walking skeleton: header, opens, declarations in the order the
 /// shape tier fixed. `module rec` so declaration order never fights reference order.
@@ -463,22 +596,25 @@ let renderSource: Pass<RenderModel> =
         let source =
             String.concat
                 "\n"
-                [ "// <auto-generated>"
-                  $"//   Generated by Xantham.Generator from {model.PackageName}."
-                  "//   Do not edit by hand - regenerate instead."
-                  "// </auto-generated>"
-                  $"module rec {model.ModuleName}"
-                  ""
-                  "open System"
-                  "open Fable.Core"
-                  "open Fable.Core.JsInterop"
-                  "open Xantham.Fable.Core"
-                  ""
-                  body
-                  "" ]
+                [
+                    "// <auto-generated>"
+                    $"//   Generated by Xantham.Generator from {model.PackageName}."
+                    "//   Do not edit by hand - regenerate instead."
+                    "// </auto-generated>"
+                    $"module rec {model.ModuleName}"
+                    ""
+                    "open System"
+                    "open Fable.Core"
+                    "open Fable.Core.JsInterop"
+                    "open Xantham.Fable.Core"
+                    ""
+                    body
+                    ""
+                ]
 
         { model with
-            Files = model.Files @ [ $"{model.ModuleName}.fs", source ] })
+            Files = model.Files @ [ $"{model.ModuleName}.fs", source ]
+        })
 
 /// The top-level symbol a finding belongs to: the qualified name cut at the first member or
 /// parameter qualifier.
@@ -490,7 +626,10 @@ let private ownerOf (findingSymbol: string) =
 /// Per-symbol fidelity: every generated declaration in output order, then any finding subjects
 /// that produced no declaration (drops, table-level findings), each with its worst tier.
 let symbolTiers (model: RenderModel) : (string * Tier * Finding list) list =
-    let grouped = model.Findings |> List.groupBy (fun finding -> ownerOf finding.Symbol) |> Map.ofList
+    let grouped =
+        model.Findings
+        |> List.groupBy (fun finding -> ownerOf finding.Symbol)
+        |> Map.ofList
 
     let declared =
         model.Decls
@@ -528,10 +667,12 @@ let counts (rows: (string * Tier * Finding list) list) =
     let count tier =
         rows |> List.filter (fun (_, rowTier, _) -> rowTier = tier) |> List.length
 
-    { Exact = count Exact
-      Ergonomic = count Ergonomic
-      Widened = count Widened
-      Escape = count Escape }
+    {
+        Exact = count Exact
+        Ergonomic = count Ergonomic
+        Widened = count Widened
+        Escape = count Escape
+    }
 
 let private tierLabel =
     function
@@ -545,40 +686,50 @@ let private tierLabel =
 // is null where a symbol has no declaration to point at (drops, table-level findings) and is
 // then omitted from the JSON.
 type ManifestFinding =
-    { key: string
-      pass: string
-      tier: string
-      symbol: string
-      message: string }
+    {
+        key: string
+        pass: string
+        tier: string
+        symbol: string
+        message: string
+    }
 
 type ManifestCounts =
-    { exact: int
-      ergonomic: int
-      widened: int
-      escape: int }
+    {
+        exact: int
+        ergonomic: int
+        widened: int
+        escape: int
+    }
 
 /// A pass's tallies: only the non-zero ones are written, so a pass that raised nothing at any
 /// tier is just its label.
 type ManifestPass =
-    { pass: string
-      total: Nullable<int>
-      exact: Nullable<int>
-      ergonomic: Nullable<int>
-      widened: Nullable<int>
-      escape: Nullable<int> }
+    {
+        pass: string
+        total: Nullable<int>
+        exact: Nullable<int>
+        ergonomic: Nullable<int>
+        widened: Nullable<int>
+        escape: Nullable<int>
+    }
 
 type ManifestSymbol =
-    { name: string
-      file: string
-      tier: string
-      findings: ManifestFinding list }
+    {
+        name: string
+        file: string
+        tier: string
+        findings: ManifestFinding list
+    }
 
 type Manifest =
-    { package: string
-      ``module``: string
-      counts: ManifestCounts
-      passes: ManifestPass list
-      symbols: ManifestSymbol list }
+    {
+        package: string
+        ``module``: string
+        counts: ManifestCounts
+        passes: ManifestPass list
+        symbols: ManifestSymbol list
+    }
 
 let private manifestOptions =
     let options = JsonSerializerOptions(WriteIndented = true)
@@ -625,19 +776,26 @@ let private declFiles (model: RenderModel) : Map<string, string> =
 let private passTallies (findings: Finding list) : ManifestPass list =
     let byPass = findings |> List.groupBy _.Pass |> Map.ofList
 
-    [ for pass in findings |> List.map _.Pass |> List.distinct ->
-          let raised = byPass[pass]
+    [
+        for pass in findings |> List.map _.Pass |> List.distinct ->
+            let raised = byPass[pass]
 
-          // Zero is absence: the field is omitted rather than written as 0.
-          let nonZero count = if count = 0 then Nullable() else Nullable count
-          let count tier = raised |> List.filter (fun f -> f.Tier = tier) |> List.length |> nonZero
+            // Zero is absence: the field is omitted rather than written as 0.
+            let nonZero count =
+                if count = 0 then Nullable() else Nullable count
 
-          { pass = FindingCatalogue.passLabel pass
-            total = nonZero raised.Length
-            exact = count Exact
-            ergonomic = count Ergonomic
-            widened = count Widened
-            escape = count Escape } ]
+            let count tier =
+                raised |> List.filter (fun f -> f.Tier = tier) |> List.length |> nonZero
+
+            {
+                pass = FindingCatalogue.passLabel pass
+                total = nonZero raised.Length
+                exact = count Exact
+                ergonomic = count Ergonomic
+                widened = count Widened
+                escape = count Escape
+            }
+    ]
 
 /// The fidelity report: which pass widened what, and why, per exported symbol.
 let renderManifest: Pass<RenderModel> =
@@ -647,31 +805,45 @@ let renderManifest: Pass<RenderModel> =
         let files = declFiles model
 
         let manifest =
-            { package = model.PackageName
-              ``module`` = model.ModuleName
-              counts =
-                { exact = tallies.Exact
-                  ergonomic = tallies.Ergonomic
-                  widened = tallies.Widened
-                  escape = tallies.Escape }
-              passes = passTallies model.Findings
-              symbols =
-                [ for name, tier, findings in rows ->
-                      { name = name
-                        file = files |> Map.tryFind name |> Option.toObj
-                        tier = tierLabel tier
-                        findings =
-                          [ for finding in findings |> List.sortBy (fun f -> f.Pass, f.Symbol, f.Key, f.Message) ->
-                                { key = finding.Key
-                                  pass = finding.Pass
-                                  tier = tierLabel finding.Tier
-                                  symbol = finding.Symbol
-                                  message = finding.Message } ] } ] }
+            {
+                package = model.PackageName
+                ``module`` = model.ModuleName
+                counts =
+                    {
+                        exact = tallies.Exact
+                        ergonomic = tallies.Ergonomic
+                        widened = tallies.Widened
+                        escape = tallies.Escape
+                    }
+                passes = passTallies model.Findings
+                symbols =
+                    [
+                        for name, tier, findings in rows ->
+                            {
+                                name = name
+                                file = files |> Map.tryFind name |> Option.toObj
+                                tier = tierLabel tier
+                                findings =
+                                    [
+                                        for finding in
+                                            findings |> List.sortBy (fun f -> f.Pass, f.Symbol, f.Key, f.Message) ->
+                                            {
+                                                key = finding.Key
+                                                pass = finding.Pass
+                                                tier = tierLabel finding.Tier
+                                                symbol = finding.Symbol
+                                                message = finding.Message
+                                            }
+                                    ]
+                            }
+                    ]
+            }
 
         let json = JsonSerializer.Serialize(manifest, manifestOptions) + "\n"
 
         { model with
-            Files = model.Files @ [ "manifest.json", json ] })
+            Files = model.Files @ [ "manifest.json", json ]
+        })
 
 /// The tier's pass list, in execution order.
 let passes: Pass<RenderModel> list = [ renderSource; renderManifest ]

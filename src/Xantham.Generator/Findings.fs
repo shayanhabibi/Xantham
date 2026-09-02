@@ -69,12 +69,14 @@ type IFindingKind =
 /// A finding union read once through reflection: prefix, tag reader and per-case tiers, cached
 /// per type. Reading is a dictionary hit and a tag read; the reflection happens once.
 type Coder =
-    { Prefix: string
-      /// The pass a per-pass union belongs to; `None` for the shared helpers.
-      Pass: string option
-      Tag: obj -> int
-      Tiers: Tier[]
-      Names: string[] }
+    {
+        Prefix: string
+        /// The pass a per-pass union belongs to; `None` for the shared helpers.
+        Pass: string option
+        Tag: obj -> int
+        Tiers: Tier[]
+        Names: string[]
+    }
 
 module Coder =
     let private cache = ConcurrentDictionary<Type, Coder>()
@@ -99,11 +101,13 @@ module Coder =
 
         let reader = FSharpValue.PreComputeUnionTagReader(kindType, true)
 
-        { Prefix = prefix
-          Pass = pass
-          Tag = reader
-          Tiers = tiers
-          Names = cases |> Array.map _.Name }
+        {
+            Prefix = prefix
+            Pass = pass
+            Tag = reader
+            Tiers = tiers
+            Names = cases |> Array.map _.Name
+        }
 
     /// The coder for a finding union, computed on first use.
     let forType (kindType: Type) : Coder = cache.GetOrAdd(kindType, precompute)
@@ -137,13 +141,15 @@ module Coder =
 /// Findings are the raw material of the fidelity manifest - a silent drop is a bug by
 /// definition, so every non-Exact emission produces one of these.
 type Finding =
-    { /// The pass that produced the finding. Stamped by `Pipeline.runTier`, so passes leave it
-      /// empty and cannot misreport themselves.
-      Pass: string
-      /// The symbol concerned, qualified from the exported name down: `Options.onlyFirst`.
-      Symbol: string
-      /// Which finding, with whatever detail it carries. Key, tier and message derive from it.
-      Kind: IFindingKind }
+    {
+        /// The pass that produced the finding. Stamped by `Pipeline.runTier`, so passes leave it
+        /// empty and cannot misreport themselves.
+        Pass: string
+        /// The symbol concerned, qualified from the exported name down: `Options.onlyFirst`.
+        Symbol: string
+        /// Which finding, with whatever detail it carries. Key, tier and message derive from it.
+        Kind: IFindingKind
+    }
 
     member this.Key = Coder.code this.Kind
     member this.Tier = Coder.tier this.Kind
@@ -152,7 +158,11 @@ type Finding =
 module Finding =
     /// A finding not yet stamped with its pass; the pipeline fold fills `Pass` in.
     let make symbol (kind: #IFindingKind) =
-        { Pass = ""; Symbol = symbol; Kind = kind }
+        {
+            Pass = ""
+            Symbol = symbol
+            Kind = kind
+        }
 
 // -------------------------------------------------------------------------------------------------
 // Shared helpers: raised from wherever a type is written at a reference position, under
@@ -223,11 +233,9 @@ type TypeReference =
                 "an unnamed brand has no measure to carry; widened to the primitive it brands (§4.6)"
             | IntersectionOverNonObject ->
                 "intersection over a non-object operand has no members to flatten; widened to obj (§4.6)"
-            | IntersectionNotDeclared ->
-                "intersection of object types not declared by this run; widened to obj (§4.6)"
+            | IntersectionNotDeclared -> "intersection of object types not declared by this run; widened to obj (§4.6)"
             | IndexedAccessNoForm -> "indexed access has no F# form here; widened to obj"
-            | AnonymousInReferencedGroup ->
-                "anonymous type in a referenced group cannot be templated; widened to obj"
+            | AnonymousInReferencedGroup -> "anonymous type in a referenced group cannot be templated; widened to obj"
             | GlobalThisToObj -> "typeof globalThis is the whole global scope; widened to obj"
             | NotAmongGeneratedDeclarations shown -> $"{shown} is not among the generated declarations; widened to obj"
             | LibExtraTypeArgumentsDropped(name, given, fsharpName, arity) ->
@@ -459,22 +467,24 @@ module FindingCatalogue =
     /// Every finding union, in the order the manifest legend lists them. The snapshot test
     /// enumerates these; a union missing here has keys nothing guards.
     let unions: Type list =
-        [ typeof<TypeReference>
-          typeof<TypeParameters>
-          typeof<Members>
-          typeof<HarvestGlobals>
-          typeof<ResolveExportTypes>
-          typeof<ResolveTypeTable>
-          typeof<ClassifyLiteralUnions>
-          typeof<DetectTaggedUnions>
-          typeof<ShapeInterfaces>
-          typeof<ShapeAliases>
-          typeof<ShapeClasses>
-          typeof<ShapeExports>
-          typeof<SynthesizeParamObjects>
-          typeof<DedupeOverloads>
-          typeof<RepairArity>
-          typeof<AuditCoverage> ]
+        [
+            typeof<TypeReference>
+            typeof<TypeParameters>
+            typeof<Members>
+            typeof<HarvestGlobals>
+            typeof<ResolveExportTypes>
+            typeof<ResolveTypeTable>
+            typeof<ClassifyLiteralUnions>
+            typeof<DetectTaggedUnions>
+            typeof<ShapeInterfaces>
+            typeof<ShapeAliases>
+            typeof<ShapeClasses>
+            typeof<ShapeExports>
+            typeof<SynthesizeParamObjects>
+            typeof<DedupeOverloads>
+            typeof<RepairArity>
+            typeof<AuditCoverage>
+        ]
 
     /// Pass name -> the key prefix of the union that pass owns. Passes without a union never
     /// raise findings of their own and are absent.
@@ -494,8 +504,10 @@ module FindingCatalogue =
 
     /// The whole key table: `(key, union case name, tier)` for every case of every union.
     let table () =
-        [ for kindType in unions do
-              let coder = Coder.forType kindType
+        [
+            for kindType in unions do
+                let coder = Coder.forType kindType
 
-              for tag in 0 .. coder.Names.Length - 1 do
-                  Coder.key coder tag, $"{kindType.Name}.{coder.Names[tag]}", coder.Tiers[tag] ]
+                for tag in 0 .. coder.Names.Length - 1 do
+                    Coder.key coder tag, $"{kindType.Name}.{coder.Names[tag]}", coder.Tiers[tag]
+        ]

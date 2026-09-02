@@ -1,4 +1,5 @@
 ﻿namespace JetBrains.Annotations
+
 open System
 
 type InjectedLanguage =
@@ -8,15 +9,17 @@ type InjectedLanguage =
     | JSON = 3
     | XML = 4
 
-[<AttributeUsage(AttributeTargets.Parameter ||| AttributeTargets.Field ||| AttributeTargets.Property)>]
+[<AttributeUsage(AttributeTargets.Parameter
+                 ||| AttributeTargets.Field
+                 ||| AttributeTargets.Property)>]
 type LanguageInjectionAttribute private (?injectedLanguage: InjectedLanguage, ?injectedLanguageName: string) =
     inherit Attribute()
     member x.InjectedLanguage = injectedLanguage
     member x.InjectedLanguageName = injectedLanguageName
     member val Prefix = "" with get, set
     member val Suffix = "" with get, set
-    new(injectedLanguage: InjectedLanguage) = LanguageInjectionAttribute (injectedLanguage = injectedLanguage)
-    new(injectedLanguageName: string) = LanguageInjectionAttribute (injectedLanguageName = injectedLanguageName)
+    new(injectedLanguage: InjectedLanguage) = LanguageInjectionAttribute(injectedLanguage = injectedLanguage)
+    new(injectedLanguageName: string) = LanguageInjectionAttribute(injectedLanguageName = injectedLanguageName)
 
 namespace Xantham.TypeScript.Wire
 
@@ -54,8 +57,10 @@ type TsGoCallback = string -> string
 
 /// The entries of one directory, as `getAccessibleEntries` answers them: names, not paths.
 type FileSystemEntries =
-    { Files: string[]
-      Directories: string[] }
+    {
+        Files: string[]
+        Directories: string[]
+    }
 
 /// What `readFile` found. The server distinguishes all three, and the distinction is the reason
 /// the reply is an object rather than a bare string: `Missing` stops resolution at this path,
@@ -84,28 +89,33 @@ type FileRead =
 /// rather than returning an option.</para>
 /// </remarks>
 type VirtualFileSystem =
-    { DirectoryExists: (string -> bool voption) voption
-      FileExists: (string -> bool voption) voption
-      GetAccessibleEntries: (string -> FileSystemEntries voption) voption
-      ReadFile: (string -> FileRead) voption
-      Realpath: (string -> string voption) voption
-      /// Takes the path and then the content to write. The server expects no answer.
-      WriteFile: (string -> string -> unit) voption }
+    {
+        DirectoryExists: (string -> bool voption) voption
+        FileExists: (string -> bool voption) voption
+        GetAccessibleEntries: (string -> FileSystemEntries voption) voption
+        ReadFile: (string -> FileRead) voption
+        Realpath: (string -> string voption) voption
+        /// Takes the path and then the content to write. The server expects no answer.
+        WriteFile: (string -> string -> unit) voption
+    }
 
     /// A filesystem that answers nothing, so every path falls back to the real one. Copy-update
     /// it with the members you mean to serve.
     static member Default =
-        { DirectoryExists = ValueNone
-          FileExists = ValueNone
-          GetAccessibleEntries = ValueNone
-          ReadFile = ValueNone
-          Realpath = ValueNone
-          WriteFile = ValueNone }
+        {
+            DirectoryExists = ValueNone
+            FileExists = ValueNone
+            GetAccessibleEntries = ValueNone
+            ReadFile = ValueNone
+            Realpath = ValueNone
+            WriteFile = ValueNone
+        }
 
 [<RequireQualifiedAccess>]
 module VirtualFileSystem =
     /// The argument always arrives as a JSON string - `"C:/..."`, quotes included.
-    let private path (argument: string) = Json.JsonSerializer.Deserialize<string> argument
+    let private path (argument: string) =
+        Json.JsonSerializer.Deserialize<string> argument
 
     let private json (value: 'T) = Json.JsonSerializer.Serialize<'T> value
 
@@ -147,11 +157,16 @@ module VirtualFileSystem =
 
         fs.GetAccessibleEntries
         |> ValueOption.iter (fun getEntries ->
-            add "getAccessibleEntries" (
-                path
-                >> getEntries
-                >> orFallBack (fun entries ->
-                    "{\"files\":" + json entries.Files + ",\"directories\":" + json entries.Directories + "}")))
+            add
+                "getAccessibleEntries"
+                (path
+                 >> getEntries
+                 >> orFallBack (fun entries ->
+                     "{\"files\":"
+                     + json entries.Files
+                     + ",\"directories\":"
+                     + json entries.Directories
+                     + "}")))
 
         fs.WriteFile
         |> ValueOption.iter (fun writeFile ->
@@ -159,7 +174,10 @@ module VirtualFileSystem =
             // the server expects nothing back from.
             add "writeFile" (fun argument ->
                 use document = Json.JsonDocument.Parse argument
-                let field name = document.RootElement.GetProperty(name: string).GetString()
+
+                let field name =
+                    document.RootElement.GetProperty(name: string).GetString()
+
                 writeFile (field "path") (field "data")
                 ""))
 
@@ -184,30 +202,31 @@ module Wtf8 =
             Encoding.UTF8.GetString bytes
         else
 
-        let sb = StringBuilder(bytes.Length)
-        let mutable runStart = 0
-        let mutable i = 0
+            let sb = StringBuilder(bytes.Length)
+            let mutable runStart = 0
+            let mutable i = 0
 
-        while i < bytes.Length do
-            if isSurrogateStart bytes i then
-                if i > runStart then
-                    sb.Append(Encoding.UTF8.GetString(bytes.Slice(runStart, i - runStart))) |> ignore
+            while i < bytes.Length do
+                if isSurrogateStart bytes i then
+                    if i > runStart then
+                        sb.Append(Encoding.UTF8.GetString(bytes.Slice(runStart, i - runStart)))
+                        |> ignore
 
-                let b1 = int bytes[i + 1]
-                let b2 = int bytes[i + 2]
-                sb.Append(char (0xD000 ||| ((b1 &&& 0x3F) <<< 6) ||| (b2 &&& 0x3F))) |> ignore
-                i <- i + 3
-                runStart <- i
-            else
-                i <- i + 1
+                    let b1 = int bytes[i + 1]
+                    let b2 = int bytes[i + 2]
+                    sb.Append(char (0xD000 ||| ((b1 &&& 0x3F) <<< 6) ||| (b2 &&& 0x3F))) |> ignore
+                    i <- i + 3
+                    runStart <- i
+                else
+                    i <- i + 1
 
-        if runStart < bytes.Length then
-            sb.Append(Encoding.UTF8.GetString(bytes.Slice runStart)) |> ignore
+            if runStart < bytes.Length then
+                sb.Append(Encoding.UTF8.GetString(bytes.Slice runStart)) |> ignore
 
-        sb.ToString()
+            sb.ToString()
 
     let decodeArray (bytes: byte[]) = decode (ReadOnlySpan bytes)
-    
+
 
 /// <summary>
 /// Sync channel envelope - msgpack 3-tuple of <c>[type; method; payload]</c>.
@@ -251,15 +270,22 @@ module internal Msgpack =
             stream.Write(ReadOnlySpan header)
 
         stream.Write value
-    
+
     /// <summary>
     /// Writes a frame, and flushes the stream.
     /// </summary>
-    let writeFrame (stream: Stream) (messageType: MessageType) (method: ReadOnlySpan<byte>) (payload: ReadOnlySpan<byte>) =
+    let writeFrame
+        (stream: Stream)
+        (messageType: MessageType)
+        (method: ReadOnlySpan<byte>)
+        (payload: ReadOnlySpan<byte>)
+        =
         stream.WriteByte Fixarray3
         // A type below 0x80 is a positive fixint; the wider form is legal but nothing emits it.
         let t = byte messageType
-        if t < 0x80uy then stream.WriteByte t
+
+        if t < 0x80uy then
+            stream.WriteByte t
         else
             stream.WriteByte Uint8
             stream.WriteByte t
@@ -275,11 +301,11 @@ module internal Msgpack =
 
     let private readExactly (stream: Stream) (count: int) =
         let buffer = Array.zeroCreate<byte> count
-        #if !NETSTANDARD2_1
+#if !NETSTANDARD2_1
         stream.ReadExactly(buffer, 0, count)
-        #else
+#else
         stream.Read(buffer, 0, count) |> ignore
-        #endif
+#endif
         buffer
 
     let private readBin (stream: Stream) =
@@ -292,7 +318,7 @@ module internal Msgpack =
 
         readExactly stream len
 
-    
+
     /// <summary>
     /// Reads one frame. Blocks until a whole frame has arrived.
     /// </summary>
@@ -381,8 +407,7 @@ module internal Msgpack =
         /// The element count of the array that starts here.
         member _.ReadArrayLength() =
             match tag () with
-            | fixarray when fixarray >= FixarrayLow && fixarray <= FixarrayHigh ->
-                int (fixarray &&& 0x0Fuy)
+            | fixarray when fixarray >= FixarrayLow && fixarray <= FixarrayHigh -> int (fixarray &&& 0x0Fuy)
             | Array16 -> int (BinaryPrimitives.ReadUInt16BigEndian(take 2))
             | Array32 -> int (BinaryPrimitives.ReadUInt32BigEndian(take 4))
             | other -> failwithf $"expected a msgpack array header, got 0x%02X{other}"
@@ -425,18 +450,34 @@ module Tsc =
     let locate (searchRoot: string) =
         let rid =
             let platform =
-                #if !NETSTANDARD2_1
+#if !NETSTANDARD2_1
                 if OperatingSystem.IsWindows() then "win32"
                 elif OperatingSystem.IsMacOS() then "darwin"
                 elif OperatingSystem.IsFreeBSD() then "freebsd"
                 else "linux"
-                #else
-                if System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows) then "win32"
-                elif System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX) then "darwin"
-                elif System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux) then "linux"
-                else "freebsd"
-                #endif
-                
+#else
+                if
+                    System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                        System.Runtime.InteropServices.OSPlatform.Windows
+                    )
+                then
+                    "win32"
+                elif
+                    System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                        System.Runtime.InteropServices.OSPlatform.OSX
+                    )
+                then
+                    "darwin"
+                elif
+                    System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                        System.Runtime.InteropServices.OSPlatform.Linux
+                    )
+                then
+                    "linux"
+                else
+                    "freebsd"
+#endif
+
 
             let arch =
                 match Runtime.InteropServices.RuntimeInformation.OSArchitecture with
@@ -446,11 +487,19 @@ module Tsc =
 
             $"{platform}-{arch}"
 
-        #if !NETSTANDARD2_1
+#if !NETSTANDARD2_1
         let extension = if OperatingSystem.IsWindows() then ".exe" else ""
-        #else
-        let extension = if System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows) then ".exe" else ""
-        #endif
+#else
+        let extension =
+            if
+                System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                    System.Runtime.InteropServices.OSPlatform.Windows
+                )
+            then
+                ".exe"
+            else
+                ""
+#endif
 
         // Platform package and executable stem, most current layout first.
         let layouts = [ $"typescript-{rid}", "tsc"; $"native-preview-{rid}", "tsgo" ]
@@ -480,8 +529,9 @@ module Tsc =
 /// <summary>
 /// <b>SYNC</b> TypeScript compiler speaking the sync MessagePack protocol over redirected stdio.
 /// </summary>
-type TscChannel (exePath: string, cwd: string, ?callbacks: IDictionary<string, TsGoCallback>) =
+type TscChannel(exePath: string, cwd: string, ?callbacks: IDictionary<string, TsGoCallback>) =
     let callbacks = defaultArg callbacks (dict [])
+
     let startInfo =
         let args = ResizeArray [ "--api"; "--cwd"; cwd ]
 
@@ -540,8 +590,7 @@ type TscChannel (exePath: string, cwd: string, ?callbacks: IDictionary<string, T
 
             match messageType with
             | MessageType.Response -> result <- ValueSome responsePayload
-            | MessageType.Error ->
-                raise (TsGoError(method, Encoding.UTF8.GetString responsePayload))
+            | MessageType.Error -> raise (TsGoError(method, Encoding.UTF8.GetString responsePayload))
             | MessageType.Call ->
                 // A callback must be answered inline, tagged with the same method name, before
                 // the server will continue toward our response.
@@ -558,9 +607,17 @@ type TscChannel (exePath: string, cwd: string, ?callbacks: IDictionary<string, T
 
                     match reply with
                     | Ok bytes ->
-                        Msgpack.writeFrame input MessageType.CallResponse (ReadOnlySpan responseMethod) (ReadOnlySpan bytes)
+                        Msgpack.writeFrame
+                            input
+                            MessageType.CallResponse
+                            (ReadOnlySpan responseMethod)
+                            (ReadOnlySpan bytes)
                     | Error bytes ->
-                        Msgpack.writeFrame input MessageType.CallError (ReadOnlySpan responseMethod) (ReadOnlySpan bytes)
+                        Msgpack.writeFrame
+                            input
+                            MessageType.CallError
+                            (ReadOnlySpan responseMethod)
+                            (ReadOnlySpan bytes)
                 | _ ->
                     let message = Encoding.UTF8.GetBytes $"no callback registered for {name}"
                     Msgpack.writeFrame input MessageType.CallError (ReadOnlySpan responseMethod) (ReadOnlySpan message)
@@ -573,7 +630,7 @@ type TscChannel (exePath: string, cwd: string, ?callbacks: IDictionary<string, T
     /// <returns>Response in bytes</returns>
     member this.Request(method: string, [<LanguageInjection(InjectedLanguage.JSON)>] json: string) =
         this.Request(method, Encoding.UTF8.GetBytes json)
-        
+
     /// <param name="method">The protocol method name.</param>
     /// <param name="json">JSON payload</param>
     /// <returns>Response in bytes</returns>
@@ -587,7 +644,7 @@ type TscChannel (exePath: string, cwd: string, ?callbacks: IDictionary<string, T
         match this.Request(method, json) with
         | [||] -> ValueNone
         | bytes -> ValueSome(Encoding.UTF8.GetString bytes)
-    
+
     /// <param name="method">The protocol method name.</param>
     /// <param name="json">JSON payload</param>
     /// <returns>Response in UTF-8 JSON</returns>
@@ -595,8 +652,9 @@ type TscChannel (exePath: string, cwd: string, ?callbacks: IDictionary<string, T
         this.RequestJson(method, json.ToJsonString())
 
     /// Must be called once before anything else
-    member this.Initialize() = this.Request("initialize", "null") |> ignore
-    
+    member this.Initialize() =
+        this.Request("initialize", "null") |> ignore
+
     interface IDisposable with
         member _.Dispose() =
             try
@@ -604,11 +662,11 @@ type TscChannel (exePath: string, cwd: string, ?callbacks: IDictionary<string, T
                 input.Close()
 
                 if not (proc.WaitForExit 2000) then
-                    #if !NETSTANDARD2_1
+#if !NETSTANDARD2_1
                     proc.Kill true
-                    #else
+#else
                     proc.Kill()
-                    #endif
+#endif
             with _ ->
                 ()
 
@@ -680,12 +738,14 @@ module Ast =
     /// section offsets read out of the header.
     [<Struct>]
     type SourceFile =
-        { Data: byte[]
-          StringTableOffsets: int
-          StringTable: int
-          ExtendedData: int
-          StructuredData: int
-          Nodes: int }
+        {
+            Data: byte[]
+            StringTableOffsets: int
+            StringTable: int
+            ExtendedData: int
+            StructuredData: int
+            Nodes: int
+        }
 
         /// Number of node records in the blob. Index 0 is a null slot; index 1 is the SourceFile.
         member this.NodeCount = (this.Data.Length - this.Nodes) / NodeLen
@@ -706,17 +766,23 @@ module Ast =
         if version <> ProtocolVersion then
             failwithf $"unsupported AST protocol version %d{version} (this client implements %d{ProtocolVersion})"
 
-        { Data = data
-          StringTableOffsets = int (u32 data 24)
-          StringTable = int (u32 data 28)
-          ExtendedData = int (u32 data 32)
-          StructuredData = int (u32 data 36)
-          Nodes = int (u32 data 40) }
+        {
+            Data = data
+            StringTableOffsets = int (u32 data 24)
+            StringTable = int (u32 data 28)
+            ExtendedData = int (u32 data 32)
+            StructuredData = int (u32 data 36)
+            Nodes = int (u32 data 40)
+        }
 
     /// The 128-bit content hash, used to tell whether a cached blob is still current.
     let contentHash (file: SourceFile) =
         let hex (v: uint32) = $"%08x{v}"
-        hex (u32 file.Data 16) + hex (u32 file.Data 12) + hex (u32 file.Data 8) + hex (u32 file.Data 4)
+
+        hex (u32 file.Data 16)
+        + hex (u32 file.Data 12)
+        + hex (u32 file.Data 8)
+        + hex (u32 file.Data 4)
 
     let inline private nodeAt (file: SourceFile) (index: int) = file.Nodes + index * NodeLen
 
@@ -735,9 +801,11 @@ module Ast =
     let endPos (file: SourceFile) (index: int) = i32 file.Data (nodeAt file index + 8)
 
     /// The next sibling within a node list; 0 terminates.
-    let next (file: SourceFile) (index: int) = int (u32 file.Data (nodeAt file index + 12))
+    let next (file: SourceFile) (index: int) =
+        int (u32 file.Data (nodeAt file index + 12))
 
-    let parent (file: SourceFile) (index: int) = int (u32 file.Data (nodeAt file index + 16))
+    let parent (file: SourceFile) (index: int) =
+        int (u32 file.Data (nodeAt file index + 16))
 
     /// The node's `NodeFlags` - `Const`, `Ambient`, `JavaScriptFile` and the rest of the word
     /// the parser set while reading it.
@@ -813,8 +881,9 @@ module Ast =
     /// The unescaped source text of a template literal fragment.
     let rawText (file: SourceFile) (index: int) =
         match kind file index with
-        | SyntaxKind.TemplateHead | SyntaxKind.TemplateMiddle | SyntaxKind.TemplateTail ->
-            extendedWord file index 4<byteOffset> |> ValueOption.map (tag >> getString file)
+        | SyntaxKind.TemplateHead
+        | SyntaxKind.TemplateMiddle
+        | SyntaxKind.TemplateTail -> extendedWord file index 4<byteOffset> |> ValueOption.map (tag >> getString file)
         | _ -> ValueNone
 
     /// The literal's `TokenFlags`, for the kinds that record them.
@@ -824,14 +893,18 @@ module Ast =
         | SyntaxKind.NumericLiteral
         | SyntaxKind.BigIntLiteral
         | SyntaxKind.RegularExpressionLiteral ->
-            extendedWord file index 4<byteOffset> |> ValueOption.map LanguagePrimitives.EnumOfValue<uint32, TokenFlags>
+            extendedWord file index 4<byteOffset>
+            |> ValueOption.map LanguagePrimitives.EnumOfValue<uint32, TokenFlags>
         | _ -> ValueNone
 
     /// The template fragment's `TokenFlags`, which sit past its raw text.
     let templateFlags (file: SourceFile) (index: int) =
         match kind file index with
-        | SyntaxKind.TemplateHead | SyntaxKind.TemplateMiddle | SyntaxKind.TemplateTail ->
-            extendedWord file index 8<byteOffset> |> ValueOption.map LanguagePrimitives.EnumOfValue<uint32, TokenFlags>
+        | SyntaxKind.TemplateHead
+        | SyntaxKind.TemplateMiddle
+        | SyntaxKind.TemplateTail ->
+            extendedWord file index 8<byteOffset>
+            |> ValueOption.map LanguagePrimitives.EnumOfValue<uint32, TokenFlags>
         | _ -> ValueNone
 
     /// The child occupying declared slot `order`, if present.
@@ -844,7 +917,8 @@ module Ast =
         let mask =
             match data file index with
             | Children mask -> mask
-            | StringIndex _ | Extended _ -> ChildMask
+            | StringIndex _
+            | Extended _ -> ChildMask
 
         // With an all-ones fallback the emptiness check is load-bearing: a childless leaf would
         // otherwise report every slot present and walk `next` into unrelated nodes.
@@ -856,21 +930,21 @@ module Ast =
             // many `next` pointers from the first child.
             //
             // Present slots below `order`; equivalently `order` minus the missing ones.
-            #if !NETSTANDARD2_1
+#if !NETSTANDARD2_1
             let propertyIndex = BitOperations.PopCount(uint32 (mask &&&& slotsBelow order))
-            #else
+#else
             let popCount32 (value: uint32) : int =
                 // Subtract the shifted value to count pairs of bits
                 let v1 = value - ((value >>> 1) &&& 0x55555555u)
-                
+
                 // Combine neighboring 2-bit fields into 4-bit fields
                 let v2 = (v1 &&& 0x33333333u) + ((v1 >>> 2) &&& 0x33333333u)
-                
+
                 // Combine 4-bit fields into 8-bit fields, then multiply to sum all bytes
                 int (((v2 + (v2 >>> 4)) &&& 0x0F0F0F0Fu) * 0x01010101u) >>> 24
 
-            let propertyIndex = popCount32(uint32 (mask &&&& slotsBelow order))
-            #endif
+            let propertyIndex = popCount32 (uint32 (mask &&&& slotsBelow order))
+#endif
 
             let mutable child = index + 1
 
@@ -918,50 +992,55 @@ module Ast =
     /// A `/// <reference ... />` directive, with its positions already in UTF-16 code units.
     [<Struct>]
     type FileReference =
-        { Pos: int
-          End: int
-          FileName: string
-          /// `ResolutionMode`, which the schema does not name; 0 is "unspecified".
-          ResolutionMode: uint32
-          Preserve: bool }
+        {
+            Pos: int
+            End: int
+            FileName: string
+            /// `ResolutionMode`, which the schema does not name; 0 is "unspecified".
+            ResolutionMode: uint32
+            Preserve: bool
+        }
 
     /// One mapping between a virtual file and the original it was extracted from.
     [<Struct>]
     type SpanMapSegment =
-        { VirtualStart: int
-          VirtualLength: int
-          OriginalStart: int
-          OriginalLength: int
-          Kind: SpanMapKind
-          /// <summary>
-          /// Absent when the compiler wrote a five-element segment.
-          /// </summary>
-          /// <remarks>
-          /// Absent is not "no features": the reference client reads a segment with no sixth
-          /// element as <c>SpanMapFeature.All</c> (`dist/api/node/node.js`, `get spanMap`). The
-          /// wire fact is kept as it is rather than defaulted, so that a caller can tell the two
-          /// forms apart - but a caller asking what the segment supports should read
-          /// <c>ValueNone</c> as everything.
-          /// </remarks>
-          Features: SpanMapFeature voption }
+        {
+            VirtualStart: int
+            VirtualLength: int
+            OriginalStart: int
+            OriginalLength: int
+            Kind: SpanMapKind
+            /// <summary>
+            /// Absent when the compiler wrote a five-element segment.
+            /// </summary>
+            /// <remarks>
+            /// Absent is not "no features": the reference client reads a segment with no sixth
+            /// element as <c>SpanMapFeature.All</c> (`dist/api/node/node.js`, `get spanMap`). The
+            /// wire fact is kept as it is rather than defaulted, so that a caller can tell the two
+            /// forms apart - but a caller asking what the segment supports should read
+            /// <c>ValueNone</c> as everything.
+            /// </remarks>
+            Features: SpanMapFeature voption
+        }
 
     /// A suppression directive mapped from an original file onto a virtual one, in UTF-16 code
     /// units.
     [<Struct>]
     type DiagnosticDirective =
-        { OriginalStart: int
-          OriginalLength: int
-          VirtualStart: int
-          VirtualLength: int
-          Policy: DiagnosticDirectivePolicy
-          UnusedCode: uint32 }
+        {
+            OriginalStart: int
+            OriginalLength: int
+            VirtualStart: int
+            VirtualLength: int
+            Policy: DiagnosticDirectivePolicy
+            UnusedCode: uint32
+        }
 
     let private sourceFileWord (file: SourceFile) (offset: int<byteOffset>) =
         match extendedWord file Root offset with
         | ValueSome word -> word
         | ValueNone ->
-            failwithf
-                $"the root node is a %A{kind file Root} carrying %A{data file Root}, not a SourceFile record"
+            failwithf $"the root node is a %A{kind file Root} carrying %A{data file Root}, not a SourceFile record"
 
     /// A record field that is an index into the string table. The one place the three meanings a
     /// record word can carry - string index, node index, structured-data offset - are told apart,
@@ -998,20 +1077,25 @@ module Ast =
             // `[pos; end; fileName; resolutionMode; preserve]`, per `encoder.go:734-750`.
             reader.ReadArrayLength() |> ignore
 
-            { Pos = int (reader.ReadUInt32())
-              End = int (reader.ReadUInt32())
-              FileName = reader.ReadString()
-              ResolutionMode = reader.ReadUInt32()
-              Preserve = reader.ReadBool() })
+            {
+                Pos = int (reader.ReadUInt32())
+                End = int (reader.ReadUInt32())
+                FileName = reader.ReadString()
+                ResolutionMode = reader.ReadUInt32()
+                Preserve = reader.ReadBool()
+            })
 
     /// The file's whole source text, which the string table is mostly made of.
-    let sourceText (file: SourceFile) = getString file (stringIndexField file SourceFileRecord.Text)
+    let sourceText (file: SourceFile) =
+        getString file (stringIndexField file SourceFileRecord.Text)
 
     /// The file name the compiler knows this file by.
-    let fileName (file: SourceFile) = getString file (stringIndexField file SourceFileRecord.FileName)
+    let fileName (file: SourceFile) =
+        getString file (stringIndexField file SourceFileRecord.FileName)
 
     /// The file's canonicalised path.
-    let path (file: SourceFile) = getString file (stringIndexField file SourceFileRecord.Path)
+    let path (file: SourceFile) =
+        getString file (stringIndexField file SourceFileRecord.Path)
 
     /// <summary>
     /// The text as it was before any transformation, equal to <c>sourceText</c> for an ordinary
@@ -1079,12 +1163,14 @@ module Ast =
             // `[originalStart; originalLength; virtualStart; virtualLength; policy; unusedCode]`.
             reader.ReadArrayLength() |> ignore
 
-            { OriginalStart = int (reader.ReadUInt32())
-              OriginalLength = int (reader.ReadUInt32())
-              VirtualStart = int (reader.ReadUInt32())
-              VirtualLength = int (reader.ReadUInt32())
-              Policy = LanguagePrimitives.EnumOfValue<uint32, DiagnosticDirectivePolicy>(reader.ReadUInt32())
-              UnusedCode = reader.ReadUInt32() })
+            {
+                OriginalStart = int (reader.ReadUInt32())
+                OriginalLength = int (reader.ReadUInt32())
+                VirtualStart = int (reader.ReadUInt32())
+                VirtualLength = int (reader.ReadUInt32())
+                Policy = LanguagePrimitives.EnumOfValue<uint32, DiagnosticDirectivePolicy>(reader.ReadUInt32())
+                UnusedCode = reader.ReadUInt32()
+            })
 
     /// <summary>
     /// The mapping back to the file this one was extracted from, empty when there is none.
@@ -1094,13 +1180,18 @@ module Ast =
             // The sixth element is optional, so the header length is load-bearing here.
             let length = reader.ReadArrayLength()
 
-            { VirtualStart = int (reader.ReadUInt32())
-              VirtualLength = int (reader.ReadUInt32())
-              OriginalStart = int (reader.ReadUInt32())
-              OriginalLength = int (reader.ReadUInt32())
-              Kind = LanguagePrimitives.EnumOfValue<uint32, SpanMapKind>(reader.ReadUInt32())
-              Features =
-                if length > 5 then ValueSome(LanguagePrimitives.EnumOfValue<uint32, SpanMapFeature>(reader.ReadUInt32())) else ValueNone })
+            {
+                VirtualStart = int (reader.ReadUInt32())
+                VirtualLength = int (reader.ReadUInt32())
+                OriginalStart = int (reader.ReadUInt32())
+                OriginalLength = int (reader.ReadUInt32())
+                Kind = LanguagePrimitives.EnumOfValue<uint32, SpanMapKind>(reader.ReadUInt32())
+                Features =
+                    if length > 5 then
+                        ValueSome(LanguagePrimitives.EnumOfValue<uint32, SpanMapFeature>(reader.ReadUInt32()))
+                    else
+                        ValueNone
+            })
 
     /// The names of the files this one was assembled from.
     let supplementalSourceFileNames (file: SourceFile) =
@@ -1111,7 +1202,9 @@ module Ast =
         sourceFileString file SourceFileRecord.CanonicalSourceFileName
 
     /// The content mapper that produced this file.
-    let contentMapper (file: SourceFile) = sourceFileString file SourceFileRecord.ContentMapper
+    let contentMapper (file: SourceFile) =
+        sourceFileString file SourceFileRecord.ContentMapper
 
     /// The name this file is addressed by when it is virtual.
-    let virtualFileName (file: SourceFile) = sourceFileString file SourceFileRecord.VirtualFileName
+    let virtualFileName (file: SourceFile) =
+        sourceFileString file SourceFileRecord.VirtualFileName

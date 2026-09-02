@@ -75,16 +75,22 @@ module ProtoJson =
         options.DefaultIgnoreCondition <- JsonIgnoreCondition.Never
         options
 
-    let serialize (value: 'T) = JsonSerializer.SerializeToUtf8Bytes(value, options)
+    let serialize (value: 'T) =
+        JsonSerializer.SerializeToUtf8Bytes(value, options)
 
-    let deserialize<'T> (bytes: byte[]) = JsonSerializer.Deserialize<'T>(ReadOnlySpan bytes, options)
+    let deserialize<'T> (bytes: byte[]) =
+        JsonSerializer.Deserialize<'T>(ReadOnlySpan bytes, options)
 
     /// An empty payload is the server's `undefined`; a literal `null` is its `null`. Both mean
     /// "no result" to a caller, and both must be caught before `Deserialize` sees them - asking
     /// for a record and getting null back yields a null record rather than an exception.
     let isAbsent (bytes: byte[]) =
         bytes.Length = 0
-        || (bytes.Length = 4 && bytes[0] = 110uy && bytes[1] = 117uy && bytes[2] = 108uy && bytes[3] = 108uy)
+        || (bytes.Length = 4
+            && bytes[0] = 110uy
+            && bytes[1] = 117uy
+            && bytes[2] = 108uy
+            && bytes[3] = 108uy)
 
     /// Encodes any parameter record for use as `BatchRequest.Params`.
     ///
@@ -92,7 +98,10 @@ module ProtoJson =
     /// call would have sent - there is no second encoding to keep in step, and every parameter
     /// type works here without the generator knowing anything about batching.
     let batchEntry (method: string) (parameters: 'Params) : BatchRequest =
-        { Method = method; Params = serialize parameters }
+        {
+            Method = method
+            Params = serialize parameters
+        }
 
     /// A batch entry for one of the methods the schema types as taking no parameters. The payload
     /// is left absent rather than sent as a literal null, which is what those methods expect
@@ -102,7 +111,11 @@ module ProtoJson =
     /// A request whose result the schema permits to be null.
     let requestOption<'Params, 'Result> (channel: TscChannel) (method: string) (parameters: 'Params) =
         let response = channel.Request(method, serialize parameters)
-        if isAbsent response then ValueNone else ValueSome(deserialize<'Result> response)
+
+        if isAbsent response then
+            ValueNone
+        else
+            ValueSome(deserialize<'Result> response)
 
     /// A request whose result the schema says is always present.
     let request<'Params, 'Result> (channel: TscChannel) (method: string) (parameters: 'Params) =
@@ -118,7 +131,11 @@ module ProtoJson =
     /// an empty payload, so the four bytes are required.
     let requestNoParams<'Result> (channel: TscChannel) (method: string) =
         let response = channel.Request(method, "null")
-        if isAbsent response then ValueNone else ValueSome(deserialize<'Result> response)
+
+        if isAbsent response then
+            ValueNone
+        else
+            ValueSome(deserialize<'Result> response)
 
     /// The four AST-returning methods.
     ///

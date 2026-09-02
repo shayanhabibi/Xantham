@@ -37,7 +37,14 @@ let initialRaw: char = Brand.untagChar initial
 
 // A branded string is still a string at every use site that untags it.
 let describe () =
-    sprintf "%s/%s/%s/%b/%c/%f" (Brand.untagString user) (Brand.untagString order) userRaw flagRaw initialRaw (float elapsed)
+    sprintf
+        "%s/%s/%s/%b/%c/%f"
+        (Brand.untagString user)
+        (Brand.untagString order)
+        userRaw
+        flagRaw
+        initialRaw
+        (float elapsed)
 
 // The negative direction is what makes the brand worth emitting; these must not compile,
 // and are recorded here as prose because the gate has no way to assert a non-compile:

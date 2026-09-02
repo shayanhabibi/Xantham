@@ -23,84 +23,92 @@ type TscMailbox(exePath, cwd, ?callbacks: IDictionary<string, TsGoCallback>) =
 
     // Replies carry the failure rather than raising inside the agent
     let agent =
-        MailboxProcessor<BatchRequest * AsyncReplyChannel<Result<byte[], exn>>>.Start(
-            (fun inbox ->
-                // Everything already queued goes out together. The count is read after the first
-                // Receive, so it reflects what accumulated while the previous batch was in flight.
-                let rec drain (batch: ResizeArray<_>) =
-                    async {
-                        if inbox.CurrentQueueLength = 0 then
-                            return batch
+        MailboxProcessor<BatchRequest * AsyncReplyChannel<Result<byte[], exn>>>
+            .Start(
+                (fun inbox ->
+                    // Everything already queued goes out together. The count is read after the first
+                    // Receive, so it reflects what accumulated while the previous batch was in flight.
+                    let rec drain (batch: ResizeArray<_>) =
+                        async {
+                            if inbox.CurrentQueueLength = 0 then
+                                return batch
+                            else
+                                let! message = inbox.Receive()
+                                batch.Add message
+                                return! drain batch
+                        }
+
+                    let one (request: BatchRequest) =
+                        // Not `ProtoJson.request<byte[], _>`: the params are already UTF-8 JSON, and
+                        // serialising a byte[] would base64 it into a string.
+                        if isNull request.Params then
+                            channel.Request(request.Method, "null")
                         else
-                            let! message = inbox.Receive()
-                            batch.Add message
-                            return! drain batch
-                    }
+                            channel.Request(request.Method, request.Params)
 
-                let one (request: BatchRequest) =
-                    // Not `ProtoJson.request<byte[], _>`: the params are already UTF-8 JSON, and
-                    // serialising a byte[] would base64 it into a string.
-                    if isNull request.Params then
-                        channel.Request(request.Method, "null")
-                    else
-                        channel.Request(request.Method, request.Params)
+                    let many (requests: BatchRequest[]) =
+                        let response =
+                            ProtoJson.request<BatchRequestsParams, BatchRequestsResponse>
+                                channel
+                                Method.BatchRequests
+                                { Requests = ValueSome requests }
 
-                let many (requests: BatchRequest[]) =
-                    let response =
-                        ProtoJson.request<BatchRequestsParams, BatchRequestsResponse>
-                            channel Method.BatchRequests { Requests = ValueSome requests }
+                        if response.Responses.Length <> requests.Length then
+                            failwithf
+                                $"batchRequests answered %d{response.Responses.Length} of %d{requests.Length} requests"
 
-                    if response.Responses.Length <> requests.Length then
-                        failwithf $"batchRequests answered %d{response.Responses.Length} of %d{requests.Length} requests"
+                        response.Responses
+                        |> Array.map (fun response ->
+                            match response.Error with
+                            | ValueSome error -> Error(TsGoError(response.Method, error))
+                            | ValueNone when isNull response.Result -> Ok [||]
+                            // The AST methods return their blob raw when sent alone, but a batch
+                            // response is JSON and cannot carry bytes, so here the same result is a
+                            // base64 string.
+                            | ValueNone when Method.binaryResultMethods.Contains response.Method ->
+                                Ok(Convert.FromBase64String(ProtoJson.deserialize<string> response.Result))
+                            // caller's payload as raw UTF-8 JSON
+                            | ValueNone -> Ok response.Result)
 
-                    response.Responses
-                    |> Array.map (fun response ->
-                        match response.Error with
-                        | ValueSome error -> Error(TsGoError(response.Method, error))
-                        | ValueNone when isNull response.Result -> Ok [||]
-                        // The AST methods return their blob raw when sent alone, but a batch
-                        // response is JSON and cannot carry bytes, so here the same result is a
-                        // base64 string.
-                        | ValueNone when Method.binaryResultMethods.Contains response.Method ->
-                            Ok(Convert.FromBase64String(ProtoJson.deserialize<string> response.Result))
-                        // caller's payload as raw UTF-8 JSON
-                        | ValueNone -> Ok response.Result)
+                    let rec loop () =
+                        async {
+                            let! first = inbox.Receive()
+                            let! batch = drain (ResizeArray [ first ])
+                            let requests = batch |> Seq.map fst |> Array.ofSeq
 
-                let rec loop () =
-                    async {
-                        let! first = inbox.Receive()
-                        let! batch = drain (ResizeArray [ first ])
-                        let requests = batch |> Seq.map fst |> Array.ofSeq
+                            let results =
+                                try
+                                    if requests.Length = 1 then
+                                        [| Ok(one requests[0]) |]
+                                    else
+                                        many requests
+                                with
+                                | TsGoError _ when requests.Length > 1 ->
+                                    // The server refused the batch as a whole, not one member of it:
+                                    // a batch response is marshalled in one piece, so a single
+                                    // result that cannot be encoded (verified live: a number literal
+                                    // type whose value is `1e999` is `+Inf` to Go's JSON encoder)
+                                    // fails every request travelling with it. The channel survived -
+                                    // the refusal is an ordinary error frame - so replay the members
+                                    // one by one and let only the guilty one fail.
+                                    requests
+                                    |> Array.map (fun request ->
+                                        try
+                                            Ok(one request)
+                                        with error ->
+                                            Error error)
+                                | error ->
+                                    // The channel is dead; nobody in this group gets an answer, so
+                                    // tell all of them the same thing.
+                                    Array.create requests.Length (Error error)
 
-                        let results =
-                            try
-                                if requests.Length = 1 then [| Ok(one requests[0]) |] else many requests
-                            with
-                            | TsGoError _ when requests.Length > 1 ->
-                                // The server refused the batch as a whole, not one member of it:
-                                // a batch response is marshalled in one piece, so a single
-                                // result that cannot be encoded (verified live: a number literal
-                                // type whose value is `1e999` is `+Inf` to Go's JSON encoder)
-                                // fails every request travelling with it. The channel survived -
-                                // the refusal is an ordinary error frame - so replay the members
-                                // one by one and let only the guilty one fail.
-                                requests
-                                |> Array.map (fun request ->
-                                    try
-                                        Ok(one request)
-                                    with error ->
-                                        Error error)
-                            | error ->
-                                // The channel is dead; nobody in this group gets an answer, so
-                                // tell all of them the same thing.
-                                Array.create requests.Length (Error error)
+                            Seq.iteri (fun i (_, reply: AsyncReplyChannel<_>) -> reply.Reply results[i]) batch
+                            return! loop ()
+                        }
 
-                        Seq.iteri (fun i (_, reply: AsyncReplyChannel<_>) -> reply.Reply results[i]) batch
-                        return! loop ()
-                    }
-
-                loop ()),
-            cancellationToken = cancellation.Token)
+                    loop ()),
+                cancellationToken = cancellation.Token
+            )
 
     let send entry =
         async {

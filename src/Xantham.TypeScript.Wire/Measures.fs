@@ -57,20 +57,17 @@ module Operators =
 
     /// Masks a value, keeping its role: masking a `word` yields a `word`. Deliberately
     /// asymmetric, so the mask has to be the right-hand operand.
-    let inline (&&&&) (value: uint32<'role>) (mask: uint32<mask>) : uint32<'role> =
-        tag (uint32 value &&& uint32 mask)
+    let inline (&&&&) (value: uint32<'role>) (mask: uint32<mask>) : uint32<'role> = tag (uint32 value &&& uint32 mask)
 
     /// True when every bit of `mask` is set in `value`.
     let inline hasAll (mask: uint32<mask>) (value: uint32<'role>) =
         uint32 value &&& uint32 mask = uint32 mask
 
     /// True when any bit of `mask` is set in `value`.
-    let inline hasAny (mask: uint32<mask>) (value: uint32<'role>) =
-        uint32 value &&& uint32 mask <> 0u
+    let inline hasAny (mask: uint32<mask>) (value: uint32<'role>) = uint32 value &&& uint32 mask <> 0u
 
     /// Right-shifts a value, keeping its role. The distance is a bit count, not a mask.
-    let inline (>>>>) (value: uint32<'role>) (count: int<bits>) : uint32<'role> =
-        tag (uint32 value >>> int count)
+    let inline (>>>>) (value: uint32<'role>) (count: int<bits>) : uint32<'role> = tag (uint32 value >>> int count)
 
     /// Re-tags a value whose role has changed because bits were taken out of it - masking the
     /// string index out of a data word makes it a string index. Explicit, because this is the
