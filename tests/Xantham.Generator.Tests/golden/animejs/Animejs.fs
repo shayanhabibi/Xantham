@@ -599,7 +599,7 @@ type Eases =
 
 [<Interface>]
 type Easings =
-    abstract Spring: obj with get, set
+    abstract Spring: SpringConstructor with get, set
     abstract spring: Func<SpringParams option, Spring> with get, set
     abstract createSpring: Func<SpringParams option, Spring> with get, set
     abstract cubicBezier: Func<float option, float option, float option, float option, EasingFunction> with get, set
@@ -608,7 +608,11 @@ type Easings =
     abstract irregular: Func<float option, float option, EasingFunction> with get, set
     abstract eases: Eases with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (Spring: obj, spring: Func<SpringParams option, Spring>, createSpring: Func<SpringParams option, Spring>, cubicBezier: Func<float option, float option, float option, float option, EasingFunction>, steps: Func<float option, bool option, EasingFunction>, linear: Func<TimelinePosition[], EasingFunction>, irregular: Func<float option, float option, EasingFunction>, eases: Eases) : Easings = jsNative
+    static member Create (Spring: SpringConstructor, spring: Func<SpringParams option, Spring>, createSpring: Func<SpringParams option, Spring>, cubicBezier: Func<float option, float option, float option, float option, EasingFunction>, steps: Func<float option, bool option, EasingFunction>, linear: Func<TimelinePosition[], EasingFunction>, irregular: Func<float option, float option, EasingFunction>, eases: Eases) : Easings = jsNative
+
+type SpringConstructor =
+    [<EmitConstructor>]
+    abstract Create: ?parameters: SpringParams -> Spring
 
 type Spring =
     abstract timeStep: float with get, set
@@ -1233,12 +1237,16 @@ type Text =
     /// A class that splits text into words and wraps them in span elements while preserving the original HTML structure.
     /// </summary>
     /// <remarks>@class</remarks>
-    abstract TextSplitter: obj with get, set
+    abstract TextSplitter: TextSplitterConstructor with get, set
     abstract splitText: Func<U4<string, Browser.Types.Element[], Browser.Types.Element, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter> with get, set
     abstract split: Func<U4<string, Browser.Types.HTMLElement[], Browser.Types.HTMLElement, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter> with get, set
     abstract scrambleText: Func<ScrambleTextParams option, Func<Target option, float option, Target[] option, Tween option, ScrambleTextTween>> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (TextSplitter: obj, splitText: Func<U4<string, Browser.Types.Element[], Browser.Types.Element, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter>, split: Func<U4<string, Browser.Types.HTMLElement[], Browser.Types.HTMLElement, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter>, scrambleText: Func<ScrambleTextParams option, Func<Target option, float option, Target[] option, Tween option, ScrambleTextTween>>) : Text = jsNative
+    static member Create (TextSplitter: TextSplitterConstructor, splitText: Func<U4<string, Browser.Types.Element[], Browser.Types.Element, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter>, split: Func<U4<string, Browser.Types.HTMLElement[], Browser.Types.HTMLElement, Browser.Types.NodeList>, TextSplitterParams option, TextSplitter>, scrambleText: Func<ScrambleTextParams option, Func<Target option, float option, Target[] option, Tween option, ScrambleTextTween>>) : Text = jsNative
+
+type TextSplitterConstructor =
+    [<EmitConstructor>]
+    abstract Create: target: U4<string, Browser.Types.Element[], Browser.Types.Element, Browser.Types.NodeList> * ?parameters: TextSplitterParams -> TextSplitter
 
 [<Interface>]
 type ScrambleTextTween =

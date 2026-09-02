@@ -33,6 +33,7 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\generics-lab\GenericsLab.fs" Link="generics-lab\GenericsLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\intersection-lab\IntersectionLab.fs" Link="intersection-lab\IntersectionLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\statics-lab\StaticsLab.fs" Link="statics-lab\StaticsLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\ctor-lab\CtorLab.fs" Link="ctor-lab\CtorLab.fs" />
     <Compile Include="..\Xantham.Generator.Tests\golden\brand-lab\BrandLab.fs" Link="brand-lab\BrandLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\flags-lab\FlagsLab.fs" Link="flags-lab\FlagsLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\lib-lab\LibLab.fs" Link="lib-lab\LibLab.fs" />

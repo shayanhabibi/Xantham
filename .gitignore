@@ -52,6 +52,9 @@ tests/fixtures/statics-lab/node_modules/
 !tests/fixtures/flags-lab/
 !tests/fixtures/flags-lab/**
 tests/fixtures/flags-lab/node_modules/
+!tests/fixtures/ctor-lab/
+!tests/fixtures/ctor-lab/**
+tests/fixtures/ctor-lab/node_modules/
 !tests/fixtures/parse-lab/
 !tests/fixtures/parse-lab/**
 tests/fixtures/parse-lab/node_modules/

@@ -433,6 +433,16 @@ let private renderMember (m: FsMember) =
             let mutability = if i.ReadOnly then "" else " with get, set"
             yield $"    abstract Item: {printType i.Key} -> {printType i.Value}{mutability}"
         ]
+    | FsConstructor c ->
+        // `[<EmitConstructor>]` is `Emit("new $0($1...)")`, and on an abstract member `$0` is
+        // the object the member is read off - so `scope.Request.Create(url)` compiles to
+        // `new scope.Request(url)` rather than to a call (§4.4).
+        [
+            yield! docLines "    " c.Docs c.Tags
+            yield "    [<EmitConstructor>]"
+            let head = declHead "Create" c.TypeParameters
+            yield $"    abstract {head}: {renderAbstractSignature c.Parameters c.Return}"
+        ]
 
 /// One bound member - an `Exports` member or a class static - as its attribute line and its
 /// signature. Both hold an `ImportBinding` and neither has an F# body, so they render the same.

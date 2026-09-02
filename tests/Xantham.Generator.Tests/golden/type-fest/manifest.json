@@ -3,8 +3,8 @@
   "module": "TypeFest",
   "counts": {
     "exact": 25,
-    "ergonomic": 55,
-    "widened": 219,
+    "ergonomic": 59,
+    "widened": 215,
     "escape": 2
   },
   "passes": [
@@ -15,20 +15,20 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 1020,
-      "ergonomic": 629,
-      "widened": 391
+      "total": 1024,
+      "ergonomic": 635,
+      "widened": 389
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 606,
-      "ergonomic": 176,
-      "widened": 430
+      "total": 600,
+      "ergonomic": 174,
+      "widened": 426
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 38,
-      "ergonomic": 38
+      "total": 36,
+      "ergonomic": 36
     },
     {
       "pass": "AC - audit-coverage",
@@ -473,63 +473,49 @@
     {
       "name": "Class",
       "file": "source/basic.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Class",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
         {
           "key": "TP002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Class",
           "message": "constraint on \u0027Arguments\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Class.prototype",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "Class",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
     {
       "name": "Constructor",
       "file": "source/basic.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
-          "key": "SA002",
-          "pass": "shape-aliases",
-          "tier": "widened",
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "symbol": "Constructor",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
         },
         {
           "key": "TP002",
-          "pass": "shape-aliases",
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Constructor",
           "message": "constraint on \u0027Arguments\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "Constructor",
-          "message": "__type is not among the generated declarations; widened to obj"
         }
       ]
     },
     {
       "name": "AbstractClass",
       "file": "source/basic.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SI002",
@@ -539,53 +525,39 @@
           "message": "base members flattened into the interface (the is-a relation is not emitted)"
         },
         {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AbstractClass",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
           "key": "TP002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AbstractClass",
           "message": "constraint on \u0027Arguments\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AbstractClass.prototype",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "AbstractClass",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
     {
       "name": "AbstractConstructor",
       "file": "source/basic.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
-          "key": "SA002",
-          "pass": "shape-aliases",
-          "tier": "widened",
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "symbol": "AbstractConstructor",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
         },
         {
           "key": "TP002",
-          "pass": "shape-aliases",
+          "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "AbstractConstructor",
           "message": "constraint on \u0027Arguments\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "AbstractConstructor",
-          "message": "__type is not among the generated declarations; widened to obj"
         }
       ]
     },

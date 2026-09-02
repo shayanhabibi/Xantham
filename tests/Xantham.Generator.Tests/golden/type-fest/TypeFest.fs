@@ -752,36 +752,34 @@ type Asyncify<'Function_> = private Asyncify__ of obj
 /// Matches a [<c>class</c>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes).
 /// </summary>
 /// <remarks>@category Class</remarks>
-[<Interface>]
 type Class<'T, 'Arguments> =
-    abstract prototype: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (prototype: obj) : Class<'T, 'Arguments> = jsNative
+    [<EmitConstructor>]
+    abstract Create: [<ParamArray>] arguments_: 'Arguments -> 'T
 
 /// <summary>
 /// Matches a [<c>class</c> constructor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes).
 /// </summary>
 /// <remarks>@category Class</remarks>
-[<Erase>]
-type Constructor<'T, 'Arguments> = private Constructor__ of obj
+type Constructor<'T, 'Arguments> =
+    [<EmitConstructor>]
+    abstract Create: [<ParamArray>] arguments_: 'Arguments -> 'T
 
 /// <summary>
 /// Matches an [<c>abstract class</c>](https://www.typescriptlang.org/docs/handbook/2/classes.html#abstract-classes-and-members).
 /// </summary>
 /// <remarks>@category Class</remarks>
 /// <remarks>@privateRemarks We cannot use a <c>type</c> here because TypeScript throws: 'abstract' modifier cannot appear on a type member. (1070)</remarks>
-[<Interface>]
 type AbstractClass<'T, 'Arguments> =
-    abstract prototype: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (prototype: obj) : AbstractClass<'T, 'Arguments> = jsNative
+    [<EmitConstructor>]
+    abstract Create: [<ParamArray>] arguments_: 'Arguments -> 'T
 
 /// <summary>
 /// Matches an [<c>abstract class</c>](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-2.html#abstract-construct-signatures) constructor.
 /// </summary>
 /// <remarks>@category Class</remarks>
-[<Erase>]
-type AbstractConstructor<'T, 'Arguments> = private AbstractConstructor__ of obj
+type AbstractConstructor<'T, 'Arguments> =
+    [<EmitConstructor>]
+    abstract Create: [<ParamArray>] arguments_: 'Arguments -> 'T
 
 /// <summary>
 /// CamelCase options.

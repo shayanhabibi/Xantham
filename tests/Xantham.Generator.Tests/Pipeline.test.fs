@@ -501,6 +501,72 @@ let pipelineTests =
                             $"{dropped} says why" ])
 
         yield!
+            fixtureTests "ctor-lab" (handFixture "ctor-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a constructor object is declared as its own interface (§4.4)" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `declare const Widget: { prototype: Widget; new (label: string): Widget }`.
+                    // F# has no first-class type for a class's static side, so it becomes an
+                    // interface whose construct signatures are `[<EmitConstructor>] Create`
+                    // members - `$0` is the object the member is read off.
+                    Expect.stringContains source "type WidgetConstructor =" "named after the export it is the value of"
+                    Expect.stringContains source "abstract DEFAULT_LABEL: string" "a property of it is a class static"
+                    Expect.stringContains source "[<EmitConstructor>]" "the construct signature is a constructor"
+                    Expect.stringContains source "abstract Create: label: string -> Widget" "returning the instance side"
+
+                    // `prototype` *is* the instance side, which is a declaration of its own.
+                    Expect.isFalse (source.Contains "abstract prototype") "prototype is not a member of the static side"
+
+                    Expect.stringContains
+                        source
+                        "static member Widget: WidgetConstructor = jsNative"
+                        "so the export is constructible rather than obj"
+
+                  testCase "typeof X at a member position names the constructor object" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // The construct the whole `ServiceWorkerGlobalScope` constructor table is
+                    // made of; it used to reach `abstract Gauge: obj`.
+                    Expect.stringContains source "abstract Gauge: GaugeConstructor" "the member names the static side"
+                    Expect.stringContains source "type GaugeConstructor =" "which is declared"
+                    Expect.stringContains source "abstract UNIT: string" "carrying the class's statics"
+                    Expect.stringContains source "abstract Create: size: float -> Gauge" "and its constructor"
+
+                  testCase "an interface of construct signatures only is no longer obj" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.isFalse (source.Contains "type ParcelFactory = obj") "it has members after all"
+                    Expect.stringContains source "abstract Create<'T>: value: 'T -> Parcel<'T>" "a generic construct signature"
+                    Expect.stringContains source "abstract Create: unit -> Parcel<string>" "and its overload"
+
+                  testCase "nothing else grows a constructor interface" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // A class no `typeof` names keeps its static side on `Exports` and its own
+                    // declaration, where `shape-classes` puts it; `typeof` over a plain value is
+                    // that value's type.
+                    Expect.isFalse (source.Contains "SoloConstructor") "an unreferenced class's static side is not declared"
+                    Expect.isFalse (source.Contains "VersionConstructor") "nor is typeof over a plain value"
+                    Expect.stringContains source "abstract version: string" "which reads as the value's own type"
+
+                  testCase "the idiom is recorded, and nothing in the lab widens" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                    Expect.contains
+                        (rendered.Findings |> List.map (fun finding -> finding.Tier, finding.Message))
+                        (Ergonomic,
+                         "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (§4.4)")
+                        "the mapping owns itself"
+
+                    Expect.isEmpty
+                        (rendered.Findings |> List.filter (fun finding -> finding.Tier = Widened || finding.Tier = Escape))
+                        "every constructor object in the lab is declared" ])
+
+        yield!
             fixtureTests "keyof-lab" (handFixture "keyof-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "a mapped type over a concrete operand is expanded, not widened (D6)" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)

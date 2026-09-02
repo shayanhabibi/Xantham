@@ -1,4 +1,4 @@
-/// The finding catalogue's one invariant that the compiler cannot hold: keys are positional, so
+﻿/// The finding catalogue's one invariant that the compiler cannot hold: keys are positional, so
 /// they are stable only while unions stay append-only. This snapshot is the guard - a renumbered
 /// key fails here, not silently in every golden manifest.
 module Xantham.Generator.Tests.FindingsTests
@@ -72,6 +72,7 @@ let findingsTests =
                     "TR040 TypeReference.ObjectTypeToObj widened"
                     "TR041 TypeReference.SymbolNoBinding widened"
                     "TR042 TypeReference.UniqueSymbolNoBinding widened"
+                    "TR043 TypeReference.ConstructorObjectNotDeclared widened"
                     "TP001 TypeParameters.UnnamedTypeParameter widened"
                     "TP002 TypeParameters.ConstraintDropped ergonomic"
                     "TP003 TypeParameters.GenericFunctionHoisted ergonomic"
@@ -94,12 +95,14 @@ let findingsTests =
                     "SI001 ShapeInterfaces.HybridLosesCallSignatures widened"
                     "SI002 ShapeInterfaces.BaseMembersFlattened ergonomic"
                     "SI003 ShapeInterfaces.IntersectionFlattened ergonomic"
+                    "SI004 ShapeInterfaces.ConstructorObjectDeclared ergonomic"
                     "SA001 ShapeAliases.BrandAsMeasure ergonomic"
                     "SA002 ShapeAliases.PhantomComputation widened"
                     "SC001 ShapeClasses.ClassWithoutValueType escape"
                     "SC002 ShapeClasses.StaticMemberDropped widened"
                     "SC003 ShapeClasses.StaticReadOnly widened"
                     "SC004 ShapeClasses.StaticWithoutDeclaration widened"
+                    "SC005 ShapeClasses.StaticMethodWithoutSignatures widened"
                     "SE001 ShapeExports.NoValueType escape"
                     "SP001 SynthesizeParamObjects.ParamObjectSynthesized ergonomic"
                     "DO001 DedupeOverloads.OverloadDropped widened"

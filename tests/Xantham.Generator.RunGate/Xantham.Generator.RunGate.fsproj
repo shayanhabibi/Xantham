@@ -32,6 +32,7 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\lab\PhaseBLab.fs" Link="lab\PhaseBLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\statics-lab\StaticsLab.fs" Link="statics-lab\StaticsLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\flags-lab\FlagsLab.fs" Link="flags-lab\FlagsLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\ctor-lab\CtorLab.fs" Link="ctor-lab\CtorLab.fs" />
         <Compile Include="Program.fs" />
         <None Include="register.mjs" />
     </ItemGroup>

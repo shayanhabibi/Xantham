@@ -2,10 +2,10 @@
   "package": "@cloudflare/workers-types",
   "module": "Cloudflare.WorkersTypes",
   "counts": {
-    "exact": 260,
-    "ergonomic": 972,
-    "widened": 375,
-    "escape": 107
+    "exact": 261,
+    "ergonomic": 1037,
+    "widened": 382,
+    "escape": 117
   },
   "passes": [
     {
@@ -38,10 +38,10 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 8107,
-      "ergonomic": 7086,
-      "widened": 882,
-      "escape": 139
+      "total": 8188,
+      "ergonomic": 7227,
+      "widened": 811,
+      "escape": 150
     },
     {
       "pass": "SA - shape-aliases",
@@ -58,9 +58,9 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 35,
+      "total": 30,
       "ergonomic": 15,
-      "widened": 13,
+      "widened": 8,
       "escape": 7
     },
     {
@@ -106,11 +106,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SC003",
+          "key": "SC005",
           "pass": "shape-classes",
           "tier": "widened",
           "symbol": "DOMException.isError",
-          "message": "a settable static is emitted read-only: Fable compiles an assignment to an imported static as a call"
+          "message": "static method emitted as a value: its type is declared in typescript/lib, which this run resolves identity-only, so there are no signatures to shape"
         },
         {
           "key": "TR023",
@@ -959,6 +959,20 @@
       ]
     },
     {
+      "name": "EventTargetConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "EventTargetConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
       "name": "WorkerGlobalScope",
       "file": "index.d.ts",
       "tier": "widened",
@@ -969,13 +983,6 @@
           "tier": "ergonomic",
           "symbol": "WorkerGlobalScope",
           "message": "base members flattened into the interface (the is-a relation is not emitted)"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WorkerGlobalScope.EventTarget",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
         },
         {
           "key": "TP002",
@@ -1372,6 +1379,34 @@
       ]
     },
     {
+      "name": "CompileErrorConstructor",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CompileErrorConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CompileErrorConstructor.Create(message)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "CompileErrorConstructor.isError",
+          "message": "isError is not among the generated declarations; widened to obj"
+        }
+      ]
+    },
+    {
       "name": "Global",
       "file": "index.d.ts",
       "tier": "escape",
@@ -1388,6 +1423,27 @@
           "pass": "shape-interfaces",
           "tier": "escape",
           "symbol": "Global.valueOf()",
+          "message": "any maps to obj"
+        }
+      ]
+    },
+    {
+      "name": "GlobalConstructor",
+      "file": "index.d.ts",
+      "tier": "escape",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "GlobalConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "GlobalConstructor.Create(value)",
           "message": "any maps to obj"
         }
       ]
@@ -1441,6 +1497,34 @@
       ]
     },
     {
+      "name": "InstanceConstructor",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "InstanceConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "InstanceConstructor.Create(imports)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "InstanceConstructor.Create(module)",
+          "message": "Module is not among the generated declarations; widened to obj"
+        }
+      ]
+    },
+    {
       "name": "InstanceExports",
       "file": "index.d.ts",
       "tier": "ergonomic",
@@ -1459,6 +1543,20 @@
       "file": "index.d.ts",
       "tier": "exact",
       "findings": []
+    },
+    {
+      "name": "MemoryConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "MemoryConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
     },
     {
       "name": "MemoryDescriptor",
@@ -1499,6 +1597,48 @@
           "tier": "ergonomic",
           "symbol": "MemoryDescriptor",
           "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "ModuleConstructor",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ModuleConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "ModuleConstructor.Create()",
+          "message": "Module is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "ModuleConstructor.customSections(module)",
+          "message": "Module is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "ModuleConstructor.exports(module)",
+          "message": "Module is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "ModuleConstructor.imports(module)",
+          "message": "Module is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -1586,6 +1726,34 @@
       ]
     },
     {
+      "name": "RuntimeErrorConstructor",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "RuntimeErrorConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "RuntimeErrorConstructor.Create(message)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "RuntimeErrorConstructor.isError",
+          "message": "isError is not among the generated declarations; widened to obj"
+        }
+      ]
+    },
+    {
       "name": "Table",
       "file": "index.d.ts",
       "tier": "escape",
@@ -1609,6 +1777,27 @@
           "pass": "shape-interfaces",
           "tier": "escape",
           "symbol": "Table.set(value)",
+          "message": "any maps to obj"
+        }
+      ]
+    },
+    {
+      "name": "TableConstructor",
+      "file": "index.d.ts",
+      "tier": "escape",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TableConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "TableConstructor.Create(value)",
           "message": "any maps to obj"
         }
       ]
@@ -1652,55 +1841,6 @@
       "file": "index.d.ts",
       "tier": "widened",
       "findings": [
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WebAssembly.CompileError",
-          "message": "CompileError is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WebAssembly.Global",
-          "message": "Global is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WebAssembly.Instance",
-          "message": "Instance is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WebAssembly.Memory",
-          "message": "Memory is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WebAssembly.Module",
-          "message": "Module is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WebAssembly.RuntimeError",
-          "message": "RuntimeError is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "WebAssembly.Table",
-          "message": "Table is not among the generated declarations; widened to obj"
-        },
         {
           "key": "TR032",
           "pass": "shape-interfaces",
@@ -1760,6 +1900,153 @@
       ]
     },
     {
+      "name": "AbortControllerConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AbortControllerConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "AbortSignalConstructor",
+      "file": "index.d.ts",
+      "tier": "escape",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "AbortSignalConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "AbortSignalConstructor.abort(reason)",
+          "message": "any maps to obj"
+        }
+      ]
+    },
+    {
+      "name": "BlobConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "BlobConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR024",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "BlobConstructor.Create(bits)",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "BlobConstructor.Create(bits)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "BlobConstructor.Create(options)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "BodyConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "BodyConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "ByteLengthQueuingStrategyConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ByteLengthQueuingStrategyConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "CacheConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CacheConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "CacheStorageConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CacheStorageConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "CloseEventConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CloseEventConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CloseEventConstructor.Create(initializer)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
       "name": "CloudflareCompatibilityFlags",
       "file": "index.d.ts",
       "tier": "ergonomic",
@@ -1770,6 +2057,671 @@
           "tier": "ergonomic",
           "symbol": "CloudflareCompatibilityFlags.[]",
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        }
+      ]
+    },
+    {
+      "name": "CompressionStreamConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CompressionStreamConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "CountQueuingStrategyConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CountQueuingStrategyConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "CryptoConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CryptoConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "CryptoKeyConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CryptoKeyConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "CustomEventConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CustomEventConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CustomEventConstructor.Create(init)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "DOMExceptionConstructor",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DOMExceptionConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DOMExceptionConstructor.Create(message)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DOMExceptionConstructor.Create(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DOMExceptionConstructor.isError",
+          "message": "isError is not among the generated declarations; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "DecompressionStreamConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DecompressionStreamConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "ErrorEventConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ErrorEventConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ErrorEventConstructor.Create(init)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "EventConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "EventConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "EventConstructor.Create(init)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "EventSourceConstructor",
+      "file": "index.d.ts",
+      "tier": "escape",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "EventSourceConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "EventSourceConstructor.Create(init)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "EventSourceConstructor.from(stream)",
+          "message": "any maps to obj"
+        }
+      ]
+    },
+    {
+      "name": "ExtendableEventConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ExtendableEventConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ExtendableEventConstructor.Create(init)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "FetchEventConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "FetchEventConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "FetchEventConstructor.Create(init)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "FileConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "FileConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR024",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "FileConstructor.Create(bits)",
+          "message": "ArrayBufferView carries 1 type arguments where JS.ArrayBufferView takes 0; the extras are dropped"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "FileConstructor.Create(bits)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "FileConstructor.Create(options)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "FixedLengthStreamConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "FixedLengthStreamConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "FixedLengthStreamConstructor.Create(queuingStrategy)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "FormDataConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "FormDataConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "HTMLRewriterConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "HTMLRewriterConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "HeadersConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "HeadersConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "HeadersConstructor.Create(init)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "IdentityTransformStreamConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "IdentityTransformStreamConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "IdentityTransformStreamConstructor.Create(queuingStrategy)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "MessageChannelConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "MessageChannelConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "MessageEventConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "MessageEventConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "MessageEventConstructor.Create(initializer)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "MessagePortConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "MessagePortConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "NavigatorConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NavigatorConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "PerformanceConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PerformanceConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "PerformanceEntryConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PerformanceEntryConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "PerformanceMarkConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PerformanceMarkConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PerformanceMarkConstructor.Create(maybeOptions)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "PerformanceMeasureConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PerformanceMeasureConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "PerformanceObserverConstructor",
+      "file": "index.d.ts",
+      "tier": "escape",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PerformanceObserverConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "PerformanceObserverConstructor.Create(callback)",
+          "message": "any maps to obj"
+        }
+      ]
+    },
+    {
+      "name": "PerformanceObserverEntryListConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PerformanceObserverEntryListConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "PerformanceResourceTimingConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PerformanceResourceTimingConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "PromiseRejectionEventConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PromiseRejectionEventConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "PromiseRejectionEventConstructor.Create(init)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "ReadableByteStreamControllerConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ReadableByteStreamControllerConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "ReadableStreamBYOBReaderConstructor",
+      "file": "index.d.ts",
+      "tier": "escape",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ReadableStreamBYOBReaderConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "ReadableStreamBYOBReaderConstructor.Create(stream)",
+          "message": "any maps to obj"
+        }
+      ]
+    },
+    {
+      "name": "ReadableStreamBYOBRequestConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ReadableStreamBYOBRequestConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "ReadableStreamDefaultControllerConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ReadableStreamDefaultControllerConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "ReadableStreamDefaultReaderConstructor",
+      "file": "index.d.ts",
+      "tier": "escape",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ReadableStreamDefaultReaderConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "ReadableStreamDefaultReaderConstructor.Create(stream)",
+          "message": "any maps to obj"
+        }
+      ]
+    },
+    {
+      "name": "ScheduledEventConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ScheduledEventConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ScheduledEventConstructor.Create(init)",
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -1786,480 +2738,11 @@
           "message": "base members flattened into the interface (the is-a relation is not emitted)"
         },
         {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.AbortController",
-          "message": "AbortController is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.AbortSignal",
-          "message": "AbortSignal is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.Blob",
-          "message": "Blob is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.Body",
-          "message": "Body is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "TR008",
           "pass": "shape-interfaces",
           "tier": "escape",
           "symbol": "ServiceWorkerGlobalScope.Buffer",
           "message": "any maps to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.ByteLengthQueuingStrategy",
-          "message": "ByteLengthQueuingStrategy is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.Cache",
-          "message": "Cache is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.CacheStorage",
-          "message": "CacheStorage is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.CloseEvent",
-          "message": "CloseEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.CompressionStream",
-          "message": "CompressionStream is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.CountQueuingStrategy",
-          "message": "CountQueuingStrategy is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.Crypto",
-          "message": "Crypto is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.CryptoKey",
-          "message": "CryptoKey is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.CustomEvent",
-          "message": "CustomEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.DOMException",
-          "message": "DOMException is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.DecompressionStream",
-          "message": "DecompressionStream is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.ErrorEvent",
-          "message": "ErrorEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.Event",
-          "message": "Event is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.EventSource",
-          "message": "EventSource is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.EventTarget",
-          "message": "EventTarget is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.ExtendableEvent",
-          "message": "ExtendableEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.FetchEvent",
-          "message": "FetchEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.File",
-          "message": "File is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.FixedLengthStream",
-          "message": "FixedLengthStream is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.FormData",
-          "message": "FormData is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.HTMLRewriter",
-          "message": "HTMLRewriter is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.Headers",
-          "message": "Headers is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.IdentityTransformStream",
-          "message": "IdentityTransformStream is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.MessageChannel",
-          "message": "MessageChannel is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.MessageEvent",
-          "message": "MessageEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.MessagePort",
-          "message": "MessagePort is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.Navigator",
-          "message": "Navigator is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.Performance",
-          "message": "Performance is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.PerformanceEntry",
-          "message": "PerformanceEntry is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.PerformanceMark",
-          "message": "PerformanceMark is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.PerformanceMeasure",
-          "message": "PerformanceMeasure is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.PerformanceObserver",
-          "message": "PerformanceObserver is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.PerformanceObserverEntryList",
-          "message": "PerformanceObserverEntryList is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.PerformanceResourceTiming",
-          "message": "PerformanceResourceTiming is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.PromiseRejectionEvent",
-          "message": "PromiseRejectionEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.ReadableByteStreamController",
-          "message": "ReadableByteStreamController is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.ReadableStream",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.ReadableStreamBYOBReader",
-          "message": "ReadableStreamBYOBReader is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.ReadableStreamBYOBRequest",
-          "message": "ReadableStreamBYOBRequest is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.ReadableStreamDefaultController",
-          "message": "ReadableStreamDefaultController is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.ReadableStreamDefaultReader",
-          "message": "ReadableStreamDefaultReader is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.Request",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.Response",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.ScheduledEvent",
-          "message": "ScheduledEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.SubtleCrypto",
-          "message": "SubtleCrypto is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.TailEvent",
-          "message": "TailEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.TextDecoder",
-          "message": "TextDecoder is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.TextDecoderStream",
-          "message": "TextDecoderStream is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.TextEncoder",
-          "message": "TextEncoder is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.TextEncoderStream",
-          "message": "TextEncoderStream is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.TraceEvent",
-          "message": "TailEvent is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.TransformStream",
-          "message": "TransformStream is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.TransformStreamDefaultController",
-          "message": "TransformStreamDefaultController is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.URL",
-          "message": "URL is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.URLPattern",
-          "message": "URLPattern is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.URLSearchParams",
-          "message": "URLSearchParams is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.WebSocket",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.WebSocketPair",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.WebSocketRequestResponsePair",
-          "message": "WebSocketRequestResponsePair is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.WorkerGlobalScope",
-          "message": "WorkerGlobalScope is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.WritableStream",
-          "message": "WritableStream is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.WritableStreamDefaultController",
-          "message": "WritableStreamDefaultController is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScope.WritableStreamDefaultWriter",
-          "message": "WritableStreamDefaultWriter is not among the generated declarations; widened to obj"
         },
         {
           "key": "TP002",
@@ -2760,6 +3243,125 @@
       ]
     },
     {
+      "name": "SubtleCryptoConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SubtleCryptoConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "TailEventConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TailEventConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TailEventConstructor.Create(init)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "TextDecoderConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TextDecoderConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TextDecoderConstructor.Create(label)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TextDecoderConstructor.Create(options)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "TextDecoderStreamConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TextDecoderStreamConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TextDecoderStreamConstructor.Create(label)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TextDecoderStreamConstructor.Create(options)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "TextEncoderConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TextEncoderConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "TextEncoderStreamConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TextEncoderStreamConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
       "name": "TraceItemTailAttributes",
       "file": "index.d.ts",
       "tier": "ergonomic",
@@ -2770,6 +3372,272 @@
           "tier": "ergonomic",
           "symbol": "TraceItemTailAttributes.[]",
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        }
+      ]
+    },
+    {
+      "name": "TransformStreamConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TransformStreamConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TransformStreamConstructor.Create(readableStrategy)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TransformStreamConstructor.Create(transformer)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TransformStreamConstructor.Create(writableStrategy)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "TransformStreamDefaultControllerConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TransformStreamDefaultControllerConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "URLConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "URLConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "URLConstructor.Create(base)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "URLConstructor.canParse(base)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "URLConstructor.parse()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "URLConstructor.parse(base)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "URLPatternConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "URLPatternConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "URLPatternConstructor.Create(baseURL)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "URLPatternConstructor.Create(input)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "URLPatternConstructor.Create(patternOptions)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "URLSearchParamsConstructor",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "URLSearchParamsConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "URLSearchParamsConstructor.Create(init)",
+          "message": "Iterable is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "URLSearchParamsConstructor.Create(init)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR035",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "URLSearchParamsConstructor.Create(init)",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        }
+      ]
+    },
+    {
+      "name": "WebSocketRequestResponsePairConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WebSocketRequestResponsePairConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "WorkerGlobalScopeConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkerGlobalScopeConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "WritableStreamConstructor",
+      "file": "index.d.ts",
+      "tier": "escape",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WritableStreamConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "WritableStreamConstructor.Create(queuingStrategy)",
+          "message": "any maps to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WritableStreamConstructor.Create(queuingStrategy)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "WritableStreamConstructor.Create(underlyingSink)",
+          "message": "any maps to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WritableStreamConstructor.Create(underlyingSink)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "WritableStreamDefaultControllerConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WritableStreamDefaultControllerConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "WritableStreamDefaultWriterConstructor",
+      "file": "index.d.ts",
+      "tier": "escape",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WritableStreamDefaultWriterConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "WritableStreamDefaultWriterConstructor.Create(stream)",
+          "message": "any maps to obj"
         }
       ]
     },
@@ -7726,21 +8594,35 @@
     {
       "name": "Crypto",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Crypto.DigestStream",
-          "message": "DigestStream is not among the generated declarations; widened to obj"
-        },
         {
           "key": "TP002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Crypto.getRandomValues",
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        }
+      ]
+    },
+    {
+      "name": "DigestStreamConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DigestStreamConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DigestStreamConstructor.Create(options)",
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -10129,13 +11011,6 @@
       "tier": "escape",
       "findings": [
         {
-          "key": "TR023",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "Response",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "SI002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -10175,6 +11050,55 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Response.webSocket",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "ResponseConstructor",
+      "file": "index.d.ts",
+      "tier": "escape",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ResponseConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ResponseConstructor.Create(body)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ResponseConstructor.Create(init)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "ResponseConstructor.json(any)",
+          "message": "any maps to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ResponseConstructor.json(maybeInit)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ResponseConstructor.redirect(status)",
           "message": "null/undefined union members hoisted to option"
         }
       ]
@@ -10289,13 +11213,6 @@
       "tier": "escape",
       "findings": [
         {
-          "key": "TR023",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "Request",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "SI002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -10356,6 +11273,27 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Request.fetcher",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "RequestConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "RequestConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "RequestConstructor.Create(init)",
           "message": "null/undefined union members hoisted to option"
         }
       ]
@@ -14371,13 +15309,6 @@
       "tier": "escape",
       "findings": [
         {
-          "key": "TR023",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "ReadableStream",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "MB002",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -14417,6 +15348,55 @@
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "ReadableStream.values(options)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "ReadableStreamConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ReadableStreamConstructor",
+          "message": "constructor object declared as its own interface; 2 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR024",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ReadableStreamConstructor.Create()",
+          "message": "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0; the extras are dropped"
+        },
+        {
+          "key": "TR024",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ReadableStreamConstructor.Create(strategy)",
+          "message": "Uint8Array carries 1 type arguments where JS.Uint8Array takes 0; the extras are dropped"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ReadableStreamConstructor.Create(strategy)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ReadableStreamConstructor.Create(strategy)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ReadableStreamConstructor.Create(underlyingSource)",
           "message": "null/undefined union members hoisted to option"
         }
       ]
@@ -16358,13 +17338,6 @@
       "tier": "escape",
       "findings": [
         {
-          "key": "TR023",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "WebSocket",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "SI002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -16507,6 +17480,27 @@
       ]
     },
     {
+      "name": "WebSocketConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WebSocketConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WebSocketConstructor.Create(protocols)",
+          "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
       "name": "WebSocketAcceptOptions",
       "file": "index.d.ts",
       "tier": "ergonomic",
@@ -16535,24 +17529,24 @@
       ]
     },
     {
+      "name": "WebSocketPairConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WebSocketPairConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
       "name": "SqlStorage",
       "file": "index.d.ts",
       "tier": "escape",
       "findings": [
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SqlStorage.Cursor",
-          "message": "SqlStorageCursor is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SqlStorage.Statement",
-          "message": "SqlStorageStatement is not among the generated declarations; widened to obj"
-        },
         {
           "key": "TP002",
           "pass": "shape-interfaces",
@@ -16566,6 +17560,41 @@
           "tier": "escape",
           "symbol": "SqlStorage.exec(bindings)",
           "message": "any maps to obj"
+        }
+      ]
+    },
+    {
+      "name": "SqlStorageCursorConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SqlStorageCursorConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SqlStorageCursorConstructor.Create",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        }
+      ]
+    },
+    {
+      "name": "SqlStorageStatementConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SqlStorageStatementConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
         }
       ]
     },
@@ -18731,17 +19760,24 @@
       ]
     },
     {
-      "name": "Tracing",
+      "name": "SpanConstructor",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
-          "key": "TR023",
+          "key": "SI004",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Tracing.Span",
-          "message": "Span is not among the generated declarations; widened to obj"
-        },
+          "tier": "ergonomic",
+          "symbol": "SpanConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        }
+      ]
+    },
+    {
+      "name": "Tracing",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
         {
           "key": "TP002",
           "pass": "shape-interfaces",
@@ -72663,48 +73699,6 @@
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "CloudflareWorkersModule.DurableObject",
-          "message": "DurableObject is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.RpcStub",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.RpcTarget",
-          "message": "RpcTarget is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.WorkerEntrypoint",
-          "message": "WorkerEntrypoint is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.WorkflowEntrypoint",
-          "message": "WorkflowEntrypoint is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CloudflareWorkersModule.WorkflowStep",
-          "message": "WorkflowStep is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "symbol": "CloudflareWorkersModule.env",
           "message": "Env is not among the generated declarations; widened to obj"
         },
@@ -72798,6 +73792,34 @@
           "tier": "ergonomic",
           "symbol": "CloudflareWorkersModule",
           "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "CloudflareWorkersModuleRpcStubConstructor",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CloudflareWorkersModuleRpcStubConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CloudflareWorkersModuleRpcStubConstructor.Create",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TR018",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "CloudflareWorkersModuleRpcStubConstructor.Create()",
+          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         }
       ]
     },
@@ -72963,6 +73985,27 @@
       ]
     },
     {
+      "name": "DurableObjectConstructor",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DurableObjectConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DurableObjectConstructor.Create(ctx)",
+          "message": "unknown maps to obj (D8)"
+        }
+      ]
+    },
+    {
       "name": "RpcTarget",
       "file": "index.d.ts",
       "tier": "ergonomic",
@@ -72980,6 +74023,20 @@
           "tier": "ergonomic",
           "symbol": "RpcTarget",
           "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "RpcTargetConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "RpcTargetConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
         }
       ]
     },
@@ -73222,6 +74279,27 @@
       ]
     },
     {
+      "name": "WorkerEntrypointConstructor",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkerEntrypointConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkerEntrypointConstructor.Create(ctx)",
+          "message": "unknown maps to obj (D8)"
+        }
+      ]
+    },
+    {
       "name": "WorkflowEntrypoint",
       "file": "index.d.ts",
       "tier": "widened",
@@ -73252,6 +74330,34 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowEntrypoint.run()",
+          "message": "unknown maps to obj (D8)"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowEntrypointConstructor",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowEntrypointConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowEntrypointConstructor.Create",
+          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkflowEntrypointConstructor.Create(ctx)",
           "message": "unknown maps to obj (D8)"
         }
       ]
@@ -73414,6 +74520,20 @@
           "tier": "widened",
           "symbol": "WorkflowStep.waitForEvent",
           "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
+        }
+      ]
+    },
+    {
+      "name": "WorkflowStepConstructor",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "WorkflowStepConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
         }
       ]
     },
@@ -78399,16 +79519,8 @@
     },
     {
       "name": "WebSocketPair",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "TR023",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "WebSocketPair",
-          "message": "__type is not among the generated declarations; widened to obj"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "\u0022assets:*\u0022",

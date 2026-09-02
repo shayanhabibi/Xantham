@@ -3,8 +3,8 @@
   "module": "Animejs",
   "counts": {
     "exact": 73,
-    "ergonomic": 76,
-    "widened": 34,
+    "ergonomic": 80,
+    "widened": 32,
     "escape": 52
   },
   "passes": [
@@ -22,9 +22,9 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 2371,
-      "ergonomic": 1241,
-      "widened": 813,
+      "total": 2373,
+      "ergonomic": 1245,
+      "widened": 811,
       "escape": 317
     },
     {
@@ -1219,15 +1219,8 @@
     {
       "name": "Easings",
       "file": "dist/modules/easings/index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Easings.Spring",
-          "message": "Spring is not among the generated declarations; widened to obj"
-        },
         {
           "key": "TR032",
           "pass": "shape-interfaces",
@@ -1304,6 +1297,27 @@
           "tier": "ergonomic",
           "symbol": "Easings",
           "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "SpringConstructor",
+      "file": "dist/modules/easings/index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SpringConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SpringConstructor.Create(parameters)",
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -5382,15 +5396,8 @@
     {
       "name": "Text",
       "file": "dist/modules/text/index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Text.TextSplitter",
-          "message": "TextSplitter is not among the generated declarations; widened to obj"
-        },
         {
           "key": "TR032",
           "pass": "shape-interfaces",
@@ -5446,6 +5453,27 @@
           "tier": "ergonomic",
           "symbol": "Text",
           "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "TextSplitterConstructor",
+      "file": "dist/modules/text/index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TextSplitterConstructor",
+          "message": "constructor object declared as its own interface; 1 construct signature(s) read as EmitConstructor Create members (\u00A74.4)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TextSplitterConstructor.Create(parameters)",
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },

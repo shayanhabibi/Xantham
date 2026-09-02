@@ -815,6 +815,7 @@ let shapePassTests =
                  |> List.map (function
                      | FsProperty p -> p.Name
                      | FsMethod m -> m.Name
+                     | FsConstructor _ -> "Create"
                      | FsIndexer _ -> "Item"))
                 [ "name"; "at" ]
                 "both member sets, in the checker's order"
@@ -1362,6 +1363,179 @@ let shapePassTests =
                 ("SC002", "Clash.status")
                 "the dropped static says which one and why"
 
+        // -----------------------------------------------------------------------------------
+        // Constructor objects (§4.4): the static side of a class, and what `typeof X` names.
+        // -----------------------------------------------------------------------------------
+
+        /// `class Gauge { constructor(size: number); readonly size: number; static readonly
+        /// UNIT: string }` as the checker reports it: an instance type, and a static side
+        /// carrying `prototype`, the statics, and the construct signatures.
+        let gaugeInstance =
+            { Build.facts (Build.typeResponse 60 TypeFlags.Object) with
+                SymbolName = Some "Gauge"
+                Members = [ Build.resolvedMember (Build.symbol 601 "size" SymbolFlags.Property) 2 ] }
+
+        let gaugeStatic (symbolName: string option) =
+            { Build.facts (Build.typeResponse 61 TypeFlags.Object) with
+                SymbolName = symbolName
+                Members =
+                    [ Build.resolvedMember (Build.symbol 602 "prototype" SymbolFlags.Property) 60
+                      { Build.resolvedMember (Build.symbol 603 "UNIT" SymbolFlags.Property) 1 with ReadOnly = true } ]
+                ConstructSignatures =
+                    [ Build.signature
+                          [ Build.resolvedMember (Build.symbol 604 "size" SymbolFlags.FunctionScopedVariable) 2 ]
+                          60 ] }
+
+        testCase "name-constructor-objects names a typeof member after the class it constructs" <| fun _ ->
+            // `interface Scope { readonly Gauge: typeof Gauge }` - the shape the whole
+            // `ServiceWorkerGlobalScope` constructor table has.
+            let scope =
+                { Build.facts (Build.typeResponse 62 TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol 605 "Gauge" SymbolFlags.Property) 61 ] }
+
+            let model =
+                { Build.shapeModel (gaugeInstance :: gaugeStatic (Some "Gauge") :: scope :: Build.primitives) with
+                    DeclNames = Map.ofList [ 60, "Gauge"; 62, "Scope" ] }
+
+            let named, _ = Build.runPass Shape.nameConstructorObjects model
+
+            Expect.equal (Map.tryFind 61 named.DeclNames) (Some "GaugeConstructor") "named after what it constructs"
+            Expect.equal (Map.tryFind 60 named.DeclNames) (Some "Gauge") "the instance side keeps its own name"
+
+        testCase "name-constructor-objects leaves an unreferenced class's static side alone" <| fun _ ->
+            // Nothing names `typeof Gauge`, so the constructor object is `shape-classes`'s work
+            // and only that: a second interface here would be referenced by nothing.
+            let model =
+                { Build.shapeModel (gaugeInstance :: gaugeStatic (Some "Gauge") :: Build.primitives) with
+                    Harvest =
+                        { Exports =
+                            [ Build.export "Gauge" (Build.symbol 600 "Gauge" (SymbolFlags.Class ||| SymbolFlags.Value)) ] }
+                    ExportTypes = Map.ofList [ 600, { Declared = Some 60; Value = Some 61 } ]
+                    DeclNames = Map.ofList [ 60, "Gauge" ] }
+
+            let named, _ = Build.runPass Shape.nameConstructorObjects model
+
+            Expect.equal (Map.tryFind 61 named.DeclNames) None "no declaration for a class's own static side"
+
+        testCase "name-constructor-objects names a non-class export's value type after the export" <| fun _ ->
+            // `declare const widgets: { new (size: number): Gauge }`: the checker calls the
+            // object `__type`, and `Exports.widgets` is the position that wants the name.
+            let model =
+                { Build.shapeModel (gaugeInstance :: gaugeStatic (Some "__type") :: Build.primitives) with
+                    Harvest =
+                        { Exports =
+                            [ Build.export "widgets" (Build.symbol 600 "widgets" SymbolFlags.BlockScopedVariable) ] }
+                    ExportTypes = Map.ofList [ 600, { Declared = None; Value = Some 61 } ]
+                    DeclNames = Map.ofList [ 60, "Gauge" ] }
+
+            let named, _ = Build.runPass Shape.nameConstructorObjects model
+
+            Expect.equal (Map.tryFind 61 named.DeclNames) (Some "WidgetsConstructor") "named after the export"
+
+        testCase "shape-interfaces reads construct signatures as EmitConstructor Create members" <| fun _ ->
+            let model =
+                { Build.shapeModel (gaugeInstance :: gaugeStatic (Some "Gauge") :: Build.primitives) with
+                    DeclNames = Map.ofList [ 60, "Gauge"; 61, "GaugeConstructor" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeInterfaces model
+
+            let decl =
+                shaped.Decls
+                |> List.pick (function
+                    | FsInterface d when d.Name = "GaugeConstructor" -> Some d
+                    | _ -> None)
+
+            match decl.Members with
+            | [ FsProperty statics; FsConstructor create ] ->
+                // `prototype` is the instance side, declared separately, and must not come back
+                // as a member of its own static side.
+                Expect.equal statics.Name "UNIT" "the statics are the constructor object's properties"
+                Expect.equal (create.Parameters |> List.map _.Name) [ "size" ] "the construct signature's parameters"
+                Expect.equal create.Return (FsNamed "Gauge") "returning the instance side"
+            | members -> failtest $"expected a static and a Create, got %A{members}"
+
+            Expect.contains
+                (findings |> List.map (fun f -> f.Key, f.Symbol))
+                ("SI004", "GaugeConstructor")
+                "the idiom is recorded once, on the declaration"
+
+        testCase "an undeclared constructor object names the class it stands for" <| fun _ ->
+            // The honest fallback: nothing declared `typeof Gauge`, so the reference widens -
+            // but the message says which constructor object, not `__type`.
+            let holder =
+                { Build.facts (Build.typeResponse 63 TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol 605 "Gauge" SymbolFlags.Property) 61 ] }
+
+            let model =
+                { Build.shapeModel (gaugeInstance :: gaugeStatic (Some "__type") :: holder :: Build.primitives) with
+                    DeclNames = Map.ofList [ 60, "Gauge"; 63, "Holder" ] }
+
+            let shaped, findings = Build.runPass Shape.shapeInterfaces model
+
+            let decl =
+                shaped.Decls
+                |> List.pick (function
+                    | FsInterface d when d.Name = "Holder" -> Some d
+                    | _ -> None)
+
+            match decl.Members with
+            | [ FsProperty p ] -> Expect.equal p.Type FsObj "the reference widens"
+            | members -> failtest $"expected one property, got %A{members}"
+
+            Expect.contains
+                (findings |> List.map (fun f -> f.Key, f.Message))
+                ("TR043", "typeof Gauge is a constructor object this run does not declare; widened to obj (§4.4)")
+                "the finding names the construct, not the checker's placeholder"
+
+        testCase "shape-classes says a static method had no signatures, not that it was settable" <| fun _ ->
+            // `DOMException.isError` is inherited from the lib's `ErrorConstructor`, which this
+            // run resolves identity-only - so there are no call signatures to shape a method
+            // from. It is not a settable static, and `StaticReadOnly` said it was.
+            let isError =
+                { Build.facts (Build.typeResponse 82 TypeFlags.Object) with Origin = CompilerLib }
+
+            let instance = Build.facts (Build.typeResponse 80 TypeFlags.Object)
+
+            let static' =
+                { Build.facts (Build.typeResponse 81 TypeFlags.Object) with
+                    ConstructSignatures = [ Build.signature [] 80 ]
+                    Members = [ Build.resolvedMember (Build.symbol 813 "isError" SymbolFlags.Method) 82 ] }
+
+            let declared =
+                FsInterface
+                    { Name = "DOMException"
+                      Docs = ""
+                      Tags = []
+                      Order = None
+                      TypeParameters = []
+                      Inherits = []
+                      Members = []
+                      CreateOverloads = []
+                      Statics = [] }
+
+            let model =
+                { Build.shapeModel (instance :: static' :: isError :: Build.primitives) with
+                    Harvest =
+                        { Exports =
+                            [ Build.export
+                                  "DOMException"
+                                  (Build.symbol 810 "DOMException" (SymbolFlags.Class ||| SymbolFlags.Value)) ] }
+                    ExportTypes = Map.ofList [ 810, { Declared = Some 80; Value = Some 81 } ]
+                    DeclNames = Map.ofList [ 80, "DOMException" ]
+                    Decls = [ declared ] }
+
+            let _, findings = Build.runPass Shape.shapeClasses model
+            let keyed = findings |> List.map (fun f -> f.Key, f.Symbol)
+
+            Expect.contains keyed ("SC005", "DOMException.isError") "the finding says what actually happened"
+            Expect.isFalse (keyed |> List.contains ("SC003", "DOMException.isError")) "and not that it was settable"
+
+            Expect.contains
+                (findings |> List.map (fun f -> f.Key, f.Message))
+                ("SC005",
+                 "static method emitted as a value: its type is declared in typescript/lib, which this run resolves identity-only, so there are no signatures to shape")
+                "naming the group whose resolution lost the signatures"
+
         testCase "synthesize-paramobjects gives plain-data interfaces a Create overload (D3)" <| fun _ ->
             let decl =
                 FsInterface
@@ -1488,6 +1662,7 @@ let shapePassTests =
                      |> List.map (function
                          | FsMethod m -> m.Parameters.Head.Type
                          | FsProperty p -> p.Type
+                         | FsConstructor c -> c.Return
                          | FsIndexer i -> i.Value))
                     [ FsNamed "DOMTargets"; FsString ]
                     "first of the obj pair survives; the string overload is distinct"
