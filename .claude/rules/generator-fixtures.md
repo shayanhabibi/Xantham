@@ -117,18 +117,20 @@ five-line reproducer is the whole handoff.
 ## Working alongside other branches
 
 Generator work is usually dispatched several branches at a time, and the passes themselves merge
-cleanly — `Shape.fs` auto-merged on every branch of the last wave despite being the file all of
-them edited. What conflicts is the handful of **append-only lists**. Most have since been turned
-into patterns or made to read the tree, and the ones that remain need care:
+cleanly: `Shape/` is one file per pass over the shared `Spec.fs`, so two branches on different
+passes touch different files, and even the single 3,593-line file that preceded it auto-merged on
+every branch of the last wave. What conflicts is the handful of **append-only lists**. Most have
+since been turned into patterns or made to read the tree, and the ones that remain need care:
 
 - **Finding codes are positional.** A manifest key is its union's `Prefix` plus the case's 1-based
   declaration position, so `SI005` means "the fifth case of the `ShapeInterfaces` union" and
-  nothing else. **Append your cases to the end of the union, never insert or reorder.** Two
-  branches that each append are both correct in isolation and both renumbered by the merge —
-  which is why `Findings.test.fs` snapshots key *and* case name together, and why that snapshot
-  failing after a merge is the system working. Expect to renumber your citations at integration:
-  `Pipeline.test.fs` and `Shape.test.fs` pin codes as bare string literals, deliberately, because
-  those codes are published in every manifest.
+  nothing else. **Append your cases to the end of the union, never insert or reorder** — and if
+  the manager pre-declared your cases at dispatch, use those and edit `Findings.fs` no further.
+  Two branches that each append are both correct in isolation and both renumbered by the merge,
+  which is why `Findings.test.fs` snapshots key *and* case name together: that snapshot failing
+  after a merge is the system working. `Pipeline.test.fs` and `Shape.test.fs` pin codes as bare
+  string literals, deliberately, because those codes are published in every manifest — so a
+  renumbering is repaired by hand across all three files.
 - **The run gate is still a two-place addition** — link the golden in
   `Xantham.Generator.RunGate.fsproj` and add the checks to its `Program.fs`. Both are deliberate
   (a check is a judgement about behaviour, not a file listing), so both can conflict. Only add a
@@ -138,6 +140,36 @@ into patterns or made to read the tree, and the ones that remain need care:
   or a manifest is resolved by taking either side and re-running with `--update`, never by hand.
 - Say in your handover which finding codes you added and which large-fixture counts moved. That
   is what the managing agent composes; a branch that reports only "green" cannot be composed.
+
+## For the managing agent
+
+You dispatch the wave, you resolve the merges, and the cost of both is set before any agent
+starts.
+
+**Pre-declare every finding case on the integration branch, before dispatch.** Codes are
+positional, so `Findings.fs` is the one append point no pattern can remove: two agents appending
+correct cases still renumber each other, and the repair spans `Findings.fs`, `Findings.test.fs`,
+`Pipeline.test.fs` and `Shape.test.fs`. Decide from each agent's brief which findings it will
+need, append them all yourself in one commit with the snapshot updated, and hand each agent the
+case names it owns. Agents then raise findings that already exist and leave the union alone, and
+the class of conflict is gone for the wave. A case that turns out unused costs one dead union
+case; a case discovered mid-task is a request back to you, which is cheaper than a renumbering.
+
+The rest of the dispatch checklist:
+
+- **Give each agent a different pass file.** `Shape/` is one file per pass; two agents in
+  `Shape/Interfaces.fs` is a merge you chose to have. Work landing in `Shape/Spec.fs` is shared
+  by every pass — sequence it alone rather than concurrently with a wave.
+- **Name each agent's lab fixture in the brief**, so two agents do not both write `union-lab`.
+- **Require the measurements**, not a verdict: `findings` output before and after, tier counts,
+  and the finding codes added. A branch that reports only "green" cannot be composed with three
+  others.
+- **Merge goldens by regenerating.** Take either side of any golden or manifest conflict, then
+  run `dotnet fsi build.fsx -- test --update` once over the composed tree. Generation is
+  deterministic, so the result is the same whichever side you took.
+- **Compose the measurements after merging.** Every count each agent reported independently
+  should survive composition; one that does not is an interaction between branches, and it is
+  yours to find, because no agent could have seen it.
 
 ## Asking for more
 

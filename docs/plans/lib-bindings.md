@@ -59,7 +59,7 @@ the full pipeline runs over it. A driver script replicates `Bootstrap.start` wit
 Getting this far required one generator fix, included with this document: the shape
 tier recursed forever on `lib.dom.d.ts` through the cycle
 `typeRef → unionRef → erasedUnionRef → typeRef → objectRef → typeRef`. A 1 GB stack did
-not help, which proved the recursion cyclic rather than merely deep. `Shape.fs` now
+not help, which proved the recursion cyclic rather than merely deep. `Shape/Spec.fs` now
 carries a thread-static `Descent` path set: a type id already on the current reference
 descent widens to `obj` with a `Widened` finding instead of being followed again. The
 full suite (120 generator tests, 84 wire tests) is unchanged — every committed golden is
@@ -75,7 +75,7 @@ yields **1,700 errors**:
 | Missing subtype relation (heritage flattened, `Inherits = []`) | 1,698 |
 | FS1212 optional-argument ordering (the `createElementNS` overloads) | 2 |
 
-The heritage errors are all of one shape. `Shape.fs` flattens base members into the
+The heritage errors are all of one shape. `Shape/Interfaces.fs` flattens base members into the
 derived interface and emits an `Ergonomic` finding —
 *"base members flattened into the interface (the is-a relation is not emitted)"* — with
 `Inherits = []` hard-coded. That is fine until a generic constraint needs the relation:
