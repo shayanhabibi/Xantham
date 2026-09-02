@@ -2,9 +2,9 @@
   "package": "@cloudflare/workers-types",
   "module": "Cloudflare.WorkersTypes",
   "counts": {
-    "exact": 262,
-    "ergonomic": 1036,
-    "widened": 382,
+    "exact": 272,
+    "ergonomic": 1033,
+    "widened": 374,
     "escape": 117
   },
   "passes": [
@@ -17,6 +17,11 @@
       "pass": "RT - resolve-type-table",
       "total": 1,
       "widened": 1
+    },
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 9,
+      "exact": 9
     },
     {
       "pass": "LU - classify-literal-unions",
@@ -38,17 +43,17 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 8199,
+      "total": 8024,
       "exact": 57,
-      "ergonomic": 7179,
-      "widened": 813,
+      "ergonomic": 6992,
+      "widened": 825,
       "escape": 150
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 84,
+      "total": 83,
       "ergonomic": 31,
-      "widened": 53
+      "widened": 52
     },
     {
       "pass": "SC - shape-classes",
@@ -59,15 +64,15 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 30,
+      "total": 31,
       "ergonomic": 15,
-      "widened": 8,
+      "widened": 9,
       "escape": 7
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 1141,
-      "ergonomic": 1141
+      "total": 1137,
+      "ergonomic": 1137
     },
     {
       "pass": "DO - dedupe-overloads",
@@ -76,9 +81,9 @@
     },
     {
       "pass": "RA - repair-arity",
-      "total": 28,
+      "total": 21,
       "ergonomic": 4,
-      "widened": 24
+      "widened": 17
     },
     {
       "pass": "AC - audit-coverage",
@@ -178,18 +183,6 @@
       ]
     },
     {
-      "name": "IncomingRequestCfPropertiesTLSClientAuthCertRevoked",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "IncomingRequestCfPropertiesTLSClientAuthCertVerified",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
       "name": "ReadableStreamBYOBReaderReadAtLeastResultItem",
       "file": "index.d.ts",
       "tier": "ergonomic",
@@ -279,6 +272,13 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "RequestFetcher.fetch(init)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -291,315 +291,15 @@
           "tier": "widened",
           "symbol": "RequestFetcher.fetch(input)",
           "message": "unknown maps to obj (D8)"
-        }
-      ]
-    },
-    {
-      "name": "RequestFetcherFetchInitItem",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem",
-          "message": "intersection of 5 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
         },
         {
           "key": "TR009",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "RequestFetcherFetchInitItem",
+          "symbol": "RequestFetcher.fetch(input)",
           "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "RequestFetcherFetchInitItem.[]",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.asOrganization",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.asOrganization",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.asn",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.asn",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.city",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.city",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.clientAcceptEncoding",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.clientAcceptEncoding",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.clientTcpRtt",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.clientTcpRtt",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.continent",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.continent",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.country",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.country",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.hostMetadata",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "RequestFetcherFetchInitItem.hostMetadata",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.isEUCountry",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR006",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "RequestFetcherFetchInitItem.isEUCountry",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.isEUCountry",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.latitude",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.latitude",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.longitude",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.longitude",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.metroCode",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.metroCode",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.postalCode",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.postalCode",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.region",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.region",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.regionCode",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.regionCode",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.timezone",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.timezone",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.tlsExportedAuthenticator",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItem.tlsExportedAuthenticator",
-          "message": "null/undefined union members hoisted to option"
         }
       ]
-    },
-    {
-      "name": "RequestFetcherFetchInitItemBotManagement",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItemBotManagement",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "RequestFetcherFetchInitItemBotManagement",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "RequestFetcherFetchInitItemCountry",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
     },
     {
       "name": "RequestInitCache",
@@ -2830,6 +2530,13 @@
           "message": "unknown maps to obj (D8)"
         },
         {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "ServiceWorkerGlobalScope.fetch(input)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
           "key": "TR008",
           "pass": "shape-interfaces",
           "tier": "escape",
@@ -2962,279 +2669,6 @@
       "file": "index.d.ts",
       "tier": "exact",
       "findings": []
-    },
-    {
-      "name": "ServiceWorkerGlobalScopeRequestInputItem",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem",
-          "message": "intersection of 5 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.[]",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.asOrganization",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.asOrganization",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.asn",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.asn",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.city",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.city",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.clientAcceptEncoding",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.clientAcceptEncoding",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.clientTcpRtt",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.clientTcpRtt",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.continent",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.continent",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.country",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.country",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.hostMetadata",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.hostMetadata",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.isEUCountry",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR006",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.isEUCountry",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.isEUCountry",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.latitude",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.latitude",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.longitude",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.longitude",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.metroCode",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.metroCode",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.postalCode",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.postalCode",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.region",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.region",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.regionCode",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.regionCode",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.timezone",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.timezone",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.tlsExportedAuthenticator",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ServiceWorkerGlobalScopeRequestInputItem.tlsExportedAuthenticator",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
     },
     {
       "name": "ServiceWorkerGlobalScopeWebSocketPairResult",
@@ -3813,289 +3247,8 @@
     {
       "name": "ExportedHandlerFetchHandler",
       "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "RA003",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "ExportedHandlerFetchHandler",
-          "message": "ExportedHandlerFetchHandlerRequestItem is generic and this position has no arguments to apply; widened to obj"
-        }
-      ]
-    },
-    {
-      "name": "ExportedHandlerFetchHandlerRequestItem",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem",
-          "message": "intersection of 5 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.[]",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.asOrganization",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.asOrganization",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.asn",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.asn",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.city",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.city",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.clientAcceptEncoding",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.clientAcceptEncoding",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.clientTcpRtt",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.clientTcpRtt",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.continent",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.continent",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.country",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.country",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.hostMetadata",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.hostMetadata",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.isEUCountry",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR006",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.isEUCountry",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.isEUCountry",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.latitude",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.latitude",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.longitude",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.longitude",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.metroCode",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.metroCode",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.postalCode",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.postalCode",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.region",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.region",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.regionCode",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.regionCode",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.timezone",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.timezone",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.tlsExportedAuthenticator",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchHandlerRequestItem.tlsExportedAuthenticator",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "ExportedHandlerConnectHandler",
@@ -5466,20 +4619,6 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "RA003",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "ExportedHandler",
-          "message": "ExportedHandlerFetchRequestItem is generic and this position has no arguments to apply; widened to obj"
-        },
-        {
-          "key": "RA003",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "ExportedHandler",
-          "message": "ExportedHandlerFetchRequestItem is generic and this position has no arguments to apply; widened to obj"
-        },
-        {
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -5688,279 +4827,6 @@
           "tier": "ergonomic",
           "symbol": "ExportedHandler",
           "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "ExportedHandlerFetchRequestItem",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem",
-          "message": "intersection of 5 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ExportedHandlerFetchRequestItem.[]",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.asOrganization",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.asOrganization",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.asn",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.asn",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.city",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.city",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.clientAcceptEncoding",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.clientAcceptEncoding",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.clientTcpRtt",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.clientTcpRtt",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.continent",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.continent",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.country",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.country",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.hostMetadata",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.hostMetadata",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.isEUCountry",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR006",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ExportedHandlerFetchRequestItem.isEUCountry",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.isEUCountry",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.latitude",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.latitude",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.longitude",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.longitude",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.metroCode",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.metroCode",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.postalCode",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.postalCode",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.region",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.region",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.regionCode",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.regionCode",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.timezone",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.timezone",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.tlsExportedAuthenticator",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ExportedHandlerFetchRequestItem.tlsExportedAuthenticator",
-          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -6196,6 +5062,13 @@
           "tier": "ergonomic",
           "symbol": "DurableObject.connect()",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DurableObject.fetch(request)",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "key": "TR009",
@@ -8542,6 +7415,13 @@
           "message": "unknown maps to obj (D8)"
         },
         {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Cache.delete(request)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -8560,6 +7440,20 @@
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Cache.match(request)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Cache.match(request)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Cache.put(request)",
           "message": "unknown maps to obj (D8)"
         },
         {
@@ -10844,6 +9738,13 @@
           "message": "unknown maps to obj (D8)"
         },
         {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "FetchEvent.request",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -11295,7 +10196,7 @@
     {
       "name": "RequestConstructor",
       "file": "index.d.ts",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "key": "SI004",
@@ -11310,6 +10211,20 @@
           "tier": "ergonomic",
           "symbol": "RequestConstructor.Create(init)",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "RequestConstructor.Create(input)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "RequestConstructor.Create(input)",
+          "message": "unknown maps to obj (D8)"
         }
       ]
     },
@@ -18716,11 +17631,25 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "LoopbackDurableObjectNamespaceGetResult.fetch(init)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "LoopbackDurableObjectNamespaceGetResult.fetch(init)",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "LoopbackDurableObjectNamespaceGetResult.fetch(input)",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "key": "TR009",
@@ -65299,11 +64228,25 @@
           "message": "overload dropped: identical to an earlier one after widening"
         },
         {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "BrowserRun.fetch(init)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "BrowserRun.fetch(init)",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "BrowserRun.fetch(input)",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "key": "TR009",
@@ -67582,6 +66525,45 @@
       ]
     },
     {
+      "name": "IncomingRequestCfPropertiesBotManagement2",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "IncomingRequestCfPropertiesBotManagement2",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "IncomingRequestCfPropertiesBotManagement2",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "IncomingRequestCfPropertiesCountry",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "IncomingRequestCfPropertiesTLSClientAuthCertRevoked",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "IncomingRequestCfPropertiesTLSClientAuthCertVerified",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    },
+    {
       "name": "IncomingRequestCfPropertiesBase",
       "file": "index.d.ts",
       "tier": "widened",
@@ -68154,287 +67136,14 @@
     {
       "name": "CfProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "exact",
       "findings": [
         {
-          "key": "SA002",
-          "pass": "shape-aliases",
-          "tier": "widened",
+          "key": "SY001",
+          "pass": "synthesize-anonymous",
+          "tier": "exact",
           "symbol": "CfProperties",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        }
-      ]
-    },
-    {
-      "name": "CfProperties2",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2",
-          "message": "intersection of 5 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
-        {
-          "key": "TR009",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CfProperties2.[]",
-          "message": "unknown maps to obj (D8)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.asOrganization",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.asOrganization",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.asn",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.asn",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.city",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.city",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.clientAcceptEncoding",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.clientAcceptEncoding",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.clientTcpRtt",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.clientTcpRtt",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.continent",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.continent",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.country",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.country",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.hostMetadata",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.hostMetadata",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.isEUCountry",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR006",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CfProperties2.isEUCountry",
-          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.isEUCountry",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.latitude",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.latitude",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.longitude",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.longitude",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.metroCode",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.metroCode",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.postalCode",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.postalCode",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.region",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.region",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.regionCode",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.regionCode",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.timezone",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.timezone",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.tlsExportedAuthenticator",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "CfProperties2.tlsExportedAuthenticator",
-          "message": "null/undefined union members hoisted to option"
+          "message": "anonymous shape is an instantiation of IncomingRequestCfProperties; written as an application"
         }
       ]
     },
@@ -68712,112 +67421,14 @@
     {
       "name": "D1Database",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "key": "RA003",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "D1Database",
-          "message": "D1DatabaseBatchResultItemItem is generic and this position has no arguments to apply; widened to obj"
-        },
-        {
-          "key": "TP006",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "D1Database.batch",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
         {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "D1Database.withSession(constraintOrBookmark)",
           "message": "null/undefined union members hoisted to option"
-        }
-      ]
-    },
-    {
-      "name": "D1DatabaseBatchResultItemItem",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "D1DatabaseBatchResultItemItem",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "D1DatabaseBatchResultItemItem.error",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "D1DatabaseBatchResultItemItem",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "D1DatabaseSessionBatchResultItemItem",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "D1DatabaseSessionBatchResultItemItem",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "D1DatabaseSessionBatchResultItemItem.error",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "D1DatabaseSessionBatchResultItemItem",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "D1PreparedStatementAllResultItem",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "D1PreparedStatementAllResultItem",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "D1PreparedStatementAllResultItem.error",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "D1PreparedStatementAllResultItem",
-          "message": "ParamObject Create synthesized (D3)"
         }
       ]
     },
@@ -68864,52 +67475,10 @@
       ]
     },
     {
-      "name": "D1PreparedStatementRunResultItem",
+      "name": "D1DatabaseSession",
       "file": "index.d.ts",
       "tier": "ergonomic",
       "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "D1PreparedStatementRunResultItem",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "D1PreparedStatementRunResultItem.error",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
-          "tier": "ergonomic",
-          "symbol": "D1PreparedStatementRunResultItem",
-          "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "D1DatabaseSession",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "RA003",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "D1DatabaseSession",
-          "message": "D1DatabaseSessionBatchResultItemItem is generic and this position has no arguments to apply; widened to obj"
-        },
-        {
-          "key": "TP006",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "D1DatabaseSession.batch",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
         {
           "key": "TR032",
           "pass": "shape-interfaces",
@@ -68924,27 +67493,6 @@
       "file": "index.d.ts",
       "tier": "widened",
       "findings": [
-        {
-          "key": "RA003",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "D1PreparedStatement",
-          "message": "D1PreparedStatementAllResultItem is generic and this position has no arguments to apply; widened to obj"
-        },
-        {
-          "key": "RA003",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "D1PreparedStatement",
-          "message": "D1PreparedStatementRunResultItem is generic and this position has no arguments to apply; widened to obj"
-        },
-        {
-          "key": "TP006",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "D1PreparedStatement.all",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
-        },
         {
           "key": "TR009",
           "pass": "shape-interfaces",
@@ -68986,13 +67534,6 @@
           "tier": "ergonomic",
           "symbol": "D1PreparedStatement.raw(options)",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TP006",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "D1PreparedStatement.run",
-          "message": "type parameter \u0027T\u0027 is erased: every use of it widened away"
         }
       ]
     },
@@ -73131,11 +71672,25 @@
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EventContext.next(init)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "EventContext.next(init)",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EventContext.next(input)",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "key": "TR009",
@@ -73157,6 +71712,13 @@
           "tier": "widened",
           "symbol": "EventContext.params",
           "message": "__type is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EventContext.request",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "key": "TR009",
@@ -73201,11 +71763,25 @@
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "PagesFunctionContext.next(init)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "PagesFunctionContext.next(init)",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "PagesFunctionContext.next(input)",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "key": "TR009",
@@ -73227,6 +71803,13 @@
           "tier": "widened",
           "symbol": "PagesFunctionContext.params",
           "message": "__type is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "PagesFunctionContext.request",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "key": "TR009",
@@ -73271,11 +71854,25 @@
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EventPluginContext.next(init)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "EventPluginContext.next(init)",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EventPluginContext.next(input)",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "key": "TR009",
@@ -73297,6 +71894,13 @@
           "tier": "widened",
           "symbol": "EventPluginContext.params",
           "message": "__type is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EventPluginContext.request",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "key": "TR009",
@@ -73341,11 +71945,25 @@
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "PagesPluginFunctionContext.next(init)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "PagesPluginFunctionContext.next(init)",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "PagesPluginFunctionContext.next(input)",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "key": "TR009",
@@ -73367,6 +71985,13 @@
           "tier": "widened",
           "symbol": "PagesPluginFunctionContext.params",
           "message": "__type is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "PagesPluginFunctionContext.request",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "key": "TR009",
@@ -73984,6 +72609,13 @@
           "message": "unknown maps to obj (D8)"
         },
         {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DurableObject2.fetch(request)",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
           "key": "MB003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -74185,6 +72817,13 @@
           "tier": "ergonomic",
           "symbol": "WorkerEntrypoint.fetch",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "WorkerEntrypoint.fetch(request)",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "key": "TR009",
@@ -79493,6 +78132,13 @@
           "tier": "widened",
           "symbol": "fetch(input)",
           "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "fetch(input)",
+          "message": "unknown maps to obj (D8)"
         }
       ]
     },
@@ -79705,6 +78351,84 @@
       ]
     },
     {
+      "name": "D1DatabaseBatchResultItemItem",
+      "tier": "exact",
+      "findings": [
+        {
+          "key": "SY001",
+          "pass": "synthesize-anonymous",
+          "tier": "exact",
+          "symbol": "D1DatabaseBatchResultItemItem",
+          "message": "anonymous shape is an instantiation of D1Result; written as an application"
+        }
+      ]
+    },
+    {
+      "name": "D1DatabaseSessionBatchResultItemItem",
+      "tier": "exact",
+      "findings": [
+        {
+          "key": "SY001",
+          "pass": "synthesize-anonymous",
+          "tier": "exact",
+          "symbol": "D1DatabaseSessionBatchResultItemItem",
+          "message": "anonymous shape is an instantiation of D1Result; written as an application"
+        }
+      ]
+    },
+    {
+      "name": "D1PreparedStatementAllResultItem",
+      "tier": "exact",
+      "findings": [
+        {
+          "key": "SY001",
+          "pass": "synthesize-anonymous",
+          "tier": "exact",
+          "symbol": "D1PreparedStatementAllResultItem",
+          "message": "anonymous shape is an instantiation of D1Result; written as an application"
+        }
+      ]
+    },
+    {
+      "name": "D1PreparedStatementRunResultItem",
+      "tier": "exact",
+      "findings": [
+        {
+          "key": "SY001",
+          "pass": "synthesize-anonymous",
+          "tier": "exact",
+          "symbol": "D1PreparedStatementRunResultItem",
+          "message": "anonymous shape is an instantiation of D1Result; written as an application"
+        }
+      ]
+    },
+    {
+      "name": "ExportedHandlerFetchHandlerRequestItem",
+      "tier": "exact",
+      "findings": [
+        {
+          "key": "SY001",
+          "pass": "synthesize-anonymous",
+          "tier": "exact",
+          "symbol": "ExportedHandlerFetchHandlerRequestItem",
+          "message": "anonymous shape is an instantiation of IncomingRequestCfProperties; written as an application"
+        }
+      ]
+    },
+    {
+      "name": "ExportedHandlerFetchRequestItem",
+      "tier": "exact",
+      "findings": [
+        {
+          "key": "SY001",
+          "pass": "synthesize-anonymous",
+          "tier": "exact",
+          "symbol": "ExportedHandlerFetchRequestItem",
+          "message": "anonymous shape is an instantiation of IncomingRequestCfProperties; written as an application"
+        }
+      ]
+    },
+    {
       "name": "PagesFunction",
       "tier": "escape",
       "findings": [
@@ -79755,6 +78479,32 @@
           "tier": "ergonomic",
           "symbol": "PagesPluginFunction",
           "message": "constraint on \u0027Params\u0027 has no F# form and is dropped (\u00A74.9)"
+        }
+      ]
+    },
+    {
+      "name": "RequestFetcherFetchInitItem",
+      "tier": "exact",
+      "findings": [
+        {
+          "key": "SY001",
+          "pass": "synthesize-anonymous",
+          "tier": "exact",
+          "symbol": "RequestFetcherFetchInitItem",
+          "message": "anonymous shape is an instantiation of IncomingRequestCfProperties; written as an application"
+        }
+      ]
+    },
+    {
+      "name": "ServiceWorkerGlobalScopeRequestInputItem",
+      "tier": "exact",
+      "findings": [
+        {
+          "key": "SY001",
+          "pass": "synthesize-anonymous",
+          "tier": "exact",
+          "symbol": "ServiceWorkerGlobalScopeRequestInputItem",
+          "message": "anonymous shape is an instantiation of IncomingRequestCfProperties; written as an application"
         }
       ]
     }

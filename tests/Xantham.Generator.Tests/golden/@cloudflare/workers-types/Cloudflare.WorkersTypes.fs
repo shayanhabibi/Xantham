@@ -102,20 +102,6 @@ type EventCurrentTargetItem =
     [<EmitIndexer>]
     abstract Item: string -> Event with get, set
 
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type IncomingRequestCfPropertiesTLSClientAuthCertRevoked =
-    | [<CompiledName("0")>] N0
-    | [<CompiledName("1")>] N1
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type IncomingRequestCfPropertiesTLSClientAuthCertVerified =
-    | FAILED
-    | [<CompiledName("FAILED:certificate has expired")>] FAILEDCertificateHasExpired
-    | [<CompiledName("FAILED:certificate is not yet valid")>] FAILEDCertificateIsNotYetValid
-    | [<CompiledName("FAILED:self signed certificate")>] FAILEDSelfSignedCertificate
-    | [<CompiledName("FAILED:unable to verify the first certificate")>] FAILEDUnableToVerifyTheFirstCertificate
-    | SUCCESS
-
 [<Interface>]
 type ReadableStreamBYOBReaderReadAtLeastResultItem<'T when 'T :> JS.ArrayBufferView> =
     abstract ``done``: bool with get, set
@@ -145,465 +131,8 @@ type ReadableStreamDefaultReaderReadResultItem2 =
     static member Create (``done``: bool, ?value: unit) : ReadableStreamDefaultReaderReadResultItem2 = jsNative
 
 type RequestFetcher =
-    abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, URL> * ?init: RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> -> JS.Promise<Response>
+    abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL> * ?init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> JS.Promise<Response>
     abstract connect: address: U2<string, SocketAddress> * ?options: SocketOptions -> Socket
-
-type RequestFetcherFetchInitItem =
-    inherit IncomingRequestCfPropertiesBase
-    inherit IncomingRequestCfPropertiesBotManagementEnterprise
-    inherit IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<obj>
-    inherit IncomingRequestCfPropertiesGeographicInformation
-    inherit IncomingRequestCfPropertiesCloudflareAccessOrApiShield
-    /// <summary>
-    /// [ASN](https://www.iana.org/assignments/as-numbers/as-numbers.xhtml) of the incoming request.
-    /// </summary>
-    /// <remarks>@example 395747</remarks>
-    abstract asn: float option with get, set
-    /// <summary>
-    /// The organization which owns the ASN of the incoming request.
-    /// </summary>
-    /// <remarks>@example "Google Cloud"</remarks>
-    abstract asOrganization: string option with get, set
-    /// <summary>
-    /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
-    /// </summary>
-    /// <remarks>@example "gzip, deflate, br"</remarks>
-    abstract clientAcceptEncoding: string option with get, set
-    /// <summary>
-    /// The number of milliseconds it took for the request to reach your worker.
-    /// </summary>
-    /// <remarks>@example 22</remarks>
-    abstract clientTcpRtt: float option with get, set
-    /// <summary>
-    /// The three-letter [IATA](https://en.wikipedia.org/wiki/IATA_airport_code)
-    /// airport code of the data center that the request hit.
-    /// </summary>
-    /// <remarks>@example "DFW"</remarks>
-    abstract colo: string with get, set
-    /// <summary>
-    /// Represents the upstream's response to a
-    /// [TCP <c>keepalive</c> message](https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html)
-    /// from cloudflare.
-    ///
-    /// For workers with no upstream, this will always be <c>1</c>.
-    /// </summary>
-    /// <remarks>@example 3</remarks>
-    abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
-    /// <summary>
-    /// The HTTP Protocol the request used.
-    /// </summary>
-    /// <remarks>@example "HTTP/2"</remarks>
-    abstract httpProtocol: string with get, set
-    /// <summary>
-    /// The browser-requested prioritization information in the request object.
-    ///
-    /// If no information was set, defaults to the empty string <c>""</c>
-    /// </summary>
-    /// <remarks>@example "weight=192;exclusive=0;group=3;group-weight=127"</remarks>
-    /// <remarks>@default ""</remarks>
-    abstract requestPriority: string with get, set
-    /// <summary>
-    /// The TLS version of the connection to Cloudflare.
-    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-    /// </summary>
-    /// <remarks>@example "TLSv1.3"</remarks>
-    abstract tlsVersion: string with get, set
-    /// <summary>
-    /// The cipher for the connection to Cloudflare.
-    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-    /// </summary>
-    /// <remarks>@example "AEAD-AES128-GCM-SHA256"</remarks>
-    abstract tlsCipher: string with get, set
-    /// <summary>
-    /// Metadata containing the [<c>HELLO</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2) and [<c>FINISHED</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9) messages from this request's TLS handshake.
-    ///
-    /// If the incoming request was served over plaintext (without TLS) this field is undefined.
-    /// </summary>
-    abstract tlsExportedAuthenticator: IncomingRequestCfPropertiesExportedAuthenticatorMetadata option with get, set
-    /// <summary>
-    /// Results of Cloudflare's Bot Management analysis
-    /// </summary>
-    abstract botManagement: RequestFetcherFetchInitItemBotManagement with get, set
-    /// <summary>
-    /// Duplicate of <c>botManagement.score</c>.
-    /// </summary>
-    /// <remarks>@deprecated</remarks>
-    abstract clientTrustScore: float with get, set
-    /// <summary>
-    /// Custom metadata set per-host in [Cloudflare for SaaS](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/).
-    ///
-    /// This field is only present if you have Cloudflare for SaaS enabled on your account
-    /// and you have followed the [required steps to enable it]((https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/)).
-    /// </summary>
-    abstract hostMetadata: obj option with get, set
-    /// <summary>
-    /// The [ISO 3166-1 Alpha 2](https://www.iso.org/iso-3166-country-codes.html) country code the request originated from.
-    ///
-    /// If your worker is [configured to accept TOR connections](https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing), this may also be <c>"T1"</c>, indicating a request that originated over TOR.
-    ///
-    /// If Cloudflare is unable to determine where the request originated this property is omitted.
-    ///
-    /// The country code <c>"T1"</c> is used for requests originating on TOR.
-    /// </summary>
-    /// <remarks>@example "GB"</remarks>
-    abstract country: RequestFetcherFetchInitItemCountry option with get, set
-    /// <summary>
-    /// If present, this property indicates that the request originated in the EU
-    /// </summary>
-    /// <remarks>@example "1"</remarks>
-    abstract isEUCountry: string option with get, set
-    /// <summary>
-    /// A two-letter code indicating the continent the request originated from.
-    /// </summary>
-    /// <remarks>@example "AN"</remarks>
-    abstract continent: ContinentCode option with get, set
-    /// <summary>
-    /// The city the request originated from
-    /// </summary>
-    /// <remarks>@example "Austin"</remarks>
-    abstract city: string option with get, set
-    /// <summary>
-    /// Postal code of the incoming request
-    /// </summary>
-    /// <remarks>@example "78701"</remarks>
-    abstract postalCode: string option with get, set
-    /// <summary>
-    /// Latitude of the incoming request
-    /// </summary>
-    /// <remarks>@example "30.27130"</remarks>
-    abstract latitude: string option with get, set
-    /// <summary>
-    /// Longitude of the incoming request
-    /// </summary>
-    /// <remarks>@example "-97.74260"</remarks>
-    abstract longitude: string option with get, set
-    /// <summary>
-    /// Timezone of the incoming request
-    /// </summary>
-    /// <remarks>@example "America/Chicago"</remarks>
-    abstract timezone: string option with get, set
-    /// <summary>
-    /// If known, the ISO 3166-2 name for the first level region associated with
-    /// the IP address of the incoming request
-    /// </summary>
-    /// <remarks>@example "Texas"</remarks>
-    abstract region: string option with get, set
-    /// <summary>
-    /// If known, the ISO 3166-2 code for the first-level region associated with
-    /// the IP address of the incoming request
-    /// </summary>
-    /// <remarks>@example "TX"</remarks>
-    abstract regionCode: string option with get, set
-    /// <summary>
-    /// Metro code (DMA) of the incoming request
-    /// </summary>
-    /// <remarks>@example "635"</remarks>
-    abstract metroCode: string option with get, set
-    /// <summary>
-    /// Information about the client certificate presented to Cloudflare.
-    ///
-    /// This is populated when the incoming request is served over TLS using
-    /// either Cloudflare Access or API Shield (mTLS)
-    /// and the presented SSL certificate has a valid
-    /// [Certificate Serial Number](https://ldapwiki.com/wiki/Certificate%20Serial%20Number)
-    /// (i.e., not <c>null</c> or <c>""</c>).
-    ///
-    /// Otherwise, a set of placeholder values are used.
-    ///
-    /// The property <c>certPresented</c> will be set to <c>"1"</c> when
-    /// the object is populated (i.e. the above conditions were met).
-    /// </summary>
-    abstract tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder> with get, set
-    [<EmitIndexer>]
-    abstract Item: string -> obj with get, set
-
-[<Interface>]
-type RequestFetcherFetchInitItemBotManagement =
-    inherit IncomingRequestCfPropertiesBotManagementBase
-    /// <summary>
-    /// Cloudflare’s [level of certainty](https://developers.cloudflare.com/bots/concepts/bot-score/) that a request comes from a bot,
-    /// represented as an integer percentage between <c>1</c> (almost certainly a bot) and <c>99</c> (almost certainly human).
-    /// </summary>
-    /// <remarks>@example 54</remarks>
-    abstract score: float with get, set
-    /// <summary>
-    /// A boolean value that is true if the request comes from a good bot, like Google or Bing.
-    /// Most customers choose to allow this traffic. For more details, see [Traffic from known bots](https://developers.cloudflare.com/firewall/known-issues-and-faq/#how-does-firewall-rules-handle-traffic-from-known-bots).
-    /// </summary>
-    abstract verifiedBot: bool with get, set
-    /// <summary>
-    /// A boolean value that is true if the request originates from a
-    /// Cloudflare-verified proxy service.
-    /// </summary>
-    abstract corporateProxy: bool with get, set
-    /// <summary>
-    /// A boolean value that's true if the request matches [file extensions](https://developers.cloudflare.com/bots/reference/static-resources/) for many types of static resources.
-    /// </summary>
-    abstract staticResource: bool with get, set
-    /// <summary>
-    /// List of IDs that correlate to the Bot Management heuristic detections made on a request (you can have multiple heuristic detections on the same request).
-    /// </summary>
-    abstract detectionIds: float[] with get, set
-    /// <summary>
-    /// A [JA3 Fingerprint](https://developers.cloudflare.com/bots/concepts/ja3-fingerprint/) to help profile specific SSL/TLS clients
-    /// across different destination IPs, Ports, and X509 certificates.
-    /// </summary>
-    abstract ja3Hash: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (score: float, verifiedBot: bool, corporateProxy: bool, staticResource: bool, detectionIds: float[], ja3Hash: string) : RequestFetcherFetchInitItemBotManagement = jsNative
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type RequestFetcherFetchInitItemCountry =
-    | AD
-    | AE
-    | AF
-    | AG
-    | AI
-    | AL
-    | AM
-    | AO
-    | AQ
-    | AR
-    | AS
-    | AT
-    | AU
-    | AW
-    | AX
-    | AZ
-    | BA
-    | BB
-    | BD
-    | BE
-    | BF
-    | BG
-    | BH
-    | BI
-    | BJ
-    | BL
-    | BM
-    | BN
-    | BO
-    | BQ
-    | BR
-    | BS
-    | BT
-    | BV
-    | BW
-    | BY
-    | BZ
-    | CA
-    | CC
-    | CD
-    | CF
-    | CG
-    | CH
-    | CI
-    | CK
-    | CL
-    | CM
-    | CN
-    | CO
-    | CR
-    | CU
-    | CV
-    | CW
-    | CX
-    | CY
-    | CZ
-    | DE
-    | DJ
-    | DK
-    | DM
-    | DO
-    | DZ
-    | EC
-    | EE
-    | EG
-    | EH
-    | ER
-    | ES
-    | ET
-    | FI
-    | FJ
-    | FK
-    | FM
-    | FO
-    | FR
-    | GA
-    | GB
-    | GD
-    | GE
-    | GF
-    | GG
-    | GH
-    | GI
-    | GL
-    | GM
-    | GN
-    | GP
-    | GQ
-    | GR
-    | GS
-    | GT
-    | GU
-    | GW
-    | GY
-    | HK
-    | HM
-    | HN
-    | HR
-    | HT
-    | HU
-    | ID
-    | IE
-    | IL
-    | IM
-    | IN
-    | IO
-    | IQ
-    | IR
-    | IS
-    | IT
-    | JE
-    | JM
-    | JO
-    | JP
-    | KE
-    | KG
-    | KH
-    | KI
-    | KM
-    | KN
-    | KP
-    | KR
-    | KW
-    | KY
-    | KZ
-    | LA
-    | LB
-    | LC
-    | LI
-    | LK
-    | LR
-    | LS
-    | LT
-    | LU
-    | LV
-    | LY
-    | MA
-    | MC
-    | MD
-    | ME
-    | MF
-    | MG
-    | MH
-    | MK
-    | ML
-    | MM
-    | MN
-    | MO
-    | MP
-    | MQ
-    | MR
-    | MS
-    | MT
-    | MU
-    | MV
-    | MW
-    | MX
-    | MY
-    | MZ
-    | NA
-    | NC
-    | NE
-    | NF
-    | NG
-    | NI
-    | NL
-    | NO
-    | NP
-    | NR
-    | NU
-    | NZ
-    | OM
-    | PA
-    | PE
-    | PF
-    | PG
-    | PH
-    | PK
-    | PL
-    | PM
-    | PN
-    | PR
-    | PS
-    | PT
-    | PW
-    | PY
-    | QA
-    | RE
-    | RO
-    | RS
-    | RU
-    | RW
-    | SA
-    | SB
-    | SC
-    | SD
-    | SE
-    | SG
-    | SH
-    | SI
-    | SJ
-    | SK
-    | SL
-    | SM
-    | SN
-    | SO
-    | SR
-    | SS
-    | ST
-    | SV
-    | SX
-    | SY
-    | SZ
-    | T1
-    | TC
-    | TD
-    | TF
-    | TG
-    | TH
-    | TJ
-    | TK
-    | TL
-    | TM
-    | TN
-    | TO
-    | TR
-    | TT
-    | TV
-    | TW
-    | TZ
-    | UA
-    | UG
-    | UM
-    | US
-    | UY
-    | UZ
-    | VA
-    | VC
-    | VE
-    | VG
-    | VI
-    | VN
-    | VU
-    | WF
-    | WS
-    | YE
-    | YT
-    | ZA
-    | ZM
-    | ZW
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type RequestInitCache =
@@ -1345,7 +874,7 @@ type ServiceWorkerGlobalScope =
     abstract queueMicrotask: task: JS.Function -> unit
     abstract structuredClone<'T>: value: 'T * ?options: StructuredSerializeOptions -> 'T
     abstract reportError: error: obj -> unit
-    abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, URL> * ?init: RequestInit<RequestInitCfProperties> -> JS.Promise<Response>
+    abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL> * ?init: RequestInit<RequestInitCfProperties> -> JS.Promise<Response>
     abstract self: ServiceWorkerGlobalScope with get, set
     abstract crypto: Crypto with get, set
     abstract caches: CacheStorage with get, set
@@ -1448,175 +977,6 @@ type ServiceWorkerGlobalScopeCompressionStreamFormat =
     | [<CompiledName("deflate")>] Deflate
     | [<CompiledName("deflate-raw")>] DeflateRaw
     | [<CompiledName("gzip")>] Gzip
-
-type ServiceWorkerGlobalScopeRequestInputItem =
-    inherit IncomingRequestCfPropertiesBase
-    inherit IncomingRequestCfPropertiesBotManagementEnterprise
-    inherit IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>
-    inherit IncomingRequestCfPropertiesGeographicInformation
-    inherit IncomingRequestCfPropertiesCloudflareAccessOrApiShield
-    /// <summary>
-    /// [ASN](https://www.iana.org/assignments/as-numbers/as-numbers.xhtml) of the incoming request.
-    /// </summary>
-    /// <remarks>@example 395747</remarks>
-    abstract asn: float option with get, set
-    /// <summary>
-    /// The organization which owns the ASN of the incoming request.
-    /// </summary>
-    /// <remarks>@example "Google Cloud"</remarks>
-    abstract asOrganization: string option with get, set
-    /// <summary>
-    /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
-    /// </summary>
-    /// <remarks>@example "gzip, deflate, br"</remarks>
-    abstract clientAcceptEncoding: string option with get, set
-    /// <summary>
-    /// The number of milliseconds it took for the request to reach your worker.
-    /// </summary>
-    /// <remarks>@example 22</remarks>
-    abstract clientTcpRtt: float option with get, set
-    /// <summary>
-    /// The three-letter [IATA](https://en.wikipedia.org/wiki/IATA_airport_code)
-    /// airport code of the data center that the request hit.
-    /// </summary>
-    /// <remarks>@example "DFW"</remarks>
-    abstract colo: string with get, set
-    /// <summary>
-    /// Represents the upstream's response to a
-    /// [TCP <c>keepalive</c> message](https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html)
-    /// from cloudflare.
-    ///
-    /// For workers with no upstream, this will always be <c>1</c>.
-    /// </summary>
-    /// <remarks>@example 3</remarks>
-    abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
-    /// <summary>
-    /// The HTTP Protocol the request used.
-    /// </summary>
-    /// <remarks>@example "HTTP/2"</remarks>
-    abstract httpProtocol: string with get, set
-    /// <summary>
-    /// The browser-requested prioritization information in the request object.
-    ///
-    /// If no information was set, defaults to the empty string <c>""</c>
-    /// </summary>
-    /// <remarks>@example "weight=192;exclusive=0;group=3;group-weight=127"</remarks>
-    /// <remarks>@default ""</remarks>
-    abstract requestPriority: string with get, set
-    /// <summary>
-    /// The TLS version of the connection to Cloudflare.
-    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-    /// </summary>
-    /// <remarks>@example "TLSv1.3"</remarks>
-    abstract tlsVersion: string with get, set
-    /// <summary>
-    /// The cipher for the connection to Cloudflare.
-    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-    /// </summary>
-    /// <remarks>@example "AEAD-AES128-GCM-SHA256"</remarks>
-    abstract tlsCipher: string with get, set
-    /// <summary>
-    /// Metadata containing the [<c>HELLO</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2) and [<c>FINISHED</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9) messages from this request's TLS handshake.
-    ///
-    /// If the incoming request was served over plaintext (without TLS) this field is undefined.
-    /// </summary>
-    abstract tlsExportedAuthenticator: IncomingRequestCfPropertiesExportedAuthenticatorMetadata option with get, set
-    /// <summary>
-    /// Results of Cloudflare's Bot Management analysis
-    /// </summary>
-    abstract botManagement: RequestFetcherFetchInitItemBotManagement with get, set
-    /// <summary>
-    /// Duplicate of <c>botManagement.score</c>.
-    /// </summary>
-    /// <remarks>@deprecated</remarks>
-    abstract clientTrustScore: float with get, set
-    /// <summary>
-    /// Custom metadata set per-host in [Cloudflare for SaaS](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/).
-    ///
-    /// This field is only present if you have Cloudflare for SaaS enabled on your account
-    /// and you have followed the [required steps to enable it]((https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/)).
-    /// </summary>
-    abstract hostMetadata: U2<RequestInitCfProperties, RequestFetcherFetchInitItem> option with get, set
-    /// <summary>
-    /// The [ISO 3166-1 Alpha 2](https://www.iso.org/iso-3166-country-codes.html) country code the request originated from.
-    ///
-    /// If your worker is [configured to accept TOR connections](https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing), this may also be <c>"T1"</c>, indicating a request that originated over TOR.
-    ///
-    /// If Cloudflare is unable to determine where the request originated this property is omitted.
-    ///
-    /// The country code <c>"T1"</c> is used for requests originating on TOR.
-    /// </summary>
-    /// <remarks>@example "GB"</remarks>
-    abstract country: RequestFetcherFetchInitItemCountry option with get, set
-    /// <summary>
-    /// If present, this property indicates that the request originated in the EU
-    /// </summary>
-    /// <remarks>@example "1"</remarks>
-    abstract isEUCountry: string option with get, set
-    /// <summary>
-    /// A two-letter code indicating the continent the request originated from.
-    /// </summary>
-    /// <remarks>@example "AN"</remarks>
-    abstract continent: ContinentCode option with get, set
-    /// <summary>
-    /// The city the request originated from
-    /// </summary>
-    /// <remarks>@example "Austin"</remarks>
-    abstract city: string option with get, set
-    /// <summary>
-    /// Postal code of the incoming request
-    /// </summary>
-    /// <remarks>@example "78701"</remarks>
-    abstract postalCode: string option with get, set
-    /// <summary>
-    /// Latitude of the incoming request
-    /// </summary>
-    /// <remarks>@example "30.27130"</remarks>
-    abstract latitude: string option with get, set
-    /// <summary>
-    /// Longitude of the incoming request
-    /// </summary>
-    /// <remarks>@example "-97.74260"</remarks>
-    abstract longitude: string option with get, set
-    /// <summary>
-    /// Timezone of the incoming request
-    /// </summary>
-    /// <remarks>@example "America/Chicago"</remarks>
-    abstract timezone: string option with get, set
-    /// <summary>
-    /// If known, the ISO 3166-2 name for the first level region associated with
-    /// the IP address of the incoming request
-    /// </summary>
-    /// <remarks>@example "Texas"</remarks>
-    abstract region: string option with get, set
-    /// <summary>
-    /// If known, the ISO 3166-2 code for the first-level region associated with
-    /// the IP address of the incoming request
-    /// </summary>
-    /// <remarks>@example "TX"</remarks>
-    abstract regionCode: string option with get, set
-    /// <summary>
-    /// Metro code (DMA) of the incoming request
-    /// </summary>
-    /// <remarks>@example "635"</remarks>
-    abstract metroCode: string option with get, set
-    /// <summary>
-    /// Information about the client certificate presented to Cloudflare.
-    ///
-    /// This is populated when the incoming request is served over TLS using
-    /// either Cloudflare Access or API Shield (mTLS)
-    /// and the presented SSL certificate has a valid
-    /// [Certificate Serial Number](https://ldapwiki.com/wiki/Certificate%20Serial%20Number)
-    /// (i.e., not <c>null</c> or <c>""</c>).
-    ///
-    /// Otherwise, a set of placeholder values are used.
-    ///
-    /// The property <c>certPresented</c> will be set to <c>"1"</c> when
-    /// the object is populated (i.e. the above conditions were met).
-    /// </summary>
-    abstract tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder> with get, set
-    [<EmitIndexer>]
-    abstract Item: string -> obj with get, set
 
 [<Interface>]
 type ServiceWorkerGlobalScopeWebSocketPairResult =
@@ -1764,176 +1124,7 @@ type SpanSetAttributesAttributes =
     [<EmitIndexer>]
     abstract Item: string -> U3<string, float, bool> option with get, set
 
-type ExportedHandlerFetchHandler<'Env, 'CfHostMetadata, 'Props> = Func<Request<'CfHostMetadata, obj>, 'Env, ExecutionContext<'Props>, U2<JS.Promise<Response>, Response>>
-
-type ExportedHandlerFetchHandlerRequestItem<'CfHostMetadata> =
-    inherit IncomingRequestCfPropertiesBase
-    inherit IncomingRequestCfPropertiesBotManagementEnterprise
-    inherit IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<'CfHostMetadata>
-    inherit IncomingRequestCfPropertiesGeographicInformation
-    inherit IncomingRequestCfPropertiesCloudflareAccessOrApiShield
-    /// <summary>
-    /// [ASN](https://www.iana.org/assignments/as-numbers/as-numbers.xhtml) of the incoming request.
-    /// </summary>
-    /// <remarks>@example 395747</remarks>
-    abstract asn: float option with get, set
-    /// <summary>
-    /// The organization which owns the ASN of the incoming request.
-    /// </summary>
-    /// <remarks>@example "Google Cloud"</remarks>
-    abstract asOrganization: string option with get, set
-    /// <summary>
-    /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
-    /// </summary>
-    /// <remarks>@example "gzip, deflate, br"</remarks>
-    abstract clientAcceptEncoding: string option with get, set
-    /// <summary>
-    /// The number of milliseconds it took for the request to reach your worker.
-    /// </summary>
-    /// <remarks>@example 22</remarks>
-    abstract clientTcpRtt: float option with get, set
-    /// <summary>
-    /// The three-letter [IATA](https://en.wikipedia.org/wiki/IATA_airport_code)
-    /// airport code of the data center that the request hit.
-    /// </summary>
-    /// <remarks>@example "DFW"</remarks>
-    abstract colo: string with get, set
-    /// <summary>
-    /// Represents the upstream's response to a
-    /// [TCP <c>keepalive</c> message](https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html)
-    /// from cloudflare.
-    ///
-    /// For workers with no upstream, this will always be <c>1</c>.
-    /// </summary>
-    /// <remarks>@example 3</remarks>
-    abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
-    /// <summary>
-    /// The HTTP Protocol the request used.
-    /// </summary>
-    /// <remarks>@example "HTTP/2"</remarks>
-    abstract httpProtocol: string with get, set
-    /// <summary>
-    /// The browser-requested prioritization information in the request object.
-    ///
-    /// If no information was set, defaults to the empty string <c>""</c>
-    /// </summary>
-    /// <remarks>@example "weight=192;exclusive=0;group=3;group-weight=127"</remarks>
-    /// <remarks>@default ""</remarks>
-    abstract requestPriority: string with get, set
-    /// <summary>
-    /// The TLS version of the connection to Cloudflare.
-    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-    /// </summary>
-    /// <remarks>@example "TLSv1.3"</remarks>
-    abstract tlsVersion: string with get, set
-    /// <summary>
-    /// The cipher for the connection to Cloudflare.
-    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-    /// </summary>
-    /// <remarks>@example "AEAD-AES128-GCM-SHA256"</remarks>
-    abstract tlsCipher: string with get, set
-    /// <summary>
-    /// Metadata containing the [<c>HELLO</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2) and [<c>FINISHED</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9) messages from this request's TLS handshake.
-    ///
-    /// If the incoming request was served over plaintext (without TLS) this field is undefined.
-    /// </summary>
-    abstract tlsExportedAuthenticator: IncomingRequestCfPropertiesExportedAuthenticatorMetadata option with get, set
-    /// <summary>
-    /// Results of Cloudflare's Bot Management analysis
-    /// </summary>
-    abstract botManagement: RequestFetcherFetchInitItemBotManagement with get, set
-    /// <summary>
-    /// Duplicate of <c>botManagement.score</c>.
-    /// </summary>
-    /// <remarks>@deprecated</remarks>
-    abstract clientTrustScore: float with get, set
-    /// <summary>
-    /// Custom metadata set per-host in [Cloudflare for SaaS](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/).
-    ///
-    /// This field is only present if you have Cloudflare for SaaS enabled on your account
-    /// and you have followed the [required steps to enable it]((https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/)).
-    /// </summary>
-    abstract hostMetadata: 'CfHostMetadata option with get, set
-    /// <summary>
-    /// The [ISO 3166-1 Alpha 2](https://www.iso.org/iso-3166-country-codes.html) country code the request originated from.
-    ///
-    /// If your worker is [configured to accept TOR connections](https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing), this may also be <c>"T1"</c>, indicating a request that originated over TOR.
-    ///
-    /// If Cloudflare is unable to determine where the request originated this property is omitted.
-    ///
-    /// The country code <c>"T1"</c> is used for requests originating on TOR.
-    /// </summary>
-    /// <remarks>@example "GB"</remarks>
-    abstract country: RequestFetcherFetchInitItemCountry option with get, set
-    /// <summary>
-    /// If present, this property indicates that the request originated in the EU
-    /// </summary>
-    /// <remarks>@example "1"</remarks>
-    abstract isEUCountry: string option with get, set
-    /// <summary>
-    /// A two-letter code indicating the continent the request originated from.
-    /// </summary>
-    /// <remarks>@example "AN"</remarks>
-    abstract continent: ContinentCode option with get, set
-    /// <summary>
-    /// The city the request originated from
-    /// </summary>
-    /// <remarks>@example "Austin"</remarks>
-    abstract city: string option with get, set
-    /// <summary>
-    /// Postal code of the incoming request
-    /// </summary>
-    /// <remarks>@example "78701"</remarks>
-    abstract postalCode: string option with get, set
-    /// <summary>
-    /// Latitude of the incoming request
-    /// </summary>
-    /// <remarks>@example "30.27130"</remarks>
-    abstract latitude: string option with get, set
-    /// <summary>
-    /// Longitude of the incoming request
-    /// </summary>
-    /// <remarks>@example "-97.74260"</remarks>
-    abstract longitude: string option with get, set
-    /// <summary>
-    /// Timezone of the incoming request
-    /// </summary>
-    /// <remarks>@example "America/Chicago"</remarks>
-    abstract timezone: string option with get, set
-    /// <summary>
-    /// If known, the ISO 3166-2 name for the first level region associated with
-    /// the IP address of the incoming request
-    /// </summary>
-    /// <remarks>@example "Texas"</remarks>
-    abstract region: string option with get, set
-    /// <summary>
-    /// If known, the ISO 3166-2 code for the first-level region associated with
-    /// the IP address of the incoming request
-    /// </summary>
-    /// <remarks>@example "TX"</remarks>
-    abstract regionCode: string option with get, set
-    /// <summary>
-    /// Metro code (DMA) of the incoming request
-    /// </summary>
-    /// <remarks>@example "635"</remarks>
-    abstract metroCode: string option with get, set
-    /// <summary>
-    /// Information about the client certificate presented to Cloudflare.
-    ///
-    /// This is populated when the incoming request is served over TLS using
-    /// either Cloudflare Access or API Shield (mTLS)
-    /// and the presented SSL certificate has a valid
-    /// [Certificate Serial Number](https://ldapwiki.com/wiki/Certificate%20Serial%20Number)
-    /// (i.e., not <c>null</c> or <c>""</c>).
-    ///
-    /// Otherwise, a set of placeholder values are used.
-    ///
-    /// The property <c>certPresented</c> will be set to <c>"1"</c> when
-    /// the object is populated (i.e. the above conditions were met).
-    /// </summary>
-    abstract tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder> with get, set
-    [<EmitIndexer>]
-    abstract Item: string -> obj with get, set
+type ExportedHandlerFetchHandler<'Env, 'CfHostMetadata, 'Props> = Func<Request<'CfHostMetadata, IncomingRequestCfProperties<'CfHostMetadata>>, 'Env, ExecutionContext<'Props>, U2<JS.Promise<Response>, Response>>
 
 type ExportedHandlerConnectHandler<'Env, 'Props> = Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
 
@@ -2273,7 +1464,7 @@ type EmailAttachment3 =
 
 [<Interface>]
 type ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> =
-    abstract fetch: Func<Request<'CfHostMetadata, obj>, 'Env, ExecutionContext<'Props>, U2<JS.Promise<Response>, Response>> option with get, set
+    abstract fetch: Func<Request<'CfHostMetadata, IncomingRequestCfProperties<'CfHostMetadata>>, 'Env, ExecutionContext<'Props>, U2<JS.Promise<Response>, Response>> option with get, set
     abstract connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
@@ -2283,176 +1474,7 @@ type ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> =
     abstract email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?fetch: Func<Request<'CfHostMetadata, obj>, 'Env, ExecutionContext<'Props>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tailStream: Func<TailEvent2<Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?test: Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>) : ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> = jsNative
-
-type ExportedHandlerFetchRequestItem<'CfHostMetadata> =
-    inherit IncomingRequestCfPropertiesBase
-    inherit IncomingRequestCfPropertiesBotManagementEnterprise
-    inherit IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<'CfHostMetadata>
-    inherit IncomingRequestCfPropertiesGeographicInformation
-    inherit IncomingRequestCfPropertiesCloudflareAccessOrApiShield
-    /// <summary>
-    /// [ASN](https://www.iana.org/assignments/as-numbers/as-numbers.xhtml) of the incoming request.
-    /// </summary>
-    /// <remarks>@example 395747</remarks>
-    abstract asn: float option with get, set
-    /// <summary>
-    /// The organization which owns the ASN of the incoming request.
-    /// </summary>
-    /// <remarks>@example "Google Cloud"</remarks>
-    abstract asOrganization: string option with get, set
-    /// <summary>
-    /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
-    /// </summary>
-    /// <remarks>@example "gzip, deflate, br"</remarks>
-    abstract clientAcceptEncoding: string option with get, set
-    /// <summary>
-    /// The number of milliseconds it took for the request to reach your worker.
-    /// </summary>
-    /// <remarks>@example 22</remarks>
-    abstract clientTcpRtt: float option with get, set
-    /// <summary>
-    /// The three-letter [IATA](https://en.wikipedia.org/wiki/IATA_airport_code)
-    /// airport code of the data center that the request hit.
-    /// </summary>
-    /// <remarks>@example "DFW"</remarks>
-    abstract colo: string with get, set
-    /// <summary>
-    /// Represents the upstream's response to a
-    /// [TCP <c>keepalive</c> message](https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html)
-    /// from cloudflare.
-    ///
-    /// For workers with no upstream, this will always be <c>1</c>.
-    /// </summary>
-    /// <remarks>@example 3</remarks>
-    abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
-    /// <summary>
-    /// The HTTP Protocol the request used.
-    /// </summary>
-    /// <remarks>@example "HTTP/2"</remarks>
-    abstract httpProtocol: string with get, set
-    /// <summary>
-    /// The browser-requested prioritization information in the request object.
-    ///
-    /// If no information was set, defaults to the empty string <c>""</c>
-    /// </summary>
-    /// <remarks>@example "weight=192;exclusive=0;group=3;group-weight=127"</remarks>
-    /// <remarks>@default ""</remarks>
-    abstract requestPriority: string with get, set
-    /// <summary>
-    /// The TLS version of the connection to Cloudflare.
-    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-    /// </summary>
-    /// <remarks>@example "TLSv1.3"</remarks>
-    abstract tlsVersion: string with get, set
-    /// <summary>
-    /// The cipher for the connection to Cloudflare.
-    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-    /// </summary>
-    /// <remarks>@example "AEAD-AES128-GCM-SHA256"</remarks>
-    abstract tlsCipher: string with get, set
-    /// <summary>
-    /// Metadata containing the [<c>HELLO</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2) and [<c>FINISHED</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9) messages from this request's TLS handshake.
-    ///
-    /// If the incoming request was served over plaintext (without TLS) this field is undefined.
-    /// </summary>
-    abstract tlsExportedAuthenticator: IncomingRequestCfPropertiesExportedAuthenticatorMetadata option with get, set
-    /// <summary>
-    /// Results of Cloudflare's Bot Management analysis
-    /// </summary>
-    abstract botManagement: RequestFetcherFetchInitItemBotManagement with get, set
-    /// <summary>
-    /// Duplicate of <c>botManagement.score</c>.
-    /// </summary>
-    /// <remarks>@deprecated</remarks>
-    abstract clientTrustScore: float with get, set
-    /// <summary>
-    /// Custom metadata set per-host in [Cloudflare for SaaS](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/).
-    ///
-    /// This field is only present if you have Cloudflare for SaaS enabled on your account
-    /// and you have followed the [required steps to enable it]((https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/)).
-    /// </summary>
-    abstract hostMetadata: 'CfHostMetadata option with get, set
-    /// <summary>
-    /// The [ISO 3166-1 Alpha 2](https://www.iso.org/iso-3166-country-codes.html) country code the request originated from.
-    ///
-    /// If your worker is [configured to accept TOR connections](https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing), this may also be <c>"T1"</c>, indicating a request that originated over TOR.
-    ///
-    /// If Cloudflare is unable to determine where the request originated this property is omitted.
-    ///
-    /// The country code <c>"T1"</c> is used for requests originating on TOR.
-    /// </summary>
-    /// <remarks>@example "GB"</remarks>
-    abstract country: RequestFetcherFetchInitItemCountry option with get, set
-    /// <summary>
-    /// If present, this property indicates that the request originated in the EU
-    /// </summary>
-    /// <remarks>@example "1"</remarks>
-    abstract isEUCountry: string option with get, set
-    /// <summary>
-    /// A two-letter code indicating the continent the request originated from.
-    /// </summary>
-    /// <remarks>@example "AN"</remarks>
-    abstract continent: ContinentCode option with get, set
-    /// <summary>
-    /// The city the request originated from
-    /// </summary>
-    /// <remarks>@example "Austin"</remarks>
-    abstract city: string option with get, set
-    /// <summary>
-    /// Postal code of the incoming request
-    /// </summary>
-    /// <remarks>@example "78701"</remarks>
-    abstract postalCode: string option with get, set
-    /// <summary>
-    /// Latitude of the incoming request
-    /// </summary>
-    /// <remarks>@example "30.27130"</remarks>
-    abstract latitude: string option with get, set
-    /// <summary>
-    /// Longitude of the incoming request
-    /// </summary>
-    /// <remarks>@example "-97.74260"</remarks>
-    abstract longitude: string option with get, set
-    /// <summary>
-    /// Timezone of the incoming request
-    /// </summary>
-    /// <remarks>@example "America/Chicago"</remarks>
-    abstract timezone: string option with get, set
-    /// <summary>
-    /// If known, the ISO 3166-2 name for the first level region associated with
-    /// the IP address of the incoming request
-    /// </summary>
-    /// <remarks>@example "Texas"</remarks>
-    abstract region: string option with get, set
-    /// <summary>
-    /// If known, the ISO 3166-2 code for the first-level region associated with
-    /// the IP address of the incoming request
-    /// </summary>
-    /// <remarks>@example "TX"</remarks>
-    abstract regionCode: string option with get, set
-    /// <summary>
-    /// Metro code (DMA) of the incoming request
-    /// </summary>
-    /// <remarks>@example "635"</remarks>
-    abstract metroCode: string option with get, set
-    /// <summary>
-    /// Information about the client certificate presented to Cloudflare.
-    ///
-    /// This is populated when the incoming request is served over TLS using
-    /// either Cloudflare Access or API Shield (mTLS)
-    /// and the presented SSL certificate has a valid
-    /// [Certificate Serial Number](https://ldapwiki.com/wiki/Certificate%20Serial%20Number)
-    /// (i.e., not <c>null</c> or <c>""</c>).
-    ///
-    /// Otherwise, a set of placeholder values are used.
-    ///
-    /// The property <c>certPresented</c> will be set to <c>"1"</c> when
-    /// the object is populated (i.e. the above conditions were met).
-    /// </summary>
-    abstract tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder> with get, set
-    [<EmitIndexer>]
-    abstract Item: string -> obj with get, set
+    static member Create (?fetch: Func<Request<'CfHostMetadata, IncomingRequestCfProperties<'CfHostMetadata>>, 'Env, ExecutionContext<'Props>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tailStream: Func<TailEvent2<Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?test: Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>) : ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> = jsNative
 
 [<Interface>]
 type StructuredSerializeOptions =
@@ -2514,7 +1536,7 @@ type ColoLocalActorNamespace =
     abstract get: actorId: string -> RequestFetcher
 
 type DurableObject =
-    abstract fetch: request: Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> -> U2<JS.Promise<Response>, Response>
+    abstract fetch: request: Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<Response>, Response>
     abstract connect: Func<Socket, JS.Promise<unit> option> option with get, set
     abstract alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option> option with get, set
     abstract webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
@@ -3457,9 +2479,9 @@ type CacheStorage =
 /// [Cloudflare Docs Reference](https://developers.cloudflare.com/workers/runtime-apis/cache/)
 /// </summary>
 type Cache =
-    abstract delete: request: U3<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, URL> * ?options: CacheQueryOptions -> JS.Promise<bool>
-    abstract ``match``: request: U3<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, URL> * ?options: CacheQueryOptions -> JS.Promise<Response option>
-    abstract put: request: U3<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, URL> * response: Response -> JS.Promise<unit>
+    abstract delete: request: U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL> * ?options: CacheQueryOptions -> JS.Promise<bool>
+    abstract ``match``: request: U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL> * ?options: CacheQueryOptions -> JS.Promise<Response option>
+    abstract put: request: U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL> * response: Response -> JS.Promise<unit>
 
 [<Interface>]
 type CacheQueryOptions =
@@ -4466,7 +3488,7 @@ type FetchEvent =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FetchEvent/request)
     /// </summary>
-    abstract request: Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>
+    abstract request: Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>
     /// <summary>
     /// The **<c>respondWith()</c>** method of FetchEvent prevents the browser's default fetch handling, and allows you to provide a promise for a Response yourself.
     ///
@@ -4811,7 +3833,7 @@ type Request<'CfHostMetadata, 'Cf> =
 
 type RequestConstructor =
     [<EmitConstructor>]
-    abstract Create<'CfHostMetadata, 'Cf>: input: U3<string, Request<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>, U2<RequestInitCfProperties, ServiceWorkerGlobalScopeRequestInputItem>>, URL> * ?init: RequestInit<'Cf> -> Request<'CfHostMetadata, 'Cf>
+    abstract Create<'CfHostMetadata, 'Cf>: input: U3<string, Request<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>, U2<RequestInitCfProperties, IncomingRequestCfProperties<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>>>, URL> * ?init: RequestInit<'Cf> -> Request<'CfHostMetadata, 'Cf>
 
 [<Interface>]
 type RequestInit<'Cf> =
@@ -7448,7 +6470,7 @@ type LoopbackDurableObjectNamespace =
 
 type LoopbackDurableObjectNamespaceGetResult =
     inherit RequestFetcher
-    abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, URL> * ?init: RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> -> JS.Promise<Response>
+    abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL> * ?init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> JS.Promise<Response>
     abstract connect: address: U2<string, SocketAddress> * ?options: SocketOptions -> Socket
     abstract id: DurableObjectId
     abstract name: string option
@@ -22865,7 +21887,7 @@ type BrowserRun =
     /// Used by libraries like <c>@cloudflare/puppeteer</c> to acquire and connect to a browser instance.
     /// </summary>
     /// <remarks>@see https://developers.cloudflare.com/browser-run/</remarks>
-    abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, URL> * ?init: RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> -> JS.Promise<Response>
+    abstract fetch: input: U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL> * ?init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> -> JS.Promise<Response>
     /// <summary>
     /// Take a screenshot of a web page.
     /// Generate a PDF of a web page.
@@ -25035,7 +24057,7 @@ type IncomingRequestCfProperties<'HostMetadata> =
     /// <summary>
     /// Results of Cloudflare's Bot Management analysis
     /// </summary>
-    abstract botManagement: RequestFetcherFetchInitItemBotManagement with get, set
+    abstract botManagement: IncomingRequestCfPropertiesBotManagement2 with get, set
     /// <summary>
     /// Duplicate of <c>botManagement.score</c>.
     /// </summary>
@@ -25058,7 +24080,7 @@ type IncomingRequestCfProperties<'HostMetadata> =
     /// The country code <c>"T1"</c> is used for requests originating on TOR.
     /// </summary>
     /// <remarks>@example "GB"</remarks>
-    abstract country: RequestFetcherFetchInitItemCountry option with get, set
+    abstract country: IncomingRequestCfPropertiesCountry option with get, set
     /// <summary>
     /// If present, this property indicates that the request originated in the EU
     /// </summary>
@@ -25128,6 +24150,308 @@ type IncomingRequestCfProperties<'HostMetadata> =
     abstract tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder> with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
+
+[<Interface>]
+type IncomingRequestCfPropertiesBotManagement2 =
+    inherit IncomingRequestCfPropertiesBotManagementBase
+    /// <summary>
+    /// Cloudflare’s [level of certainty](https://developers.cloudflare.com/bots/concepts/bot-score/) that a request comes from a bot,
+    /// represented as an integer percentage between <c>1</c> (almost certainly a bot) and <c>99</c> (almost certainly human).
+    /// </summary>
+    /// <remarks>@example 54</remarks>
+    abstract score: float with get, set
+    /// <summary>
+    /// A boolean value that is true if the request comes from a good bot, like Google or Bing.
+    /// Most customers choose to allow this traffic. For more details, see [Traffic from known bots](https://developers.cloudflare.com/firewall/known-issues-and-faq/#how-does-firewall-rules-handle-traffic-from-known-bots).
+    /// </summary>
+    abstract verifiedBot: bool with get, set
+    /// <summary>
+    /// A boolean value that is true if the request originates from a
+    /// Cloudflare-verified proxy service.
+    /// </summary>
+    abstract corporateProxy: bool with get, set
+    /// <summary>
+    /// A boolean value that's true if the request matches [file extensions](https://developers.cloudflare.com/bots/reference/static-resources/) for many types of static resources.
+    /// </summary>
+    abstract staticResource: bool with get, set
+    /// <summary>
+    /// List of IDs that correlate to the Bot Management heuristic detections made on a request (you can have multiple heuristic detections on the same request).
+    /// </summary>
+    abstract detectionIds: float[] with get, set
+    /// <summary>
+    /// A [JA3 Fingerprint](https://developers.cloudflare.com/bots/concepts/ja3-fingerprint/) to help profile specific SSL/TLS clients
+    /// across different destination IPs, Ports, and X509 certificates.
+    /// </summary>
+    abstract ja3Hash: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (score: float, verifiedBot: bool, corporateProxy: bool, staticResource: bool, detectionIds: float[], ja3Hash: string) : IncomingRequestCfPropertiesBotManagement2 = jsNative
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type IncomingRequestCfPropertiesCountry =
+    | AD
+    | AE
+    | AF
+    | AG
+    | AI
+    | AL
+    | AM
+    | AO
+    | AQ
+    | AR
+    | AS
+    | AT
+    | AU
+    | AW
+    | AX
+    | AZ
+    | BA
+    | BB
+    | BD
+    | BE
+    | BF
+    | BG
+    | BH
+    | BI
+    | BJ
+    | BL
+    | BM
+    | BN
+    | BO
+    | BQ
+    | BR
+    | BS
+    | BT
+    | BV
+    | BW
+    | BY
+    | BZ
+    | CA
+    | CC
+    | CD
+    | CF
+    | CG
+    | CH
+    | CI
+    | CK
+    | CL
+    | CM
+    | CN
+    | CO
+    | CR
+    | CU
+    | CV
+    | CW
+    | CX
+    | CY
+    | CZ
+    | DE
+    | DJ
+    | DK
+    | DM
+    | DO
+    | DZ
+    | EC
+    | EE
+    | EG
+    | EH
+    | ER
+    | ES
+    | ET
+    | FI
+    | FJ
+    | FK
+    | FM
+    | FO
+    | FR
+    | GA
+    | GB
+    | GD
+    | GE
+    | GF
+    | GG
+    | GH
+    | GI
+    | GL
+    | GM
+    | GN
+    | GP
+    | GQ
+    | GR
+    | GS
+    | GT
+    | GU
+    | GW
+    | GY
+    | HK
+    | HM
+    | HN
+    | HR
+    | HT
+    | HU
+    | ID
+    | IE
+    | IL
+    | IM
+    | IN
+    | IO
+    | IQ
+    | IR
+    | IS
+    | IT
+    | JE
+    | JM
+    | JO
+    | JP
+    | KE
+    | KG
+    | KH
+    | KI
+    | KM
+    | KN
+    | KP
+    | KR
+    | KW
+    | KY
+    | KZ
+    | LA
+    | LB
+    | LC
+    | LI
+    | LK
+    | LR
+    | LS
+    | LT
+    | LU
+    | LV
+    | LY
+    | MA
+    | MC
+    | MD
+    | ME
+    | MF
+    | MG
+    | MH
+    | MK
+    | ML
+    | MM
+    | MN
+    | MO
+    | MP
+    | MQ
+    | MR
+    | MS
+    | MT
+    | MU
+    | MV
+    | MW
+    | MX
+    | MY
+    | MZ
+    | NA
+    | NC
+    | NE
+    | NF
+    | NG
+    | NI
+    | NL
+    | NO
+    | NP
+    | NR
+    | NU
+    | NZ
+    | OM
+    | PA
+    | PE
+    | PF
+    | PG
+    | PH
+    | PK
+    | PL
+    | PM
+    | PN
+    | PR
+    | PS
+    | PT
+    | PW
+    | PY
+    | QA
+    | RE
+    | RO
+    | RS
+    | RU
+    | RW
+    | SA
+    | SB
+    | SC
+    | SD
+    | SE
+    | SG
+    | SH
+    | SI
+    | SJ
+    | SK
+    | SL
+    | SM
+    | SN
+    | SO
+    | SR
+    | SS
+    | ST
+    | SV
+    | SX
+    | SY
+    | SZ
+    | T1
+    | TC
+    | TD
+    | TF
+    | TG
+    | TH
+    | TJ
+    | TK
+    | TL
+    | TM
+    | TN
+    | TO
+    | TR
+    | TT
+    | TV
+    | TW
+    | TZ
+    | UA
+    | UG
+    | UM
+    | US
+    | UY
+    | UZ
+    | VA
+    | VC
+    | VE
+    | VG
+    | VI
+    | VN
+    | VU
+    | WF
+    | WS
+    | YE
+    | YT
+    | ZA
+    | ZM
+    | ZW
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type IncomingRequestCfPropertiesTLSClientAuthCertRevoked =
+    | [<CompiledName("0")>] N0
+    | [<CompiledName("1")>] N1
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type IncomingRequestCfPropertiesTLSClientAuthCertVerified =
+    | FAILED
+    | [<CompiledName("FAILED:certificate has expired")>] FAILEDCertificateHasExpired
+    | [<CompiledName("FAILED:certificate is not yet valid")>] FAILEDCertificateIsNotYetValid
+    | [<CompiledName("FAILED:self signed certificate")>] FAILEDSelfSignedCertificate
+    | [<CompiledName("FAILED:unable to verify the first certificate")>] FAILEDUnableToVerifyTheFirstCertificate
+    | SUCCESS
 
 type IncomingRequestCfPropertiesBase =
     inherit RequestInitCfPropertiesBase
@@ -25249,14 +24573,14 @@ type IncomingRequestCfPropertiesBotManagementEnterprise =
     /// <summary>
     /// Results of Cloudflare's Bot Management analysis
     /// </summary>
-    abstract botManagement: RequestFetcherFetchInitItemBotManagement with get, set
+    abstract botManagement: IncomingRequestCfPropertiesBotManagement2 with get, set
     /// <summary>
     /// Duplicate of <c>botManagement.score</c>.
     /// </summary>
     /// <remarks>@deprecated</remarks>
     abstract clientTrustScore: float with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (botManagement: RequestFetcherFetchInitItemBotManagement, clientTrustScore: float) : IncomingRequestCfPropertiesBotManagementEnterprise = jsNative
+    static member Create (botManagement: IncomingRequestCfPropertiesBotManagement2, clientTrustScore: float) : IncomingRequestCfPropertiesBotManagementEnterprise = jsNative
 
 [<Interface>]
 type IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<'HostMetadata> =
@@ -25333,7 +24657,7 @@ type IncomingRequestCfPropertiesGeographicInformation =
     /// The country code <c>"T1"</c> is used for requests originating on TOR.
     /// </summary>
     /// <remarks>@example "GB"</remarks>
-    abstract country: RequestFetcherFetchInitItemCountry option with get, set
+    abstract country: IncomingRequestCfPropertiesCountry option with get, set
     /// <summary>
     /// If present, this property indicates that the request originated in the EU
     /// </summary>
@@ -25387,7 +24711,7 @@ type IncomingRequestCfPropertiesGeographicInformation =
     /// <remarks>@example "635"</remarks>
     abstract metroCode: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?country: RequestFetcherFetchInitItemCountry, ?isEUCountry: string, ?continent: ContinentCode, ?city: string, ?postalCode: string, ?latitude: string, ?longitude: string, ?timezone: string, ?region: string, ?regionCode: string, ?metroCode: string) : IncomingRequestCfPropertiesGeographicInformation = jsNative
+    static member Create (?country: IncomingRequestCfPropertiesCountry, ?isEUCountry: string, ?continent: ContinentCode, ?city: string, ?postalCode: string, ?latitude: string, ?longitude: string, ?timezone: string, ?region: string, ?regionCode: string, ?metroCode: string) : IncomingRequestCfPropertiesGeographicInformation = jsNative
 
 /// <summary>
 /// Data about the incoming request's TLS certificate
@@ -25816,177 +25140,7 @@ type ContinentCode =
     | OC
     | SA
 
-[<Erase>]
-type CfProperties<'HostMetadata> = private CfProperties__ of obj
-
-type CfProperties2<'HostMetadata> =
-    inherit IncomingRequestCfPropertiesBase
-    inherit IncomingRequestCfPropertiesBotManagementEnterprise
-    inherit IncomingRequestCfPropertiesCloudflareForSaaSEnterprise<'HostMetadata>
-    inherit IncomingRequestCfPropertiesGeographicInformation
-    inherit IncomingRequestCfPropertiesCloudflareAccessOrApiShield
-    /// <summary>
-    /// [ASN](https://www.iana.org/assignments/as-numbers/as-numbers.xhtml) of the incoming request.
-    /// </summary>
-    /// <remarks>@example 395747</remarks>
-    abstract asn: float option with get, set
-    /// <summary>
-    /// The organization which owns the ASN of the incoming request.
-    /// </summary>
-    /// <remarks>@example "Google Cloud"</remarks>
-    abstract asOrganization: string option with get, set
-    /// <summary>
-    /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
-    /// </summary>
-    /// <remarks>@example "gzip, deflate, br"</remarks>
-    abstract clientAcceptEncoding: string option with get, set
-    /// <summary>
-    /// The number of milliseconds it took for the request to reach your worker.
-    /// </summary>
-    /// <remarks>@example 22</remarks>
-    abstract clientTcpRtt: float option with get, set
-    /// <summary>
-    /// The three-letter [IATA](https://en.wikipedia.org/wiki/IATA_airport_code)
-    /// airport code of the data center that the request hit.
-    /// </summary>
-    /// <remarks>@example "DFW"</remarks>
-    abstract colo: string with get, set
-    /// <summary>
-    /// Represents the upstream's response to a
-    /// [TCP <c>keepalive</c> message](https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html)
-    /// from cloudflare.
-    ///
-    /// For workers with no upstream, this will always be <c>1</c>.
-    /// </summary>
-    /// <remarks>@example 3</remarks>
-    abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
-    /// <summary>
-    /// The HTTP Protocol the request used.
-    /// </summary>
-    /// <remarks>@example "HTTP/2"</remarks>
-    abstract httpProtocol: string with get, set
-    /// <summary>
-    /// The browser-requested prioritization information in the request object.
-    ///
-    /// If no information was set, defaults to the empty string <c>""</c>
-    /// </summary>
-    /// <remarks>@example "weight=192;exclusive=0;group=3;group-weight=127"</remarks>
-    /// <remarks>@default ""</remarks>
-    abstract requestPriority: string with get, set
-    /// <summary>
-    /// The TLS version of the connection to Cloudflare.
-    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-    /// </summary>
-    /// <remarks>@example "TLSv1.3"</remarks>
-    abstract tlsVersion: string with get, set
-    /// <summary>
-    /// The cipher for the connection to Cloudflare.
-    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-    /// </summary>
-    /// <remarks>@example "AEAD-AES128-GCM-SHA256"</remarks>
-    abstract tlsCipher: string with get, set
-    /// <summary>
-    /// Metadata containing the [<c>HELLO</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2) and [<c>FINISHED</c>](https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9) messages from this request's TLS handshake.
-    ///
-    /// If the incoming request was served over plaintext (without TLS) this field is undefined.
-    /// </summary>
-    abstract tlsExportedAuthenticator: IncomingRequestCfPropertiesExportedAuthenticatorMetadata option with get, set
-    /// <summary>
-    /// Results of Cloudflare's Bot Management analysis
-    /// </summary>
-    abstract botManagement: RequestFetcherFetchInitItemBotManagement with get, set
-    /// <summary>
-    /// Duplicate of <c>botManagement.score</c>.
-    /// </summary>
-    /// <remarks>@deprecated</remarks>
-    abstract clientTrustScore: float with get, set
-    /// <summary>
-    /// Custom metadata set per-host in [Cloudflare for SaaS](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/).
-    ///
-    /// This field is only present if you have Cloudflare for SaaS enabled on your account
-    /// and you have followed the [required steps to enable it]((https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/)).
-    /// </summary>
-    abstract hostMetadata: 'HostMetadata option with get, set
-    /// <summary>
-    /// The [ISO 3166-1 Alpha 2](https://www.iso.org/iso-3166-country-codes.html) country code the request originated from.
-    ///
-    /// If your worker is [configured to accept TOR connections](https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing), this may also be <c>"T1"</c>, indicating a request that originated over TOR.
-    ///
-    /// If Cloudflare is unable to determine where the request originated this property is omitted.
-    ///
-    /// The country code <c>"T1"</c> is used for requests originating on TOR.
-    /// </summary>
-    /// <remarks>@example "GB"</remarks>
-    abstract country: RequestFetcherFetchInitItemCountry option with get, set
-    /// <summary>
-    /// If present, this property indicates that the request originated in the EU
-    /// </summary>
-    /// <remarks>@example "1"</remarks>
-    abstract isEUCountry: string option with get, set
-    /// <summary>
-    /// A two-letter code indicating the continent the request originated from.
-    /// </summary>
-    /// <remarks>@example "AN"</remarks>
-    abstract continent: ContinentCode option with get, set
-    /// <summary>
-    /// The city the request originated from
-    /// </summary>
-    /// <remarks>@example "Austin"</remarks>
-    abstract city: string option with get, set
-    /// <summary>
-    /// Postal code of the incoming request
-    /// </summary>
-    /// <remarks>@example "78701"</remarks>
-    abstract postalCode: string option with get, set
-    /// <summary>
-    /// Latitude of the incoming request
-    /// </summary>
-    /// <remarks>@example "30.27130"</remarks>
-    abstract latitude: string option with get, set
-    /// <summary>
-    /// Longitude of the incoming request
-    /// </summary>
-    /// <remarks>@example "-97.74260"</remarks>
-    abstract longitude: string option with get, set
-    /// <summary>
-    /// Timezone of the incoming request
-    /// </summary>
-    /// <remarks>@example "America/Chicago"</remarks>
-    abstract timezone: string option with get, set
-    /// <summary>
-    /// If known, the ISO 3166-2 name for the first level region associated with
-    /// the IP address of the incoming request
-    /// </summary>
-    /// <remarks>@example "Texas"</remarks>
-    abstract region: string option with get, set
-    /// <summary>
-    /// If known, the ISO 3166-2 code for the first-level region associated with
-    /// the IP address of the incoming request
-    /// </summary>
-    /// <remarks>@example "TX"</remarks>
-    abstract regionCode: string option with get, set
-    /// <summary>
-    /// Metro code (DMA) of the incoming request
-    /// </summary>
-    /// <remarks>@example "635"</remarks>
-    abstract metroCode: string option with get, set
-    /// <summary>
-    /// Information about the client certificate presented to Cloudflare.
-    ///
-    /// This is populated when the incoming request is served over TLS using
-    /// either Cloudflare Access or API Shield (mTLS)
-    /// and the presented SSL certificate has a valid
-    /// [Certificate Serial Number](https://ldapwiki.com/wiki/Certificate%20Serial%20Number)
-    /// (i.e., not <c>null</c> or <c>""</c>).
-    ///
-    /// Otherwise, a set of placeholder values are used.
-    ///
-    /// The property <c>certPresented</c> will be set to <c>"1"</c> when
-    /// the object is populated (i.e. the above conditions were met).
-    /// </summary>
-    abstract tlsClientAuth: U2<IncomingRequestCfPropertiesTLSClientAuth, IncomingRequestCfPropertiesTLSClientAuthPlaceholder> with get, set
-    [<EmitIndexer>]
-    abstract Item: string -> obj with get, set
+type CfProperties<'HostMetadata> = U2<RequestInitCfProperties, IncomingRequestCfProperties<'HostMetadata>>
 
 [<Interface>]
 type D1Meta =
@@ -26092,7 +25246,7 @@ type D1SessionBookmark = Ai_Cf_Leonardo_Phoenix_1_0_Output
 
 type D1Database =
     abstract prepare: query: string -> D1PreparedStatement
-    abstract batch: statements: D1PreparedStatement[] -> JS.Promise<obj[]>
+    abstract batch<'T>: statements: D1PreparedStatement[] -> JS.Promise<D1Result<'T>[]>
     abstract exec: query: string -> JS.Promise<D1ExecResult>
     /// <summary>
     /// Creates a new D1 Session anchored at the given constraint or the bookmark.
@@ -26103,36 +25257,6 @@ type D1Database =
     abstract withSession: ?constraintOrBookmark: string -> D1DatabaseSession
     /// <remarks>@deprecated dump() will be removed soon, only applies to deprecated alpha v1 databases.</remarks>
     abstract dump: unit -> JS.Promise<JS.ArrayBuffer>
-
-[<Interface>]
-type D1DatabaseBatchResultItemItem<'T> =
-    inherit D1Response
-    abstract success: bool with get, set
-    abstract meta: D1ResponseMeta with get, set
-    abstract error: unit option with get, set
-    abstract results: 'T[] with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (success: bool, meta: D1ResponseMeta, results: 'T[], ?error: unit) : D1DatabaseBatchResultItemItem<'T> = jsNative
-
-[<Interface>]
-type D1DatabaseSessionBatchResultItemItem<'T> =
-    inherit D1Response
-    abstract success: bool with get, set
-    abstract meta: D1ResponseMeta with get, set
-    abstract error: unit option with get, set
-    abstract results: 'T[] with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (success: bool, meta: D1ResponseMeta, results: 'T[], ?error: unit) : D1DatabaseSessionBatchResultItemItem<'T> = jsNative
-
-[<Interface>]
-type D1PreparedStatementAllResultItem<'T> =
-    inherit D1Response
-    abstract success: bool with get, set
-    abstract meta: D1ResponseMeta with get, set
-    abstract error: unit option with get, set
-    abstract results: 'T[] with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (success: bool, meta: D1ResponseMeta, results: 'T[], ?error: unit) : D1PreparedStatementAllResultItem<'T> = jsNative
 
 [<Interface>]
 type D1PreparedStatementRawOptions =
@@ -26146,19 +25270,9 @@ type D1PreparedStatementRawOptions2 =
     [<ParamObject; Emit("$0")>]
     static member Create (?columnNames: bool) : D1PreparedStatementRawOptions2 = jsNative
 
-[<Interface>]
-type D1PreparedStatementRunResultItem<'T> =
-    inherit D1Response
-    abstract success: bool with get, set
-    abstract meta: D1ResponseMeta with get, set
-    abstract error: unit option with get, set
-    abstract results: 'T[] with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (success: bool, meta: D1ResponseMeta, results: 'T[], ?error: unit) : D1PreparedStatementRunResultItem<'T> = jsNative
-
 type D1DatabaseSession =
     abstract prepare: query: string -> D1PreparedStatement
-    abstract batch: statements: D1PreparedStatement[] -> JS.Promise<obj[]>
+    abstract batch<'T>: statements: D1PreparedStatement[] -> JS.Promise<D1Result<'T>[]>
     /// <remarks>
     /// @returns
     /// The latest session bookmark across all executed queries on the session.
@@ -26170,8 +25284,8 @@ type D1PreparedStatement =
     abstract bind: [<ParamArray>] values: obj[] -> D1PreparedStatement
     abstract first<'T>: colName: string -> JS.Promise<'T option>
     abstract first<'T>: unit -> JS.Promise<'T option>
-    abstract run: unit -> JS.Promise<obj>
-    abstract all: unit -> JS.Promise<obj>
+    abstract run<'T>: unit -> JS.Promise<D1Result<'T>>
+    abstract all<'T>: unit -> JS.Promise<D1Result<'T>>
     abstract raw: options: D1PreparedStatementRawOptions -> JS.Promise<obj[]>
     abstract raw<'T>: ?options: D1PreparedStatementRawOptions2 -> JS.Promise<'T[]>
 
@@ -28079,57 +27193,57 @@ type Params<'P> = private Params__ of obj
 
 [<Interface>]
 type EventContext<'Env, 'P, 'Data> =
-    abstract request: Request<obj, RequestFetcherFetchInitItem> with get, set
+    abstract request: Request<obj, IncomingRequestCfProperties<obj>> with get, set
     abstract functionPath: string with get, set
     abstract waitUntil: Action<JS.Promise<obj>> with get, set
     abstract passThroughOnException: Action with get, set
-    abstract next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>> option, RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> option, JS.Promise<Response>> with get, set
+    abstract next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>> with get, set
     abstract env: obj with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: Request<obj, RequestFetcherFetchInitItem>, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>> option, RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data) : EventContext<'Env, 'P, 'Data> = jsNative
+    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data) : EventContext<'Env, 'P, 'Data> = jsNative
 
 [<Interface>]
 type PagesFunctionContext<'Env, 'Params, 'Data when 'Data :> RequestInitCfPropertiesBase> =
-    abstract request: Request<obj, RequestFetcherFetchInitItem> with get, set
+    abstract request: Request<obj, IncomingRequestCfProperties<obj>> with get, set
     abstract functionPath: string with get, set
     abstract waitUntil: Action<JS.Promise<obj>> with get, set
     abstract passThroughOnException: Action with get, set
-    abstract next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>> option, RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> option, JS.Promise<Response>> with get, set
+    abstract next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>> with get, set
     abstract env: obj with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: Request<obj, RequestFetcherFetchInitItem>, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>> option, RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data) : PagesFunctionContext<'Env, 'Params, 'Data> = jsNative
+    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data) : PagesFunctionContext<'Env, 'Params, 'Data> = jsNative
 
 [<Interface>]
 type EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> =
-    abstract request: Request<obj, RequestFetcherFetchInitItem> with get, set
+    abstract request: Request<obj, IncomingRequestCfProperties<obj>> with get, set
     abstract functionPath: string with get, set
     abstract waitUntil: Action<JS.Promise<obj>> with get, set
     abstract passThroughOnException: Action with get, set
-    abstract next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>> option, RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> option, JS.Promise<Response>> with get, set
+    abstract next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>> with get, set
     abstract env: obj with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     abstract pluginArgs: 'PluginArgs with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: Request<obj, RequestFetcherFetchInitItem>, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>> option, RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> = jsNative
+    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> = jsNative
 
 [<Interface>]
 type PagesPluginFunctionContext<'Env, 'Params, 'Data, 'PluginArgs when 'Data :> RequestInitCfPropertiesBase> =
-    abstract request: Request<obj, RequestFetcherFetchInitItem> with get, set
+    abstract request: Request<obj, IncomingRequestCfProperties<obj>> with get, set
     abstract functionPath: string with get, set
     abstract waitUntil: Action<JS.Promise<obj>> with get, set
     abstract passThroughOnException: Action with get, set
-    abstract next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>> option, RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> option, JS.Promise<Response>> with get, set
+    abstract next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>> with get, set
     abstract env: obj with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     abstract pluginArgs: 'PluginArgs with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: Request<obj, RequestFetcherFetchInitItem>, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>> option, RequestInit<U2<RequestInitCfProperties, RequestFetcherFetchInitItem>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : PagesPluginFunctionContext<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
+    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: Action<JS.Promise<obj>>, passThroughOnException: Action, next: Func<U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option, RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option, JS.Promise<Response>>, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : PagesPluginFunctionContext<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
 
 [<Interface>]
 type PubSubMessage =
@@ -28229,13 +27343,13 @@ type DurableObject2<'Env, 'Props> =
     abstract ctx: DurableObjectState<'Props> with get, set
     abstract env: 'Env with get, set
     abstract alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option> option with get, set
-    abstract fetch: Func<Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, U2<JS.Promise<Response>, Response>> option with get, set
+    abstract fetch: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>> option with get, set
     abstract connect: Func<Socket, JS.Promise<unit> option> option with get, set
     abstract webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
     abstract webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option> option with get, set
     abstract webSocketError: Func<WebSocket, obj, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: DurableObjectState<'Props>, env: 'Env, ?alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option>, ?fetch: Func<Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, JS.Promise<unit> option>, ?webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<WebSocket, obj, JS.Promise<unit> option>) : DurableObject2<'Env, 'Props> = jsNative
+    static member Create (ctx: DurableObjectState<'Props>, env: 'Env, ?alarm: Func<AlarmInvocationInfo option, JS.Promise<unit> option>, ?fetch: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, JS.Promise<unit> option>, ?webSocketMessage: Func<WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<WebSocket, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<WebSocket, obj, JS.Promise<unit> option>) : DurableObject2<'Env, 'Props> = jsNative
 
 type DurableObjectConstructor =
     [<EmitConstructor>]
@@ -28257,7 +27371,7 @@ type WorkerEntrypoint<'Env, 'Props> =
     abstract ctx: ExecutionContext<'Props> with get, set
     abstract env: 'Env with get, set
     abstract email: Func<ForwardableEmailMessage, JS.Promise<unit> option> option with get, set
-    abstract fetch: Func<Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, U2<JS.Promise<Response>, Response>> option with get, set
+    abstract fetch: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>> option with get, set
     abstract connect: Func<Socket, JS.Promise<unit> option> option with get, set
     abstract queue: Func<MessageBatch<obj>, JS.Promise<unit> option> option with get, set
     abstract scheduled: Func<ScheduledController, JS.Promise<unit> option> option with get, set
@@ -28266,7 +27380,7 @@ type WorkerEntrypoint<'Env, 'Props> =
     abstract test: Func<TestController, JS.Promise<unit> option> option with get, set
     abstract trace: Func<TraceItem[], JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (ctx: ExecutionContext<'Props>, env: 'Env, ?email: Func<ForwardableEmailMessage, JS.Promise<unit> option>, ?fetch: Func<Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, JS.Promise<unit> option>, ?queue: Func<MessageBatch<obj>, JS.Promise<unit> option>, ?scheduled: Func<ScheduledController, JS.Promise<unit> option>, ?tail: Func<TraceItem[], JS.Promise<unit> option>, ?tailStream: Func<TailEvent2<Onset>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?test: Func<TestController, JS.Promise<unit> option>, ?trace: Func<TraceItem[], JS.Promise<unit> option>) : WorkerEntrypoint<'Env, 'Props> = jsNative
+    static member Create (ctx: ExecutionContext<'Props>, env: 'Env, ?email: Func<ForwardableEmailMessage, JS.Promise<unit> option>, ?fetch: Func<Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, JS.Promise<unit> option>, ?queue: Func<MessageBatch<obj>, JS.Promise<unit> option>, ?scheduled: Func<ScheduledController, JS.Promise<unit> option>, ?tail: Func<TraceItem[], JS.Promise<unit> option>, ?tailStream: Func<TailEvent2<Onset>, U3<JS.Promise<U2<Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, Func<TailEvent2<obj>, JS.Promise<unit> option>, ExportedHandlerTailStreamHandlerResultItem>>, ?test: Func<TestController, JS.Promise<unit> option>, ?trace: Func<TraceItem[], JS.Promise<unit> option>) : WorkerEntrypoint<'Env, 'Props> = jsNative
 
 type WorkerEntrypointConstructor =
     [<EmitConstructor>]
@@ -30296,7 +29410,7 @@ type Exports =
     [<Global("reportError")>]
     static member reportError (error: obj) : unit = jsNative
     [<Global("fetch")>]
-    static member fetch (input: U3<string, Request<obj, U2<RequestInitCfProperties, RequestFetcherFetchInitItem>>, URL>, ?init: RequestInit<RequestInitCfProperties>) : JS.Promise<Response> = jsNative
+    static member fetch (input: U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL>, ?init: RequestInit<RequestInitCfProperties>) : JS.Promise<Response> = jsNative
     [<Global("self")>]
     static member self: ServiceWorkerGlobalScope = jsNative
     /// <summary>

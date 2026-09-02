@@ -71,13 +71,20 @@ let shapeInterfaces: Pass<ShapeModel> =
                     // graph can already walk back from is enough to keep the whole graph acyclic.
                     let mutable inheritGraph: Map<string, string list> = Map.empty
 
+                    // A name is declared once. `synthesize-anonymous` hash-conses an erased alias
+                    // application onto the declaration it applies, so two ids can deliberately
+                    // carry one name: the smaller is the declared form and the larger is a
+                    // reference site. Everything else it names is unique by construction.
+                    let mutable declaredOnce = Set.empty
+
                     let decls =
                         model.DeclNames
                         |> Map.toList
                         |> List.sortBy fst
                         |> List.choose (fun (typeId, name) ->
                             match Map.tryFind typeId model.Types with
-                            | Some facts when declaresInterface model facts ->
+                            | Some facts when declaresInterface model facts && not (Set.contains name declaredOnce) ->
+                                declaredOnce <- Set.add name declaredOnce
                                 let typeParameters, scope, parameterFindings = declTypeParams ctx model name facts
 
                                 findings <- findings @ parameterFindings

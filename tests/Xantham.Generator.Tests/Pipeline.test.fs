@@ -978,14 +978,105 @@ let pipelineTests =
                     Expect.stringContains source "abstract echo<'T>:" "a parameter with no constraint"
                     Expect.stringContains source "abstract on<'T when 'T :> EventMap>:" "a constraint that is a bare name" ])
 
-        // Enrolled with no assertions of its own, deliberately: this is wave two lane A's
-        // fixture, and what it pins today is the defect. `docs/plans/generator-three-rung.md`
-        // §9 blocker 1 reduced `three`'s 518 declarations and 369,116 lines to these 11 lines,
-        // which mint a `<Member>Result` declaration per application until the depth cutoff
-        // stops the walk. The golden is committed as the *baseline* the fix is measured
-        // against - it compiles clean, so the gate stays green while it is still wrong.
-        // Lane A owns the assertions that say what bounded output looks like.
-        yield! fixtureTests "chain-lab" (handFixture "chain-lab") GeneratorConfig.Default (fun _ -> [])
+        // Wave two lane A's fixture. `docs/plans/generator-three-rung.md` §9 blocker 1: a
+        // polymorphic-`this` method returning an intersection *containing* `this` mints a
+        // strictly larger anonymous type per application, and the shaper hoisted each one to a
+        // `<Member>Result` declaration whose own `toVar` minted another - 518 declarations and
+        // 369,116 lines on the `three` rung, stopped only by the depth cutoff. These 11
+        // declarative lines reproduce it; what follows says what bounded output looks like.
+        yield!
+            fixtureTests "chain-lab" (handFixture "chain-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a this-returning intersection is written as an application, not hoisted again" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // The bound itself: the source declares four types and one export
+                      // container, and generation adds none. An unbounded run mints one
+                      // declaration per application instead, so this count is the regression
+                      // test - not the line count, which moves with unrelated rendering.
+                      Expect.equal
+                          (rendered.Decls |> List.length)
+                          6
+                          "five declared types and the export container, and nothing minted"
+
+                      Expect.equal
+                          (rendered.Decls
+                           |> List.choose (fun decl ->
+                               match decl with
+                               | FsInterface iface -> Some iface.Name
+                               | _ -> None))
+                          [ "NodeExtensions"; "Node"; "VarNodeInterface"; "VarNode"; "Plain" ]
+                          "the source's own names, once each, in declaration order"
+
+                      // The mint was named by appending the member name plus `Result`. No such
+                      // name may exist: every one of them was an application of a type the run
+                      // already declares.
+                      Expect.isFalse (source.Contains "Result") "no <Member>Result declaration is minted"
+
+                  testCase "each hoist site reads back as the declaration it instantiates" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // `this` in `VarNode<TNodeType, this>` is the declaration the member is
+                      // written on, so each of the three sites applies a different argument and
+                      // none of them is a new type.
+                      Expect.stringContains
+                          source
+                          "abstract toVar: Func<string option, VarNode<'TNodeType, NodeExtensions<'TNodeType>>> with get, set"
+                          "the interface `this` is written on"
+
+                      Expect.stringContains
+                          source
+                          "abstract toVar: Func<string option, VarNode<'TNodeType, Node<'TNodeType>>> with get, set"
+                          "the alias that intersects it, applied over its own parameter"
+
+                      Expect.stringContains
+                          source
+                          "abstract toVar: Func<string option, VarNode<'TNodeType, VarNode<'TNodeType, 'TNode>>> with get, set"
+                          "and the alias that intersects that one, applied over both of its parameters"
+
+                      // `const seed: Node<number>` resolves to the same erased intersection as
+                      // the alias, so the export is the fourth site.
+                      Expect.stringContains source "static member seed: Node<float> = jsNative" "the export site"
+
+                  testCase "the shaper reports the hash-consing, and nothing widens for want of it" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let keyed key =
+                          rendered.Findings |> List.filter (fun f -> f.Key = key)
+
+                      Expect.equal
+                          (keyed "SY001" |> List.map _.Symbol)
+                          [ "NodeExtensionsToVarResult"; "NodeToVarResult"; "VarNodeToVarResult"; "Seed" ]
+                          "one SY001 per site, named for the declaration that would have been minted"
+
+                      // The fallback exists for an application whose arguments cannot be
+                      // recovered from the operands. Recovery works here, so it stays silent.
+                      Expect.isEmpty (keyed "SY002") "no hoist is refused outright"
+
+                      // A self-reference that came back out bare would be widened by
+                      // `repair-arity` instead of applied, which is the failure this rung is
+                      // most likely to regress into.
+                      Expect.isEmpty (keyed "RA003") "no generic is left in a position with no arguments"
+                      Expect.isFalse (source.Contains ": obj") "nothing on the chain widens"
+
+                  testCase "a shape that closes no cycle keeps its own name" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // The negatives. `wrap` names an already-declared generic and `self`
+                      // returns bare `this`; neither mints a larger type, so neither may be
+                      // rewritten by the recognition that fixes the chain.
+                      Expect.stringContains
+                          source
+                          "abstract wrap: value: 'TValue -> VarNodeInterface<'TValue>"
+                          "an application of a declared generic is written as itself"
+
+                      Expect.stringContains
+                          source
+                          "abstract self: unit -> Plain<'TValue>"
+                          "bare polymorphic `this` still reads as its own declaration" ])
 
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 
