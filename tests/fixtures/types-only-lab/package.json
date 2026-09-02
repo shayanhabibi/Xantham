@@ -1,0 +1,1 @@
+{"name":"@types/types-only-lab","type":"module","types":"index.d.ts","description":"Wave two lane D lab (recon blocker 5): a DefinitelyTyped-shaped, types-only package, whose imports must bind to the runtime package rather than to the @types/ package that carries only the declarations."}

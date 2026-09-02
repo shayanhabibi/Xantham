@@ -13,6 +13,7 @@ let private renderAll (model: RenderModel) =
 let private baseModel =
     { ModuleName = "TestPkg"
       PackageName = "test-pkg"
+      RuntimePackage = "test-pkg"
       PackageDir = "/pkg/test-pkg"
       Decls = []
       Findings = []

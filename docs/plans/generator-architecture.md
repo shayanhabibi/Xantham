@@ -249,8 +249,13 @@ New projects (names step around the archive, which is invisible to the solution 
   editors check it. The generator core is a library function taking the config record; the
   CLI (`xantham generate <package-dir> [-o <out>] [--config <path>]`) and the scratch
   harness are both thin shells over it, and the CLI is deferred to phase C. Keys so far:
-  `module`, `groups` (O7), and `lib` - the compiler's option as `tsconfig.json` spells it,
-  for a global type library that replaces the DOM rather than extending it (phase E).
+  `module`, `groups` (O7), `lib` - the compiler's option as `tsconfig.json` spells it,
+  for a global type library that replaces the DOM rather than extending it (phase E) - and
+  `runtime`, the npm package the generated `[<Import(…)>]` attributes name, which defaults to
+  the package name with DefinitelyTyped's `@types/` naming undone (phase E, wave two lane D;
+  `generator-three-rung.md` §8). **The generated schema is still unbuilt**: `load` is a
+  hand-written `System.Text.Json` reader, so a new key is two hand edits and its round-trip
+  test, and nothing validates an `xantham.json` in an editor yet.
 
 Phases — each ends with the compile gate green on its fixtures:
 

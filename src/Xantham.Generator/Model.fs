@@ -46,6 +46,13 @@ type GeneratorConfig =
         /// the DOM loaded, every such name merges with the lib's declaration, is grouped as the
         /// compiler lib by its first declaration, and is not the package's to harvest.
         Lib: string list option
+        /// Overrides the npm package the generated `[<Import(…)>]` attributes name. `None`
+        /// derives it from the package name (`GeneratorConfig.runtimePackage`), which is right
+        /// for every package that ships its own JavaScript and for the DefinitelyTyped naming
+        /// convention. It is the escape hatch for the packages the convention cannot describe:
+        /// a `@types/*` package whose runtime is named something else entirely, and a
+        /// types-only package published outside DefinitelyTyped.
+        RuntimePackage: string option
     }
 
     static member Default =
@@ -53,6 +60,7 @@ type GeneratorConfig =
             ModuleName = None
             Groups = Map.empty
             Lib = None
+            RuntimePackage = None
         }
 
 module GeneratorConfig =
@@ -107,7 +115,43 @@ module GeneratorConfig =
                 ModuleName = field "module"
                 Groups = groups
                 Lib = lib
+                RuntimePackage = field "runtime"
             }
+
+    /// The npm package a binding's imports name at runtime, derived from the package the
+    /// declarations were generated from.
+    ///
+    /// A DefinitelyTyped package ships no JavaScript, so an import that names it resolves to
+    /// nothing at all: `@types/three` carries the types and `three` carries the code. The
+    /// derivation is DefinitelyTyped's own naming convention, which is the only thing on disk
+    /// that says what the runtime is called - a `@types/*` manifest has no field for it:
+    ///
+    /// - `@types/three` -> `three`;
+    /// - `@types/babel__core` -> `@babel/core`, because DT mangles a scope into the name by
+    ///   folding `@scope/name` to `scope__name` (it publishes one flat `@types` scope, so it
+    ///   has nowhere else to put the scope);
+    /// - anything not under `@types/` is its own runtime, unchanged.
+    ///
+    /// The mangling is only ambiguous against an unscoped package whose own name contains
+    /// `__`, which DefinitelyTyped's convention cannot express either; `runtime` in
+    /// `xantham.json` overrides the whole derivation for that and for every other package the
+    /// convention does not describe.
+    let derivedRuntimePackage (packageName: string) =
+        let prefix = "@types/"
+
+        if not (packageName.StartsWith(prefix, System.StringComparison.Ordinal)) then
+            packageName
+        else
+            let mangled = packageName.Substring prefix.Length
+
+            match mangled.IndexOf("__", System.StringComparison.Ordinal) with
+            | -1 -> if mangled = "" then packageName else mangled
+            | at -> $"@{mangled.Substring(0, at)}/{mangled.Substring(at + 2)}"
+
+    /// The configured runtime package, or the derived one. What every `[<Import(…)>]` the run
+    /// renders names.
+    let runtimePackage (config: GeneratorConfig) (packageName: string) =
+        config.RuntimePackage |> Option.defaultValue (derivedRuntimePackage packageName)
 
     /// The key a group is addressed by under `xantham.json`'s `groups`; `None` for the groups
     /// that are not configurable (the entry package always ships).
@@ -889,6 +933,11 @@ type RenderModel =
     {
         ModuleName: string
         PackageName: string
+        /// The npm package every `[<Import(…)>]` names - the configured `runtime`, or the one
+        /// derived from `PackageName`. Distinct from `PackageName`, which stays the package the
+        /// *declarations* came from: a `@types/*` package is the provenance of the binding and
+        /// never the specifier a consumer's bundler resolves.
+        RuntimePackage: string
         /// Absolute path of the package generated from; the manifest writes declaration files
         /// relative to it.
         PackageDir: string
