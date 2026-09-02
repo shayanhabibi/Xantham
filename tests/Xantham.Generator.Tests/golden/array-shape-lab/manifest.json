@@ -1,0 +1,119 @@
+{
+  "package": "array-shape-lab",
+  "module": "ArrayShapeLab",
+  "counts": {
+    "exact": 4,
+    "ergonomic": 1,
+    "widened": 4,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 1,
+      "ergonomic": 1
+    },
+    {
+      "pass": "SA - shape-aliases",
+      "total": 3,
+      "widened": 3
+    },
+    {
+      "pass": "SE - shape-exports",
+      "total": 1,
+      "widened": 1
+    }
+  ],
+  "symbols": [
+    {
+      "name": "Chapters",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "Tagged",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR048",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "Tagged",
+          "message": "array-shaped intersection maps to its element array; 1 members from the other operands are dropped"
+        }
+      ]
+    },
+    {
+      "name": "TupleOf",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR020",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "TupleOf",
+          "message": "indexed access has no F# form here; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "ReadonlyTuple",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR013",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "ReadonlyTuple",
+          "message": "type parameter is not in scope here; widened to obj"
+        }
+      ]
+    },
+    {
+      "name": "Register",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "MB004",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Register.[]",
+          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        }
+      ]
+    },
+    {
+      "name": "chapters",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "tagged",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR048",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "tagged",
+          "message": "array-shaped intersection maps to its element array; 1 members from the other operands are dropped"
+        }
+      ]
+    },
+    {
+      "name": "pair",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "register",
+      "tier": "exact",
+      "findings": []
+    }
+  ]
+}

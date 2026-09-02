@@ -2,10 +2,10 @@
   "package": "@cloudflare/workers-types",
   "module": "Cloudflare.WorkersTypes",
   "counts": {
-    "exact": 272,
-    "ergonomic": 1033,
-    "widened": 376,
-    "escape": 115
+    "exact": 252,
+    "ergonomic": 1032,
+    "widened": 371,
+    "escape": 117
   },
   "passes": [
     {
@@ -25,8 +25,8 @@
     },
     {
       "pass": "LU - classify-literal-unions",
-      "total": 7,
-      "exact": 7
+      "total": 5,
+      "exact": 5
     },
     {
       "pass": "DT - detect-tagged-unions",
@@ -43,17 +43,17 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 8025,
+      "total": 7832,
       "exact": 57,
-      "ergonomic": 6993,
-      "widened": 825,
+      "ergonomic": 6908,
+      "widened": 717,
       "escape": 150
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 83,
+      "total": 80,
       "ergonomic": 31,
-      "widened": 52
+      "widened": 49
     },
     {
       "pass": "SC - shape-classes",
@@ -81,9 +81,14 @@
     },
     {
       "pass": "RA - repair-arity",
-      "total": 23,
+      "total": 21,
       "ergonomic": 4,
-      "widened": 19
+      "widened": 17
+    },
+    {
+      "pass": "AC - audit-coverage",
+      "total": 2,
+      "escape": 2
     }
   ],
   "symbols": [
@@ -3098,11 +3103,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR023",
+          "key": "TR047",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "TestController",
-          "message": "TestController is not among the generated declarations; widened to obj"
+          "message": "object type declares no members; obj admits the same values"
         }
       ]
     },
@@ -3203,11 +3208,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TR047",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "ExecutionContext.exports",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "TR008",
@@ -5384,13 +5389,6 @@
           "tier": "ergonomic",
           "symbol": "DurableObjectClass",
           "message": "constraint on \u0027_T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "DurableObjectClass",
-          "message": "DurableObjectClass is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -5776,11 +5774,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TR047",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "DurableObjectState.exports",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "TR032",
@@ -15410,11 +15408,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR023",
+          "key": "TR047",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "TraceItemConnectEventInfo",
-          "message": "TraceItemConnectEventInfo is not among the generated declarations; widened to obj"
+          "message": "object type declares no members; obj admits the same values"
         }
       ]
     },
@@ -15424,11 +15422,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR023",
+          "key": "TR047",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "TraceItemCustomEventInfo",
-          "message": "TraceItemCustomEventInfo is not among the generated declarations; widened to obj"
+          "message": "object type declares no members; obj admits the same values"
         }
       ]
     },
@@ -16592,11 +16590,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR023",
+          "key": "TR047",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "SqlStorageStatement",
-          "message": "SqlStorageStatement is not among the generated declarations; widened to obj"
+          "message": "object type declares no members; obj admits the same values"
         }
       ]
     },
@@ -25778,307 +25776,6 @@
       ]
     },
     {
-      "name": "AiTextGenerationOutputToolCalls",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCalls",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCalls.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
-        {
-          "key": "MB002",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.__@iterator",
-          "message": "symbol-keyed member dropped (unrepresentable in F#)"
-        },
-        {
-          "key": "MB002",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.__@unscopables",
-          "message": "symbol-keyed member dropped (unrepresentable in F#)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.at",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.concat",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.copyWithin",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.entries",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.every",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.fill",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.filter",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.find",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.findIndex",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.findLast",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.findLastIndex",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.flat",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.flatMap",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.forEach",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.includes",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.indexOf",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.join",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.keys",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.lastIndexOf",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.map",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.pop",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.push",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.reduce",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.reduceRight",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.reverse",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.shift",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.slice",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.some",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.sort",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.splice",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.toLocaleString",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.toReversed",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.toSorted",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.toSpliced",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.toString",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.unshift",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.values",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        },
-        {
-          "key": "TR018",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "AiTextGenerationOutputToolCalls.with",
-          "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
-        }
-      ]
-    },
-    {
       "name": "AiTextGenerationOutputToolCallsItem",
       "file": "index.d.ts",
       "tier": "widened",
@@ -26112,701 +25809,6 @@
           "message": "ParamObject Create synthesized (D3)"
         }
       ]
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptions",
-      "file": "index.d.ts",
-      "tier": "ergonomic",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.calendar",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.calendar",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.compactDisplay",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.compactDisplay",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.currency",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.currency",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.currencyDisplay",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.currencyDisplay",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.currencySign",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.currencySign",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.dateStyle",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.dateStyle",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.day",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.day",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.dayPeriod",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.dayPeriod",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.era",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.era",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.formatMatcher",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.formatMatcher",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.fractionalSecondDigits",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.fractionalSecondDigits",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.hour",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.hour",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.hour12",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.hour12",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.hourCycle",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.hourCycle",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.localeMatcher",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.localeMatcher",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.maximumFractionDigits",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.maximumFractionDigits",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.maximumSignificantDigits",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.maximumSignificantDigits",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.minimumFractionDigits",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.minimumFractionDigits",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.minimumIntegerDigits",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.minimumIntegerDigits",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.minimumSignificantDigits",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.minimumSignificantDigits",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.minute",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.minute",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.month",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.month",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.notation",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.notation",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.numberingSystem",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.numberingSystem",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.roundingIncrement",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.roundingIncrement",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.roundingMode",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.roundingMode",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.roundingPriority",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.roundingPriority",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.second",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.second",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.signDisplay",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.signDisplay",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.style",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.style",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.timeStyle",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.timeStyle",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.timeZone",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.timeZone",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.timeZoneName",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.timeZoneName",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.trailingZeroDisplay",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.trailingZeroDisplay",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.unit",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.unit",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.unitDisplay",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.unitDisplay",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.useGrouping",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.useGrouping",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.weekday",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.weekday",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.year",
-          "message": "optional member reads as option"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptions.year",
-          "message": "null/undefined union members hoisted to option"
-        }
-      ]
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsCompactDisplay",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsCurrencyDisplay",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsCurrencySign",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsDateStyle",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsFormatMatcher",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsFractionalSecondDigits",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsHourCycle",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsLocaleMatcher",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsMonth",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsNotation",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsRoundingIncrement",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsRoundingMode",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsRoundingPriority",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsSignDisplay",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsStyle",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsTimeZoneName",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsTrailingZeroDisplay",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsUnitDisplay",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsUseGrouping",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": [
-        {
-          "key": "LU001",
-          "pass": "classify-literal-unions",
-          "tier": "exact",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptionsUseGrouping",
-          "message": "non-string literal case carries CompiledValue (D12)"
-        },
-        {
-          "key": "LU001",
-          "pass": "classify-literal-unions",
-          "tier": "exact",
-          "symbol": "AiTextGenerationOutputToolCallsToLocaleStringOptionsUseGrouping",
-          "message": "non-string literal case carries CompiledValue (D12)"
-        }
-      ]
-    },
-    {
-      "name": "AiTextGenerationOutputToolCallsToLocaleStringOptionsYear",
-      "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
     },
     {
       "name": "BaseAiTextGeneration",
@@ -32849,13 +31851,6 @@
           "tier": "widened",
           "symbol": "Without",
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "Without",
-          "message": "__type is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -44404,18 +43399,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_ResponseChoicesItem.logprobs",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_ResponseChoicesItem.logprobs",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR047",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_ResponseChoicesItem.logprobs",
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "MB003",
@@ -44606,18 +43601,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Text_Completion_ResponseChoicesItem.logprobs",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Text_Completion_ResponseChoicesItem.logprobs",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR047",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Text_Completion_ResponseChoicesItem.logprobs",
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "MB003",
@@ -44627,18 +43622,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Text_Completion_ResponseChoicesItem.prompt_logprobs",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Text_Completion_ResponseChoicesItem.prompt_logprobs",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR047",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Text_Completion_ResponseChoicesItem.prompt_logprobs",
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "MB003",
@@ -44809,18 +43804,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.prompt_logprobs",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.prompt_logprobs",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR047",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.prompt_logprobs",
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "MB003",
@@ -49732,18 +48727,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_ResponseChoicesItem.logprobs",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_ResponseChoicesItem.logprobs",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR047",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_ResponseChoicesItem.logprobs",
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "MB003",
@@ -49934,18 +48929,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_ResponseChoicesItem.logprobs",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_ResponseChoicesItem.logprobs",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR047",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_ResponseChoicesItem.logprobs",
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "MB003",
@@ -49955,18 +48950,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_ResponseChoicesItem.prompt_logprobs",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_ResponseChoicesItem.prompt_logprobs",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR047",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_ResponseChoicesItem.prompt_logprobs",
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "MB003",
@@ -50137,18 +49132,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.prompt_logprobs",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.prompt_logprobs",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR047",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.prompt_logprobs",
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "MB003",
@@ -51599,18 +50594,18 @@
           "message": "optional member reads as option"
         },
         {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Ai_Cf_Moondream_Moondream3_1_9B_A2B_OutputReasoning.grounding",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
           "symbol": "Ai_Cf_Moondream_Moondream3_1_9B_A2B_OutputReasoning.grounding",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR047",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Ai_Cf_Moondream_Moondream3_1_9B_A2B_OutputReasoning.grounding",
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "SP001",
@@ -67726,613 +66721,25 @@
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
+          "key": "TR048",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EmailDestinations2.to",
+          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
+        },
+        {
+          "key": "TR048",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EmailDestinations2.to",
+          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
+        },
+        {
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
           "symbol": "EmailDestinations2",
           "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "EmailDestinations2To",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "EmailDestinations2To",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "EmailDestinations2To.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
-        {
-          "key": "MB002",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.__@iterator",
-          "message": "symbol-keyed member dropped (unrepresentable in F#)"
-        },
-        {
-          "key": "MB002",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.__@unscopables",
-          "message": "symbol-keyed member dropped (unrepresentable in F#)"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.at",
-          "message": "at is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.concat",
-          "message": "concat is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.copyWithin",
-          "message": "copyWithin is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.entries",
-          "message": "entries is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.every",
-          "message": "every is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.fill",
-          "message": "fill is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.filter",
-          "message": "filter is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.find",
-          "message": "find is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.findIndex",
-          "message": "findIndex is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.findLast",
-          "message": "findLast is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.findLastIndex",
-          "message": "findLastIndex is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.flat",
-          "message": "flat is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.flatMap",
-          "message": "flatMap is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.forEach",
-          "message": "forEach is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.includes",
-          "message": "includes is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.indexOf",
-          "message": "indexOf is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.join",
-          "message": "join is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.keys",
-          "message": "keys is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.lastIndexOf",
-          "message": "lastIndexOf is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.map",
-          "message": "map is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.pop",
-          "message": "pop is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.push",
-          "message": "push is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.reduce",
-          "message": "reduce is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.reduceRight",
-          "message": "reduceRight is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.reverse",
-          "message": "reverse is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.shift",
-          "message": "shift is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.slice",
-          "message": "slice is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.some",
-          "message": "some is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.sort",
-          "message": "sort is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.splice",
-          "message": "splice is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.toLocaleString",
-          "message": "toLocaleString is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.toReversed",
-          "message": "toReversed is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.toSorted",
-          "message": "toSorted is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.toSpliced",
-          "message": "toSpliced is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.toString",
-          "message": "toString is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.unshift",
-          "message": "unshift is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.values",
-          "message": "values is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To.with",
-          "message": "with is not among the generated declarations; widened to obj"
-        }
-      ]
-    },
-    {
-      "name": "EmailDestinations2To2",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "SI003",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "EmailDestinations2To2",
-          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
-        },
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "EmailDestinations2To2.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
-        {
-          "key": "MB002",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.__@iterator",
-          "message": "symbol-keyed member dropped (unrepresentable in F#)"
-        },
-        {
-          "key": "MB002",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.__@unscopables",
-          "message": "symbol-keyed member dropped (unrepresentable in F#)"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.at",
-          "message": "at is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.concat",
-          "message": "concat is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.copyWithin",
-          "message": "copyWithin is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.entries",
-          "message": "entries is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.every",
-          "message": "every is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.fill",
-          "message": "fill is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.filter",
-          "message": "filter is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.find",
-          "message": "find is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.findIndex",
-          "message": "findIndex is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.findLast",
-          "message": "findLast is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.findLastIndex",
-          "message": "findLastIndex is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.flat",
-          "message": "flat is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.flatMap",
-          "message": "flatMap is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.forEach",
-          "message": "forEach is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.includes",
-          "message": "includes is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.indexOf",
-          "message": "indexOf is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.join",
-          "message": "join is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.keys",
-          "message": "keys is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.lastIndexOf",
-          "message": "lastIndexOf is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.map",
-          "message": "map is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.pop",
-          "message": "pop is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.push",
-          "message": "push is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.reduce",
-          "message": "reduce is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.reduceRight",
-          "message": "reduceRight is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.reverse",
-          "message": "reverse is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.shift",
-          "message": "shift is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.slice",
-          "message": "slice is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.some",
-          "message": "some is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.sort",
-          "message": "sort is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.splice",
-          "message": "splice is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.toLocaleString",
-          "message": "toLocaleString is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.toReversed",
-          "message": "toReversed is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.toSorted",
-          "message": "toSorted is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.toSpliced",
-          "message": "toSpliced is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.toString",
-          "message": "toString is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.unshift",
-          "message": "unshift is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.values",
-          "message": "values is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "EmailDestinations2To2.with",
-          "message": "with is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -68396,6 +66803,20 @@
           "tier": "widened",
           "symbol": "EmailDestinations3.cc",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR048",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EmailDestinations3.cc",
+          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
+        },
+        {
+          "key": "TR048",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EmailDestinations3.cc",
+          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
         },
         {
           "key": "MB003",
@@ -68466,6 +66887,20 @@
           "tier": "widened",
           "symbol": "EmailDestinations4.bcc",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR048",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EmailDestinations4.bcc",
+          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
+        },
+        {
+          "key": "TR048",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EmailDestinations4.bcc",
+          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
         },
         {
           "key": "MB003",
@@ -68740,6 +67175,20 @@
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
+          "key": "TR048",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EmailMessageBuilder2.to",
+          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
+        },
+        {
+          "key": "TR048",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EmailMessageBuilder2.to",
+          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
+        },
+        {
           "key": "SP001",
           "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
@@ -68822,6 +67271,20 @@
           "tier": "widened",
           "symbol": "EmailMessageBuilder3.cc",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR048",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EmailMessageBuilder3.cc",
+          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
+        },
+        {
+          "key": "TR048",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EmailMessageBuilder3.cc",
+          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
         },
         {
           "key": "MB003",
@@ -68962,6 +67425,20 @@
           "tier": "widened",
           "symbol": "EmailMessageBuilder4.bcc",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR048",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EmailMessageBuilder4.bcc",
+          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
+        },
+        {
+          "key": "TR048",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "EmailMessageBuilder4.bcc",
+          "message": "array-shaped intersection maps to its element array; 2 members from the other operands are dropped"
         },
         {
           "key": "MB003",
@@ -71651,13 +70128,6 @@
           "tier": "ergonomic",
           "symbol": "Params",
           "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "Params",
-          "message": "__type is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -71716,11 +70186,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TR047",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "EventContext.params",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "TR009",
@@ -71749,34 +70219,6 @@
           "tier": "ergonomic",
           "symbol": "EventContext",
           "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "PagesFunction",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "RA003",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "PagesFunction",
-          "message": "PagesFunctionContext is generic and this position has no arguments to apply; widened to obj"
-        },
-        {
-          "key": "RA006",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "PagesFunction",
-          "message": "PagesFunction resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "PagesFunction",
-          "message": "constraint on \u0027Params\u0027 has no F# form and is dropped (\u00A74.9)"
         }
       ]
     },
@@ -71835,11 +70277,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TR047",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "PagesFunctionContext.params",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "TR009",
@@ -71926,11 +70368,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TR047",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "EventPluginContext.params",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "TR009",
@@ -71959,34 +70401,6 @@
           "tier": "ergonomic",
           "symbol": "EventPluginContext",
           "message": "ParamObject Create synthesized (D3)"
-        }
-      ]
-    },
-    {
-      "name": "PagesPluginFunction",
-      "file": "index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "RA003",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "PagesPluginFunction",
-          "message": "PagesPluginFunctionContext is generic and this position has no arguments to apply; widened to obj"
-        },
-        {
-          "key": "RA006",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "PagesPluginFunction",
-          "message": "PagesPluginFunction resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "PagesPluginFunction",
-          "message": "constraint on \u0027Params\u0027 has no F# form and is dropped (\u00A74.9)"
         }
       ]
     },
@@ -72045,11 +70459,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TR047",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "PagesPluginFunctionContext.params",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "TR009",
@@ -72471,11 +70885,11 @@
           "message": "Env is not among the generated declarations; widened to obj"
         },
         {
-          "key": "TR023",
+          "key": "TR047",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "CloudflareWorkersModule.exports",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "TR009",
@@ -73150,11 +71564,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR023",
+          "key": "TR047",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowEntrypointRunEvent.payload",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "MB003",
@@ -74557,11 +72971,11 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR023",
+          "key": "TR047",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "WorkflowStepWaitForEventResultItem.payload",
-          "message": "__type is not among the generated declarations; widened to obj"
+          "message": "object type declares no members; obj admits the same values"
         },
         {
           "key": "MB003",
@@ -78490,6 +76904,60 @@
           "tier": "exact",
           "symbol": "ExportedHandlerFetchRequestItem",
           "message": "anonymous shape is an instantiation of IncomingRequestCfProperties; written as an application"
+        }
+      ]
+    },
+    {
+      "name": "PagesFunction",
+      "tier": "escape",
+      "findings": [
+        {
+          "key": "AC001",
+          "pass": "audit-coverage",
+          "tier": "escape",
+          "symbol": "PagesFunction",
+          "message": "export not represented in the generated output"
+        },
+        {
+          "key": "RA001",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "PagesFunction",
+          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "symbol": "PagesFunction",
+          "message": "constraint on \u0027Params\u0027 has no F# form and is dropped (\u00A74.9)"
+        }
+      ]
+    },
+    {
+      "name": "PagesPluginFunction",
+      "tier": "escape",
+      "findings": [
+        {
+          "key": "AC001",
+          "pass": "audit-coverage",
+          "tier": "escape",
+          "symbol": "PagesPluginFunction",
+          "message": "export not represented in the generated output"
+        },
+        {
+          "key": "RA001",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "PagesPluginFunction",
+          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "symbol": "PagesPluginFunction",
+          "message": "constraint on \u0027Params\u0027 has no F# form and is dropped (\u00A74.9)"
         }
       ]
     },

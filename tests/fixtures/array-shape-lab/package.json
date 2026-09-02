@@ -1,0 +1,1 @@
+{"name":"array-shape-lab","type":"module","types":"index.d.ts","description":"Wave three lab: array-shaped operands arriving under a name other than `Array` - an interface extending it, an intersection over it, and a mapped type over a deferred tuple - beside a shape that only looks indexable."}

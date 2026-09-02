@@ -18,7 +18,7 @@ let private declaresInterface (model: ShapeModel) (facts: TypeFacts) =
          && facts.IndexInfos.IsEmpty
          && facts.ConstructSignatures.IsEmpty
      )
-     && (arrayElement facts).IsNone
+     && (arrayElement model facts).IsNone
      && not (isTuple facts)
      && (instantiationOf model facts).IsNone)
     || isFlattenable model facts

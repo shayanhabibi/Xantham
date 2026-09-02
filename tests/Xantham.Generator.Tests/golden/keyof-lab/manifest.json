@@ -15,9 +15,9 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 11,
+      "total": 9,
       "ergonomic": 1,
-      "widened": 10
+      "widened": 8
     },
     {
       "pass": "SE - shape-exports",
@@ -264,13 +264,6 @@
           "tier": "widened",
           "symbol": "DeepPartial",
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "DeepPartial",
-          "message": "__type is not among the generated declarations; widened to obj"
         }
       ]
     },
@@ -285,13 +278,6 @@
           "tier": "widened",
           "symbol": "Flags",
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "Flags",
-          "message": "__type is not among the generated declarations; widened to obj"
         }
       ]
     },

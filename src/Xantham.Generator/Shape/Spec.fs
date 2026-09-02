@@ -122,12 +122,51 @@ let internal isPureCallback (facts: TypeFacts) =
     && facts.ConstructSignatures.IsEmpty
     && facts.Members.IsEmpty
 
-/// The compiler's array types, recognized by identity so the check holds for every group
-/// disposition (the entry package cannot declare a global `Array`).
-let internal arrayElement (facts: TypeFacts) =
+/// A tuple type (§4.12). Fable compiles an F# tuple to a JS array, so a fixed tuple is an
+/// exact match; the variadic forms are not.
+let internal isTuple (facts: TypeFacts) =
+    facts.Response.IsTupleType = ValueSome true
+
+/// The members `ReadonlyArray<T>` declares in `lib.es5.d.ts`. Every later library revision adds
+/// to this set and `Array<T>` extends it, so an array carries all of them whichever `lib` the
+/// entry package compiles against.
+let internal ArrayMembers =
+    set
+        [
+            "concat"
+            "every"
+            "filter"
+            "forEach"
+            "indexOf"
+            "join"
+            "lastIndexOf"
+            "length"
+            "map"
+            "reduce"
+            "reduceRight"
+            "slice"
+            "some"
+        ]
+
+/// The element of an array-shaped type. `Array<T>` and `ReadonlyArray<T>` arrive from the
+/// compiler lib as identity and a type argument, so the name answers for them. Every other
+/// spelling - an interface extending one, an intersection over one, a mapped type over a
+/// deferred tuple - carries `Array`'s members over a numeric index signature, and the element is
+/// that signature's value. A tuple has the same members and a mapping of its own (§4.12).
+let internal arrayElement (model: ShapeModel) (facts: TypeFacts) =
     match facts.SymbolName, facts.TypeArguments with
     | Some("Array" | "ReadonlyArray"), [ element ] -> Some element
-    | _ -> None
+    | _ when
+        isTuple facts
+        || not (Set.isSubset ArrayMembers (facts.Members |> List.map _.Symbol.Name |> Set.ofList))
+        ->
+        None
+    | _ ->
+        facts.IndexInfos
+        |> List.tryPick (fun info ->
+            match Map.tryFind info.KeyTypeId model.Types with
+            | Some key when flag TypeFlags.Number key -> Some info.ValueTypeId
+            | _ -> None)
 
 /// A symbol name the checker made up for an anonymous shape rather than one the author wrote.
 /// Module symbols are named by their quoted file path, which is no name either.
@@ -137,6 +176,18 @@ let internal isSyntheticName (name: string) =
 /// A member keyed by a JS well-known symbol (`__@iterator@<id>`): unrepresentable in F#, and
 /// the embedded checker id is session-specific - keeping one would also break determinism.
 let internal isSymbolKeyed (name: string) = name.StartsWith "__@"
+
+/// How many members an array-shaped intersection's other operands contribute (§4.6). An F# array
+/// carries the element alone, so `readonly T[] & { tag: "t" }` loses `tag`. Every other spelling
+/// of an array contributes zero.
+let internal arrayMembersDropped (model: ShapeModel) (facts: TypeFacts) =
+    facts.IntersectionMembers
+    |> List.choose (fun id -> Map.tryFind id model.Types)
+    |> List.filter (fun operand -> (arrayElement model operand).IsNone)
+    |> List.collect (fun operand -> operand.Members |> List.map _.Symbol.Name)
+    |> List.filter (isSymbolKeyed >> not)
+    |> List.distinct
+    |> List.length
 
 /// The discriminant of a tagged union (D4, §4.5(2)): the property every non-nullish object
 /// member carries with a *distinct* string-literal type. Returns its TypeScript spelling with
@@ -264,11 +315,6 @@ let internal ErasedUnionArity = 4
 [<Literal>]
 let internal TaggedCaseFieldBudget = 12
 
-/// A tuple type (§4.12). Fable compiles an F# tuple to a JS array, so a fixed tuple is an
-/// exact match; the variadic forms are not.
-let internal isTuple (facts: TypeFacts) =
-    facts.Response.IsTupleType = ValueSome true
-
 /// A tuple element the checker marked `...rest` or variadic. F# tuples are fixed-arity, so a
 /// tuple carrying one has no tuple form at all.
 let internal isVariadicElement (flags: ElementFlags) =
@@ -314,12 +360,13 @@ let internal ownArguments (facts: TypeFacts) =
 let internal freeParamsOf (model: ShapeModel) (typeId: int) =
     Map.tryFind typeId model.DeclParams |> Option.defaultValue []
 
-/// An intersection of object types that flattens into one interface (§4.6): not a brand, and
-/// carrying the members the resolve tier read off it - which it only does when every operand
-/// is an object, so a primitive or type-parameter operand leaves this false.
+/// An intersection of object types that flattens into one interface (§4.6): not a brand, not an
+/// array, and carrying the members the resolve tier read off it - which it only does when every
+/// operand is an object, so a primitive or type-parameter operand leaves this false.
 let internal isFlattenable (model: ShapeModel) (facts: TypeFacts) =
     flag TypeFlags.Intersection facts
     && (brandedPrimitive model facts).IsNone
+    && (arrayElement model facts).IsNone
     && not (facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
 
 /// Whether an argument *is* the bound, or reaches it through the bases and intersection
@@ -567,34 +614,38 @@ and internal intersectionRef
     (owner: string)
     (facts: TypeFacts)
     : FsTypeRef * Finding list =
-    match brandedPrimitive model facts with
-    | Some primitive ->
-        match Map.tryFind facts.Response.Id model.DeclNames with
-        | Some name -> FsBranded(primitive, name), []
-        | None -> primitive, [ Finding.make owner TypeReference.UnnamedBrandToPrimitive ]
+    match arrayElement model facts with
+    | Some element -> arrayRef ctx model self owner facts element
     | None ->
-        // A flattened intersection is declared under a name (§4.6), exactly as a hoisted
-        // anonymous object is, and is applied over the parameters it reads the same way.
-        match Map.tryFind facts.Response.Id model.DeclNames with
-        | Some name when isFlattenable model facts ->
-            match freeParamsOf model facts.Response.Id with
-            | [] ->
-                // A *generic alias* over an intersection binds parameters of its own instead,
-                // and `declTypeParams` writes them on the left side - so a self-reference has
-                // to re-apply them, the way `objectRef` re-applies `ownArguments`. Without
-                // this it comes back out bare and `repair-arity` widens it (`RA003`).
-                match facts.AliasTypeArguments with
-                | [] -> FsNamed name, []
-                | parameters -> appliedRef ctx model self owner name parameters
-            | arguments -> appliedRef ctx model self owner name arguments
-        | _ ->
-            let reason =
-                if facts.Members.IsEmpty && facts.IndexInfos.IsEmpty then
-                    TypeReference.IntersectionOverNonObject
-                else
-                    TypeReference.IntersectionNotDeclared
 
-            FsObj, [ Finding.make owner reason ]
+        match brandedPrimitive model facts with
+        | Some primitive ->
+            match Map.tryFind facts.Response.Id model.DeclNames with
+            | Some name -> FsBranded(primitive, name), []
+            | None -> primitive, [ Finding.make owner TypeReference.UnnamedBrandToPrimitive ]
+        | None ->
+            // A flattened intersection is declared under a name (§4.6), exactly as a hoisted
+            // anonymous object is, and is applied over the parameters it reads the same way.
+            match Map.tryFind facts.Response.Id model.DeclNames with
+            | Some name when isFlattenable model facts ->
+                match freeParamsOf model facts.Response.Id with
+                | [] ->
+                    // A *generic alias* over an intersection binds parameters of its own instead,
+                    // and `declTypeParams` writes them on the left side - so a self-reference has
+                    // to re-apply them, the way `objectRef` re-applies `ownArguments`. Without
+                    // this it comes back out bare and `repair-arity` widens it (`RA003`).
+                    match facts.AliasTypeArguments with
+                    | [] -> FsNamed name, []
+                    | parameters -> appliedRef ctx model self owner name parameters
+                | arguments -> appliedRef ctx model self owner name arguments
+            | _ ->
+                let reason =
+                    if facts.Members.IsEmpty && facts.IndexInfos.IsEmpty then
+                        TypeReference.IntersectionOverNonObject
+                    else
+                        TypeReference.IntersectionNotDeclared
+
+                FsObj, [ Finding.make owner reason ]
 
 /// `T[K]`. Where `K` is a key variable this signature bound as `typekeyof<'T,'R>`, the access is
 /// exactly the `'R` that idiom introduced. Everything else - `T[keyof T]`, an access over an
@@ -614,6 +665,25 @@ and internal indexedAccessRef (model: ShapeModel) (owner: string) (facts: TypeFa
     | Some(TypedKeyOf(operand, result)), Some name when operand = name -> FsTypeVar result, []
     | _ -> FsObj, [ Finding.make owner TypeReference.IndexedAccessNoForm ]
 
+/// An array-shaped type as an F# array over its element. The members an intersection's other
+/// operands contribute are reported as dropped.
+and internal arrayRef
+    (ctx: Context)
+    (model: ShapeModel)
+    (self: string option)
+    (owner: string)
+    (facts: TypeFacts)
+    (element: int)
+    : FsTypeRef * Finding list =
+    let inner, findings = typeRef ctx model self owner element
+
+    let dropped =
+        match arrayMembersDropped model facts with
+        | 0 -> []
+        | count -> [ Finding.make owner (TypeReference.ArrayIntersectionMembersDropped count) ]
+
+    FsArray inner, findings @ dropped
+
 and internal objectRef
     (ctx: Context)
     (model: ShapeModel)
@@ -621,10 +691,8 @@ and internal objectRef
     (owner: string)
     (facts: TypeFacts)
     : FsTypeRef * Finding list =
-    match arrayElement facts with
-    | Some element ->
-        let inner, findings = typeRef ctx model self owner element
-        FsArray inner, findings
+    match arrayElement model facts with
+    | Some element -> arrayRef ctx model self owner facts element
     | None ->
 
         match Map.tryFind facts.Response.Id model.DeclNames with
@@ -672,6 +740,15 @@ and internal objectRef
                                 |> Option.defaultValue "an anonymous class"
 
                             FsObj, [ Finding.make owner (TypeReference.ConstructorObjectNotDeclared constructs) ]
+                        | (Ship | Widen), _ when facts.Members.IsEmpty && facts.IndexInfos.IsEmpty ->
+                            // A member-less object type maps completely to `obj`, and the
+                            // declaration it would have taken would hold the same. An
+                            // author-written name read from somewhere else stays a declaration
+                            // this run owes the reader.
+                            match facts.SymbolName with
+                            | Some shown when shown <> owner && not (isSyntheticName shown) ->
+                                FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations shown) ]
+                            | _ -> FsObj, [ Finding.make owner TypeReference.ObjectWithoutMembers ]
                         | (Ship | Widen), _ ->
                             let shown = facts.SymbolName |> Option.defaultValue "an anonymous object type"
                             FsObj, [ Finding.make owner (TypeReference.NotAmongGeneratedDeclarations shown) ]
@@ -759,7 +836,7 @@ and internal appliedRefTo
             | Some bound when
                 flag TypeFlags.Object bound
                 && (ownArguments bound).IsEmpty
-                && (arrayElement bound).IsNone
+                && (arrayElement model bound).IsNone
                 && not (isTuple bound)
                 && not (isPureCallback bound)
                 ->
@@ -821,12 +898,17 @@ and internal tupleRef
     : FsTypeRef * Finding list =
     let mutable findings = []
 
-    let components =
-        facts.TypeArguments
-        |> List.map (fun element ->
-            let reference, refFindings = typeRef ctx model self owner element
-            findings <- findings @ refFindings
-            reference)
+    // A `...rest` element is reported as the element type and a `[...Spread]` element as the
+    // array being spread, so a spread contributes its own element to the widened array.
+    let componentOf (flags: ElementFlags) (element: int) =
+        let reference, refFindings = typeRef ctx model self owner element
+        findings <- findings @ refFindings
+
+        match reference with
+        | FsArray inner when flags.HasFlag ElementFlags.Variadic -> inner
+        | reference -> reference
+
+    let components = List.map2 componentOf (tupleElementFlags facts) facts.TypeArguments
 
     let widenToArray reason =
         let element =
@@ -1019,7 +1101,7 @@ let internal typeParamsOf
                         match Map.tryFind boundId model.Types with
                         | Some bound ->
                             flag TypeFlags.Object bound
-                            && (arrayElement bound).IsNone
+                            && (arrayElement model bound).IsNone
                             && not (isTuple bound)
                             && not (isPureCallback bound)
                         | None -> false

@@ -1231,6 +1231,56 @@ let pipelineTests =
                       // A generic alias with no condition in it.
                       Expect.stringContains source "type Box<'T> =" "an ordinary generic alias" ])
 
+        // Wave three lane H's fixture. An array reaches the shaper under whatever name the
+        // author put on it, and `Array` is only one of them. The three spellings below each
+        // collapse to an F# array; the fourth is indexable by number and is not an array.
+        yield!
+            fixtureTests "array-shape-lab" (handFixture "array-shape-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "an interface extending Array is its element array" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "type Chapters = string[]" "the element, not a page of obj"
+
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun f -> f.Symbol.StartsWith "Chapters."))
+                          "and Array's own members are never walked"
+
+                  testCase "an array intersected with a shape reports the members it drops" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "type Tagged = float[]" "the element array"
+
+                      let dropped =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = "TR048" && f.Symbol = "Tagged")
+
+                      Expect.equal dropped.Length 1 "one drop reported against the declaration"
+                      Expect.stringContains dropped.Head.Message "1 member" "`kind`, and only `kind`"
+
+                  testCase "a mapped type over a deferred tuple is an array" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // The expansion leaves `Element` out of scope, so the element widens; the
+                      // array around it does not.
+                      Expect.stringContains source "type ReadonlyTuple = obj[]" "an array of a widened element"
+
+                  testCase "an indexable shape with none of Array's members stays a shape" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "type Register =" "declared as an interface"
+                      Expect.stringContains source "abstract Item: float -> string" "with its indexer intact"
+
+                  testCase "no array member is reported as a missing declaration" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun f -> f.Key = "TR023"))
+                          "the whole of TR023 here was Array's member set" ])
+
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 
         // workers-types is a global type library that *replaces* the DOM lib: its README
