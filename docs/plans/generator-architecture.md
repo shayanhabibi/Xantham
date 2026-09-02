@@ -983,8 +983,8 @@ Every finding case the wave needed was appended in one pre-dispatch commit, so n
 not match the condition an agent ended up guarding were corrected on the integration branch
 rather than in the lane. The corpus stands at 21 fixtures. `TR014` closed to zero, and the three
 largest keys (`TR032`, `MB003`, `SP001`) are working as designed and were left alone. `TR006`
-(1,212, a string literal type widened to `string`) is **still open**: the plan asked whether it
-records intent or a defect and no lane took the question up, so it is unmoved and undecided.
+(1,212, a string literal type widened to `string`) was reviewed and accepted as intent for now,
+so it is unmoved by design rather than by omission.
 
 The recon that scoped the wave had run against a commit predating `c592092`, so blocker 3's 328
 `FS0001` were already unreachable when lane C opened it - but they were being paid for by
