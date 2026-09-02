@@ -26,24 +26,15 @@
              `generate-wire.fsx generate browser`. -->
         <Compile Include="BrowserBindings.fs" />
         <Compile Include="BrandIdioms.fs" />
-        <Compile Include="..\Xantham.Generator.Tests\golden\ansi-regex\AnsiRegex.fs" Link="ansi-regex\AnsiRegex.fs" />
-        <Compile Include="..\Xantham.Generator.Tests\golden\lab\PhaseBLab.fs" Link="lab\PhaseBLab.fs" />
-        <Compile Include="..\Xantham.Generator.Tests\golden\globals-lab\GlobalsLab.fs" Link="globals-lab\GlobalsLab.fs" />
-        <Compile Include="..\Xantham.Generator.Tests\golden\keyof-lab\KeyofLab.fs" Link="keyof-lab\KeyofLab.fs" />
-        <Compile Include="..\Xantham.Generator.Tests\golden\generics-lab\GenericsLab.fs" Link="generics-lab\GenericsLab.fs" />
-        <Compile Include="..\Xantham.Generator.Tests\golden\intersection-lab\IntersectionLab.fs" Link="intersection-lab\IntersectionLab.fs" />
-        <Compile Include="..\Xantham.Generator.Tests\golden\statics-lab\StaticsLab.fs" Link="statics-lab\StaticsLab.fs" />
-        <Compile Include="..\Xantham.Generator.Tests\golden\ctor-lab\CtorLab.fs" Link="ctor-lab\CtorLab.fs" />
-        <Compile Include="..\Xantham.Generator.Tests\golden\inherit-lab\InheritLab.fs" Link="inherit-lab\InheritLab.fs" />
-    <Compile Include="..\Xantham.Generator.Tests\golden\brand-lab\BrandLab.fs" Link="brand-lab\BrandLab.fs" />
-        <Compile Include="..\Xantham.Generator.Tests\golden\flags-lab\FlagsLab.fs" Link="flags-lab\FlagsLab.fs" />
-        <Compile Include="..\Xantham.Generator.Tests\golden\lib-lab\LibLab.fs" Link="lib-lab\LibLab.fs" />
-        <Compile Include="..\Xantham.Generator.Tests\golden\parse-lab\ParseLab.fs" Link="parse-lab\ParseLab.fs" />
-    <Compile Include="..\Xantham.Generator.Tests\golden\animejs\Animejs.fs" Link="animejs\Animejs.fs" />
-        <Compile Include="..\Xantham.Generator.Tests\golden\@cloudflare\workers-types\Cloudflare.WorkersTypes.fs"
-                 Link="workers-types\Cloudflare.WorkersTypes.fs" />
-        <Compile Include="..\Xantham.Generator.Tests\golden\solid-js\SolidJs.fs" Link="solid-js\SolidJs.fs" />
-        <Compile Include="..\Xantham.Generator.Tests\golden\type-fest\TypeFest.fs" Link="type-fest\TypeFest.fs" />
+        <!-- Every committed golden, by wildcard rather than by name. The gate's job is to
+             compile *all* of them, so a list of them is a list that can only ever be wrong:
+             a golden left off the list is a golden silently ungated. Naming them also made
+             this a file every parallel branch appended a line to, and so a file every merge
+             conflicted in. The goldens are independent modules, so wildcard order is
+             immaterial - but all of them follow the two hand-written files above, which
+             they are allowed to reference. -->
+        <Compile Include="..\Xantham.Generator.Tests\golden\**\*.fs"
+                 Link="golden\%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
     <ItemGroup>

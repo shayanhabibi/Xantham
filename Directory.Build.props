@@ -9,5 +9,16 @@
         <PackageProjectUrl>https://shayanhabibi.github.io/Xantham</PackageProjectUrl>
         <FsDocsLogoSource>content/assets/favicon-32x32.png</FsDocsLogoSource>
         <FsDocsFaviconSource>content/assets/favicon.ico</FsDocsFaviconSource>
+
+        <!--
+            Cap the error stream. The compile gate compiles the whole golden corpus, so one bad
+            rendering decision is not one error - it is the same error at three hundred sites, and
+            fsc's default of 100 reported errors is several thousand lines of near-identical text.
+            The build still fails on error 26; you just stop paying to read 26 through 300, and
+            the distinct codes are all visible in the first few. Raise it on the command line
+            (-p:MaxCompilerErrors=100) when you genuinely want the full stream.
+        -->
+        <MaxCompilerErrors Condition="'$(MaxCompilerErrors)' == ''">25</MaxCompilerErrors>
+        <OtherFlags>$(OtherFlags) --maxerrors:$(MaxCompilerErrors)</OtherFlags>
     </PropertyGroup>
 </Project>

@@ -23,44 +23,20 @@ node_modules/
 tests/**/output.json
 tests/**/package-lock.json
 tests/fixtures/**/*
-# ... except the hand-authored lab fixture, which is source: the committed goldens are
-# generated from it, so an ignored copy would make them unreproducible.
-!tests/fixtures/lab/
-!tests/fixtures/lab/**
-tests/fixtures/lab/node_modules/
-!tests/fixtures/globals-lab/
-!tests/fixtures/globals-lab/**
-tests/fixtures/globals-lab/node_modules/
-!tests/fixtures/keyof-lab/
-!tests/fixtures/keyof-lab/**
-tests/fixtures/keyof-lab/node_modules/
-!tests/fixtures/brand-lab/
-!tests/fixtures/brand-lab/**
-tests/fixtures/brand-lab/node_modules/
-!tests/fixtures/lib-lab/
-!tests/fixtures/lib-lab/**
-tests/fixtures/lib-lab/node_modules/
-!tests/fixtures/generics-lab/
-!tests/fixtures/generics-lab/**
-tests/fixtures/generics-lab/node_modules/
-!tests/fixtures/intersection-lab/
-!tests/fixtures/intersection-lab/**
-tests/fixtures/intersection-lab/node_modules/
-!tests/fixtures/statics-lab/
-!tests/fixtures/statics-lab/**
-tests/fixtures/statics-lab/node_modules/
-!tests/fixtures/flags-lab/
-!tests/fixtures/flags-lab/**
-tests/fixtures/flags-lab/node_modules/
-!tests/fixtures/ctor-lab/
-!tests/fixtures/ctor-lab/**
-tests/fixtures/ctor-lab/node_modules/
-!tests/fixtures/parse-lab/
-!tests/fixtures/parse-lab/**
-tests/fixtures/parse-lab/node_modules/
-!tests/fixtures/inherit-lab/
-!tests/fixtures/inherit-lab/**
-tests/fixtures/inherit-lab/node_modules/
+# ... except the hand-authored lab fixtures, which are source: the committed goldens are
+# generated from them, so an ignored copy would make them unreproducible.
+#
+# Matched by name rather than listed one by one. Every lab directory ends in `lab`, so
+# `*lab` covers both `lab` itself and the `<feature>-lab` family, and a new lab is tracked
+# the moment it is created. Listing them individually made this the file every parallel
+# branch appended to, and so the file every merge conflicted in.
+#
+# The directory line must come before the contents line: git will not re-include a path
+# whose parent directory it has already excluded, and `tests/fixtures/**/*` excludes the
+# lab directories themselves.
+!tests/fixtures/*lab/
+!tests/fixtures/*lab/**
+tests/fixtures/*lab/node_modules/
 # ... and except the pins, which are the tracked half of every npm rung: the install is
 # untracked, so the version it was generated against has to be written down somewhere.
 !tests/fixtures/pins.json

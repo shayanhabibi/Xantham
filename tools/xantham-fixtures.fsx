@@ -37,31 +37,37 @@ type Fixture = Fixture of string
 
 type FixtureGroup = FixtureGroup of Fixture list
 
+/// The rungs `init` installs. **Distinct**, and `List.distinct` keeps it so: `init` runs these
+/// four at a time, and two entries naming one fixture are two workers writing one directory -
+/// two `package.json` creates and two `npm install`s interleaved in the same place. That is what
+/// left `..."*"}}260901.1"}}` on disk and failed the next install with `EJSONPARSE`. Fixtures
+/// that differ install to different directories and share nothing, so the parallelism itself is
+/// safe once the list is.
 let fixtures =
-    [
-        Fixture "@cloudflare/workers-types"
-        Fixture "@types/node"
-        Fixture "@types/semver"
-        Fixture "@types/lodash"
-        Fixture "@types/d3"
-        Fixture "@types/three"
-        Fixture "typescript"
-        Fixture "@cloudflare/ai-chat"
-        Fixture "@cloudflare/dynamic-workflows"
-        Fixture "@cloudflare/sandbox"
-        Fixture "@cloudflare/shell"
-        Fixture "@cloudflare/think"
-        Fixture "@cloudflare/voice"
-        Fixture "@cloudflare/worker-bundler"
-        Fixture "@cloudflare/puppeteer"
-        Fixture "@cloudflare/containers"
-        Fixture "@cloudflare/workers-types"
-        Fixture "solid-js"
-        Fixture "ansi-regex"
-        Fixture "type-fest"
-        Fixture "animejs"
-        Fixture "agents"
-    ]
+    List.distinct
+        [
+            Fixture "@cloudflare/workers-types"
+            Fixture "@types/node"
+            Fixture "@types/semver"
+            Fixture "@types/lodash"
+            Fixture "@types/d3"
+            Fixture "@types/three"
+            Fixture "typescript"
+            Fixture "@cloudflare/ai-chat"
+            Fixture "@cloudflare/dynamic-workflows"
+            Fixture "@cloudflare/sandbox"
+            Fixture "@cloudflare/shell"
+            Fixture "@cloudflare/think"
+            Fixture "@cloudflare/voice"
+            Fixture "@cloudflare/worker-bundler"
+            Fixture "@cloudflare/puppeteer"
+            Fixture "@cloudflare/containers"
+            Fixture "solid-js"
+            Fixture "ansi-regex"
+            Fixture "type-fest"
+            Fixture "animejs"
+            Fixture "agents"
+        ]
 
 /// The versions `tests/fixtures/pins.json` pins the litmus rungs at (JSONC, like every other
 /// configuration Xantham reads). A pinned fixture is installed as `name@version`, exactly, so
