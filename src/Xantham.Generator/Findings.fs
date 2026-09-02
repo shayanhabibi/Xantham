@@ -326,6 +326,9 @@ type TypeParameters =
     /// rendered as an `FS0001` waiting to happen. Distinct from `TP002`, which is a constraint
     /// with no F# form at all.
     | [<Ergonomic>] ConstraintNotProvenNominal of name: string * bound: string
+    /// Wave three, lane K. Several call signatures of one alias declare the same parameter name.
+    /// The head writes it once, and every signature's uses bind to that single variable.
+    | [<Ergonomic>] DuplicateTypeParameterCollapsed of name: string * declared: int
 
     interface IFindingKind with
         member this.Message =
@@ -341,6 +344,8 @@ type TypeParameters =
                 $"{count} type parameters have no name to write; their uses widen to obj"
             | ConstraintNotProvenNominal(name, bound) ->
                 $"constraint {bound} on '{name}' is structural in TypeScript and nominal in F#; dropped from the head (§4.9)"
+            | DuplicateTypeParameterCollapsed(name, declared) ->
+                $"'{name}' is declared by {declared} signatures of the same alias; the head writes one variable"
 
 /// Member and parameter shaping: `Shape.parametersOf` and `membersOf`.
 [<Prefix "MB">]
@@ -439,6 +444,9 @@ type SynthesizeAnonymous =
     /// Renamed to say that, because it fires nowhere in the corpus today and a message that
     /// misdescribes its own guard is worth less than no message at all.
     | [<Widened>] HoistArgumentsNotRecovered of name: string
+    /// Wave three, lane J. One operand of an intersection resists hoisting while the others are
+    /// named, so the reference carries the named operands and widens the rest.
+    | [<Widened>] IntersectionOperandNotHoisted of name: string
 
     interface IFindingKind with
         member this.Message =
@@ -446,6 +454,8 @@ type SynthesizeAnonymous =
             | InstantiationNamedOnce name -> $"anonymous shape is an instantiation of {name}; written as an application"
             | HoistArgumentsNotRecovered name ->
                 $"{name} is an instantiation whose type arguments could not be recovered; widened to obj rather than named again"
+            | IntersectionOperandNotHoisted name ->
+                $"{name} intersects an operand no declaration names; that operand's members are dropped"
 
 /// `shape-interfaces`.
 [<Prefix("SI", "shape-interfaces")>]

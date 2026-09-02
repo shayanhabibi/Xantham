@@ -89,22 +89,59 @@ pre-dispatch  →  [ G | H | I ]  →  merge  →  batch 2
 Lane G writes no source. Lane H owns `Shape/Spec.fs`, lane I owns `Shape/Arity.fs`. Both regenerate
 goldens; a golden conflict is resolved by regenerating over the composed tree, never by hand.
 
-## Batch 2 — scoped after batch 1 merges
+## Batch 1 — landed
 
-Sequenced, and its contents depend on lane G's numbers:
+| lane | result |
+|---|---|
+| G | `@types/three` still refused: 1 of 4 criteria passes. Compiles clean (0 errors, was 666), but 482,801 lines, non-deterministic, 3 m 47 s gate. Blockers 1 and 2 unmoved; the cause is reduced to 12 lines. |
+| H | `TR023` 727 → 182, the predicted number. `TR047` 27, `TR048` 14. `TR018` fell 232 → 194 as a side effect. |
+| I | Escape 200 → 190. `RA001` 11 → 1, `AC001` 13 → 3, `RA006` 11. Lane E's handback closed. |
 
-- **`TR023` lane 1B** (`Resolve.fs`, `isAnonymousShape`): the remaining 86 cause-1 sites. The recon
-  requires 1A to land first, and warns that 1B deepens the type table on lib-heavy rungs and
-  converts some sites into a different finding rather than into exact.
-- **Wave two's second handback** — `solid-js`'s `Setter` renders `Action<obj[]>` through §4.12's
-  empty-tuple rest widening where §4.11's call is what it wants. `Shape/Spec.fs`.
-- **`TR044`'s unproven absence** — the substitution matches `FsNamed` / `FsApp` / `FsObj` /
-  `FsTypeVar` only, so a primitive or tuple argument against a still-written constraint would fall
-  through to a faithful reference and be `FS0001`. Nothing in the corpus does this; the compile
-  gate is an absence, not a closed hole. A lab settles it. `Shape/Spec.fs`.
-- **`TR018` re-measured**, once 1A and 1B have moved the surface it sits on.
+Corpus 15,278 → 14,618 findings over 23 fixtures. Each lane's counts survived composition
+exactly, so the branches composed rather than interacted.
 
-The last three all land in `Shape/Spec.fs`, so they run one after another, not concurrently.
+## Batch 2 — three agents, disjoint files
+
+### Lane J — an alias body that intersects a conditional is not hoisted
+
+Lane G's reproducer, and the reason wave two's lane A did not carry to `three`: an alias whose
+body intersects a conditional type is not recognised as a hoistable instantiation, so `SY001`
+fires 4 times on a control and zero times on the reproducer. This is blocker 1, which decides the
+rung.
+
+- Owns `Shape/Anonymous.fs`. Lab: `hoist-conditional-lab`.
+- Findings: `SY003` where one operand of an intersection resists hoisting.
+- Done: the reproducer bounds at the control's declaration count, and `three` re-measured.
+
+### Lane K — the `Shape/Spec.fs` queue, in one lane because they share a file
+
+Three items, ordered. The first is a live compile-gate defect that lane I had to guard around:
+
+1. `aliasTypeParams` appends every call signature's type parameter without deduplicating, so
+   `solid-js`'s `Setter` renders `Setter<'T, 'U, 'U, 'U, 'U>` — FS0037. Raises `TP009`.
+2. `Setter` then renders `Action<obj[]>` through §4.12's empty-tuple rest widening where §4.11's
+   call is what it wants. Wave two's second handback.
+3. `TR044`'s substitution matches `FsNamed` / `FsApp` / `FsObj` / `FsTypeVar` only. A primitive or
+   tuple argument against a still-written constraint falls through to a faithful reference and is
+   `FS0001`. Nothing in the corpus does this, so the compile gate is an absence, not a closed
+   hole. A lab settles it either way.
+
+- Owns `Shape/Spec.fs`. Labs: `setter-lab` (1 and 2), `constraint-arg-lab` (3).
+
+### Lane L — `TR023` lane 1B, and `TR018` re-priced
+
+The remaining 86 cause-1 sites: extend `isAnonymousShape` so a symbol whose flags say *member*
+rather than *type declaration* resolves structurally regardless of its group. The recon requires
+1A first, which has landed, and warns that 1B deepens the type table on lib-heavy rungs and
+converts some sites into a different finding rather than into exact.
+
+- Owns `Resolve.fs`. Lab: `member-shape-lab`.
+- Also re-measures `TR018`, now 194 after lane H took 38 of it, and says whether what remains is a
+  distinct defect or the same one.
+
+```
+[ J | K | L ]  →  merge  →  wave record
+```
 
 ## Deliberately not in this wave
 
