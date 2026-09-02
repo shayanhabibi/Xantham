@@ -233,6 +233,15 @@ type TypeReference =
     /// Wave three, lane H. An intersection whose operands include an array shape maps to the
     /// element array; members contributed by the other operands have no F# form on an array.
     | [<Widened>] ArrayIntersectionMembersDropped of dropped: int
+    /// Wave four, lane P. `X & {}` - the autocomplete idiom - reduces to `X`, and the reference
+    /// renders `X`'s own form.
+    | [<Exact>] EmptyIntersectionOperandReduced
+    /// Wave four, lane P. An intersection of callable operands at a member position, rendered
+    /// from the call signatures the operands carry.
+    | [<Ergonomic>] IntersectionCallableFlattened of signatures: int
+    /// Wave four, lane P. Every operand of a flattened property is the same type, so the
+    /// property renders that type.
+    | [<Exact>] IntersectionOperandsIdentical
 
     interface IFindingKind with
         member this.Message =
@@ -302,6 +311,10 @@ type TypeReference =
             | ObjectWithoutMembers -> "object type declares no members; obj admits the same values"
             | ArrayIntersectionMembersDropped dropped ->
                 $"array-shaped intersection maps to its element array; {dropped} members from the other operands are dropped"
+            | EmptyIntersectionOperandReduced -> "empty intersection operand reduced away; the remaining operand is the type"
+            | IntersectionCallableFlattened signatures ->
+                $"intersection of callable operands rendered from its {signatures} call signatures"
+            | IntersectionOperandsIdentical -> "every operand of the flattened property is the same type"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
@@ -534,6 +547,9 @@ type ShapeClasses =
     /// the group it is declared in is not shipped, so there are no signatures to shape from.
     /// It is not a settable static, and saying so (`StaticReadOnly`) was misleading.
     | [<Widened>] StaticMethodWithoutSignatures of declaredIn: string
+    /// Wave four, lane N. A settable static emitted with a setter, proven against `index.js` by
+    /// the run gate.
+    | [<Exact>] StaticSettable
 
     interface IFindingKind with
         member this.Message =
@@ -547,6 +563,7 @@ type ShapeClasses =
                 "static member dropped: the class declares no instance members, so this run emits no type to carry it"
             | StaticMethodWithoutSignatures declaredIn ->
                 $"static method emitted as a value: its type is declared in {declaredIn}, which this run resolves identity-only, so there are no signatures to shape"
+            | StaticSettable -> "settable static emitted with a setter"
 
 /// `shape-exports`.
 [<Prefix("SE", "shape-exports")>]
@@ -556,6 +573,9 @@ type ShapeExports =
     /// import that names it resolves to nothing at all. The runtime package is configuration;
     /// this says when the run had to derive one rather than being told.
     | [<Ergonomic>] RuntimeSpecifierDerived of specifier: string
+    /// Wave four, lane N. A `var` or `let` binding - a global or a module export - emitted
+    /// get-only, so an assignment a consumer is entitled to write has no F# form.
+    | [<Widened>] MutableValueReadOnly
 
     interface IFindingKind with
         member this.Message =
@@ -563,16 +583,25 @@ type ShapeExports =
             | NoValueType -> "no value type in the table; export dropped"
             | RuntimeSpecifierDerived specifier ->
                 $"types-only package has no runtime; imports bind to {specifier}, derived rather than configured"
+            | MutableValueReadOnly -> "mutable binding emitted read-only"
 
 /// `synthesize-paramobjects`.
 [<Prefix("SP", "synthesize-paramobjects")>]
 type SynthesizeParamObjects =
     | [<Ergonomic>] ParamObjectSynthesized
+    /// Wave four, lane O. A method member carried into `Create` as a function-typed parameter.
+    /// The delegate it binds receives no `this`.
+    | [<Ergonomic>] MethodMemberAsCreateParameter
+    /// Wave four, lane O. An interface with no `Create`, and why.
+    | [<Widened>] CreateNotSynthesized of reason: string
 
     interface IFindingKind with
         member this.Message =
             match this with
             | ParamObjectSynthesized -> "ParamObject Create synthesized (D3)"
+            | MethodMemberAsCreateParameter ->
+                "method member reads as a function-typed Create parameter; the delegate receives no this"
+            | CreateNotSynthesized reason -> $"no ParamObject Create synthesized: {reason}"
 
 /// `dedupe-overloads`.
 [<Prefix("DO", "dedupe-overloads")>]
