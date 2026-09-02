@@ -1,4 +1,4 @@
-/// The shape tier's nano-pass payoff: each pass exercised on a hand-built model, asserted on
+﻿/// The shape tier's nano-pass payoff: each pass exercised on a hand-built model, asserted on
 /// the output model and its findings. No wire, no fixtures.
 module Xantham.Generator.Tests.ShapeTests
 
@@ -1211,6 +1211,84 @@ let shapePassTests =
                 | body -> failtest $"expected a constructor returning Timer, got %A{body}"
             | members -> failtest $"expected one constructor member, got %A{members}"
 
+        testCase "shape-classes keeps only the static F# admits beside an instance member" <| fun _ ->
+            // `json` is a method on both halves - the one collision F# allows, and the one
+            // `Response` has. `status` is a property on both, which is FS0441.
+            let jsonType =
+                { Build.facts (Build.typeResponse 82 TypeFlags.Object) with
+                    CallSignatures = [ Build.signature [] 2 ] }
+
+            let instanceJson = Build.resolvedMember (Build.symbol 811 "json" SymbolFlags.Method) 82
+            let instanceStatus = Build.resolvedMember (Build.symbol 812 "status" SymbolFlags.Property) 2
+
+            let instance =
+                { Build.facts (Build.typeResponse 80 TypeFlags.Object) with
+                    Members = [ instanceJson; instanceStatus ] }
+
+            let static' =
+                { Build.facts (Build.typeResponse 81 TypeFlags.Object) with
+                    ConstructSignatures = [ Build.signature [] 80 ]
+                    Members =
+                        [ instanceJson
+                          instanceStatus
+                          { Build.resolvedMember (Build.symbol 813 "MAX" SymbolFlags.Property) 2 with
+                              ReadOnly = true } ] }
+
+            // The instance interface shape-interfaces would have left behind: statics hang off
+            // it, and it is what the collision is judged against.
+            let declared =
+                FsInterface
+                    { Name = "Clash"
+                      Docs = ""
+                      Tags = []
+                      Order = None
+                      TypeParameters = []
+                      Inherits = []
+                      Members =
+                        [ FsMethod
+                            { Name = "json"
+                              Docs = ""
+                              Tags = []
+                              TypeParameters = []
+                              Parameters = []
+                              Return = FsFloat }
+                          FsProperty
+                              { Name = "status"
+                                Docs = ""
+                                Tags = []
+                                ReadOnly = false
+                                Type = FsFloat } ]
+                      CreateOverloads = []
+                      Statics = [] }
+
+            let model =
+                { Build.shapeModel (instance :: static' :: jsonType :: Build.primitives) with
+                    Harvest =
+                        { Exports =
+                            [ Build.export "Clash" (Build.symbol 810 "Clash" (SymbolFlags.Class ||| SymbolFlags.Value)) ] }
+                    ExportTypes = Map.ofList [ 810, { Declared = Some 80; Value = Some 81 } ]
+                    DeclNames = Map.ofList [ 80, "Clash" ]
+                    Decls = [ declared ] }
+
+            let shaped, findings = Build.runPass Shape.shapeClasses model
+
+            match shaped.Decls with
+            | [ FsInterface decl ] ->
+                Expect.equal
+                    (decl.Statics |> List.map _.Name)
+                    [ "json"; "MAX" ]
+                    "the method survives its instance twin, the property does not"
+
+                match decl.Statics with
+                | [ { Binding = ImportNamed "Clash.json" }; { Binding = ImportNamed "Clash.MAX" } ] -> ()
+                | statics -> failtest $"expected dotted selectors off the class, got %A{statics}"
+            | decls -> failtest $"expected one interface, got %A{decls}"
+
+            Expect.contains
+                (findings |> List.map (fun f -> f.Key, f.Symbol))
+                ("SC002", "Clash.status")
+                "the dropped static says which one and why"
+
         testCase "synthesize-paramobjects gives plain-data interfaces a Create overload (D3)" <| fun _ ->
             let decl =
                 FsInterface
@@ -1233,7 +1311,8 @@ let shapePassTests =
                                 Tags = []
                                 ReadOnly = false
                                 Type = FsString } ]
-                      CreateOverloads = [] }
+                      CreateOverloads = []
+                      Statics = [] }
 
             let model = { Build.shapeModel [] with Decls = [ decl ] }
             let shaped, findings = Build.runPass Shape.synthesizeParamObjects model
@@ -1266,7 +1345,8 @@ let shapePassTests =
                                 TypeParameters = []
                                 Parameters = []
                                 Return = FsUnit } ]
-                      CreateOverloads = [] }
+                      CreateOverloads = []
+                      Statics = [] }
 
             let model = { Build.shapeModel [] with Decls = [ decl ] }
             let shaped, findings = Build.runPass Shape.synthesizeParamObjects model
@@ -1318,7 +1398,8 @@ let shapePassTests =
                                   [ method' "add" [ parameter "targets" (FsNamed "DOMTargets") ]
                                     method' "add" [ parameter "targets" (FsNamed "JSTargets") ]
                                     method' "add" [ parameter "targets" FsString ] ]
-                                CreateOverloads = [] } ] }
+                                CreateOverloads = []
+                                Statics = [] } ] }
 
             let deduped, findings = Build.runPass Shape.dedupeOverloads model
 
@@ -1707,7 +1788,8 @@ let shapePassTests =
                       TypeParameters = []
                       Inherits = []
                       Members = []
-                      CreateOverloads = [] }
+                      CreateOverloads = []
+                      Statics = [] }
 
             let model =
                 { Build.shapeModel [] with
@@ -1761,7 +1843,8 @@ let shapePassTests =
                                             Tags = []
                                             ReadOnly = true
                                             Type = FsApp("Params", [ FsString ]) } ]
-                                CreateOverloads = [] } ] }
+                                CreateOverloads = []
+                                Statics = [] } ] }
 
             let repaired, findings = Build.runPass Shape.repairArity model
 
@@ -1790,7 +1873,8 @@ let shapePassTests =
                       TypeParameters = [ { Name = "Env"; Constraint = None } ]
                       Inherits = []
                       Members = []
-                      CreateOverloads = [] }
+                      CreateOverloads = []
+                      Statics = [] }
 
             let model =
                 { Build.shapeModel [] with
@@ -1835,7 +1919,8 @@ let shapePassTests =
                                             Tags = []
                                             ReadOnly = false
                                             Type = FsUnit } ]
-                                CreateOverloads = [] } ] }
+                                CreateOverloads = []
+                                Statics = [] } ] }
 
             let repaired, findings = Build.runPass Shape.repairArity model
 

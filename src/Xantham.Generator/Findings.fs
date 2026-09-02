@@ -393,13 +393,26 @@ type ShapeAliases =
 [<Prefix("SC", "shape-classes")>]
 type ShapeClasses =
     | [<Escape>] ClassWithoutValueType
+    /// A static F# will not let the class carry. The only case is a name an instance member
+    /// already has: F# admits that between two methods and nowhere else - property over
+    /// property is FS0441, method over property FS0434, and a static property under an abstract
+    /// method is FS3214 at every use of it.
     | [<Widened>] StaticMemberDropped
+    | [<Widened>] StaticReadOnly
+    /// A class whose instance type declares nothing has no interface of its own for the statics
+    /// to sit on, and F# has no free-standing static member.
+    | [<Widened>] StaticWithoutDeclaration
 
     interface IFindingKind with
         member this.Message =
             match this with
             | ClassWithoutValueType -> "class export without a value type; constructor dropped"
-            | StaticMemberDropped -> "static class member dropped (statics emission awaits a fixture)"
+            | StaticMemberDropped ->
+                "static member dropped: its name is an instance member's, which F# admits only between two methods"
+            | StaticReadOnly ->
+                "a settable static is emitted read-only: Fable compiles an assignment to an imported static as a call"
+            | StaticWithoutDeclaration ->
+                "static member dropped: the class declares no instance members, so this run emits no type to carry it"
 
 /// `shape-exports`.
 [<Prefix("SE", "shape-exports")>]

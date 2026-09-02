@@ -49,6 +49,7 @@ let private globals () =
     let spun = gadget.spin(2.0).spin(3.0)
     equal "a `this`-returning method chains on the same instance" true (obj.ReferenceEquals(gadget, spun))
     equal "and the runtime saw both calls" 5.0 (emitJsExpr gadget "$0.turns")
+    equal "a static on a global class reads off the global name" 9.0 GlobalsLab.Gadget.SPEED
 
 /// `[<Import>]` bindings land on the module's exports; a tagged union case is the tagged object
 /// the JavaScript side reads, and a tagged object built by JavaScript matches the F# case.
@@ -107,6 +108,24 @@ let private imports () =
     let settings: obj = import "configured" "phase-b-lab"
     equal "a synthesized ParamObject reaches the function as the literal" """{"fps":60}""" (json settings)
 
+/// A class static reaches the property on the constructor object: not the constructor, not an
+/// instance member of the same name, and - through a subclass - the base's static that
+/// JavaScript inherits down the constructor chain.
+let private statics () =
+    equal "a const-like static reads off the constructor object" 100.0 StaticsLab.Counter.MAX
+    equal "and a settable one reads the same way" 7.0 StaticsLab.Counter.tick
+    equal "a static factory runs the static, not the constructor" 3.0 (StaticsLab.Counter.from 3.0).value
+    equal "a static overload picks the number arm" 4.0 (StaticsLab.Counter.``of`` 4.0).value
+    equal "and the string arm reaches the same JavaScript static" 4.0 (StaticsLab.Counter.``of`` "abcd").value
+    equal "a subclass carries the static JavaScript inherits for it" 100.0 StaticsLab.Doubling.MAX
+    equal "a static on a generic declaration is reachable once instantiated" 0.0 StaticsLab.Box<float>.EMPTY
+
+    // `Clash.json` is the one collision F# admits: a static method beside an instance method of
+    // the same name. Both have to reach their own JavaScript half.
+    let clash = StaticsLab.Exports.Clash()
+    equal "an instance method survives beside the static of its name" 42.0 (clash.json ())
+    equal "and the static of that name reaches the constructor object's" 10.0 (StaticsLab.Clash.json 5.0).status
+
 let private taggedUnions () =
     let circle = PhaseBLab.Shape.Circle 2.0
     equal "a tagged-union case erases to the tagged object" """{"kind":"circle","radius":2}""" (json circle)
@@ -132,6 +151,7 @@ let private taggedUnions () =
 let main _ =
     globals ()
     imports ()
+    statics ()
     taggedUnions ()
 
     match failures with

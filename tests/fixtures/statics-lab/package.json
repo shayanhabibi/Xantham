@@ -1,0 +1,7 @@
+{
+    "name": "statics-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "description": "Hand-authored fixture for class statics: const-like statics, static factories and overloads, statics inherited by a subclass, a static on a generic declaration, and the four static/instance name collisions. Tracked in git, no npm install, so the goldens pin the mapping under the live compiler and the run gate proves the dotted import selector reaches the right property."
+}

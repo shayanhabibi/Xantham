@@ -680,6 +680,46 @@ Phases — each ends with the compile gate green on its fixtures:
     that reached it (`RequestInitCfPropertiesBase`) - hash-consing by id names a lib mapped
     type as if it were the package's own literal, and an alias-aware name (`Record` and its
     arguments) would read better.
+  - *Class statics emitted (2026-09-02).* The 81 sites the entry above left visible - a
+    finding whose own message said statics emission awaited a fixture. A class's statics live
+    on the constructor object, not on the prototype, so each one binds individually through a
+    dotted selector off whatever binds the class: `[<Import("Counter.MAX", "statics-lab")>]`,
+    `[<Global("Gadget.SPEED")>]`, `default.MAX` for a default export. They are emitted as
+    static members of the class's own instance interface rather than on `Exports`, so the
+    consumer spells `Counter.MAX` exactly as TypeScript does. A static is the same thing an
+    export is - a bound value on a JavaScript object - so it reuses `FsExportMember` and one
+    renderer serves both. `tests/fixtures/statics-lab` pins the behaviour; what it taught:
+    - *Fable compiles an assignment to an imported static as a call.* `Timer.tick <- 3.0`
+      came out `Timer.tick(3)`. Read off the emitted JavaScript, not recalled. So a settable
+      static is emitted get-only, with a finding (`SC003`); the setter route (`with get` /
+      `and set`, which is also the only way past FS0554 on a `get, set` static with a body)
+      was abandoned once the emit was read.
+    - *F# admits a static beside an instance member of the same name only when both are
+      methods.* Property over property is FS0441, method over property FS0434, and a static
+      property under an abstract method *declares* cleanly but is FS3214 at every use. The one
+      arrangement that survives is the one the wild has (`Response.json` is both). The other
+      three are dropped, and `SC002` now says why instead of saying it awaits a fixture.
+    - *A declaration carrying a static is no longer inferred as an interface.* FS0054/FS0365
+      at the type, not at the member. `[<Interface>]` is emitted whenever a declaration has
+      statics or a synthesized `Create`.
+    - *A class with no instance members has no type to hang statics on* - F# has no
+      free-standing static member - so those are dropped with `SC004`.
+    - *JavaScript inherits statics down the constructor chain, and the checker agrees.* It
+      reports the base's statics as the subclass's own, so `Doubling.MAX` is emitted again;
+      the run gate proves it reads 100 rather than `undefined`.
+    Measured: `workers-types` `SC002` 81 → 0 and the pass's widened 85 → 6, for 214 lines of
+    statics in the golden (`DOMException`'s 25 legacy `*_ERR` codes, `AbortSignal.abort`,
+    `EventSource.from`, `URL.parse`/`URL.canParse`); four symbols' worst loss improved with
+    it (widened 384 → 380, ergonomic 963 → 967, escape held at 107), and the statics' own
+    `any` and `null` shapes are owned where they land.
+    Both gates grew: `statics-lab` is linked into the compile gate and the run gate, and
+    `globals-lab`'s `Gadget` gained a static so the `[<Global>]` dotted selector is run-gated
+    beside the imported one (30 → 40 checks). Not done, and now visible: `DOMException.isError`
+    is inherited from the lib's `ErrorConstructor`, whose member type is a named declaration
+    the generator never emits, so it lands as `static member isError: obj` (`TR023` plus a
+    misleading `SC003`) rather than as a method; and `synthesize-paramobjects` still offers a
+    `[<ParamObject>]` `Create` on a class whose instance type is all properties (`Box`), which
+    cannot build a class instance - both predate this pass and are separate behaviour changes.
 
 ## 7. Decisions (2026-09-01)
 

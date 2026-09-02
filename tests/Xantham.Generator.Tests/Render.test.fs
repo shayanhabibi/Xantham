@@ -1,4 +1,4 @@
-/// The renderer against hand-built models: identifier escaping, the printed source, and the
+﻿/// The renderer against hand-built models: identifier escaping, the printed source, and the
 /// manifest, each asserted byte-for-byte - the renderer's contract is byte-identical output.
 module Xantham.Generator.Tests.RenderTests
 
@@ -120,7 +120,8 @@ let renderTests =
                                   [ [ { Name = "held"
                                         Type = FsTypeVar "T"
                                         Optional = false
-                                        Rest = false } ] ] }
+                                        Rest = false } ] ]
+                                Statics = [] }
                           FsAbbrev
                               { Name = "Mapper"
                                 Docs = ""
@@ -158,7 +159,8 @@ let renderTests =
                                     { Name = "V"; Constraint = Some(FsApp("Box", [ FsTypeVar "U" ])) } ]
                                 Inherits = []
                                 Members = []
-                                CreateOverloads = [] } ] }
+                                CreateOverloads = []
+                                Statics = [] } ] }
 
             let source = renderAll model |> Map.find "TestPkg.fs"
 
@@ -214,7 +216,8 @@ let renderTests =
                                       { Name = "count"
                                         Optional = true
                                         Rest = false
-                                        Type = FsOption FsFloat } ] ] }
+                                        Type = FsOption FsFloat } ] ]
+                                Statics = [] }
                           FsStringEnum
                               { Name = "TimeUnit"
                                 Docs = ""
@@ -454,7 +457,8 @@ let renderTests =
                                 TypeParameters = []
                                 Inherits = []
                                 Members = []
-                                CreateOverloads = [] } ]
+                                CreateOverloads = []
+                                Statics = [] } ]
                     Findings =
                         [ { Pass = "shape-interfaces"
                             Symbol = "Options.legacy"

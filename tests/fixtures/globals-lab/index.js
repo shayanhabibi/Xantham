@@ -7,6 +7,7 @@ globalThis.registry = { label: "root", size: 3 };
 globalThis.counter = 41;
 globalThis.ping = (target, retries) => target === "up" && (retries === undefined || retries > 0);
 globalThis.Gadget = class Gadget {
+    static SPEED = 9;
     #turns = 0;
     constructor(widget) {
         this.widget = widget;

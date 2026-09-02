@@ -1,0 +1,106 @@
+{
+  "package": "statics-lab",
+  "module": "StaticsLab",
+  "counts": {
+    "exact": 0,
+    "ergonomic": 1,
+    "widened": 3,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 1,
+      "ergonomic": 1
+    },
+    {
+      "pass": "SC - shape-classes",
+      "total": 5,
+      "widened": 5
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 1,
+      "ergonomic": 1
+    }
+  ],
+  "symbols": [
+    {
+      "name": "Counter",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SC003",
+          "pass": "shape-classes",
+          "tier": "widened",
+          "symbol": "Counter.tick",
+          "message": "a settable static is emitted read-only: Fable compiles an assignment to an imported static as a call"
+        }
+      ]
+    },
+    {
+      "name": "Doubling",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SC003",
+          "pass": "shape-classes",
+          "tier": "widened",
+          "symbol": "Doubling.tick",
+          "message": "a settable static is emitted read-only: Fable compiles an assignment to an imported static as a call"
+        },
+        {
+          "key": "SI002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Doubling",
+          "message": "base members flattened into the interface (the is-a relation is not emitted)"
+        }
+      ]
+    },
+    {
+      "name": "Box",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Box",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Clash",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SC002",
+          "pass": "shape-classes",
+          "tier": "widened",
+          "symbol": "Clash.status",
+          "message": "static member dropped: its name is an instance member\u0027s, which F# admits only between two methods"
+        },
+        {
+          "key": "SC002",
+          "pass": "shape-classes",
+          "tier": "widened",
+          "symbol": "Clash.text",
+          "message": "static member dropped: its name is an instance member\u0027s, which F# admits only between two methods"
+        },
+        {
+          "key": "SC002",
+          "pass": "shape-classes",
+          "tier": "widened",
+          "symbol": "Clash.url",
+          "message": "static member dropped: its name is an instance member\u0027s, which F# admits only between two methods"
+        }
+      ]
+    }
+  ]
+}

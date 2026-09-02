@@ -3,8 +3,8 @@
   "module": "Cloudflare.WorkersTypes",
   "counts": {
     "exact": 260,
-    "ergonomic": 963,
-    "widened": 384,
+    "ergonomic": 967,
+    "widened": 380,
     "escape": 107
   },
   "passes": [
@@ -51,10 +51,10 @@
     },
     {
       "pass": "SC - shape-classes",
-      "total": 132,
-      "ergonomic": 41,
-      "widened": 85,
-      "escape": 6
+      "total": 58,
+      "ergonomic": 44,
+      "widened": 6,
+      "escape": 8
     },
     {
       "pass": "SE - shape-exports",
@@ -106,186 +106,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.ABORT_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.DATA_CLONE_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.DOMSTRING_SIZE_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.HIERARCHY_REQUEST_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.INDEX_SIZE_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.INUSE_ATTRIBUTE_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.INVALID_ACCESS_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.INVALID_CHARACTER_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.INVALID_MODIFICATION_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.INVALID_NODE_TYPE_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.INVALID_STATE_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.NAMESPACE_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.NETWORK_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.NOT_FOUND_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.NOT_SUPPORTED_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.NO_DATA_ALLOWED_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.NO_MODIFICATION_ALLOWED_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.QUOTA_EXCEEDED_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.SECURITY_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.SYNTAX_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.TIMEOUT_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.TYPE_MISMATCH_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.URL_MISMATCH_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.VALIDATION_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.WRONG_DOCUMENT_ERR",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
+          "key": "SC003",
           "pass": "shape-classes",
           "tier": "widened",
           "symbol": "DOMException.isError",
-          "message": "static class member dropped (statics emission awaits a fixture)"
+          "message": "a settable static is emitted read-only: Fable compiles an assignment to an imported static as a call"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-classes",
+          "tier": "widened",
+          "symbol": "DOMException.isError",
+          "message": "isError is not among the generated declarations; widened to obj"
         },
         {
           "key": "SI002",
@@ -7058,7 +6890,7 @@
     {
       "name": "Event",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "TR032",
@@ -7066,34 +6898,6 @@
           "tier": "ergonomic",
           "symbol": "Event(init)",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "Event.AT_TARGET",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "Event.BUBBLING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "Event.CAPTURING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "Event.NONE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
         },
         {
           "key": "TR032",
@@ -7387,25 +7191,11 @@
       "tier": "escape",
       "findings": [
         {
-          "key": "SC002",
+          "key": "TR008",
           "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "AbortSignal.abort",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "AbortSignal.any",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "AbortSignal.timeout",
-          "message": "static class member dropped (statics emission awaits a fixture)"
+          "tier": "escape",
+          "symbol": "AbortSignal.abort(reason)",
+          "message": "any maps to obj"
         },
         {
           "key": "SI002",
@@ -7513,34 +7303,6 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "ExtendableEvent.AT_TARGET",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "ExtendableEvent.BUBBLING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "ExtendableEvent.CAPTURING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "ExtendableEvent.NONE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
           "key": "SI002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -7580,7 +7342,7 @@
     {
       "name": "CustomEvent",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "TR032",
@@ -7588,34 +7350,6 @@
           "tier": "ergonomic",
           "symbol": "CustomEvent(init)",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "CustomEvent.AT_TARGET",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "CustomEvent.BUBBLING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "CustomEvent.CAPTURING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "CustomEvent.NONE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
         },
         {
           "key": "SI002",
@@ -9255,34 +8989,6 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "ErrorEvent.AT_TARGET",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "ErrorEvent.BUBBLING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "ErrorEvent.CAPTURING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "ErrorEvent.NONE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
           "key": "SI002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -9456,34 +9162,6 @@
           "tier": "ergonomic",
           "symbol": "MessageEvent(initializer)",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "MessageEvent.AT_TARGET",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "MessageEvent.BUBBLING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "MessageEvent.CAPTURING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "MessageEvent.NONE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
         },
         {
           "key": "SI002",
@@ -9673,34 +9351,6 @@
           "tier": "ergonomic",
           "symbol": "PromiseRejectionEvent(init)",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "PromiseRejectionEvent.AT_TARGET",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "PromiseRejectionEvent.BUBBLING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "PromiseRejectionEvent.CAPTURING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "PromiseRejectionEvent.NONE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
         },
         {
           "key": "SI002",
@@ -10302,34 +9952,6 @@
           "tier": "ergonomic",
           "symbol": "FetchEvent(init)",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "FetchEvent.AT_TARGET",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "FetchEvent.BUBBLING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "FetchEvent.CAPTURING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "FetchEvent.NONE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
         },
         {
           "key": "SI002",
@@ -14107,34 +13729,6 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "ScheduledEvent.AT_TARGET",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "ScheduledEvent.BUBBLING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "ScheduledEvent.CAPTURING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "ScheduledEvent.NONE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
           "key": "SI002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -15757,34 +15351,6 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "TailEvent.AT_TARGET",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "TailEvent.BUBBLING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "TailEvent.CAPTURING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "TailEvent.NONE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
           "key": "SI002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -16355,7 +15921,7 @@
     {
       "name": "URL",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "TR032",
@@ -16365,32 +15931,25 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SC002",
+          "key": "TR032",
           "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "URL.canParse",
-          "message": "static class member dropped (statics emission awaits a fixture)"
+          "tier": "ergonomic",
+          "symbol": "URL.canParse(base)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SC002",
+          "key": "TR032",
           "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "URL.createObjectURL",
-          "message": "static class member dropped (statics emission awaits a fixture)"
+          "tier": "ergonomic",
+          "symbol": "URL.parse()",
+          "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SC002",
+          "key": "TR032",
           "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "URL.parse",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "URL.revokeObjectURL",
-          "message": "static class member dropped (statics emission awaits a fixture)"
+          "tier": "ergonomic",
+          "symbol": "URL.parse(base)",
+          "message": "null/undefined union members hoisted to option"
         }
       ]
     },
@@ -16740,7 +16299,7 @@
     {
       "name": "CloseEvent",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "TR032",
@@ -16748,34 +16307,6 @@
           "tier": "ergonomic",
           "symbol": "CloseEvent(initializer)",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "CloseEvent.AT_TARGET",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "CloseEvent.BUBBLING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "CloseEvent.CAPTURING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "CloseEvent.NONE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
         },
         {
           "key": "SI002",
@@ -17394,32 +16925,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SC002",
+          "key": "TR008",
           "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "EventSource.CLOSED",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "EventSource.CONNECTING",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "EventSource.OPEN",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "EventSource.from",
-          "message": "static class member dropped (statics emission awaits a fixture)"
+          "tier": "escape",
+          "symbol": "EventSource.from(stream)",
+          "message": "any maps to obj"
         },
         {
           "key": "SI002",
@@ -70039,34 +69549,6 @@
           "tier": "ergonomic",
           "symbol": "EmailEvent(init)",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "EmailEvent.AT_TARGET",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "EmailEvent.BUBBLING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "EmailEvent.CAPTURING_PHASE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
-        },
-        {
-          "key": "SC002",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "EmailEvent.NONE",
-          "message": "static class member dropped (statics emission awaits a fixture)"
         },
         {
           "key": "SI002",

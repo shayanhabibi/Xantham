@@ -398,6 +398,69 @@ let pipelineTests =
                         "the old blanket widening is gone" ])
 
         yield!
+            fixtureTests "statics-lab" (handFixture "statics-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a class static binds through a dotted import selector" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // Fable reads `Counter.MAX` as "import `Counter`, then take `MAX` off it",
+                    // which is exactly what the constructor object carries at runtime.
+                    Expect.stringContains source "[<Import(\"Counter.MAX\", \"statics-lab\")>]" "the selector is dotted"
+                    Expect.stringContains source "static member MAX: float = jsNative" "a const-like static reads get-only"
+                    Expect.stringContains source "static member from (value: float) : Counter = jsNative" "a static factory"
+                    Expect.stringContains source "static member ``of`` (value: float) : Counter = jsNative" "one overload"
+                    Expect.stringContains source "static member ``of`` (text: string) : Counter = jsNative" "and the other"
+
+                    // The statics sit on the class's own type, so a consumer spells them the
+                    // way TypeScript does - `Counter.MAX`, not `Exports.Counter_MAX`.
+                    Expect.stringContains source "[<Interface>]\ntype Counter =" "which makes the type need the attribute"
+
+                  testCase "a subclass carries the statics JavaScript inherits for it" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains source "[<Import(\"Doubling.MAX\", \"statics-lab\")>]" "off the subclass's own constructor"
+
+                  testCase "a static on a generic declaration is emitted" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains source "[<Import(\"Box.EMPTY\", \"statics-lab\")>]" "the declaration is legal F#"
+
+                  testCase "a settable static reads only, and says so" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains source "static member tick: float = jsNative" "no setter is emitted"
+
+                    Expect.contains
+                        (rendered.Findings |> List.map (fun finding -> finding.Tier, finding.Message))
+                        (Widened,
+                         "a settable static is emitted read-only: Fable compiles an assignment to an imported static as a call")
+                        "the lost setter is owned"
+
+                  testCase "only method-over-method survives a static/instance name collision" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // F# admits a static method beside an abstract method of the same name and
+                    // nothing else: property/property is FS0441, method/property FS0434, and a
+                    // static property under an abstract method is FS3214 at every use.
+                    Expect.stringContains source "static member json (body: float) : Clash = jsNative" "method over method"
+
+                    for dropped in [ "Clash.status"; "Clash.text"; "Clash.url" ] do
+                        Expect.isFalse (source.Contains $"[<Import(\"{dropped}\", \"statics-lab\")>]") $"{dropped} is dropped"
+
+                    let messages = rendered.Findings |> List.map (fun finding -> finding.Symbol, finding.Message)
+
+                    for dropped in [ "Clash.status"; "Clash.text"; "Clash.url" ] do
+                        Expect.contains
+                            messages
+                            (dropped,
+                             "static member dropped: its name is an instance member's, which F# admits only between two methods")
+                            $"{dropped} says why" ])
+
+        yield!
             fixtureTests "keyof-lab" (handFixture "keyof-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "a mapped type over a concrete operand is expanded, not widened (D6)" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)

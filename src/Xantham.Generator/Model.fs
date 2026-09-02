@@ -309,6 +309,11 @@ module Naming =
 
         "N" + text.Replace("-", "Minus").Replace(".", "_")
 
+    /// The import selector a default export binds under - the JavaScript key, not an F# name.
+    /// Shared because a class's statics compose it into a dotted selector of their own
+    /// (`default.MAX`, which Fable reads as "the default import, then `.MAX`").
+    let defaultImportKey = "default"
+
     /// The name a default export falls back to when its symbol is itself named `default`:
     /// the package name's last segment, camelCased (`ansi-regex` -> `ansiRegex`).
     let defaultExport (packageName: string) =
@@ -640,7 +645,10 @@ type ImportBinding =
     /// name is taken off `globalThis` with `[<Global>]`.
     | GlobalName of string
 
-/// What one member of the `Exports` erased type is.
+/// What one *bound* member is - a member whose body is not F# but a reference into JavaScript,
+/// carried by an `ImportBinding`. Two kinds of declaration hold these: the `Exports` type, whose
+/// members are the module's value exports, and a class, whose statics live on the constructor
+/// object rather than on an instance.
 type FsExportBody =
     /// A top-level exported function; overloads are consecutive members sharing a name.
     | ExportFunction of FsParam list * FsTypeRef
@@ -649,7 +657,7 @@ type FsExportBody =
     /// A class constructor: `[<EmitConstructor>]`, so `Exports.Name(...)` is `new Name(...)`.
     | ExportConstructor of FsParam list * FsTypeRef
 
-/// One member of the `Exports` erased type.
+/// One bound member: an `Exports` member, or a class static.
 type FsExportMember =
     {
         Name: string
@@ -675,6 +683,11 @@ type FsInterfaceDecl =
         /// `[<ParamObject; Emit("$0")>]` Create overloads for plain-data interfaces (D3) -
         /// parameter lists mirroring the members, so consumers never hand-build objects.
         CreateOverloads: FsParam list list
+        /// A class's static members (§4.4): the properties of the constructor object, bound
+        /// individually through a dotted selector (`[<Import("Counter.MAX", "pkg")>]`) so a
+        /// consumer spells `Counter.MAX` exactly as TypeScript does. Empty for everything that
+        /// is not an exported class.
+        Statics: FsExportMember list
     }
 
 /// One case of a `[<StringEnum>]` DU. `CompiledName` carries the literal when it differs from

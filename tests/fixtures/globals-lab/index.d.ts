@@ -23,6 +23,8 @@ declare class Gadget {
     constructor(widget: Widget);
     readonly widget: Widget;
     spin(turns: number): this;
+    /** A static on a global class: the selector is dotted off the global name, not imported. */
+    static readonly SPEED: number;
 }
 
 /** A nominal brand: the property can never hold a value, so F# gives it no setter. */

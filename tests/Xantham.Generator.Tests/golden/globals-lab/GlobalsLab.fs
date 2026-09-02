@@ -25,9 +25,15 @@ type Widget =
 /// <summary>
 /// A global class: <c>[&lt;Global&gt;]</c> plus <c>[&lt;EmitConstructor&gt;]</c>.
 /// </summary>
+[<Interface>]
 type Gadget =
     abstract widget: Widget
     abstract spin: turns: float -> Gadget
+    /// <summary>
+    /// A static on a global class: the selector is dotted off the global name, not imported.
+    /// </summary>
+    [<Global("Gadget.SPEED")>]
+    static member SPEED: float = jsNative
 
 /// <summary>
 /// A nominal brand: the property can never hold a value, so F# gives it no setter.

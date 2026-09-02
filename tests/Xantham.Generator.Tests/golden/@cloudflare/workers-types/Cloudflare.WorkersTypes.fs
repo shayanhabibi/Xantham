@@ -37,6 +37,61 @@ type DOMException =
     abstract cause: obj option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (message: string, name: string, code: float, stack: obj, ?cause: obj) : DOMException = jsNative
+    [<Global("DOMException.INDEX_SIZE_ERR")>]
+    static member INDEX_SIZE_ERR: float = jsNative
+    [<Global("DOMException.DOMSTRING_SIZE_ERR")>]
+    static member DOMSTRING_SIZE_ERR: float = jsNative
+    [<Global("DOMException.HIERARCHY_REQUEST_ERR")>]
+    static member HIERARCHY_REQUEST_ERR: float = jsNative
+    [<Global("DOMException.WRONG_DOCUMENT_ERR")>]
+    static member WRONG_DOCUMENT_ERR: float = jsNative
+    [<Global("DOMException.INVALID_CHARACTER_ERR")>]
+    static member INVALID_CHARACTER_ERR: float = jsNative
+    [<Global("DOMException.NO_DATA_ALLOWED_ERR")>]
+    static member NO_DATA_ALLOWED_ERR: float = jsNative
+    [<Global("DOMException.NO_MODIFICATION_ALLOWED_ERR")>]
+    static member NO_MODIFICATION_ALLOWED_ERR: float = jsNative
+    [<Global("DOMException.NOT_FOUND_ERR")>]
+    static member NOT_FOUND_ERR: float = jsNative
+    [<Global("DOMException.NOT_SUPPORTED_ERR")>]
+    static member NOT_SUPPORTED_ERR: float = jsNative
+    [<Global("DOMException.INUSE_ATTRIBUTE_ERR")>]
+    static member INUSE_ATTRIBUTE_ERR: float = jsNative
+    [<Global("DOMException.INVALID_STATE_ERR")>]
+    static member INVALID_STATE_ERR: float = jsNative
+    [<Global("DOMException.SYNTAX_ERR")>]
+    static member SYNTAX_ERR: float = jsNative
+    [<Global("DOMException.INVALID_MODIFICATION_ERR")>]
+    static member INVALID_MODIFICATION_ERR: float = jsNative
+    [<Global("DOMException.NAMESPACE_ERR")>]
+    static member NAMESPACE_ERR: float = jsNative
+    [<Global("DOMException.INVALID_ACCESS_ERR")>]
+    static member INVALID_ACCESS_ERR: float = jsNative
+    [<Global("DOMException.VALIDATION_ERR")>]
+    static member VALIDATION_ERR: float = jsNative
+    [<Global("DOMException.TYPE_MISMATCH_ERR")>]
+    static member TYPE_MISMATCH_ERR: float = jsNative
+    [<Global("DOMException.SECURITY_ERR")>]
+    static member SECURITY_ERR: float = jsNative
+    [<Global("DOMException.NETWORK_ERR")>]
+    static member NETWORK_ERR: float = jsNative
+    [<Global("DOMException.ABORT_ERR")>]
+    static member ABORT_ERR: float = jsNative
+    [<Global("DOMException.URL_MISMATCH_ERR")>]
+    static member URL_MISMATCH_ERR: float = jsNative
+    [<Global("DOMException.QUOTA_EXCEEDED_ERR")>]
+    static member QUOTA_EXCEEDED_ERR: float = jsNative
+    [<Global("DOMException.TIMEOUT_ERR")>]
+    static member TIMEOUT_ERR: float = jsNative
+    [<Global("DOMException.INVALID_NODE_TYPE_ERR")>]
+    static member INVALID_NODE_TYPE_ERR: float = jsNative
+    [<Global("DOMException.DATA_CLONE_ERR")>]
+    static member DATA_CLONE_ERR: float = jsNative
+    /// <summary>
+    /// Indicates whether the argument provided is a built-in Error instance or not.
+    /// </summary>
+    [<Global("DOMException.isError")>]
+    static member isError: obj = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type BasicImageTransformationsGravityCoordinatesMode =
@@ -2331,6 +2386,7 @@ type AnalyticsEngineDataPoint =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event)
 /// </summary>
+[<Interface>]
 type Event =
     /// <summary>
     /// The **<c>type</c>** read-only property of the Event interface returns a string containing the event's type. It is set when the event is constructed and is the name commonly used to refer to the specific event, such as click, load, or error.
@@ -2432,6 +2488,14 @@ type Event =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+    [<Global("Event.NONE")>]
+    static member NONE: float = jsNative
+    [<Global("Event.CAPTURING_PHASE")>]
+    static member CAPTURING_PHASE: float = jsNative
+    [<Global("Event.AT_TARGET")>]
+    static member AT_TARGET: float = jsNative
+    [<Global("Event.BUBBLING_PHASE")>]
+    static member BUBBLING_PHASE: float = jsNative
 
 [<Interface>]
 type EventInit =
@@ -2518,6 +2582,7 @@ type AbortController =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal)
 /// </summary>
+[<Interface>]
 type AbortSignal =
     /// <summary>
     /// The **<c>aborted</c>** read-only property returns a value that indicates whether the asynchronous operations the signal is communicating with are aborted (true) or not (false).
@@ -2556,6 +2621,27 @@ type AbortSignal =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
     /// </summary>
     abstract dispatchEvent: ``event``: Event -> bool
+    /// <summary>
+    /// The **<c>AbortSignal.abort()</c>** static method returns an AbortSignal that is already set as aborted (and which does not trigger an abort event).
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal/abort_static)
+    /// </summary>
+    [<Global("AbortSignal.abort")>]
+    static member abort (reason: obj) : AbortSignal = jsNative
+    /// <summary>
+    /// The **<c>AbortSignal.timeout()</c>** static method returns an AbortSignal that will automatically abort after a specified time.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal/timeout_static)
+    /// </summary>
+    [<Global("AbortSignal.timeout")>]
+    static member timeout (delay: float) : AbortSignal = jsNative
+    /// <summary>
+    /// The **<c>AbortSignal.any()</c>** static method takes an iterable of abort signals and returns an AbortSignal. The returned abort signal is aborted when any of the input iterable abort signals are aborted. The abort reason will be set to the reason of the first signal that is aborted. If any of the given abort signals are already aborted then so will be the returned AbortSignal.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/AbortSignal/any_static)
+    /// </summary>
+    [<Global("AbortSignal.any")>]
+    static member any (signals: AbortSignal[]) : AbortSignal = jsNative
 
 /// <summary>
 /// The **<c>Scheduler</c>** interface of the Prioritized Task Scheduling API provides methods for scheduling prioritized tasks.
@@ -2576,6 +2662,7 @@ type SchedulerWaitOptions =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent)
 /// </summary>
+[<Interface>]
 type ExtendableEvent =
     /// <summary>
     /// The **<c>ExtendableEvent.waitUntil()</c>** method tells the event dispatcher that work is ongoing. It can also be used to detect whether that work was successful. In service workers, waitUntil() tells the browser that work is ongoing until the promise settles, and it shouldn't terminate the service worker if it wants that work to complete.
@@ -2683,12 +2770,21 @@ type ExtendableEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+    [<Global("ExtendableEvent.NONE")>]
+    static member NONE: float = jsNative
+    [<Global("ExtendableEvent.CAPTURING_PHASE")>]
+    static member CAPTURING_PHASE: float = jsNative
+    [<Global("ExtendableEvent.AT_TARGET")>]
+    static member AT_TARGET: float = jsNative
+    [<Global("ExtendableEvent.BUBBLING_PHASE")>]
+    static member BUBBLING_PHASE: float = jsNative
 
 /// <summary>
 /// The **<c>CustomEvent</c>** interface can be used to attach custom data to an event generated by an application.
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CustomEvent)
 /// </summary>
+[<Interface>]
 type CustomEvent<'T> =
     /// <summary>
     /// The read-only **<c>detail</c>** property of the CustomEvent interface returns any data passed when initializing the event.
@@ -2796,6 +2892,14 @@ type CustomEvent<'T> =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+    [<Global("CustomEvent.NONE")>]
+    static member NONE: float = jsNative
+    [<Global("CustomEvent.CAPTURING_PHASE")>]
+    static member CAPTURING_PHASE: float = jsNative
+    [<Global("CustomEvent.AT_TARGET")>]
+    static member AT_TARGET: float = jsNative
+    [<Global("CustomEvent.BUBBLING_PHASE")>]
+    static member BUBBLING_PHASE: float = jsNative
 
 [<Interface>]
 type CustomEventCustomEventInit =
@@ -3344,6 +3448,7 @@ type TextEncoderEncodeIntoResult =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ErrorEvent)
 /// </summary>
+[<Interface>]
 type ErrorEvent =
     /// <summary>
     /// The **<c>filename</c>** read-only property of the ErrorEvent interface returns a string containing the name of the script file in which the error occurred.
@@ -3475,6 +3580,14 @@ type ErrorEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+    [<Global("ErrorEvent.NONE")>]
+    static member NONE: float = jsNative
+    [<Global("ErrorEvent.CAPTURING_PHASE")>]
+    static member CAPTURING_PHASE: float = jsNative
+    [<Global("ErrorEvent.AT_TARGET")>]
+    static member AT_TARGET: float = jsNative
+    [<Global("ErrorEvent.BUBBLING_PHASE")>]
+    static member BUBBLING_PHASE: float = jsNative
 
 [<Interface>]
 type ErrorEventErrorEventInit =
@@ -3494,6 +3607,7 @@ type ErrorEventErrorEventInit =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/MessageEvent)
 /// </summary>
+[<Interface>]
 type MessageEvent =
     /// <summary>
     /// The **<c>data</c>** read-only property of the MessageEvent interface represents the data sent by the message emitter.
@@ -3625,6 +3739,14 @@ type MessageEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+    [<Global("MessageEvent.NONE")>]
+    static member NONE: float = jsNative
+    [<Global("MessageEvent.CAPTURING_PHASE")>]
+    static member CAPTURING_PHASE: float = jsNative
+    [<Global("MessageEvent.AT_TARGET")>]
+    static member AT_TARGET: float = jsNative
+    [<Global("MessageEvent.BUBBLING_PHASE")>]
+    static member BUBBLING_PHASE: float = jsNative
 
 [<Interface>]
 type MessageEventInit =
@@ -3644,6 +3766,7 @@ type MessageEventInit =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/PromiseRejectionEvent)
 /// </summary>
+[<Interface>]
 type PromiseRejectionEvent =
     /// <summary>
     /// The PromiseRejectionEvent interface's **<c>promise</c>** read-only property indicates the JavaScript Promise which was rejected. You can examine the event's PromiseRejectionEvent.reason property to learn why the promise was rejected.
@@ -3757,6 +3880,14 @@ type PromiseRejectionEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+    [<Global("PromiseRejectionEvent.NONE")>]
+    static member NONE: float = jsNative
+    [<Global("PromiseRejectionEvent.CAPTURING_PHASE")>]
+    static member CAPTURING_PHASE: float = jsNative
+    [<Global("PromiseRejectionEvent.AT_TARGET")>]
+    static member AT_TARGET: float = jsNative
+    [<Global("PromiseRejectionEvent.BUBBLING_PHASE")>]
+    static member BUBBLING_PHASE: float = jsNative
 
 /// <summary>
 /// The **<c>FormData</c>** interface provides a way to construct a set of key/value pairs representing form fields and their values, which can be sent using the fetch(), XMLHttpRequest.send() or navigator.sendBeacon() methods. It uses the same format a form would use if the encoding type were set to "multipart/form-data".
@@ -3915,6 +4046,7 @@ type DocumentEnd =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/FetchEvent)
 /// </summary>
+[<Interface>]
 type FetchEvent =
     /// <summary>
     /// The **<c>request</c>** read-only property of the FetchEvent interface returns the Request that triggered the event handler.
@@ -4035,6 +4167,14 @@ type FetchEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
     abstract waitUntil: promise: JS.Promise<obj> -> unit
+    [<Global("FetchEvent.NONE")>]
+    static member NONE: float = jsNative
+    [<Global("FetchEvent.CAPTURING_PHASE")>]
+    static member CAPTURING_PHASE: float = jsNative
+    [<Global("FetchEvent.AT_TARGET")>]
+    static member AT_TARGET: float = jsNative
+    [<Global("FetchEvent.BUBBLING_PHASE")>]
+    static member BUBBLING_PHASE: float = jsNative
 
 type HeadersInit = obj
 
@@ -4928,6 +5068,7 @@ type R2UploadPartOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?ssecKey: U2<string, JS.ArrayBuffer>) : R2UploadPartOptions = jsNative
 
+[<Interface>]
 type ScheduledEvent =
     abstract scheduledTime: float
     abstract cron: string
@@ -5038,6 +5179,14 @@ type ScheduledEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
     abstract waitUntil: promise: JS.Promise<obj> -> unit
+    [<Global("ScheduledEvent.NONE")>]
+    static member NONE: float = jsNative
+    [<Global("ScheduledEvent.CAPTURING_PHASE")>]
+    static member CAPTURING_PHASE: float = jsNative
+    [<Global("ScheduledEvent.AT_TARGET")>]
+    static member AT_TARGET: float = jsNative
+    [<Global("ScheduledEvent.BUBBLING_PHASE")>]
+    static member BUBBLING_PHASE: float = jsNative
 
 type ScheduledController =
     abstract scheduledTime: float
@@ -5702,6 +5851,7 @@ type ScriptVersion =
     [<ParamObject; Emit("$0")>]
     static member Create (?id: string, ?tag: string, ?message: string) : ScriptVersion = jsNative
 
+[<Interface>]
 type TailEvent =
     abstract events: TraceItem[]
     abstract traces: TraceItem[]
@@ -5811,6 +5961,14 @@ type TailEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
     abstract waitUntil: promise: JS.Promise<obj> -> unit
+    [<Global("TailEvent.NONE")>]
+    static member NONE: float = jsNative
+    [<Global("TailEvent.CAPTURING_PHASE")>]
+    static member CAPTURING_PHASE: float = jsNative
+    [<Global("TailEvent.AT_TARGET")>]
+    static member AT_TARGET: float = jsNative
+    [<Global("TailEvent.BUBBLING_PHASE")>]
+    static member BUBBLING_PHASE: float = jsNative
 
 [<Interface>]
 type TraceItem =
@@ -5980,6 +6138,7 @@ type UnsafeTraceMetrics =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL)
 /// </summary>
+[<Interface>]
 type URL =
     /// <summary>
     /// The **<c>origin</c>** read-only property of the URL interface returns a string containing the Unicode serialization of the origin of the represented URL.
@@ -6060,6 +6219,34 @@ type URL =
     /// </summary>
     abstract toJSON: unit -> string
     abstract toString: unit -> string
+    /// <summary>
+    /// The **<c>URL.canParse()</c>** static method of the URL interface returns a boolean indicating whether or not an absolute URL, or a relative URL combined with a base URL, are parsable and valid.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/canParse_static)
+    /// </summary>
+    [<Global("URL.canParse")>]
+    static member canParse (url: string, ?``base``: string) : bool = jsNative
+    /// <summary>
+    /// The **<c>URL.parse()</c>** static method of the URL interface returns a newly created URL object representing the URL defined by the parameters.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/parse_static)
+    /// </summary>
+    [<Global("URL.parse")>]
+    static member parse (url: string, ?``base``: string) : URL option = jsNative
+    /// <summary>
+    /// The **<c>createObjectURL()</c>** static method of the URL interface creates a string containing a blob URL pointing to the object given in the parameter.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/createObjectURL_static)
+    /// </summary>
+    [<Global("URL.createObjectURL")>]
+    static member createObjectURL (``object``: U2<Blob, File>) : string = jsNative
+    /// <summary>
+    /// The **<c>revokeObjectURL()</c>** static method of the URL interface releases an existing object URL which was previously created by calling URL.createObjectURL().
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/URL/revokeObjectURL_static)
+    /// </summary>
+    [<Global("URL.revokeObjectURL")>]
+    static member revokeObjectURL (object_url: string) : unit = jsNative
 
 /// <summary>
 /// The **<c>URLSearchParams</c>** interface defines utility methods to work with the query string of a URL.
@@ -6240,6 +6427,7 @@ type URLPatternOptions =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CloseEvent)
 /// </summary>
+[<Interface>]
 type CloseEvent =
     /// <summary>
     /// The **<c>code</c>** read-only property of the CloseEvent interface returns a WebSocket connection close code indicating the reason the connection was closed.
@@ -6359,6 +6547,14 @@ type CloseEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Event/composedPath)
     /// </summary>
     abstract composedPath: unit -> EventTarget<EventCurrentTargetItem>[]
+    [<Global("CloseEvent.NONE")>]
+    static member NONE: float = jsNative
+    [<Global("CloseEvent.CAPTURING_PHASE")>]
+    static member CAPTURING_PHASE: float = jsNative
+    [<Global("CloseEvent.AT_TARGET")>]
+    static member AT_TARGET: float = jsNative
+    [<Global("CloseEvent.BUBBLING_PHASE")>]
+    static member BUBBLING_PHASE: float = jsNative
 
 [<Interface>]
 type CloseEventInit =
@@ -6525,6 +6721,7 @@ type SocketInfo =
 ///
 /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventSource)
 /// </summary>
+[<Interface>]
 type EventSource =
     /// <summary>
     /// The **<c>close()</c>** method of the EventSource interface closes the connection, if one is made, and sets the EventSource.readyState attribute to 2 (closed).
@@ -6571,6 +6768,14 @@ type EventSource =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
     /// </summary>
     abstract dispatchEvent: ``event``: Event -> bool
+    [<Global("EventSource.CONNECTING")>]
+    static member CONNECTING: float = jsNative
+    [<Global("EventSource.OPEN")>]
+    static member OPEN: float = jsNative
+    [<Global("EventSource.CLOSED")>]
+    static member CLOSED: float = jsNative
+    [<Global("EventSource.from")>]
+    static member from (stream: ReadableStream<obj>) : EventSource = jsNative
 
 [<Interface>]
 type EventSourceEventSourceInit =
@@ -26444,6 +26649,7 @@ type SendEmail =
     abstract send: message: EmailMessage -> JS.Promise<EmailSendResult>
     abstract send: builder: EmailMessageBuilder -> JS.Promise<EmailSendResult>
 
+[<Interface>]
 type EmailEvent =
     abstract message: ForwardableEmailMessage
     /// <summary>
@@ -26552,6 +26758,14 @@ type EmailEvent =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/ExtendableEvent/waitUntil)
     /// </summary>
     abstract waitUntil: promise: JS.Promise<obj> -> unit
+    [<Global("EmailEvent.NONE")>]
+    static member NONE: float = jsNative
+    [<Global("EmailEvent.CAPTURING_PHASE")>]
+    static member CAPTURING_PHASE: float = jsNative
+    [<Global("EmailEvent.AT_TARGET")>]
+    static member AT_TARGET: float = jsNative
+    [<Global("EmailEvent.BUBBLING_PHASE")>]
+    static member BUBBLING_PHASE: float = jsNative
 
 type EmailExportedHandler<'Env, 'Props> = Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>
 

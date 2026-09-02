@@ -420,20 +420,52 @@ let private renderMember (m: FsMember) =
             yield $"    abstract Item: {printType i.Key} -> {printType i.Value}{mutability}"
         ]
 
-let private renderInterface (decl: FsInterfaceDecl) =
+/// One bound member - an `Exports` member or a class static - as its attribute line and its
+/// signature. Both hold an `ImportBinding` and neither has an F# body, so they render the same.
+let private renderBound (packageName: string) (m: FsExportMember) =
+    [
+        yield! docLines "    " m.Docs m.Tags
+
+        // The binding attribute, optionally carrying a second attribute inside the same
+        // brackets: a global is named off `globalThis` and imports nothing.
+        let attribute (also: string) =
+            let package = stringLit packageName
+
+            match m.Binding with
+            | ImportDefault -> $"    [<Import({stringLit Naming.defaultImportKey}, {package}){also}>]"
+            | ImportNamed name -> $"    [<Import({stringLit name}, {package}){also}>]"
+            | GlobalName name -> $"    [<Global({stringLit name}){also}>]"
+
+        match m.Body with
+        | ExportFunction(parameters, returns) ->
+            yield attribute ""
+
+            yield
+                $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
+        | ExportValue reference ->
+            yield attribute ""
+            yield $"    static member {ident m.Name}: {printType reference} = jsNative"
+        | ExportConstructor(parameters, returns) ->
+            yield attribute "; EmitConstructor"
+
+            yield
+                $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
+    ]
+
+let private renderInterface (packageName: string) (decl: FsInterfaceDecl) =
     [
         yield! docLines "" decl.Docs decl.Tags
 
-        // A static Create with a body makes F# infer a class; the attribute keeps the type an
+        // Any static with a body makes F# infer a class; the attribute keeps the type an
         // interface (and needs default-interface-member runtime support to type-check).
-        if not decl.CreateOverloads.IsEmpty then
+        if not (decl.CreateOverloads.IsEmpty && decl.Statics.IsEmpty) then
             yield "[<Interface>]"
 
-        match decl.Inherits, decl.Members, decl.CreateOverloads with
-        | [], [], [] ->
+        match decl.Inherits, decl.Members, decl.CreateOverloads, decl.Statics with
+        | [], [], [], [] ->
             yield $"type {declHead decl.Name decl.TypeParameters} ="
             yield "    interface end"
-        | inherits, members, creates ->
+        | inherits, members, creates, statics ->
             yield $"type {declHead decl.Name decl.TypeParameters} ="
 
             for baseRef in inherits do
@@ -449,6 +481,11 @@ let private renderInterface (decl: FsInterfaceDecl) =
 
                 yield
                     $"    static member Create {renderParamList overload} : {declRef decl.Name decl.TypeParameters} = jsNative"
+
+            // Class statics (§4.4), last so that the instance surface reads first and a
+            // generated Create keeps the place it has held since phase B.
+            for m in statics do
+                yield! renderBound packageName m
     ]
 
 let private renderStringEnum (decl: FsStringEnumDecl) =
@@ -537,9 +574,6 @@ let private renderPhantom (decl: FsPhantomDecl) =
         yield $"type {declHead decl.Name decl.TypeParameters} = private {case} of {printType decl.Carrier}"
     ]
 
-/// The import name a default export binds under - the JavaScript key, not an F# name.
-let private defaultExportKey = "default"
-
 let private renderExports (packageName: string) (members: FsExportMember list) =
     [
         yield "/// <summary>The package's value exports, each bound to its import.</summary>"
@@ -547,32 +581,7 @@ let private renderExports (packageName: string) (members: FsExportMember list) =
         yield "type Exports ="
 
         for m in members do
-            yield! docLines "    " m.Docs m.Tags
-
-            // The binding attribute, optionally carrying a second attribute inside the same
-            // brackets: a global is named off `globalThis` and imports nothing.
-            let attribute (also: string) =
-                let package = stringLit packageName
-
-                match m.Binding with
-                | ImportDefault -> $"    [<Import({stringLit defaultExportKey}, {package}){also}>]"
-                | ImportNamed name -> $"    [<Import({stringLit name}, {package}){also}>]"
-                | GlobalName name -> $"    [<Global({stringLit name}){also}>]"
-
-            match m.Body with
-            | ExportFunction(parameters, returns) ->
-                yield attribute ""
-
-                yield
-                    $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
-            | ExportValue reference ->
-                yield attribute ""
-                yield $"    static member {ident m.Name}: {printType reference} = jsNative"
-            | ExportConstructor(parameters, returns) ->
-                yield attribute "; EmitConstructor"
-
-                yield
-                    $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
+            yield! renderBound packageName m
     ]
 
 /// The one `.fs` file of the walking skeleton: header, opens, declarations in the order the
@@ -582,7 +591,7 @@ let renderSource: Pass<RenderModel> =
         let body =
             model.Decls
             |> List.map (function
-                | FsInterface decl -> renderInterface decl
+                | FsInterface decl -> renderInterface model.PackageName decl
                 | FsStringEnum decl -> renderStringEnum decl
                 | FsTaggedUnion decl -> renderTaggedUnion decl
                 | FsEnum decl -> renderEnum decl

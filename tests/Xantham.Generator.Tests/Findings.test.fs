@@ -92,6 +92,8 @@ let findingsTests =
                     "SA002 ShapeAliases.PhantomComputation widened"
                     "SC001 ShapeClasses.ClassWithoutValueType escape"
                     "SC002 ShapeClasses.StaticMemberDropped widened"
+                    "SC003 ShapeClasses.StaticReadOnly widened"
+                    "SC004 ShapeClasses.StaticWithoutDeclaration widened"
                     "SE001 ShapeExports.NoValueType escape"
                     "SP001 SynthesizeParamObjects.ParamObjectSynthesized ergonomic"
                     "DO001 DedupeOverloads.OverloadDropped widened"
