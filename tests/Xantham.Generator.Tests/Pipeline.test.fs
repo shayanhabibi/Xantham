@@ -1281,6 +1281,73 @@ let pipelineTests =
                           (rendered.Findings |> List.filter (fun f -> f.Key = "TR023"))
                           "the whole of TR023 here was Array's member set" ])
 
+        yield!
+            fixtureTests "setter-lab" (handFixture "setter-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a name every call signature declares is one variable on the head" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "type Setter<'T, 'U> =" "one 'U, not one per signature"
+
+                      let collapsed = rendered.Findings |> List.filter (fun f -> f.Key = "TP009")
+
+                      Expect.equal (collapsed |> List.map _.Symbol) [ "Setter" ] "reported once, on the alias"
+                      Expect.stringContains collapsed.Head.Message "3 signatures" "and says how many declared it"
+
+                  testCase "signatures declaring different names keep a slot each" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "type Distinct<'T, 'A, 'B> =" "'A and 'B are two variables"
+                      Expect.stringContains source "type Single<'T, 'U> =" "and one signature collapses nothing"
+
+                  testCase "one name under two bounds is refused rather than retyped" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.isFalse (source.Contains "type DivergentBound") "the head F# refuses does not render"
+
+                      Expect.equal
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Key = "RA001")
+                           |> List.map _.Symbol)
+                          [ "DivergentBound" ]
+                          "and the drop is graded as an escape, not an ergonomic collapse"
+
+                  testCase "a tuple-typed rest parameter reads as the parameters it stands for" <| fun _ ->
+                      // Wave two's second handback: `Setter<string | undefined>` reached the
+                      // empty tuple and rendered `Action<obj[]>`.
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "abstract optional: Action with" "no parameter at all"
+                      Expect.stringContains source "abstract setter: Func<obj, obj> with" "and one for a one-element tuple"
+
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun f -> f.Key = "TR029"))
+                          "neither arity is a tuple the renderer has to widen" ])
+
+        yield!
+            fixtureTests "constraint-arg-lab" (handFixture "constraint-arg-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "an argument F# seals is written as the constraint it cannot inherit" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "type HeldString = Holder<Lengthy>" "a primitive"
+                      Expect.stringContains source "type HeldTuple = Holder<Lengthy>" "a tuple"
+                      Expect.stringContains source "type HeldArray = Holder<Lengthy>" "an array"
+
+                      Expect.equal
+                          (rendered.Findings |> List.filter (fun f -> f.Key = "TR044") |> List.length)
+                          6
+                          "each of the three, in alias and in member position"
+
+                  testCase "a named subtype of the constraint is applied as itself" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "type HeldSized = Holder<Sized>" "the negative stands" ])
+
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 
         // workers-types is a global type library that *replaces* the DOM lib: its README

@@ -476,6 +476,88 @@ let typeRefTests =
             Expect.equal reference (FsApp("Holder", [ FsNamed "Subtype" ])) "the argument stands"
             Expect.isEmpty findings "a nominal subtype needs no repair"
 
+        // Wave three, lane K. The substitution reached named types and applications only, so a
+        // primitive, a tuple or an array against a still-written constraint arrived as itself
+        // and read FS0001 at the consumer. `constraint-arg-lab` pins the same three live.
+        testCase "a sealed argument is written as the bound it cannot inherit" <| fun _ ->
+            let member' id name = Build.resolvedMember (Build.symbol id name SymbolFlags.Property) 2
+
+            let marker =
+                { Build.facts (Build.typeResponse 60 TypeFlags.Object) with Members = [ member' 600 "length" ] }
+
+            let tuple =
+                { Build.facts
+                    { Build.typeResponse 71 TypeFlags.Object with
+                        IsTupleType = ValueSome true } with
+                    TypeArguments = [ 1; 2 ] }
+
+            let instantiation argument typeId =
+                { Build.facts
+                    { Build.typeResponse typeId TypeFlags.Object with
+                        ObjectFlags = ValueSome ObjectFlags.Reference
+                        Target = ValueSome 30 } with
+                    TypeArguments = [ argument ] }
+
+            let model =
+                { Build.shapeModel (
+                      genericDecl 30 [ 20 ] []
+                      :: instantiation 1 31
+                      :: instantiation 71 32
+                      :: marker
+                      :: tuple
+                      :: { typeParam 20 "T" with Constraint = Some 60 }
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 30, "Holder"; 60, "Lengthy" ] }
+
+            let primitive, primitiveFindings = Spec.typeRef Build.context model None "x" 31
+            let tupled, tupleFindings = Spec.typeRef Build.context model None "x" 32
+
+            Expect.equal primitive (FsApp("Holder", [ FsNamed "Lengthy" ])) "string is written as the bound"
+            Expect.equal tupled (FsApp("Holder", [ FsNamed "Lengthy" ])) "and so is a tuple"
+
+            Expect.contains
+                (primitiveFindings |> List.map (fun finding -> finding.Key, finding.Tier, finding.Message))
+                ("TR044",
+                 Widened,
+                 "string does not inherit Holder's constraint Lengthy; the argument is written as the constraint")
+                "the primitive is named by its F# spelling"
+
+            Expect.contains
+                (tupleFindings |> List.map _.Message)
+                "string * float does not inherit Holder's constraint Lengthy; the argument is written as the constraint"
+                "and so is the tuple"
+
+        testCase "a variable bound by the same constraint is applied as itself" <| fun _ ->
+            // The negative that keeps `EventListenerOrEventListenerObject<'EventType>` exact:
+            // `'EventType :> Event` already satisfies the parameter it is passed to.
+            let event = Build.facts (Build.typeResponse 60 TypeFlags.Object)
+            let variable = { typeParam 21 "EventType" with Constraint = Some 60 }
+
+            let instantiation =
+                { Build.facts
+                    { Build.typeResponse 31 TypeFlags.Object with
+                        ObjectFlags = ValueSome ObjectFlags.Reference
+                        Target = ValueSome 30 } with
+                    TypeArguments = [ 21 ] }
+
+            let model =
+                { Build.shapeModel (
+                      genericDecl 30 [ 20 ] []
+                      :: instantiation
+                      :: event
+                      :: variable
+                      :: { typeParam 20 "T" with Constraint = Some 60 }
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 30, "Listener"; 60, "Event" ]
+                    TypeVars = Map.ofList [ 21, "EventType" ] }
+
+            let reference, findings = Spec.typeRef Build.context model None "x" 31
+
+            Expect.equal reference (FsApp("Listener", [ FsTypeVar "EventType" ])) "the variable stands"
+            Expect.isEmpty findings "nothing to repair"
+
         testCase "a generic declaration named at a reference re-applies its parameters" <| fun _ ->
             // `map(next: T): Box<T>` refers to the declaration itself; F# has no bare `Box`.
             let model =
@@ -1673,6 +1755,150 @@ let shapePassTests =
 
             Expect.isEmpty findings "a generic alias is exact"
 
+        // Wave three, lane K. `solid-js`'s `Setter` is an object type whose four call
+        // signatures each declare `U extends T`; the head wrote `Setter<'T, 'U, 'U, 'U, 'U>`
+        // and F# refused it (FS0037). `setter-lab` pins the same shape live.
+        testCase "shape-callbacks writes one variable per name a signature hoists" <| fun _ ->
+            let signature =
+                { Build.signature
+                      [ Build.resolvedMember (Build.symbol 500 "value" SymbolFlags.FunctionScopedVariable) 21 ]
+                      21 with
+                    TypeParameters = [ 21 ] }
+
+            let other =
+                { Build.signature
+                      [ Build.resolvedMember (Build.symbol 501 "value" SymbolFlags.FunctionScopedVariable) 22 ]
+                      22 with
+                    TypeParameters = [ 22 ] }
+
+            let setter =
+                { Build.facts (Build.typeResponse 50 TypeFlags.Object) with
+                    AliasTypeArguments = [ 20 ]
+                    CallSignatures = [ signature; other ] }
+
+            let model =
+                { Build.shapeModel (
+                      setter
+                      :: typeParam 20 "T"
+                      :: { typeParam 21 "U" with Constraint = Some 20 }
+                      :: { typeParam 22 "U" with Constraint = Some 20 }
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 50, "Setter" ] }
+
+            let shaped, findings = Build.runPass Callbacks.shapeCallbacks model
+
+            match shaped.Decls with
+            | [ FsAbbrev decl ] ->
+                Expect.equal (decl.TypeParameters |> List.map _.Name) [ "T"; "U" ] "Setter<'T, 'U>"
+
+                // The second signature is discarded, but its `U` still had to resolve to the
+                // variable the head wrote rather than widening.
+                Expect.equal decl.Target (FsDelegate([ FsTypeVar "U" ], FsTypeVar "U")) "Func<'U, 'U>"
+            | decls -> failtest $"expected one abbreviation, got %A{decls}"
+
+            Expect.contains
+                (findings |> List.map (fun finding -> finding.Key, finding.Tier, finding.Message))
+                ("TP009", Ergonomic, "'U' is declared by 2 signatures of the same alias; the head writes one variable")
+                "the collapse is reported"
+
+        testCase "shape-callbacks keeps one name declared under two bounds apart" <| fun _ ->
+            // One variable would retype a signature, so the head stays as declared and
+            // `repair-arity` prices what F# refuses.
+            let signature =
+                { Build.signature
+                      [ Build.resolvedMember (Build.symbol 500 "value" SymbolFlags.FunctionScopedVariable) 21 ]
+                      21 with
+                    TypeParameters = [ 21 ] }
+
+            let other =
+                { Build.signature
+                      [ Build.resolvedMember (Build.symbol 501 "value" SymbolFlags.FunctionScopedVariable) 22 ]
+                      22 with
+                    TypeParameters = [ 22 ] }
+
+            let divergent =
+                { Build.facts (Build.typeResponse 50 TypeFlags.Object) with
+                    AliasTypeArguments = [ 20 ]
+                    CallSignatures = [ signature; other ] }
+
+            let model =
+                { Build.shapeModel (
+                      divergent
+                      :: typeParam 20 "T"
+                      :: { typeParam 21 "U" with Constraint = Some 20 }
+                      :: { typeParam 22 "U" with Constraint = Some 1 }
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 50, "DivergentBound" ] }
+
+            let shaped, findings = Build.runPass Callbacks.shapeCallbacks model
+
+            match shaped.Decls with
+            | [ FsAbbrev decl ] ->
+                Expect.equal (decl.TypeParameters |> List.map _.Name) [ "T"; "U"; "U" ] "a slot per bound"
+            | decls -> failtest $"expected one abbreviation, got %A{decls}"
+
+            Expect.isEmpty (findings |> List.filter (fun finding -> finding.Key = "TP009")) "nothing was collapsed"
+
+        // Wave three, lane K, wave two's second handback. `(...args: [value: T]) => R` is
+        // TypeScript's spelling of `(value: T) => R`, and it arrived as `Func<obj[], R>`.
+        testCase "a tuple-typed rest parameter reads as the parameters it stands for" <| fun _ ->
+            let tuple flags elements typeId =
+                { Build.facts
+                    { Build.typeResponse typeId TypeFlags.Object with
+                        IsTupleType = ValueSome true } with
+                    TupleElements = flags
+                    TypeArguments = elements }
+
+            let callback rest typeId =
+                { Build.facts (Build.typeResponse typeId TypeFlags.Object) with
+                    CallSignatures =
+                        [ { Build.signature
+                                [ Build.resolvedMember (Build.symbol 500 "args" SymbolFlags.FunctionScopedVariable) rest ]
+                                4 with
+                              HasRest = true } ] }
+
+            let model =
+                Build.shapeModel (
+                    callback 71 50
+                    :: callback 72 51
+                    :: tuple [ ElementFlags.Required ] [ 1 ] 71
+                    :: tuple [] [] 72
+                    :: Build.primitives
+                )
+
+            let single, singleFindings = Spec.typeRef Build.context model None "x" 50
+            let empty, emptyFindings = Spec.typeRef Build.context model None "x" 51
+
+            Expect.equal single (FsDelegate([ FsString ], FsUnit)) "Action<string>"
+            Expect.equal empty (FsDelegate([], FsUnit)) "Action"
+            Expect.isEmpty singleFindings "a parameter list is exact"
+            Expect.isEmpty emptyFindings "and so is an empty one"
+
+        testCase "a rest parameter with a variadic tail keeps its array form" <| fun _ ->
+            // The negative: `[A, ...B[]]` is the one shape F# has no parameter list for.
+            let variadic =
+                { Build.facts
+                    { Build.typeResponse 71 TypeFlags.Object with
+                        IsTupleType = ValueSome true } with
+                    TupleElements = [ ElementFlags.Required; ElementFlags.Rest ]
+                    TypeArguments = [ 1; 2 ] }
+
+            let callback =
+                { Build.facts (Build.typeResponse 50 TypeFlags.Object) with
+                    CallSignatures =
+                        [ { Build.signature
+                                [ Build.resolvedMember (Build.symbol 500 "args" SymbolFlags.FunctionScopedVariable) 71 ]
+                                4 with
+                              HasRest = true } ] }
+
+            let model = Build.shapeModel (callback :: variadic :: Build.primitives)
+            let reference, findings = Spec.typeRef Build.context model None "x" 50
+
+            Expect.equal reference (FsDelegate([ FsArray FsObj ], FsUnit)) "the rest tail still widens"
+            Expect.equal (findings |> List.map _.Key) [ "TR028" ] "and says so"
+
         testCase "shape-classes emits a constructor member per construct signature" <| fun _ ->
             let instance =
                 { Build.facts (Build.typeResponse 80 TypeFlags.Object) with
@@ -2608,14 +2834,15 @@ let shapePassTests =
             Expect.isEmpty findings "and nothing to report"
 
         testCase "repair-arity drops an alias whose head names one variable twice" <| fun _ ->
-            // solid-js's `Setter` arrives with `'U` four times over, one per call signature the
-            // shaping pass read the head from. F# rejects the head at either arity, so the
-            // phantom is no repair and the declaration goes, as it did before.
+            // Wave three, lane K collapsed the signatures that share a bound, so what still
+            // arrives this way is one name declared under two bounds - `setter-lab`'s
+            // `DivergentBound`. F# rejects the head at either arity, so the phantom is no
+            // repair and the declaration goes.
             let model =
                 { Build.shapeModel [] with
                     Decls =
                         [ FsAbbrev
-                              { Name = "Setter"
+                              { Name = "DivergentBound"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -2631,7 +2858,7 @@ let shapePassTests =
 
             Expect.equal
                 (findings |> List.map (fun f -> f.Key, f.Symbol))
-                [ "RA001", "Setter" ]
+                [ "RA001", "DivergentBound" ]
                 "the drop is reported, not the phantom"
 
         testCase "repair-arity widens a generic named without its arguments" <| fun _ ->

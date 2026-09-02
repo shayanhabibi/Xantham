@@ -1,0 +1,1 @@
+{ "name": "setter-lab", "type": "module", "types": "index.d.ts", "description": "Wave three lab: type parameters hoisted onto an alias from several call signatures of one object type, and the rest parameter of solid-js's `Setter`." }
