@@ -4,21 +4,22 @@
   "counts": {
     "exact": 0,
     "ergonomic": 12,
-    "widened": 3,
-    "escape": 0
+    "widened": 2,
+    "escape": 1
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
-      "total": 28,
+      "total": 34,
       "exact": 9,
-      "ergonomic": 13,
-      "widened": 6
+      "ergonomic": 20,
+      "widened": 3,
+      "escape": 2
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 15,
-      "ergonomic": 15
+      "total": 14,
+      "ergonomic": 14
     }
   ],
   "symbols": [
@@ -291,7 +292,7 @@
     {
       "name": "Deferred",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "escape",
       "findings": [
         {
           "key": "SI006",
@@ -308,32 +309,67 @@
           "message": "symbol-keyed member dropped (unrepresentable in F#)"
         },
         {
-          "key": "TR023",
+          "key": "TR032",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Deferred.catch",
-          "message": "catch is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Deferred.finally",
-          "message": "finally is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "Deferred.then",
-          "message": "then is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "SP001",
-          "pass": "synthesize-paramobjects",
           "tier": "ergonomic",
-          "symbol": "Deferred",
-          "message": "ParamObject Create synthesized (D3)"
+          "symbol": "Deferred.catch(onrejected)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR025",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Deferred.catch(onrejected)()",
+          "message": "PromiseLike reads as JS.Promise; a bare thenable is not one"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "Deferred.catch(onrejected)(reason)",
+          "message": "any maps to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Deferred.finally(onfinally)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Deferred.then(onfulfilled)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR025",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Deferred.then(onfulfilled)()",
+          "message": "PromiseLike reads as JS.Promise; a bare thenable is not one"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Deferred.then(onrejected)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR025",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Deferred.then(onrejected)()",
+          "message": "PromiseLike reads as JS.Promise; a bare thenable is not one"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "Deferred.then(onrejected)(reason)",
+          "message": "any maps to obj"
         }
       ]
     },

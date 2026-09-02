@@ -2,7 +2,7 @@
   "package": "animejs",
   "module": "Animejs",
   "counts": {
-    "exact": 73,
+    "exact": 74,
     "ergonomic": 80,
     "widened": 32,
     "escape": 52
@@ -22,11 +22,11 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 2373,
+      "total": 2433,
       "exact": 4,
-      "ergonomic": 1241,
-      "widened": 811,
-      "escape": 317
+      "ergonomic": 1317,
+      "widened": 793,
+      "escape": 319
     },
     {
       "pass": "SA - shape-aliases",
@@ -53,8 +53,8 @@
     },
     {
       "pass": "DO - dedupe-overloads",
-      "total": 2,
-      "widened": 2
+      "total": 17,
+      "widened": 17
     }
   ],
   "symbols": [
@@ -5183,6 +5183,12 @@
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         }
       ]
+    },
+    {
+      "name": "DrawableSVGGeometryInsertAdjacentElementWhere",
+      "file": "dist/modules/svg/drawable.d.ts",
+      "tier": "exact",
+      "findings": []
     },
     {
       "name": "Svg",
@@ -16285,6 +16291,111 @@
       "tier": "escape",
       "findings": [
         {
+          "key": "DO001",
+          "pass": "dedupe-overloads",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.closest",
+          "message": "overload dropped: identical to an earlier one after widening"
+        },
+        {
+          "key": "DO001",
+          "pass": "dedupe-overloads",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.closest",
+          "message": "overload dropped: identical to an earlier one after widening"
+        },
+        {
+          "key": "DO001",
+          "pass": "dedupe-overloads",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.getElementsByTagName",
+          "message": "overload dropped: identical to an earlier one after widening"
+        },
+        {
+          "key": "DO001",
+          "pass": "dedupe-overloads",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.getElementsByTagName",
+          "message": "overload dropped: identical to an earlier one after widening"
+        },
+        {
+          "key": "DO001",
+          "pass": "dedupe-overloads",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.getElementsByTagName",
+          "message": "overload dropped: identical to an earlier one after widening"
+        },
+        {
+          "key": "DO001",
+          "pass": "dedupe-overloads",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.getElementsByTagNameNS",
+          "message": "overload dropped: identical to an earlier one after widening"
+        },
+        {
+          "key": "DO001",
+          "pass": "dedupe-overloads",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.getElementsByTagNameNS",
+          "message": "overload dropped: identical to an earlier one after widening"
+        },
+        {
+          "key": "DO001",
+          "pass": "dedupe-overloads",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.matches",
+          "message": "overload dropped: identical to an earlier one after widening"
+        },
+        {
+          "key": "DO001",
+          "pass": "dedupe-overloads",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.matches",
+          "message": "overload dropped: identical to an earlier one after widening"
+        },
+        {
+          "key": "DO001",
+          "pass": "dedupe-overloads",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.querySelector",
+          "message": "overload dropped: identical to an earlier one after widening"
+        },
+        {
+          "key": "DO001",
+          "pass": "dedupe-overloads",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.querySelector",
+          "message": "overload dropped: identical to an earlier one after widening"
+        },
+        {
+          "key": "DO001",
+          "pass": "dedupe-overloads",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.querySelector",
+          "message": "overload dropped: identical to an earlier one after widening"
+        },
+        {
+          "key": "DO001",
+          "pass": "dedupe-overloads",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.querySelectorAll",
+          "message": "overload dropped: identical to an earlier one after widening"
+        },
+        {
+          "key": "DO001",
+          "pass": "dedupe-overloads",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.querySelectorAll",
+          "message": "overload dropped: identical to an earlier one after widening"
+        },
+        {
+          "key": "DO001",
+          "pass": "dedupe-overloads",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.querySelectorAll",
+          "message": "overload dropped: identical to an earlier one after widening"
+        },
+        {
           "key": "SI003",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -16418,39 +16529,109 @@
           "message": "numeric literal type widened to float (doc-noted, \u00A74.2)"
         },
         {
-          "key": "TR023",
+          "key": "TP002",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "DrawableSVGGeometry.addEventListener",
-          "message": "addEventListener is not among the generated declarations; widened to obj"
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.after",
-          "message": "after is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.addEventListener(listener)",
+          "message": "EventListener is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.animate",
-          "message": "animate is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.addEventListener(listener)",
+          "message": "EventListenerObject is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "DrawableSVGGeometry.addEventListener(listener)()",
+          "message": "any maps to obj"
+        },
+        {
+          "key": "TR020",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.addEventListener(listener)(ev)",
+          "message": "indexed access has no F# form here; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.addEventListener(options)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.addEventListener(options)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.append",
-          "message": "append is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.animate()",
+          "message": "Animation is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.appendChild",
-          "message": "appendChild is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.animate(keyframes)",
+          "message": "Keyframe is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.animate(keyframes)",
+          "message": "PropertyIndexedKeyframes is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.animate(keyframes)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR035",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.animate(keyframes)",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.animate(options)",
+          "message": "KeyframeAnimationOptions is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.animate(options)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR035",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.animate(options)",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "key": "TR032",
@@ -16827,13 +17008,6 @@
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.attachShadow",
-          "message": "attachShadow is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
           "symbol": "DrawableSVGGeometry.attributeStyleMap",
           "message": "StylePropertyMap is not among the generated declarations; widened to obj"
         },
@@ -16841,22 +17015,15 @@
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.before",
-          "message": "before is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.checkVisibility(options)",
+          "message": "CheckVisibilityOptions is not among the generated declarations; widened to obj"
         },
         {
-          "key": "TR023",
+          "key": "TR032",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.blur",
-          "message": "blur is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.checkVisibility",
-          "message": "checkVisibility is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.checkVisibility(options)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR008",
@@ -16866,39 +17033,95 @@
           "message": "any maps to obj"
         },
         {
-          "key": "TR023",
+          "key": "TR032",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.cloneNode",
-          "message": "cloneNode is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.cloneNode(subtree)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TP002",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "DrawableSVGGeometry.closest",
-          "message": "closest is not among the generated declarations; widened to obj"
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.closest",
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.closest",
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TR020",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.closest()",
+          "message": "indexed access has no F# form here; widened to obj"
+        },
+        {
+          "key": "TR020",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.closest()",
+          "message": "indexed access has no F# form here; widened to obj"
+        },
+        {
+          "key": "TR020",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.closest()",
+          "message": "indexed access has no F# form here; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.closest()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.closest()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.closest()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.closest()",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.compareDocumentPosition",
-          "message": "compareDocumentPosition is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.computedStyleMap()",
+          "message": "StylePropertyMapReadOnly is not among the generated declarations; widened to obj"
         },
         {
-          "key": "TR023",
+          "key": "TR032",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.computedStyleMap",
-          "message": "computedStyleMap is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.contains",
-          "message": "contains is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.contains(other)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR023",
@@ -16913,13 +17136,6 @@
           "tier": "ergonomic",
           "symbol": "DrawableSVGGeometry.customElementRegistry",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.dispatchEvent",
-          "message": "dispatchEvent is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR037",
@@ -16946,232 +17162,372 @@
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.focus",
-          "message": "focus is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.focus(options)",
+          "message": "FocusOptions is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.focus(options)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getAnimations",
-          "message": "getAnimations is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getAnimations()",
+          "message": "Animation is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getAttribute",
-          "message": "getAttribute is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getAnimations(options)",
+          "message": "GetAnimationsOptions is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.getAnimations(options)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.getAttribute()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.getAttributeNS()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.getAttributeNS(namespace)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.getAttributeNode()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.getAttributeNodeNS()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.getAttributeNodeNS(namespace)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getAttributeNS",
-          "message": "getAttributeNS is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getBBox()",
+          "message": "DOMRect is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getAttributeNames",
-          "message": "getAttributeNames is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getBBox(options)",
+          "message": "SVGBoundingBoxOptions is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.getBBox(options)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getAttributeNode",
-          "message": "getAttributeNode is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getBoundingClientRect()",
+          "message": "DOMRect is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getAttributeNodeNS",
-          "message": "getAttributeNodeNS is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getCTM()",
+          "message": "DOMMatrix is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.getCTM()",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getBBox",
-          "message": "getBBox is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getClientRects()",
+          "message": "DOMRectList is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getBoundingClientRect",
-          "message": "getBoundingClientRect is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getElementsByClassName()",
+          "message": "HTMLCollectionOf is not among the generated declarations; widened to obj"
         },
         {
-          "key": "TR023",
+          "key": "TP002",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getCTM",
-          "message": "getCTM is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getClientRects",
-          "message": "getClientRects is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getElementsByClassName",
-          "message": "getElementsByClassName is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "DrawableSVGGeometry.getElementsByTagName",
-          "message": "getElementsByTagName is not among the generated declarations; widened to obj"
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.getElementsByTagName",
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.getElementsByTagName",
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.getElementsByTagName",
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getElementsByTagNameNS",
-          "message": "getElementsByTagNameNS is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getElementsByTagName()",
+          "message": "HTMLCollectionOf is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getHTML",
-          "message": "getHTML is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getElementsByTagName()",
+          "message": "HTMLCollectionOf is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getPointAtLength",
-          "message": "getPointAtLength is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getElementsByTagName()",
+          "message": "HTMLCollectionOf is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getRootNode",
-          "message": "getRootNode is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getElementsByTagName()",
+          "message": "HTMLCollectionOf is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getScreenCTM",
-          "message": "getScreenCTM is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getElementsByTagName()",
+          "message": "HTMLCollectionOf is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.getTotalLength",
-          "message": "getTotalLength is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getElementsByTagNameNS()",
+          "message": "HTMLCollectionOf is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.hasAttribute",
-          "message": "hasAttribute is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getElementsByTagNameNS()",
+          "message": "HTMLCollectionOf is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.hasAttributeNS",
-          "message": "hasAttributeNS is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getElementsByTagNameNS()",
+          "message": "HTMLCollectionOf is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.hasAttributes",
-          "message": "hasAttributes is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getElementsByTagNameNS()",
+          "message": "HTMLCollectionOf is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.getElementsByTagNameNS(namespace)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR006",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.getElementsByTagNameNS(namespaceURI)",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR006",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.getElementsByTagNameNS(namespaceURI)",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
+        },
+        {
+          "key": "TR006",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.getElementsByTagNameNS(namespaceURI)",
+          "message": "string literal type widened to string (doc-noted, \u00A74.2)"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.hasChildNodes",
-          "message": "hasChildNodes is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getHTML(options)",
+          "message": "GetHTMLOptions is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.getHTML(options)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.hasPointerCapture",
-          "message": "hasPointerCapture is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getPointAtLength()",
+          "message": "DOMPoint is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.insertAdjacentElement",
-          "message": "insertAdjacentElement is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getRootNode(options)",
+          "message": "GetRootNodeOptions is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.getRootNode(options)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.insertAdjacentHTML",
-          "message": "insertAdjacentHTML is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.getScreenCTM()",
+          "message": "DOMMatrix is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.getScreenCTM()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.hasAttributeNS(namespace)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.insertAdjacentElement()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.insertBefore(child)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.isDefaultNamespace(namespace)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.isEqualNode(otherNode)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.insertAdjacentText",
-          "message": "insertAdjacentText is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.isPointInFill(point)",
+          "message": "DOMPointInit is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.isPointInFill(point)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.insertBefore",
-          "message": "insertBefore is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.isPointInStroke(point)",
+          "message": "DOMPointInit is not among the generated declarations; widened to obj"
         },
         {
-          "key": "TR023",
+          "key": "TR032",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.isDefaultNamespace",
-          "message": "isDefaultNamespace is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.isPointInStroke(point)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TR032",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.isEqualNode",
-          "message": "isEqualNode is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.isPointInFill",
-          "message": "isPointInFill is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.isPointInStroke",
-          "message": "isPointInStroke is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.isSameNode",
-          "message": "isSameNode is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.isSameNode(otherNode)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR032",
@@ -17188,32 +17544,60 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TR032",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.lookupNamespaceURI",
-          "message": "lookupNamespaceURI is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.lookupNamespaceURI()",
+          "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TR032",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.lookupPrefix",
-          "message": "lookupPrefix is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.lookupNamespaceURI(prefix)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TR032",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.lookupPrefix()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.lookupPrefix(namespace)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "symbol": "DrawableSVGGeometry.matches",
-          "message": "matches is not among the generated declarations; widened to obj"
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR023",
+          "key": "TP002",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.moveBefore",
-          "message": "moveBefore is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.matches",
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.matches",
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.moveBefore(child)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR032",
@@ -17242,13 +17626,6 @@
           "tier": "ergonomic",
           "symbol": "DrawableSVGGeometry.nodeValue",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.normalize",
-          "message": "normalize is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR032",
@@ -18777,13 +19154,6 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.prepend",
-          "message": "prepend is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -18798,102 +19168,263 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TP002",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "DrawableSVGGeometry.querySelector",
-          "message": "querySelector is not among the generated declarations; widened to obj"
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR023",
+          "key": "TP002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.querySelector",
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.querySelector",
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.querySelector",
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TR020",
           "pass": "shape-interfaces",
           "tier": "widened",
+          "symbol": "DrawableSVGGeometry.querySelector()",
+          "message": "indexed access has no F# form here; widened to obj"
+        },
+        {
+          "key": "TR020",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.querySelector()",
+          "message": "indexed access has no F# form here; widened to obj"
+        },
+        {
+          "key": "TR020",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.querySelector()",
+          "message": "indexed access has no F# form here; widened to obj"
+        },
+        {
+          "key": "TR020",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.querySelector()",
+          "message": "indexed access has no F# form here; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.querySelector()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.querySelector()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.querySelector()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.querySelector()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.querySelector()",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "symbol": "DrawableSVGGeometry.querySelectorAll",
-          "message": "querySelectorAll is not among the generated declarations; widened to obj"
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR023",
+          "key": "TP002",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.releasePointerCapture",
-          "message": "releasePointerCapture is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.querySelectorAll",
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR023",
+          "key": "TP002",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.remove",
-          "message": "remove is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.querySelectorAll",
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR023",
+          "key": "TP002",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.removeAttribute",
-          "message": "removeAttribute is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.querySelectorAll",
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR023",
+          "key": "TR020",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.removeAttributeNS",
-          "message": "removeAttributeNS is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.querySelectorAll()",
+          "message": "indexed access has no F# form here; widened to obj"
         },
         {
-          "key": "TR023",
+          "key": "TR020",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.removeAttributeNode",
-          "message": "removeAttributeNode is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.querySelectorAll()",
+          "message": "indexed access has no F# form here; widened to obj"
         },
         {
-          "key": "TR023",
+          "key": "TR020",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.removeChild",
-          "message": "removeChild is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.querySelectorAll()",
+          "message": "indexed access has no F# form here; widened to obj"
         },
         {
-          "key": "TR023",
+          "key": "TR020",
           "pass": "shape-interfaces",
           "tier": "widened",
+          "symbol": "DrawableSVGGeometry.querySelectorAll()",
+          "message": "indexed access has no F# form here; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.removeAttributeNS(namespace)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
           "symbol": "DrawableSVGGeometry.removeEventListener",
-          "message": "removeEventListener is not among the generated declarations; widened to obj"
+          "message": "constraint on \u0027K\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.replaceChild",
-          "message": "replaceChild is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.removeEventListener(listener)",
+          "message": "EventListener is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.replaceChildren",
-          "message": "replaceChildren is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.removeEventListener(listener)",
+          "message": "EventListenerObject is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR008",
+          "pass": "shape-interfaces",
+          "tier": "escape",
+          "symbol": "DrawableSVGGeometry.removeEventListener(listener)()",
+          "message": "any maps to obj"
+        },
+        {
+          "key": "TR020",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.removeEventListener(listener)(ev)",
+          "message": "indexed access has no F# form here; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.replaceWith",
-          "message": "replaceWith is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.removeEventListener(options)",
+          "message": "EventListenerOptions is not among the generated declarations; widened to obj"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.requestFullscreen",
-          "message": "requestFullscreen is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.removeEventListener(options)",
+          "message": "EventListenerOptions is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.removeEventListener(options)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.removeEventListener(options)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR035",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.removeEventListener(options)",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR035",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.removeEventListener(options)",
+          "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.requestPointerLock",
-          "message": "requestPointerLock is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.requestFullscreen(options)",
+          "message": "FullscreenOptions is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.requestFullscreen(options)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR023",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "DrawableSVGGeometry.requestPointerLock(options)",
+          "message": "PointerLockOptions is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.requestPointerLock(options)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR032",
@@ -18906,29 +19437,50 @@
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.scroll",
-          "message": "scroll is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.scroll(options)",
+          "message": "ScrollToOptions is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.scroll(options)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.scrollBy",
-          "message": "scrollBy is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.scrollBy(options)",
+          "message": "ScrollToOptions is not among the generated declarations; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.scrollBy(options)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.scrollIntoView(arg)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR023",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DrawableSVGGeometry.scrollIntoView",
-          "message": "scrollIntoView is not among the generated declarations; widened to obj"
+          "symbol": "DrawableSVGGeometry.scrollTo(options)",
+          "message": "ScrollToOptions is not among the generated declarations; widened to obj"
         },
         {
-          "key": "TR023",
+          "key": "TR032",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.scrollTo",
-          "message": "scrollTo is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.scrollTo(options)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR018",
@@ -18938,39 +19490,25 @@
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
         },
         {
-          "key": "TR023",
+          "key": "TR032",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.setAttributeNS",
-          "message": "setAttributeNS is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.setAttributeNS(namespace)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TR032",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.setAttributeNode",
-          "message": "setAttributeNode is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.setAttributeNode()",
+          "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TR032",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.setAttributeNodeNS",
-          "message": "setAttributeNodeNS is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.setHTMLUnsafe",
-          "message": "setHTMLUnsafe is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.setPointerCapture",
-          "message": "setPointerCapture is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.setAttributeNodeNS()",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR032",
@@ -18980,11 +19518,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TR032",
           "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.toggleAttribute",
-          "message": "toggleAttribute is not among the generated declarations; widened to obj"
+          "tier": "ergonomic",
+          "symbol": "DrawableSVGGeometry.toggleAttribute(force)",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR032",
@@ -18992,13 +19530,6 @@
           "tier": "ergonomic",
           "symbol": "DrawableSVGGeometry.viewportElement",
           "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "DrawableSVGGeometry.webkitMatchesSelector",
-          "message": "webkitMatchesSelector is not among the generated declarations; widened to obj"
         }
       ]
     },

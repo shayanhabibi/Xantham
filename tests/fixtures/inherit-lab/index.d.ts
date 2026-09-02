@@ -63,7 +63,8 @@ export interface Failure extends Error {
 }
 
 /** Not inherited: `Promise` is the compiler lib's too, but a shipped Fable package does bind
- *  it - under a name this run did not declare, so the members flatten and say so. */
+ *  it - under a name this run did not declare, so the members flatten into this type, each
+ *  keeping its call signature. */
 export interface Deferred extends Promise<string> {
     tag: string;
 }

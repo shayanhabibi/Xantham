@@ -58,9 +58,9 @@
     },
     {
       "pass": "SC - shape-classes",
-      "total": 57,
+      "total": 56,
       "ergonomic": 45,
-      "widened": 4,
+      "widened": 3,
       "escape": 8
     },
     {
@@ -108,18 +108,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "SC005",
+          "key": "TR009",
           "pass": "shape-classes",
           "tier": "widened",
-          "symbol": "DOMException.isError",
-          "message": "static method emitted as a value: its type is declared in typescript/lib, which this run resolves identity-only, so there are no signatures to shape"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-classes",
-          "tier": "widened",
-          "symbol": "DOMException.isError",
-          "message": "isError is not among the generated declarations; widened to obj"
+          "symbol": "DOMException.isError(error)",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "key": "SI002",
@@ -1102,11 +1095,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TR009",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "CompileErrorConstructor.isError",
-          "message": "isError is not among the generated declarations; widened to obj"
+          "symbol": "CompileErrorConstructor.isError(error)",
+          "message": "unknown maps to obj (D8)"
         }
       ]
     },
@@ -1449,11 +1442,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TR009",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "RuntimeErrorConstructor.isError",
-          "message": "isError is not among the generated declarations; widened to obj"
+          "symbol": "RuntimeErrorConstructor.isError(error)",
+          "message": "unknown maps to obj (D8)"
         }
       ]
     },
@@ -1868,11 +1861,11 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR023",
+          "key": "TR009",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "DOMExceptionConstructor.isError",
-          "message": "isError is not among the generated declarations; widened to obj"
+          "symbol": "DOMExceptionConstructor.isError(error)",
+          "message": "unknown maps to obj (D8)"
         }
       ]
     },
@@ -76828,7 +76821,7 @@
           "pass": "resolve-type-table",
           "tier": "widened",
           "symbol": "\u003Ctype-table\u003E",
-          "message": "261 types not resolved: beyond the depth cutoff (12) - the frontier of instantiations still growing after that many generations"
+          "message": "1772 types not resolved: beyond the depth cutoff (12) - the frontier of instantiations still growing after that many generations"
         }
       ]
     },
