@@ -126,6 +126,42 @@ let private statics () =
     equal "an instance method survives beside the static of its name" 42.0 (clash.json ())
     equal "and the static of that name reaches the constructor object's" 10.0 (StaticsLab.Clash.json 5.0).status
 
+/// The one claim in the flags lab a compile gate cannot make: that F# `bigint` *is* the native
+/// JavaScript `BigInt` after Fable's compile. The fixture runtime throws on anything whose
+/// `typeof` is not `"bigint"`, so every call here is the assertion; `emitJsExpr` reads the
+/// runtime's own verdict back for the values that never cross the boundary.
+let private bigints () =
+    let two = 2I
+    check "an F# bigint literal is a native JavaScript BigInt" (emitJsExpr two "typeof $0 === \"bigint\"")
+
+    // `total` reduces with `+` over `0n`, which TypeErrors on a mixed operand: a float that
+    // merely printed like an integer would not survive the call, let alone sum correctly.
+    equal "an array of bigint arrives as bigints and sums" 6I (FlagsLab.Exports.total [| 1I; 2I; 3I |])
+
+    equal
+        "a bigint round-trips through JavaScript with no float precision to lose"
+        9007199254740993I
+        (FlagsLab.Exports.total [| 9007199254740993I |])
+
+    let ledger = FlagsLab.Exports.ledger 10I
+    equal "a bigint-typed member reads back as the value JavaScript holds" 10I ledger.balance
+    equal "and a bigint parameter reaches a method that adds it to one" 15I (ledger.credit 5I)
+    check "what came back is still a BigInt, not a number" (emitJsExpr (ledger.balance) "typeof $0 === \"bigint\"")
+
+    // The neighbours, at runtime: a template literal really is a string on the way in and out,
+    // and `symbol` really is a symbol - which is why `obj` is where the binding had to stop.
+    equal
+        "a template literal parameter is a string JavaScript can call string methods on"
+        "onsave"
+        (FlagsLab.Exports.normalize "save")
+
+    equal "and an intrinsic mapping is the string its transform produced" "LOUD" (FlagsLab.Exports.shout "loud")
+
+    equal
+        "the value behind the `unique symbol` binding is a real symbol"
+        "symbol"
+        (FlagsLab.Exports.describe FlagsLab.Exports.brandTag)
+
 let private taggedUnions () =
     let circle = PhaseBLab.Shape.Circle 2.0
     equal "a tagged-union case erases to the tagged object" """{"kind":"circle","radius":2}""" (json circle)
@@ -152,6 +188,7 @@ let main _ =
     globals ()
     imports ()
     statics ()
+    bigints ()
     taggedUnions ()
 
     match failures with

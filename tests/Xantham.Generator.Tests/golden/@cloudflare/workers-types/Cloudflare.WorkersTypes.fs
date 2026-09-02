@@ -3355,7 +3355,7 @@ type CryptoKeyArbitraryKeyAlgorithm =
 
 type DigestStream =
     abstract digest: JS.Promise<JS.ArrayBuffer>
-    abstract bytesWritten: obj
+    abstract bytesWritten: U2<float, bigint>
     /// <summary>
     /// The **<c>locked</c>** read-only property of the WritableStream interface returns a boolean indicating whether the WritableStream is locked to a writer.
     ///
@@ -5195,10 +5195,10 @@ type ScheduledController =
 
 [<Interface>]
 type QueuingStrategy<'T> =
-    abstract highWaterMark: obj option with get, set
-    abstract size: Func<'T, obj> option with get, set
+    abstract highWaterMark: U2<float, bigint> option with get, set
+    abstract size: Func<'T, U2<float, bigint>> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?highWaterMark: obj, ?size: Func<'T, obj>) : QueuingStrategy<'T> = jsNative
+    static member Create (?highWaterMark: U2<float, bigint>, ?size: Func<'T, U2<float, bigint>>) : QueuingStrategy<'T> = jsNative
 
 [<Interface>]
 type UnderlyingSink<'W> =
@@ -5226,9 +5226,9 @@ type UnderlyingSource<'R> =
     abstract start: Func<ReadableStreamDefaultController<'R>, JS.Promise<unit> option> option with get, set
     abstract pull: Func<ReadableStreamDefaultController<'R>, JS.Promise<unit> option> option with get, set
     abstract cancel: Func<obj, JS.Promise<unit> option> option with get, set
-    abstract expectedLength: obj option with get, set
+    abstract expectedLength: U2<float, bigint> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?``type``: string, ?start: Func<ReadableStreamDefaultController<'R>, JS.Promise<unit> option>, ?pull: Func<ReadableStreamDefaultController<'R>, JS.Promise<unit> option>, ?cancel: Func<obj, JS.Promise<unit> option>, ?expectedLength: obj) : UnderlyingSource<'R> = jsNative
+    static member Create (?``type``: string, ?start: Func<ReadableStreamDefaultController<'R>, JS.Promise<unit> option>, ?pull: Func<ReadableStreamDefaultController<'R>, JS.Promise<unit> option>, ?cancel: Func<obj, JS.Promise<unit> option>, ?expectedLength: U2<float, bigint>) : UnderlyingSource<'R> = jsNative
 
 [<Interface>]
 type Transformer<'I, 'O> =
@@ -5681,9 +5681,9 @@ type IdentityTransformStream =
 
 [<Interface>]
 type IdentityTransformStreamQueuingStrategy =
-    abstract highWaterMark: obj option with get, set
+    abstract highWaterMark: U2<float, bigint> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?highWaterMark: obj) : IdentityTransformStreamQueuingStrategy = jsNative
+    static member Create (?highWaterMark: U2<float, bigint>) : IdentityTransformStreamQueuingStrategy = jsNative
 
 [<Interface>]
 type ReadableStreamValuesOptions =
@@ -6692,9 +6692,9 @@ type Socket =
 type SocketOptions =
     abstract secureTransport: string option with get, set
     abstract allowHalfOpen: bool with get, set
-    abstract highWaterMark: obj option with get, set
+    abstract highWaterMark: U2<float, bigint> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (allowHalfOpen: bool, ?secureTransport: string, ?highWaterMark: obj) : SocketOptions = jsNative
+    static member Create (allowHalfOpen: bool, ?secureTransport: string, ?highWaterMark: U2<float, bigint>) : SocketOptions = jsNative
 
 [<Interface>]
 type SocketAddress =
@@ -6830,7 +6830,7 @@ type Container =
     abstract destroy: error: obj -> JS.Promise<unit>
     abstract signal: signo: float -> unit
     abstract getTcpPort: port: float -> RequestFetcher
-    abstract setInactivityTimeout: durationMs: obj -> JS.Promise<unit>
+    abstract setInactivityTimeout: durationMs: U2<float, bigint> -> JS.Promise<unit>
     abstract interceptOutboundHttp: addr: string * binding: RequestFetcher -> JS.Promise<unit>
     abstract interceptAllOutboundHttp: binding: RequestFetcher -> JS.Promise<unit>
     abstract snapshotDirectory: options: ContainerDirectorySnapshotOptions -> JS.Promise<ContainerDirectorySnapshot>
@@ -18316,7 +18316,7 @@ type AiOptions =
 
 type GatewayOptionsMetadata =
     [<EmitIndexer>]
-    abstract Item: string -> obj option with get, set
+    abstract Item: string -> U4<string, float, bigint, bool> option with get, set
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type GatewayRetriesBackoff =
@@ -27867,10 +27867,10 @@ type WorkflowStepDoConfig3 =
 [<Interface>]
 type WorkflowStepDoConfigRetries =
     abstract limit: float with get, set
-    abstract delay: Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput, obj> with get, set
+    abstract delay: Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput, U3<float, JS.Promise<WorkflowSleepDuration>, string>> with get, set
     abstract backoff: GatewayRetriesBackoff option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (limit: float, delay: Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput, obj>, ?backoff: GatewayRetriesBackoff) : WorkflowStepDoConfigRetries = jsNative
+    static member Create (limit: float, delay: Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput, U3<float, JS.Promise<WorkflowSleepDuration>, string>>, ?backoff: GatewayRetriesBackoff) : WorkflowStepDoConfigRetries = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptions<'T> =
@@ -27940,10 +27940,10 @@ type WorkflowStepDoRollbackOptionsRollbackConfig =
 [<Interface>]
 type WorkflowStepDoRollbackOptionsRollbackConfigRetries =
     abstract limit: float with get, set
-    abstract delay: obj with get, set
+    abstract delay: U3<float, Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput, U3<float, JS.Promise<WorkflowSleepDuration>, string>>, string> with get, set
     abstract backoff: GatewayRetriesBackoff option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (limit: float, delay: obj, ?backoff: GatewayRetriesBackoff) : WorkflowStepDoRollbackOptionsRollbackConfigRetries = jsNative
+    static member Create (limit: float, delay: U3<float, Func<WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput, U3<float, JS.Promise<WorkflowSleepDuration>, string>>, string>, ?backoff: GatewayRetriesBackoff) : WorkflowStepDoRollbackOptionsRollbackConfigRetries = jsNative
 
 [<Interface>]
 type WorkflowStepDoRollbackOptionsRollbackConfigRetriesDelayInput =
@@ -29606,7 +29606,7 @@ type WorkflowDurationLabel =
     | [<CompiledName("week")>] Week
     | [<CompiledName("year")>] Year
 
-type WorkflowSleepDuration = obj
+type WorkflowSleepDuration = U2<float, string>
 
 type WorkflowRetentionDuration = WorkflowSleepDuration
 
@@ -30076,7 +30076,7 @@ type Exports =
     [<Global("TransformStream"); EmitConstructor>]
     static member TransformStream<'I, 'O> (?transformer: Transformer<'I, 'O>, ?writableStrategy: QueuingStrategy<'I>, ?readableStrategy: QueuingStrategy<'O>) : TransformStream<'I, 'O> = jsNative
     [<Global("FixedLengthStream"); EmitConstructor>]
-    static member FixedLengthStream (expectedLength: obj, ?queuingStrategy: IdentityTransformStreamQueuingStrategy) : FixedLengthStream = jsNative
+    static member FixedLengthStream (expectedLength: U2<float, bigint>, ?queuingStrategy: IdentityTransformStreamQueuingStrategy) : FixedLengthStream = jsNative
     [<Global("IdentityTransformStream"); EmitConstructor>]
     static member IdentityTransformStream (?queuingStrategy: IdentityTransformStreamQueuingStrategy) : IdentityTransformStream = jsNative
     /// <summary>

@@ -361,7 +361,9 @@ type private Descent() =
 /// The F# type written at a reference position, with the findings any widening produces.
 /// `self` is the name of the declaration being shaped, so a polymorphic `this` return can
 /// resolve to it. Flag-test order matters: `boolean` (a union wearing the Boolean flag) before
-/// the union case, unions before the literal tests, literals before their base primitives.
+/// the union case, unions before the literal tests, literals before their base primitives, and
+/// `unique symbol` before `symbol` - the two are distinct bits, but reading them in that order
+/// keeps each pair's message about the narrower construct.
 let rec typeRef
     (ctx: Context)
     (model: ShapeModel)
@@ -408,10 +410,46 @@ and private typeRefOnPath
             FsString, [ Finding.make owner TypeReference.StringLiteralToString ]
         elif has TypeFlags.NumberLiteral then
             FsFloat, [ Finding.make owner TypeReference.NumericLiteralToFloat ]
+        elif has TypeFlags.BigIntLiteral then
+            FsBigInt, [ Finding.make owner TypeReference.BigIntLiteralToBigInt ]
         elif has TypeFlags.String then
             FsString, []
         elif has TypeFlags.Number then
             FsFloat, []
+        elif has TypeFlags.BigInt then
+            // Exact, and the one intrinsic here whose mapping costs nothing: F# `bigint` is
+            // the native JavaScript `BigInt` under Fable 5 (proven by the run gate, not by
+            // the compile gate - the F# type says nothing about what the erasure did).
+            FsBigInt, []
+        elif has TypeFlags.TemplateLiteral then
+            // `` `on${string}` `` is a string at runtime, and the generator already knows how
+            // to keep that much: the same trade TR006 makes for a string *literal* type
+            // (§4.11). What is lost is the pattern, not the type - widening to `obj` threw
+            // away both. A *closed* template literal never reaches here: the checker expands
+            // one over finite unions into its union of literals, which takes the StringEnum
+            // path and stays exact.
+            FsString, [ Finding.make owner TypeReference.TemplateLiteralToString ]
+        elif has TypeFlags.StringMapping then
+            // `Uppercase<T>` over an operand the checker could not finish. Same argument: the
+            // result is a string, and only the transform is lost.
+            FsString, [ Finding.make owner TypeReference.StringMappingToString ]
+        elif has TypeFlags.NonPrimitive then
+            // TypeScript's `object` - anything that is not a primitive. `obj` is the mapping
+            // §4.1 asks for and there is no closer one, but it is still a widening in the
+            // direction that matters: `obj` admits the primitives `object` was written to
+            // exclude. Reported as that, rather than as an unmapped flag.
+            FsObj, [ Finding.make owner TypeReference.ObjectTypeToObj ]
+        elif has TypeFlags.UniqueESSymbol then
+            // A `unique symbol` is a nominal singleton. Nothing shipped binds even the
+            // ordinary one (below), and F# has no form for the identity on top of it, so
+            // both halves of the loss are named.
+            FsObj, [ Finding.make owner TypeReference.UniqueSymbolNoBinding ]
+        elif has TypeFlags.ESSymbol then
+            // `symbol`. §4.1 wanted `JS.Symbol`, but Fable.Core 5.2.0 declares no such type -
+            // checked against the shipped assembly rather than recalled - and inventing a
+            // binding for a name the pinned package does not have is what the compile gate
+            // exists to catch. Widened, with the reason.
+            FsObj, [ Finding.make owner TypeReference.SymbolNoBinding ]
         elif has TypeFlags.Void || has TypeFlags.Undefined || has TypeFlags.Never then
             FsUnit, []
         elif has TypeFlags.Any then

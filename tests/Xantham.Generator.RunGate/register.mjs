@@ -13,6 +13,7 @@ const fixtures = path.resolve(import.meta.dirname, "..", "fixtures");
 const packages = new Map([
     ["phase-b-lab", path.join(fixtures, "lab", "index.js")],
     ["statics-lab", path.join(fixtures, "statics-lab", "index.js")],
+    ["flags-lab", path.join(fixtures, "flags-lab", "index.js")],
 ]);
 
 registerHooks({

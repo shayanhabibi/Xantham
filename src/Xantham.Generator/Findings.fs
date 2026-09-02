@@ -208,6 +208,12 @@ type TypeReference =
     | [<Widened>] EmptyUnionToObj
     | [<Widened>] UnionWithObjArm
     | [<Widened>] UnionTooWide of arms: int * cap: int
+    | [<Widened>] TemplateLiteralToString
+    | [<Widened>] StringMappingToString
+    | [<Widened>] BigIntLiteralToBigInt
+    | [<Widened>] ObjectTypeToObj
+    | [<Widened>] SymbolNoBinding
+    | [<Widened>] UniqueSymbolNoBinding
 
     interface IFindingKind with
         member this.Message =
@@ -256,6 +262,16 @@ type TypeReference =
             | UnionWithObjArm -> "union with an obj arm widened to obj (an erased union over obj is no safer)"
             | UnionTooWide(arms, cap) ->
                 $"union of {arms} distinct types widened to obj (D4 caps the erased union at {cap})"
+            | TemplateLiteralToString ->
+                "template literal type reads as the string it is at runtime; the pattern is not carried (§4.11)"
+            | StringMappingToString ->
+                "intrinsic string mapping reads as string; the transform it applies is not carried (§4.11)"
+            | BigIntLiteralToBigInt -> "bigint literal type widened to bigint (doc-noted, §4.2)"
+            | ObjectTypeToObj ->
+                "TypeScript's object maps to obj, which also admits the primitives object excludes (§4.1)"
+            | SymbolNoBinding -> "symbol has no binding in Fable.Core 5.2.0; widened to obj (§4.1)"
+            | UniqueSymbolNoBinding ->
+                "unique symbol has no binding in Fable.Core 5.2.0 and no F# form for its identity; widened to obj"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]

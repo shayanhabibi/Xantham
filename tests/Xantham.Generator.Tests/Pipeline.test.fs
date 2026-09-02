@@ -710,6 +710,61 @@ let pipelineTests =
                       Expect.isFalse (source.Contains "Merged>") "and none of them is written as a measure" ])
 
 
+        yield!
+            fixtureTests "flags-lab" (handFixture "flags-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "the type flags the tier used to refuse map, and say what each cost" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      let says key fragment =
+                          rendered.Findings
+                          |> List.exists (fun f -> f.Key = key && f.Message.Contains(fragment: string))
+
+                      // A template literal is a string at runtime, so `string` is the read
+                      // (§4.11) - in an alias, on a member, and at a parameter and a return.
+                      Expect.stringContains source "type EventName = string" "the alias position"
+                      Expect.stringContains source "abstract channel: string" "written inline on a member"
+                      Expect.stringContains source "abstract resolve: scope: string -> string" "parameter and return"
+
+                      Expect.stringContains
+                          source
+                          "static member normalize (name: string) : string"
+                          "and on an exported function"
+
+                      Expect.isTrue (says "TR037" "pattern is not carried") "each site says what was lost"
+                      Expect.isTrue (says "TR038" "transform it applies") "and an intrinsic mapping says its own"
+
+                      // The negatives. A closed template literal is expanded by the checker
+                      // into its literal union and stays exact; one over a type parameter
+                      // stays the phantom, which keeps the arity `string` would have lost.
+                      Expect.stringContains source "type ModeEvent =" "a closed template literal is a StringEnum"
+                      Expect.stringContains source "[<CompiledName(\"onRead\")>] OnRead" "expanded, not widened"
+                      Expect.stringContains source "type Tagged<'T> = private Tagged__ of string" "open operand: phantom"
+
+                      // bigint is exact, and an exact mapping is reported nowhere at all.
+                      Expect.stringContains source "abstract balance: bigint" "a bigint member"
+                      Expect.stringContains source "static member total (amounts: bigint[]) : bigint" "and an export"
+
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun f -> f.Symbol.StartsWith "Ledger"))
+                          "nothing is lost mapping bigint, so nothing is reported"
+
+                      Expect.stringContains source "type Two = bigint" "a bigint literal keeps its own widening"
+                      Expect.isTrue (says "TR039" "bigint literal") "reported as the literal it was"
+
+                      // `object`, `symbol` and `unique symbol` still widen - nothing shipped
+                      // binds a symbol - but each names its construct instead of a flag.
+                      Expect.stringContains source "abstract holder: obj" "object is obj"
+                      Expect.stringContains source "static member describe (key: obj) : string" "so is symbol"
+                      Expect.isTrue (says "TR040" "admits the primitives object excludes") "object's widening"
+                      Expect.isTrue (says "TR041" "no binding in Fable.Core") "symbol's"
+                      Expect.isTrue (says "TR042" "no F# form for its identity") "and unique symbol's"
+
+                      // The point of the work: no site in this fixture answers with a flag name.
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun f -> f.Key = "TR014"))
+                          "no construct here is left reported as an unmapped flag" ])
+
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 
         // workers-types is a global type library that *replaces* the DOM lib: its README

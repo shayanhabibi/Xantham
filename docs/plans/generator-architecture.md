@@ -720,6 +720,61 @@ Phases — each ends with the compile gate green on its fixtures:
     misleading `SC003`) rather than as a method; and `synthesize-paramobjects` still offers a
     `[<ParamObject>]` `Create` on a class whose instance type is all properties (`Box`), which
     cannot build a class instance - both predate this pass and are separate behaviour changes.
+  - *The type flags the shape tier refused (2026-09-02).* `TR014` was one finding standing in
+    for six unrelated constructs, and its message was a flag name - the single largest thing
+    the manifest could say about a symbol without saying anything. Aggregating every golden
+    manifest by that key gave the survey: 350 sites, of which `TemplateLiteral` 60,
+    `NonPrimitive` 42, `BigInt` 13, `UniqueESSymbol` 5, `ESSymbol` 3, `Conditional` 227. Five
+    of the six are now mapped, each with a finding that names the construct and what it cost;
+    `Conditional` is untouched and keeps `TR014` to itself. `tests/fixtures/flags-lab` pins
+    every mapping and its negatives, and is the readable half of the evidence. What it settled:
+    - *A template literal is a string at runtime, so `string` is the whole of the mapping.*
+      The pattern is what is lost, and F# has no form for it; `obj` lost the pattern *and*
+      the type. The same goes for an intrinsic string mapping (`Uppercase<string>`), which
+      says separately that the transform is gone (`TR037`, `TR038`, §4.11).
+    - *The two template-literal negatives already worked and had to keep working.* A closed
+      template literal over finite unions (`` `on${Capitalize<Mode>}` ``) is expanded by the
+      checker into its literal union and takes the StringEnum path - Exact, never reaching the
+      widening. One over a type parameter (`` `x-${T}` ``) stays the erased phantom of D9,
+      because `string` binds no variable and would lose the arity. Both are in the lab.
+    - *Fable 5 compiles F# `bigint` to the native JavaScript `BigInt`, so the mapping is Exact
+      and reports nothing at all.* Read off the emitted `fable-out/Program.js`, not recalled:
+      `2I` is `fromInt32(2)` and `9007199254740993I` is `fromInt64(9007199254740993n)`, both
+      from `fable-library-js.5.0.0/BigInt.js`, whose `fromInt32(n)` is `BigInt(n)`. The run
+      gate calls a fixture runtime that `TypeError`s on any argument whose `typeof` is not
+      `"bigint"`, sums with `+` over `0n`, and reads `typeof` back through `emitJsExpr`. A
+      `bigint` *literal* type keeps its own widening (`TR039`), as its string and number
+      counterparts do.
+    - *`obj` was already the right answer for `object`; only the report was wrong.* `object`
+      is TypeScript for "not a primitive" and F# has nothing narrower, so the mapping stands -
+      but it is still a widening, and `TR040` now says which one: `obj` admits exactly the
+      primitives `object` was written to exclude. A finding that reports a flag name reports
+      nothing; a finding that reports the wrong tier overstates the damage.
+    - *Nothing binds a symbol.* Fable.Core 5.2.0 declares no `JS.Symbol` - checked by
+      reflecting over the shipped assembly, since §4.1 aspires to one. So `symbol` and
+      `unique symbol` still widen to `obj`, with `TR041` and `TR042` naming the missing
+      binding and, for the unique one, the identity there is no F# form for. These are the two
+      findings to revisit if a binding ever ships.
+    - *Mapping a flag unblocked the unions it was poisoning.* `number | bigint` was `obj`
+      across `workers-types` because one arm was unmapped; it is `U2<float, bigint>` now, and
+      `WorkflowSleepDuration` (`` `${number} ${WorkflowDurationLabel}` | number ``) is
+      `U2<float, string>`. Fourteen `TR035` "union with an obj arm" findings went away with
+      them - and one union that had been collapsing distinct arms into a single `obj`
+      (`Attribute.value`) now has more than four and reports `TR036` instead, which is the
+      honest answer rather than a regression.
+    Measured, aggregated over every manifest rather than read: `TR014` 350 → 227 sites, and
+    every one that remains is `Conditional` (type-fest 172, solid-js 49, workers-types 3,
+    animejs 2, keyof-lab 1). Per rung: `workers-types` 110 → 3, `type-fest` 178 → 172,
+    `solid-js` 54 → 49, `animejs` 3 → 2, `keyof-lab` 2 → 1, `lib-lab` 2 → 0, `brand-lab`
+    1 → 0. In their place, `TR037` 60, `TR040` 42, `TR042` 5, `TR041` 3 - and 13 `BigInt`
+    sites that now report nothing, because nothing is lost. `workers-types` tiers moved
+    widened 380 → 375 and ergonomic 967 → 972 (five symbols whose only widening had been a
+    `bigint`), exact 260 and escape 107 both held; `TR035` 36 → 22, `TR036` 16 → 17. The
+    golden diff is 10 files, 391 insertions and 573 deletions, none of it in a package the
+    change did not target. All three gates green: `dotnet build Xantham.slnx` clean,
+    177 + 85 Expecto tests, and the run gate 40 → 49 checks with `flags-lab` linked into both
+    gates. Not done: `Conditional`, the 227 sites above and now the whole of `TR014` - §4.11
+    treats a conditional type as deferred, and it is a shape question, not a flag one.
 
 ## 7. Decisions (2026-09-01)
 
