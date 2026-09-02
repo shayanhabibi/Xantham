@@ -4,8 +4,8 @@
   "counts": {
     "exact": 20,
     "ergonomic": 60,
-    "widened": 73,
-    "escape": 20
+    "widened": 74,
+    "escape": 19
   },
   "passes": [
     {
@@ -20,8 +20,8 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 25,
-      "ergonomic": 18,
+      "total": 23,
+      "ergonomic": 16,
       "widened": 7
     },
     {
@@ -56,11 +56,6 @@
       "total": 26,
       "ergonomic": 7,
       "widened": 19
-    },
-    {
-      "pass": "AC - audit-coverage",
-      "total": 1,
-      "escape": 1
     }
   ],
   "symbols": [
@@ -1473,6 +1468,76 @@
       "file": "types/reactive/signal.d.ts",
       "tier": "exact",
       "findings": []
+    },
+    {
+      "name": "Setter",
+      "file": "types/reactive/signal.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA006",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "Setter",
+          "message": "Setter resolves to a target using fewer type parameters than its head; the surplus are erased phantoms"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "symbol": "Setter",
+          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "symbol": "Setter",
+          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TP003",
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "symbol": "Setter",
+          "message": "generic function type hoisted onto the alias; F# has no rank-2 form (\u00A74.9)"
+        },
+        {
+          "key": "TP006",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "Setter",
+          "message": "type parameter \u0027U\u0027 is erased: every use of it widened away"
+        },
+        {
+          "key": "TP009",
+          "pass": "shape-callbacks",
+          "tier": "ergonomic",
+          "symbol": "Setter",
+          "message": "\u0027U\u0027 is declared by 4 signatures of the same alias; the head writes one variable"
+        },
+        {
+          "key": "TR031",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "Setter",
+          "message": "callback with 4 overloads shaped from the first"
+        },
+        {
+          "key": "TR045",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "Setter()",
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
+        },
+        {
+          "key": "TR045",
+          "pass": "shape-callbacks",
+          "tier": "widened",
+          "symbol": "Setter(args)",
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
+        }
+      ]
     },
     {
       "name": "Signal",
@@ -8176,96 +8241,6 @@
           "tier": "widened",
           "symbol": "Exports",
           "message": "CreateResourceResultItem4 applied to 1 arguments but declares 2; widened to obj"
-        }
-      ]
-    },
-    {
-      "name": "Setter",
-      "tier": "escape",
-      "findings": [
-        {
-          "key": "AC001",
-          "pass": "audit-coverage",
-          "tier": "escape",
-          "symbol": "Setter",
-          "message": "export not represented in the generated output"
-        },
-        {
-          "key": "RA001",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "Setter",
-          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Setter",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Setter",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Setter",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Setter",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Setter",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TP003",
-          "pass": "shape-callbacks",
-          "tier": "ergonomic",
-          "symbol": "Setter",
-          "message": "generic function type hoisted onto the alias; F# has no rank-2 form (\u00A74.9)"
-        },
-        {
-          "key": "TP006",
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "symbol": "Setter",
-          "message": "type parameter \u0027U\u0027 is erased: every use of it widened away"
-        },
-        {
-          "key": "TR031",
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "symbol": "Setter",
-          "message": "callback with 4 overloads shaped from the first"
-        },
-        {
-          "key": "TR045",
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "symbol": "Setter()",
-          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
-        },
-        {
-          "key": "TR045",
-          "pass": "shape-callbacks",
-          "tier": "widened",
-          "symbol": "Setter(args)",
-          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     }

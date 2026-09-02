@@ -4,10 +4,15 @@
   "counts": {
     "exact": 0,
     "ergonomic": 0,
-    "widened": 4,
+    "widened": 5,
     "escape": 1
   },
   "passes": [
+    {
+      "pass": "RT - resolve-type-table",
+      "total": 1,
+      "widened": 1
+    },
     {
       "pass": "shape-callbacks",
       "total": 21,
@@ -299,6 +304,19 @@
           "tier": "ergonomic",
           "symbol": "Holder",
           "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "\u003Ctype-table\u003E",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RT001",
+          "pass": "resolve-type-table",
+          "tier": "widened",
+          "symbol": "\u003Ctype-table\u003E",
+          "message": "2 types not resolved: beyond the depth cutoff (12) - the frontier of instantiations still growing after that many generations"
         }
       ]
     },
