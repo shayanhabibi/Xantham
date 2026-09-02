@@ -36,7 +36,14 @@ tests/fixtures/**/*
 # lab directories themselves.
 !tests/fixtures/*lab/
 !tests/fixtures/*lab/**
-tests/fixtures/*lab/node_modules/
+tests/fixtures/*lab/node_modules/*
+# ... except a lab's own hand-authored dependencies, which are source for the same reason the
+# lab is. A multi-package lab installs nothing: the dependency is a `<name>lab` directory
+# committed where the compiler's module resolution looks for it, so the group a declaration
+# lands in is decided by the same path rule an npm install would produce. The contents line
+# above excludes the entries rather than the directory, so these two re-include both.
+!tests/fixtures/*lab/node_modules/*lab/
+!tests/fixtures/*lab/node_modules/*lab/**
 # ... and except the pins, which are the tracked half of every npm rung: the install is
 # untracked, so the version it was generated against has to be written down somewhere.
 !tests/fixtures/pins.json
