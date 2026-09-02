@@ -3,8 +3,8 @@
   "module": "GenericsLab",
   "counts": {
     "exact": 5,
-    "ergonomic": 9,
-    "widened": 2,
+    "ergonomic": 10,
+    "widened": 1,
     "escape": 0
   },
   "passes": [
@@ -27,8 +27,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 11,
-      "ergonomic": 10,
-      "widened": 1
+      "ergonomic": 11
     }
   ],
   "symbols": [
@@ -241,7 +240,7 @@
     {
       "name": "ManifestFlags",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -253,7 +252,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ManifestFlags",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }

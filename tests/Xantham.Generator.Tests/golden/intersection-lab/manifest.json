@@ -22,8 +22,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 13,
-      "ergonomic": 12,
-      "widened": 1
+      "ergonomic": 13
     }
   ],
   "symbols": [
@@ -245,7 +244,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Bag",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }

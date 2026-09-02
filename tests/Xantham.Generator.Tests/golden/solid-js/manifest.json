@@ -50,8 +50,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 85,
-      "ergonomic": 83,
-      "widened": 2
+      "ergonomic": 85
     },
     {
       "pass": "RA - repair-arity",
@@ -6049,7 +6048,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "SplitPropsResultItemItem",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -6896,7 +6895,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "SharedConfigResources",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }

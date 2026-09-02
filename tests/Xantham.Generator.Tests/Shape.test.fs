@@ -2539,7 +2539,7 @@ let shapePassTests =
 
             let shaped, findings = Build.runPass ParamObjects.synthesizeParamObjects model
 
-            Expect.equal (findings |> List.map (fun f -> f.Key, f.Tier) |> List.distinct) [ "SP003", Widened ] "all widened"
+            Expect.equal (findings |> List.map (fun f -> f.Key, f.Tier) |> List.distinct) [ "SP003", Ergonomic ] "all ergonomic"
 
             let reasons = findings |> List.map (fun f -> f.Symbol, f.Message)
 

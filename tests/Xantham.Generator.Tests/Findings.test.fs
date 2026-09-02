@@ -126,7 +126,7 @@ let findingsTests =
                     "SE003 ShapeExports.MutableValueReadOnly widened"
                     "SP001 SynthesizeParamObjects.ParamObjectSynthesized ergonomic"
                     "SP002 SynthesizeParamObjects.MethodMemberAsCreateParameter ergonomic"
-                    "SP003 SynthesizeParamObjects.CreateNotSynthesized widened"
+                    "SP003 SynthesizeParamObjects.CreateNotSynthesized ergonomic"
                     "DO001 DedupeOverloads.OverloadDropped widened"
                     "RA001 RepairArity.GenericAliasDropped widened"
                     "RA002 RepairArity.ReferenceToDroppedAlias widened"

@@ -3,8 +3,8 @@
   "module": "TypeFest",
   "counts": {
     "exact": 25,
-    "ergonomic": 53,
-    "widened": 222,
+    "ergonomic": 71,
+    "widened": 204,
     "escape": 2
   },
   "passes": [
@@ -35,8 +35,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 58,
-      "ergonomic": 36,
-      "widened": 22
+      "ergonomic": 58
     },
     {
       "pass": "RA - repair-arity",
@@ -1130,7 +1129,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "EmptyObject",
           "message": "no ParamObject Create synthesized: the declaration has no members of its own"
         }
@@ -2805,7 +2804,7 @@
     {
       "name": "JsonObject",
       "file": "source/json-value.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -2824,7 +2823,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "JsonObject",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -2931,7 +2930,7 @@
     {
       "name": "Jsonifiable2",
       "file": "source/jsonifiable.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -2950,7 +2949,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Jsonifiable2",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5007,7 +5006,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PackageJson",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5058,7 +5057,7 @@
     {
       "name": "PackageJsonBin",
       "file": "source/package-json.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -5077,7 +5076,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PackageJsonBin",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5086,7 +5085,7 @@
     {
       "name": "PackageJsonBrowser",
       "file": "source/package-json.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -5105,7 +5104,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PackageJsonBrowser",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5156,7 +5155,7 @@
     {
       "name": "PackageJsonDependencies",
       "file": "source/package-json.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -5175,7 +5174,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PackageJsonDependencies",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5316,7 +5315,7 @@
     {
       "name": "PackageJsonDirectories",
       "file": "source/package-json.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -5419,7 +5418,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PackageJsonDirectories",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5428,7 +5427,7 @@
     {
       "name": "PackageJsonEngines",
       "file": "source/package-json.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -5482,7 +5481,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PackageJsonEngines",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5491,7 +5490,7 @@
     {
       "name": "PackageJsonEsnext",
       "file": "source/package-json.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -5538,7 +5537,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PackageJsonEsnext",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5547,7 +5546,7 @@
     {
       "name": "PackageJsonExportsItem",
       "file": "source/package-json.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -5566,7 +5565,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PackageJsonExportsItem",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5678,7 +5677,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PackageJsonImports",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5729,7 +5728,7 @@
     {
       "name": "PackageJsonOverrides",
       "file": "source/package-json.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -5748,7 +5747,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PackageJsonOverrides",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5757,7 +5756,7 @@
     {
       "name": "PackageJsonPeerDependenciesMeta",
       "file": "source/package-json.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -5776,7 +5775,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PackageJsonPeerDependenciesMeta",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5799,7 +5798,7 @@
     {
       "name": "PackageJsonPublishConfig",
       "file": "source/package-json.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -5860,7 +5859,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PackageJsonPublishConfig",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5903,7 +5902,7 @@
     {
       "name": "PackageJsonScripts",
       "file": "source/package-json.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SI003",
@@ -6321,7 +6320,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PackageJsonScripts",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -6336,7 +6335,7 @@
     {
       "name": "PackageJsonTypesVersions",
       "file": "source/package-json.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -6355,7 +6354,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PackageJsonTypesVersions",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -6364,7 +6363,7 @@
     {
       "name": "PackageJsonTypesVersionsItem",
       "file": "source/package-json.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -6383,7 +6382,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PackageJsonTypesVersionsItem",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -8576,7 +8575,7 @@
     {
       "name": "StructuredCloneable2",
       "file": "source/structured-cloneable.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -8609,7 +8608,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "StructuredCloneable2",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -8989,7 +8988,7 @@
     {
       "name": "TsConfigJsonCompilerOptions",
       "file": "source/tsconfig-json.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB003",
@@ -10702,7 +10701,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "TsConfigJsonCompilerOptions",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -10765,7 +10764,7 @@
     {
       "name": "TsConfigJsonCompilerOptionsPaths",
       "file": "source/tsconfig-json.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -10777,7 +10776,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "TsConfigJsonCompilerOptionsPaths",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -11436,7 +11435,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "UnknownRecord",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }

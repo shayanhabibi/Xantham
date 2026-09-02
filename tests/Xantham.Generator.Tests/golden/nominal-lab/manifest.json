@@ -3,8 +3,8 @@
   "module": "NominalLab",
   "counts": {
     "exact": 3,
-    "ergonomic": 3,
-    "widened": 4,
+    "ergonomic": 5,
+    "widened": 2,
     "escape": 0
   },
   "passes": [
@@ -23,8 +23,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 7,
-      "ergonomic": 5,
-      "widened": 2
+      "ergonomic": 7
     }
   ],
   "symbols": [
@@ -73,7 +72,7 @@
     {
       "name": "Narrow",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -85,7 +84,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Narrow",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -94,7 +93,7 @@
     {
       "name": "Wide",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -106,7 +105,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Wide",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }

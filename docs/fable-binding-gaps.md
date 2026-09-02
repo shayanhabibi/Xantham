@@ -84,7 +84,8 @@ exposes. A consumer gets `obj` where the `.d.ts` promised a sequence.
 the type is expressible as one of them with a documented loss, rather than absent outright.
 
 [//]: # (ANSWER)
-
+We will have to generate or hand roll our own bindings for these constructs and ship them with Xantham.Fable.Core.
+We will submit a PR at a later time to Fable for a bunch of different constructs once the generator is working.
 [//]: # (ANSWER END)
 
 ---
@@ -116,7 +117,7 @@ let `unique symbol` and `symbol` bind; the *keyed member* still needs `EmitIndex
 route, which wave three verified exists but did not take.
 
 [//]: # (ANSWER)
-
+Same as before; we'll generate or hand roll our own bindings for this.
 [//]: # (ANSWER END)
 
 ---
@@ -135,7 +136,9 @@ This reads as an oversight upstream rather than a decision. One site today, and 
 gap is that the whole family cannot be bound by rule — a table with one hole needs a special case.
 
 [//]: # (ANSWER)
-
+Same as previous.
+We can shadow the types that we are handrolling/generating for these types that should exist in Fable.Core.JS
+through Xantham.Fable.Core such that they are reachable through the Fable.Core.JS namespace/module.
 [//]: # (ANSWER END)
 
 ---
@@ -155,7 +158,7 @@ the same class of question and the answer may be the same: bind it upstream, bin
 `src/Xantham.Fable.Core`, or accept the loss.
 
 [//]: # (ANSWER)
-
+Bind it in Xantham.Fable.Core
 [//]: # (ANSWER END)
 
 ---

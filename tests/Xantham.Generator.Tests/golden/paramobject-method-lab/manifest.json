@@ -3,8 +3,8 @@
   "module": "ParamobjectMethodLab",
   "counts": {
     "exact": 4,
-    "ergonomic": 3,
-    "widened": 3,
+    "ergonomic": 5,
+    "widened": 1,
     "escape": 0
   },
   "passes": [
@@ -17,8 +17,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 7,
-      "ergonomic": 4,
-      "widened": 3
+      "ergonomic": 7
     }
   ],
   "symbols": [
@@ -86,7 +85,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Bag",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -123,12 +122,12 @@
     {
       "name": "Formatter",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Formatter",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -137,12 +136,12 @@
     {
       "name": "Wide",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Wide",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }

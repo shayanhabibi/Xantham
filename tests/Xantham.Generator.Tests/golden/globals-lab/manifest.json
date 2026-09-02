@@ -3,8 +3,8 @@
   "module": "GlobalsLab",
   "counts": {
     "exact": 2,
-    "ergonomic": 5,
-    "widened": 2,
+    "ergonomic": 7,
+    "widened": 0,
     "escape": 1
   },
   "passes": [
@@ -26,8 +26,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 7,
-      "ergonomic": 5,
-      "widened": 2
+      "ergonomic": 7
     },
     {
       "pass": "RA - repair-arity",
@@ -109,7 +108,7 @@
     {
       "name": "Loose",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -121,7 +120,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Loose",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -144,7 +143,7 @@
     {
       "name": "BagLoose",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -156,7 +155,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "BagLoose",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }

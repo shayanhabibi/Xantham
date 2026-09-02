@@ -3,8 +3,8 @@
   "module": "KeyofLab",
   "counts": {
     "exact": 5,
-    "ergonomic": 9,
-    "widened": 11,
+    "ergonomic": 13,
+    "widened": 7,
     "escape": 0
   },
   "passes": [
@@ -28,8 +28,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 13,
-      "ergonomic": 9,
-      "widened": 4
+      "ergonomic": 13
     }
   ],
   "symbols": [
@@ -124,7 +123,7 @@
     {
       "name": "Bag",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -136,7 +135,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Bag",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -145,7 +144,7 @@
     {
       "name": "Slots",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -157,7 +156,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Slots",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -166,7 +165,7 @@
     {
       "name": "Registry",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -178,7 +177,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Registry",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -187,7 +186,7 @@
     {
       "name": "FrozenBag",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -199,7 +198,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "FrozenBag",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }

@@ -3,8 +3,8 @@
   "module": "Cloudflare.WorkersTypes",
   "counts": {
     "exact": 231,
-    "ergonomic": 1008,
-    "widened": 418,
+    "ergonomic": 1061,
+    "widened": 365,
     "escape": 115
   },
   "passes": [
@@ -73,8 +73,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 1926,
-      "ergonomic": 1817,
-      "widened": 109
+      "ergonomic": 1926
     },
     {
       "pass": "DO - dedupe-overloads",
@@ -161,7 +160,7 @@
     {
       "name": "EventCurrentTargetItem",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -173,7 +172,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "EventCurrentTargetItem",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -347,7 +346,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "RequestInitCfPropertiesBase",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -356,7 +355,7 @@
     {
       "name": "RequestInitCfPropertiesCacheTtlByStatus",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -368,7 +367,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "RequestInitCfPropertiesCacheTtlByStatus",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -641,7 +640,7 @@
     {
       "name": "RequestInitHeaders",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -653,7 +652,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "RequestInitHeaders",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -1463,7 +1462,7 @@
     {
       "name": "InstanceExports",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -1475,7 +1474,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "InstanceExports",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -1853,7 +1852,7 @@
     {
       "name": "WebAssemblyInstanceImports",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -1865,7 +1864,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "WebAssemblyInstanceImports",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -1893,7 +1892,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "WebAssemblyInstanceImportsItem",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -2049,7 +2048,7 @@
     {
       "name": "CloudflareCompatibilityFlags",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -2061,7 +2060,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "CloudflareCompatibilityFlags",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -2964,7 +2963,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ServiceWorkerGlobalScope",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -3112,7 +3111,7 @@
     {
       "name": "TraceItemTailAttributes",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -3124,7 +3123,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "TraceItemTailAttributes",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -3567,7 +3566,7 @@
     {
       "name": "SpanSetAttributesAttributes",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -3586,7 +3585,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "SpanSetAttributesAttributes",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -6437,7 +6436,7 @@
     {
       "name": "DurableObjectStoragePutEntries",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -6449,7 +6448,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "DurableObjectStoragePutEntries",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -6458,7 +6457,7 @@
     {
       "name": "DurableObjectTransactionPutEntries",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -6470,7 +6469,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "DurableObjectTransactionPutEntries",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -6638,7 +6637,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "DurableObjectTransaction",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -6757,7 +6756,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "DurableObjectStorage",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -10528,7 +10527,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "FormData",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -12949,7 +12948,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "KVNamespace",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -14053,7 +14052,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "R2Bucket",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -16626,7 +16625,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ReadableStream",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -21230,7 +21229,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "WorkerLoaderWorkerCodeModules",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -22644,7 +22643,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "CloudflareAccessIdentity",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -23367,7 +23366,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchOptions",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -23485,7 +23484,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchOptionsQueryRewrite",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -23555,7 +23554,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchOptionsReranking",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -23723,7 +23722,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchOptionsRetrieval",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -24061,7 +24060,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchChatCompletionsRequest",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -24152,7 +24151,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchMultiSearchOptions",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -24389,7 +24388,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchMultiSearchChunkScoringDetails",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -24480,7 +24479,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchMultiChatCompletionsRequest",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -24543,7 +24542,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchMultiChatCompletionsResponse",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -24655,7 +24654,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchChatCompletionsResponse",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -24697,7 +24696,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchChatCompletionsResponseChoicesItem",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -24732,7 +24731,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchChatCompletionsResponseChoicesItemMessage",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -25390,7 +25389,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchInstanceInfo",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -26107,7 +26106,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchConfig",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -26429,7 +26428,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchItemInfo",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -27587,7 +27586,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchInstance",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -27650,7 +27649,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchInstanceChatCompletionsParams",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -28070,7 +28069,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchInstanceUpdateConfig",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -28098,7 +28097,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchNamespace",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -28147,7 +28146,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiSearchNamespaceChatCompletionsParams",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -29181,7 +29180,7 @@
     {
       "name": "AiTextGenerationToolLegacyInputParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -29193,7 +29192,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiTextGenerationToolLegacyInputParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -29314,7 +29313,7 @@
     {
       "name": "AiTextGenerationToolInputFunctionParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -29326,7 +29325,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiTextGenerationToolInputFunctionParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -32385,7 +32384,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ChatCompletionsCommonOptions",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -33292,7 +33291,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ChatCompletionsMessagesInput",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -33388,7 +33387,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ResponseFormatTextJSONSchemaConfigSchema",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -33428,7 +33427,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ResponsesFunctionToolParameters",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -33756,7 +33755,7 @@
     {
       "name": "ResponsePromptVariables",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -33768,7 +33767,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ResponsePromptVariables",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -38479,7 +38478,7 @@
     {
       "name": "Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem2FunctionParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -38491,7 +38490,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem2FunctionParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -38542,7 +38541,7 @@
     {
       "name": "Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItemParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -38554,7 +38553,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItemParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -39380,7 +39379,7 @@
     {
       "name": "Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItem2FunctionParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -39392,7 +39391,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItem2FunctionParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -39443,7 +39442,7 @@
     {
       "name": "Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItemParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -39455,7 +39454,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Meta_Llama_3_3_70B_Instruct_Fp8_Fast_MessagesToolsItemParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -40707,7 +40706,7 @@
     {
       "name": "Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItem2FunctionParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -40719,7 +40718,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItem2FunctionParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -40770,7 +40769,7 @@
     {
       "name": "Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItemParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -40782,7 +40781,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Qwen_Qwen2_5_Coder_32B_Instruct_MessagesToolsItemParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -41742,7 +41741,7 @@
     {
       "name": "Ai_Cf_Qwen_Qwq_32B_MessagesToolsItem2FunctionParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -41754,7 +41753,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Qwen_Qwq_32B_MessagesToolsItem2FunctionParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -41805,7 +41804,7 @@
     {
       "name": "Ai_Cf_Qwen_Qwq_32B_MessagesToolsItemParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -41817,7 +41816,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Qwen_Qwq_32B_MessagesToolsItemParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -42693,7 +42692,7 @@
     {
       "name": "Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItem2FunctionParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -42705,7 +42704,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItem2FunctionParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -42756,7 +42755,7 @@
     {
       "name": "Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItemParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -42768,7 +42767,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Mistralai_Mistral_Small_3_1_24B_Instruct_MessagesToolsItemParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -43546,7 +43545,7 @@
     {
       "name": "Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItem2FunctionParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -43558,7 +43557,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItem2FunctionParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -43609,7 +43608,7 @@
     {
       "name": "Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItemParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -43621,7 +43620,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Google_Gemma_3_12B_It_MessagesToolsItemParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -44497,7 +44496,7 @@
     {
       "name": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItem2FunctionParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -44509,7 +44508,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItem2FunctionParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -44560,7 +44559,7 @@
     {
       "name": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItemParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -44572,7 +44571,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_MessagesToolsItemParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -44903,7 +44902,7 @@
     {
       "name": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItem2FunctionParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -44915,7 +44914,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItem2FunctionParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -44966,7 +44965,7 @@
     {
       "name": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItemParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -44978,7 +44977,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Meta_Llama_4_Scout_17B_16E_Instruct_Messages_InnerToolsItemParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -46232,7 +46231,7 @@
     {
       "name": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItem2FunctionParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -46244,7 +46243,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItem2FunctionParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -46295,7 +46294,7 @@
     {
       "name": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItemParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -46307,7 +46306,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_MessagesToolsItemParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -46470,7 +46469,7 @@
     {
       "name": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItem2FunctionParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -46482,7 +46481,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItem2FunctionParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -46533,7 +46532,7 @@
     {
       "name": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItemParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -46545,7 +46544,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Messages_1ToolsItemParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -48135,7 +48134,7 @@
     {
       "name": "Ai_Cf_Deepgram_Nova_3_Input",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB003",
@@ -48630,7 +48629,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Deepgram_Nova_3_Input",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -49892,7 +49891,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Base_Ai_Cf_Openai_Gpt_Oss_120BInputs",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -50445,7 +50444,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Base_Ai_Cf_Openai_Gpt_Oss_120BInputs2",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -50454,7 +50453,7 @@
     {
       "name": "Base_Ai_Cf_Openai_Gpt_Oss_120BPostProcessedOutputs",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SI003",
@@ -50641,7 +50640,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Base_Ai_Cf_Openai_Gpt_Oss_120BPostProcessedOutputs",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -51026,7 +51025,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Base_Ai_Cf_Openai_Gpt_Oss_120BPostProcessedOutputs2",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -51623,7 +51622,7 @@
     {
       "name": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItem2FunctionParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -51635,7 +51634,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItem2FunctionParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -51686,7 +51685,7 @@
     {
       "name": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItemParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -51698,7 +51697,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_MessagesToolsItemParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -51861,7 +51860,7 @@
     {
       "name": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItem2FunctionParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -51873,7 +51872,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItem2FunctionParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -51924,7 +51923,7 @@
     {
       "name": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItemParametersProperties",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -51936,7 +51935,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Messages_1ToolsItemParametersProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -54897,12 +54896,12 @@
     {
       "name": "AiModels",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiModels",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -55044,7 +55043,7 @@
     {
       "name": "GatewayOptionsMetadata",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -55063,7 +55062,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "GatewayOptionsMetadata",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -55367,7 +55366,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiModelListType",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -55605,7 +55604,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AIGatewayUniversalRequestHeaders",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -55857,7 +55856,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Ai",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -56446,7 +56445,7 @@
     {
       "name": "AutoRagSearchResponseDataItemAttributes",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -56465,7 +56464,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AutoRagSearchResponseDataItemAttributes",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -57116,7 +57115,7 @@
     {
       "name": "AiGatewayLog",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB003",
@@ -57289,7 +57288,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AiGatewayLog",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -57330,7 +57329,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AIGatewayHeaders",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -58796,7 +58795,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AutoRAG",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -66892,7 +66891,7 @@
     {
       "name": "BrowserRunSerializedAXNode",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB003",
@@ -67247,7 +67246,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "BrowserRunSerializedAXNode",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -67716,7 +67715,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "BrowserRun",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -68059,7 +68058,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "RequestInitCfProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -68186,7 +68185,7 @@
     {
       "name": "RequestInitCfPropertiesVaryHeaders",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -68233,7 +68232,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "RequestInitCfPropertiesVaryHeaders",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -69094,7 +69093,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "RequestInitCfPropertiesImageDraw",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -69591,7 +69590,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "RequestInitCfPropertiesImage",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -69955,7 +69954,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "IncomingRequestCfProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -70099,7 +70098,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "IncomingRequestCfPropertiesBase",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -70809,7 +70808,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "D1ResponseMeta",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -71059,7 +71058,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "D1PreparedStatement",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -71096,7 +71095,7 @@
     {
       "name": "ForwardableEmailMessage",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SI005",
@@ -71122,7 +71121,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ForwardableEmailMessage",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -71815,12 +71814,12 @@
     {
       "name": "SendEmail",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "SendEmail",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -71934,7 +71933,7 @@
     {
       "name": "FlagshipEvaluationContext",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -71946,7 +71945,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "FlagshipEvaluationContext",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -73783,7 +73782,7 @@
     {
       "name": "ImageListFilterMetadata",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -73795,7 +73794,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ImageListFilterMetadata",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -76529,7 +76528,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "WorkflowStep",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -77931,7 +77930,7 @@
     {
       "name": "StreamVideo",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "TR032",
@@ -78041,7 +78040,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "StreamVideo",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -78573,7 +78572,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "StreamWatermarks",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -79934,7 +79933,7 @@
     {
       "name": "ToMarkdownService",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "TR032",
@@ -79953,7 +79952,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ToMarkdownService",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -79982,7 +79981,7 @@
     {
       "name": "VectorizeVectorMetadata2",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -79994,7 +79993,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "VectorizeVectorMetadata2",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -80090,7 +80089,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "VectorizeVectorMetadataFilter",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -80348,7 +80347,7 @@
     {
       "name": "VectorizeVectorMetadata3",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -80360,7 +80359,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "VectorizeVectorMetadata3",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -80920,7 +80919,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "DynamicDispatchOptionsOutbound",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -80983,7 +80982,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "DispatchNamespaceGetArgs",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }

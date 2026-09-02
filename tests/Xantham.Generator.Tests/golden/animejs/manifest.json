@@ -3,8 +3,8 @@
   "module": "Animejs",
   "counts": {
     "exact": 72,
-    "ergonomic": 67,
-    "widened": 47,
+    "ergonomic": 82,
+    "widened": 32,
     "escape": 52
   },
   "passes": [
@@ -51,8 +51,7 @@
     {
       "pass": "SP - synthesize-paramobjects",
       "total": 130,
-      "ergonomic": 87,
-      "widened": 43
+      "ergonomic": 130
     },
     {
       "pass": "DO - dedupe-overloads",
@@ -92,7 +91,7 @@
     {
       "name": "AnimatableAnimations",
       "file": "dist/modules/animatable/animatable.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -104,7 +103,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AnimatableAnimations",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -657,7 +656,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "DurationKeyframesItem",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -666,7 +665,7 @@
     {
       "name": "PercentageKeyframesItem",
       "file": "dist/modules/animatable/animatable.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SI003",
@@ -699,7 +698,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PercentageKeyframesItem",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -720,7 +719,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ScrollContainer",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -735,7 +734,7 @@
     {
       "name": "TimelineLabels",
       "file": "dist/modules/animatable/animatable.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -747,7 +746,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "TimelineLabels",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -915,7 +914,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "JSAnimation",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -1230,7 +1229,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Draggable",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -1358,12 +1357,12 @@
     {
       "name": "Eases",
       "file": "dist/modules/easings/eases/parser.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Eases",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -1496,7 +1495,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Spring",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -1524,7 +1523,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Engine",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -1663,7 +1662,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ScrollObserver",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -1768,7 +1767,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AutoLayoutParamsDelay",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -2393,7 +2392,7 @@
     {
       "name": "LayoutStateAnimationProperties",
       "file": "dist/modules/layout/layout.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -2433,7 +2432,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "LayoutStateAnimationProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -2930,7 +2929,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "LayoutStateParams",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5667,7 +5666,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AutoLayoutParams",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -5676,7 +5675,7 @@
     {
       "name": "LayoutNodeProperties",
       "file": "dist/modules/layout/layout.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SI003",
@@ -5723,7 +5722,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "LayoutNodeProperties",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5732,7 +5731,7 @@
     {
       "name": "LayoutNode",
       "file": "dist/modules/layout/layout.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "TR032",
@@ -5821,7 +5820,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "LayoutNode",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -5836,7 +5835,7 @@
     {
       "name": "Scope",
       "file": "dist/modules/scope/scope.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "TR032",
@@ -5848,7 +5847,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Scope",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -5876,7 +5875,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ScopeData",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5885,7 +5884,7 @@
     {
       "name": "ScopeMatches",
       "file": "dist/modules/scope/scope.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -5897,7 +5896,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ScopeMatches",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5906,7 +5905,7 @@
     {
       "name": "ScopeMediaQueryLists",
       "file": "dist/modules/scope/scope.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -5918,7 +5917,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ScopeMediaQueryLists",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5927,7 +5926,7 @@
     {
       "name": "ScopeMethods",
       "file": "dist/modules/scope/scope.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -5939,7 +5938,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ScopeMethods",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -5948,7 +5947,7 @@
     {
       "name": "ScopeParamsMediaQueries",
       "file": "dist/modules/scope/scope.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -5960,7 +5959,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ScopeParamsMediaQueries",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -6687,7 +6686,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Timeline",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -6834,7 +6833,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Timer",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -7924,7 +7923,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "CallbackArgument",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -8092,7 +8091,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "CallbackArgumentHead",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -8253,7 +8252,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "CallbackArgumentHead2",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -8512,7 +8511,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "CallbackArgumentHeadParent",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -8778,7 +8777,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "CallbackArgumentHeadPrev",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -9091,7 +9090,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "JSTarget",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -10857,7 +10856,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Tween",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -10908,7 +10907,7 @@
     {
       "name": "TweenLookups",
       "file": "dist/modules/types/index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -10920,7 +10919,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "TweenLookups",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -12383,7 +12382,7 @@
     {
       "name": "PercentageKeyframeParams",
       "file": "dist/modules/types/index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -12395,7 +12394,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PercentageKeyframeParams",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -12404,7 +12403,7 @@
     {
       "name": "PercentageKeyframes",
       "file": "dist/modules/types/index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "MB004",
@@ -12416,7 +12415,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "PercentageKeyframes",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -13297,7 +13296,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AnimationParams",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -15065,7 +15064,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "WAAPIAnimationParams",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -15190,7 +15189,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AnimatableObject",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -15568,7 +15567,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AnimatableParams",
           "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
@@ -16845,7 +16844,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "DraggableParams",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -20561,7 +20560,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "DrawableSVGGeometry",
           "message": "no ParamObject Create synthesized: an overloaded method would bind two parameters of one name"
         }
@@ -21171,7 +21170,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Utils",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }
@@ -21290,7 +21289,7 @@
         {
           "key": "SP003",
           "pass": "synthesize-paramobjects",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "WAAPIAnimation",
           "message": "no ParamObject Create synthesized: more members than the Create parameter budget"
         }

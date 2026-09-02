@@ -593,8 +593,9 @@ type SynthesizeParamObjects =
     /// Wave four, lane O. A method member carried into `Create` as a function-typed parameter.
     /// The delegate it binds receives no `this`.
     | [<Ergonomic>] MethodMemberAsCreateParameter
-    /// Wave four, lane O. An interface with no `Create`, and why.
-    | [<Widened>] CreateNotSynthesized of reason: string
+    /// Wave four, lane O. An interface with no `Create`, and why. The interface itself is
+    /// unchanged: a consumer builds it as they did before this convenience existed.
+    | [<Ergonomic>] CreateNotSynthesized of reason: string
 
     interface IFindingKind with
         member this.Message =
