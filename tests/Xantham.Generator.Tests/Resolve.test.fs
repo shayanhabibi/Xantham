@@ -65,4 +65,13 @@ let classifyTests =
             Expect.equal (Naming.groupModule "ansi-regex" CompilerLib) "TypeScript.Lib" "the lib module"
             Expect.equal (Naming.groupModule "ansi-regex" (Dependency "left-pad")) "LeftPad" "a dependency"
             Expect.equal (Naming.groupModule "ansi-regex" EntryPackage) "AnsiRegex" "the entry"
+
+            // A DefinitelyTyped package is named for the library it describes, so the module an
+            // F# consumer opens is the library's.
+            Expect.equal (Naming.packageModule "@types/three") "Three" "a types package"
+            Expect.equal (Naming.packageModule "@types/babel__core") "Babel.Core" "and one whose scope DT mangled"
+
+            // The reference side derives it too, or a dependency would be opened under a name no
+            // `ship` run of it ever writes.
+            Expect.equal (Naming.groupModule "ansi-regex" (Dependency "@types/three")) "Three" "a types dependency"
     ]

@@ -1,6 +1,6 @@
 {
   "package": "@types/types-only-lab",
-  "module": "Types.TypesOnlyLab",
+  "module": "TypesOnlyLab",
   "counts": {
     "exact": 2,
     "ergonomic": 2,

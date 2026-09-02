@@ -186,8 +186,16 @@ module Naming =
         segments text |> Array.map capitalize |> String.concat ""
 
     /// A package's module name: `@scope/pkg-name` -> `Scope.PkgName`.
+    ///
+    /// The name is taken from the runtime package, so a DefinitelyTyped package is named for the
+    /// library it describes: `@types/three` -> `Three`, `@types/babel__core` -> `Babel.Core`. An
+    /// F# consumer opens the binding for the library, and `@types/` is a TypeScript-side
+    /// convention for attaching declarations to a package that shipped without them - it
+    /// distinguishes nothing on this side, where the declarations and the library are one
+    /// binding. Deriving it here rather than at the call site keeps a declaration and every
+    /// cross-package reference to it on the same name.
     let packageModule (packageName: string) =
-        packageName.TrimStart('@').Split('/')
+        (GeneratorConfig.derivedRuntimePackage packageName).TrimStart('@').Split('/')
         |> Array.map pascalSegment
         |> String.concat "."
 

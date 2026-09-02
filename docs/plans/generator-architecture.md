@@ -925,6 +925,25 @@ Phases — each ends with the compile gate green on its fixtures:
     (`inherit EventTarget<EventCurrentTargetItem>`, not `<WorkerGlobalScopeEventMap>`), which
     is honest but is the one place the emitted relation is weaker than the source's.
 
+- **Phase E — a DefinitelyTyped package is named for the library it describes.**
+  `Naming.packageModule` takes its name from the runtime package, so `@types/three` binds as
+  `Three` and `@types/babel__core` as `Babel.Core`. `@types/` is a TypeScript-side convention for
+  attaching declarations to a library that shipped without them; on the F# side the declarations
+  and the library are one binding, so the scope segment separates a thing from itself. The
+  derivation is lane D's `derivedRuntimePackage`, which already undoes DefinitelyTyped's
+  `scope__name` folding — reusing it keeps `Babel.Core` a namespace, where stripping the prefix
+  literally would give `BabelCore`. It sits inside `packageModule` rather than at either call
+  site, so `Pipeline.moduleName` and `Naming.groupModule` stay on one name and a `reference`
+  group templates the module a real `ship` run of that package writes.
+
+  This amends O7's pinned naming contract, and it is breaking for every binding generated from a
+  `@types/*` package. One golden moved: `types-only-lab` renders `module rec TypesOnlyLab` with
+  its manifest reading `"module": "TypesOnlyLab"`, and the file renamed with it — git recorded a
+  pure rename, so the binding is otherwise identical. Provenance is untouched, the header still
+  recording `@types/types-only-lab`; `runtime` in `xantham.json` still overrides the import
+  specifier and leaves the module name alone; and a real scope keeps its segment, with
+  `@cloudflare/workers-types` staying `Cloudflare.WorkersTypes`.
+
 ## 7. Decisions (2026-09-01)
 
 All six original open questions were resolved in review; each is also inlined at its
@@ -980,8 +999,9 @@ section above.
   mattering: a `reference` group templates exactly the names a real `ship` run of that
   group produces, so "generate B against already-generated A" and "generate B first"
   emit identical source. Second, **naming is a contract**: `Naming.groupModule`
-  (`@scope/pkg` → `Scope.Pkg`, compiler lib → `TypeScript.Lib`) is pinned and versioned
-  because independently generated packages must agree on every templated name — while
+  (`@scope/pkg` → `Scope.Pkg`, `@types/pkg` → the library's own name, compiler lib →
+  `TypeScript.Lib`) is pinned and versioned because independently generated packages must
+  agree on every templated name — while
   remembering that source-level agreement is not identity; the compiled *assembly*
   (NuGet version discipline against the `typescript` npm pin, as Wire already
   practices) is what unifies a type across packages. Ship-group emission beyond the
