@@ -1,4 +1,4 @@
----
+﻿---
 category: Generator
 audience: managing agent
 title: Plan - generator wave four
@@ -186,6 +186,21 @@ every site attributed, or the unattributed remainder stated with its count.
   labs run outside the repository, exactly as the `TR018` recon did.
 - `TR009` (156, `UnknownToObj`) and `TR006` (297, `StringLiteralToString`) are settled decisions
   and are **out of scope**. So is anything under §§1, 2, 4, 5 of the workarounds document.
+
+## Batch 1 — landed
+
+| lane | result |
+|---|---|
+| N | `SC003` 3 → 0. The loss was the attribute's placement, not Fable's compilation model: a type-level `[<Import("Budget", …)>]` with a bare `get`/`set` member emits `Budget.limit = 5`, where the per-member form emits a call. `SC006` 3 exact, `SE003` 1. Run gate writes and reads back. **`fable5-workarounds.md` §6 closed.** |
+| O | `Create` synthesized for interfaces carrying a method: `SP001` +180, cloudflare 1,137 → 1,278. `SP002` 615, `SP003` 190 with four ranked reasons. Overloaded methods refused rather than first-wins. **§3 closed.** |
+| P | `TR018` 197 → **77**, against a prediction of 112. `TR049` 59, `TR050` 44, `TR051` 9. `TR035` 88 → 27 and `TR036` 35 → 72 — the recon's flagged interaction, and the direction it moved. `TR019` re-read: reachable, and a distinct population from `TR018`. |
+| Q | `docs/plans/generator-cloudflare-recon.md`, 777 lines, residual zero over 242 findings and the whole 115-symbol escape tier. |
+
+Composition cost one interaction and one manager error. The interaction: lane P's
+`intersection-callable-lab` gains a `Create` from lane O, which never saw that fixture. The error:
+`SP003` was pre-declared `Widened` and is `Ergonomic` — 190 refusals on symbols that are not
+widened had pushed the litmus package from 374 widened to 418, in a wave that reduced widening
+everywhere else. Re-tiered in place at `35c2ea4`; the package reads 365.
 
 ## Batch 2 — priced by batch 1
 

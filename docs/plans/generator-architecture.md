@@ -1,4 +1,4 @@
----
+﻿---
 category: Generator
 title: Plan - Architecture
 index: 1
@@ -1001,6 +1001,44 @@ Three things the wave learned that outlive it. `TR044`'s absence was not evidenc
 `TP007` is constructed nowhere in `src/` and is retained rather than retired, because removing it renumbers `TP008`, which is quoted by four source files and by measurements two plan documents record. The case says so.
 
 The measurement handed up rather than acted on: `RT001` says `@cloudflare/workers-types` now truncates 1,772 types at `FollowDepth` 12 against 261 before, and a five-symbol lab from another lane crossed the cutoff during composition. No output is wrong today. Raising the cutoff is a corpus-wide behaviour change and belongs to a wave that measures it deliberately.
+
+**Wave four, closed (2026-09-03).** Four lanes over `docs/plans/generator-wave-four.md`, in one
+batch on disjoint pass files. The corpus stands at 30 fixtures. `TR018` fell 197 to 77 and
+`@cloudflare/workers-types` - now the litmus test in place of `@types/three` - reads exact 231,
+ergonomic 1,061, widened 365, escape 115, from 374 widened.
+
+The wave was scoped by the user's dispositions rather than by the corpus. Four of the six losses
+in `docs/fable5-workarounds.md` are closed as unresolvable and carry no work in any wave. Two
+carried work and both landed, so **§3 and §6 of that document are now closed**. Deprioritising
+`@types/three` cost the previous wave-four list its second item: `alignOperands` stands at 45 on
+`three` against 1 on cloudflare, so with the rung out of scope the lane had no justification and
+was not dispatched.
+
+Three things the wave learned that outlive it. **A settable static was never blocked by Fable's
+compilation model** - `Shape/Classes.fs` asserted that an assignment to an imported static
+compiles to a call, which is true of a per-member `[<Import("Budget.limit", …)>]` and false of a
+type-level `[<Import("Budget", …)>]` carrying a bare `get`/`set` member. The loss was the
+placement of the attribute, and the run gate now writes through the binding and reads the value
+back off the JavaScript object. **A recon's prediction was low by a third**: `TR018` was priced at
+112 and landed at 77, because reducing `X & {}` inside a union also removes the union-and-union
+intersections booked to a different cause. And **`TR035` is a cascade rather than a population** -
+it fell 88 to 27 while `TR036` rose 35 to 72, because arms that used to collapse into one `obj`
+now survive as distinct types and meet D4's cap of four instead.
+
+`docs/fable-binding-gaps.md` is new, and is a fourth cause of loss beside the three
+`fable5-workarounds.md` sorts into: the mapping is expressible and **`Fable.Core` ships no name to
+bind to**. Four entries, all answered - the synchronous iteration protocol (28 sites; the async
+half ships and the sync half does not), `symbol` (11), `BigUint64Array` (1), and a bound name that
+drops arity (132). The user's disposition on all four is to hand-roll or generate the bindings in
+`src/Xantham.Fable.Core`, shadowing the `Fable.Core.JS` namespace so the names resolve there, and
+to raise a PR upstream once the generator is working. That is a wave-five lane.
+
+The measurement handed up rather than acted on, for the second wave running: `RT001` and the
+`FollowDepth` cutoff. `docs/plans/generator-cloudflare-recon.md` adds three more - a finding-count
+inflation of x14 in `erasedUnionRef` that makes `TR037`'s 56 into 4 real owners, an
+`ErasedUnionArity` cap of 4 that `Fable.Core`'s `U2`-`U9` does not require, and `KVNamespace.get`
+binding only its first overload, which makes the arrayBuffer, stream and json forms unreachable
+from F# on the litmus package.
 
 ## 7. Decisions (2026-09-01)
 
