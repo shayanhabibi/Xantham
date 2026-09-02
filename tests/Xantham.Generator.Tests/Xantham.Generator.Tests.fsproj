@@ -12,6 +12,7 @@
         <Compile Include="Shape.test.fs" />
         <Compile Include="Render.test.fs" />
         <Compile Include="Findings.test.fs" />
+        <Compile Include="MultiPackage.test.fs" />
         <Compile Include="Pipeline.test.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
