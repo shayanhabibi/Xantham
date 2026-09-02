@@ -574,6 +574,213 @@ under ~30 s. Blocker 1 is the one that decides it; the other three are bounded w
 
 ---
 
+## 11. Re-measurement at wave three HEAD (2026-09-02)
+
+§10 gated reconsideration on four criteria. This section reports all four at `2c84d1d`, the wave
+three integration branch after its pre-dispatch commit, by Appendix A's methods unchanged. No
+source was modified for it.
+
+**Provenance.** The fixture floats, and it landed on the version §1 measured:
+`@types/three@0.185.4`, 924 `.d.ts` files, 53,460 lines. Compiler `typescript@7.1.0-dev.20260830.1`,
+borrowed from the main checkout through `tools/workspace.fsx`. `GeneratorConfig.Default`, with no
+`xantham.json` beside the package. Harness: a scratch `.fsx` calling `Pipeline.generate config
+packageDir` twice in one process, writing outside the repository. Every number below therefore
+compares to §1-§7 directly.
+
+### 11.1 The four criteria
+
+| criterion | threshold | baseline (`master` @ 4f08945) | HEAD (`2c84d1d`) | |
+|---|---|---|---|---|
+| rendered size | under ~50k lines | 482,524 lines / 134,520,603 bytes | 482,801 lines / 134,527,443 bytes | **fail** |
+| determinism | byte-identical over two in-process runs | `.fs` identical, manifest differs on 162 lines | `.fs` identical, manifest differs on 162 lines | **fail** |
+| compiler errors | zero | 337 `FS0010`, 328 `FS0001`, 1 `FS0043`, 8 `FS0193` | 0 errors, 0 warnings | **pass** |
+| gate compile time | under ~30 s | 3 m 20 s | 3 m 46.8 s | **fail** |
+
+One of four. Generation itself took 72,260 ms and 70,412 ms over the two runs, against §3's
+76,059 ms.
+
+**Blockers 3 and 4 are closed, and the whole 128 MB file is the evidence.** It compiles against the
+`CompileGate` package set - `Fable.Core 5.2.0`, `Xantham.Fable.Core`, the 23 `Fable.Browser.*` pins
+- under `--maxerrors:5000`, and fsc emits no diagnostic at any severity. `SI002` fell 254 -> 0 and
+`SI005` rose 0 -> 270, which is lane C's `inherit` for declared bases: the sites that produced the
+328 `FS0001` resolve nominally now, `FS0043` and the eight `FS0193` warnings with them, and the
+`>>:` parse error is gone. §7's secondary observation stands too - fsc type-checks a 482k-line file
+without exhausting memory.
+
+**Blocker 5 is closed.** The module renders as `Three` rather than `Types.Three`, and `SE002`
+reports once, at the module: `types-only package has no runtime; imports bind to three, derived
+rather than configured`.
+
+**Blockers 1 and 2 are open at the same magnitude.** Every §5 measurement is inside a rounding
+error of the baseline:
+
+| measurement | baseline | HEAD |
+|---|---:|---:|
+| declaration blocks | 1,253 | 1,255 |
+| blocks named `…Result` | 518 | 518 |
+| lines in them | 369,116 | 369,112 |
+| share of the file | 76.5% | 76.5% |
+| blocks over 1,000 lines | 95 | 95 |
+| blocks over 500 lines | 366 | 366 |
+| largest block | `Exports`, 3,642 lines | `Exports`, 3,642 lines |
+| name length p50 / p90 / p99 / max | 23 / 1,363 / 1,622 / 1,689 | 23 / 1,363 / 1,624 / 1,689 |
+| names over 200 chars | 425 | 425 |
+| names over 1,000 chars | 271 | 271 |
+| max `…Result` segments in one name | 135 | 135 |
+
+The determinism failure is unchanged in kind and in count: the rendered `.fs` is byte-identical
+across the two runs at 134,527,443 bytes, and `manifest.json` differs at byte 669,241 over 162
+single-line hunks, each one a `TP001` message carrying a different checker-assigned type id.
+`Findings.fs`'s `UnnamedTypeParameter` still interpolates the id and `Shape/Spec.fs`'s
+`typeParamsOf` still raises it, so §4's diagnosis holds verbatim.
+
+### 11.2 Findings profile
+
+43 distinct keys, 51,073 findings over 1,472 symbols; tiers 101 exact / 259 ergonomic / 1,039
+widened / 73 escape, against §5's 101 / 257 / 1,038 / 73. Top 25, with §6's value beside each:
+
+```
+key      HEAD    §6        key      HEAD    §6
+TR032   21352  21352       SI003     511    511
+TR002    5698   5698       TR007     345    345
+TR036    4626   4626       TR008     297    297
+TR009    3599   3593       SI005     270      0
+MB003    2866   2866       SP001     257    257
+TP002    2330   2330       SC003     205    205
+TR031    2097   2097       TR035     184    184
+TR018    2053   2053       TP001     162    162
+TR001    1751   1751       TR024      96     96
+TR023    1009   1001       MB004      60     60
+TP006     657    657       TR014      20     27
+TR006     541    541       SC004      18     18
+                           DO001      17     17
+```
+
+Tail: `TR004` 10, `TR040` 8, `MB002` 6, `TR013` 5, `LU001` 4, `TP008` 4, `SI004` 2, `TR015` 2,
+`TP004` 2, and one each of `TR033`, `SA002`, `TR029`, `TR027`, `SI006`, `SE002`, `RT001`, `AC001`,
+`RA001`. `SI002` is the one key that left the profile, at 254 -> 0.
+
+The four keys §10 named as the reason to keep `three` as a diagnostic rung all sit where they sat:
+
+| key | §6 | HEAD | reading |
+|---|---:|---:|---|
+| `TR002` | 5,698 | 5,698 | members truncated at the depth cutoff, still zero on every other rung |
+| `RT001` | 1 (10,461 types) | 1 (10,462 types) | the frontier is still growing when the cutoff stops it |
+| `TP001` | 162 | 162 | the determinism failure, unmoved |
+| `TR036` | 4,626 | 4,626 | the union-arity cap, 132x the next rung (`@cloudflare/workers-types` at 35) |
+
+The runaway is capped exactly where it was capped, and the cap is the only thing bounding it.
+
+### 11.3 `TP007` and `SY002`
+
+Both are zero on `three`, as they are on all 21 corpus fixtures.
+
+- **`TP007 UnnamedTypeParametersCounted` has no raise site.** `Findings.fs` declares it and
+  `Findings.test.fs` snapshots it; nothing in `src/Xantham.Generator/` constructs it. It cannot fire
+  on any input. Its intended replacement target, `TP001`, still fires 162 times with the checker id
+  in the message.
+- **`SY002 HoistArgumentsNotRecovered` has a raise site** at `Shape/Anonymous.fs:245`, on the branch
+  where `aliasInstantiationOf` recognises the alias and the unification fails to recover its
+  arguments. On `three` that branch is unreachable, because recognition itself fails one step
+  earlier - `SY001 InstantiationNamedOnce` is also zero here, against 9 on
+  `@cloudflare/workers-types` and 4 on `chain-lab`.
+
+`TP007` is a dead case on the evidence of its own source, independent of any fixture. `SY002` is a
+live guard whose condition `three` never reaches; §11.4 is why.
+
+### 11.4 The next blocker: a conditional operand in the alias body defeats the recogniser
+
+Lane A's `aliasInstantiationOf` bounds `chain-lab` - 11 lines in, 11 symbols and 52 rendered lines
+out, `SY001` firing 4 times and the chain stopping. It fires zero times on `three`, whose runaway is
+unchanged. The lab and the package differ in that `three`'s `Node<TNodeType>`
+(`src/nodes/core/Node.d.ts`) intersects a conditional type into the alias body:
+
+```ts
+type Node<TNodeType> = NodeInterface<…>
+    & (unknown extends TNodeType ? {} : NodeExtensions<TNodeType>)
+    & NodeExtras[TNodeType & string]
+    & { __TypeScript_NODE_TYPE__: TNodeType };
+```
+
+**Reproducer** - `chain-lab` with one operand changed, 12 declarative lines:
+
+```ts
+export interface NodeExtensions<TNodeType> {
+    toVar: (name?: string | null) => VarNode<TNodeType, this>;
+}
+export type Node<TNodeType> =
+    & { readonly isNode: true }
+    & (unknown extends TNodeType ? {} : NodeExtensions<TNodeType>);
+export interface VarNodeInterface<TNode> {
+    node: TNode;
+    readonly isVarNode: true;
+}
+export type VarNode<TNodeType, TNode> = Node<TNodeType> & VarNodeInterface<TNode>;
+export declare const seed: Node<number>;
+```
+
+Against the control, which is the same file with `& NodeExtensions<TNodeType>` written in place of
+the conditional operand:
+
+| | control | reproducer |
+|---|---:|---:|
+| declarations | 10 | 13 |
+| rendered lines | 49 | 109 |
+| `SY001` | 4 | 0 |
+| `SY002` | 0 | 0 |
+| `TR002` | 0 | 1 |
+| max `…Result` segments | 1 | 6 |
+
+Both runs declare `VarNode`, so the alias has a name to be written as. The control hoists one
+generation - `NodeToVarResult`, `NodeExtensionsToVarResult`, `VarNodeToVarResult` - and recognises
+the second as an application of `VarNode`. The reproducer recognises nothing and mints
+`SeedToVarResult…` six deep until the depth cutoff stops it, with `SY002` silent, so the failure is
+in recognition rather than in the unification `SY002` guards. `aliasDeclarationForms`
+(`Shape/Anonymous.fs`) admits an alias only where `isFlattenable` holds of its declaration form and
+the form binds parameters of its own; an intersection carrying an unresolved conditional operand is
+where to look first.
+
+Closing it needs the recogniser to admit an alias whose body intersects a conditional type, or a
+refusal to hoist through polymorphic `this` at all - §9's second option, one finding in place of 518
+declarations. Either way the size assertion belongs on a lab: `chain-lab` passes today and the
+package it was reduced from does not, so the lab as written under-approximates the construct. A
+second lab pinning the conditional operand is the negative that would have caught this at wave two.
+
+### 11.5 §10's fourth reason
+
+It survives unchanged. 518 of 1,255 declaration blocks are `…Result` hoists occupying 76.5% of the
+rendered file, and 494 of them carry a repeated `ToVarResult` segment from a single member of a
+single package file. A golden over this output would pin where the depth cutoff lands rather than
+the package's surface, and any change to `FollowDepth`, to naming, or to the shaper's hoist rule
+would rewrite a 128 MB artefact for reasons unrelated to `three`.
+
+### 11.6 Recommendation
+
+**Do not enrol.** Three of the four criteria fail, and the two §10 called the decision - size and
+determinism - are unmoved to the digit.
+
+The single next blocker is §11.4: the hoist recogniser does not see an alias whose body intersects a
+conditional type, so `three`'s `toVar` chain mints 518 declarations exactly as it did at
+reconnaissance. The reproducer above is 12 lines and its control is the same file minus one operand,
+so the work is scoped: land the pair as a lab with a declaration-count assertion, then widen the
+recogniser until the reproducer matches its control. Blocker 2 falls out of that - §4 established
+that `TP001` fires only where the depth cutoff already fired - and `TP007` is waiting unused for the
+aggregate form, should the id be kept out of the message instead.
+
+Two smaller items ride along:
+
+- **`TP007` is dead by construction**, not merely unfired. Retiring it renumbers `TypeParameters`
+  after position 7, which is the cost the wave three plan already priced.
+- **`SY002` stays.** It guards a real branch that `three` cannot reach today and will reach the
+  moment §11.4 closes.
+
+The gate cost stands as a separate objection even once size and determinism are fixed: 3 m 46.8 s on
+every `dotnet build Xantham.slnx`, against a ~30 s budget. A `three` rung that clears the first three
+criteria still needs that answered - by a binding of 50k lines rather than 482k, or by a gate tier
+running somewhere other than every build.
+
+---
+
 ## Appendix A — how each number was taken
 
 Per `.claude/rules/generator-fixtures.md`: run everything, read almost none of it. No rendered file
@@ -593,3 +800,5 @@ three individual lines extracted with `sed -n '<n>p'` to name a compiler-error s
 | import specifiers | `grep -oE 'Import\("[^"]*", "[^"]*"\)' … \| sort -u` |
 | DOM-collision probe | set membership of 25 names against the manifest's symbol names |
 | compiler errors | scratch net8.0 project mirroring `Xantham.Generator.CompileGate`'s package set, `--maxerrors:5000`; build log deduplicated by a `python` script keyed on `(line, col, code)` with quoted identifiers normalised |
+| gate compile time (§11) | wall clock around `dotnet build` of that same scratch project, restore excluded |
+| reproducer and control counts (§11) | a scratch `.fsx` calling `Pipeline.generate` over a hand-written package directory, printing declaration count, rendered line count and findings by key |
