@@ -4377,11 +4377,11 @@ type R2Bucket =
 [<Interface>]
 type R2BucketGetOptions =
     inherit R2GetOptions
-    abstract onlyIf: U4<Headers, R2Conditional, R2BucketGetOptionsOnlyIf, R2BucketGetOptionsOnlyIf2> with get, set
+    abstract onlyIf: U2<Headers, R2Conditional> with get, set
     abstract range: U4<Headers, R2ObjectRange, R2ObjectRange2, R2ObjectRange3> option with get, set
     abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (onlyIf: U4<Headers, R2Conditional, R2BucketGetOptionsOnlyIf, R2BucketGetOptionsOnlyIf2>, ?range: U4<Headers, R2ObjectRange, R2ObjectRange2, R2ObjectRange3>, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2BucketGetOptions = jsNative
+    static member Create (onlyIf: U2<Headers, R2Conditional>, ?range: U4<Headers, R2ObjectRange, R2ObjectRange2, R2ObjectRange3>, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2BucketGetOptions = jsNative
 
 [<Interface>]
 type R2BucketGetOptionsOnlyIf =
@@ -4492,7 +4492,7 @@ type R2BucketGetOptionsOnlyIf2 =
 [<Interface>]
 type R2BucketPutOptions =
     inherit R2PutOptions
-    abstract onlyIf: U4<Headers, R2Conditional, R2BucketGetOptionsOnlyIf, R2BucketGetOptionsOnlyIf2> with get, set
+    abstract onlyIf: U2<Headers, R2Conditional> with get, set
     abstract httpMetadata: U2<Headers, R2HTTPMetadata> option with get, set
     abstract customMetadata: RequestInitHeaders option with get, set
     abstract md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> option with get, set
@@ -4503,7 +4503,7 @@ type R2BucketPutOptions =
     abstract storageClass: string option with get, set
     abstract ssecKey: U2<string, JS.ArrayBuffer> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (onlyIf: U4<Headers, R2Conditional, R2BucketGetOptionsOnlyIf, R2BucketGetOptionsOnlyIf2>, ?httpMetadata: U2<Headers, R2HTTPMetadata>, ?customMetadata: RequestInitHeaders, ?md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2BucketPutOptions = jsNative
+    static member Create (onlyIf: U2<Headers, R2Conditional>, ?httpMetadata: U2<Headers, R2HTTPMetadata>, ?customMetadata: RequestInitHeaders, ?md5: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha1: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha256: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha384: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?sha512: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, ?storageClass: string, ?ssecKey: U2<string, JS.ArrayBuffer>) : R2BucketPutOptions = jsNative
 
 [<Interface>]
 type R2ObjectRange =
@@ -9374,11 +9374,11 @@ type BaseAiTextEmbeddings =
 
 [<Interface>]
 type RoleScopedChatInput =
-    abstract role: obj with get, set
+    abstract role: string with get, set
     abstract content: string with get, set
     abstract name: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (role: obj, content: string, ?name: string) : RoleScopedChatInput = jsNative
+    static member Create (role: string, content: string, ?name: string) : RoleScopedChatInput = jsNative
 
 [<Interface>]
 type AiTextGenerationToolLegacyInput =
@@ -9390,11 +9390,11 @@ type AiTextGenerationToolLegacyInput =
 
 [<Interface>]
 type AiTextGenerationToolLegacyInputParameters =
-    abstract ``type``: obj with get, set
+    abstract ``type``: string with get, set
     abstract properties: AiTextGenerationToolLegacyInputParametersProperties with get, set
     abstract required: string[] with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: obj, properties: AiTextGenerationToolLegacyInputParametersProperties, required: string[]) : AiTextGenerationToolLegacyInputParameters = jsNative
+    static member Create (``type``: string, properties: AiTextGenerationToolLegacyInputParametersProperties, required: string[]) : AiTextGenerationToolLegacyInputParameters = jsNative
 
 type AiTextGenerationToolLegacyInputParametersProperties =
     [<EmitIndexer>]
@@ -9409,10 +9409,10 @@ type AiTextGenerationToolLegacyInputParametersPropertiesItem =
 
 [<Interface>]
 type AiTextGenerationToolInput =
-    abstract ``type``: obj with get, set
+    abstract ``type``: string with get, set
     abstract ``function``: AiTextGenerationToolInputFunction with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: obj, ``function``: AiTextGenerationToolInputFunction) : AiTextGenerationToolInput = jsNative
+    static member Create (``type``: string, ``function``: AiTextGenerationToolInputFunction) : AiTextGenerationToolInput = jsNative
 
 [<Interface>]
 type AiTextGenerationToolInputFunction =
@@ -9424,11 +9424,11 @@ type AiTextGenerationToolInputFunction =
 
 [<Interface>]
 type AiTextGenerationToolInputFunctionParameters =
-    abstract ``type``: obj with get, set
+    abstract ``type``: string with get, set
     abstract properties: AiTextGenerationToolInputFunctionParametersProperties with get, set
     abstract required: string[] with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: obj, properties: AiTextGenerationToolInputFunctionParametersProperties, required: string[]) : AiTextGenerationToolInputFunctionParameters = jsNative
+    static member Create (``type``: string, properties: AiTextGenerationToolInputFunctionParametersProperties, required: string[]) : AiTextGenerationToolInputFunctionParameters = jsNative
 
 type AiTextGenerationToolInputFunctionParametersProperties =
     [<EmitIndexer>]
@@ -11325,13 +11325,13 @@ type Ai_Cf_Unum_Uform_Gen2_Qwen_500M_Input2 =
     /// Increases the likelihood of the model introducing new topics.
     /// </summary>
     abstract presence_penalty: float option with get, set
-    abstract image: obj with get, set
+    abstract image: U2<float[], string> with get, set
     /// <summary>
     /// The maximum number of tokens to generate in the response.
     /// </summary>
     abstract max_tokens: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (image: obj, ?prompt: string, ?raw: bool, ?top_p: float, ?top_k: float, ?seed: float, ?repetition_penalty: float, ?frequency_penalty: float, ?presence_penalty: float, ?max_tokens: float) : Ai_Cf_Unum_Uform_Gen2_Qwen_500M_Input2 = jsNative
+    static member Create (image: U2<float[], string>, ?prompt: string, ?raw: bool, ?top_p: float, ?top_k: float, ?seed: float, ?repetition_penalty: float, ?frequency_penalty: float, ?presence_penalty: float, ?max_tokens: float) : Ai_Cf_Unum_Uform_Gen2_Qwen_500M_Input2 = jsNative
 
 [<Interface>]
 type Ai_Cf_Unum_Uform_Gen2_Qwen_500M_Output =
@@ -11903,7 +11903,7 @@ type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Prompt =
     /// The input text prompt for the model to generate a response.
     /// </summary>
     abstract prompt: string with get, set
-    abstract image: obj option with get, set
+    abstract image: U2<float[], string> option with get, set
     /// <summary>
     /// If true, a chat template is not applied and you must adhere to the specific model's expected formatting.
     /// </summary>
@@ -11949,7 +11949,7 @@ type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Prompt =
     /// </summary>
     abstract lora: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (prompt: string, ?image: obj, ?raw: bool, ?stream: bool, ?max_tokens: float, ?temperature: float, ?top_p: float, ?top_k: float, ?seed: float, ?repetition_penalty: float, ?frequency_penalty: float, ?presence_penalty: float, ?lora: string) : Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Prompt = jsNative
+    static member Create (prompt: string, ?image: U2<float[], string>, ?raw: bool, ?stream: bool, ?max_tokens: float, ?temperature: float, ?top_p: float, ?top_k: float, ?seed: float, ?repetition_penalty: float, ?frequency_penalty: float, ?presence_penalty: float, ?lora: string) : Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Prompt = jsNative
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages =
@@ -11957,7 +11957,7 @@ type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages =
     /// An array of message objects representing the conversation history.
     /// </summary>
     abstract messages: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesMessagesItem[] with get, set
-    abstract image: obj option with get, set
+    abstract image: U2<float[], string> option with get, set
     abstract functions: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesFunctionsItem[] option with get, set
     /// <summary>
     /// A list of tools available for the assistant to use.
@@ -12000,7 +12000,7 @@ type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages =
     /// </summary>
     abstract presence_penalty: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (messages: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesMessagesItem[], ?image: obj, ?functions: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesFunctionsItem[], ?tools: U2<Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem, Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem2>[], ?stream: bool, ?max_tokens: float, ?temperature: float, ?top_p: float, ?top_k: float, ?seed: float, ?repetition_penalty: float, ?frequency_penalty: float, ?presence_penalty: float) : Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages = jsNative
+    static member Create (messages: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesMessagesItem[], ?image: U2<float[], string>, ?functions: Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesFunctionsItem[], ?tools: U2<Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem, Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_MessagesToolsItem2>[], ?stream: bool, ?max_tokens: float, ?temperature: float, ?top_p: float, ?top_k: float, ?seed: float, ?repetition_penalty: float, ?frequency_penalty: float, ?presence_penalty: float) : Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Messages = jsNative
 
 [<Interface>]
 type Ai_Cf_Meta_Llama_3_2_11B_Vision_Instruct_Output =
@@ -25153,27 +25153,27 @@ type EmailDestinations = U3<EmailDestinations2, EmailDestinations3, EmailDestina
 
 [<Interface>]
 type EmailDestinations2 =
-    abstract ``to``: obj with get, set
+    abstract ``to``: U3<string, U2<string, EmailAddress>[], EmailAddress> with get, set
     abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``to``: obj, ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailDestinations2 = jsNative
+    static member Create (``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailDestinations2 = jsNative
 
 [<Interface>]
 type EmailDestinations3 =
     abstract ``to``: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
-    abstract cc: obj with get, set
+    abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> with get, set
     abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (cc: obj, ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailDestinations3 = jsNative
+    static member Create (cc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailDestinations3 = jsNative
 
 [<Interface>]
 type EmailDestinations4 =
     abstract ``to``: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
-    abstract bcc: obj with get, set
+    abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (bcc: obj, ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailDestinations4 = jsNative
+    static member Create (bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailDestinations4 = jsNative
 
 /// <summary>
 /// Fields shared by all composed emails (no recipients). Used directly by
@@ -25208,11 +25208,11 @@ type EmailMessageBuilder2 =
     abstract text: string option with get, set
     abstract html: string option with get, set
     abstract attachments: EmailAttachment[] option with get, set
-    abstract ``to``: obj with get, set
+    abstract ``to``: U3<string, U2<string, EmailAddress>[], EmailAddress> with get, set
     abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (from: U2<string, EmailAddress>, subject: string, ``to``: obj, ?replyTo: U2<string, EmailAddress>, ?headers: RequestInitHeaders, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder2 = jsNative
+    static member Create (from: U2<string, EmailAddress>, subject: string, ``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?replyTo: U2<string, EmailAddress>, ?headers: RequestInitHeaders, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder2 = jsNative
 
 [<Interface>]
 type EmailMessageBuilder3 =
@@ -25225,10 +25225,10 @@ type EmailMessageBuilder3 =
     abstract html: string option with get, set
     abstract attachments: EmailAttachment[] option with get, set
     abstract ``to``: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
-    abstract cc: obj with get, set
+    abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> with get, set
     abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (from: U2<string, EmailAddress>, subject: string, cc: obj, ?replyTo: U2<string, EmailAddress>, ?headers: RequestInitHeaders, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder3 = jsNative
+    static member Create (from: U2<string, EmailAddress>, subject: string, cc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?replyTo: U2<string, EmailAddress>, ?headers: RequestInitHeaders, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder3 = jsNative
 
 [<Interface>]
 type EmailMessageBuilder4 =
@@ -25242,9 +25242,9 @@ type EmailMessageBuilder4 =
     abstract attachments: EmailAttachment[] option with get, set
     abstract ``to``: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
     abstract cc: U3<string, U2<string, EmailAddress>[], EmailAddress> option with get, set
-    abstract bcc: obj with get, set
+    abstract bcc: U3<string, U2<string, EmailAddress>[], EmailAddress> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (from: U2<string, EmailAddress>, subject: string, bcc: obj, ?replyTo: U2<string, EmailAddress>, ?headers: RequestInitHeaders, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder4 = jsNative
+    static member Create (from: U2<string, EmailAddress>, subject: string, bcc: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?replyTo: U2<string, EmailAddress>, ?headers: RequestInitHeaders, ?text: string, ?html: string, ?attachments: EmailAttachment[], ?``to``: U3<string, U2<string, EmailAddress>[], EmailAddress>, ?cc: U3<string, U2<string, EmailAddress>[], EmailAddress>) : EmailMessageBuilder4 = jsNative
 
 /// <summary>
 /// A binding that allows a Worker to send email messages.

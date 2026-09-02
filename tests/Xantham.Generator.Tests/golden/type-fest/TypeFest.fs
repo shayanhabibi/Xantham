@@ -4931,8 +4931,7 @@ type LiteralToPrimitive<'T> = private LiteralToPrimitive__ of obj
 /// </code>
 /// </remarks>
 /// <remarks>@category Type</remarks>
-[<Erase>]
-type LiteralUnion<'LiteralType, 'BaseType> = private LiteralUnion__ of obj
+type LiteralUnion<'LiteralType, 'BaseType> = U2<'LiteralType, 'BaseType>
 
 /// <summary>
 /// MergeDeep options.
@@ -6122,7 +6121,7 @@ type PackageJson =
     /// <summary>
     /// The URL to the package's homepage.
     /// </summary>
-    abstract homepage: obj option with get, set
+    abstract homepage: string option with get, set
     /// <summary>
     /// The URL to the package's issue tracker and/or the email address to which issues should be reported.
     /// </summary>
@@ -6235,11 +6234,11 @@ type PackageJson =
     /// <summary>
     /// Operating systems the module runs on.
     /// </summary>
-    abstract os: obj[] option with get, set
+    abstract os: string[] option with get, set
     /// <summary>
     /// CPU architectures the module runs on.
     /// </summary>
-    abstract cpu: obj[] option with get, set
+    abstract cpu: string[] option with get, set
     /// <summary>
     /// Define the runtime and package manager for developing the current project.
     /// </summary>
@@ -6408,7 +6407,7 @@ type PackageJsonEngines =
     abstract node: string option with get, set
     abstract npm: string option with get, set
     [<EmitIndexer>]
-    abstract Item: obj -> string option with get, set
+    abstract Item: string -> string option with get, set
 
 type PackageJsonEsnext =
     abstract main: string option with get, set
@@ -6425,13 +6424,13 @@ type PackageJsonFunding =
     /// <summary>
     /// The type of funding.
     /// </summary>
-    abstract ``type``: obj option with get, set
+    abstract ``type``: string option with get, set
     /// <summary>
     /// The URL to the funding page.
     /// </summary>
     abstract url: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, ?``type``: obj) : PackageJsonFunding = jsNative
+    static member Create (url: string, ?``type``: string) : PackageJsonFunding = jsNative
 
 type PackageJsonImports =
     [<EmitIndexer>]

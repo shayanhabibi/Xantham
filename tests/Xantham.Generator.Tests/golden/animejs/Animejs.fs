@@ -1024,15 +1024,15 @@ type LayoutAnimationParams =
     abstract frameRate: float option with get, set
     abstract playbackRate: float option with get, set
     abstract priority: float option with get, set
-    abstract onBegin: obj option with get, set
-    abstract onBeforeUpdate: obj option with get, set
-    abstract onUpdate: obj option with get, set
-    abstract onLoop: obj option with get, set
-    abstract onPause: obj option with get, set
-    abstract onComplete: obj option with get, set
+    abstract onBegin: Func<Timer, obj> option with get, set
+    abstract onBeforeUpdate: Func<Timer, obj> option with get, set
+    abstract onUpdate: Func<Timer, obj> option with get, set
+    abstract onLoop: Func<Timer, obj> option with get, set
+    abstract onPause: Func<Timer, obj> option with get, set
+    abstract onComplete: Func<Timer, obj> option with get, set
     abstract onRender: Func<Timeline, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: TimelinePosition, ?delay: obj, ?duration: obj, ?ease: obj, ?playbackEase: EasingParam, ?swapAt: LayoutStateParams, ?enterFrom: LayoutStateParams, ?leaveTo: LayoutStateParams, ?loopDelay: float, ?reversed: bool, ?alternate: bool, ?loop: U2<float, bool>, ?autoplay: U2<bool, ScrollObserver>, ?frameRate: float, ?playbackRate: float, ?priority: float, ?onBegin: obj, ?onBeforeUpdate: obj, ?onUpdate: obj, ?onLoop: obj, ?onPause: obj, ?onComplete: obj, ?onRender: Func<Timeline, obj>) : LayoutAnimationParams = jsNative
+    static member Create (?id: TimelinePosition, ?delay: obj, ?duration: obj, ?ease: obj, ?playbackEase: EasingParam, ?swapAt: LayoutStateParams, ?enterFrom: LayoutStateParams, ?leaveTo: LayoutStateParams, ?loopDelay: float, ?reversed: bool, ?alternate: bool, ?loop: U2<float, bool>, ?autoplay: U2<bool, ScrollObserver>, ?frameRate: float, ?playbackRate: float, ?priority: float, ?onBegin: Func<Timer, obj>, ?onBeforeUpdate: Func<Timer, obj>, ?onUpdate: Func<Timer, obj>, ?onLoop: Func<Timer, obj>, ?onPause: Func<Timer, obj>, ?onComplete: Func<Timer, obj>, ?onRender: Func<Timeline, obj>) : LayoutAnimationParams = jsNative
 
 [<Interface>]
 type LayoutOptions =
@@ -1061,12 +1061,12 @@ type AutoLayoutParams =
     abstract frameRate: float option with get, set
     abstract playbackRate: float option with get, set
     abstract priority: float option with get, set
-    abstract onBegin: obj option with get, set
-    abstract onBeforeUpdate: obj option with get, set
-    abstract onUpdate: obj option with get, set
-    abstract onLoop: obj option with get, set
-    abstract onPause: obj option with get, set
-    abstract onComplete: obj option with get, set
+    abstract onBegin: Func<Timer, obj> option with get, set
+    abstract onBeforeUpdate: Func<Timer, obj> option with get, set
+    abstract onUpdate: Func<Timer, obj> option with get, set
+    abstract onLoop: Func<Timer, obj> option with get, set
+    abstract onPause: Func<Timer, obj> option with get, set
+    abstract onComplete: Func<Timer, obj> option with get, set
     abstract onRender: Func<Timeline, obj> option with get, set
     abstract children: LayoutChildrenParam option with get, set
     abstract properties: string[] option with get, set
@@ -1894,7 +1894,7 @@ type CallbackArgument =
     /// <remarks>@return</remarks>
     /// <remarks>@param newDuration</remarks>
     /// <remarks>@return</remarks>
-    abstract stretch: obj with get, set
+    abstract stretch: Func<float, CallbackArgument> with get, set
     /// <summary>
     /// Cancels the timer by seeking it back to 0 and reverting the attached scroller if necessary
     /// Cancel the animation and revert all the values affected by this animation to their original state
@@ -1902,7 +1902,7 @@ type CallbackArgument =
     /// <remarks>@return</remarks>
     /// <remarks>@return</remarks>
     /// <remarks>@return</remarks>
-    abstract revert: obj with get, set
+    abstract revert: Func<CallbackArgument> with get, set
     /// <summary>
     /// Imediatly completes the timer, cancels it and triggers the onComplete callback
     /// </summary>
@@ -1915,7 +1915,7 @@ type CallbackArgument =
     /// <remarks>@return Promise&lt;this&gt;</remarks>
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
-    abstract ``then``: obj with get, set
+    abstract ``then``: Func<Func<obj, obj> option, JS.Promise<obj>> with get, set
     /// <remarks>@type {TargetsArray}</remarks>
     abstract targets: Target[] with get, set
     /// <remarks>@type {Callback&lt;this&gt;}</remarks>
@@ -1925,7 +1925,7 @@ type CallbackArgument =
     abstract _ease: EasingFunction with get, set
     /// <remarks>@return</remarks>
     /// <remarks>@return</remarks>
-    abstract refresh: obj with get, set
+    abstract refresh: Func<CallbackArgument> with get, set
     /// <remarks>@type {Record&lt;String, Number&gt;}</remarks>
     abstract labels: TimelineLabels with get, set
     /// <remarks>@type {DefaultsParams}</remarks>
@@ -2486,21 +2486,21 @@ type CallbackArgumentHeadParent =
     /// <remarks>@return</remarks>
     /// <remarks>@param newDuration</remarks>
     /// <remarks>@return</remarks>
-    abstract stretch: obj with get, set
+    abstract stretch: Func<float, CallbackArgumentHeadParent> with get, set
     /// <remarks>@return</remarks>
     /// <remarks>@return</remarks>
-    abstract refresh: obj with get, set
+    abstract refresh: Func<CallbackArgumentHeadParent> with get, set
     /// <summary>
     /// Cancel the animation and revert all the values affected by this animation to their original state
     /// </summary>
     /// <remarks>@return</remarks>
     /// <remarks>@return</remarks>
-    abstract revert: obj with get, set
+    abstract revert: Func<CallbackArgumentHeadParent> with get, set
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
     /// <remarks>@param callback</remarks>
     /// <remarks>@return Promise&lt;this&gt;</remarks>
-    abstract ``then``: obj with get, set
+    abstract ``then``: Func<Func<obj, obj> option, JS.Promise<obj>> with get, set
     /// <remarks>@type {Number}</remarks>
     abstract deltaTime: float with get, set
     /// <remarks>@type {Number}</remarks>
@@ -3043,9 +3043,9 @@ type ElasticEasing = Func<TimelinePosition option, TimelinePosition option, Easi
 
 type EasingFunctionWithParams = U3<BackEasing, ElasticEasing, PowerEasing>
 
-type EasingParam = obj
+type EasingParam = U4<string, EasingFunction, Spring, TweakRegister>
 
-type WAAPIEasingParam = obj
+type WAAPIEasingParam = U4<string, EasingFunction, Spring, TweakRegister>
 
 [<Interface>]
 type SpringParams =
@@ -3236,7 +3236,7 @@ type TweenParamValue = obj
 
 type TweenPropValue = obj
 
-type TweenComposition = obj
+type TweenComposition = U2<float, string>
 
 [<Interface>]
 type TweenParamsOptions =
@@ -3458,7 +3458,7 @@ type AnimatablePropertySetter = Func<U2<float, float[]>, float option, EasingPar
 
 type AnimatablePropertyGetter = Func<U2<float, float[]>>
 
-type AnimatableProperty = obj
+type AnimatableProperty = Func<U2<float, float[]>, float option, EasingParam option, AnimatableObject>
 
 type AnimatableObject =
     inherit Animatable
@@ -3469,7 +3469,7 @@ type AnimatableObject =
     abstract callbacks: JSAnimation option with get, set
     abstract revert: unit -> AnimatableObject
     [<EmitIndexer>]
-    abstract Item: string -> obj with get, set
+    abstract Item: string -> Func<U2<float, float[]>, float option, EasingParam option, AnimatableObject> with get, set
 
 [<Interface>]
 type AnimatablePropertyParamsOptions =
@@ -4397,7 +4397,7 @@ type DrawableSVGGeometry =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/setAttribute)
     /// </summary>
-    abstract setAttribute: obj with get, set
+    abstract setAttribute: Action<string, string> with get, set
     /// <summary>
     /// The **<c>setAttributeNS()</c>** method of the Element interface adds a new attribute or changes the value of an attribute with the given namespace and name.
     ///
@@ -5327,18 +5327,18 @@ type ChainedLerp = Func<float, float, ChainableUtil>
 type ChainedDamp = Func<float, float, float, ChainableUtil>
 
 type Utils =
-    abstract roundPad: obj
-    abstract padStart: obj
-    abstract padEnd: obj
-    abstract wrap: obj
-    abstract mapRange: obj
-    abstract degToRad: obj
-    abstract radToDeg: obj
-    abstract snap: obj
-    abstract clamp: obj
-    abstract round: obj
-    abstract lerp: obj
-    abstract damp: obj
+    abstract roundPad: Func<TimelinePosition, float, string>
+    abstract padStart: Func<float, float, string, string>
+    abstract padEnd: Func<float, float, string, string>
+    abstract wrap: Func<float, float, float, float>
+    abstract mapRange: Func<float, float, float, float, float, float>
+    abstract degToRad: Func<float, float>
+    abstract radToDeg: Func<float, float>
+    abstract snap: Func<float, U2<float, float[]>, float>
+    abstract clamp: Func<float, float, float, float>
+    abstract round: Func<float, float, float>
+    abstract lerp: Func<float, float, float, float>
+    abstract damp: Func<float, float, float, float, float>
     /// <summary>
     /// Generates a random number between min and max (inclusive) with optional decimal precision
     /// </summary>

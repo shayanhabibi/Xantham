@@ -494,6 +494,99 @@ let pipelineTests =
                         "the old blanket widening is gone" ])
 
         yield!
+            fixtureTests "intersection-empty-lab" (handFixture "intersection-empty-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "an empty object operand reduces away and the union keeps its arms (§4.6)" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains source "type Ease = string" "the literals and the primitive are one string"
+                    Expect.stringContains source "type Loose = string" "the idiom outside a union reduces the same way"
+                    Expect.stringContains source "type Size = string" "`Record<never, never>` is the same empty operand"
+                    Expect.stringContains source "type Weight = float" "and a number carries it the same way"
+
+                    Expect.equal
+                        (rendered.Findings
+                         |> List.filter (fun finding -> finding.Key = "TR049")
+                         |> List.map _.Symbol
+                         |> List.distinct
+                         |> List.sort)
+                        [ "Ease"; "Loose"; "Size"; "Weight" ]
+                        "each reduction is owned by the declaration that carries it"
+
+                  testCase "an operand that declares something is not an empty operand" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains source "type UserId" "a marker-only operand is still a brand"
+                    Expect.stringContains source "[<Measure>]" "emitted as a measure (§4.6, D11)"
+                    Expect.stringContains source "type Counted = obj" "an operand with a real member widens as it did"
+                    Expect.stringContains source "abstract width: float with get, set" "an object operand still flattens"
+
+                    Expect.isEmpty
+                        (rendered.Findings
+                         |> List.filter (fun finding ->
+                             finding.Key = "TR049"
+                             && (finding.Symbol.StartsWith "Counted"
+                                 || finding.Symbol.StartsWith "UserId"
+                                 || finding.Symbol.StartsWith "Padded")))
+                        "nothing carrying a member is reduced" ])
+
+        yield!
+            fixtureTests
+                "intersection-callable-lab"
+                (handFixture "intersection-callable-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "a callable intersection at a member position reaches its signatures (§4.6)" <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+
+                        Expect.stringContains
+                            source
+                            "abstract round: Func<float, float, float>"
+                            "the member reads the first signature rather than obj"
+
+                        Expect.isFalse (source.Contains "abstract round: obj") "and no longer widens"
+
+                        Expect.equal
+                            (rendered.Findings
+                             |> List.filter (fun finding -> finding.Key = "TR050")
+                             |> List.map (fun finding -> finding.Symbol, finding.Message))
+                            [ "Utils.round", "intersection of callable operands rendered from its 2 call signatures" ]
+                            "the member position is the one site, and it counts both signatures"
+
+                      testCase "the export position already rendered both signatures, and still does" <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+
+                        Expect.stringContains
+                            source
+                            "static member roundPad (value: float, length: float) : float"
+                            "the first operand's signature"
+
+                        Expect.stringContains
+                            source
+                            "static member roundPad (length: float) : float"
+                            "and the second, as an overload"
+
+                        Expect.isEmpty
+                            (rendered.Findings
+                             |> List.filter (fun finding -> finding.Symbol.StartsWith "roundPad"))
+                            "an export position loses nothing and says nothing"
+
+                      testCase "a hybrid carrying properties still flattens into a shape" <| fun _ ->
+                        let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                        let source = rendered.Files |> List.head |> snd
+
+                        Expect.stringContains source "abstract cancel: unit -> unit" "the property survives"
+
+                        Expect.isEmpty
+                            (rendered.Findings
+                             |> List.filter (fun finding ->
+                                 finding.Key = "TR050" && finding.Symbol.StartsWith "Timers"))
+                            "and the hybrid is not read as a callback" ])
+
+        yield!
             fixtureTests "inherit-lab" (handFixture "inherit-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "a declared base is inherited beside the members it redeclares (§4.4)" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)

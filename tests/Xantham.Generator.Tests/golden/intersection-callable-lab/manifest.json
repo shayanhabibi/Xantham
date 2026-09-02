@@ -1,0 +1,109 @@
+{
+  "package": "intersection-callable-lab",
+  "module": "IntersectionCallableLab",
+  "counts": {
+    "exact": 4,
+    "ergonomic": 1,
+    "widened": 2,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 4,
+      "ergonomic": 2,
+      "widened": 2
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 2,
+      "ergonomic": 2
+    }
+  ],
+  "symbols": [
+    {
+      "name": "Chained",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "Utils",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "TR031",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "Utils.round",
+          "message": "callback with 2 overloads shaped from the first"
+        },
+        {
+          "key": "TR050",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Utils.round",
+          "message": "intersection of callable operands rendered from its 2 call signatures"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Utils",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Timers",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Timers",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "TimersSchedule",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SI001",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "TimersSchedule",
+          "message": "callable-and-properties hybrid loses its call signatures (Invoke emission is future work)"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "TimersSchedule",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        }
+      ]
+    },
+    {
+      "name": "round",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "utils",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "roundPad",
+      "tier": "exact",
+      "findings": []
+    }
+  ]
+}

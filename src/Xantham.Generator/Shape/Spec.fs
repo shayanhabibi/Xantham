@@ -409,6 +409,58 @@ let internal isFlattenable (model: ShapeModel) (facts: TypeFacts) =
     && (arrayElement model facts).IsNone
     && not (facts.Members.IsEmpty && facts.IndexInfos.IsEmpty)
 
+/// Whether a type stands over a type parameter, through its own arguments or its alias's. Its
+/// content is answered again at each instantiation.
+let internal standsOverTypeParameter (model: ShapeModel) (facts: TypeFacts) =
+    not facts.AliasTypeArguments.IsEmpty
+    || facts.TypeArguments
+       |> List.exists (fun id ->
+           match Map.tryFind id model.Types with
+           | Some argument -> flag TypeFlags.TypeParameter argument
+           | None -> false)
+
+/// An intersection operand that constrains nothing: an anonymous object type whose members,
+/// index signatures and signatures are all empty, at every instantiation. `"in" | "out" | (string
+/// & {})` is TypeScript's autocomplete idiom, where `{}` keeps the literals visible and `string`
+/// is the type (§4.6).
+///
+/// The operand must also be anonymous and free of type parameters: a type this run only
+/// references arrives identity-only, and an operand over a type parameter fills its members in at
+/// each use (§4.6).
+let internal isVacuousOperand (model: ShapeModel) (facts: TypeFacts) =
+    flag TypeFlags.Object facts
+    && facts.Members.IsEmpty
+    && facts.IndexInfos.IsEmpty
+    && facts.CallSignatures.IsEmpty
+    && facts.ConstructSignatures.IsEmpty
+    && facts.BaseTypes.IsEmpty
+    && not (standsOverTypeParameter model facts)
+    && (match facts.SymbolName with
+        | None -> true
+        | Some name -> isSyntheticName name)
+
+/// The operands of an intersection, where every one of them is in the type table.
+let internal operandsOf (model: ShapeModel) (facts: TypeFacts) =
+    let operands =
+        facts.IntersectionMembers |> List.choose (fun id -> Map.tryFind id model.Types)
+
+    if operands.Length = facts.IntersectionMembers.Length then
+        operands
+    else
+        []
+
+/// The single operand an intersection reduces to, once the operands that constrain nothing are
+/// dropped (§4.6). An intersection standing as a generic alias's body is left alone: its
+/// operands read empty at the declaration and fill in at each instantiation, which is the round
+/// trip `Resolve` declines (§4.6).
+let internal reducedOperand (model: ShapeModel) (facts: TypeFacts) =
+    if standsOverTypeParameter model facts then
+        None
+    else
+        match operandsOf model facts |> List.partition (isVacuousOperand model) with
+        | _ :: _, [ remaining ] -> Some remaining
+        | _ -> None
+
 /// Whether an argument *is* the bound, or reaches it through the bases and intersection
 /// operands `shape-interfaces` emits as `inherit`. An instantiation is asked of its target,
 /// the declaration carrying the heritage. This is F# subtyping, not TypeScript's: it is the
@@ -704,13 +756,34 @@ and internal intersectionRef
                     | parameters -> appliedRef ctx model self owner name parameters
                 | arguments -> appliedRef ctx model self owner name arguments
             | _ ->
-                let reason =
-                    if facts.Members.IsEmpty && facts.IndexInfos.IsEmpty then
-                        TypeReference.IntersectionOverNonObject
-                    else
-                        TypeReference.IntersectionNotDeclared
+                match reducedOperand model facts with
+                | Some operand ->
+                    let reference, findings = typeRef ctx model self owner operand.Response.Id
 
-                FsObj, [ Finding.make owner reason ]
+                    reference, findings @ [ Finding.make owner TypeReference.EmptyIntersectionOperandReduced ]
+                | None ->
+
+                    // Callable operands carry their signatures over to the intersection, which is
+                    // the overload set `typeof round & Chained` spells. A member position reads it
+                    // as a delegate, the way any other callback reads (D5); an export position
+                    // reaches the same signatures and writes them as overloads.
+                    if isPureCallback facts && facts.IndexInfos.IsEmpty then
+                        let reference, findings = delegateRef ctx model self owner facts
+
+                        reference,
+                        findings
+                        @ [
+                            Finding.make owner (TypeReference.IntersectionCallableFlattened facts.CallSignatures.Length)
+                        ]
+                    else
+
+                        let reason =
+                            if facts.Members.IsEmpty && facts.IndexInfos.IsEmpty then
+                                TypeReference.IntersectionOverNonObject
+                            else
+                                TypeReference.IntersectionNotDeclared
+
+                        FsObj, [ Finding.make owner reason ]
 
 /// `T[K]`. Where `K` is a key variable this signature bound as `typekeyof<'T,'R>`, the access is
 /// exactly the `'R` that idiom introduced. Everything else - `T[keyof T]`, an access over an
@@ -1515,6 +1588,55 @@ let internal shapeSignature
 
     live, parameters, returns, findings
 
+/// A declared type's content beside the `undefined` an optional declaration carries: the union's
+/// non-nullish members, or the type itself where it is not a union. Two declarations agreeing
+/// here declare one type, one of them optionally (D1).
+let private declaredContent (model: ShapeModel) (typeId: int) =
+    match Map.tryFind typeId model.Types with
+    | Some facts when flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) ->
+        nonNullishMemberSet model facts
+    | _ -> [ typeId ]
+
+/// Whether a declared type admits `null` or `undefined` as a union member of its own (D1).
+let private carriesNullish (model: ShapeModel) (typeId: int) =
+    match Map.tryFind typeId model.Types with
+    | Some facts when flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) ->
+        facts.UnionMembers.Length <> (nonNullishMemberSet model facts).Length
+    | _ -> false
+
+/// The type every operand of an intersection gives a member, where they agree on one (§4.6).
+/// The checker types a member several operands declare as the intersection of those declared
+/// types, and distributes that intersection over the unions inside it; where the operands
+/// declare one type, that type is the member's type and the distribution is a detour.
+///
+/// The answer is the required declaration's type: the flattened member is required wherever one
+/// operand requires it.
+let internal agreedMemberType (model: ShapeModel) (facts: TypeFacts) (m: ResolvedMember) =
+    if not (flag TypeFlags.Intersection facts) then
+        None
+    else
+        let declaredBy =
+            operandsOf model facts
+            |> List.choose (fun operand ->
+                operand.Members
+                |> List.tryFind (fun candidate -> candidate.Symbol.Name = m.Symbol.Name))
+            |> List.map _.TypeId
+
+        // A member one operand declares alone carries the checker's substitution into it - a
+        // polymorphic `this` resolving to the intersection - and that substitution is the reading
+        // the declaration owes.
+        if declaredBy.Length < 2 then
+            None
+        else
+            let declared = List.distinct declaredBy
+
+            match declared |> List.map (declaredContent model) |> List.distinct with
+            | [ _ ] ->
+                declared
+                |> List.tryFind (carriesNullish model >> not)
+                |> Option.filter (fun agreed -> agreed <> m.TypeId)
+            | _ -> None
+
 /// The interface members of an object type: methods for method symbols (each call signature an
 /// overload), properties otherwise, callbacks as delegate-typed properties (D5).
 let internal shapeMembers
@@ -1571,8 +1693,15 @@ let internal shapeMembers
                             Return = returns
                         })
             | None ->
-                let reference, refFindings = typeRef ctx model (Some self) owner m.TypeId
+                let agreed = agreedMemberType model facts m
+
+                let reference, refFindings =
+                    typeRef ctx model (Some self) owner (agreed |> Option.defaultValue m.TypeId)
+
                 findings <- findings @ refFindings
+
+                if agreed.IsSome then
+                    emit (Finding.make owner TypeReference.IntersectionOperandsIdentical)
 
                 if m.Optional then
                     emit (Finding.make owner Members.OptionalMemberAsOption)
