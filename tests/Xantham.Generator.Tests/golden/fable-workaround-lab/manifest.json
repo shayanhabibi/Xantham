@@ -2,8 +2,8 @@
   "package": "fable-workaround-lab",
   "module": "FableWorkaroundLab",
   "counts": {
-    "exact": 9,
-    "ergonomic": 5,
+    "exact": 8,
+    "ergonomic": 6,
     "widened": 1,
     "escape": 0
   },
@@ -21,8 +21,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 6,
-      "ergonomic": 6
+      "total": 8,
+      "ergonomic": 8
     }
   ],
   "symbols": [
@@ -140,8 +140,23 @@
     {
       "name": "Listener",
       "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Listener",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Listener.notify",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
     },
     {
       "name": "run",

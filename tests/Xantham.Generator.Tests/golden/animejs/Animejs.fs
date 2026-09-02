@@ -10,6 +10,7 @@ open Fable.Core.JsInterop
 open Xantham.Fable.Core
 
 /// <remarks>@import ;</remarks>
+[<Interface>]
 type Animatable =
     abstract targets: Target[] with get, set
     /// <remarks>@type {Record&lt;String, JSAnimation&gt;}</remarks>
@@ -17,11 +18,14 @@ type Animatable =
     /// <remarks>@type {JSAnimation|null}</remarks>
     abstract callbacks: JSAnimation option with get, set
     abstract revert: unit -> Animatable
+    [<ParamObject; Emit("$0")>]
+    static member Create (targets: Target[], animations: AnimatableAnimations, revert: Func<Animatable>, ?callbacks: JSAnimation) : Animatable = jsNative
 
 type AnimatableAnimations =
     [<EmitIndexer>]
     abstract Item: string -> JSAnimation with get, set
 
+[<Interface>]
 type Clock =
     /// <remarks>@type {Number}</remarks>
     abstract deltaTime: float with get, set
@@ -53,6 +57,8 @@ type Clock =
     /// <remarks>@param time</remarks>
     /// <remarks>@return</remarks>
     abstract computeDeltaTime: time: float -> float
+    [<ParamObject; Emit("$0")>]
+    static member Create (deltaTime: float, _currentTime: float, _lastTickTime: float, _startTime: float, _lastTime: float, _frameDuration: float, _fps: float, _speed: float, _hasChildren: bool, _head: U4<JSAnimation, Timeline, Timer, Tween>, _tail: U4<JSAnimation, Timeline, Timer, Tween>, fps: float, speed: float, requestTick: Func<float, float>, computeDeltaTime: Func<float, float>) : Clock = jsNative
 
 type DurationKeyframesItem =
     inherit TweenParamsOptions
@@ -319,6 +325,7 @@ type GlobalsEditor =
     [<ParamObject; Emit("$0")>]
     static member Create (showPanel: bool, addAnimation: JS.Function, addSet: JS.Function, addTimeline: JS.Function, addTimelineChild: JS.Function, addTimelineLabel: JS.Function, addTimelineCall: JS.Function, addTimelineSync: JS.Function, resolveStagger: JS.Function, _head: obj, _tail: obj) : GlobalsEditor = jsNative
 
+[<Interface>]
 type DOMProxy =
     abstract el: obj with get, set
     abstract zIndex: float with get, set
@@ -329,6 +336,8 @@ type DOMProxy =
     abstract width: obj with get, set
     abstract height: obj with get, set
     abstract getBoundingClientRect: unit -> DOMProxyGetBoundingClientRectResult
+    [<ParamObject; Emit("$0")>]
+    static member Create (el: obj, zIndex: float, parentElement: obj, classList: DOMProxyClassList, x: obj, y: obj, width: obj, height: obj, getBoundingClientRect: Func<DOMProxyGetBoundingClientRectResult>) : DOMProxy = jsNative
 
 [<Interface>]
 type DOMProxyClassList =
@@ -535,6 +544,7 @@ type DraggableScroll =
     [<ParamObject; Emit("$0")>]
     static member Create (x: float, y: float) : DraggableScroll = jsNative
 
+[<Interface>]
 type Transforms =
     abstract ``$el``: U3<DOMProxy, Browser.Types.HTMLElement, Browser.Types.SVGElement> with get, set
     abstract inlineTransforms: obj[] with get, set
@@ -549,6 +559,8 @@ type Transforms =
     abstract getMatrix: unit -> obj
     abstract remove: unit -> unit
     abstract revert: unit -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (``$el``: U3<DOMProxy, Browser.Types.HTMLElement, Browser.Types.SVGElement>, inlineTransforms: obj[], point: obj, inversedMatrix: obj, normalizePoint: Func<float, float, obj>, traverseUp: Action<Func<DOMTarget, float, obj>>, getMatrix: Func<obj>, remove: Action, revert: Action) : Transforms = jsNative
 
 type Eases =
     abstract linear: EasingFunction with get, set
@@ -811,6 +823,7 @@ type ScrollObserver =
     abstract handleScroll: unit -> unit
     abstract revert: unit -> ScrollObserver
 
+[<Interface>]
 type AutoLayout =
     /// <remarks>@type {AutoLayoutParams}</remarks>
     abstract ``params``: AutoLayoutParams with get, set
@@ -863,6 +876,8 @@ type AutoLayout =
     /// <remarks>@param params</remarks>
     /// <remarks>@return</remarks>
     abstract update: callback: Action<AutoLayout> * ?``params``: LayoutAnimationParams -> Timeline
+    [<ParamObject; Emit("$0")>]
+    static member Create (``params``: AutoLayoutParams, root: DOMTarget, id: TimelinePosition, children: LayoutChildrenParam, absoluteCoords: bool, swapAtParams: LayoutStateParams, enterFromParams: LayoutStateParams, leaveToParams: LayoutStateParams, properties: JS.Set<string>, recordedProperties: JS.Set<string>, pendingRemoval: JS.WeakSet<DOMTarget>, transitionMuteStore: JS.Map<DOMTarget, string option>, oldState: LayoutSnapshot, newState: LayoutSnapshot, timeline: Timeline, transformAnimation: WAAPIAnimation, animating: DOMTarget[], swapping: DOMTarget[], leaving: DOMTarget[], entering: DOMTarget[], revert: Func<AutoLayout>, record: Func<AutoLayout>, animate: Func<LayoutAnimationParams option, Timeline>, update: Func<Action<AutoLayout>, LayoutAnimationParams option, Timeline>) : AutoLayout = jsNative
 
 type AutoLayoutParamsDelay =
     inherit Spring
@@ -910,6 +925,7 @@ type AutoLayoutParamsDelay2 =
     [<ParamObject; Emit("$0")>]
     static member Create (``type``: string, defaultValue: obj) : AutoLayoutParamsDelay2 = jsNative
 
+[<Interface>]
 type LayoutSnapshot =
     /// <remarks>@type {AutoLayout}</remarks>
     abstract layout: AutoLayout with get, set
@@ -949,6 +965,8 @@ type LayoutSnapshot =
     abstract ensureDetachedNode: ``$el``: DOMTarget * candidates: JS.Set<DOMTarget> -> LayoutNode option
     /// <remarks>@return</remarks>
     abstract record: unit -> LayoutSnapshot
+    [<ParamObject; Emit("$0")>]
+    static member Create (layout: AutoLayout, rootNodes: JS.Set<LayoutNode>, nodes: JS.Map<string, LayoutNode>, scrollX: float, scrollY: float, revert: Func<LayoutSnapshot>, getNode: Func<DOMTarget, LayoutNode>, getComputedValue: Func<DOMTarget, string, TimelinePosition>, forEach: Action<LayoutNode option, LayoutNodeIterator>, forEachRootNode: Action<LayoutNodeIterator>, forEachNode: Action<LayoutNodeIterator>, registerElement: Func<DOMTarget, LayoutNode option, LayoutNode option>, ensureDetachedNode: Func<DOMTarget, JS.Set<DOMTarget>, LayoutNode option>, record: Func<LayoutSnapshot>, ?rootNode: LayoutNode) : LayoutSnapshot = jsNative
 
 type LayoutChildrenParam = obj
 
@@ -1272,6 +1290,7 @@ type ScrambleTextTween =
 /// A class that splits text into words and wraps them in span elements while preserving the original HTML structure.
 /// </summary>
 /// <remarks>@class</remarks>
+[<Interface>]
 type TextSplitter =
     abstract debug: bool with get, set
     abstract includeSpaces: bool with get, set
@@ -1308,6 +1327,8 @@ type TextSplitter =
     /// <remarks>@return</remarks>
     abstract split: ?clearCache: bool -> TextSplitter
     abstract refresh: unit -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (debug: bool, includeSpaces: bool, accessible: bool, linesOnly: bool, lineTemplate: U3<string, bool, SplitFunctionValue>, wordTemplate: U3<string, bool, SplitFunctionValue>, charTemplate: U3<string, bool, SplitFunctionValue>, ``$target``: Browser.Types.HTMLElement, html: string, lines: obj[], words: obj[], chars: obj[], effects: obj[], effectsCleanups: obj[], cache: string, ready: bool, width: float, resizeTimeout: obj, resizeObserver: obj, addEffect: Func<Func<obj[], U4<JSAnimation, Timeline, Timer, Action> option>, TextSplitter>, revert: Func<TextSplitter>, splitNode: Action<Browser.Types.Node>, split: Func<bool option, TextSplitter>, refresh: Action) : TextSplitter = jsNative
 
 [<Interface>]
 type Segment =

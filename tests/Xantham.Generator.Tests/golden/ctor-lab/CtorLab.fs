@@ -16,9 +16,12 @@ open Xantham.Fable.Core
 /// from somewhere else: here, from the export it is the value of. <c>prototype</c> is the instance
 /// side, which is a declaration of its own and must not be repeated as a member.
 /// </summary>
+[<Interface>]
 type Widget =
     abstract label: string
     abstract resize: by: float -> Widget
+    [<ParamObject; Emit("$0")>]
+    static member Create (label: string, resize: Func<float, Widget>) : Widget = jsNative
 
 type WidgetConstructor =
     /// <summary>
@@ -74,8 +77,11 @@ type Parcel<'T> =
 /// A negative: a class no <c>typeof</c> ever names. Its static side is <c>shape-classes</c>'s work, and
 /// a second interface for it would be referenced by nothing.
 /// </summary>
+[<Interface>]
 type Solo =
     abstract tag: unit -> string
+    [<ParamObject; Emit("$0")>]
+    static member Create (tag: Func<string>) : Solo = jsNative
 
 /// <summary>
 /// A negative: <c>typeof</c> over a plain value is that value's type, not a constructor object.

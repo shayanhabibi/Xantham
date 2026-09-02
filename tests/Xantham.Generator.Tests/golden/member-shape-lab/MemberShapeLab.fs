@@ -13,6 +13,7 @@ open Xantham.Fable.Core
 /// An intersection over a compiler-lib type: <c>then</c> / <c>catch</c> / <c>finally</c> arrive as method
 /// symbols, and each is a callback rather than a declaration.
 /// </summary>
+[<Interface>]
 type Deferred =
     /// <summary>
     /// Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -35,10 +36,13 @@ type Deferred =
     /// <remarks>@returns A Promise for the completion of the callback.</remarks>
     abstract ``finally``: ?onfinally: Action -> JS.Promise<string>
     abstract tag: string
+    [<ParamObject; Emit("$0")>]
+    static member Create (``then``: Func<Func<string, U2<'TResult1, JS.Promise<'TResult1>>> option, Func<obj, U2<'TResult2, JS.Promise<'TResult2>>> option, JS.Promise<U2<'TResult1, 'TResult2>>>, catch: Func<Func<obj, U2<'TResult, JS.Promise<'TResult>>> option, JS.Promise<U2<string, 'TResult>>>, ``finally``: Func<Action option, JS.Promise<string>>, tag: string) : Deferred = jsNative
 
 /// <summary>
 /// The same reach by heritage rather than intersection.
 /// </summary>
+[<Interface>]
 type Recorder =
     abstract channel: string
     /// <summary>
@@ -59,6 +63,8 @@ type Recorder =
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
     /// </summary>
     abstract removeEventListener: ``type``: string * ?callback: obj * ?options: obj -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (channel: string, addEventListener: Action<string, obj option, U2<bool, Browser.Types.AddEventListenerOptions> option>, dispatchEvent: Func<Browser.Types.Event, bool>, removeEventListener: Action<string, obj option, obj option>) : Recorder = jsNative
 
 /// <summary>
 /// A lib declaration at a reference position: a shipped package binds it, and the binding stands

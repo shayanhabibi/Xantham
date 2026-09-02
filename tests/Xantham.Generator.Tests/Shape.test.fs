@@ -2298,33 +2298,142 @@ let shapePassTests =
                 | overloads -> failtest $"expected one two-parameter overload, got %A{overloads}"
             | decls -> failtest $"expected the interface back, got %A{decls}"
 
-        testCase "a methodful interface gets no Create overload" <| fun _ ->
+        // Wave four lane O (docs/fable5-workarounds.md §3). A method reads as the delegate a
+        // function-valued property of the same signature already carries.
+        let paramObjectDecl name members =
+            FsInterface
+                { Name = name
+                  Docs = ""
+                  Tags = []
+                  Order = None
+                  TypeParameters = []
+                  Inherits = []
+                  Members = members
+                  CreateOverloads = []
+                  Statics = [] }
+
+        let paramObjectProperty name reference =
+            FsProperty
+                { Name = name
+                  Docs = ""
+                  Tags = []
+                  ReadOnly = false
+                  Type = reference }
+
+        let paramObjectMethod name parameters returns =
+            FsMethod
+                { Name = name
+                  Docs = ""
+                  Tags = []
+                  TypeParameters = []
+                  Parameters =
+                    parameters
+                    |> List.map (fun reference ->
+                        { Name = "arg"
+                          Optional = false
+                          Rest = false
+                          Type = reference })
+                  Return = returns }
+
+        testCase "a method member is carried into Create as a delegate-typed parameter" <| fun _ ->
             let decl =
-                FsInterface
-                    { Name = "Timer"
-                      Docs = ""
-                      Tags = []
-                      Order = None
-                      TypeParameters = []
-                      Inherits = []
-                      Members =
-                        [ FsMethod
-                              { Name = "play"
-                                Docs = ""
-                                Tags = []
-                                TypeParameters = []
-                                Parameters = []
-                                Return = FsUnit } ]
-                      CreateOverloads = []
-                      Statics = [] }
+                paramObjectDecl "Timer" [
+                    paramObjectProperty "label" FsString
+                    paramObjectMethod "play" [] FsUnit
+                    paramObjectMethod "seek" [ FsFloat ] FsBool
+                    paramObjectProperty "tag" (FsOption FsString)
+                ]
 
             let model = { Build.shapeModel [] with Decls = [ decl ] }
             let shaped, findings = Build.runPass ParamObjects.synthesizeParamObjects model
 
-            Expect.isEmpty findings "nothing to report"
+            Expect.equal
+                (findings |> List.map (fun f -> f.Key, f.Symbol))
+                [ "SP001", "Timer"; "SP002", "Timer.play"; "SP002", "Timer.seek" ]
+                "one finding per method carried in, after the synthesis itself"
 
             match shaped.Decls with
-            | [ FsInterface decl ] -> Expect.isEmpty decl.CreateOverloads "not plain data"
+            | [ FsInterface decl ] ->
+                match decl.CreateOverloads with
+                | [ [ label; play; seek; tag ] ] ->
+                    Expect.equal (label.Name, label.Type) ("label", FsString) "the property is unchanged"
+                    Expect.equal play.Type (FsDelegate([], FsUnit)) "a void method binds an Action"
+                    Expect.equal seek.Type (FsDelegate([ FsFloat ], FsBool)) "and a returning one a Func"
+                    Expect.isFalse (play.Optional || seek.Optional) "a method is required, so it sorts first"
+                    Expect.equal (tag.Name, tag.Optional) ("tag", true) "and the optional property comes last"
+                | overloads -> failtest $"expected one four-parameter overload, got %A{overloads}"
+            | decls -> failtest $"expected the interface back, got %A{decls}"
+
+        testCase "an interface that gets no Create says which shape refused it" <| fun _ ->
+            let indexed =
+                paramObjectDecl "Bag" [
+                    paramObjectProperty "label" FsString
+                    FsIndexer
+                        { Key = FsString
+                          Value = FsObj
+                          ReadOnly = false }
+                ]
+
+            let overloaded =
+                paramObjectDecl "Formatter" [
+                    paramObjectMethod "format" [ FsFloat ] FsString
+                    paramObjectMethod "format" [ FsFloat; FsFloat ] FsString
+                ]
+
+            let wide =
+                paramObjectDecl "Wide" [
+                    for i in 1..24 do
+                        yield paramObjectProperty $"a{i}" FsFloat
+
+                    yield paramObjectMethod "go" [] FsUnit
+                ]
+
+            let model =
+                { Build.shapeModel [] with
+                    Decls = [ paramObjectDecl "Marker" []; indexed; overloaded; wide ] }
+
+            let shaped, findings = Build.runPass ParamObjects.synthesizeParamObjects model
+
+            Expect.equal (findings |> List.map (fun f -> f.Key, f.Tier) |> List.distinct) [ "SP003", Widened ] "all widened"
+
+            let reasons = findings |> List.map (fun f -> f.Symbol, f.Message)
+
+            Expect.equal (reasons |> List.map fst) [ "Marker"; "Bag"; "Formatter"; "Wide" ] "one per declaration"
+            Expect.stringContains (snd reasons[0]) "no members" "an empty declaration"
+            Expect.stringContains (snd reasons[1]) "index signature" "an index signature has no name"
+            Expect.stringContains (snd reasons[2]) "overloaded method" "two parameters would share a name"
+            Expect.stringContains (snd reasons[3]) "budget" "twenty-five members is one too many"
+
+            Expect.isEmpty
+                (shaped.Decls
+                 |> List.choose (function
+                     | FsInterface d when not d.CreateOverloads.IsEmpty -> Some d.Name
+                     | _ -> None))
+                "and none of them gained a Create"
+
+        testCase "a constructor object keeps its own Create and reports nothing" <| fun _ ->
+            let decl =
+                paramObjectDecl "WidgetConstructor" [
+                    paramObjectProperty "DEFAULT_LABEL" FsString
+                    FsConstructor
+                        { Docs = ""
+                          Tags = []
+                          TypeParameters = []
+                          Parameters =
+                            [ { Name = "label"
+                                Optional = false
+                                Rest = false
+                                Type = FsString } ]
+                          Return = FsNamed "Widget" }
+                ]
+
+            let model = { Build.shapeModel [] with Decls = [ decl ] }
+            let shaped, findings = Build.runPass ParamObjects.synthesizeParamObjects model
+
+            Expect.isEmpty findings "the construct signature already supplied Create members"
+
+            match shaped.Decls with
+            | [ FsInterface decl ] -> Expect.isEmpty decl.CreateOverloads "so no ParamObject overload joins them"
             | decls -> failtest $"expected the interface back, got %A{decls}"
 
         testCase "dedupe-overloads sees through abbreviations and drops the twin" <| fun _ ->

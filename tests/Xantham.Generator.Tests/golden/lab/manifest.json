@@ -2,8 +2,8 @@
   "package": "phase-b-lab",
   "module": "PhaseBLab",
   "counts": {
-    "exact": 18,
-    "ergonomic": 9,
+    "exact": 17,
+    "ergonomic": 10,
     "widened": 4,
     "escape": 0
   },
@@ -47,8 +47,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 7,
-      "ergonomic": 7
+      "total": 13,
+      "ergonomic": 13
     }
   ],
   "symbols": [
@@ -173,6 +173,34 @@
           "tier": "ergonomic",
           "symbol": "Timer.seek(muteCallbacks)",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Timer",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Timer.play",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Timer.seek",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Timer.tween",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
@@ -329,8 +357,23 @@
     {
       "name": "Box",
       "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Box",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Box.map",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
     },
     {
       "name": "StringBox",

@@ -3,8 +3,8 @@
   "module": "ArrayShapeLab",
   "counts": {
     "exact": 4,
-    "ergonomic": 1,
-    "widened": 5,
+    "ergonomic": 0,
+    "widened": 6,
     "escape": 0
   },
   "passes": [
@@ -25,6 +25,11 @@
     },
     {
       "pass": "SE - shape-exports",
+      "total": 1,
+      "widened": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
       "total": 1,
       "widened": 1
     }
@@ -81,7 +86,7 @@
     {
       "name": "Register",
       "file": "index.d.ts",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "key": "MB004",
@@ -89,6 +94,13 @@
           "tier": "ergonomic",
           "symbol": "Register.[]",
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "key": "SP003",
+          "pass": "synthesize-paramobjects",
+          "tier": "widened",
+          "symbol": "Register",
+          "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
     },

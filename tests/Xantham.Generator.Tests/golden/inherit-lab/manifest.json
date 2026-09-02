@@ -18,8 +18,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 14,
-      "ergonomic": 14
+      "total": 18,
+      "ergonomic": 18
     }
   ],
   "symbols": [
@@ -370,6 +370,34 @@
           "tier": "escape",
           "symbol": "Deferred.then(onrejected)(reason)",
           "message": "any maps to obj"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Deferred",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Deferred.catch",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Deferred.finally",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Deferred.then",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },

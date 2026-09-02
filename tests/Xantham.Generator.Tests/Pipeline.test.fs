@@ -969,8 +969,12 @@ let pipelineTests =
                       Expect.stringContains source "abstract balance: bigint" "a bigint member"
                       Expect.stringContains source "static member total (amounts: bigint[]) : bigint" "and an export"
 
+                      // `synthesize-paramobjects` reports `Ledger` for its method member, which
+                      // is construction ergonomics rather than anything bigint cost.
                       Expect.isEmpty
-                          (rendered.Findings |> List.filter (fun f -> f.Symbol.StartsWith "Ledger"))
+                          (rendered.Findings
+                           |> List.filter (fun f ->
+                               f.Symbol.StartsWith "Ledger" && f.Pass <> "synthesize-paramobjects"))
                           "nothing is lost mapping bigint, so nothing is reported"
 
                       Expect.stringContains source "type Two = bigint" "a bigint literal keeps its own widening"
@@ -1625,5 +1629,61 @@ let pipelineTests =
                               source
                               "abstract notify: count: float -> string"
                               "a member the consumer has to supply" ])
+
+        // Wave four lane O (docs/fable5-workarounds.md §3). A method reads as a delegate-typed
+        // Create parameter; the four negatives keep getting no Create, each with its reason.
+        yield!
+            fixtureTests
+                "paramobject-method-lab"
+                (handFixture "paramobject-method-lab")
+                GeneratorConfig.Default
+                (fun package ->
+                    [ testCase "a method member becomes a delegate-typed Create parameter" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains
+                              source
+                              "static member Create (name: string, notify: Func<float, string>, reset: Action, ?tag: string)"
+                              "the methods bind delegates, required ahead of the optional property"
+
+                          let carried =
+                              rendered.Findings
+                              |> List.filter (fun f -> f.Key = "SP002")
+                              |> List.map _.Symbol
+
+                          Expect.equal carried [ "Listener.notify"; "Listener.reset" ] "one finding per method carried in"
+
+                      testCase "the shapes that still get no Create each report their reason" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                          let refused =
+                              rendered.Findings
+                              |> List.filter (fun f -> f.Key = "SP003")
+                              |> List.map (fun f -> f.Symbol, f.Message)
+
+                          let reasonFor name =
+                              refused
+                              |> List.tryPick (fun (symbol, message) -> if symbol = name then Some message else None)
+                              |> Option.defaultValue "<none>"
+
+                          Expect.stringContains (reasonFor "Bag") "index signature" "an indexed type has no name to bind"
+                          Expect.stringContains (reasonFor "Formatter") "overload" "two parameters would share a name"
+                          Expect.stringContains (reasonFor "Wide") "budget" "twenty-five members is one too many"
+
+                          Expect.isFalse
+                              (refused |> List.exists (fun (symbol, _) -> symbol = "Listener"))
+                              "and the interface that gained one reports nothing"
+
+                      testCase "a constructor object keeps the Create its construct signature gave it" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+
+                          Expect.stringContains source "EmitConstructor" "the construct signature still renders"
+
+                          Expect.isEmpty
+                              (rendered.Findings
+                               |> List.filter (fun f -> f.Key = "SP003" && f.Symbol.StartsWith "Handle"))
+                              "a declaration that already has Create members is not reported as missing one" ])
 
     ]

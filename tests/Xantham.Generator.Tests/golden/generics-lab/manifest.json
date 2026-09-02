@@ -2,9 +2,9 @@
   "package": "generics-lab",
   "module": "GenericsLab",
   "counts": {
-    "exact": 6,
+    "exact": 5,
     "ergonomic": 9,
-    "widened": 1,
+    "widened": 2,
     "escape": 0
   },
   "passes": [
@@ -26,8 +26,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 6,
-      "ergonomic": 6
+      "total": 11,
+      "ergonomic": 10,
+      "widened": 1
     }
   ],
   "symbols": [
@@ -135,8 +136,23 @@
     {
       "name": "HandleItem",
       "file": "index.d.ts",
-      "tier": "exact",
-      "findings": []
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "HandleItem",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "HandleItem.reset",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        }
+      ]
     },
     {
       "name": "Named",
@@ -191,6 +207,20 @@
           "tier": "widened",
           "symbol": "Registry.pick()",
           "message": "\u0027R is not bound with Labelled\u0027s constraint; the argument is written as the constraint Named"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Registry",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Registry.pick",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
@@ -211,7 +241,7 @@
     {
       "name": "ManifestFlags",
       "file": "index.d.ts",
-      "tier": "ergonomic",
+      "tier": "widened",
       "findings": [
         {
           "key": "MB004",
@@ -219,6 +249,13 @@
           "tier": "ergonomic",
           "symbol": "ManifestFlags.[]",
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
+        },
+        {
+          "key": "SP003",
+          "pass": "synthesize-paramobjects",
+          "tier": "widened",
+          "symbol": "ManifestFlags",
+          "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
     },

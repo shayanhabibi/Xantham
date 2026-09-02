@@ -26,8 +26,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 2,
-      "ergonomic": 2
+      "total": 7,
+      "ergonomic": 7
     }
   ],
   "symbols": [
@@ -147,6 +147,41 @@
           "tier": "ergonomic",
           "symbol": "Store.find(id)",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Store",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Store.find",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Store.get",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Store.ids",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Store.put",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },

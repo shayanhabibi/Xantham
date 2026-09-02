@@ -44,12 +44,15 @@ type TimerOptions =
 /// <summary>
 /// A minimal chainable class.
 /// </summary>
+[<Interface>]
 type Timer =
     abstract progress: float
     abstract speed: float with get, set
     abstract play: unit -> Timer
     abstract seek: time: float * ?muteCallbacks: bool -> Timer
     abstract tween: [<ParamArray>] values: float[] -> Timer
+    [<ParamObject; Emit("$0")>]
+    static member Create (progress: float, speed: float, play: Func<Timer>, seek: Func<float, bool option, Timer>, tween: Func<float[], Timer>) : Timer = jsNative
 
 [<Interface>]
 type ConfigureSettings =
@@ -123,9 +126,12 @@ type Shape =
 /// <summary>
 /// A generic declaration, referenced from its own members (§4.9).
 /// </summary>
+[<Interface>]
 type Box<'T> =
     abstract value: 'T with get, set
     abstract map: next: 'T -> Box<'T>
+    [<ParamObject; Emit("$0")>]
+    static member Create (value: 'T, map: Func<'T, Box<'T>>) : Box<'T> = jsNative
 
 /// <summary>
 /// An instantiation of a generic declaration - written as an application, not re-expanded.

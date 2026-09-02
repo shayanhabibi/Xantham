@@ -120,8 +120,11 @@ type Loose =
 /// <summary>
 /// A callable operand: the properties flatten and the call signature is the hybrid finding.
 /// </summary>
+[<Interface>]
 type Cancelable =
     abstract cancel: unit -> unit
+    [<ParamObject; Emit("$0")>]
+    static member Create (cancel: Action) : Cancelable = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

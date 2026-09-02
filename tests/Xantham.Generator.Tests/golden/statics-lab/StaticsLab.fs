@@ -19,6 +19,8 @@ type Counter =
     /// </summary>
     abstract value: float
     abstract bump: by: float -> Counter
+    [<ParamObject; Emit("$0")>]
+    static member Create (value: float, bump: Func<float, Counter>) : Counter = jsNative
     /// <summary>
     /// A const-like static: <c>readonly</c>, so F#'s get-only static is exact.
     /// </summary>
@@ -59,6 +61,8 @@ type Doubling =
     /// </summary>
     abstract value: float
     abstract bump: by: float -> Counter
+    [<ParamObject; Emit("$0")>]
+    static member Create (double: Func<Doubling>, value: float, bump: Func<float, Counter>) : Doubling = jsNative
     /// <summary>
     /// A const-like static: <c>readonly</c>, so F#'s get-only static is exact.
     /// </summary>
@@ -123,6 +127,8 @@ type Clash =
     /// Method over property: FS0434, "has the same name as a method".
     /// </summary>
     abstract url: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (json: Func<float>, status: float, text: Func<string>, url: string) : Clash = jsNative
     [<Import("Clash.json", "statics-lab")>]
     static member json (body: float) : Clash = jsNative
 

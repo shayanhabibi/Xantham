@@ -311,7 +311,8 @@ type TypeReference =
             | ObjectWithoutMembers -> "object type declares no members; obj admits the same values"
             | ArrayIntersectionMembersDropped dropped ->
                 $"array-shaped intersection maps to its element array; {dropped} members from the other operands are dropped"
-            | EmptyIntersectionOperandReduced -> "empty intersection operand reduced away; the remaining operand is the type"
+            | EmptyIntersectionOperandReduced ->
+                "empty intersection operand reduced away; the remaining operand is the type"
             | IntersectionCallableFlattened signatures ->
                 $"intersection of callable operands rendered from its {signatures} call signatures"
             | IntersectionOperandsIdentical -> "every operand of the flattened property is the same type"

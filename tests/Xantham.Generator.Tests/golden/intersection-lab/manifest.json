@@ -21,8 +21,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 10,
-      "ergonomic": 10
+      "total": 13,
+      "ergonomic": 12,
+      "widened": 1
     }
   ],
   "symbols": [
@@ -240,6 +241,13 @@
           "tier": "widened",
           "symbol": "Bag.[]",
           "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "SP003",
+          "pass": "synthesize-paramobjects",
+          "tier": "widened",
+          "symbol": "Bag",
+          "message": "no ParamObject Create synthesized: an index signature has no name to bind a parameter to"
         }
       ]
     },
@@ -310,6 +318,20 @@
           "tier": "ergonomic",
           "symbol": "Cancelable",
           "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Cancelable",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Cancelable.cancel",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
