@@ -594,6 +594,53 @@ back to its own operands. The gain is not confined to the lab fixture: in
 `WorkerStub.getDurableObjectClass<'T>` now returns `DurableObjectClass<'T>` where it returned
 `obj`.
 
+*Landed (2026-09-02, wave two) — the reference position.* A conditional in a generic
+signature arrives at the shaper deferred, and 227 of them shared one undifferentiated `obj`
+under `TR014`. Two of the shapes have a better answer than `obj`, and the run takes them:
+
+- **The head's bound already decides the condition.** The run asks the checker
+  `isTypeAssignableTo(checkType, extendsType)`, which reads a type parameter through its
+  bound; where that holds, the true branch is the answer whatever the argument turns out to
+  be. `Proven<T extends Tagged> = T extends Marker ? T : string` maps to `'T`. 34 sites,
+  22 of them in `solid-js`. The reading is directional. With the parameter as the target
+  the bound answers for a type an argument need only be assignable to, so `undefined
+  extends T ? [] : [value: T]` is left deferred rather than read as its true branch;
+  taking it turned `Ai.run`'s model name into `unit` before the guard went in.
+- **One branch is `never`.** No application lands in an uninhabited branch, so the other
+  branch is the type. `solid-js`'s `RequiredParameter<T> = T extends () => unknown ? never
+  : T` maps to `'T`. 27 sites, 21 of them in `type-fest`. A proven condition over a `never`
+  true branch names an uninhabited type and stays deferred for the same reason.
+
+Both report `TR046 ConditionalResolvedToBranch` (Ergonomic) naming the side taken. The
+condition itself is not carried, so a pair with two inhabited branches and no shared F# form
+— `Divergent<T> = T extends string ? number : boolean` — stays `obj` and reports `TR045
+ConditionalTypeDeferred` (Widened). An `undefined` branch is not a `never` branch: dropping
+it would claim the runtime produces a value, which narrows rather than widens. Nesting needs
+no special case, since the branch taken is mapped by the ordinary reference path and a
+conditional found there re-enters this one.
+
+Only the branch taken joins the resolver's frontier, and a deferred pair leaves the frontier
+alone. Following both sides of every `type-fest` conditional would mint hoisted anonymous
+declarations to the follow-depth limit; the rendered file instead lost 98 lines, as twelve
+erased phantoms in the `SA002` rung above collapsed into real abbreviations (`Float<T>`,
+`Integer<T>`, `Negative<T>`, `RequiredKeysOf<T>` and six more move Widened → Ergonomic).
+Corpus-wide `TR014` reads 0, against `TR045` 187 and `TR046` 61; the surplus over 227 is 14
+`type-fest` sites where a nested conditional sat behind a branch nothing previously reached,
+plus 7 in the lab.
+
+One interaction is worth knowing. A phantom may carry an unused type parameter and an
+abbreviation may not, so the arity repair drops one (§4.9, `RA001`). `ExcludeStrict<Union,
+Members extends Union> = Union extends Members ? never : Union` now resolves to `'Union`,
+leaving `'Members` unused, and the alias is dropped where it used to survive as a phantom:
+`ExcludeStrict` and `ExtractStrict` move Widened → Escape. Recovering them means letting an
+alias fall back to a phantom when its resolved right side uses fewer parameters than the
+head, which belongs to the arity pass rather than here.
+
+`tests/fixtures/conditional-lab` pins the three shapes and two negatives. The first bullet of
+this section is one of them, and it now has a measurement: a conditional the checker itself
+resolves (`type Decided = string extends string ? number : boolean`) never reaches the shaper
+as a conditional at all — it arrives as `float`, with no finding of any kind.
+
 ### 4.12 Tuples
 
 Fable F# tuples *are* JS arrays — a happy exact match:

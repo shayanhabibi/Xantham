@@ -21,10 +21,10 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 598,
+      "total": 607,
       "exact": 7,
-      "ergonomic": 337,
-      "widened": 213,
+      "ergonomic": 359,
+      "widened": 200,
       "escape": 41
     },
     {
@@ -36,9 +36,9 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 131,
-      "ergonomic": 80,
-      "widened": 49,
+      "total": 133,
+      "ergonomic": 84,
+      "widened": 47,
       "escape": 2
     },
     {
@@ -1783,18 +1783,18 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Signal()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Signal(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2301,18 +2301,18 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "ResourceActions.mutate()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "ResourceActions.mutate(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         },
         {
           "key": "TR032",
@@ -2504,13 +2504,6 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ResourceOptions.storage()()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -2518,11 +2511,25 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ResourceOptions.storage()()",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR029",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "ResourceOptions.storage()(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "0-element tuple has no F# tuple form; widened to an array"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ResourceOptions.storage()(args)",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         },
         {
           "key": "TR032",
@@ -2678,13 +2685,6 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "InitializedResourceOptions.storage()()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -2692,11 +2692,25 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "InitializedResourceOptions.storage()()",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR029",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "InitializedResourceOptions.storage()(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "0-element tuple has no F# tuple form; widened to an array"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "InitializedResourceOptions.storage()(args)",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         },
         {
           "key": "TR032",
@@ -2748,18 +2762,25 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "ResourceReturnItem.mutate()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR029",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "ResourceReturnItem.mutate(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "0-element tuple has no F# tuple form; widened to an array"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ResourceReturnItem.mutate(args)",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         },
         {
           "key": "TR032",
@@ -2804,18 +2825,18 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "InitializedResourceReturnItem.mutate()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "InitializedResourceReturnItem.mutate(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         },
         {
           "key": "TR032",
@@ -3042,13 +3063,6 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CreateResourceOptions.storage()()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -3056,11 +3070,25 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CreateResourceOptions.storage()()",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR029",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "CreateResourceOptions.storage()(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "0-element tuple has no F# tuple form; widened to an array"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CreateResourceOptions.storage()(args)",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         },
         {
           "key": "TR032",
@@ -3189,13 +3217,6 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CreateResourceOptions2.storage()()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
           "key": "TR020",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -3210,11 +3231,25 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CreateResourceOptions2.storage()()",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR029",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "CreateResourceOptions2.storage()(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "0-element tuple has no F# tuple form; widened to an array"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CreateResourceOptions2.storage()(args)",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         },
         {
           "key": "TR020",
@@ -3385,13 +3420,6 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CreateResourceOptions3.storage()()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
@@ -3399,11 +3427,25 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CreateResourceOptions3.storage()()",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR029",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "CreateResourceOptions3.storage()(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "0-element tuple has no F# tuple form; widened to an array"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CreateResourceOptions3.storage()(args)",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         },
         {
           "key": "TR032",
@@ -3553,13 +3595,6 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "CreateResourceOptions4.storage()()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
           "key": "TR020",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -3574,11 +3609,25 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CreateResourceOptions4.storage()()",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR029",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "CreateResourceOptions4.storage()(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "0-element tuple has no F# tuple form; widened to an array"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CreateResourceOptions4.storage()(args)",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         },
         {
           "key": "TR020",
@@ -3665,18 +3714,18 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "CreateResourceResultItem.mutate()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "CreateResourceResultItem.mutate(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         },
         {
           "key": "TR032",
@@ -3714,18 +3763,25 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "CreateResourceResultItem2.mutate()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR029",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "CreateResourceResultItem2.mutate(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "0-element tuple has no F# tuple form; widened to an array"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CreateResourceResultItem2.mutate(args)",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         },
         {
           "key": "TR032",
@@ -3770,18 +3826,18 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "CreateResourceResultItem3.mutate()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "CreateResourceResultItem3.mutate(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         },
         {
           "key": "TR032",
@@ -3819,18 +3875,25 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
           "pass": "shape-interfaces",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "CreateResourceResultItem4.mutate()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR029",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "CreateResourceResultItem4.mutate(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "0-element tuple has no F# tuple form; widened to an array"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "CreateResourceResultItem4.mutate(args)",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         },
         {
           "key": "TR032",
@@ -3931,11 +3994,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ReturnTypes",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ReturnTypes is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3945,18 +4008,18 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR014",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "AccessorArray",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
           "key": "TR028",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "AccessorArray",
           "message": "tuple with a rest element widened to an array (\u00A74.12 leaves the erased carrier to a fixture)"
+        },
+        {
+          "key": "TR045",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "AccessorArray",
+          "message": "Extract is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -5926,11 +5989,11 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ComponentProps",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ComponentProps is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -5960,11 +6023,11 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "MergeProps",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "MergeProps is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -6772,13 +6835,6 @@
           "message": "constraint on \u0027TRenderFunction\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ShowProps.children",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
           "key": "TR018",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -6798,6 +6854,13 @@
           "tier": "widened",
           "symbol": "ShowProps.children",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ShowProps.children",
+          "message": "RequiredParameter resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         },
         {
           "key": "MB003",
@@ -6856,13 +6919,6 @@
           "message": "constraint on \u0027TRenderFunction\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ShowProps2.children",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
           "key": "TR018",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -6882,6 +6938,13 @@
           "tier": "widened",
           "symbol": "ShowProps2.children",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ShowProps2.children",
+          "message": "RequiredParameter resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         },
         {
           "key": "MB003",
@@ -7045,13 +7108,6 @@
           "message": "constraint on \u0027TRenderFunction\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "MatchProps2.children",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
           "key": "TR018",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -7071,6 +7127,13 @@
           "tier": "widened",
           "symbol": "MatchProps2.children",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "MatchProps2.children",
+          "message": "RequiredParameter resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         },
         {
           "key": "MB003",
@@ -7115,13 +7178,6 @@
           "message": "constraint on \u0027TRenderFunction\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "MatchProps3.children",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
           "key": "TR018",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -7141,6 +7197,13 @@
           "tier": "widened",
           "symbol": "MatchProps3.children",
           "message": "union with an obj arm widened to obj (an erased union over obj is no safer)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "MatchProps3.children",
+          "message": "RequiredParameter resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         },
         {
           "key": "TR032",
@@ -7556,32 +7619,39 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "from(producer)(setter)()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
           "pass": "shape-exports",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "from(producer)(setter)()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR029",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "from(producer)(setter)(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "0-element tuple has no F# tuple form; widened to an array"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "from(producer)(setter)(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "symbol": "from(producer)(setter)(args)",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
@@ -7679,20 +7749,6 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "createSignal()()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
-          "key": "TR014",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "createSignal()()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
           "key": "TR032",
           "pass": "shape-exports",
           "tier": "ergonomic",
@@ -7700,18 +7756,39 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-exports",
           "tier": "widened",
-          "symbol": "createSignal()(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "symbol": "createSignal()()",
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "symbol": "createSignal()()",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR029",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "createSignal()(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "0-element tuple has no F# tuple form; widened to an array"
+        },
+        {
+          "key": "TR045",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "createSignal()(args)",
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "symbol": "createSignal()(args)",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         },
         {
           "key": "TR032",
@@ -8079,20 +8156,6 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR014",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "on(deps)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
-          "key": "TR014",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "on(deps)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        },
-        {
           "key": "TR028",
           "pass": "shape-exports",
           "tier": "widened",
@@ -8105,6 +8168,20 @@
           "tier": "widened",
           "symbol": "on(deps)",
           "message": "tuple with a rest element widened to an array (\u00A74.12 leaves the erased carrier to a fixture)"
+        },
+        {
+          "key": "TR045",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "on(deps)",
+          "message": "Extract is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
+        },
+        {
+          "key": "TR045",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "on(deps)",
+          "message": "Extract is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         },
         {
           "key": "TR020",
@@ -8436,11 +8513,11 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "mergeProps()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Simplify is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -8980,18 +9057,18 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-callbacks",
           "tier": "widened",
           "symbol": "Setter()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-callbacks",
           "tier": "widened",
           "symbol": "Setter(args)",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },

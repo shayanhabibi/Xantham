@@ -719,10 +719,10 @@ type ResourceOptions<'T, 'S> =
     abstract name: string option with get, set
     abstract deferStream: bool option with get, set
     abstract ssrLoadFrom: ResourceOptionsSsrLoadFrom option with get, set
-    abstract storage: Func<'T option, (Func<'T option> * Func<obj, obj>)> option with get, set
+    abstract storage: Func<'T option, (Func<'T option> * Action<obj[]>)> option with get, set
     abstract onHydrated: Action<'S option, ResourceOptionsOnHydratedInfo<'T>> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?initialValue: 'T, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<'T option, (Func<'T option> * Func<obj, obj>)>, ?onHydrated: Action<'S option, ResourceOptionsOnHydratedInfo<'T>>) : ResourceOptions<'T, 'S> = jsNative
+    static member Create (?initialValue: 'T, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<'T option, (Func<'T option> * Action<obj[]>)>, ?onHydrated: Action<'S option, ResourceOptionsOnHydratedInfo<'T>>) : ResourceOptions<'T, 'S> = jsNative
 
 [<Interface>]
 type ResourceOptionsOnHydratedInfo<'T> =
@@ -741,10 +741,10 @@ type InitializedResourceOptions<'T, 'S> =
     abstract name: string option with get, set
     abstract deferStream: bool option with get, set
     abstract ssrLoadFrom: ResourceOptionsSsrLoadFrom option with get, set
-    abstract storage: Func<'T option, (Func<'T option> * Func<obj, obj>)> option with get, set
+    abstract storage: Func<'T option, (Func<'T option> * Action<obj[]>)> option with get, set
     abstract onHydrated: Action<'S option, InitializedResourceOptionsOnHydratedInfo<'T>> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<'T option, (Func<'T option> * Func<obj, obj>)>, ?onHydrated: Action<'S option, InitializedResourceOptionsOnHydratedInfo<'T>>) : InitializedResourceOptions<'T, 'S> = jsNative
+    static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<'T option, (Func<'T option> * Action<obj[]>)>, ?onHydrated: Action<'S option, InitializedResourceOptionsOnHydratedInfo<'T>>) : InitializedResourceOptions<'T, 'S> = jsNative
 
 [<Interface>]
 type InitializedResourceOptionsOnHydratedInfo<'T> =
@@ -754,10 +754,10 @@ type InitializedResourceOptionsOnHydratedInfo<'T> =
 
 [<Interface>]
 type ResourceReturnItem<'R, 'T> =
-    abstract mutate: Func<obj, obj> with get, set
+    abstract mutate: Action<obj[]> with get, set
     abstract refetch: Func<'R option, U2<'T, JS.Promise<'T option>> option> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (mutate: Func<obj, obj>, refetch: Func<'R option, U2<'T, JS.Promise<'T option>> option>) : ResourceReturnItem<'R, 'T> = jsNative
+    static member Create (mutate: Action<obj[]>, refetch: Func<'R option, U2<'T, JS.Promise<'T option>> option>) : ResourceReturnItem<'R, 'T> = jsNative
 
 [<Interface>]
 type InitializedResourceReturnItem<'T, 'R> =
@@ -800,10 +800,10 @@ type CreateResourceOptions<'I, 'T> =
     abstract name: string option with get, set
     abstract deferStream: bool option with get, set
     abstract ssrLoadFrom: ResourceOptionsSsrLoadFrom option with get, set
-    abstract storage: Func<U2<'I, 'T> option, (Func<U2<'I, 'T> option> * Func<obj, obj>)> option with get, set
+    abstract storage: Func<U2<'I, 'T> option, (Func<U2<'I, 'T> option> * Action<obj[]>)> option with get, set
     abstract onHydrated: Action<bool option, CreateResourceOptionsOnHydratedInfo<'I, 'T>> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<U2<'I, 'T> option, (Func<U2<'I, 'T> option> * Func<obj, obj>)>, ?onHydrated: Action<bool option, CreateResourceOptionsOnHydratedInfo<'I, 'T>>) : CreateResourceOptions<'I, 'T> = jsNative
+    static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<U2<'I, 'T> option, (Func<U2<'I, 'T> option> * Action<obj[]>)>, ?onHydrated: Action<bool option, CreateResourceOptionsOnHydratedInfo<'I, 'T>>) : CreateResourceOptions<'I, 'T> = jsNative
 
 [<Interface>]
 type CreateResourceOptions2 =
@@ -811,10 +811,10 @@ type CreateResourceOptions2 =
     abstract name: string option with get, set
     abstract deferStream: bool option with get, set
     abstract ssrLoadFrom: ResourceOptionsSsrLoadFrom option with get, set
-    abstract storage: Func<obj option, (Func<obj option> * Func<obj, obj>)> option with get, set
+    abstract storage: Func<obj option, (Func<obj option> * Action<obj[]>)> option with get, set
     abstract onHydrated: Action<bool option, CreateResourceOptions2OnHydratedInfo> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<obj option, (Func<obj option> * Func<obj, obj>)>, ?onHydrated: Action<bool option, CreateResourceOptions2OnHydratedInfo>) : CreateResourceOptions2 = jsNative
+    static member Create (?initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<obj option, (Func<obj option> * Action<obj[]>)>, ?onHydrated: Action<bool option, CreateResourceOptions2OnHydratedInfo>) : CreateResourceOptions2 = jsNative
 
 [<Interface>]
 type CreateResourceOptions2OnHydratedInfo =
@@ -828,10 +828,10 @@ type CreateResourceOptions3<'I, 'T, 'S> =
     abstract name: string option with get, set
     abstract deferStream: bool option with get, set
     abstract ssrLoadFrom: ResourceOptionsSsrLoadFrom option with get, set
-    abstract storage: Func<U2<'I, 'T> option, (Func<U2<'I, 'T> option> * Func<obj, obj>)> option with get, set
+    abstract storage: Func<U2<'I, 'T> option, (Func<U2<'I, 'T> option> * Action<obj[]>)> option with get, set
     abstract onHydrated: Action<'S option, CreateResourceOptions3OnHydratedInfo<'I, 'T>> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<U2<'I, 'T> option, (Func<U2<'I, 'T> option> * Func<obj, obj>)>, ?onHydrated: Action<'S option, CreateResourceOptions3OnHydratedInfo<'I, 'T>>) : CreateResourceOptions3<'I, 'T, 'S> = jsNative
+    static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<U2<'I, 'T> option, (Func<U2<'I, 'T> option> * Action<obj[]>)>, ?onHydrated: Action<'S option, CreateResourceOptions3OnHydratedInfo<'I, 'T>>) : CreateResourceOptions3<'I, 'T, 'S> = jsNative
 
 [<Interface>]
 type CreateResourceOptions3OnHydratedInfo<'I, 'T> =
@@ -845,10 +845,10 @@ type CreateResourceOptions4<'S> =
     abstract name: string option with get, set
     abstract deferStream: bool option with get, set
     abstract ssrLoadFrom: ResourceOptionsSsrLoadFrom option with get, set
-    abstract storage: Func<obj option, (Func<obj option> * Func<obj, obj>)> option with get, set
+    abstract storage: Func<obj option, (Func<obj option> * Action<obj[]>)> option with get, set
     abstract onHydrated: Action<'S option, CreateResourceOptions4OnHydratedInfo> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<obj option, (Func<obj option> * Func<obj, obj>)>, ?onHydrated: Action<'S option, CreateResourceOptions4OnHydratedInfo>) : CreateResourceOptions4<'S> = jsNative
+    static member Create (?initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptionsSsrLoadFrom, ?storage: Func<obj option, (Func<obj option> * Action<obj[]>)>, ?onHydrated: Action<'S option, CreateResourceOptions4OnHydratedInfo>) : CreateResourceOptions4<'S> = jsNative
 
 [<Interface>]
 type CreateResourceOptions4OnHydratedInfo =
@@ -871,10 +871,10 @@ type CreateResourceResultItem<'R, 'I, 'T> =
 
 [<Interface>]
 type CreateResourceResultItem2<'R, 'T> =
-    abstract mutate: Func<obj, obj> with get, set
+    abstract mutate: Action<obj[]> with get, set
     abstract refetch: Func<'R option, U2<'T, JS.Promise<'T option>> option> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (mutate: Func<obj, obj>, refetch: Func<'R option, U2<'T, JS.Promise<'T option>> option>) : CreateResourceResultItem2<'R, 'T> = jsNative
+    static member Create (mutate: Action<obj[]>, refetch: Func<'R option, U2<'T, JS.Promise<'T option>> option>) : CreateResourceResultItem2<'R, 'T> = jsNative
 
 [<Interface>]
 type CreateResourceResultItem3<'R, 'I, 'T> =
@@ -885,10 +885,10 @@ type CreateResourceResultItem3<'R, 'I, 'T> =
 
 [<Interface>]
 type CreateResourceResultItem4<'R, 'T> =
-    abstract mutate: Func<obj, obj> with get, set
+    abstract mutate: Action<obj[]> with get, set
     abstract refetch: Func<'R option, U2<'T, JS.Promise<'T option>> option> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (mutate: Func<obj, obj>, refetch: Func<'R option, U2<'T, JS.Promise<'T option>> option>) : CreateResourceResultItem4<'R, 'T> = jsNative
+    static member Create (mutate: Action<obj[]>, refetch: Func<'R option, U2<'T, JS.Promise<'T option>> option>) : CreateResourceResultItem4<'R, 'T> = jsNative
 
 [<Interface>]
 type DeferredOptions<'T> =
@@ -1939,7 +1939,7 @@ type Exports =
     [<Import("from", "solid-js")>]
     static member from<'T> (producer: U2<Func<Func<obj, obj>, Action>, FromProducer<'T>>, initalValue: 'T) : Func<'T> = jsNative
     [<Import("from", "solid-js")>]
-    static member from<'T> (producer: U2<Func<Func<obj, obj>, Action>, FromProducer2<'T>>) : Func<'T option> = jsNative
+    static member from<'T> (producer: U2<Func<Action<obj[]>, Action>, FromProducer2<'T>>) : Func<'T option> = jsNative
     [<Import("requestCallback", "solid-js")>]
     static member requestCallback (fn: Action, ?options: RequestCallbackOptions) : Task = jsNative
     [<Import("cancelCallback", "solid-js")>]
@@ -1990,7 +1990,7 @@ type Exports =
     /// </remarks>
     /// <remarks>@description https://docs.solidjs.com/reference/basic-reactivity/create-signal</remarks>
     [<Import("createSignal", "solid-js")>]
-    static member createSignal<'T> () : Func<'T option> * Func<obj, obj> = jsNative
+    static member createSignal<'T> () : Func<'T option> * Action<obj[]> = jsNative
     /// <summary>
     /// Creates a simple reactive state with a getter and setter
     /// <code lang="typescript">

@@ -2099,50 +2099,6 @@ type ExcludeExactly<'Union, 'Delete> = private ExcludeExactly__ of obj
 type ExcludeRestElement<'Array_> = private ExcludeRestElement__ of obj
 
 /// <summary>
-/// A stricter version of &lt;T, U&gt; that ensures every member of <c>U</c> can successfully exclude something from <c>T</c>.
-///
-/// For example, <c>ExcludeStrict&lt;string | number | boolean, number | bigint&gt;</c> will error because <c>bigint</c> cannot exclude anything from <c>string | number | boolean</c>.
-/// </summary>
-/// <remarks>
-/// @example
-/// <code>
-/// // Valid Examples
-/// import type {ExcludeStrict} from 'type-fest';
-///
-/// type Example1 = ExcludeStrict&lt;{status: 'success'; data: string[]} | {status: 'error'; error: string}, {status: 'success'}&gt;;
-/// //=&gt; {status: 'error'; error: string}
-///
-/// type Example2 = ExcludeStrict&lt;'xs' | 's' | 'm' | 'l' | 'xl', 'xs' | 's'&gt;;
-/// //=&gt; 'm' | 'l' | 'xl'
-///
-/// type Example3 = ExcludeStrict&lt;{x: number; y: number} | [number, number], unknown[]&gt;;
-/// //=&gt; {x: number; y: number}
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
-/// <code>
-/// // Invalid Examples
-/// import type {ExcludeStrict} from 'type-fest';
-///
-/// // `'xxl'` cannot exclude anything from `'xs' | 's' | 'm' | 'l' | 'xl'`
-/// // @ts-expect-error
-/// type Example1 = ExcludeStrict&lt;'xs' | 's' | 'm' | 'l' | 'xl', 'xl' | 'xxl'&gt;;
-/// //                                                           ~~~~~~~~~~~~
-/// // Error: Type "'xl' | 'xxl'" does not satisfy the constraint 'never'.
-///
-/// // `unknown[]` cannot exclude anything from `{x: number; y: number} | {x: string; y: string}`
-/// // @ts-expect-error
-/// type Example2 = ExcludeStrict&lt;{x: number; y: number} | {x: string; y: string}, unknown[]&gt;;
-/// //                                                                             ~~~~~~~~~
-/// // Error: Type 'unknown[]' does not satisfy the constraint 'never'.
-/// </code>
-/// </remarks>
-/// <remarks>@category Improved Built-in</remarks>
-[<Erase>]
-type ExcludeStrict<'T, 'U> = private ExcludeStrict__ of obj
-
-/// <summary>
 /// Ensure mutual exclusivity in object unions by adding other members’ keys as <c>?: never</c>.
 ///
 /// Use-cases:
@@ -2445,50 +2401,6 @@ type ExtractExactly<'Union, 'Match> = private ExtractExactly__ of obj
 /// <remarks>@see {@link SplitOnRestElement}</remarks>
 /// <remarks>@category Array</remarks>
 type ExtractRestElement = obj
-
-/// <summary>
-/// A stricter version of &lt;T, U&gt; that ensures every member of <c>U</c> can successfully extract something from <c>T</c>.
-///
-/// For example, <c>ExtractStrict&lt;string | number | boolean, number | bigint&gt;</c> will error because <c>bigint</c> cannot extract anything from <c>string | number | boolean</c>.
-/// </summary>
-/// <remarks>
-/// @example
-/// <code>
-/// // Valid Examples
-/// import type {ExtractStrict} from 'type-fest';
-///
-/// type Example1 = ExtractStrict&lt;{status: 'success'; data: string[]} | {status: 'error'; error: string}, {status: 'success'}&gt;;
-/// //=&gt; {status: 'success'; data: string[]}
-///
-/// type Example2 = ExtractStrict&lt;'xs' | 's' | 'm' | 'l' | 'xl', 'xs' | 's'&gt;;
-/// //=&gt; 'xs' | 's'
-///
-/// type Example3 = ExtractStrict&lt;{x: number; y: number} | [number, number], unknown[]&gt;;
-/// //=&gt; [number, number]
-/// </code>
-/// </remarks>
-/// <remarks>
-/// @example
-/// <code>
-/// // Invalid Examples
-/// import type {ExtractStrict} from 'type-fest';
-///
-/// // `'xxl'` cannot extract anything from `'xs' | 's' | 'm' | 'l' | 'xl'`
-/// // @ts-expect-error
-/// type Example1 = ExtractStrict&lt;'xs' | 's' | 'm' | 'l' | 'xl', 'xl' | 'xxl'&gt;;
-/// //                                                           ~~~~~~~~~~~~
-/// // Error: Type "'xl' | 'xxl'" does not satisfy the constraint 'never'.
-///
-/// // `unknown[]` cannot extract anything from `{x: number; y: number} | {x: string; y: string}`
-/// // @ts-expect-error
-/// type Example2 = ExtractStrict&lt;{x: number; y: number} | {x: string; y: string}, unknown[]&gt;;
-/// //                                                                             ~~~~~~~~~
-/// // Error: Type 'unknown[]' does not satisfy the constraint 'never'.
-/// </code>
-/// </remarks>
-/// <remarks>@category Improved Built-in</remarks>
-[<Erase>]
-type ExtractStrict<'T, 'U> = private ExtractStrict__ of obj
 
 /// <summary>
 /// Tries to find the type of a global with the given name.
@@ -5308,8 +5220,7 @@ type NonEmptyObject<'T> = private NonEmptyObject__ of obj
 /// </code>
 /// </remarks>
 /// <remarks>@category String</remarks>
-[<Erase>]
-type NonEmptyString<'T> = private NonEmptyString__ of obj
+type NonEmptyString<'T> = 'T
 
 /// <summary>
 /// Matches any non-empty tuple.
@@ -5423,8 +5334,7 @@ type NonNullableDeep<'T> = private NonNullableDeep__ of obj
 /// </code>
 /// </remarks>
 /// <remarks>@category Numeric</remarks>
-[<Erase>]
-type Finite<'T> = private Finite__ of obj
+type Finite<'T> = 'T
 
 /// <summary>
 /// A <c>number</c> that is an integer.
@@ -5471,8 +5381,7 @@ type Finite<'T> = private Finite__ of obj
 /// <remarks>@see {@link NegativeInteger}</remarks>
 /// <remarks>@see {@link NonNegativeInteger}</remarks>
 /// <remarks>@category Numeric</remarks>
-[<Erase>]
-type Integer<'T> = private Integer__ of obj
+type Integer<'T> = 'T
 
 /// <summary>
 /// A <c>number</c> that is not an integer.
@@ -5491,8 +5400,7 @@ type Integer<'T> = private Integer__ of obj
 /// </remarks>
 /// <remarks>@see {@link Integer}</remarks>
 /// <remarks>@category Numeric</remarks>
-[<Erase>]
-type Float<'T> = private Float__ of obj
+type Float<'T> = 'T
 
 /// <summary>
 /// A negative (<c>-∞ &lt; x &lt; 0</c>) <c>number</c> that is not an integer.
@@ -5503,8 +5411,7 @@ type Float<'T> = private Float__ of obj
 /// <remarks>@see {@link Negative}</remarks>
 /// <remarks>@see {@link Float}</remarks>
 /// <remarks>@category Numeric</remarks>
-[<Erase>]
-type NegativeFloat<'T> = private NegativeFloat__ of obj
+type NegativeFloat<'T> = 'T
 
 /// <summary>
 /// A negative <c>number</c>/<c>bigint</c> (<c>-∞ &lt; x &lt; 0</c>)
@@ -5514,8 +5421,7 @@ type NegativeFloat<'T> = private NegativeFloat__ of obj
 /// <remarks>@see {@link NegativeInteger}</remarks>
 /// <remarks>@see {@link NonNegative}</remarks>
 /// <remarks>@category Numeric</remarks>
-[<Erase>]
-type Negative<'T> = private Negative__ of obj
+type Negative<'T> = 'T
 
 /// <summary>
 /// A negative (<c>-∞ &lt; x &lt; 0</c>) <c>number</c> that is an integer.
@@ -5528,8 +5434,7 @@ type Negative<'T> = private Negative__ of obj
 /// <remarks>@see {@link Negative}</remarks>
 /// <remarks>@see {@link Integer}</remarks>
 /// <remarks>@category Numeric</remarks>
-[<Erase>]
-type NegativeInteger<'T> = private NegativeInteger__ of obj
+type NegativeInteger<'T> = 'T
 
 /// <summary>
 /// A non-negative <c>number</c>/<c>bigint</c> (<c>0 &lt;= x &lt; ∞</c>).
@@ -5902,8 +5807,7 @@ type OptionalKeysOf<'Type> = private OptionalKeysOf__ of obj
 /// </code>
 /// </remarks>
 /// <remarks>@category Utilities</remarks>
-[<Erase>]
-type Optional<'Value> = private Optional__ of obj
+type Optional<'Value> = 'Value option
 
 /// <summary>
 /// Returns a boolean for whether any of the given elements is <c>true</c>.
@@ -8202,8 +8106,7 @@ type RequiredDeep<'T> = private RequiredDeep__ of obj
 /// </code>
 /// </remarks>
 /// <remarks>@category Utilities</remarks>
-[<Erase>]
-type RequiredKeysOf<'Type> = private RequiredKeysOf__ of obj
+type RequiredKeysOf<'Type> = keyof<'Type>
 
 /// <remarks>@see {@link Schema}</remarks>
 [<Interface>]
@@ -11829,8 +11732,7 @@ type WritableDeep<'T> = private WritableDeep__ of obj
 /// </code>
 /// </remarks>
 /// <remarks>@category Utilities</remarks>
-[<Erase>]
-type WritableKeysOf<'Type> = private WritableKeysOf__ of obj
+type WritableKeysOf<'Type> = keyof<'Type>
 
 /// <summary>
 /// Create a type that strips <c>readonly</c> from the given type. Inverse of <c>Readonly&lt;T&gt;</c>.

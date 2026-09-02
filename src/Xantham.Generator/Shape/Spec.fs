@@ -507,11 +507,42 @@ and internal typeRefOnPath
             indexedAccessRef model owner facts
         elif has TypeFlags.Intersection then
             intersectionRef ctx model self owner facts
+        elif has TypeFlags.Conditional then
+            conditionalRef ctx model self owner facts
         else
             FsObj,
             [
                 Finding.make owner (TypeReference.TypeFlagsNotMapped(string facts.Response.Flags))
             ]
+
+/// `T extends U ? X : Y` at a reference position (§4.11). F# defers no type, so the mapping is
+/// a branch wherever the run can name one: the condition holds for every argument the head
+/// admits, or one branch is `never` and no application lands in it. A branch that maps to `obj`
+/// itself carries what the undifferentiated widening already did, so it reads as deferred.
+and internal conditionalRef
+    (ctx: Context)
+    (model: ShapeModel)
+    (self: string option)
+    (owner: string)
+    (facts: TypeFacts)
+    : FsTypeRef * Finding list =
+    let name =
+        facts.Conditional
+        |> Option.bind _.Name
+        |> Option.defaultValue "an inline conditional"
+
+    let deferred =
+        FsObj, [ Finding.make owner (TypeReference.ConditionalTypeDeferred name) ]
+
+    match facts.Conditional |> Option.bind _.Branch with
+    | None -> deferred
+    | Some(side, branch) ->
+        match typeRef ctx model self owner branch with
+        | FsObj, _ -> deferred
+        | reference, findings ->
+            reference,
+            findings
+            @ [ Finding.make owner (TypeReference.ConditionalResolvedToBranch(name, side)) ]
 
 /// `keyof T` at an operand the checker could not finish (§4.10). A closed `keyof` arrives
 /// already expanded into its union of literal keys and shapes as a StringEnum; this open regime

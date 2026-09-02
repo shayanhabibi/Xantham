@@ -19282,11 +19282,11 @@
           "message": "callback with 4 overloads shaped from the first"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-interfaces",
           "tier": "widened",
           "symbol": "Utils.keepTime()()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         },
         {
           "key": "TR008",
@@ -20575,11 +20575,11 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "keepTime()()",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         },
         {
           "key": "TR008",

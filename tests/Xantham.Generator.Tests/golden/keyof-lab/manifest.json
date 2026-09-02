@@ -322,11 +322,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Unwrap",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Unwrap is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },

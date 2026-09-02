@@ -1,0 +1,1 @@
+{"name":"conditional-lab","type":"module","types":"index.d.ts","description":"Wave two lab: `T extends U ? X : Y` at a reference position - the condition a constraint decides, the pair only one branch of which is inhabited, and the pair that stays deferred."}
