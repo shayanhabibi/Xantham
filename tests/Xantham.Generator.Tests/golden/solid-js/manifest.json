@@ -4,7 +4,7 @@
   "counts": {
     "exact": 20,
     "ergonomic": 60,
-    "widened": 69,
+    "widened": 66,
     "escape": 26
   },
   "passes": [
@@ -21,23 +21,23 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 607,
+      "total": 487,
       "exact": 7,
       "ergonomic": 359,
-      "widened": 200,
+      "widened": 80,
       "escape": 41
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 255,
-      "ergonomic": 13,
-      "widened": 241,
+      "total": 257,
+      "ergonomic": 14,
+      "widened": 242,
       "escape": 1
     },
     {
       "pass": "SE - shape-exports",
-      "total": 133,
-      "ergonomic": 84,
+      "total": 135,
+      "ergonomic": 86,
       "widened": 47,
       "escape": 2
     },
@@ -48,9 +48,9 @@
     },
     {
       "pass": "RA - repair-arity",
-      "total": 25,
+      "total": 23,
       "ergonomic": 7,
-      "widened": 18
+      "widened": 16
     },
     {
       "pass": "AC - audit-coverage",
@@ -60,318 +60,17 @@
   ],
   "symbols": [
     {
-      "name": "ArrayElement",
-      "file": "types/index.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "SI002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ArrayElement",
-          "message": "base has no F# name at this position; its members are flattened in and the is-a relation is not emitted (\u00A74.4)"
-        },
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ArrayElement.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
-        {
-          "key": "TR032",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "ArrayElement.[]",
-          "message": "null/undefined union members hoisted to option"
-        },
-        {
-          "key": "MB002",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.__@iterator",
-          "message": "symbol-keyed member dropped (unrepresentable in F#)"
-        },
-        {
-          "key": "MB002",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.__@unscopables",
-          "message": "symbol-keyed member dropped (unrepresentable in F#)"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.at",
-          "message": "at is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.concat",
-          "message": "concat is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.copyWithin",
-          "message": "copyWithin is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.entries",
-          "message": "entries is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.every",
-          "message": "every is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.fill",
-          "message": "fill is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.filter",
-          "message": "filter is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.find",
-          "message": "find is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.findIndex",
-          "message": "findIndex is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.findLast",
-          "message": "findLast is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.findLastIndex",
-          "message": "findLastIndex is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.flat",
-          "message": "flat is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.flatMap",
-          "message": "flatMap is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.forEach",
-          "message": "forEach is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.includes",
-          "message": "includes is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.indexOf",
-          "message": "indexOf is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.join",
-          "message": "join is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.keys",
-          "message": "keys is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.lastIndexOf",
-          "message": "lastIndexOf is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.map",
-          "message": "map is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.pop",
-          "message": "pop is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.push",
-          "message": "push is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.reduce",
-          "message": "reduce is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.reduceRight",
-          "message": "reduceRight is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.reverse",
-          "message": "reverse is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.shift",
-          "message": "shift is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.slice",
-          "message": "slice is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.some",
-          "message": "some is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.sort",
-          "message": "sort is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.splice",
-          "message": "splice is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.toLocaleString",
-          "message": "toLocaleString is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.toReversed",
-          "message": "toReversed is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.toSorted",
-          "message": "toSorted is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.toSpliced",
-          "message": "toSpliced is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.toString",
-          "message": "toString is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.unshift",
-          "message": "unshift is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.values",
-          "message": "values is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "ArrayElement.with",
-          "message": "with is not among the generated declarations; widened to obj"
-        }
-      ]
-    },
-    {
       "name": "JSXElement",
       "file": "types/index.d.ts",
       "tier": "widened",
       "findings": [
+        {
+          "key": "TR001",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "JSXElement",
+          "message": "type refers to itself through unnamed shapes; widened to obj"
+        },
         {
           "key": "TR018",
           "pass": "shape-aliases",
@@ -4008,6 +3707,13 @@
       "tier": "widened",
       "findings": [
         {
+          "key": "TR009",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "AccessorArray",
+          "message": "unknown maps to obj (D8)"
+        },
+        {
           "key": "TR028",
           "pass": "shape-aliases",
           "tier": "widened",
@@ -4015,11 +3721,11 @@
           "message": "tuple with a rest element widened to an array (\u00A74.12 leaves the erased carrier to a fixture)"
         },
         {
-          "key": "TR045",
+          "key": "TR046",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "AccessorArray",
-          "message": "Extract is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
+          "message": "Extract resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
@@ -6037,632 +5743,23 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR023",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "SplitProps",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "TR028",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "SplitProps",
           "message": "tuple with a rest element widened to an array (\u00A74.12 leaves the erased carrier to a fixture)"
+        },
+        {
+          "key": "TR047",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "SplitProps",
+          "message": "object type declares no members; obj admits the same values"
         }
       ]
     },
     {
-      "name": "SplitPropsItem",
-      "file": "types/render/component.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SplitPropsItem.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
-        {
-          "key": "MB002",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.__@iterator",
-          "message": "symbol-keyed member dropped (unrepresentable in F#)"
-        },
-        {
-          "key": "MB002",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.__@unscopables",
-          "message": "symbol-keyed member dropped (unrepresentable in F#)"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.at",
-          "message": "at is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.concat",
-          "message": "concat is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.copyWithin",
-          "message": "copyWithin is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.entries",
-          "message": "entries is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.every",
-          "message": "every is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.fill",
-          "message": "fill is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.filter",
-          "message": "filter is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.find",
-          "message": "find is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.findIndex",
-          "message": "findIndex is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.findLast",
-          "message": "findLast is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.findLastIndex",
-          "message": "findLastIndex is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.flat",
-          "message": "flat is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.flatMap",
-          "message": "flatMap is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.forEach",
-          "message": "forEach is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.includes",
-          "message": "includes is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.indexOf",
-          "message": "indexOf is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.join",
-          "message": "join is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.keys",
-          "message": "keys is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.lastIndexOf",
-          "message": "lastIndexOf is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.map",
-          "message": "map is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.pop",
-          "message": "pop is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.push",
-          "message": "push is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.reduce",
-          "message": "reduce is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.reduceRight",
-          "message": "reduceRight is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.reverse",
-          "message": "reverse is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.shift",
-          "message": "shift is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.slice",
-          "message": "slice is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.some",
-          "message": "some is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.sort",
-          "message": "sort is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.splice",
-          "message": "splice is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.toLocaleString",
-          "message": "toLocaleString is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.toReversed",
-          "message": "toReversed is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.toSorted",
-          "message": "toSorted is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.toSpliced",
-          "message": "toSpliced is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.toString",
-          "message": "toString is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.unshift",
-          "message": "unshift is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.values",
-          "message": "values is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsItem.with",
-          "message": "with is not among the generated declarations; widened to obj"
-        }
-      ]
-    },
-    {
-      "name": "SplitPropsResultItem",
-      "file": "types/render/component.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "RA003",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem",
-          "message": "SplitPropsResultItem0 is generic and this position has no arguments to apply; widened to obj"
-        },
-        {
-          "key": "RA003",
-          "pass": "repair-arity",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem",
-          "message": "SplitPropsResultItem0 is generic and this position has no arguments to apply; widened to obj"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SplitPropsResultItem",
-          "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "MB004",
-          "pass": "shape-interfaces",
-          "tier": "ergonomic",
-          "symbol": "SplitPropsResultItem.[]",
-          "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
-        },
-        {
-          "key": "MB002",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.__@iterator",
-          "message": "symbol-keyed member dropped (unrepresentable in F#)"
-        },
-        {
-          "key": "MB002",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.__@unscopables",
-          "message": "symbol-keyed member dropped (unrepresentable in F#)"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.at",
-          "message": "at is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.concat",
-          "message": "concat is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.copyWithin",
-          "message": "copyWithin is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.entries",
-          "message": "entries is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.every",
-          "message": "every is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.fill",
-          "message": "fill is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.filter",
-          "message": "filter is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.find",
-          "message": "find is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.findIndex",
-          "message": "findIndex is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.findLast",
-          "message": "findLast is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.findLastIndex",
-          "message": "findLastIndex is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.flat",
-          "message": "flat is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.flatMap",
-          "message": "flatMap is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.forEach",
-          "message": "forEach is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.includes",
-          "message": "includes is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.indexOf",
-          "message": "indexOf is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.join",
-          "message": "join is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.keys",
-          "message": "keys is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.lastIndexOf",
-          "message": "lastIndexOf is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.map",
-          "message": "map is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.pop",
-          "message": "pop is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.push",
-          "message": "push is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.reduce",
-          "message": "reduce is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.reduceRight",
-          "message": "reduceRight is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.reverse",
-          "message": "reverse is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.shift",
-          "message": "shift is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.slice",
-          "message": "slice is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.some",
-          "message": "some is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.sort",
-          "message": "sort is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.splice",
-          "message": "splice is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.toLocaleString",
-          "message": "toLocaleString is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.toReversed",
-          "message": "toReversed is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.toSorted",
-          "message": "toSorted is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.toSpliced",
-          "message": "toSpliced is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.toString",
-          "message": "toString is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.unshift",
-          "message": "unshift is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.values",
-          "message": "values is not among the generated declarations; widened to obj"
-        },
-        {
-          "key": "TR023",
-          "pass": "shape-interfaces",
-          "tier": "widened",
-          "symbol": "SplitPropsResultItem.with",
-          "message": "with is not among the generated declarations; widened to obj"
-        }
-      ]
-    },
-    {
-      "name": "SplitPropsResultItem0",
+      "name": "SplitPropsResultItemItem",
       "file": "types/render/component.d.ts",
       "tier": "widened",
       "findings": [
@@ -6670,21 +5767,21 @@
           "key": "TP002",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "symbol": "SplitPropsResultItem0",
+          "symbol": "SplitPropsResultItemItem",
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
           "key": "MB004",
           "pass": "shape-interfaces",
           "tier": "ergonomic",
-          "symbol": "SplitPropsResultItem0.[]",
+          "symbol": "SplitPropsResultItemItem.[]",
           "message": "index signature reads as an EmitIndexer Item member (\u00A74.10)"
         },
         {
           "key": "TR020",
           "pass": "shape-interfaces",
           "tier": "widened",
-          "symbol": "SplitPropsResultItem0.[]",
+          "symbol": "SplitPropsResultItemItem.[]",
           "message": "indexed access has no F# form here; widened to obj"
         }
       ]
@@ -6849,6 +5946,13 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ShowProps.children",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
           "key": "TR035",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -6924,6 +6028,13 @@
           "tier": "widened",
           "symbol": "ShowProps2.children",
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ShowProps2.children",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR032",
@@ -7031,6 +6142,13 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "MatchProps.children",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
           "key": "TR035",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -7122,6 +6240,13 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "MatchProps2.children",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
           "key": "TR035",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -7192,6 +6317,13 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "MatchProps3.children",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
           "key": "TR035",
           "pass": "shape-interfaces",
           "tier": "widened",
@@ -7239,6 +6371,13 @@
           "tier": "widened",
           "symbol": "ErrorBoundaryProps.fallback",
           "message": "intersection over a non-object operand has no members to flatten; widened to obj (\u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "ErrorBoundaryProps.fallback",
+          "message": "null/undefined union members hoisted to option"
         },
         {
           "key": "TR032",
@@ -8156,11 +7295,18 @@
           "message": "null/undefined union members hoisted to option"
         },
         {
-          "key": "TR028",
+          "key": "TR009",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "on(deps)",
-          "message": "tuple with a rest element widened to an array (\u00A74.12 leaves the erased carrier to a fixture)"
+          "message": "unknown maps to obj (D8)"
+        },
+        {
+          "key": "TR009",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "on(deps)",
+          "message": "unknown maps to obj (D8)"
         },
         {
           "key": "TR028",
@@ -8170,18 +7316,25 @@
           "message": "tuple with a rest element widened to an array (\u00A74.12 leaves the erased carrier to a fixture)"
         },
         {
-          "key": "TR045",
+          "key": "TR028",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "on(deps)",
-          "message": "Extract is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
+          "message": "tuple with a rest element widened to an array (\u00A74.12 leaves the erased carrier to a fixture)"
         },
         {
-          "key": "TR045",
+          "key": "TR046",
           "pass": "shape-exports",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "on(deps)",
-          "message": "Extract is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
+          "message": "Extract resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-exports",
+          "tier": "ergonomic",
+          "symbol": "on(deps)",
+          "message": "Extract resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         },
         {
           "key": "TR020",
@@ -8540,18 +7693,18 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR023",
-          "pass": "shape-exports",
-          "tier": "widened",
-          "symbol": "splitProps()",
-          "message": "__type is not among the generated declarations; widened to obj"
-        },
-        {
           "key": "TR028",
           "pass": "shape-exports",
           "tier": "widened",
           "symbol": "splitProps()",
           "message": "tuple with a rest element widened to an array (\u00A74.12 leaves the erased carrier to a fixture)"
+        },
+        {
+          "key": "TR047",
+          "pass": "shape-exports",
+          "tier": "widened",
+          "symbol": "splitProps()",
+          "message": "object type declares no members; obj admits the same values"
         }
       ]
     },

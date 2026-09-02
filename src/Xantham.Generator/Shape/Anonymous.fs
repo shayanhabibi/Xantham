@@ -178,7 +178,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             (GeneratorConfig.disposition ctx.Config facts.Origin = Ship
              || facts.SymbolName |> Option.forall isSyntheticName)
             && not (isPureCallback facts)
-            && (arrayElement facts).IsNone
+            && (arrayElement model facts).IsNone
             && not (isTuple facts)
             && facts.ConstructSignatures.IsEmpty
             // An index signature is shape too: `Record<string, boolean>` has no members
@@ -271,7 +271,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     // A tuple reads only its components and an array only its element, so
                     // `length`, the numeric indices and `Array<T>`'s lib members claim no
                     // names. A symbol-keyed member is dropped at render, so nor does its type.
-                    if not (isTuple facts) && (arrayElement facts).IsNone then
+                    if not (isTuple facts) && (arrayElement model facts).IsNone then
                         for m in facts.Members do
                             if not (isSymbolKeyed m.Symbol.Name) then
                                 walk (into (Naming.pascalSegment m.Symbol.Name)) order m.TypeId

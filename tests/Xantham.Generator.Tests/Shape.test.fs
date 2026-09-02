@@ -35,6 +35,40 @@ let private tuple (id: int) (components: int list) (flags: ElementFlags list) =
         TypeArguments = components
         TupleElements = flags }
 
+/// An object type carrying `Array`'s member set over a numeric index signature, the way an
+/// interface extending `Array<T>` or an intersection over one reaches the shaper. `extra` names
+/// members beyond the array's own.
+let private arrayShaped (id: int) (name: string) (element: int) (extra: string list) =
+    let member' index memberName =
+        Build.resolvedMember (Build.symbol (id * 100 + index) memberName SymbolFlags.Property) element
+
+    { Build.facts
+          { Build.typeResponse id TypeFlags.Object with
+              IsTupleType = ValueSome false } with
+        SymbolName = Some name
+        Members =
+            [ "concat"
+              "every"
+              "filter"
+              "forEach"
+              "indexOf"
+              "join"
+              "lastIndexOf"
+              "length"
+              "map"
+              "reduce"
+              "reduceRight"
+              "slice"
+              "some" ]
+            @ extra
+            |> List.mapi member'
+        IndexInfos =
+            [ {
+                  KeyTypeId = 2
+                  ValueTypeId = element
+                  IsReadonly = false
+              } ] }
+
 /// A type parameter type, named by its own symbol the way the resolve tier records it.
 let private typeParam (id: int) (name: string) =
     { Build.facts (Build.typeResponse id TypeFlags.TypeParameter) with SymbolName = Some name }
@@ -243,6 +277,19 @@ let typeRefTests =
 
             Expect.equal reference (FsArray FsObj) "components disagree, so the element is obj"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
+
+        testCase "a spread element contributes its own element to the widened array" <| fun _ ->
+            // `[...Chapters]` spreads an array, so the widened array is that array, not one over it.
+            let model =
+                Build.shapeModel (
+                    tuple 10 [ 30 ] [ ElementFlags.Variadic ]
+                    :: arrayShaped 30 "Chapters" 1 []
+                    :: Build.primitives
+                )
+
+            let reference, _ = Spec.typeRef Build.context model None "x" 10
+
+            Expect.equal reference (FsArray FsString) "one array level, not two"
 
         testCase "a one-element tuple has no F# form either" <| fun _ ->
             let model =
@@ -470,6 +517,77 @@ let typeRefTests =
                 (Spec.typeRef Build.context model None "x" 11)
                 (FsArray(FsNamed "Timer"), [])
                 "Array<Timer> -> Timer[], whatever the lib group's disposition"
+
+        testCase "an array under a name of its own reads as an F# array" <| fun _ ->
+            // `interface Chapters extends Array<string> {}`: the checker hands the interface
+            // `Array`'s member set and its numeric index signature, under the name the author
+            // wrote.
+            let model = Build.shapeModel (arrayShaped 30 "Chapters" 1 [] :: Build.primitives)
+
+            Expect.equal
+                (Spec.typeRef Build.context model None "x" 30)
+                (FsArray FsString, [])
+                "the element the index signature carries"
+
+        testCase "an array intersected with a shape reports the members it drops" <| fun _ ->
+            let other =
+                { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
+                    Members =
+                        [ Build.resolvedMember (Build.symbol 410 "kind" SymbolFlags.Property) 1
+                          Build.resolvedMember (Build.symbol 411 "rank" SymbolFlags.Property) 2 ] }
+
+            let intersected =
+                { arrayShaped 40 "Tagged" 1 [ "kind"; "rank" ] with
+                    Response = { Build.typeResponse 40 TypeFlags.Intersection with IsTupleType = ValueSome false }
+                    IntersectionMembers = [ 42; 41 ] }
+
+            let model =
+                Build.shapeModel (intersected :: other :: arrayShaped 42 "ReadonlyArray" 1 [] :: Build.primitives)
+
+            let reference, findings = Spec.typeRef Build.context model None "Tagged" 40
+
+            Expect.equal reference (FsArray FsString) "the element array"
+            Expect.equal (findings |> List.map _.Key) [ "TR048" ] "one drop, counted"
+            Expect.stringContains findings.Head.Message "2 member" "`kind` and `rank`"
+
+        testCase "an indexable shape with none of Array's members is not an array" <| fun _ ->
+            let register =
+                { Build.facts (Build.typeResponse 50 TypeFlags.Object) with
+                    SymbolName = Some "Register"
+                    Members = [ Build.resolvedMember (Build.symbol 500 "length" SymbolFlags.Property) 2 ]
+                    IndexInfos = [ { KeyTypeId = 2; ValueTypeId = 1; IsReadonly = false } ] }
+
+            let model =
+                { Build.shapeModel (register :: Build.primitives) with
+                    DeclNames = Map.ofList [ 50, "Register" ] }
+
+            Expect.equal
+                (Spec.typeRef Build.context model None "x" 50)
+                (FsNamed "Register", [])
+                "a numeric index signature and `length` are not an array on their own"
+
+        testCase "a member-less object reads as obj without claiming a declaration is missing"
+        <| fun _ ->
+            let anonymous =
+                { Build.facts (Build.typeResponse 60 TypeFlags.Object) with
+                    SymbolName = Some "__type" }
+
+            let named =
+                { Build.facts (Build.typeResponse 61 TypeFlags.Object) with
+                    SymbolName = Some "Env" }
+
+            let model = Build.shapeModel (anonymous :: named :: Build.primitives)
+
+            let _, anonymousFindings = Spec.typeRef Build.context model None "x" 60
+            Expect.equal (anonymousFindings |> List.map _.Key) [ "TR047" ] "nothing was ever going to be named"
+
+            let _, ownFindings = Spec.typeRef Build.context model None "Env" 61
+            Expect.equal (ownFindings |> List.map _.Key) [ "TR047" ] "nor at the declaration of the name itself"
+
+            // Read from somewhere else, the name is one the reader follows and this run owes
+            // them a declaration for.
+            let _, referenceFindings = Spec.typeRef Build.context model None "Holder.env" 61
+            Expect.equal (referenceFindings |> List.map _.Key) [ "TR023" ] "a reference that leads nowhere"
 
         testCase "an anonymous callback reads as a delegate (D5)" <| fun _ ->
             let callback =

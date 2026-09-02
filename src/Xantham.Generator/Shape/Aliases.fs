@@ -172,14 +172,37 @@ let shapeAliases: Pass<ShapeModel> =
                                         // The named cases earlier passes handle; what reaches here is
                                         // referable without a declaration of its own.
                                         let reference, refFindings =
-                                            match arrayElement facts with
-                                            | Some element ->
-                                                let inner, innerFindings = typeRef ctx scoped None name element
-                                                FsArray inner, innerFindings
+                                            match arrayElement scoped facts with
+                                            | Some element -> arrayRef ctx scoped None name facts element
                                             | None ->
                                                 match Map.tryFind facts.Response.Id model.DeclNames with
                                                 | Some primary when primary <> name -> FsNamed primary, []
                                                 | _ -> typeRefIgnoringSelf ctx scoped name facts
+
+                                        // A right side that does not mention its parameters is a
+                                        // type-level computation the checker could not finish
+                                        // (`DeepPartial<T>`); a phantom keeps name and arity.
+                                        let isPhantom =
+                                            not typeParameters.IsEmpty
+                                            && typeParameters
+                                               |> List.forall (fun p ->
+                                                   not (Set.contains p.Name (typeVarsOf reference)))
+
+                                        // The phantom is the whole mapping, so the widening its
+                                        // right side reported repeats under a second key.
+                                        let refFindings =
+                                            if isPhantom then
+                                                refFindings
+                                                |> List.filter (fun finding ->
+                                                    match finding.Kind with
+                                                    | :? TypeReference as kind ->
+                                                        match kind with
+                                                        | TypeReference.ObjectWithoutMembers
+                                                        | TypeReference.NotAmongGeneratedDeclarations _ -> false
+                                                        | _ -> true
+                                                    | _ -> true)
+                                            else
+                                                refFindings
 
                                         findings <- findings @ parameterFindings @ refFindings
 
@@ -187,15 +210,7 @@ let shapeAliases: Pass<ShapeModel> =
 
                                         let order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
 
-                                        // A right side that does not mention its parameters is a
-                                        // type-level computation the checker could not finish
-                                        // (`DeepPartial<T>`); a phantom keeps name and arity.
-                                        if
-                                            not typeParameters.IsEmpty
-                                            && typeParameters
-                                               |> List.forall (fun p ->
-                                                   not (Set.contains p.Name (typeVarsOf reference)))
-                                        then
+                                        if isPhantom then
                                             findings <-
                                                 findings @ [ Finding.make name ShapeAliases.PhantomComputation ]
 
