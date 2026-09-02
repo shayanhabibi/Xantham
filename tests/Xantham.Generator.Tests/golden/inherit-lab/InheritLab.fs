@@ -133,9 +133,9 @@ type Failure =
 
 /// <summary>
 /// Not inherited: <c>Promise</c> is the compiler lib's too, but a shipped Fable package does bind
-/// it - under a name this run did not declare, so the members flatten and say so.
+/// it - under a name this run did not declare, so the members flatten into this type, each
+/// keeping its call signature.
 /// </summary>
-[<Interface>]
 type Deferred =
     abstract tag: string with get, set
     /// <summary>
@@ -144,22 +144,20 @@ type Deferred =
     /// <remarks>@param onfulfilled The callback to execute when the Promise is resolved.</remarks>
     /// <remarks>@param onrejected The callback to execute when the Promise is rejected.</remarks>
     /// <remarks>@returns A Promise for the completion of which ever callback is executed.</remarks>
-    abstract ``then``: obj with get, set
+    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: Func<string, U2<'TResult1, JS.Promise<'TResult1>>> * ?onrejected: Func<obj, U2<'TResult2, JS.Promise<'TResult2>>> -> JS.Promise<U2<'TResult1, 'TResult2>>
     /// <summary>
     /// Attaches a callback for only the rejection of the Promise.
     /// </summary>
     /// <remarks>@param onrejected The callback to execute when the Promise is rejected.</remarks>
     /// <remarks>@returns A Promise for the completion of the callback.</remarks>
-    abstract catch: obj with get, set
+    abstract catch<'TResult>: ?onrejected: Func<obj, U2<'TResult, JS.Promise<'TResult>>> -> JS.Promise<U2<string, 'TResult>>
     /// <summary>
     /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
     /// resolved value cannot be modified from the callback.
     /// </summary>
     /// <remarks>@param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).</remarks>
     /// <remarks>@returns A Promise for the completion of the callback.</remarks>
-    abstract ``finally``: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (tag: string, ``then``: obj, catch: obj, ``finally``: obj) : Deferred = jsNative
+    abstract ``finally``: ?onfinally: Action -> JS.Promise<string>
 
 /// <summary>
 /// A utility-type base: TypeScript's surgery over <c>Base</c> rather than a name it can inherit.

@@ -1281,6 +1281,54 @@ let pipelineTests =
                           (rendered.Findings |> List.filter (fun f -> f.Key = "TR023"))
                           "the whole of TR023 here was Array's member set" ])
 
+        // Wave three lane L's fixture. A compiler-lib type reached structurally hands over
+        // member symbols; their types carry a member's name, so they resolve by content. A lib
+        // declaration named at a reference position keeps the O7 shortcut.
+        yield!
+            fixtureTests "member-shape-lab" (handFixture "member-shape-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a lib method reached through an intersection renders as a delegate" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "abstract catch" "the member survives"
+                      Expect.stringContains source "Func<" "carrying its call signature"
+
+                      Expect.isEmpty
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Key = "TR023" && f.Symbol.StartsWith "Deferred"))
+                          "and no member of it is reported as a missing declaration"
+
+                  testCase "a lib method reached by heritage resolves the same way" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "abstract dispatchEvent" "the member survives"
+                      Expect.stringContains source "Browser.Types.Event" "with its parameter type bound"
+
+                      // What is left under TR023 names a type this run does not declare. A
+                      // member's name arriving there is the defect this lab pins.
+                      Expect.isEmpty
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Key = "TR023" && Char.IsLower f.Message[0]))
+                          "no finding in the lab names a member"
+
+                  testCase "a bound lib declaration at a reference position stays identity only" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains source "abstract at: JS.Date" "Date binds, and binds whole"
+                      Expect.isFalse (source.Contains "abstract getTime") "with none of its members walked"
+
+                  testCase "an unbound lib declaration widens under its own name" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                      let named =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = "TR023" && f.Symbol = "Located.matrix")
+
+                      Expect.equal named.Length 1 "one finding, against the property"
+                      Expect.stringContains named.Head.Message "DOMMatrix" "naming the declaration, not a member" ])
+
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 
         // workers-types is a global type library that *replaces* the DOM lib: its README

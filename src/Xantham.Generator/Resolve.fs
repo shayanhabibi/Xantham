@@ -395,7 +395,27 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
             let isAnonymousShape =
                 let objectFlags = ty.ObjectFlags |> ValueOption.defaultValue ObjectFlags.None
 
+                // A member's type is named for the member: the type of `Promise.then` carries
+                // the symbol `then`, a member name rather than a declaration head. Such a type
+                // resolves by content whatever group it was written in; a symbol that declares
+                // a type keeps the shortcut.
+                let isMemberType =
+                    match symbol with
+                    | ValueSome s ->
+                        hasAny (SymbolFlags.Method ||| SymbolFlags.Property ||| SymbolFlags.Signature) s.Flags
+                        && not (
+                            hasAny
+                                (SymbolFlags.Interface
+                                 ||| SymbolFlags.Class
+                                 ||| SymbolFlags.TypeAlias
+                                 ||| SymbolFlags.RegularEnum
+                                 ||| SymbolFlags.ConstEnum)
+                                s.Flags
+                        )
+                    | ValueNone -> false
+
                 objectFlags.HasFlag ObjectFlags.Mapped
+                || isMemberType
                 || match symbol with
                    | ValueSome s -> s.Name.StartsWith "__"
                    | ValueNone -> true

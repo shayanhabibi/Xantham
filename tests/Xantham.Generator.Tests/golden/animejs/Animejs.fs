@@ -1197,6 +1197,13 @@ type ScopeParamsMediaQueries =
     [<EmitIndexer>]
     abstract Item: string -> string with get, set
 
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type DrawableSVGGeometryInsertAdjacentElementWhere =
+    | [<CompiledName("afterbegin")>] Afterbegin
+    | [<CompiledName("afterend")>] Afterend
+    | [<CompiledName("beforebegin")>] Beforebegin
+    | [<CompiledName("beforeend")>] Beforeend
+
 [<Interface>]
 type Svg =
     abstract createMotionPath: Func<TargetsParam, float option, SvgCreateMotionPathResult> with get, set
@@ -3692,37 +3699,49 @@ type DrawableSVGGeometry =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/getPointAtLength)
     /// </summary>
-    abstract getPointAtLength: obj with get, set
+    abstract getPointAtLength: distance: float -> obj
     /// <summary>
     /// The **<c>SVGGeometryElement.getTotalLength()</c>** method returns the user agent's computed value for the total length of the path in user units.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/getTotalLength)
     /// </summary>
-    abstract getTotalLength: obj with get, set
+    abstract getTotalLength: unit -> float
     /// <summary>
     /// The **<c>isPointInFill()</c>** method of the SVGGeometryElement interface determines whether a given point is within the fill shape of an element. The point argument is interpreted as a point in the local coordinate system of the element.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/isPointInFill)
     /// </summary>
-    abstract isPointInFill: obj with get, set
+    abstract isPointInFill: ?point: obj -> bool
     /// <summary>
     /// The **<c>isPointInStroke()</c>** method of the SVGGeometryElement interface determines whether a given point is within the stroke shape of an element. The point argument is interpreted as a point in the local coordinate system of the element.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGGeometryElement/isPointInStroke)
     /// </summary>
-    abstract isPointInStroke: obj with get, set
+    abstract isPointInStroke: ?point: obj -> bool
     /// <summary>
     /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
     /// </summary>
-    abstract addEventListener: obj with get, set
+    abstract addEventListener<'K>: ``type``: 'K * listener: Func<obj, obj> * ?options: U2<bool, Browser.Types.AddEventListenerOptions> -> unit
+    /// <summary>
+    /// The **<c>addEventListener()</c>** method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener)
+    /// </summary>
+    abstract addEventListener: ``type``: string * listener: obj * ?options: U2<bool, Browser.Types.AddEventListenerOptions> -> unit
     /// <summary>
     /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
     /// </summary>
-    abstract removeEventListener: obj with get, set
+    abstract removeEventListener<'K>: ``type``: 'K * listener: Func<obj, obj> * ?options: obj -> unit
+    /// <summary>
+    /// The **<c>removeEventListener()</c>** method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener)
+    /// </summary>
+    abstract removeEventListener: ``type``: string * listener: obj * ?options: obj -> unit
     /// <summary>
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/ariaActiveDescendantElement)
     /// </summary>
@@ -3934,11 +3953,11 @@ type DrawableSVGGeometry =
     /// <summary>
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animate)
     /// </summary>
-    abstract animate: obj with get, set
+    abstract animate: ?keyframes: obj * ?options: obj -> obj
     /// <summary>
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getAnimations)
     /// </summary>
-    abstract getAnimations: obj with get, set
+    abstract getAnimations: ?options: obj -> obj[]
     /// <summary>
     /// Inserts nodes just after node, while replacing strings in nodes with equivalent Text nodes.
     ///
@@ -3946,7 +3965,7 @@ type DrawableSVGGeometry =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CharacterData/after)
     /// </summary>
-    abstract after: obj with get, set
+    abstract after: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
     /// <summary>
     /// Inserts nodes just before node, while replacing strings in nodes with equivalent Text nodes.
     ///
@@ -3954,13 +3973,13 @@ type DrawableSVGGeometry =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CharacterData/before)
     /// </summary>
-    abstract before: obj with get, set
+    abstract before: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
     /// <summary>
     /// Removes node.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CharacterData/remove)
     /// </summary>
-    abstract remove: obj with get, set
+    abstract remove: unit -> unit
     /// <summary>
     /// Replaces node with nodes, while replacing strings in nodes with equivalent Text nodes.
     ///
@@ -3968,7 +3987,7 @@ type DrawableSVGGeometry =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/CharacterData/replaceWith)
     /// </summary>
-    abstract replaceWith: obj with get, set
+    abstract replaceWith: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
     /// <summary>
     /// The **<c>Element.attributes</c>** property returns a live collection of all attribute nodes registered to the specified node. It is a NamedNodeMap, not an Array, so it has no Array methods and the Attr nodes' indexes may differ among browsers. To be more specific, attributes is a key/value pair of strings that represents any information regarding that attribute.
     ///
@@ -4115,200 +4134,243 @@ type DrawableSVGGeometry =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/attachShadow)
     /// </summary>
-    abstract attachShadow: obj with get, set
+    abstract attachShadow: init: Browser.Types.ShadowRootInit -> Browser.Types.ShadowRoot
     /// <summary>
     /// The **<c>checkVisibility()</c>** method of the Element interface checks whether the element is visible.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/checkVisibility)
     /// </summary>
-    abstract checkVisibility: obj with get, set
+    abstract checkVisibility: ?options: obj -> bool
     /// <summary>
     /// The **<c>closest()</c>** method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/closest)
     /// </summary>
-    abstract closest: obj with get, set
+    abstract closest<'K>: selector: 'K -> obj option
+    /// <summary>
+    /// The **<c>closest()</c>** method of the Element interface traverses the element and its parents (heading toward the document root) until it finds a node that matches the specified CSS selector.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/closest)
+    /// </summary>
+    abstract closest<'E when 'E :> Browser.Types.Element>: selectors: string -> 'E option
     /// <summary>
     /// The **<c>computedStyleMap()</c>** method of the Element interface returns a StylePropertyMapReadOnly interface which provides a read-only representation of a CSS declaration block that is an alternative to CSSStyleDeclaration.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/computedStyleMap)
     /// </summary>
-    abstract computedStyleMap: obj with get, set
+    abstract computedStyleMap: unit -> obj
     /// <summary>
     /// The **<c>getAttribute()</c>** method of the Element interface returns the value of a specified attribute on the element.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getAttribute)
     /// </summary>
-    abstract getAttribute: obj with get, set
+    abstract getAttribute: qualifiedName: string -> string option
     /// <summary>
     /// The **<c>getAttributeNS()</c>** method of the Element interface returns the string value of the attribute with the specified namespace and name. If the named attribute does not exist, the value returned will either be null or "" (the empty string); see Notes for details.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getAttributeNS)
     /// </summary>
-    abstract getAttributeNS: obj with get, set
+    abstract getAttributeNS: ``namespace``: string option * localName: string -> string option
     /// <summary>
     /// The **<c>getAttributeNames()</c>** method of the Element interface returns the attribute names of the element as an Array of strings. If the element has no attributes it returns an empty array.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getAttributeNames)
     /// </summary>
-    abstract getAttributeNames: obj with get, set
+    abstract getAttributeNames: unit -> string[]
     /// <summary>
     /// Returns the specified attribute of the specified element, as an Attr node.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getAttributeNode)
     /// </summary>
-    abstract getAttributeNode: obj with get, set
+    abstract getAttributeNode: qualifiedName: string -> Browser.Types.Attr option
     /// <summary>
     /// The **<c>getAttributeNodeNS()</c>** method of the Element interface returns the namespaced Attr node of an element.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getAttributeNodeNS)
     /// </summary>
-    abstract getAttributeNodeNS: obj with get, set
+    abstract getAttributeNodeNS: ``namespace``: string option * localName: string -> Browser.Types.Attr option
     /// <summary>
     /// The **<c>Element.getBoundingClientRect()</c>** method returns a DOMRect object providing information about the size of an element and its position relative to the viewport.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getBoundingClientRect)
     /// </summary>
-    abstract getBoundingClientRect: obj with get, set
+    abstract getBoundingClientRect: unit -> obj
     /// <summary>
     /// The **<c>getClientRects()</c>** method of the Element interface returns a collection of DOMRect objects that indicate the bounding rectangles for each CSS border box in a client.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getClientRects)
     /// </summary>
-    abstract getClientRects: obj with get, set
+    abstract getClientRects: unit -> obj
     /// <summary>
     /// The Element method **<c>getElementsByClassName()</c>** returns a live HTMLCollection which contains every descendant element which has the specified class name or names.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getElementsByClassName)
     /// </summary>
-    abstract getElementsByClassName: obj with get, set
+    abstract getElementsByClassName: classNames: string -> obj
     /// <summary>
     /// The **<c>Element.getElementsByTagName()</c>** method returns a live HTMLCollection of elements with the given tag name.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName)
     /// </summary>
     /// <remarks>@deprecated</remarks>
-    abstract getElementsByTagName: obj with get, set
+    abstract getElementsByTagName<'K>: qualifiedName: 'K -> obj
+    /// <summary>
+    /// The **<c>Element.getElementsByTagName()</c>** method returns a live HTMLCollection of elements with the given tag name.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagName)
+    /// </summary>
+    /// <remarks>@deprecated</remarks>
+    abstract getElementsByTagName: qualifiedName: string -> obj
     /// <summary>
     /// The **<c>Element.getElementsByTagNameNS()</c>** method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS)
     /// </summary>
-    abstract getElementsByTagNameNS: obj with get, set
+    abstract getElementsByTagNameNS: namespaceURI: string * localName: string -> obj
+    /// <summary>
+    /// The **<c>Element.getElementsByTagNameNS()</c>** method returns a live HTMLCollection of elements with the given tag name belonging to the given namespace. It is similar to Document.getElementsByTagNameNS, except that its search is restricted to descendants of the specified element.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getElementsByTagNameNS)
+    /// </summary>
+    abstract getElementsByTagNameNS: ``namespace``: string option * localName: string -> obj
     /// <summary>
     /// The **<c>getHTML()</c>** method of the Element interface is used to serialize an element's DOM to an HTML string.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/getHTML)
     /// </summary>
-    abstract getHTML: obj with get, set
+    abstract getHTML: ?options: obj -> string
     /// <summary>
     /// The **<c>Element.hasAttribute()</c>** method returns a Boolean value indicating whether the specified element has the specified attribute or not.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/hasAttribute)
     /// </summary>
-    abstract hasAttribute: obj with get, set
+    abstract hasAttribute: qualifiedName: string -> bool
     /// <summary>
     /// The **<c>hasAttributeNS()</c>** method of the Element interface returns a boolean value indicating whether the current element has the specified attribute with the specified namespace.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/hasAttributeNS)
     /// </summary>
-    abstract hasAttributeNS: obj with get, set
+    abstract hasAttributeNS: ``namespace``: string option * localName: string -> bool
     /// <summary>
     /// The **<c>hasAttributes()</c>** method of the Element interface returns a boolean value indicating whether the current element has any attributes or not.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/hasAttributes)
     /// </summary>
-    abstract hasAttributes: obj with get, set
+    abstract hasAttributes: unit -> bool
     /// <summary>
     /// The **<c>hasPointerCapture()</c>** method of the Element interface checks whether the element on which it is invoked has pointer capture for the pointer identified by the given pointer ID.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/hasPointerCapture)
     /// </summary>
-    abstract hasPointerCapture: obj with get, set
+    abstract hasPointerCapture: pointerId: float -> bool
     /// <summary>
     /// The **<c>insertAdjacentElement()</c>** method of the Element interface inserts a given element node at a given position relative to the element it is invoked upon.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/insertAdjacentElement)
     /// </summary>
-    abstract insertAdjacentElement: obj with get, set
+    abstract insertAdjacentElement: where: DrawableSVGGeometryInsertAdjacentElementWhere * element: Browser.Types.Element -> Browser.Types.Element option
     /// <summary>
     /// The **<c>insertAdjacentHTML()</c>** method of the Element interface parses the specified input as HTML or XML and inserts the resulting nodes into the DOM tree at a specified position.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/insertAdjacentHTML)
     /// </summary>
-    abstract insertAdjacentHTML: obj with get, set
+    abstract insertAdjacentHTML: position: DrawableSVGGeometryInsertAdjacentElementWhere * string: string -> unit
     /// <summary>
     /// The **<c>insertAdjacentText()</c>** method of the Element interface, given a relative position and a string, inserts a new text node at the given position relative to the element it is called from.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/insertAdjacentText)
     /// </summary>
-    abstract insertAdjacentText: obj with get, set
+    abstract insertAdjacentText: where: DrawableSVGGeometryInsertAdjacentElementWhere * data: string -> unit
     /// <summary>
     /// The **<c>matches()</c>** method of the Element interface tests whether the element would be selected by the specified CSS selector.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/matches)
     /// </summary>
-    abstract matches: obj with get, set
+    abstract matches<'K>: selectors: 'K -> bool
+    /// <summary>
+    /// The **<c>matches()</c>** method of the Element interface tests whether the element would be selected by the specified CSS selector.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/matches)
+    /// </summary>
+    abstract matches: selectors: string -> bool
     /// <summary>
     /// The **<c>releasePointerCapture()</c>** method of the Element interface releases (stops) pointer capture that was previously set for a specific (PointerEvent) pointer.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/releasePointerCapture)
     /// </summary>
-    abstract releasePointerCapture: obj with get, set
+    abstract releasePointerCapture: pointerId: float -> unit
     /// <summary>
     /// The Element method **<c>removeAttribute()</c>** removes the attribute with the specified name from the element.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/removeAttribute)
     /// </summary>
-    abstract removeAttribute: obj with get, set
+    abstract removeAttribute: qualifiedName: string -> unit
     /// <summary>
     /// The **<c>removeAttributeNS()</c>** method of the Element interface removes the specified attribute with the specified namespace from an element.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/removeAttributeNS)
     /// </summary>
-    abstract removeAttributeNS: obj with get, set
+    abstract removeAttributeNS: ``namespace``: string option * localName: string -> unit
     /// <summary>
     /// The **<c>removeAttributeNode()</c>** method of the Element interface removes the specified Attr node from the element.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/removeAttributeNode)
     /// </summary>
-    abstract removeAttributeNode: obj with get, set
+    abstract removeAttributeNode: attr: Browser.Types.Attr -> Browser.Types.Attr
     /// <summary>
     /// The **<c>Element.requestFullscreen()</c>** method issues an asynchronous request to make the element be displayed in fullscreen mode.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/requestFullscreen)
     /// </summary>
-    abstract requestFullscreen: obj with get, set
+    abstract requestFullscreen: ?options: obj -> JS.Promise<unit>
     /// <summary>
     /// The **<c>requestPointerLock()</c>** method of the Element interface lets you asynchronously ask for the pointer to be locked on the given element.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/requestPointerLock)
     /// </summary>
-    abstract requestPointerLock: obj with get, set
+    abstract requestPointerLock: ?options: obj -> JS.Promise<unit>
     /// <summary>
     /// The **<c>scroll()</c>** method of the Element interface scrolls the element to a particular set of coordinates inside a given element.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scroll)
     /// </summary>
-    abstract scroll: obj with get, set
+    abstract scroll: ?options: obj -> unit
+    /// <summary>
+    /// The **<c>scroll()</c>** method of the Element interface scrolls the element to a particular set of coordinates inside a given element.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scroll)
+    /// </summary>
+    abstract scroll: x: float * y: float -> unit
     /// <summary>
     /// The **<c>scrollBy()</c>** method of the Element interface scrolls an element by the given amount.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scrollBy)
     /// </summary>
-    abstract scrollBy: obj with get, set
+    abstract scrollBy: ?options: obj -> unit
+    /// <summary>
+    /// The **<c>scrollBy()</c>** method of the Element interface scrolls an element by the given amount.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scrollBy)
+    /// </summary>
+    abstract scrollBy: x: float * y: float -> unit
     /// <summary>
     /// The Element interface's **<c>scrollIntoView()</c>** method scrolls the element's ancestor containers such that the element on which scrollIntoView() is called is visible to the user.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scrollIntoView)
     /// </summary>
-    abstract scrollIntoView: obj with get, set
+    abstract scrollIntoView: ?arg: U2<bool, Browser.Types.ScrollIntoViewOptions> -> unit
     /// <summary>
     /// The **<c>scrollTo()</c>** method of the Element interface scrolls to a particular set of coordinates inside a given element.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scrollTo)
     /// </summary>
-    abstract scrollTo: obj with get, set
+    abstract scrollTo: ?options: obj -> unit
+    /// <summary>
+    /// The **<c>scrollTo()</c>** method of the Element interface scrolls to a particular set of coordinates inside a given element.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/scrollTo)
+    /// </summary>
+    abstract scrollTo: x: float * y: float -> unit
     /// <summary>
     /// The **<c>setAttribute()</c>** method of the Element interface sets the value of an attribute on the specified element. If the attribute already exists, the value is updated; otherwise a new attribute is added with the specified name and value.
     ///
@@ -4320,44 +4382,44 @@ type DrawableSVGGeometry =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/setAttributeNS)
     /// </summary>
-    abstract setAttributeNS: obj with get, set
+    abstract setAttributeNS: ``namespace``: string option * qualifiedName: string * value: string -> unit
     /// <summary>
     /// The **<c>setAttributeNode()</c>** method of the Element interface adds a new Attr node to the specified element.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/setAttributeNode)
     /// </summary>
-    abstract setAttributeNode: obj with get, set
+    abstract setAttributeNode: attr: Browser.Types.Attr -> Browser.Types.Attr option
     /// <summary>
     /// The **<c>setAttributeNodeNS()</c>** method of the Element interface adds a new namespaced Attr node to an element.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/setAttributeNodeNS)
     /// </summary>
-    abstract setAttributeNodeNS: obj with get, set
+    abstract setAttributeNodeNS: attr: Browser.Types.Attr -> Browser.Types.Attr option
     /// <summary>
     /// The **<c>setHTMLUnsafe()</c>** method of the Element interface is used to parse HTML input into a DocumentFragment, optionally filtering out unwanted elements and attributes, and those that don't belong in the context, and then using it to replace the element's subtree in the DOM.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/setHTMLUnsafe)
     /// </summary>
-    abstract setHTMLUnsafe: obj with get, set
+    abstract setHTMLUnsafe: html: string -> unit
     /// <summary>
     /// The **<c>setPointerCapture()</c>** method of the Element interface is used to designate a specific element as the capture target of future pointer events. Subsequent events for the pointer will be targeted at the capture element until capture is released (via Element.releasePointerCapture() or the pointerup event is fired).
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/setPointerCapture)
     /// </summary>
-    abstract setPointerCapture: obj with get, set
+    abstract setPointerCapture: pointerId: float -> unit
     /// <summary>
     /// The **<c>toggleAttribute()</c>** method of the Element interface toggles a Boolean attribute (removing it if it is present and adding it if it is not present) on the given element.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/toggleAttribute)
     /// </summary>
-    abstract toggleAttribute: obj with get, set
+    abstract toggleAttribute: qualifiedName: string * ?force: bool -> bool
     /// <remarks>
     /// @deprecated
     /// This is a legacy alias of <c>matches</c>.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/matches)
     /// </remarks>
-    abstract webkitMatchesSelector: obj with get, set
+    abstract webkitMatchesSelector: selectors: string -> bool
     /// <summary>
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/textContent)
     /// The **<c>textContent</c>** property of the Node interface represents the text content of the node and its descendants.
@@ -4378,7 +4440,7 @@ type DrawableSVGGeometry =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent)
     /// </summary>
-    abstract dispatchEvent: obj with get, set
+    abstract dispatchEvent: ``event``: Browser.Types.Event -> bool
     /// <summary>
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/abort_event)
     /// </summary>
@@ -4814,11 +4876,11 @@ type DrawableSVGGeometry =
     /// <summary>
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/blur)
     /// </summary>
-    abstract blur: obj with get, set
+    abstract blur: unit -> unit
     /// <summary>
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/focus)
     /// </summary>
-    abstract focus: obj with get, set
+    abstract focus: ?options: obj -> unit
     /// <summary>
     /// The read-only **<c>baseURI</c>** property of the Node interface returns the absolute base URL of the document containing the node.
     ///
@@ -4896,91 +4958,91 @@ type DrawableSVGGeometry =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/appendChild)
     /// </summary>
-    abstract appendChild: obj with get, set
+    abstract appendChild<'T when 'T :> Browser.Types.Node>: node: 'T -> 'T
     /// <summary>
     /// The **<c>cloneNode()</c>** method of the Node interface returns a duplicate of the node on which this method was called. Its parameter controls if the subtree contained in the node is also cloned or not.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/cloneNode)
     /// </summary>
-    abstract cloneNode: obj with get, set
+    abstract cloneNode: ?subtree: bool -> Browser.Types.Node
     /// <summary>
     /// The **<c>compareDocumentPosition()</c>** method of the Node interface reports the position of its argument node relative to the node on which it is called.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/compareDocumentPosition)
     /// </summary>
-    abstract compareDocumentPosition: obj with get, set
+    abstract compareDocumentPosition: other: Browser.Types.Node -> float
     /// <summary>
     /// The **<c>contains()</c>** method of the Node interface returns a boolean value indicating whether a node is a descendant of a given node, that is the node itself, one of its direct children (childNodes), one of the children's direct children, and so on.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/contains)
     /// </summary>
-    abstract contains: obj with get, set
+    abstract contains: ?other: Browser.Types.Node -> bool
     /// <summary>
     /// The **<c>getRootNode()</c>** method of the Node interface returns the context object's root, which optionally includes the shadow root if it is available.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/getRootNode)
     /// </summary>
-    abstract getRootNode: obj with get, set
+    abstract getRootNode: ?options: obj -> Browser.Types.Node
     /// <summary>
     /// The **<c>hasChildNodes()</c>** method of the Node interface returns a boolean value indicating whether the given Node has child nodes or not.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/hasChildNodes)
     /// </summary>
-    abstract hasChildNodes: obj with get, set
+    abstract hasChildNodes: unit -> bool
     /// <summary>
     /// The **<c>insertBefore()</c>** method of the Node interface inserts a node before a reference node as a child of a specified parent node.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/insertBefore)
     /// </summary>
-    abstract insertBefore: obj with get, set
+    abstract insertBefore<'T when 'T :> Browser.Types.Node>: node: 'T * ?child: Browser.Types.Node -> 'T
     /// <summary>
     /// The **<c>isDefaultNamespace()</c>** method of the Node interface accepts a namespace URI as an argument. It returns a boolean value that is true if the namespace is the default namespace on the given node and false if not. The default namespace can be retrieved with Node.lookupNamespaceURI() by passing null as the argument.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/isDefaultNamespace)
     /// </summary>
-    abstract isDefaultNamespace: obj with get, set
+    abstract isDefaultNamespace: ?``namespace``: string -> bool
     /// <summary>
     /// The **<c>isEqualNode()</c>** method of the Node interface tests whether two nodes are equal. Two nodes are equal when they have the same type, defining characteristics (for elements, this would be their ID, number of children, and so forth), its attributes match, and so on. The specific set of data points that must match varies depending on the types of the nodes.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/isEqualNode)
     /// </summary>
-    abstract isEqualNode: obj with get, set
+    abstract isEqualNode: ?otherNode: Browser.Types.Node -> bool
     /// <summary>
     /// The **<c>isSameNode()</c>** method of the Node interface is a legacy alias the for the === strict equality operator. That is, it tests whether two nodes are the same (in other words, whether they reference the same object).
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/isSameNode)
     /// </summary>
-    abstract isSameNode: obj with get, set
+    abstract isSameNode: ?otherNode: Browser.Types.Node -> bool
     /// <summary>
     /// The **<c>lookupNamespaceURI()</c>** method of the Node interface takes a prefix as parameter and returns the namespace URI associated with it on the given node if found (and null if not). This method's existence allows Node objects to be passed as a namespace resolver to XPathEvaluator.createExpression() and XPathEvaluator.evaluate().
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/lookupNamespaceURI)
     /// </summary>
-    abstract lookupNamespaceURI: obj with get, set
+    abstract lookupNamespaceURI: ?prefix: string -> string option
     /// <summary>
     /// The **<c>lookupPrefix()</c>** method of the Node interface returns a string containing the prefix for a given namespace URI, if present, and null if not. When multiple prefixes are possible, the first prefix is returned.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/lookupPrefix)
     /// </summary>
-    abstract lookupPrefix: obj with get, set
+    abstract lookupPrefix: ?``namespace``: string -> string option
     /// <summary>
     /// The **<c>normalize()</c>** method of the Node interface puts the specified node and all of its sub-tree into a normalized form. In a normalized sub-tree, no text nodes in the sub-tree are empty and there are no adjacent text nodes.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/normalize)
     /// </summary>
-    abstract normalize: obj with get, set
+    abstract normalize: unit -> unit
     /// <summary>
     /// The **<c>removeChild()</c>** method of the Node interface removes a child node from the DOM and returns the removed node.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/removeChild)
     /// </summary>
-    abstract removeChild: obj with get, set
+    abstract removeChild<'T when 'T :> Browser.Types.Node>: child: 'T -> 'T
     /// <summary>
     /// The **<c>replaceChild()</c>** method of the Node interface replaces a child node within the given (parent) node.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/replaceChild)
     /// </summary>
-    abstract replaceChild: obj with get, set
+    abstract replaceChild<'T when 'T :> Browser.Types.Node>: node: Browser.Types.Node * child: 'T -> 'T
     /// <summary>
     /// node is an element.
     /// </summary>
@@ -5079,11 +5141,11 @@ type DrawableSVGGeometry =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/append)
     /// </summary>
-    abstract append: obj with get, set
+    abstract append: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
     /// <summary>
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/moveBefore)
     /// </summary>
-    abstract moveBefore: obj with get, set
+    abstract moveBefore: node: Browser.Types.Node * ?child: Browser.Types.Node -> unit
     /// <summary>
     /// Inserts nodes before the first child of node, while replacing strings in nodes with equivalent Text nodes.
     ///
@@ -5091,21 +5153,35 @@ type DrawableSVGGeometry =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/prepend)
     /// </summary>
-    abstract prepend: obj with get, set
+    abstract prepend: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
     /// <summary>
     /// Returns the first element that is a descendant of node that matches selectors.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/querySelector)
     /// </summary>
     /// <remarks>@deprecated</remarks>
-    abstract querySelector: obj with get, set
+    abstract querySelector<'K>: selectors: 'K -> obj option
+    /// <summary>
+    /// Returns the first element that is a descendant of node that matches selectors.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/querySelector)
+    /// </summary>
+    /// <remarks>@deprecated</remarks>
+    abstract querySelector<'E when 'E :> Browser.Types.Element>: selectors: string -> 'E option
     /// <summary>
     /// Returns all element descendants of node that match selectors.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll)
     /// </summary>
     /// <remarks>@deprecated</remarks>
-    abstract querySelectorAll: obj with get, set
+    abstract querySelectorAll<'K>: selectors: 'K -> Browser.Types.NodeListOf<obj>
+    /// <summary>
+    /// Returns all element descendants of node that match selectors.
+    ///
+    /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/querySelectorAll)
+    /// </summary>
+    /// <remarks>@deprecated</remarks>
+    abstract querySelectorAll<'E when 'E :> Browser.Types.Element>: selectors: string -> Browser.Types.NodeListOf<'E>
     /// <summary>
     /// Replace all children of node with nodes, while replacing strings in nodes with equivalent Text nodes.
     ///
@@ -5113,7 +5189,7 @@ type DrawableSVGGeometry =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/replaceChildren)
     /// </summary>
-    abstract replaceChildren: obj with get, set
+    abstract replaceChildren: [<ParamArray>] nodes: U2<string, Browser.Types.Node>[] -> unit
     /// <remarks>@deprecated</remarks>
     abstract className: obj
     /// <summary>
@@ -5139,19 +5215,19 @@ type DrawableSVGGeometry =
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/getBBox)
     /// </summary>
-    abstract getBBox: obj with get, set
+    abstract getBBox: ?options: obj -> obj
     /// <summary>
     /// The **<c>getCTM()</c>** method of the SVGGraphicsElement interface represents the matrix that transforms the current element's coordinate system to its SVG viewport's coordinate system.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/getCTM)
     /// </summary>
-    abstract getCTM: obj with get, set
+    abstract getCTM: unit -> obj option
     /// <summary>
     /// The **<c>getScreenCTM()</c>** method of the SVGGraphicsElement interface represents the matrix that transforms the current element's coordinate system to the coordinate system of the SVG viewport for the SVG document fragment.
     ///
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement/getScreenCTM)
     /// </summary>
-    abstract getScreenCTM: obj with get, set
+    abstract getScreenCTM: unit -> obj option
     /// <summary>
     /// [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGAnimationElement/requiredExtensions)
     /// </summary>

@@ -4,10 +4,15 @@
   "counts": {
     "exact": 20,
     "ergonomic": 60,
-    "widened": 72,
+    "widened": 73,
     "escape": 20
   },
   "passes": [
+    {
+      "pass": "RT - resolve-type-table",
+      "total": 1,
+      "widened": 1
+    },
     {
       "pass": "DT - detect-tagged-unions",
       "total": 2,
@@ -8089,6 +8094,19 @@
           "tier": "ergonomic",
           "symbol": "Suspense()",
           "message": "null/undefined union members hoisted to option"
+        }
+      ]
+    },
+    {
+      "name": "\u003Ctype-table\u003E",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RT001",
+          "pass": "resolve-type-table",
+          "tier": "widened",
+          "symbol": "\u003Ctype-table\u003E",
+          "message": "217 types not resolved: beyond the depth cutoff (12) - the frontier of instantiations still growing after that many generations"
         }
       ]
     },

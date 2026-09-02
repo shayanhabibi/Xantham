@@ -4,7 +4,7 @@
   "counts": {
     "exact": 25,
     "ergonomic": 69,
-    "widened": 205,
+    "widened": 206,
     "escape": 2
   },
   "passes": [
@@ -12,6 +12,11 @@
       "pass": "RE - resolve-export-types",
       "total": 2,
       "escape": 2
+    },
+    {
+      "pass": "RT - resolve-type-table",
+      "total": 1,
+      "widened": 1
     },
     {
       "pass": "SI - shape-interfaces",
@@ -11592,6 +11597,19 @@
           "tier": "widened",
           "symbol": "Xor",
           "message": "Xor is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
+        }
+      ]
+    },
+    {
+      "name": "\u003Ctype-table\u003E",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RT001",
+          "pass": "resolve-type-table",
+          "tier": "widened",
+          "symbol": "\u003Ctype-table\u003E",
+          "message": "1 types not resolved: beyond the depth cutoff (12) - the frontier of instantiations still growing after that many generations"
         }
       ]
     },

@@ -4,10 +4,15 @@
   "counts": {
     "exact": 4,
     "ergonomic": 1,
-    "widened": 4,
+    "widened": 5,
     "escape": 0
   },
   "passes": [
+    {
+      "pass": "RT - resolve-type-table",
+      "total": 1,
+      "widened": 1
+    },
     {
       "pass": "SI - shape-interfaces",
       "total": 1,
@@ -114,6 +119,19 @@
       "name": "register",
       "tier": "exact",
       "findings": []
+    },
+    {
+      "name": "\u003Ctype-table\u003E",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RT001",
+          "pass": "resolve-type-table",
+          "tier": "widened",
+          "symbol": "\u003Ctype-table\u003E",
+          "message": "1 types not resolved: beyond the depth cutoff (12) - the frontier of instantiations still growing after that many generations"
+        }
+      ]
     }
   ]
 }

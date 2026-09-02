@@ -1,0 +1,7 @@
+{
+    "name": "member-shape-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "description": "Hand-authored fixture for wave three lane L: a compiler-lib type reached structurally hands the shaper method and property symbols, whose types carry a member's name rather than a declaration's. Those resolve by content whatever group declared them, while a lib declaration named at a reference position stays identity-only."
+}

@@ -91,7 +91,7 @@ type DOMException =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     [<Global("DOMException.isError")>]
-    static member isError: obj = jsNative
+    static member isError (error: obj) : bool = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type BasicImageTransformationsGravityCoordinatesMode =
@@ -436,7 +436,7 @@ type CompileErrorConstructor =
     /// <summary>
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
-    abstract isError: obj with get, set
+    abstract isError: error: obj -> bool
     [<EmitConstructor>]
     abstract Create: ?message: string -> CompileError
 
@@ -537,7 +537,7 @@ type RuntimeErrorConstructor =
     /// <summary>
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
-    abstract isError: obj with get, set
+    abstract isError: error: obj -> bool
     [<EmitConstructor>]
     abstract Create: ?message: string -> RuntimeError
 
@@ -697,7 +697,7 @@ type DOMExceptionConstructor =
     /// <summary>
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
-    abstract isError: obj with get, set
+    abstract isError: error: obj -> bool
     [<EmitConstructor>]
     abstract Create: ?message: string * ?name: string -> DOMException
 
