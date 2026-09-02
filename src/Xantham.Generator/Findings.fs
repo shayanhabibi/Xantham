@@ -315,6 +315,11 @@ type TypeParameters =
     /// Wave two, lane A (recon blocker 2). `TP001` interpolates a checker-assigned type id into
     /// its message, and ids are handed out in the order answers arrive - so the manifest differs
     /// run to run wherever it fires. Counted the way `RT001` counts the frontier instead.
+    ///
+    /// Wave three, lane G: no pass constructs this. It is retained rather than retired because
+    /// retiring it renumbers `TP008`, and the key is quoted by four source files and by the
+    /// measurements two plan documents record. Delete it only alongside a renumbering already
+    /// being paid for.
     | [<Widened>] UnnamedTypeParametersCounted of count: int
     /// Wave two, lane C. TypeScript's `extends` is structural and F#'s `:>` is nominal, so a
     /// constraint the run cannot prove nominally is dropped from the rendered head rather than
