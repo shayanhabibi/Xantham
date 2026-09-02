@@ -1,0 +1,1438 @@
+{
+  "package": "chain-lab",
+  "module": "ChainLab",
+  "counts": {
+    "exact": 2,
+    "ergonomic": 7,
+    "widened": 23,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "RT - resolve-type-table",
+      "total": 1,
+      "widened": 1
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 55,
+      "ergonomic": 51,
+      "widened": 4
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 29,
+      "ergonomic": 29
+    },
+    {
+      "pass": "RA - repair-arity",
+      "total": 84,
+      "widened": 84
+    }
+  ],
+  "symbols": [
+    {
+      "name": "NodeExtensions",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensions",
+          "message": "NodeExtensionsToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensions",
+          "message": "NodeExtensionsToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensions.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensions",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "NodeExtensionsToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "NodeExtensionsToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResultToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "NodeExtensionsToVarResultToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "NodeExtensionsToVarResultToVarResultToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR002",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult.toVar",
+          "message": "type not resolved (beyond the depth cutoff (12)); widened to obj"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeExtensionsToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Node",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "Node",
+          "message": "NodeToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "Node",
+          "message": "NodeToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Node",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Node.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Node",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "NodeToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResult",
+          "message": "Node is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResult",
+          "message": "Node is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResult",
+          "message": "Node is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResult",
+          "message": "NodeToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResult",
+          "message": "NodeToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "NodeToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResult",
+          "message": "NodeToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResult",
+          "message": "NodeToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResult",
+          "message": "NodeToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResultToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "NodeToVarResultToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResultToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResultToVarResultToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResultToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "NodeToVarResultToVarResultToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "NodeToVarResultToVarResultToVarResultToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResultToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "NodeToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "NodeToVarResultToVarResultToVarResultToVarResultToVarResult is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR002",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult.toVar",
+          "message": "type not resolved (beyond the depth cutoff (12)); widened to obj"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "NodeToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "VarNodeInterface",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "VarNodeInterface",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "VarNode",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNode",
+          "message": "VarNodeToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNode",
+          "message": "VarNodeToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "VarNode",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "VarNode.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "VarNode",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "VarNodeToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResult",
+          "message": "VarNode is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResult",
+          "message": "VarNode is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA003",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResult",
+          "message": "VarNode is generic and this position has no arguments to apply; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResult",
+          "message": "VarNodeToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResult",
+          "message": "VarNodeToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "VarNodeToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResult",
+          "message": "VarNodeToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResult",
+          "message": "VarNodeToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResult",
+          "message": "VarNodeToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResultToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "VarNodeToVarResultToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResultToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResultToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResultToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResultToVarResultToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResultToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "VarNodeToVarResultToVarResultToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResultToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResultToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResultToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "RA004",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResult applied to 1 arguments but declares 2; widened to obj"
+        },
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR002",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult.toVar",
+          "message": "type not resolved (beyond the depth cutoff (12)); widened to obj"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "VarNodeToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Seed",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Seed",
+          "message": "intersection of 2 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "Seed.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Seed",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "SeedToVarResult",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "SeedToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResultToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "SeedToVarResultToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResultToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResultToVarResultToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResultToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "SeedToVarResultToVarResultToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResultToVarResultToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResultToVarResultToVarResultToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResultToVarResultToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "SeedToVarResultToVarResultToVarResultToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "ergonomic",
+      "findings": [
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR032",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResultToVarResultToVarResultToVarResultToVarResult.toVar(name)",
+          "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "SeedToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+      "file": "index.d.ts",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "SI003",
+          "pass": "shape-interfaces",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "intersection of 3 object types flattened into one interface (the is-a relation to its operands is not emitted, \u00A74.6)"
+        },
+        {
+          "key": "TR002",
+          "pass": "shape-interfaces",
+          "tier": "widened",
+          "symbol": "SeedToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult.toVar",
+          "message": "type not resolved (beyond the depth cutoff (12)); widened to obj"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "SeedToVarResultToVarResultToVarResultToVarResultToVarResultToVarResult",
+          "message": "ParamObject Create synthesized (D3)"
+        }
+      ]
+    },
+    {
+      "name": "Plain",
+      "file": "index.d.ts",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "seed",
+      "tier": "exact",
+      "findings": []
+    },
+    {
+      "name": "\u003Ctype-table\u003E",
+      "tier": "widened",
+      "findings": [
+        {
+          "key": "RT001",
+          "pass": "resolve-type-table",
+          "tier": "widened",
+          "symbol": "\u003Ctype-table\u003E",
+          "message": "11 types not resolved: beyond the depth cutoff (12) - the frontier of instantiations still growing after that many generations"
+        }
+      ]
+    }
+  ]
+}

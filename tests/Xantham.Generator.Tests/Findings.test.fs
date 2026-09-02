@@ -74,12 +74,16 @@ let findingsTests =
                     "TR042 TypeReference.UniqueSymbolNoBinding widened"
                     "TR043 TypeReference.ConstructorObjectNotDeclared widened"
                     "TR044 TypeReference.ArgumentNotASubtypeOfConstraint widened"
+                    "TR045 TypeReference.ConditionalTypeDeferred widened"
+                    "TR046 TypeReference.ConditionalResolvedToBranch ergonomic"
                     "TP001 TypeParameters.UnnamedTypeParameter widened"
                     "TP002 TypeParameters.ConstraintDropped ergonomic"
                     "TP003 TypeParameters.GenericFunctionHoisted ergonomic"
                     "TP004 TypeParameters.KeyWithIndexedAccess ergonomic"
                     "TP005 TypeParameters.KeyOverOperand ergonomic"
                     "TP006 TypeParameters.TypeParameterErased widened"
+                    "TP007 TypeParameters.UnnamedTypeParametersCounted widened"
+                    "TP008 TypeParameters.ConstraintNotProvenNominal ergonomic"
                     "MB001 Members.OptionalParameterAsOption ergonomic"
                     "MB002 Members.SymbolKeyedMemberDropped widened"
                     "MB003 Members.OptionalMemberAsOption ergonomic"
@@ -93,6 +97,8 @@ let findingsTests =
                     "LU001 ClassifyLiteralUnions.NonStringLiteralCase exact"
                     "DT001 DetectTaggedUnions.ArmNotPlainData ergonomic"
                     "DT002 DetectTaggedUnions.TaggedUnion exact"
+                    "SY001 SynthesizeAnonymous.InstantiationNamedOnce exact"
+                    "SY002 SynthesizeAnonymous.SelfReferentialHoistRefused widened"
                     "SI001 ShapeInterfaces.HybridLosesCallSignatures widened"
                     "SI002 ShapeInterfaces.BaseMembersFlattened ergonomic"
                     "SI003 ShapeInterfaces.IntersectionFlattened ergonomic"
@@ -108,6 +114,7 @@ let findingsTests =
                     "SC004 ShapeClasses.StaticWithoutDeclaration widened"
                     "SC005 ShapeClasses.StaticMethodWithoutSignatures widened"
                     "SE001 ShapeExports.NoValueType escape"
+                    "SE002 ShapeExports.RuntimeSpecifierDerived ergonomic"
                     "SP001 SynthesizeParamObjects.ParamObjectSynthesized ergonomic"
                     "DO001 DedupeOverloads.OverloadDropped widened"
                     "RA001 RepairArity.GenericAliasDropped widened"
@@ -124,7 +131,7 @@ let findingsTests =
               Expect.equal (FindingCatalogue.passLabel "name-exports") "name-exports" "a pass without one stays bare"
 
               let passes = FindingCatalogue.passPrefixes |> Map.toList |> List.map fst
-              Expect.equal passes.Length 13 "every per-pass union names its pass"
+              Expect.equal passes.Length 14 "every per-pass union names its pass"
 
           testCase "a finding derives key, tier and message from its kind" <| fun _ ->
               let finding = Finding.make "Options.legacy" (TypeReference.UnionTooWide(5, 4))

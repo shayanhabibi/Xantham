@@ -946,6 +946,15 @@ let pipelineTests =
                     Expect.stringContains source "abstract echo<'T>:" "a parameter with no constraint"
                     Expect.stringContains source "abstract on<'T when 'T :> EventMap>:" "a constraint that is a bare name" ])
 
+        // Enrolled with no assertions of its own, deliberately: this is wave two lane A's
+        // fixture, and what it pins today is the defect. `docs/plans/generator-three-rung.md`
+        // §9 blocker 1 reduced `three`'s 518 declarations and 369,116 lines to these 11 lines,
+        // which mint a `<Member>Result` declaration per application until the depth cutoff
+        // stops the walk. The golden is committed as the *baseline* the fix is measured
+        // against - it compiles clean, so the gate stays green while it is still wrong.
+        // Lane A owns the assertions that say what bounded output looks like.
+        yield! fixtureTests "chain-lab" (handFixture "chain-lab") GeneratorConfig.Default (fun _ -> [])
+
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 
         // workers-types is a global type library that *replaces* the DOM lib: its README

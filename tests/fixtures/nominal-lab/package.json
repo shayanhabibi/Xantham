@@ -1,0 +1,1 @@
+{"name":"nominal-lab","type":"module","types":"index.d.ts","description":"Wave two lab: a structural `extends` constraint whose default argument satisfies it structurally but not nominally - TypeScript's `extends` is structural, F#'s `:>` is nominal, so the rendered head is FS0001 at every use."}

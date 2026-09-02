@@ -1,0 +1,1 @@
+{"name":"chain-lab","type":"module","types":"index.d.ts","description":"Wave two lab: a polymorphic-`this` method whose return type is an intersection containing `this`, so every application mints a strictly larger anonymous type and the hoist runs away until the depth cutoff stops it."}

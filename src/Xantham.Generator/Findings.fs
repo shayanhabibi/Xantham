@@ -219,6 +219,13 @@ type TypeReference =
     /// the constraint's members is FS0001 at the application, so it is written as the
     /// constraint, the way an argument that widened to `obj` already is.
     | [<Widened>] ArgumentNotASubtypeOfConstraint of argument: string * name: string * bound: string
+    /// Wave two, lane E. A conditional type is deferred: its branch is not chosen until the
+    /// checker has an argument to test, and F# has no form that defers a type. The whole of
+    /// `TR014` is now this construct, so it is named rather than reported as a flag.
+    | [<Widened>] ConditionalTypeDeferred of conditional: string
+    /// Wave two, lane E. The negative of the above: the checker resolved the condition itself,
+    /// so a branch is known and the mapping is the branch rather than `obj`.
+    | [<Ergonomic>] ConditionalResolvedToBranch of conditional: string * branch: string
 
     interface IFindingKind with
         member this.Message =
@@ -281,6 +288,10 @@ type TypeReference =
                 $"typeof {constructs} is a constructor object this run does not declare; widened to obj (§4.4)"
             | ArgumentNotASubtypeOfConstraint(argument, name, bound) ->
                 $"{argument} does not inherit {name}'s constraint {bound}; the argument is written as the constraint"
+            | ConditionalTypeDeferred conditional ->
+                $"{conditional} is a conditional type: the branch is not chosen until it is applied, and F# defers no type (§4.11)"
+            | ConditionalResolvedToBranch(conditional, branch) ->
+                $"{conditional} resolved to its {branch} branch; the condition itself is not carried (§4.11)"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
@@ -291,6 +302,15 @@ type TypeParameters =
     | [<Ergonomic>] KeyWithIndexedAccess of operand: string * result: string
     | [<Ergonomic>] KeyOverOperand of operand: string
     | [<Widened>] TypeParameterErased of name: string
+    /// Wave two, lane A (recon blocker 2). `TP001` interpolates a checker-assigned type id into
+    /// its message, and ids are handed out in the order answers arrive - so the manifest differs
+    /// run to run wherever it fires. Counted the way `RT001` counts the frontier instead.
+    | [<Widened>] UnnamedTypeParametersCounted of count: int
+    /// Wave two, lane C. TypeScript's `extends` is structural and F#'s `:>` is nominal, so a
+    /// constraint the run cannot prove nominally is dropped from the rendered head rather than
+    /// rendered as an `FS0001` waiting to happen. Distinct from `TP002`, which is a constraint
+    /// with no F# form at all.
+    | [<Ergonomic>] ConstraintNotProvenNominal of name: string * bound: string
 
     interface IFindingKind with
         member this.Message =
@@ -302,6 +322,10 @@ type TypeParameters =
                 $"key over '{operand}' with its indexed access reads as typekeyof<'{operand},'{result}> (§4.10)"
             | KeyOverOperand operand -> $"key over '{operand}' reads as keyof<'{operand}> (§4.10)"
             | TypeParameterErased name -> $"type parameter '{name}' is erased: every use of it widened away"
+            | UnnamedTypeParametersCounted count ->
+                $"{count} type parameters have no name to write; their uses widen to obj"
+            | ConstraintNotProvenNominal(name, bound) ->
+                $"constraint {bound} on '{name}' is structural in TypeScript and nominal in F#; dropped from the head (§4.9)"
 
 /// Member and parameter shaping: `Shape.parametersOf` and `membersOf`.
 [<Prefix "MB">]
@@ -383,6 +407,27 @@ type DetectTaggedUnions =
             match this with
             | ArmNotPlainData tag -> $"discriminated by '{tag}', but an arm is not plain data; left as an erased union"
             | TaggedUnion tag -> $"discriminated union on '{tag}' (D4)"
+
+/// `shape-interfaces`.
+/// `synthesize-anonymous`. Wave two, lane A: the pass had no findings of its own, because until
+/// the `three` recon nothing had measured what it does to a shape that reaches itself - 518
+/// declarations and 369,116 lines, stopped only by the depth cutoff.
+[<Prefix("SY", "synthesize-anonymous")>]
+type SynthesizeAnonymous =
+    /// A hoisted anonymous shape that is an instantiation of a declaration this run already
+    /// named: the reference is written to that declaration instead of minting another name.
+    | [<Exact>] InstantiationNamedOnce of name: string
+    /// The runaway's honest answer where the above cannot be taken: a shape whose hoist would
+    /// reach itself through polymorphic `this` is refused and widened, one finding instead of a
+    /// chain of `<Member>Result` declarations.
+    | [<Widened>] SelfReferentialHoistRefused of name: string
+
+    interface IFindingKind with
+        member this.Message =
+            match this with
+            | InstantiationNamedOnce name -> $"anonymous shape is an instantiation of {name}; written as an application"
+            | SelfReferentialHoistRefused name ->
+                $"hoisting {name} would reach itself through polymorphic this; widened to obj rather than named again"
 
 /// `shape-interfaces`.
 [<Prefix("SI", "shape-interfaces")>]
@@ -479,11 +524,17 @@ type ShapeClasses =
 [<Prefix("SE", "shape-exports")>]
 type ShapeExports =
     | [<Escape>] NoValueType
+    /// Wave two, lane D (recon blocker 5). A `@types/*` package has no runtime of its own, so an
+    /// import that names it resolves to nothing at all. The runtime package is configuration;
+    /// this says when the run had to derive one rather than being told.
+    | [<Ergonomic>] RuntimeSpecifierDerived of specifier: string
 
     interface IFindingKind with
         member this.Message =
             match this with
             | NoValueType -> "no value type in the table; export dropped"
+            | RuntimeSpecifierDerived specifier ->
+                $"types-only package has no runtime; imports bind to {specifier}, derived rather than configured"
 
 /// `synthesize-paramobjects`.
 [<Prefix("SP", "synthesize-paramobjects")>]
@@ -550,6 +601,7 @@ module FindingCatalogue =
             typeof<ResolveTypeTable>
             typeof<ClassifyLiteralUnions>
             typeof<DetectTaggedUnions>
+            typeof<SynthesizeAnonymous>
             typeof<ShapeInterfaces>
             typeof<ShapeAliases>
             typeof<ShapeClasses>
