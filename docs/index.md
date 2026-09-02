@@ -48,6 +48,8 @@ Targets `net10.0`, `net8.0` and `netstandard2.1`. See the
   decisions, and what each phase landed.
 - [Type mapping](plans/generator-type-mapping.md) — how each TypeScript construct becomes F#,
   and what it costs when it cannot.
+- [The `@types/three` rung](plans/generator-three-rung.md) — reconnaissance on the largest
+  litmus rung attempted, why it does not land yet, and the reproducers it yielded.
 
 ---
 
