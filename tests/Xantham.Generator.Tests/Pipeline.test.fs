@@ -1121,6 +1121,75 @@ let pipelineTests =
                       // `g` reads as the type TypeScript resolved it to rather than as `Wide`.
                       Expect.stringContains source "static member g: Geometry<Narrow>" "the default, written out" ])
 
+        // Wave two lane E's fixture. `T extends U ? X : Y` reaches the shaper deferred: the
+        // whole of the old `TR014` was this construct. Two of the three shapes name a branch
+        // and the third stays `obj`; the lines below pin one of each, plus the negatives.
+        yield!
+            fixtureTests "conditional-lab" (handFixture "conditional-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a condition the parameter's bound decides reads as its branch" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // `Tagged` inherits `Marker`, so `T extends Marker` holds for every
+                      // argument the head admits and the true branch is the whole mapping.
+                      Expect.stringContains source "type Proven<'T when 'T :> Tagged> = 'T" "the true branch"
+
+                      Expect.isTrue
+                          (rendered.Findings
+                           |> List.exists (fun f ->
+                               f.Key = "TR046" && f.Symbol = "Proven" && f.Message.Contains "true"))
+                          "recorded as resolved to its true branch"
+
+                  testCase "a pair with an uninhabited branch reads as the other one" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // `T extends () => unknown ? never : T`: nothing is ever the `never`
+                      // branch, so the alias is its parameter.
+                      Expect.stringContains source "type Inhabited<'T> = 'T" "the inhabited branch"
+
+                      Expect.isTrue
+                          (rendered.Findings
+                           |> List.exists (fun f -> f.Key = "TR046" && f.Symbol = "Inhabited"))
+                          "recorded against the alias"
+
+                  testCase "a pair the run cannot decide stays obj and says so" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+
+                      let deferred =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = "TR045")
+                          |> List.map _.Symbol
+                          |> List.distinct
+                          |> List.sort
+
+                      // `Divergent` has two inhabited branches with no shared F# form, and
+                      // `OrUndefined`'s second branch is `undefined`, which an application does
+                      // land in - `never` is the only branch this drops.
+                      Expect.equal
+                          deferred
+                          [ "Divergent"; "OrUndefined"; "divergent(value)" ]
+                          "both divergent pairs and the use site of one"
+
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun f -> f.Key = "TR014"))
+                          "and no conditional is reported as an unmapped flag"
+
+                  testCase "the negatives keep their own shape" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      // A condition over no type variable is answered by the checker, so it
+                      // arrives already a branch and carries no conditional finding at all.
+                      Expect.stringContains source "type Decided = float" "the checker's own answer"
+
+                      Expect.isFalse
+                          (rendered.Findings |> List.exists (fun f -> f.Symbol = "Decided"))
+                          "and nothing is recorded against it"
+
+                      // A generic alias with no condition in it.
+                      Expect.stringContains source "type Box<'T> =" "an ordinary generic alias" ])
+
         yield! fixtureTests "animejs" (npmFixture "animejs") GeneratorConfig.Default (fun _ -> [])
 
         // workers-types is a global type library that *replaces* the DOM lib: its README

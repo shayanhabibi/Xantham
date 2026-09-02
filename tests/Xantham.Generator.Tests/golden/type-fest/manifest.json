@@ -3,9 +3,9 @@
   "module": "TypeFest",
   "counts": {
     "exact": 25,
-    "ergonomic": 59,
-    "widened": 215,
-    "escape": 2
+    "ergonomic": 69,
+    "widened": 203,
+    "escape": 4
   },
   "passes": [
     {
@@ -21,9 +21,9 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 629,
-      "ergonomic": 203,
-      "widened": 426
+      "total": 637,
+      "ergonomic": 236,
+      "widened": 401
     },
     {
       "pass": "SP - synthesize-paramobjects",
@@ -31,9 +31,14 @@
       "ergonomic": 36
     },
     {
-      "pass": "AC - audit-coverage",
+      "pass": "RA - repair-arity",
       "total": 2,
-      "escape": 2
+      "widened": 2
+    },
+    {
+      "pass": "AC - audit-coverage",
+      "total": 4,
+      "escape": 4
     }
   ],
   "symbols": [
@@ -57,11 +62,11 @@
           "message": "constraint on \u0027N\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Absolute",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Absolute is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -120,11 +125,11 @@
           "message": "constraint AllExtendOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "AllExtend",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "AllExtend is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -141,11 +146,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "AllUnionFields",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "AllUnionFields is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -169,11 +174,11 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "AndAll",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "AndAll is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -183,11 +188,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "And",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -204,11 +209,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ArrayElement",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ArrayElement is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -232,11 +237,11 @@
           "message": "constraint on \u0027Element\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ArrayIndices",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ArrayIndices is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -274,11 +279,11 @@
           "message": "constraint on \u0027TArray\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ArrayReverse",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ArrayReverse is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -316,11 +321,11 @@
           "message": "constraint on \u0027Start\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ArraySlice",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ArraySlice is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -365,11 +370,39 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR012",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ArraySplice",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "type parameter is not in scope here; widened to its constraint UnknownArray"
+        },
+        {
+          "key": "TR012",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "ArraySplice",
+          "message": "type parameter is not in scope here; widened to its constraint UnknownArray"
+        },
+        {
+          "key": "TR028",
+          "pass": "shape-aliases",
+          "tier": "widened",
+          "symbol": "ArraySplice",
+          "message": "tuple with a rest element widened to an array (\u00A74.12 leaves the erased carrier to a fixture)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "ArraySplice",
+          "message": "ArraySplice resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "ArraySplice",
+          "message": "an inline conditional resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
@@ -393,11 +426,11 @@
           "message": "constraint on \u0027TArray\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ArrayTail",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ArrayTail is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -441,11 +474,11 @@
           "message": "constraint on \u0027Target\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "AsyncReturnType",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "AsyncReturnType is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -469,11 +502,11 @@
           "message": "constraint on \u0027Function_\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Asyncify",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Asyncify is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -665,11 +698,11 @@
           "message": "constraint on \u0027Options\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "CamelCase",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "CamelCase is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -693,11 +726,11 @@
           "message": "constraint on \u0027Options\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "CamelCasedPropertiesDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "CamelCasedPropertiesDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -721,11 +754,11 @@
           "message": "constraint on \u0027Options\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "CamelCasedProperties",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "CamelCasedProperties is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -780,11 +813,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ConditionalKeys",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ConditionalKeys is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -842,11 +875,11 @@
           "message": "constraint ConditionalPickDeepOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ConditionalPickDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ConditionalPickDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -863,11 +896,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ConditionalPick",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ConditionalPick is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -884,11 +917,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ConditionalSimplifyDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ConditionalSimplifyDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -905,11 +938,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ConditionalSimplify",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ConditionalSimplify is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -940,11 +973,11 @@
           "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "DelimiterCase",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "DelimiterCase is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -975,11 +1008,11 @@
           "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "DelimiterCasedPropertiesDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "DelimiterCasedPropertiesDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1010,11 +1043,11 @@
           "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "DelimiterCasedProperties",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "DelimiterCasedProperties is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1038,11 +1071,11 @@
           "message": "constraint on \u0027KeyType\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "DistributedOmit",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "DistributedOmit is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1066,11 +1099,11 @@
           "message": "constraint on \u0027KeyType\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "DistributedPick",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "DistributedPick is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1101,11 +1134,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsEmptyObject",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsEmptyObject is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1122,11 +1155,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Entries",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Entries is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1143,11 +1176,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Entry",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Entry is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1164,11 +1197,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Exact",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Exact is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1248,11 +1281,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ExcludeExactly",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ExcludeExactly is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1276,39 +1309,11 @@
           "message": "constraint on \u0027Array_\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ExcludeRestElement",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        }
-      ]
-    },
-    {
-      "name": "ExcludeStrict",
-      "file": "source/exclude-strict.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "SA002",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "ExcludeStrict",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "ExcludeStrict",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR014",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "ExcludeStrict",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ExcludeRestElement is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1325,11 +1330,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ExclusifyUnion",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ExclusifyUnion is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1409,11 +1414,11 @@
           "message": "constraint ExtendsStrictOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ExtendsStrict",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ExtendsStrict is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1430,11 +1435,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ExtractExactly",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ExtractExactly is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1449,34 +1454,6 @@
           "tier": "widened",
           "symbol": "ExtractRestElement",
           "message": "indexed access has no F# form here; widened to obj"
-        }
-      ]
-    },
-    {
-      "name": "ExtractStrict",
-      "file": "source/extract-strict.d.ts",
-      "tier": "widened",
-      "findings": [
-        {
-          "key": "SA002",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "ExtractStrict",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
-        {
-          "key": "TP002",
-          "pass": "shape-aliases",
-          "tier": "ergonomic",
-          "symbol": "ExtractStrict",
-          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
-        },
-        {
-          "key": "TR014",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "ExtractStrict",
-          "message": "type flags Conditional not mapped yet; widened to obj"
         }
       ]
     },
@@ -1500,11 +1477,11 @@
           "message": "constraint on \u0027Name\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "FindGlobalType",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "FindGlobalType is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1528,11 +1505,11 @@
           "message": "constraint on \u0027Name\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "FindGlobalInstanceType",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "FindGlobalInstanceType is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1619,11 +1596,11 @@
           "message": "constraint GetOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Get",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Get is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1668,11 +1645,11 @@
           "message": "constraint on \u0027B\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "GreaterThanOrEqual",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "GreaterThanOrEqual is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1703,11 +1680,11 @@
           "message": "constraint on \u0027B\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "GreaterThan",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "GreaterThan is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1731,11 +1708,11 @@
           "message": "constraint on \u0027BaseType\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "HasOptionalKeys",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "HasOptionalKeys resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
@@ -1759,11 +1736,11 @@
           "message": "constraint on \u0027BaseType\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "HasReadonlyKeys",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "HasReadonlyKeys resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
@@ -1787,11 +1764,11 @@
           "message": "constraint on \u0027BaseType\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "HasRequiredKeys",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "HasRequiredKeys is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1815,11 +1792,11 @@
           "message": "constraint on \u0027BaseType\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "HasWritableKeys",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "HasWritableKeys is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1836,11 +1813,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IfAny",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IfAny is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1857,11 +1834,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IfEmptyObject",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IfEmptyObject is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1878,11 +1855,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IfNever",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IfNever is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1899,11 +1876,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IfNull",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IfNull is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1920,11 +1897,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IfUnknown",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IfUnknown is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1948,11 +1925,11 @@
           "message": "constraint on \u0027Type\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "If",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "If is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -1976,11 +1953,11 @@
           "message": "constraint on \u0027Value\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Includes",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Includes is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2018,11 +1995,11 @@
           "message": "constraint on \u0027Start\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IntClosedRange",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IntClosedRange is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2060,11 +2037,11 @@
           "message": "constraint on \u0027Step\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IntRange",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IntRange is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2102,11 +2079,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsAny",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsAny is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2123,11 +2100,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsBooleanLiteral",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsBooleanLiteral is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2144,11 +2121,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsEqual",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsEqual is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2165,11 +2142,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsFloat",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsFloat is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2186,11 +2163,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsInteger",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsInteger is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2207,11 +2184,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsLiteral",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsLiteral is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2235,11 +2212,11 @@
           "message": "constraint on \u0027S\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsLowercase",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsLowercase is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2256,11 +2233,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsNever",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsNever is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2277,11 +2254,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsNull",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsNull is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2298,11 +2275,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsNullable",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsNullable is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2319,11 +2296,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsNumericLiteral",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsNumericLiteral is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2354,11 +2331,25 @@
           "message": "constraint on \u0027Type\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "IsOptionalKeyOf",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsOptionalKeyOf resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "IsOptionalKeyOf",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "IsOptionalKeyOf",
+          "message": "an inline conditional resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
@@ -2375,11 +2366,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsOptional",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsOptional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2410,11 +2401,11 @@
           "message": "constraint on \u0027Type\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsReadonlyKeyOf",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsReadonlyKeyOf is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2445,11 +2436,11 @@
           "message": "constraint on \u0027Type\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsRequiredKeyOf",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsRequiredKeyOf is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2466,11 +2457,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsStringLiteral",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsStringLiteral is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2487,11 +2478,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsSymbolLiteral",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsSymbolLiteral is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2550,11 +2541,11 @@
           "message": "constraint IsTupleOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsTuple",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsTuple is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2571,11 +2562,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsUndefined",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsUndefined is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2592,11 +2583,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsUnion",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsUnion is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2613,11 +2604,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsUnknown",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsUnknown is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2641,11 +2632,11 @@
           "message": "constraint on \u0027S\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsUppercase",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsUppercase is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2676,11 +2667,11 @@
           "message": "constraint on \u0027Type\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsWritableKeyOf",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsWritableKeyOf is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2697,11 +2688,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IterableElement",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IterableElement is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2732,11 +2723,11 @@
           "message": "constraint on \u0027Items\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Join",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Join is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2914,11 +2905,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Jsonify",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Jsonify is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2942,11 +2933,11 @@
           "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "KebabCase",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "KebabCase is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2970,11 +2961,11 @@
           "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "KebabCasedPropertiesDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "KebabCasedPropertiesDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -2998,11 +2989,11 @@
           "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "KebabCasedProperties",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "KebabCasedProperties is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3054,11 +3045,11 @@
           "message": "constraint on \u0027TArray\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "LastArrayElement",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "LastArrayElement is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3089,11 +3080,11 @@
           "message": "constraint on \u0027B\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "LessThanOrEqual",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "LessThanOrEqual is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3124,11 +3115,11 @@
           "message": "constraint on \u0027B\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "LessThan",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "LessThan is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3145,11 +3136,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "LiteralToPrimitiveDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "LiteralToPrimitiveDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3166,11 +3157,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "LiteralToPrimitive",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "LiteralToPrimitive is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3277,11 +3268,11 @@
           "message": "constraint MergeDeepOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "MergeDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "MergeDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3298,11 +3289,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "MergeExclusive",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "MergeExclusive is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3319,11 +3310,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Merge",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Merge is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3347,11 +3338,11 @@
           "message": "constraint on \u0027Dimensions\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "MultidimensionalArray",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "MultidimensionalArray is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3375,11 +3366,11 @@
           "message": "constraint on \u0027Dimensions\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "MultidimensionalReadonlyArray",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "MultidimensionalReadonlyArray is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3403,26 +3394,19 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "NonEmptyObject",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "NonEmptyObject is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
     {
       "name": "NonEmptyString",
       "file": "source/non-empty-string.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "key": "SA002",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "NonEmptyString",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
         {
           "key": "TP002",
           "pass": "shape-aliases",
@@ -3431,11 +3415,11 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "NonEmptyString",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "NonEmptyString resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
@@ -3466,26 +3450,19 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "NonNullableDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "NonNullableDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
     {
       "name": "Finite",
       "file": "source/numeric.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "key": "SA002",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "Finite",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
         {
           "key": "TP002",
           "pass": "shape-aliases",
@@ -3494,68 +3471,61 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Finite",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Finite resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
     {
       "name": "Integer",
       "file": "source/numeric.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
-          "key": "SA002",
+          "key": "TR046",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Integer",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+          "message": "Integer resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Integer",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
     {
       "name": "Float",
       "file": "source/numeric.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
-          "key": "SA002",
+          "key": "TR046",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Float",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
+          "message": "Float resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Float",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
     {
       "name": "NegativeFloat",
       "file": "source/numeric.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "key": "SA002",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "NegativeFloat",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
         {
           "key": "TP002",
           "pass": "shape-aliases",
@@ -3564,26 +3534,40 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "NegativeFloat",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Float resolved to its true branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "NegativeFloat",
+          "message": "NegativeFloat resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "NegativeFloat",
+          "message": "an inline conditional resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "NegativeFloat",
+          "message": "an inline conditional resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
     {
       "name": "Negative",
       "file": "source/numeric.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "key": "SA002",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "Negative",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
         {
           "key": "TP002",
           "pass": "shape-aliases",
@@ -3592,26 +3576,26 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "Negative",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Negative resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "Negative",
+          "message": "an inline conditional resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
     {
       "name": "NegativeInteger",
       "file": "source/numeric.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "key": "SA002",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "NegativeInteger",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
         {
           "key": "TP002",
           "pass": "shape-aliases",
@@ -3620,11 +3604,32 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR046",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "NegativeInteger",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Integer resolved to its true branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "NegativeInteger",
+          "message": "NegativeInteger resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "NegativeInteger",
+          "message": "an inline conditional resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "NegativeInteger",
+          "message": "an inline conditional resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
@@ -3648,11 +3653,11 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "NonNegative",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "NonNegative is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3676,11 +3681,11 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "NonNegativeInteger",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "NonNegativeInteger is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3704,11 +3709,11 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "IsNegative",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "IsNegative is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3739,11 +3744,11 @@
           "message": "constraint on \u0027Second\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ObjectMerge",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ObjectMerge is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3767,11 +3772,11 @@
           "message": "constraint on \u0027PathUnion\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "OmitDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "OmitDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3816,39 +3821,32 @@
           "message": "constraint on \u0027Type\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "OptionalKeysOf",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "OptionalKeysOf is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
     {
       "name": "Optional",
       "file": "source/optional.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "key": "SA002",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "Optional",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
-        {
-          "key": "TR014",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "Optional",
-          "message": "type flags Conditional not mapped yet; widened to obj"
-        },
         {
           "key": "TR032",
           "pass": "shape-aliases",
           "tier": "ergonomic",
           "symbol": "Optional",
           "message": "null/undefined union members hoisted to option"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "Optional",
+          "message": "Exclude resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
@@ -3872,11 +3870,11 @@
           "message": "constraint on \u0027T\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "OrAll",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "OrAll is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3886,11 +3884,11 @@
       "tier": "widened",
       "findings": [
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Or",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "an inline conditional is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -3914,11 +3912,11 @@
           "message": "constraint on \u0027TOverride\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "OverrideProperties",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "OverrideProperties is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -6354,11 +6352,11 @@
           "message": "constraint PartialDeepOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "PartialDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "PartialDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -6410,11 +6408,11 @@
           "message": "constraint PartialOnUndefinedDeepOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "PartialOnUndefinedDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "PartialOnUndefinedDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -6438,11 +6436,11 @@
           "message": "constraint on \u0027Options\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "PascalCase",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "PascalCase is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -6466,11 +6464,11 @@
           "message": "constraint on \u0027Options\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "PascalCasedPropertiesDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "PascalCasedPropertiesDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -6494,11 +6492,11 @@
           "message": "constraint on \u0027Options\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "PascalCasedProperties",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "PascalCasedProperties is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -6592,11 +6590,11 @@
           "message": "constraint PathsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Paths",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Paths is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -6620,11 +6618,11 @@
           "message": "constraint on \u0027PathUnion\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "PickDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "PickDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -6704,11 +6702,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ReadonlyDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ReadonlyDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -6732,11 +6730,11 @@
           "message": "constraint on \u0027Type\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ReadonlyKeysOf",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ReadonlyKeysOf is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9196,11 +9194,11 @@
           "message": "constraint RemovePrefixOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "RemovePrefix",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "RemovePrefix is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9266,11 +9264,11 @@
           "message": "constraint RemoveSuffixOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "RemoveSuffix",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "RemoveSuffix is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9301,11 +9299,11 @@
           "message": "constraint on \u0027RenameMap\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "RenameKeys",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "RenameKeys is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9378,11 +9376,11 @@
           "message": "constraint ReplaceOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Replace",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Replace is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9406,11 +9404,11 @@
           "message": "constraint on \u0027KeysType\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "RequireAllOrNone",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "RequireAllOrNone is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9434,11 +9432,11 @@
           "message": "constraint on \u0027KeysType\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "RequireAtLeastOne",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "RequireAtLeastOne is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9462,11 +9460,11 @@
           "message": "constraint on \u0027KeysType\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "RequireExactlyOne",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "RequireExactlyOne is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9490,11 +9488,11 @@
           "message": "constraint on \u0027KeysType\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "RequireOneOrNone",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "RequireOneOrNone is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9511,26 +9509,19 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "RequiredDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "RequiredDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
     {
       "name": "RequiredKeysOf",
       "file": "source/required-keys-of.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "key": "SA002",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "RequiredKeysOf",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
         {
           "key": "TP002",
           "pass": "shape-aliases",
@@ -9539,11 +9530,25 @@
           "message": "constraint on \u0027Type\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR015",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "RequiredKeysOf",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "keyof over an open operand reads as keyof\u003C\u0027Type\u003E (\u00A74.10)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "RequiredKeysOf",
+          "message": "Exclude resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "RequiredKeysOf",
+          "message": "RequiredKeysOf resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
@@ -9595,11 +9600,11 @@
           "message": "constraint SchemaOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Schema",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Schema is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9623,11 +9628,11 @@
           "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "ScreamingSnakeCase",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "ScreamingSnakeCase is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9693,11 +9698,11 @@
           "message": "constraint on \u0027KeyPaths\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "SetNonNullableDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "SetNonNullableDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9784,11 +9789,11 @@
           "message": "constraint on \u0027P\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "SetParameterType",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "SetParameterType is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9840,11 +9845,11 @@
           "message": "constraint on \u0027KeyPaths\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "SetRequiredDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "SetRequiredDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9896,11 +9901,11 @@
           "message": "constraint on \u0027Function_\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "SetReturnType",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "SetReturnType is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9952,11 +9957,11 @@
           "message": "constraint SharedUnionFieldsDeepOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "SharedUnionFieldsDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "SharedUnionFieldsDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9973,11 +9978,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "SharedUnionFields",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "SharedUnionFields is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -9994,11 +9999,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "SimplifyDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "SimplifyDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -10029,11 +10034,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "SingleKeyObject",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "SingleKeyObject is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -10057,11 +10062,11 @@
           "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "SnakeCase",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "SnakeCase is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -10085,11 +10090,11 @@
           "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "SnakeCasedPropertiesDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "SnakeCasedPropertiesDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -10113,11 +10118,11 @@
           "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "SnakeCasedProperties",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "SnakeCasedProperties is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -10176,11 +10181,11 @@
           "message": "constraint SomeExtendOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "SomeExtend",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "SomeExtend is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -10211,11 +10216,11 @@
           "message": "constraint on \u0027Options\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "SplitOnRestElement",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "SplitOnRestElement is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -10281,11 +10286,11 @@
           "message": "constraint SplitOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Split",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Split is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -10316,11 +10321,11 @@
           "message": "constraint on \u0027SecondType\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Spread",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Spread is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -10365,11 +10370,11 @@
           "message": "constraint on \u0027S\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "StringRepeat",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "StringRepeat is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -10407,11 +10412,11 @@
           "message": "constraint on \u0027Start\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "StringSlice",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "StringSlice is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -10470,11 +10475,11 @@
           "message": "constraint StringToArrayOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "StringToArray",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "StringToArray is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -10498,11 +10503,11 @@
           "message": "constraint on \u0027S\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "StringToNumber",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "StringToNumber is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -10890,11 +10895,11 @@
           "message": "constraint on \u0027B\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Subtract",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Subtract is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -10925,11 +10930,11 @@
           "message": "constraint on \u0027B\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Sum",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Sum is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -11009,11 +11014,11 @@
           "message": "constraint on \u0027TaggedType\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "UnwrapTagged",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "UnwrapTagged is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -11058,11 +11063,11 @@
           "message": "constraint on \u0027OpaqueType\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "UnwrapOpaque",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "UnwrapOpaque is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -11086,11 +11091,11 @@
           "message": "constraint on \u0027V\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Trim",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Trim is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -13311,11 +13316,11 @@
           "message": "constraint on \u0027Length\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "TupleOf",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "TupleOf is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -13339,11 +13344,11 @@
           "message": "constraint on \u0027TArray\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "TupleToObject",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "TupleToObject is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -13360,11 +13365,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "TupleToUnion",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "TupleToUnion is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -13479,11 +13484,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "UndefinedOnPartialDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "UndefinedOnPartialDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -13514,11 +13519,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "UnionMember",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "UnionMember is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -13535,11 +13540,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "UnionToIntersection",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "UnionToIntersection is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -13556,11 +13561,18 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR012",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "UnionToTuple",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "type parameter is not in scope here; widened to its constraint UnknownArray"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "UnionToTuple",
+          "message": "UnionToTuple resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
@@ -13696,11 +13708,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "UnwrapPartial",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "UnwrapPartial is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -13717,11 +13729,11 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "UnwrapRequired",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "UnwrapRequired is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -13808,11 +13820,11 @@
           "message": "constraint WordsOptions on \u0027Options\u0027 is structural in TypeScript and nominal in F#; dropped from the head (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Words",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Words is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -13829,26 +13841,19 @@
           "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "WritableDeep",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "WritableDeep is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
     {
       "name": "WritableKeysOf",
       "file": "source/writable-keys-of.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
-        {
-          "key": "SA002",
-          "pass": "shape-aliases",
-          "tier": "widened",
-          "symbol": "WritableKeysOf",
-          "message": "type-level computation over an unresolved operand; emitted as an erased phantom, which casts are the only use of"
-        },
         {
           "key": "TP002",
           "pass": "shape-aliases",
@@ -13857,11 +13862,25 @@
           "message": "constraint on \u0027Type\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR015",
           "pass": "shape-aliases",
-          "tier": "widened",
+          "tier": "ergonomic",
           "symbol": "WritableKeysOf",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "keyof over an open operand reads as keyof\u003C\u0027Type\u003E (\u00A74.10)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "WritableKeysOf",
+          "message": "Exclude resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "WritableKeysOf",
+          "message": "WritableKeysOf resolved to its true branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },
@@ -13885,11 +13904,11 @@
           "message": "constraint on \u0027Keys\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Writable",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Writable is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
         }
       ]
     },
@@ -13920,11 +13939,79 @@
           "message": "constraint on \u0027B\u0027 has no F# form and is dropped (\u00A74.9)"
         },
         {
-          "key": "TR014",
+          "key": "TR045",
           "pass": "shape-aliases",
           "tier": "widened",
           "symbol": "Xor",
-          "message": "type flags Conditional not mapped yet; widened to obj"
+          "message": "Xor is a conditional type: the branch is not chosen until it is applied, and F# defers no type (\u00A74.11)"
+        }
+      ]
+    },
+    {
+      "name": "ExcludeStrict",
+      "tier": "escape",
+      "findings": [
+        {
+          "key": "AC001",
+          "pass": "audit-coverage",
+          "tier": "escape",
+          "symbol": "ExcludeStrict",
+          "message": "export not represented in the generated output"
+        },
+        {
+          "key": "RA001",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "ExcludeStrict",
+          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "ExcludeStrict",
+          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "ExcludeStrict",
+          "message": "ExcludeStrict resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
+        }
+      ]
+    },
+    {
+      "name": "ExtractStrict",
+      "tier": "escape",
+      "findings": [
+        {
+          "key": "AC001",
+          "pass": "audit-coverage",
+          "tier": "escape",
+          "symbol": "ExtractStrict",
+          "message": "export not represented in the generated output"
+        },
+        {
+          "key": "RA001",
+          "pass": "repair-arity",
+          "tier": "widened",
+          "symbol": "ExtractStrict",
+          "message": "generic alias dropped: its target widened away every type parameter, and F# has no unused type variable in an abbreviation"
+        },
+        {
+          "key": "TP002",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "ExtractStrict",
+          "message": "constraint on \u0027U\u0027 has no F# form and is dropped (\u00A74.9)"
+        },
+        {
+          "key": "TR046",
+          "pass": "shape-aliases",
+          "tier": "ergonomic",
+          "symbol": "ExtractStrict",
+          "message": "ExtractStrict resolved to its sole inhabited branch; the condition itself is not carried (\u00A74.11)"
         }
       ]
     },

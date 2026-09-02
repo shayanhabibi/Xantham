@@ -490,6 +490,16 @@ type ResolvedSignature =
         ReturnTypeId: int
     }
 
+/// A conditional type's mapping facts (§4.11).
+type ConditionalFacts =
+    {
+        /// The alias the conditional is written under.
+        Name: string option
+        /// The branch the mapping takes, named for the manifest and carried by id. Absent where
+        /// both branches are reachable and inhabited.
+        Branch: (string * int) option
+    }
+
 /// A `TypeResponse` plus the derived facts of the kinds the skeleton resolves: object members,
 /// call signatures, union membership. Everything else stays on the raw response.
 type TypeFacts =
@@ -529,6 +539,8 @@ type TypeFacts =
         Constraint: int option
         /// A type parameter's default type argument, by id (§4.9).
         Default: int option
+        /// `T extends U ? X : Y` (§4.11), where the type is one.
+        Conditional: ConditionalFacts option
         UnionMembers: int list
     }
 
@@ -550,6 +562,7 @@ module TypeFacts =
             IntersectionMembers = []
             Constraint = None
             Default = None
+            Conditional = None
             UnionMembers = []
         }
 

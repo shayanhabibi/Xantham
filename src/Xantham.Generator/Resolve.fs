@@ -461,6 +461,7 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
                         IntersectionMembers = []
                         Constraint = None
                         Default = None
+                        Conditional = None
                         UnionMembers = []
                     },
                     discovered
@@ -526,11 +527,92 @@ let private deriveFacts (ctx: Context) (ty: TypeResponse) : Async<TypeFacts * Ty
 
             let bound = aliasTypeArguments @ operands
 
+            // A conditional's two branches (§4.11). Both responses are read - choosing between
+            // them is what they are for - and only the branch the mapping takes is followed
+            // into the table, so a pair that stays deferred leaves the frontier alone.
+            let! conditional =
+                if has TypeFlags.Conditional then
+                    async {
+                        let! alias = ctx.Session.getAliasSymbolOfType ty.Id
+                        let! whenTrue = ctx.Session.getTrueTypeOfConditionalType ty.Id
+                        let! whenFalse = ctx.Session.getFalseTypeOfConditionalType ty.Id
+
+                        // The condition's two sides. They are requested rather than read off
+                        // `ty.CheckType`/`ty.ExtendsType`: the ids on a response are handles the
+                        // compiler registers when it hands the type over, and an id nothing has
+                        // asked for is rejected by the next request that names it.
+                        let! check = ctx.Session.getCheckTypeOfType ty.Id
+                        let! against = ctx.Session.getExtendsTypeOfType ty.Id
+
+                        // `isTypeAssignableTo` reads a type parameter through its bound, so this
+                        // asks whether every argument the head admits satisfies the condition.
+                        // The checker defers a conditional it cannot answer for the parameter
+                        // *without* its bound, so one it deferred can still be decided here.
+                        // The reading holds while the parameter is the source. As the target a
+                        // bound answers for a type an argument need only be assignable to, so
+                        // `undefined extends T ? [] : [value: T]` and its kind stay deferred.
+                        let! decided =
+                            if against.Flags.HasFlag TypeFlags.TypeParameter then
+                                async.Return false
+                            else
+                                ctx.Session.isTypeAssignableTo (check.Id, against.Id)
+
+                        let uninhabited (branch: TypeResponse) = branch.Flags.HasFlag TypeFlags.Never
+
+                        let branch =
+                            if decided then
+                                // A proven condition over an uninhabited true branch names an
+                                // uninhabited type, which F# writes in no reference position.
+                                if uninhabited whenTrue then
+                                    None
+                                else
+                                    Some("true", whenTrue)
+                            elif uninhabited whenTrue && not (uninhabited whenFalse) then
+                                Some("sole inhabited", whenFalse)
+                            elif uninhabited whenFalse && not (uninhabited whenTrue) then
+                                Some("sole inhabited", whenTrue)
+                            else
+                                None
+
+                        // The true branch reaches back into the condition: a `T` on that side
+                        // arrives as a substitution type, `T` refined by what the condition
+                        // proved of it. F# writes the parameter, so the refinement is peeled
+                        // off - it is the same knowledge the head already carries.
+                        let rec peeled (branch: TypeResponse) =
+                            async {
+                                if branch.Flags.HasFlag TypeFlags.Substitution then
+                                    let! bare = ctx.Session.getBaseTypeOfType branch.Id
+                                    return! peeled bare
+                                else
+                                    return branch
+                            }
+
+                        let! taken =
+                            match branch with
+                            | Some(side, whichever) ->
+                                async {
+                                    let! bare = peeled whichever
+                                    return Some(side, bare)
+                                }
+                            | None -> async.Return None
+
+                        return
+                            Some
+                                {
+                                    Name = alias |> ValueOption.map _.Name |> ValueOption.toOption
+                                    Branch = taken |> Option.map (fun (side, bare) -> side, bare.Id)
+                                },
+                            taken |> Option.map snd |> Option.toList
+                    }
+                else
+                    async.Return(None, [])
+
             return
                 { TypeFacts.shallow ty with
                     AliasTypeArguments = bound |> List.map _.Id
+                    Conditional = fst conditional
                 },
-                bound
+                bound @ snd conditional
     }
 
 /// Builds the closed type table: derive the current frontier (sorted by id, so the fold is
