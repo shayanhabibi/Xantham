@@ -1,4 +1,4 @@
-#r "nuget: Partas.Build, 0.3.0"
+﻿#r "nuget: Partas.Build, 0.3.0"
 #r "nuget: Partas.TypeProvider.BuildHelper, 0.2.5"
 #r "nuget: Str"
 #r "nuget: Fake.IO.FileSystem"
@@ -60,6 +60,41 @@ module Options =
     let generateOnly =
         Input.option<string> "--only"
         |> Input.description "Limit generation to one layer: ast | proto | session | browser. All four by default."
+        |> Input.def ""
+
+    /// The generator's inner loop, in three flags. An agent iterating on a pass runs
+    /// `test --quick --update --no-run-gate` until the Expecto suite is green, then drops all
+    /// three for the full gate before it commits. Each flag removes a step that is real safety
+    /// on the way out and pure latency on the way in.
+    let updateGoldens =
+        Input.option<bool> "--update"
+        |> Input.alias "-u"
+        |> Input.description
+            "Regenerate the golden corpus before asserting against it. Runs the suite twice: once writing, once checking."
+        |> Input.def false
+
+    let testFilter =
+        Input.option<string> "--filter"
+        |> Input.description
+            "Run only tests whose name matches, e.g. --filter \"generator e2e\". Every test by default."
+        |> Input.def ""
+
+    let skipRunGate =
+        Input.option<bool> "--no-run-gate"
+        |> Input.description
+            "Skip the Fable run gate, much the slowest step. The compile gate and the Expecto suites still run."
+        |> Input.def false
+
+    /// `findings` reads the manifests, which is the only part of a large fixture worth reading:
+    /// the per-symbol array is tens of thousands of lines, its aggregate is a page.
+    let findingsFixture =
+        Input.option<string> "--fixture"
+        |> Input.description "Aggregate one fixture's manifest rather than every one."
+        |> Input.def ""
+
+    let findingsKey =
+        Input.option<string> "--key"
+        |> Input.description "Report only this finding key, e.g. --key TR023."
         |> Input.def ""
 
     let syncUpstream =
@@ -228,22 +263,118 @@ module Stages =
         input {
             let! skipTests = Options.skipTests
             and! config = Options.config
+            and! update = Options.updateGoldens
+            and! filter = Options.testFilter
+            and! skipRunGate = Options.skipRunGate
+
+            // `cmd` quotes each interpolation hole as one argument, so the flag and its value
+            // have to be part of the format string rather than a pre-baked `" --filter ..."`
+            // hole - that arrives as a single argument and MSBuild rejects it as one switch.
+            let suite =
+                if System.String.IsNullOrWhiteSpace filter then
+                    cmd $"dotnet test {Repo.Project.SolutionFile} -c {config} --no-build"
+                else
+                    cmd $"dotnet test {Repo.Project.SolutionFile} -c {config} --no-build --filter {filter}"
 
             return
                 stage "test" {
                     when' (not skipTests)
                     run (cmd $"dotnet build {Repo.Project.SolutionFile} -c {config} -v q")
-                    run (cmd $"dotnet test {Repo.Project.SolutionFile} -c {config} --no-build")
+
+                    // Regeneration is a *separate* run of the same suite, not a mode of the
+                    // checking one: with `XANTHAM_UPDATE_GOLDEN` set the e2e tests write the
+                    // goldens, so asserting in that same pass would only assert that a file
+                    // equals what was just written to it. Child processes inherit the variable.
+                    stage "regenerate goldens" {
+                        when' update
+
+                        run (fun _ ->
+                            System.Environment.SetEnvironmentVariable("XANTHAM_UPDATE_GOLDEN", "1")
+                            Ok())
+
+                        run suite
+
+                        run (fun _ ->
+                            System.Environment.SetEnvironmentVariable("XANTHAM_UPDATE_GOLDEN", null)
+                            Ok())
+                    }
+
+                    run suite
                     // The Fable *run* gate (§5 of the architecture plan): the linked goldens compiled
                     // by Fable and executed under node against the fixtures' JavaScript runtimes.
                     // `--noCache` because Fable's up-to-date check missed a changed linked golden once,
                     // and a gate that skips its compile is not a gate.
                     stage "run gate" {
+                        when' (not skipRunGate)
                         workingDir "tests/Xantham.Generator.RunGate"
 
                         run
                             "dotnet fable . -o fable-out --noCache --run node --import ./register.mjs fable-out/Program.js"
                     }
+                }
+        }
+
+    /// The aggregate of every manifest, which is what a large fixture is *for*: `TR023 148` is
+    /// the measurement a change is justified by, and reading the 78k-line `symbols` array it was
+    /// computed from tells you strictly less.
+    let findings =
+        input {
+            let! fixture = Options.findingsFixture
+            and! key = Options.findingsKey
+
+            return
+                stage "findings" {
+                    run (fun _ ->
+                        let golden =
+                            System.IO.Path.Combine(__SOURCE_DIRECTORY__, "tests", "Xantham.Generator.Tests", "golden")
+
+                        let manifests =
+                            System.IO.Directory.GetFiles(
+                                golden,
+                                "manifest.json",
+                                System.IO.SearchOption.AllDirectories
+                            )
+                            |> Array.filter (fun path ->
+                                System.String.IsNullOrWhiteSpace fixture
+                                || path.Replace('\\', '/').Contains $"/{fixture}/")
+                            |> Array.sort
+
+                        if Array.isEmpty manifests then
+                            Error $"no golden manifest matches {fixture}"
+                        else
+                            for path in manifests do
+                                use doc = System.Text.Json.JsonDocument.Parse(System.IO.File.ReadAllText path)
+                                let root = doc.RootElement
+                                let tiers = root.GetProperty "counts"
+                                let tier (name: string) = tiers.GetProperty(name).GetInt32()
+
+                                let counts =
+                                    root.GetProperty("symbols").EnumerateArray()
+                                    |> Seq.collect (fun symbol ->
+                                        match symbol.TryGetProperty "findings" with
+                                        | true, findings -> findings.EnumerateArray() |> Seq.cast
+                                        | _ -> Seq.empty<System.Text.Json.JsonElement>)
+                                    |> Seq.map (fun finding -> finding.GetProperty("key").GetString())
+                                    |> Seq.filter (fun found -> System.String.IsNullOrWhiteSpace key || found = key)
+                                    |> Seq.countBy id
+                                    |> Seq.sortByDescending snd
+                                    |> Seq.toList
+
+                                let package = root.GetProperty("package").GetString()
+                                let exact = tier "exact"
+                                let ergonomic = tier "ergonomic"
+                                let widened = tier "widened"
+                                let escape = tier "escape"
+
+                                printfn ""
+                                printfn $"{package}"
+
+                                printfn $"  exact {exact}  ergonomic {ergonomic}  widened {widened}  escape {escape}"
+
+                                for found, count in counts do
+                                    printfn $"  {found} {count}"
+
+                            Ok())
                 }
         }
 
@@ -332,6 +463,8 @@ rootCommand fsi.CommandLineArgs[1..] {
         Stages.fixtures
         Stages.test
     }
+
+    command "findings" { Stages.findings }
 
     command "pack" {
         Stages.restore
