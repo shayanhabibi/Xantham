@@ -2,8 +2,8 @@
   "package": "statics-lab",
   "module": "StaticsLab",
   "counts": {
-    "exact": 2,
-    "ergonomic": 1,
+    "exact": 0,
+    "ergonomic": 3,
     "widened": 1,
     "escape": 0
   },
@@ -21,15 +21,15 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 1,
-      "ergonomic": 1
+      "total": 9,
+      "ergonomic": 9
     }
   ],
   "symbols": [
     {
       "name": "Counter",
       "file": "index.d.ts",
-      "tier": "exact",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SC006",
@@ -37,13 +37,27 @@
           "tier": "exact",
           "symbol": "Counter.tick",
           "message": "settable static emitted with a setter"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Counter",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Counter.bump",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
     {
       "name": "Doubling",
       "file": "index.d.ts",
-      "tier": "exact",
+      "tier": "ergonomic",
       "findings": [
         {
           "key": "SC006",
@@ -58,6 +72,27 @@
           "tier": "exact",
           "symbol": "Doubling",
           "message": "base Counter is inherited: the is-a relation is emitted (\u00A74.4)"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Doubling",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Doubling.bump",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Doubling.double",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     },
@@ -100,6 +135,27 @@
           "tier": "widened",
           "symbol": "Clash.url",
           "message": "static member dropped: its name is an instance member\u0027s, which F# admits only between two methods"
+        },
+        {
+          "key": "SP001",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Clash",
+          "message": "ParamObject Create synthesized (D3)"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Clash.json",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
+        },
+        {
+          "key": "SP002",
+          "pass": "synthesize-paramobjects",
+          "tier": "ergonomic",
+          "symbol": "Clash.text",
+          "message": "method member reads as a function-typed Create parameter; the delegate receives no this"
         }
       ]
     }
