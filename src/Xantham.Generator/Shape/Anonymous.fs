@@ -242,7 +242,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     // whole point: hoisting is what runs away.
                     findings <-
                         findings
-                        @ [ Finding.make path (SynthesizeAnonymous.SelfReferentialHoistRefused name) ]
+                        @ [ Finding.make path (SynthesizeAnonymous.HoistArgumentsNotRecovered name) ]
                 | None -> ()
 
                 // Recurse in the shape the declaration will read: members, signatures,

@@ -417,17 +417,20 @@ type SynthesizeAnonymous =
     /// A hoisted anonymous shape that is an instantiation of a declaration this run already
     /// named: the reference is written to that declaration instead of minting another name.
     | [<Exact>] InstantiationNamedOnce of name: string
-    /// The runaway's honest answer where the above cannot be taken: a shape whose hoist would
-    /// reach itself through polymorphic `this` is refused and widened, one finding instead of a
-    /// chain of `<Member>Result` declarations.
-    | [<Widened>] SelfReferentialHoistRefused of name: string
+    /// The runaway's honest answer where the above cannot be taken. Pre-declared as
+    /// `SelfReferentialHoistRefused`, on the assumption that polymorphic `this` would be the
+    /// condition; the pass that landed guards something broader - an instantiation whose type
+    /// arguments could not be recovered by unification, of which the `this` chain is one case.
+    /// Renamed to say that, because it fires nowhere in the corpus today and a message that
+    /// misdescribes its own guard is worth less than no message at all.
+    | [<Widened>] HoistArgumentsNotRecovered of name: string
 
     interface IFindingKind with
         member this.Message =
             match this with
             | InstantiationNamedOnce name -> $"anonymous shape is an instantiation of {name}; written as an application"
-            | SelfReferentialHoistRefused name ->
-                $"hoisting {name} would reach itself through polymorphic this; widened to obj rather than named again"
+            | HoistArgumentsNotRecovered name ->
+                $"{name} is an instantiation whose type arguments could not be recovered; widened to obj rather than named again"
 
 /// `shape-interfaces`.
 [<Prefix("SI", "shape-interfaces")>]

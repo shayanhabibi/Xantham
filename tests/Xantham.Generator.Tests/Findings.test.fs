@@ -98,7 +98,7 @@ let findingsTests =
                     "DT001 DetectTaggedUnions.ArmNotPlainData ergonomic"
                     "DT002 DetectTaggedUnions.TaggedUnion exact"
                     "SY001 SynthesizeAnonymous.InstantiationNamedOnce exact"
-                    "SY002 SynthesizeAnonymous.SelfReferentialHoistRefused widened"
+                    "SY002 SynthesizeAnonymous.HoistArgumentsNotRecovered widened"
                     "SI001 ShapeInterfaces.HybridLosesCallSignatures widened"
                     "SI002 ShapeInterfaces.BaseMembersFlattened ergonomic"
                     "SI003 ShapeInterfaces.IntersectionFlattened ergonomic"
