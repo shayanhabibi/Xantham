@@ -32,6 +32,13 @@ let private globals () =
     equal "a global value binds to globalThis.registry" "root" root.label
     equal "and its optional member reads back as Some" (Some 3.0) root.size
     equal "a mutable global reads through [<Global>]" 41.0 GlobalsLab.Exports.counter
+
+    // The write half of the same binding. `Exports` carries `[<Global("globalThis")>]`, so the
+    // assignment is `globalThis.counter = 55` rather than the call `counter(55)`.
+    GlobalsLab.Exports.counter <- 55.0
+    equal "and an assignment lands on globalThis" 55.0 (emitJsExpr () "globalThis.counter")
+    equal "which the binding reads back" 55.0 GlobalsLab.Exports.counter
+    GlobalsLab.Exports.counter <- 41.0
     equal "a global function is called by name" true (GlobalsLab.Exports.ping "up")
     equal "with its optional parameter passed through" false (GlobalsLab.Exports.ping ("up", 0.0))
     equal "and omitted when absent" false (GlobalsLab.Exports.ping "down")
@@ -114,6 +121,16 @@ let private imports () =
 let private statics () =
     equal "a const-like static reads off the constructor object" 100.0 StaticsLab.Counter.MAX
     equal "and a settable one reads the same way" 7.0 StaticsLab.Counter.tick
+
+    // The declaration carries `[<Import("Counter", "statics-lab")>]`, so the assignment is
+    // `Counter.tick = 12` on the constructor object itself. A per-member `[<Import>]` would
+    // compile it to the call `Counter.tick(12)` and TypeError here.
+    let counterClass: obj = import "Counter" "statics-lab"
+    StaticsLab.Counter.tick <- 12.0
+    equal "a settable static writes the property on the constructor object" 12.0 (unbox<float> counterClass?tick)
+    equal "which the binding reads back" 12.0 StaticsLab.Counter.tick
+    equal "and the subclass sees the write JavaScript inherits for it" 12.0 StaticsLab.Doubling.tick
+    StaticsLab.Counter.tick <- 7.0
     equal "a static factory runs the static, not the constructor" 3.0 (StaticsLab.Counter.from 3.0).value
     equal "a static overload picks the number arm" 4.0 (StaticsLab.Counter.``of`` 4.0).value
     equal "and the string arm reaches the same JavaScript static" 4.0 (StaticsLab.Counter.``of`` "abcd").value
@@ -294,16 +311,18 @@ let private workarounds () =
     equal "narrowing on the member the extension adds reaches it" (Some 2.0) (asCircle shapes[1] |> Option.map _.radius)
     equal "and refuses a value that only satisfies the base" None (asCircle shapes[0] |> Option.map _.radius)
 
-    // 3. A settable static and a mutable global. Fable compiles an assignment through
-    // `[<Import>]` or `[<Global>]` as a *call*, so both bind get-only.
+    // 3. A settable static and a mutable global, both writable through the binding: the
+    // attribute sits on the declaration, and Fable compiles `<-` under it as a property write.
     equal "a settable static reads through the binding" 100.0 FableWorkaroundLab.Budget.limit
     let budgetClass: obj = import "Budget" "fable-workaround-lab"
-    budgetClass?limit <- 250.0
-    equal "and the constructor object it is read off can be written" 250.0 FableWorkaroundLab.Budget.limit
+    FableWorkaroundLab.Budget.limit <- 250.0
+    equal "and an assignment reaches the constructor object it is read off" 250.0 (unbox<float> budgetClass?limit)
+    equal "which the binding reads back" 250.0 FableWorkaroundLab.Budget.limit
+    FableWorkaroundLab.Budget.limit <- 100.0
 
-    emitJsStatement 55.0 "globalThis.counter = $0"
-    equal "a mutable global is written the same way, through globalThis" 55.0 GlobalsLab.Exports.counter
-    emitJsStatement 41.0 "globalThis.counter = $0"
+    GlobalsLab.Exports.counter <- 55.0
+    equal "a mutable global is written the same way, through globalThis" 55.0 (emitJsExpr () "globalThis.counter")
+    GlobalsLab.Exports.counter <- 41.0
 
     // 4. `string | null` and `value?: string` are the same F# type, and `None` is `undefined`.
     let slots = FableWorkaroundLab.Exports.slots ()

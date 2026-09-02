@@ -59,8 +59,8 @@ let shapeClasses: Pass<ShapeModel> =
                     let mutable statics: Map<string, FsExportMember list> = Map.empty
 
                     /// One static, shaped: a method where the checker says so and it has a
-                    /// signature, a get-only property otherwise - Fable compiles an assignment
-                    /// to an imported static as a *call*, so there is no setter to emit.
+                    /// signature, a property otherwise - settable where TypeScript declares it
+                    /// assignable, get-only where it declares it `readonly`.
                     let shapeStatic (export: HarvestedExport) (name: string) (m: ResolvedMember) =
                         let key = Naming.memberName m.Symbol.Name
                         let owner = $"{name}.{key}"
@@ -114,6 +114,7 @@ let shapeClasses: Pass<ShapeModel> =
                                         TypeParameters = typeParameters
                                         Binding = binding
                                         Body = ExportFunction(parameters, returns)
+                                        Settable = false
                                     })
                             | None ->
                                 let reference, refFindings = typeRef ctx model (Some name) owner m.TypeId
@@ -121,6 +122,11 @@ let shapeClasses: Pass<ShapeModel> =
 
                                 if m.Optional then
                                     emit (Finding.make owner Members.OptionalMemberAsOption)
+
+                                // A settable static binds through the class itself, and the
+                                // attribute goes on the declaration - the placement under which
+                                // Fable compiles `Counter.tick <- 8.0` to `Counter.tick = 8`.
+                                let settable = not (hasAny SymbolFlags.Method m.Symbol.Flags) && not m.ReadOnly
 
                                 if hasAny SymbolFlags.Method m.Symbol.Flags then
                                     // A method the checker gave no call signatures: its type is
@@ -132,8 +138,8 @@ let shapeClasses: Pass<ShapeModel> =
                                         |> Option.defaultValue "another group"
 
                                     emit (Finding.make owner (ShapeClasses.StaticMethodWithoutSignatures declaredIn))
-                                elif not m.ReadOnly then
-                                    emit (Finding.make owner ShapeClasses.StaticReadOnly)
+                                elif settable then
+                                    emit (Finding.make owner ShapeClasses.StaticSettable)
 
                                 [
                                     {
@@ -141,8 +147,9 @@ let shapeClasses: Pass<ShapeModel> =
                                         Docs = m.Docs
                                         Tags = m.Tags
                                         TypeParameters = []
-                                        Binding = binding
+                                        Binding = (if settable then bindingOf export else binding)
                                         Body = ExportValue(optionalRef m.Optional reference)
+                                        Settable = settable
                                     }
                                 ]
 
@@ -208,6 +215,7 @@ let shapeClasses: Pass<ShapeModel> =
                                             TypeParameters = typeParameters
                                             Binding = bindingOf export
                                             Body = ExportConstructor(parameters, returns)
+                                            Settable = false
                                         }))
 
                     let decls =

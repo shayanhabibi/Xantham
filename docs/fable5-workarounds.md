@@ -2,7 +2,8 @@
 
 Six places where a generated binding gives you less than the `.d.ts` declared, because of what
 Fable 5 emits or what its runtime library supports. Each entry carries the TypeScript, the F# the
-generator emits for it, the JavaScript Fable produces, and F# you can write instead.
+generator emits for it, the JavaScript Fable produces, and F# you can write instead. Entry 6 is
+closed - the generator emits the setter now - and is kept for the compilation rule it turns on.
 
 Every claim here was compiled and run against this repository's pins - the `fable` tool 5.0.0,
 `Fable.Core` 5.2.0, `fable-library-js` 5.0.0 - and every workaround is executed by the run gate
@@ -342,10 +343,13 @@ apply to an interface with no runtime counterpart. Both name the JavaScript side
 
 ---
 
-## 6. A settable static and a mutable global bind read-only
+## 6. A settable static and a mutable global bind read-only - closed
 
-**Incidence: 2 sites** - `SC003` (settable static emitted read-only), both in `statics-lab`, none
-in the four npm rungs. The mutable-global half is counted by no finding code.
+**Closed in wave four.** A settable static and a mutable global both bind `with get, set`, and the
+run gate writes each one and reads it back off the JavaScript object. `SC003` (settable static
+emitted read-only) fires nowhere in the corpus; `SC006` counts the statics that now carry a setter,
+at the exact tier. The entry is kept because the rule it turns on - *where* a binding attribute
+sits decides whether `<-` is a property write - governs every bound member the generator emits.
 
 ### What TypeScript declares
 
@@ -362,47 +366,67 @@ and, in a globals package, `declare var counter: number;`.
 
 ### What the binding emits
 
+The declaration carries the binding, and the member carries none:
+
 ```fsharp
-[<Import("Budget.limit", "fable-workaround-lab")>]
-static member limit: float = jsNative
+[<Interface>]
+[<Import("Budget", "fable-workaround-lab")>]
+type Budget =
+    abstract spent: float
+    static member limit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 ```
 
-Get-only. The global reads the same way, through `[<Global("counter")>]`.
+A mutable global is the same shape with `Exports` as the declaration and `globalThis` as the
+object:
+
+```fsharp
+[<Erase>]
+[<Global("globalThis")>]
+type Exports =
+    static member counter
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
+```
+
+`readonly` statics keep the per-member dotted selector they always had
+(`[<Import("Counter.MAX", "statics-lab")>]`), so the two shapes sit side by side in one
+declaration.
 
 ### What Fable 5 does with it
 
-A setter on an `[<Import>]` or `[<Global>]` static member compiles the assignment as a *call*.
-Given a member declared `with get () = jsNative and set (_: float) = jsNative`,
-`Counter.tick <- 8.0` emits
+```fsharp
+Budget.limit <- 5.0
+Exports.counter <- 5.0
+```
 
 ```js
-Counter.tick(8);
+Budget.limit = 5;
+globalThis.counter = 5;
 ```
 
-which is a `TypeError` at run time, and `Exports.counter <- 5.0` emits `counter(5)`. The generator
-emits get-only rather than a setter that compiles to that.
+**The placement is what decides it.** A binding attribute on the *member* compiles a read
+correctly and an assignment as a call: `[<Import("Budget.limit", "fable-workaround-lab")>]` gives
+`Budget.limit = 5` for the read and `Budget.limit(5)` for the write, a `TypeError`; per-member
+`[<Global("counter")>]` gives `counter(5)`. Hoisting the attribute to the declaring type and
+leaving the member bare is what makes the assignment a property write. A member name F# can only
+spell backticked reaches JavaScript as a subscript (`Odd["my-name"] = 2`), so a key that is not an
+identifier survives too.
 
-### The workaround
+`static member val limit: float = JS.undefined with get, set` compiles the assignment identically,
+and F# rejects it inside an `[<Interface>]` type - FS0865, "interfaces cannot contain definitions
+of static initializers". Generated class declarations are interfaces, so the emission is the
+explicit `with get () ... and set (...)` pair.
 
-Reach the object the static hangs off, and set the property on it:
+### What still binds read-only
 
-```fsharp
-let budgetClass: obj = import "Budget" "fable-workaround-lab"
-budgetClass?limit <- 250.0
-// FableWorkaroundLab.Budget.limit now reads 250.0
+A `var` or `let` **exported from a module** - `export declare var Owner` in `solid-js`. An ES
+module's exports are immutable to an importer, so an assignment has nothing to reach. `SE003`
+records it, widened.
 
-emitJsStatement 55.0 "globalThis.counter = $0"
-// GlobalsLab.Exports.counter now reads 55.0
-```
-
-Both emit the assignment the declaration asked for: `Budget.limit = 250` and
-`globalThis.counter = 55`.
-
-### What it costs
-
-`?` is untyped, so the property name and the value type are both unchecked - `budgetClass?limit <-
-"wrong"` compiles. The name is a string on the F# side, so a rename in the `.d.ts` moves past it.
-Reading still goes through the binding, so only the write loses its type.
+A `let` **global** carries the same symbol flag a `const` global does, so it stays get-only and is
+uncounted. `declare var` is the form that gets a setter.
 
 ---
 

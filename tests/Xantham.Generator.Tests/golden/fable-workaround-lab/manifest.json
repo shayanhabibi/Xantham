@@ -3,8 +3,8 @@
   "module": "FableWorkaroundLab",
   "counts": {
     "exact": 9,
-    "ergonomic": 5,
-    "widened": 1,
+    "ergonomic": 6,
+    "widened": 0,
     "escape": 0
   },
   "passes": [
@@ -17,7 +17,7 @@
     {
       "pass": "SC - shape-classes",
       "total": 1,
-      "widened": 1
+      "exact": 1
     },
     {
       "pass": "SP - synthesize-paramobjects",
@@ -98,14 +98,14 @@
     {
       "name": "Budget",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "ergonomic",
       "findings": [
         {
-          "key": "SC003",
+          "key": "SC006",
           "pass": "shape-classes",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "Budget.limit",
-          "message": "a settable static is emitted read-only: Fable compiles an assignment to an imported static as a call"
+          "message": "settable static emitted with a setter"
         },
         {
           "key": "SP001",

@@ -38,6 +38,7 @@ type Circle =
     static member Create (radius: float, area: float) : Circle = jsNative
 
 [<Interface>]
+[<Import("Budget", "fable-workaround-lab")>]
 type Budget =
     abstract spent: float
     [<ParamObject; Emit("$0")>]
@@ -45,8 +46,9 @@ type Budget =
     /// <summary>
     /// Assignable from JavaScript.
     /// </summary>
-    [<Import("Budget.limit", "fable-workaround-lab")>]
-    static member limit: float = jsNative
+    static member limit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
 type Slot =

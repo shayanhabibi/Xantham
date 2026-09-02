@@ -755,8 +755,15 @@ type FsExportMember =
         /// A top-level generic function binds its parameters on the member: `Exports` itself is
         /// not generic, so `get<T>(source: T)` has nowhere else to put `T`.
         TypeParameters: FsTypeParam list
+        /// The selector the member is read under. A settable member is bound through the object
+        /// it hangs off (`Counter`, `globalThis`) and carries the attribute on its declaring
+        /// type; every other member is bound through its own dotted selector (`Counter.MAX`) and
+        /// carries the attribute itself.
         Binding: ImportBinding
         Body: FsExportBody
+        /// A settable static or mutable global, rendered `with get, set`. Assignment to it
+        /// compiles to a JavaScript property write.
+        Settable: bool
     }
 
 type FsInterfaceDecl =
@@ -772,10 +779,11 @@ type FsInterfaceDecl =
         /// `[<ParamObject; Emit("$0")>]` Create overloads for plain-data interfaces (D3) -
         /// parameter lists mirroring the members, so consumers never hand-build objects.
         CreateOverloads: FsParam list list
-        /// A class's static members (§4.4): the properties of the constructor object, bound
-        /// individually through a dotted selector (`[<Import("Counter.MAX", "pkg")>]`) so a
-        /// consumer spells `Counter.MAX` exactly as TypeScript does. Empty for everything that
-        /// is not an exported class.
+        /// A class's static members (§4.4): the properties of the constructor object. A get-only
+        /// static is bound through a dotted selector of its own (`[<Import("Counter.MAX",
+        /// "pkg")>]`); a settable one is bound through the type-level attribute this list puts on
+        /// the declaration. Either way a consumer spells `Counter.MAX` as TypeScript does. Empty
+        /// for everything that is not an exported class.
         Statics: FsExportMember list
     }
 

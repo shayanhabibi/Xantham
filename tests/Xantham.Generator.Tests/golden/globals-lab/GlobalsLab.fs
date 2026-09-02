@@ -67,6 +67,7 @@ type BagLoose =
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
+[<Global("globalThis")>]
 type Exports =
     /// <summary>
     /// A global value: already on <c>globalThis</c>, so it binds with <c>[&lt;Global&gt;]</c>, not <c>[&lt;Import&gt;]</c>.
@@ -76,8 +77,9 @@ type Exports =
     /// <summary>
     /// A mutable global.
     /// </summary>
-    [<Global("counter")>]
-    static member counter: float = jsNative
+    static member counter
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
     /// <summary>
     /// A global function.
     /// </summary>

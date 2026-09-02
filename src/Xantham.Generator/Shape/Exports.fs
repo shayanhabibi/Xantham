@@ -5,8 +5,13 @@ open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator.Shape.Spec
 
+/// The object every ambient global is a property of, and the selector a settable global binds
+/// through.
+let private globalObject = "globalThis"
+
 /// `Exports` members from the value exports that are not classes: functions (every overload
-/// emitted), and values - `const`/`let` and namespace objects - as get-only properties.
+/// emitted), and values - `const`/`let`/`var` and namespace objects - as properties, settable
+/// where the value is a mutable global.
 let shapeExports: Pass<ShapeModel> =
     {
         Name = "shape-exports"
@@ -69,10 +74,26 @@ let shapeExports: Pass<ShapeModel> =
                                             TypeParameters = typeParameters
                                             Binding = binding
                                             Body = ExportFunction(parameters, returns)
+                                            Settable = false
                                         })
                                 | Some facts ->
                                     let reference, refFindings = typeRef ctx model None name facts.Response.Id
                                     findings <- findings @ refFindings
+
+                                    // A `var` on the global object is the one binding an
+                                    // assignment reaches: it is a writable property of
+                                    // `globalThis`, where a module's exports stay immutable to
+                                    // an importer whatever the exporter declared them.
+                                    let mutableValue = hasAny SymbolFlags.FunctionScopedVariable export.Symbol.Flags
+
+                                    let settable =
+                                        match binding with
+                                        | GlobalName _ -> mutableValue
+                                        | ImportDefault
+                                        | ImportNamed _ -> false
+
+                                    if mutableValue && not settable then
+                                        emit (Finding.make name ShapeExports.MutableValueReadOnly)
 
                                     [
                                         index,
@@ -81,8 +102,9 @@ let shapeExports: Pass<ShapeModel> =
                                             Docs = export.Docs
                                             Tags = export.Tags
                                             TypeParameters = []
-                                            Binding = binding
+                                            Binding = (if settable then GlobalName globalObject else binding)
                                             Body = ExportValue reference
+                                            Settable = settable
                                         }
                                     ])
 

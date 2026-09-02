@@ -2774,7 +2774,8 @@ let shapePassTests =
                             Tags = []
                             TypeParameters = []
                             Binding = ImportNamed "make"
-                            Body = ExportValue FsFloat } ] }
+                            Body = ExportValue FsFloat
+                            Settable = false } ] }
 
             let ordered, _ = Build.runPass Ordering.orderDeclarations model
 

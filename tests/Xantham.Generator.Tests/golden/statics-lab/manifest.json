@@ -2,9 +2,9 @@
   "package": "statics-lab",
   "module": "StaticsLab",
   "counts": {
-    "exact": 0,
+    "exact": 2,
     "ergonomic": 1,
-    "widened": 3,
+    "widened": 1,
     "escape": 0
   },
   "passes": [
@@ -16,7 +16,8 @@
     {
       "pass": "SC - shape-classes",
       "total": 5,
-      "widened": 5
+      "exact": 2,
+      "widened": 3
     },
     {
       "pass": "SP - synthesize-paramobjects",
@@ -28,28 +29,28 @@
     {
       "name": "Counter",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "exact",
       "findings": [
         {
-          "key": "SC003",
+          "key": "SC006",
           "pass": "shape-classes",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "Counter.tick",
-          "message": "a settable static is emitted read-only: Fable compiles an assignment to an imported static as a call"
+          "message": "settable static emitted with a setter"
         }
       ]
     },
     {
       "name": "Doubling",
       "file": "index.d.ts",
-      "tier": "widened",
+      "tier": "exact",
       "findings": [
         {
-          "key": "SC003",
+          "key": "SC006",
           "pass": "shape-classes",
-          "tier": "widened",
+          "tier": "exact",
           "symbol": "Doubling.tick",
-          "message": "a settable static is emitted read-only: Fable compiles an assignment to an imported static as a call"
+          "message": "settable static emitted with a setter"
         },
         {
           "key": "SI005",
