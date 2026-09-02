@@ -101,4 +101,11 @@ let bindFreeTypeParams: Pass<ShapeModel> =
                 | _ -> None)
             |> Map.ofList
 
-        { model with DeclParams = bound })
+        // An entry `synthesize-anonymous` set itself wins: an erased alias application carries
+        // the arguments recovered from its operands, which are what a reference has to apply -
+        // not whatever type parameters its expansion happens to read free.
+        { model with
+            DeclParams =
+                model.DeclParams
+                |> Map.fold (fun kept typeId arguments -> Map.add typeId arguments kept) bound
+        })

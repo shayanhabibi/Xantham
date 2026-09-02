@@ -507,7 +507,14 @@ and internal intersectionRef
         match Map.tryFind facts.Response.Id model.DeclNames with
         | Some name when isFlattenable model facts ->
             match freeParamsOf model facts.Response.Id with
-            | [] -> FsNamed name, []
+            | [] ->
+                // A *generic alias* over an intersection binds parameters of its own instead,
+                // and `declTypeParams` writes them on the left side - so a self-reference has
+                // to re-apply them, the way `objectRef` re-applies `ownArguments`. Without
+                // this it comes back out bare and `repair-arity` widens it (`RA003`).
+                match facts.AliasTypeArguments with
+                | [] -> FsNamed name, []
+                | parameters -> appliedRef ctx model self owner name parameters
             | arguments -> appliedRef ctx model self owner name arguments
         | _ ->
             let reason =
