@@ -752,3 +752,14 @@ section above.
 Watch items rather than open questions: the debug assertion pass (O3) and the bespoke
 JSON model dump (O5) are named escape hatches, built only when their triggering need
 appears.
+
+# Easy Nits 
+
+To include in scope when a phases implementation/attempt ends up being small/quick.
+
+- Pass names should be keyed by a unique prefix.
+  - This has been done to some level, but does not cover all stages. Changing the current implementation of prefixed stages is ok if required.
+  - Stage prefixes should be unique for that stage
+  - Tests should fail quickly if a pass name & prefix is not unique.
+  - Add this as a prefix to the key of a finding as such: `XX:TY001`
+  - This will allow grepping a stage by `XX:`and a finding by `:XX000`
